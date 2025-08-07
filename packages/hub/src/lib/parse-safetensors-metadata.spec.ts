@@ -142,4 +142,139 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(safetensorsShardFileInfo?.shard, "00005");
 		assert.strictEqual(safetensorsShardFileInfo?.total, "00072");
 	});
+
+	it("should support sub-byte data types", async () => {
+		const newDataTypes: Array<"F4" | "F6_E2M3" | "F6_E3M2" | "E8M0"> = ["F4", "F6_E2M3", "F6_E3M2", "E8M0"];
+
+		for (const dtype of newDataTypes) {
+			const tensorInfo = {
+				dtype,
+				shape: [1, 2],
+				data_offsets: [0, 1] as [number, number],
+			};
+
+			assert.ok(typeof tensorInfo.dtype === "string");
+			assert.ok(["F4", "F6_E2M3", "F6_E3M2", "E8M0"].includes(tensorInfo.dtype));
+		}
+	});
+
+	it("should handle parameter counting with sub-byte data types", () => {
+		const mockHeader = {
+			tensor_f4: {
+				dtype: "F4" as const,
+				shape: [10, 20],
+				data_offsets: [0, 100] as [number, number],
+			},
+			tensor_f6_e2m3: {
+				dtype: "F6_E2M3" as const,
+				shape: [5, 10],
+				data_offsets: [100, 150] as [number, number],
+			},
+			tensor_f6_e3m2: {
+				dtype: "F6_E3M2" as const,
+				shape: [8, 12],
+				data_offsets: [150, 246] as [number, number],
+			},
+			tensor_e8m0: {
+				dtype: "E8M0" as const,
+				shape: [4, 6],
+				data_offsets: [246, 270] as [number, number],
+			},
+			__metadata__: { format: "pt" },
+		};
+
+		const computeNumOfParamsByDtypeSingleFile = (header: typeof mockHeader) => {
+			const counter: Partial<Record<string, number>> = {};
+			const tensors = Object.fromEntries(Object.entries(header).filter(([key]) => key !== "__metadata__"));
+
+			for (const [, v] of Object.entries(tensors) as [
+				string,
+				{ dtype: string; shape: number[]; data_offsets: [number, number] },
+			][]) {
+				if (v.shape.length === 0) {
+					continue;
+				}
+				counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a: number, b: number) => a * b);
+			}
+			return counter;
+		};
+
+		const parameterCount = computeNumOfParamsByDtypeSingleFile(mockHeader);
+
+		assert.strictEqual(parameterCount.F4, 200);
+		assert.strictEqual(parameterCount.F6_E2M3, 50);
+		assert.strictEqual(parameterCount.F6_E3M2, 96);
+		assert.strictEqual(parameterCount.E8M0, 24);
+	});
+
+	it("fetch info for openai/gpt-oss-20b (large sharded model)", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "openai/gpt-oss-20b",
+			computeParametersCount: true,
+			revision: "bbf09307421df45099c1e7dcbd64e3106ce5b403",
+		});
+
+		assert(parse.sharded);
+
+		assert.ok(Object.keys(parse.headers).length > 1);
+		assert.ok(parse.parameterCount);
+
+		const totalParams = parse.parameterTotal || sum(Object.values(parse.parameterCount));
+
+		assert.strictEqual(totalParams, 21_511_953_984); // 21.5B
+
+		assert.ok(parse.parameterCount.BF16 && parse.parameterCount.U8);
+
+		assert.strictEqual(Object.keys(parse.headers).length, 3);
+	});
+
+	it("should support FP4 and UE8 data types in type system", () => {
+		const newDataTypes: Array<"FP4" | "UE8"> = ["FP4", "UE8"];
+
+		for (const dtype of newDataTypes) {
+			const tensorInfo = {
+				dtype,
+				shape: [1, 2],
+				data_offsets: [0, 1] as [number, number],
+			};
+
+			assert.ok(typeof tensorInfo.dtype === "string");
+			assert.ok(["FP4", "UE8"].includes(tensorInfo.dtype));
+		}
+
+		const mockHeader = {
+			tensor_fp4: {
+				dtype: "FP4" as const,
+				shape: [100, 200],
+				data_offsets: [0, 5000] as [number, number],
+			},
+			tensor_ue8: {
+				dtype: "UE8" as const,
+				shape: [50, 100],
+				data_offsets: [5000, 10000] as [number, number],
+			},
+			__metadata__: { format: "pt" },
+		};
+
+		const computeNumOfParamsByDtypeSingleFile = (header: typeof mockHeader) => {
+			const counter: Partial<Record<string, number>> = {};
+			const tensors = Object.fromEntries(Object.entries(header).filter(([key]) => key !== "__metadata__"));
+
+			for (const [, v] of Object.entries(tensors) as [
+				string,
+				{ dtype: string; shape: number[]; data_offsets: [number, number] },
+			][]) {
+				if (v.shape.length === 0) {
+					continue;
+				}
+				counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a: number, b: number) => a * b);
+			}
+			return counter;
+		};
+
+		const parameterCount = computeNumOfParamsByDtypeSingleFile(mockHeader);
+
+		assert.strictEqual(parameterCount.FP4, 20000);
+		assert.strictEqual(parameterCount.UE8, 5000);
+	});
 });
