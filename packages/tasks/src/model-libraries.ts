@@ -1174,7 +1174,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Wan2.2",
 		repoName: "Wan2.2",
 		repoUrl: "https://github.com/Wan-Video/Wan2.2",
-		countDownloads: `path:"high_noise_model/config.json" OR path:"low_noise_model/config.json"`,
+		countDownloads: `path_filename:"config" AND path_extension:"json"`,
 	},
 	wham: {
 		prettyLabel: "WHAM",
