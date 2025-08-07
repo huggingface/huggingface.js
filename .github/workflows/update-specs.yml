@@ -28,7 +28,7 @@ jobs:
           run_install: true
 
       # Generate specs
-      - run: pnpm run inference-tgi-import
+      # - run: pnpm run inference-tgi-import
       - run: pnpm run inference-tei-import
       - run: pnpm run inference-codegen
 
