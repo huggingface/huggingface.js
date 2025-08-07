@@ -1170,6 +1170,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.vui,
 	},
+	"wan2.2": {
+		prettyLabel: "Wan2.2",
+		repoName: "Wan2.2",
+		repoUrl: "https://github.com/Wan-Video/Wan2.2",
+		countDownloads: `path_filename:"config" AND path_extension:"json"`,
+	},
 	wham: {
 		prettyLabel: "WHAM",
 		repoName: "wham",
