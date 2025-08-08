@@ -14,19 +14,12 @@
  *
  * Thanks!
  */
-import type {
-	FeatureExtractionOutput,
-	TextGenerationOutput,
-} from "@huggingface/tasks";
+import type { FeatureExtractionOutput, TextGenerationOutput } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
 
 import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
-import {
-	BaseConversationalTask,
-	TaskProviderHelper,
-	BaseTextGenerationTask,
-} from "./providerHelper.js";
+import { BaseConversationalTask, TaskProviderHelper, BaseTextGenerationTask } from "./providerHelper.js";
 
 const SCALEWAY_API_BASE_URL = "https://api.scaleway.ai";
 
