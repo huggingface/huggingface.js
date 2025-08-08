@@ -16,20 +16,16 @@
  */
 import type {
 	FeatureExtractionOutput,
-	ImageToTextInput,
-	ImageToTextOutput,
 	TextGenerationOutput,
 } from "@huggingface/tasks";
-import type { BodyParams, RequestArgs } from "../types.js";
+import type { BodyParams } from "../types.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
-import { base64FromBytes } from "../utils/base64FromBytes.js";
 
+import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
 import {
 	BaseConversationalTask,
 	TaskProviderHelper,
-	FeatureExtractionTaskHelper,
 	BaseTextGenerationTask,
-	ImageToTextTaskHelper,
 } from "./providerHelper.js";
 
 const SCALEWAY_API_BASE_URL = "https://api.scaleway.ai";
@@ -64,11 +60,17 @@ export class ScalewayTextGenerationTask extends BaseTextGenerationTask {
 			typeof response === "object" &&
 			response !== null &&
 			"choices" in response &&
-			Array.isArray((response as any).choices) &&
-			(response as any).choices.length > 0
+			Array.isArray(response.choices) &&
+			response.choices.length > 0
 		) {
-			const completion = (response as any).choices[0];
-			if (completion.text) {
+			const completion: unknown = response.choices[0];
+			if (
+				typeof completion === "object" &&
+				!!completion &&
+				"text" in completion &&
+				completion.text &&
+				typeof completion.text === "string"
+			) {
 				return {
 					generated_text: completion.text,
 				};
