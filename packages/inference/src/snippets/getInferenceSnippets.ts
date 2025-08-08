@@ -389,6 +389,7 @@ const snippets: Partial<
 	"image-text-to-text": snippetGenerator("conversational"),
 	"image-to-image": snippetGenerator("imageToImage", prepareImageToImageInput),
 	"image-to-text": snippetGenerator("basicImage"),
+	"image-to-video": snippetGenerator("imageToVideo", prepareImageToImageInput),
 	"object-detection": snippetGenerator("basicImage"),
 	"question-answering": snippetGenerator("questionAnswering", prepareQuestionAnsweringInput),
 	"sentence-similarity": snippetGenerator("basic"),

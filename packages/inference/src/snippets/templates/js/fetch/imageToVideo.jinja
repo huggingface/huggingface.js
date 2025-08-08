@@ -1,0 +1,31 @@
+const image = fs.readFileSync("{{inputs.asObj.inputs}}");
+
+async function query(data) {
+	const response = await fetch(
+		"{{ fullUrl }}",
+		{
+			headers: {
+				Authorization: "{{ authorizationHeader }}",
+				"Content-Type": "image/jpeg",
+{% if billTo %}
+				"X-HF-Bill-To": "{{ billTo }}",
+{% endif %}			},
+			method: "POST",
+			body: {
+				"inputs": `data:image/png;base64,${data.inputs.encode("base64")}`,
+				"parameters": data.parameters,
+			}
+		}
+	);
+	const result = await response.json();
+	return result;
+}
+
+query({
+	"inputs": image,
+	"parameters": {
+		"prompt": "{{inputs.asObj.parameters.prompt}}",
+	}
+}).then((response) => {
+    // Use video
+});
