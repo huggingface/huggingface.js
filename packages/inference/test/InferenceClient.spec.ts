@@ -22,7 +22,7 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
-describe.skip("InferenceClient", () => {
+describe("InferenceClient", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
 	describe("backward compatibility", () => {
@@ -1550,6 +1550,7 @@ describe.skip("InferenceClient", () => {
 					model: "meta-llama/Llama-3.1-8B-Instruct",
 					provider: "scaleway",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					tool_choice: "none",
 				});
 				if (res.choices && res.choices.length > 0) {
 					const completion = res.choices[0].message?.content;
@@ -1586,6 +1587,7 @@ describe.skip("InferenceClient", () => {
 										url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
 									},
 								},
+								{ type: "text", text: "What is this?" },
 							],
 						},
 					],
