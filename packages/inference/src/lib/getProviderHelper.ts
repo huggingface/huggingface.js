@@ -151,7 +151,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	scaleway: {
 		conversational: new Scaleway.ScalewayConversationalTask(),
-		"image-to-text": new Scaleway.ScalewayConversationalTask(),
 		"text-generation": new Scaleway.ScalewayTextGenerationTask(),
 		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
 	},
