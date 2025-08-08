@@ -16,7 +16,7 @@ const nodeConfig: Options = {
 const browserConfig: Options = {
 	...baseConfig,
 	platform: "browser",
-	target: "es2018",
+	target: "es2022",
 	splitting: true,
 	outDir: "dist/browser",
 };
