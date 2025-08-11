@@ -132,6 +132,10 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		txt: "Ternary quantization.",
 		src_url: "https://github.com/ggml-org/llama.cpp/pull/8151",
 	},
+	[GGMLQuantizationType.MXFP4]: {
+		txt: "4-bit Microscaling Block Floating Point.",
+		src_url: "https://github.com/ggml-org/llama.cpp/pull/15091",
+	},
 };
 
 const QK_K = 256;
@@ -173,4 +177,5 @@ export const GGML_QUANT_SIZES = {
 	[GGMLQuantizationType.BF16]: calcBPW(1, 2),
 	[GGMLQuantizationType.TQ1_0]: calcBPW(256, 2 + 4 * 13),
 	[GGMLQuantizationType.TQ2_0]: calcBPW(256, 2 + 64),
+	[GGMLQuantizationType.MXFP4]: calcBPW(32, 1 + 16),
 };

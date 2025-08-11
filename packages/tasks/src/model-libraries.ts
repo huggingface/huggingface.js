@@ -703,7 +703,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVIDIA/NeMo",
 		snippets: snippets.nemo,
 		filter: true,
-		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
+		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
 	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
@@ -1169,6 +1169,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/vui-ai/vui",
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.vui,
+	},
+	"wan2.2": {
+		prettyLabel: "Wan2.2",
+		repoName: "Wan2.2",
+		repoUrl: "https://github.com/Wan-Video/Wan2.2",
+		countDownloads: `path_filename:"config" AND path_extension:"json"`,
 	},
 	wham: {
 		prettyLabel: "WHAM",
