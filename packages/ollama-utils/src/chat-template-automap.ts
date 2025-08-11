@@ -5,19 +5,17 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/minicpm-v:latest
- * - library/qwen2:latest
- * - library/qwen2.5:0.5b
- * - library/llama4:latest
- * - library/command-r:latest
- * - library/phi4-reasoning:latest
- * - library/cogito:3b
- * - library/starcoder:latest
- * - library/mistral-small3.1:latest
- * - library/cogito:latest
- * - library/aya-expanse:latest
- * - library/smallthinker:3b
- * - library/command-r7b:7b
+ * - library/qwen3:0.6b
+ * - library/mistral-small:latest
+ * - library/deepseek-coder-v2:latest
+ * - library/qwen2.5vl:latest
+ * - library/zephyr:latest
+ * - library/falcon3:1b
+ * - library/deepscaler:latest
+ * - library/stablelm2:latest
+ * - library/r1-1776:70b
+ * - library/nexusraven:13b
+ * - library/marco-o1:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
