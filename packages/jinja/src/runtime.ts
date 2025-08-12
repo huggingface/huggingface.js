@@ -1,8 +1,7 @@
 import type {
-	NumericLiteral,
 	StringLiteral,
-	BooleanLiteral,
-	NullLiteral,
+	FloatLiteral,
+	IntegerLiteral,
 	ArrayLiteral,
 	Statement,
 	Program,
@@ -23,11 +22,16 @@ import type {
 	Macro,
 	Expression,
 	SelectExpression,
+	CallStatement,
+	FilterStatement,
+	Ternary,
+	SpreadExpression,
 } from "./ast";
-import { slice, titleCase } from "./utils";
+import { range, replace, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
-	| NumericValue
+	| IntegerValue
+	| FloatValue
 	| StringValue
 	| BooleanValue
 	| ObjectValue
@@ -35,6 +39,10 @@ export type AnyRuntimeValue =
 	| FunctionValue
 	| NullValue
 	| UndefinedValue;
+
+// Control-flow exceptions for loop break/continue
+class BreakControl extends Error {}
+class ContinueControl extends Error {}
 
 /**
  * Abstract base class for all Runtime values.
@@ -64,13 +72,28 @@ abstract class RuntimeValue<T> {
 	__bool__(): BooleanValue {
 		return new BooleanValue(!!this.value);
 	}
+
+	toString(): string {
+		return String(this.value);
+	}
 }
 
 /**
- * Represents a numeric value at runtime.
+ * Represents an integer value at runtime.
  */
-export class NumericValue extends RuntimeValue<number> {
-	override type = "NumericValue";
+export class IntegerValue extends RuntimeValue<number> {
+	override type = "IntegerValue";
+}
+
+/**
+ * Represents a float value at runtime.
+ */
+export class FloatValue extends RuntimeValue<number> {
+	override type = "FloatValue";
+
+	override toString(): string {
+		return this.value % 1 === 0 ? this.value.toFixed(1) : this.value.toString();
+	}
 }
 
 /**
@@ -104,7 +127,13 @@ export class StringValue extends RuntimeValue<string> {
 				return new StringValue(titleCase(this.value));
 			}),
 		],
-		["length", new NumericValue(this.value.length)],
+		[
+			"capitalize",
+			new FunctionValue(() => {
+				return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
+			}),
+		],
+		["length", new IntegerValue(this.value.length)],
 		[
 			"rstrip",
 			new FunctionValue(() => {
@@ -118,6 +147,52 @@ export class StringValue extends RuntimeValue<string> {
 			}),
 		],
 		[
+			"startswith",
+			new FunctionValue((args) => {
+				if (args.length === 0) {
+					throw new Error("startswith() requires at least one argument");
+				}
+				const pattern = args[0];
+				if (pattern instanceof StringValue) {
+					return new BooleanValue(this.value.startsWith(pattern.value));
+				} else if (pattern instanceof ArrayValue) {
+					for (const item of pattern.value) {
+						if (!(item instanceof StringValue)) {
+							throw new Error("startswith() tuple elements must be strings");
+						}
+						if (this.value.startsWith(item.value)) {
+							return new BooleanValue(true);
+						}
+					}
+					return new BooleanValue(false);
+				}
+				throw new Error("startswith() argument must be a string or tuple of strings");
+			}),
+		],
+		[
+			"endswith",
+			new FunctionValue((args) => {
+				if (args.length === 0) {
+					throw new Error("endswith() requires at least one argument");
+				}
+				const pattern = args[0];
+				if (pattern instanceof StringValue) {
+					return new BooleanValue(this.value.endsWith(pattern.value));
+				} else if (pattern instanceof ArrayValue) {
+					for (const item of pattern.value) {
+						if (!(item instanceof StringValue)) {
+							throw new Error("endswith() tuple elements must be strings");
+						}
+						if (this.value.endsWith(item.value)) {
+							return new BooleanValue(true);
+						}
+					}
+					return new BooleanValue(false);
+				}
+				throw new Error("endswith() argument must be a string or tuple of strings");
+			}),
+		],
+		[
 			"split",
 			// follows Python's `str.split(sep=None, maxsplit=-1)` function behavior
 			// https://docs.python.org/3.13/library/stdtypes.html#str.split
@@ -126,8 +201,8 @@ export class StringValue extends RuntimeValue<string> {
 				if (!(sep instanceof StringValue || sep instanceof NullValue)) {
 					throw new Error("sep argument must be a string or null");
 				}
-				const maxsplit = args[1] ?? new NumericValue(-1);
-				if (!(maxsplit instanceof NumericValue)) {
+				const maxsplit = args[1] ?? new IntegerValue(-1);
+				if (!(maxsplit instanceof IntegerValue)) {
 					throw new Error("maxsplit argument must be a number");
 				}
 
@@ -157,6 +232,34 @@ export class StringValue extends RuntimeValue<string> {
 					}
 				}
 				return new ArrayValue(result.map((part) => new StringValue(part)));
+			}),
+		],
+		[
+			"replace",
+			new FunctionValue((args): StringValue => {
+				if (args.length < 2) {
+					throw new Error("replace() requires at least two arguments");
+				}
+				const oldValue = args[0];
+				const newValue = args[1];
+				if (!(oldValue instanceof StringValue && newValue instanceof StringValue)) {
+					throw new Error("replace() arguments must be strings");
+				}
+
+				let count: AnyRuntimeValue | undefined;
+				if (args.length > 2) {
+					if (args[2].type === "KeywordArgumentsValue") {
+						count = (args[2] as KeywordArgumentsValue).value.get("count") ?? new NullValue();
+					} else {
+						count = args[2];
+					}
+				} else {
+					count = new NullValue();
+				}
+				if (!(count instanceof IntegerValue || count instanceof NullValue)) {
+					throw new Error("replace() count argument must be a number or null");
+				}
+				return new StringValue(replace(this.value, oldValue.value, newValue.value, count.value));
 			}),
 		],
 	]);
@@ -197,15 +300,22 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 				return this.value.get(key.value) ?? defaultValue ?? new NullValue();
 			}),
 		],
-		[
-			"items",
-			new FunctionValue(() => {
-				return new ArrayValue(
-					Array.from(this.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
-				);
-			}),
-		],
+		["items", new FunctionValue(() => this.items())],
+		["keys", new FunctionValue(() => this.keys())],
+		["values", new FunctionValue(() => this.values())],
 	]);
+
+	items(): ArrayValue {
+		return new ArrayValue(
+			Array.from(this.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+		);
+	}
+	keys(): ArrayValue {
+		return new ArrayValue(Array.from(this.value.keys()).map((key) => new StringValue(key)));
+	}
+	values(): ArrayValue {
+		return new ArrayValue(Array.from(this.value.values()));
+	}
 }
 
 /**
@@ -220,7 +330,7 @@ export class KeywordArgumentsValue extends ObjectValue {
  */
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	override type = "ArrayValue";
-	override builtins = new Map<string, AnyRuntimeValue>([["length", new NumericValue(this.value.length)]]);
+	override builtins = new Map<string, AnyRuntimeValue>([["length", new IntegerValue(this.value.length)]]);
 
 	/**
 	 * NOTE: necessary to override since all JavaScript arrays are considered truthy,
@@ -295,27 +405,27 @@ export class Environment {
 		[
 			"odd",
 			(operand) => {
-				if (operand.type !== "NumericValue") {
-					throw new Error(`Cannot apply test "odd" to type: ${operand.type}`);
+				if (!(operand instanceof IntegerValue)) {
+					throw new Error(`cannot odd on ${operand.type}`);
 				}
-				return (operand as NumericValue).value % 2 !== 0;
+				return operand.value % 2 !== 0;
 			},
 		],
 		[
 			"even",
 			(operand) => {
-				if (operand.type !== "NumericValue") {
-					throw new Error(`Cannot apply test "even" to type: ${operand.type}`);
+				if (!(operand instanceof IntegerValue)) {
+					throw new Error(`cannot even on ${operand.type}`);
 				}
-				return (operand as NumericValue).value % 2 === 0;
+				return operand.value % 2 === 0;
 			},
 		],
 		["false", (operand) => operand.type === "BooleanValue" && !(operand as BooleanValue).value],
 		["true", (operand) => operand.type === "BooleanValue" && (operand as BooleanValue).value],
 		["none", (operand) => operand.type === "NullValue"],
 		["string", (operand) => operand.type === "StringValue"],
-		["number", (operand) => operand.type === "NumericValue"],
-		["integer", (operand) => operand.type === "NumericValue" && Number.isInteger((operand as NumericValue).value)],
+		["number", (operand) => operand instanceof IntegerValue || operand instanceof FloatValue],
+		["integer", (operand) => operand instanceof IntegerValue],
 		["iterable", (operand) => operand.type === "ArrayValue" || operand.type === "StringValue"],
 		["mapping", (operand) => operand.type === "ObjectValue"],
 		[
@@ -398,6 +508,26 @@ export class Environment {
 	}
 }
 
+export function setupGlobals(env: Environment): void {
+	// Declare global variables
+	env.set("false", false);
+	env.set("true", true);
+	env.set("none", null);
+	env.set("raise_exception", (args: string) => {
+		throw new Error(args);
+	});
+	env.set("range", range);
+	env.set("strftime_now", strftime_now);
+
+	// NOTE: According to the Jinja docs: The special constants true, false, and none are indeed lowercase.
+	// Because that caused confusion in the past, (True used to expand to an undefined variable that was considered false),
+	// all three can now also be written in title case (True, False, and None). However, for consistency, (all Jinja identifiers are lowercase)
+	// you should use the lowercase versions.
+	env.set("True", true);
+	env.set("False", false);
+	env.set("None", null);
+}
+
 export class Interpreter {
 	global: Environment;
 
@@ -437,33 +567,48 @@ export class Interpreter {
 		}
 
 		if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
-			throw new Error("Cannot perform operation on undefined values");
+			if (right instanceof UndefinedValue && ["in", "not in"].includes(node.operator.value)) {
+				// Special case: `anything in undefined` is `false` and `anything not in undefined` is `true`
+				return new BooleanValue(node.operator.value === "not in");
+			}
+			throw new Error(`Cannot perform operation ${node.operator.value} on undefined values`);
 		} else if (left instanceof NullValue || right instanceof NullValue) {
 			throw new Error("Cannot perform operation on null values");
-		} else if (left instanceof NumericValue && right instanceof NumericValue) {
+		} else if (node.operator.value === "~") {
+			// toString and concatenation
+			return new StringValue(left.value.toString() + right.value.toString());
+		} else if (
+			(left instanceof IntegerValue || left instanceof FloatValue) &&
+			(right instanceof IntegerValue || right instanceof FloatValue)
+		) {
 			// Evaulate pure numeric operations with binary operators.
+			const a = left.value,
+				b = right.value;
 			switch (node.operator.value) {
 				// Arithmetic operators
 				case "+":
-					return new NumericValue(left.value + right.value);
 				case "-":
-					return new NumericValue(left.value - right.value);
-				case "*":
-					return new NumericValue(left.value * right.value);
+				case "*": {
+					const res = node.operator.value === "+" ? a + b : node.operator.value === "-" ? a - b : a * b;
+					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
+					return isFloat ? new FloatValue(res) : new IntegerValue(res);
+				}
 				case "/":
-					return new NumericValue(left.value / right.value);
-				case "%":
-					return new NumericValue(left.value % right.value);
-
+					return new FloatValue(a / b);
+				case "%": {
+					const rem = a % b;
+					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
+					return isFloat ? new FloatValue(rem) : new IntegerValue(rem);
+				}
 				// Comparison operators
 				case "<":
-					return new BooleanValue(left.value < right.value);
+					return new BooleanValue(a < b);
 				case ">":
-					return new BooleanValue(left.value > right.value);
+					return new BooleanValue(a > b);
 				case ">=":
-					return new BooleanValue(left.value >= right.value);
+					return new BooleanValue(a >= b);
 				case "<=":
-					return new BooleanValue(left.value <= right.value);
+					return new BooleanValue(a <= b);
 			}
 		} else if (left instanceof ArrayValue && right instanceof ArrayValue) {
 			// Evaluate array operands with binary operator.
@@ -515,11 +660,21 @@ export class Interpreter {
 		environment: Environment
 	): [AnyRuntimeValue[], Map<string, AnyRuntimeValue>] {
 		// Accumulate args and kwargs
-		const positionalArguments = [];
-		const keywordArguments = new Map();
+		const positionalArguments: AnyRuntimeValue[] = [];
+		const keywordArguments = new Map<string, AnyRuntimeValue>();
+
 		for (const argument of args) {
 			// TODO: Lazy evaluation of arguments
-			if (argument.type === "KeywordArgumentExpression") {
+			if (argument.type === "SpreadExpression") {
+				const spreadNode = argument as SpreadExpression;
+				const val = this.evaluate(spreadNode.argument, environment);
+				if (!(val instanceof ArrayValue)) {
+					throw new Error(`Cannot unpack non-iterable type: ${val.type}`);
+				}
+				for (const item of val.value) {
+					positionalArguments.push(item);
+				}
+			} else if (argument.type === "KeywordArgumentExpression") {
 				const kwarg = argument as KeywordArgumentExpression;
 				keywordArguments.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
 			} else {
@@ -532,12 +687,7 @@ export class Interpreter {
 		return [positionalArguments, keywordArguments];
 	}
 
-	/**
-	 * Evaluates expressions following the filter operation type.
-	 */
-	private evaluateFilterExpression(node: FilterExpression, environment: Environment): AnyRuntimeValue {
-		const operand = this.evaluate(node.operand, environment);
-
+	private applyFilter(operand: AnyRuntimeValue, filterNode: Identifier | CallExpression, environment: Environment) {
 		// For now, we only support the built-in filters
 		// TODO: Add support for non-identifier filters
 		//   e.g., functions which return filters: {{ numbers | select("odd") }}
@@ -550,8 +700,8 @@ export class Interpreter {
 
 		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-filters
 
-		if (node.filter.type === "Identifier") {
-			const filter = node.filter as Identifier;
+		if (filterNode.type === "Identifier") {
+			const filter = filterNode as Identifier;
 
 			if (filter.value === "tojson") {
 				return new StringValue(toJSON(operand));
@@ -566,7 +716,7 @@ export class Interpreter {
 					case "last":
 						return operand.value[operand.value.length - 1];
 					case "length":
-						return new NumericValue(operand.value.length);
+						return new IntegerValue(operand.value.length);
 					case "reverse":
 						return new ArrayValue(operand.value.reverse());
 					case "sort":
@@ -576,8 +726,9 @@ export class Interpreter {
 									throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
 								}
 								switch (a.type) {
-									case "NumericValue":
-										return (a as NumericValue).value - (b as NumericValue).value;
+									case "IntegerValue":
+									case "FloatValue":
+										return (a as IntegerValue | FloatValue).value - (b as IntegerValue | FloatValue).value;
 									case "StringValue":
 										return (a as StringValue).value.localeCompare((b as StringValue).value);
 									default:
@@ -587,21 +738,39 @@ export class Interpreter {
 						);
 					case "join":
 						return new StringValue(operand.value.map((x) => x.value).join(""));
+					case "string":
+						return new StringValue(toJSON(operand));
+					case "unique": {
+						const seen = new Set();
+						const output: AnyRuntimeValue[] = [];
+						for (const item of operand.value) {
+							if (!seen.has(item.value)) {
+								seen.add(item.value);
+								output.push(item);
+							}
+						}
+						return new ArrayValue(output);
+					}
 					default:
 						throw new Error(`Unknown ArrayValue filter: ${filter.value}`);
 				}
 			} else if (operand instanceof StringValue) {
 				switch (filter.value) {
+					// Filters that are also built-in functions
 					case "length":
-						return new NumericValue(operand.value.length);
 					case "upper":
-						return new StringValue(operand.value.toUpperCase());
 					case "lower":
-						return new StringValue(operand.value.toLowerCase());
 					case "title":
-						return new StringValue(titleCase(operand.value));
-					case "capitalize":
-						return new StringValue(operand.value.charAt(0).toUpperCase() + operand.value.slice(1));
+					case "capitalize": {
+						const builtin = operand.builtins.get(filter.value);
+						if (builtin instanceof FunctionValue) {
+							return builtin.value(/* no arguments */ [], environment);
+						} else if (builtin instanceof IntegerValue) {
+							return builtin;
+						} else {
+							throw new Error(`Unknown StringValue filter: ${filter.value}`);
+						}
+					}
 					case "trim":
 						return new StringValue(operand.value.trim());
 					case "indent":
@@ -617,13 +786,27 @@ export class Interpreter {
 					case "join":
 					case "string":
 						return operand; // no-op
+					case "int": {
+						const val = parseInt(operand.value, 10);
+						return new IntegerValue(isNaN(val) ? 0 : val);
+					}
+					case "float": {
+						const val = parseFloat(operand.value);
+						return new FloatValue(isNaN(val) ? 0.0 : val);
+					}
 					default:
 						throw new Error(`Unknown StringValue filter: ${filter.value}`);
 				}
-			} else if (operand instanceof NumericValue) {
+			} else if (operand instanceof IntegerValue || operand instanceof FloatValue) {
 				switch (filter.value) {
 					case "abs":
-						return new NumericValue(Math.abs(operand.value));
+						return operand instanceof IntegerValue
+							? new IntegerValue(Math.abs(operand.value))
+							: new FloatValue(Math.abs(operand.value));
+					case "int":
+						return new IntegerValue(Math.floor(operand.value));
+					case "float":
+						return new FloatValue(operand.value);
 					default:
 						throw new Error(`Unknown NumericValue filter: ${filter.value}`);
 				}
@@ -634,14 +817,27 @@ export class Interpreter {
 							Array.from(operand.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
 						);
 					case "length":
-						return new NumericValue(operand.value.size);
+						return new IntegerValue(operand.value.size);
 					default:
 						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
 				}
+			} else if (operand instanceof BooleanValue) {
+				switch (filter.value) {
+					case "bool":
+						return new BooleanValue(operand.value);
+					case "int":
+						return new IntegerValue(operand.value ? 1 : 0);
+					case "float":
+						return new FloatValue(operand.value ? 1.0 : 0.0);
+					case "string":
+						return new StringValue(operand.value ? "true" : "false");
+					default:
+						throw new Error(`Unknown BooleanValue filter: ${filter.value}`);
+				}
 			}
 			throw new Error(`Cannot apply filter "${filter.value}" to type: ${operand.type}`);
-		} else if (node.filter.type === "CallExpression") {
-			const filter = node.filter as CallExpression;
+		} else if (filterNode.type === "CallExpression") {
+			const filter = filterNode as CallExpression;
 
 			if (filter.callee.type !== "Identifier") {
 				throw new Error(`Unknown filter: ${filter.callee.type}`);
@@ -651,7 +847,7 @@ export class Interpreter {
 			if (filterName === "tojson") {
 				const [, kwargs] = this.evaluateArguments(filter.args, environment);
 				const indent = kwargs.get("indent") ?? new NullValue();
-				if (!(indent instanceof NumericValue || indent instanceof NullValue)) {
+				if (!(indent instanceof IntegerValue || indent instanceof NullValue)) {
 					throw new Error("If set, indent must be a number");
 				}
 				return new StringValue(toJSON(operand, indent.value));
@@ -673,6 +869,34 @@ export class Interpreter {
 				}
 
 				return new StringValue(value.join(separator.value));
+			} else if (filterName === "int" || filterName === "float") {
+				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+				const defaultValue =
+					args.at(0) ?? kwargs.get("default") ?? (filterName === "int" ? new IntegerValue(0) : new FloatValue(0.0));
+
+				if (operand instanceof StringValue) {
+					const val = filterName === "int" ? parseInt(operand.value, 10) : parseFloat(operand.value);
+					return isNaN(val) ? defaultValue : filterName === "int" ? new IntegerValue(val) : new FloatValue(val);
+				} else if (operand instanceof IntegerValue || operand instanceof FloatValue) {
+					return operand;
+				} else if (operand instanceof BooleanValue) {
+					return filterName === "int"
+						? new IntegerValue(operand.value ? 1 : 0)
+						: new FloatValue(operand.value ? 1.0 : 0.0);
+				} else {
+					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
+				}
+			} else if (filterName === "default") {
+				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+				const defaultValue = args[0] ?? new StringValue("");
+				const booleanValue = args[1] ?? kwargs.get("boolean") ?? new BooleanValue(false);
+				if (!(booleanValue instanceof BooleanValue)) {
+					throw new Error("`default` filter flag must be a boolean");
+				}
+				if (operand instanceof UndefinedValue || (booleanValue.value && !operand.__bool__().value)) {
+					return defaultValue;
+				}
+				return operand;
 			}
 
 			if (operand instanceof ArrayValue) {
@@ -748,8 +972,8 @@ export class Interpreter {
 
 						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
 
-						const width = args.at(0) ?? kwargs.get("width") ?? new NumericValue(4);
-						if (!(width instanceof NumericValue)) {
+						const width = args.at(0) ?? kwargs.get("width") ?? new IntegerValue(4);
+						if (!(width instanceof IntegerValue)) {
 							throw new Error("width must be a number");
 						}
 						const first = args.at(1) ?? kwargs.get("first") ?? new BooleanValue(false);
@@ -762,13 +986,29 @@ export class Interpreter {
 						);
 						return new StringValue(indented.join("\n"));
 					}
+					case "replace": {
+						const replaceFn = operand.builtins.get("replace");
+						if (!(replaceFn instanceof FunctionValue)) {
+							throw new Error("replace filter not available");
+						}
+						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+						return replaceFn.value([...args, new KeywordArgumentsValue(kwargs)], environment);
+					}
 				}
 				throw new Error(`Unknown StringValue filter: ${filterName}`);
 			} else {
 				throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 			}
 		}
-		throw new Error(`Unknown filter: ${node.filter.type}`);
+		throw new Error(`Unknown filter: ${filterNode.type}`);
+	}
+
+	/**
+	 * Evaluates expressions following the filter operation type.
+	 */
+	private evaluateFilterExpression(node: FilterExpression, environment: Environment): AnyRuntimeValue {
+		const operand = this.evaluate(node.operand, environment);
+		return this.applyFilter(operand, node.filter, environment);
 	}
 
 	/**
@@ -790,6 +1030,17 @@ export class Interpreter {
 	}
 
 	/**
+	 * Evaluates expressions following the select operation type.
+	 */
+	private evaluateSelectExpression(node: SelectExpression, environment: Environment): AnyRuntimeValue {
+		const predicate = this.evaluate(node.test, environment);
+		if (!predicate.__bool__().value) {
+			return new UndefinedValue();
+		}
+		return this.evaluate(node.lhs, environment);
+	}
+
+	/**
 	 * Evaluates expressions following the unary operation type.
 	 */
 	private evaluateUnaryExpression(node: UnaryExpression, environment: Environment): AnyRuntimeValue {
@@ -803,6 +1054,13 @@ export class Interpreter {
 		}
 	}
 
+	private evaluateTernaryExpression(node: Ternary, environment: Environment): AnyRuntimeValue {
+		const cond = this.evaluate(node.condition, environment);
+		return cond.__bool__().value
+			? this.evaluate(node.trueExpr, environment)
+			: this.evaluate(node.falseExpr, environment);
+	}
+
 	private evalProgram(program: Program, environment: Environment): StringValue {
 		return this.evaluateBlock(program.body, environment);
 	}
@@ -813,10 +1071,10 @@ export class Interpreter {
 
 		let result = "";
 		for (const statement of statements) {
-			const lastEvaluated = this.evaluate(statement, environment);
+			const lastEvaluated: AnyRuntimeValue = this.evaluate(statement, environment);
 
 			if (lastEvaluated.type !== "NullValue" && lastEvaluated.type !== "UndefinedValue") {
-				result += lastEvaluated.value;
+				result += lastEvaluated.toString();
 			}
 		}
 
@@ -857,13 +1115,13 @@ export class Interpreter {
 		const step = this.evaluate(expr.step, environment);
 
 		// Validate arguments
-		if (!(start instanceof NumericValue || start instanceof UndefinedValue)) {
+		if (!(start instanceof IntegerValue || start instanceof UndefinedValue)) {
 			throw new Error("Slice start must be numeric or undefined");
 		}
-		if (!(stop instanceof NumericValue || stop instanceof UndefinedValue)) {
+		if (!(stop instanceof IntegerValue || stop instanceof UndefinedValue)) {
 			throw new Error("Slice stop must be numeric or undefined");
 		}
-		if (!(step instanceof NumericValue || step instanceof UndefinedValue)) {
+		if (!(step instanceof IntegerValue || step instanceof UndefinedValue)) {
 			throw new Error("Slice step must be numeric or undefined");
 		}
 
@@ -895,7 +1153,7 @@ export class Interpreter {
 			}
 			value = object.value.get(property.value) ?? object.builtins.get(property.value);
 		} else if (object instanceof ArrayValue || object instanceof StringValue) {
-			if (property instanceof NumericValue) {
+			if (property instanceof IntegerValue) {
 				value = object.value.at(property.value);
 				if (object instanceof StringValue) {
 					value = new StringValue(object.value.at(property.value));
@@ -916,10 +1174,26 @@ export class Interpreter {
 	}
 
 	private evaluateSet(node: SetStatement, environment: Environment): NullValue {
-		const rhs = this.evaluate(node.value, environment);
+		const rhs = node.value ? this.evaluate(node.value, environment) : this.evaluateBlock(node.body, environment);
 		if (node.assignee.type === "Identifier") {
 			const variableName = (node.assignee as Identifier).value;
 			environment.setVariable(variableName, rhs);
+		} else if (node.assignee.type === "TupleLiteral") {
+			const tuple = node.assignee as TupleLiteral;
+			if (!(rhs instanceof ArrayValue)) {
+				throw new Error(`Cannot unpack non-iterable type in set: ${rhs.type}`);
+			}
+			const arr = rhs.value;
+			if (arr.length !== tuple.value.length) {
+				throw new Error(`Too ${tuple.value.length > arr.length ? "few" : "many"} items to unpack in set`);
+			}
+			for (let i = 0; i < tuple.value.length; ++i) {
+				const elem = tuple.value[i];
+				if (elem.type !== "Identifier") {
+					throw new Error(`Cannot unpack to non-identifier in set: ${elem.type}`);
+				}
+				environment.setVariable((elem as Identifier).value, arr[i]);
+			}
 		} else if (node.assignee.type === "MemberExpression") {
 			const member = node.assignee as MemberExpression;
 
@@ -950,14 +1224,18 @@ export class Interpreter {
 		let test, iterable;
 		if (node.iterable.type === "SelectExpression") {
 			const select = node.iterable as SelectExpression;
-			iterable = this.evaluate(select.iterable, scope);
+			iterable = this.evaluate(select.lhs, scope);
 			test = select.test;
 		} else {
 			iterable = this.evaluate(node.iterable, scope);
 		}
 
-		if (!(iterable instanceof ArrayValue)) {
-			throw new Error(`Expected iterable type in for loop: got ${iterable.type}`);
+		if (!(iterable instanceof ArrayValue || iterable instanceof ObjectValue)) {
+			throw new Error(`Expected iterable or object type in for loop: got ${iterable.type}`);
+		}
+
+		if (iterable instanceof ObjectValue) {
+			iterable = iterable.keys();
 		}
 
 		const items: Expression[] = [];
@@ -1014,13 +1292,13 @@ export class Interpreter {
 			// Update the loop variable
 			// TODO: Only create object once, then update value?
 			const loop = new Map([
-				["index", new NumericValue(i + 1)],
-				["index0", new NumericValue(i)],
-				["revindex", new NumericValue(items.length - i)],
-				["revindex0", new NumericValue(items.length - i - 1)],
+				["index", new IntegerValue(i + 1)],
+				["index0", new IntegerValue(i)],
+				["revindex", new IntegerValue(items.length - i)],
+				["revindex0", new IntegerValue(items.length - i - 1)],
 				["first", new BooleanValue(i === 0)],
 				["last", new BooleanValue(i === items.length - 1)],
-				["length", new NumericValue(items.length)],
+				["length", new IntegerValue(items.length)],
 				["previtem", i > 0 ? items[i - 1] : new UndefinedValue()],
 				["nextitem", i < items.length - 1 ? items[i + 1] : new UndefinedValue()],
 			] as [string, AnyRuntimeValue][]);
@@ -1030,9 +1308,19 @@ export class Interpreter {
 			// Update scope for this iteration
 			scopeUpdateFunctions[i](scope);
 
-			// Evaluate the body of the for loop
-			const evaluated = this.evaluateBlock(node.body, scope);
-			result += evaluated.value;
+			try {
+				// Evaluate the body of the for loop
+				const evaluated = this.evaluateBlock(node.body, scope);
+				result += evaluated.value;
+			} catch (err) {
+				if (err instanceof ContinueControl) {
+					continue;
+				}
+				if (err instanceof BreakControl) {
+					break;
+				}
+				throw err;
+			}
 
 			// At least one iteration took place
 			noIteration = false;
@@ -1093,8 +1381,39 @@ export class Interpreter {
 		return new NullValue();
 	}
 
+	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
+		const callerFn = new FunctionValue((callerArgs: AnyRuntimeValue[], callerEnv: Environment) => {
+			const callBlockEnv = new Environment(callerEnv);
+			if (node.callerArgs) {
+				for (let i = 0; i < node.callerArgs.length; ++i) {
+					const param = node.callerArgs[i];
+					if (param.type !== "Identifier") {
+						throw new Error(`Caller parameter must be an identifier, got ${param.type}`);
+					}
+					callBlockEnv.setVariable((param as Identifier).value, callerArgs[i] ?? new UndefinedValue());
+				}
+			}
+			return this.evaluateBlock(node.body, callBlockEnv);
+		});
+
+		const [macroArgs, macroKwargs] = this.evaluateArguments(node.call.args, environment);
+		macroArgs.push(new KeywordArgumentsValue(macroKwargs));
+		const fn = this.evaluate(node.call.callee, environment);
+		if (fn.type !== "FunctionValue") {
+			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
+		}
+		const newEnv = new Environment(environment);
+		newEnv.setVariable("caller", callerFn);
+		return (fn as FunctionValue).value(macroArgs, newEnv);
+	}
+
+	private evaluateFilterStatement(node: FilterStatement, environment: Environment): AnyRuntimeValue {
+		const rendered = this.evaluateBlock(node.body, environment);
+		return this.applyFilter(rendered, node.filter, environment);
+	}
+
 	evaluate(statement: Statement | undefined, environment: Environment): AnyRuntimeValue {
-		if (statement === undefined) return new UndefinedValue();
+		if (!statement) return new UndefinedValue();
 
 		switch (statement.type) {
 			// Program
@@ -1110,16 +1429,21 @@ export class Interpreter {
 				return this.evaluateFor(statement as For, environment);
 			case "Macro":
 				return this.evaluateMacro(statement as Macro, environment);
+			case "CallStatement":
+				return this.evaluateCallStatement(statement as CallStatement, environment);
+
+			case "Break":
+				throw new BreakControl();
+			case "Continue":
+				throw new ContinueControl();
 
 			// Expressions
-			case "NumericLiteral":
-				return new NumericValue(Number((statement as NumericLiteral).value));
+			case "IntegerLiteral":
+				return new IntegerValue((statement as IntegerLiteral).value);
+			case "FloatLiteral":
+				return new FloatValue((statement as FloatLiteral).value);
 			case "StringLiteral":
 				return new StringValue((statement as StringLiteral).value);
-			case "BooleanLiteral":
-				return new BooleanValue((statement as BooleanLiteral).value);
-			case "NullLiteral":
-				return new NullValue((statement as NullLiteral).value);
 			case "ArrayLiteral":
 				return new ArrayValue((statement as ArrayLiteral).value.map((x) => this.evaluate(x, environment)));
 			case "TupleLiteral":
@@ -1148,9 +1472,16 @@ export class Interpreter {
 				return this.evaluateBinaryExpression(statement as BinaryExpression, environment);
 			case "FilterExpression":
 				return this.evaluateFilterExpression(statement as FilterExpression, environment);
+			case "FilterStatement":
+				return this.evaluateFilterStatement(statement as FilterStatement, environment);
 			case "TestExpression":
 				return this.evaluateTestExpression(statement as TestExpression, environment);
-
+			case "SelectExpression":
+				return this.evaluateSelectExpression(statement as SelectExpression, environment);
+			case "Ternary":
+				return this.evaluateTernaryExpression(statement as Ternary, environment);
+			case "Comment":
+				return new NullValue();
 			default:
 				throw new SyntaxError(`Unknown node type: ${statement.type}`);
 		}
@@ -1163,7 +1494,7 @@ export class Interpreter {
 function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 	switch (typeof input) {
 		case "number":
-			return new NumericValue(input);
+			return Number.isInteger(input) ? new IntegerValue(input) : new FloatValue(input);
 		case "string":
 			return new StringValue(input);
 		case "boolean":
@@ -1206,7 +1537,8 @@ function toJSON(input: AnyRuntimeValue, indent?: number | null, depth?: number):
 		case "NullValue":
 		case "UndefinedValue": // JSON.stringify(undefined) -> undefined
 			return "null";
-		case "NumericValue":
+		case "IntegerValue":
+		case "FloatValue":
 		case "StringValue":
 		case "BooleanValue":
 			return JSON.stringify(input.value);

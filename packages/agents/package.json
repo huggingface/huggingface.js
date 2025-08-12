@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/agents",
-	"packageManager": "pnpm@8.10.5",
+	"packageManager": "pnpm@10.10.0",
 	"version": "0.0.5",
 	"description": "Multi-modal agents using Hugging Face's models",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
@@ -56,6 +56,6 @@
 		"@types/node": "^18.13.0"
 	},
 	"dependencies": {
-		"@huggingface/inference": "^2.6.1"
+		"@huggingface/inference": "workspace:^"
 	}
 }

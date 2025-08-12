@@ -105,9 +105,10 @@ export interface ChatCompletionInput {
 	[property: string]: unknown;
 }
 export interface ChatCompletionInputMessage {
-	content: ChatCompletionInputMessageContent;
+	content?: ChatCompletionInputMessageContent;
 	name?: string;
 	role: string;
+	tool_calls?: ChatCompletionInputToolCall[];
 	[property: string]: unknown;
 }
 export type ChatCompletionInputMessageContent = ChatCompletionInputMessageChunk[] | string;
@@ -122,18 +123,48 @@ export interface ChatCompletionInputURL {
 	[property: string]: unknown;
 }
 export type ChatCompletionInputMessageChunkType = "text" | "image_url";
-export interface ChatCompletionInputGrammarType {
-	type: ChatCompletionInputGrammarTypeType;
-	/**
-	 * A string that represents a [JSON Schema](https://json-schema.org/).
-	 *
-	 * JSON Schema is a declarative language that allows to annotate JSON documents
-	 * with types and descriptions.
-	 */
-	value: unknown;
+export interface ChatCompletionInputToolCall {
+	function: ChatCompletionInputFunctionDefinition;
+	id: string;
+	type: string;
 	[property: string]: unknown;
 }
-export type ChatCompletionInputGrammarTypeType = "json" | "regex";
+export interface ChatCompletionInputFunctionDefinition {
+	description?: string;
+	name: string;
+	parameters?: unknown;
+	[property: string]: unknown;
+}
+export interface ChatCompletionInputGrammarType {
+	json_schema?: ChatCompletionInputJSONSchemaConfig;
+	type: ChatCompletionInputGrammarTypeType;
+	[property: string]: unknown;
+}
+export interface ChatCompletionInputJSONSchemaConfig {
+	/**
+	 * A description of what the response format is for, used by the model to determine how to
+	 * respond in the format.
+	 */
+	description?: string;
+	/**
+	 * The name of the response format.
+	 */
+	name: string;
+	/**
+	 * The schema for the response format, described as a JSON Schema object. Learn how to build
+	 * JSON schemas [here](https://json-schema.org/).
+	 */
+	schema?: {
+		[key: string]: unknown;
+	};
+	/**
+	 * Whether to enable strict schema adherence when generating the output. If set to true, the
+	 * model will always follow the exact schema defined in the `schema` field.
+	 */
+	strict?: boolean;
+	[property: string]: unknown;
+}
+export type ChatCompletionInputGrammarTypeType = "text" | "json_schema" | "json_object";
 export interface ChatCompletionInputStreamOptions {
 	/**
 	 * If set, an additional chunk will be streamed before the data: [DONE] message. The usage
@@ -141,7 +172,7 @@ export interface ChatCompletionInputStreamOptions {
 	 * choices field will always be an empty array. All other chunks will also include a usage
 	 * field, but with a null value.
 	 */
-	include_usage: boolean;
+	include_usage?: boolean;
 	[property: string]: unknown;
 }
 /**
@@ -168,12 +199,6 @@ export interface ChatCompletionInputFunctionName {
 export interface ChatCompletionInputTool {
 	function: ChatCompletionInputFunctionDefinition;
 	type: string;
-	[property: string]: unknown;
-}
-export interface ChatCompletionInputFunctionDefinition {
-	arguments: unknown;
-	description?: string;
-	name: string;
 	[property: string]: unknown;
 }
 /**
@@ -217,6 +242,7 @@ export interface ChatCompletionOutputTopLogprob {
 export interface ChatCompletionOutputMessage {
 	content?: string;
 	role: string;
+	tool_call_id?: string;
 	tool_calls?: ChatCompletionOutputToolCall[];
 	[property: string]: unknown;
 }
@@ -227,7 +253,7 @@ export interface ChatCompletionOutputToolCall {
 	[property: string]: unknown;
 }
 export interface ChatCompletionOutputFunctionDefinition {
-	arguments: unknown;
+	arguments: string;
 	description?: string;
 	name: string;
 	[property: string]: unknown;
@@ -264,7 +290,8 @@ export interface ChatCompletionStreamOutputChoice {
 export interface ChatCompletionStreamOutputDelta {
 	content?: string;
 	role: string;
-	tool_calls?: ChatCompletionStreamOutputDeltaToolCall;
+	tool_call_id?: string;
+	tool_calls?: ChatCompletionStreamOutputDeltaToolCall[];
 	[property: string]: unknown;
 }
 export interface ChatCompletionStreamOutputDeltaToolCall {

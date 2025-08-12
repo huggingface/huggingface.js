@@ -1,15 +1,15 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
 import type { RepoDesignation, RepoId } from "../types/public";
 import { dirname, join } from "node:path";
-import { lstat, mkdir, stat, symlink, writeFile, rename } from "node:fs/promises";
+import { lstat, mkdir, stat, symlink, rename } from "node:fs/promises";
 import { pathsInfo } from "./paths-info";
-import type { Stats } from "node:fs";
+import { createWriteStream, type Stats } from "node:fs";
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { toRepoId } from "../utils/toRepoId";
 import { downloadFileToCacheDir } from "./download-file-to-cache-dir";
+import { createSymlink } from "../utils/symlink";
 
 vi.mock("node:fs/promises", () => ({
-	writeFile: vi.fn(),
 	rename: vi.fn(),
 	symlink: vi.fn(),
 	lstat: vi.fn(),
@@ -17,8 +17,16 @@ vi.mock("node:fs/promises", () => ({
 	stat: vi.fn(),
 }));
 
+vi.mock("node:fs", () => ({
+	createWriteStream: vi.fn(),
+}));
+
 vi.mock("./paths-info", () => ({
 	pathsInfo: vi.fn(),
+}));
+
+vi.mock("../utils/symlink", () => ({
+	createSymlink: vi.fn(),
 }));
 
 const DUMMY_REPO: RepoId = {
@@ -58,11 +66,15 @@ describe("downloadFileToCacheDir", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 		// mock 200 request
-		vi.mocked(fetchMock).mockResolvedValue({
-			status: 200,
-			ok: true,
-			body: "dummy-body",
-		} as unknown as Response);
+		vi.mocked(fetchMock).mockResolvedValue(
+			new Response("dummy-body", {
+				status: 200,
+				headers: {
+					etag: DUMMY_ETAG,
+					"Content-Range": "bytes 0-54/55",
+				},
+			})
+		);
 
 		// prevent to use caching
 		vi.mocked(stat).mockRejectedValue(new Error("Do not exists"));
@@ -114,6 +126,47 @@ describe("downloadFileToCacheDir", () => {
 		expect(output).toBe(expectPointer);
 	});
 
+	test("existing symlinked and blob with default revision should not re-download it", async () => {
+		// <cache>/<repo>/<revision>/snapshots/README.md
+		const expectPointer = _getSnapshotFile({
+			repo: DUMMY_REPO,
+			path: "/README.md",
+			revision: "main",
+		});
+		// stat ensure a symlink and the pointed file exists
+		vi.mocked(stat).mockResolvedValue({} as Stats); // prevent default mocked reject
+		vi.mocked(lstat).mockResolvedValue({} as Stats);
+		vi.mocked(pathsInfo).mockResolvedValue([
+			{
+				oid: DUMMY_ETAG,
+				size: 55,
+				path: "README.md",
+				type: "file",
+				lastCommit: {
+					date: new Date(),
+					id: "main",
+					title: "Commit msg",
+				},
+			},
+		]);
+
+		const output = await downloadFileToCacheDir({
+			repo: DUMMY_REPO,
+			path: "/README.md",
+			fetch: fetchMock,
+		});
+
+		expect(stat).toHaveBeenCalledOnce();
+		expect(symlink).not.toHaveBeenCalledOnce();
+		// Get call argument for stat
+		const starArg = vi.mocked(stat).mock.calls[0][0];
+
+		expect(starArg).toBe(expectPointer);
+		expect(fetchMock).not.toHaveBeenCalledWith();
+
+		expect(output).toBe(expectPointer);
+	});
+
 	test("existing blob should only create the symlink", async () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
@@ -150,13 +203,12 @@ describe("downloadFileToCacheDir", () => {
 			fetch: fetchMock,
 		});
 
-		expect(stat).not.toHaveBeenCalled();
 		// should have check for the blob
 		expect(lstat).toHaveBeenCalled();
 		expect(vi.mocked(lstat).mock.calls[0][0]).toBe(expectedBlob);
 
 		// symlink should have been created
-		expect(symlink).toHaveBeenCalledOnce();
+		expect(createSymlink).toHaveBeenCalledOnce();
 		// no download done
 		expect(fetchMock).not.toHaveBeenCalled();
 
@@ -189,6 +241,9 @@ describe("downloadFileToCacheDir", () => {
 				},
 			},
 		]);
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		vi.mocked(createWriteStream).mockReturnValue(async function* () {} as any);
 
 		const output = await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
@@ -231,6 +286,9 @@ describe("downloadFileToCacheDir", () => {
 			},
 		]);
 
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		vi.mocked(createWriteStream).mockReturnValue(async function* () {} as any);
+
 		await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
 			path: "/README.md",
@@ -239,10 +297,10 @@ describe("downloadFileToCacheDir", () => {
 
 		const incomplete = `${expectedBlob}.incomplete`;
 		// 1. should write fetch#response#body to incomplete file
-		expect(writeFile).toHaveBeenCalledWith(incomplete, "dummy-body");
+		expect(createWriteStream).toHaveBeenCalledWith(incomplete);
 		// 2. should rename the incomplete to the blob expected name
 		expect(rename).toHaveBeenCalledWith(incomplete, expectedBlob);
 		// 3. should create symlink pointing to blob
-		expect(symlink).toHaveBeenCalledWith(expectedBlob, expectPointer);
+		expect(createSymlink).toHaveBeenCalledWith({ sourcePath: expectedBlob, finalPath: expectPointer });
 	});
 });

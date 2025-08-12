@@ -1,8 +1,8 @@
 import type { ZeroShotClassificationInput, ZeroShotClassificationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { toArray } from "../../utils/toArray";
-import { request } from "../custom/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type ZeroShotClassificationArgs = BaseArgs & ZeroShotClassificationInput;
 
@@ -13,24 +13,15 @@ export async function zeroShotClassification(
 	args: ZeroShotClassificationArgs,
 	options?: Options
 ): Promise<ZeroShotClassificationOutput> {
-	const res = toArray(
-		await request<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "zero-shot-classification");
+	const { data: res } = await innerRequest<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(
+		args,
+		providerHelper,
+		{
 			...options,
 			task: "zero-shot-classification",
-		})
+		}
 	);
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) =>
-				Array.isArray(x.labels) &&
-				x.labels.every((_label) => typeof _label === "string") &&
-				Array.isArray(x.scores) &&
-				x.scores.every((_score) => typeof _score === "number") &&
-				typeof x.sequence === "string"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{labels: string[], scores: number[], sequence: string}>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

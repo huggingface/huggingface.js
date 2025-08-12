@@ -1,9 +1,9 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import type { RequestArgs } from "../../types";
-import { base64FromBytes } from "../../utils/base64FromBytes";
 import type { ZeroShotImageClassificationInput, ZeroShotImageClassificationOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options, RequestArgs } from "../../types.js";
+import { base64FromBytes } from "../../utils/base64FromBytes.js";
+import { innerRequest } from "../../utils/request.js";
 
 /**
  * @deprecated
@@ -45,15 +45,12 @@ export async function zeroShotImageClassification(
 	args: ZeroShotImageClassificationArgs,
 	options?: Options
 ): Promise<ZeroShotImageClassificationOutput> {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "zero-shot-image-classification");
 	const payload = await preparePayload(args);
-	const res = await request<ZeroShotImageClassificationOutput>(payload, {
+	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, providerHelper, {
 		...options,
 		task: "zero-shot-image-classification",
 	});
-	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

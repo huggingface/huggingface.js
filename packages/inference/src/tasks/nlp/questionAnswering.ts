@@ -1,7 +1,9 @@
 import type { QuestionAnsweringInput, QuestionAnsweringOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type QuestionAnsweringArgs = BaseArgs & QuestionAnsweringInput;
 
@@ -12,28 +14,15 @@ export async function questionAnswering(
 	args: QuestionAnsweringArgs,
 	options?: Options
 ): Promise<QuestionAnsweringOutput[number]> {
-	const res = await request<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(args, {
-		...options,
-		task: "question-answering",
-	});
-	const isValidOutput = Array.isArray(res)
-		? res.every(
-				(elem) =>
-					typeof elem === "object" &&
-					!!elem &&
-					typeof elem.answer === "string" &&
-					typeof elem.end === "number" &&
-					typeof elem.score === "number" &&
-					typeof elem.start === "number"
-		  )
-		: typeof res === "object" &&
-		  !!res &&
-		  typeof res.answer === "string" &&
-		  typeof res.end === "number" &&
-		  typeof res.score === "number" &&
-		  typeof res.start === "number";
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{answer: string, end: number, score: number, start: number}>");
-	}
-	return Array.isArray(res) ? res[0] : res;
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "question-answering");
+	const { data: res } = await innerRequest<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(
+		args,
+		providerHelper,
+		{
+			...options,
+			task: "question-answering",
+		}
+	);
+	return providerHelper.getResponse(res);
 }

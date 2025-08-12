@@ -14,37 +14,149 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { FeatureExtractionOutput, TextGenerationOutput } from "@huggingface/tasks";
+import type { BodyParams } from "../types.js";
+import { omit } from "../utils/omit.js";
+import {
+	BaseConversationalTask,
+	BaseTextGenerationTask,
+	TaskProviderHelper,
+	type FeatureExtractionTaskHelper,
+	type TextToImageTaskHelper,
+} from "./providerHelper.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
+import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		model: params.model,
-	};
-};
+interface NebiusBase64ImageGeneration {
+	data: Array<{
+		b64_json: string;
+	}>;
+}
 
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
+interface NebiusEmbeddingsResponse {
+	data: Array<{
+		embedding: number[];
+	}>;
+}
 
-const makeUrl = (params: UrlParams): string => {
-	if (params.task === "text-to-image") {
-		return `${params.baseUrl}/v1/images/generations`;
+interface NebiusTextGenerationOutput extends Omit<TextGenerationOutput, "choices"> {
+	choices: Array<{
+		text: string;
+	}>;
+}
+
+export class NebiusConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("nebius", NEBIUS_API_BASE_URL);
 	}
-	if (params.task === "text-generation") {
-		if (params.chatCompletion) {
-			return `${params.baseUrl}/v1/chat/completions`;
+
+	override preparePayload(params: BodyParams<ChatCompletionInput>): Record<string, unknown> {
+		const payload = super.preparePayload(params) as Record<string, unknown>;
+
+		const responseFormat = params.args.response_format;
+		if (responseFormat?.type === "json_schema" && responseFormat.json_schema?.schema) {
+			payload["guided_json"] = responseFormat.json_schema.schema;
 		}
-		return `${params.baseUrl}/v1/completions`;
-	}
-	return params.baseUrl;
-};
 
-export const NEBIUS_CONFIG: ProviderConfig = {
-	baseUrl: NEBIUS_API_BASE_URL,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+		return payload;
+	}
+}
+
+export class NebiusTextGenerationTask extends BaseTextGenerationTask {
+	constructor() {
+		super("nebius", NEBIUS_API_BASE_URL);
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...params.args,
+			model: params.model,
+			prompt: params.args.inputs,
+		};
+	}
+
+	override async getResponse(response: NebiusTextGenerationOutput): Promise<TextGenerationOutput> {
+		if (
+			typeof response === "object" &&
+			"choices" in response &&
+			Array.isArray(response?.choices) &&
+			response.choices.length > 0 &&
+			typeof response.choices[0]?.text === "string"
+		) {
+			return {
+				generated_text: response.choices[0].text,
+			};
+		}
+		throw new InferenceClientProviderOutputError("Received malformed response from Nebius text generation API");
+	}
+}
+
+export class NebiusTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
+	constructor() {
+		super("nebius", NEBIUS_API_BASE_URL);
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			response_format: "b64_json",
+			prompt: params.args.inputs,
+			model: params.model,
+		};
+	}
+
+	makeRoute(): string {
+		return "v1/images/generations";
+	}
+
+	async getResponse(
+		response: NebiusBase64ImageGeneration,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
+		if (
+			typeof response === "object" &&
+			"data" in response &&
+			Array.isArray(response.data) &&
+			response.data.length > 0 &&
+			"b64_json" in response.data[0] &&
+			typeof response.data[0].b64_json === "string"
+		) {
+			if (outputType === "json") {
+				return { ...response };
+			}
+			const base64Data = response.data[0].b64_json;
+			if (outputType === "url") {
+				return `data:image/jpeg;base64,${base64Data}`;
+			}
+			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
+		}
+
+		throw new InferenceClientProviderOutputError("Received malformed response from Nebius text-to-image API");
+	}
+}
+
+export class NebiusFeatureExtractionTask extends TaskProviderHelper implements FeatureExtractionTaskHelper {
+	constructor() {
+		super("nebius", NEBIUS_API_BASE_URL);
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			input: params.args.inputs,
+			model: params.model,
+		};
+	}
+
+	makeRoute(): string {
+		return "v1/embeddings";
+	}
+
+	async getResponse(response: NebiusEmbeddingsResponse): Promise<FeatureExtractionOutput> {
+		return response.data.map((item) => item.embedding);
+	}
+}

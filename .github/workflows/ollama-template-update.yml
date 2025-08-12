@@ -3,7 +3,7 @@ on:
   # push: # for debugging
   workflow_dispatch:
   schedule:
-    - cron: '0 7 * * 1'  # every monday at 7am, so I'll review it after having a 🥐
+    - cron: "0 7 * * 1" # every monday at 7am, so I'll review it after having a 🥐
 
 permissions:
   pull-requests: write # for creating PR

@@ -1,11 +1,16 @@
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { dirname, join } from "node:path";
-import { writeFile, rename, symlink, lstat, mkdir, stat } from "node:fs/promises";
+import { rename, lstat, mkdir, stat } from "node:fs/promises";
 import type { CommitInfo, PathInfo } from "./paths-info";
 import { pathsInfo } from "./paths-info";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { toRepoId } from "../utils/toRepoId";
 import { downloadFile } from "./download-file";
+import { createSymlink } from "../utils/symlink";
+import { Readable } from "node:stream";
+import type { ReadableStream } from "node:stream/web";
+import { pipeline } from "node:stream/promises";
+import { createWriteStream } from "node:fs";
 
 export const REGEX_COMMIT_HASH: RegExp = new RegExp("^[0-9a-f]{40}$");
 
@@ -96,6 +101,9 @@ export async function downloadFileToCacheDir(
 	const pointerPath = getFilePointer(storageFolder, commitHash ?? pathsInformation[0].lastCommit.id, params.path);
 	const blobPath = join(storageFolder, "blobs", etag);
 
+	// if we have the pointer file, we can shortcut the download
+	if (await exists(pointerPath, true)) return pointerPath;
+
 	// mkdir blob and pointer path parent directory
 	await mkdir(dirname(blobPath), { recursive: true });
 	await mkdir(dirname(pointerPath), { recursive: true });
@@ -104,26 +112,27 @@ export async function downloadFileToCacheDir(
 	// shortcut the download if needed
 	if (await exists(blobPath)) {
 		// create symlinks in snapshot folder to blob object
-		await symlink(blobPath, pointerPath);
+		await createSymlink({ sourcePath: blobPath, finalPath: pointerPath });
 		return pointerPath;
 	}
 
 	const incomplete = `${blobPath}.incomplete`;
 	console.debug(`Downloading ${params.path} to ${incomplete}`);
 
-	const response: Response | null = await downloadFile({
+	const blob: Blob | null = await downloadFile({
 		...params,
 		revision: commitHash,
 	});
 
-	if (!response || !response.ok || !response.body) throw new Error(`invalid response for file ${params.path}`);
+	if (!blob) {
+		throw new Error(`invalid response for file ${params.path}`);
+	}
 
-	// @ts-expect-error resp.body is a Stream, but Stream in internal to node
-	await writeFile(incomplete, response.body);
+	await pipeline(Readable.fromWeb(blob.stream() as ReadableStream), createWriteStream(incomplete));
 
 	// rename .incomplete file to expect blob
 	await rename(incomplete, blobPath);
 	// create symlinks in snapshot folder to blob object
-	await symlink(blobPath, pointerPath);
+	await createSymlink({ sourcePath: blobPath, finalPath: pointerPath });
 	return pointerPath;
 }

@@ -1,9 +1,10 @@
 import type { AudioClassificationInput, AudioClassificationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import type { LegacyAudioInput } from "./utils";
-import { preparePayload } from "./utils";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import type { LegacyAudioInput } from "./utils.js";
+import { preparePayload } from "./utils.js";
 
 export type AudioClassificationArgs = BaseArgs & (AudioClassificationInput | LegacyAudioInput);
 
@@ -15,15 +16,13 @@ export async function audioClassification(
 	args: AudioClassificationArgs,
 	options?: Options
 ): Promise<AudioClassificationOutput> {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "audio-classification");
 	const payload = preparePayload(args);
-	const res = await request<AudioClassificationOutput>(payload, {
+	const { data: res } = await innerRequest<AudioClassificationOutput>(payload, providerHelper, {
 		...options,
 		task: "audio-classification",
 	});
-	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return res;
+
+	return providerHelper.getResponse(res);
 }

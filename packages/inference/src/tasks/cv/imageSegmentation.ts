@@ -1,10 +1,11 @@
 import type { ImageSegmentationInput, ImageSegmentationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import { preparePayload, type LegacyImageInput } from "./utils";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import { makeRequestOptions } from "../../lib/makeRequestOptions.js";
 
-export type ImageSegmentationArgs = BaseArgs & (ImageSegmentationInput | LegacyImageInput);
+export type ImageSegmentationArgs = BaseArgs & ImageSegmentationInput;
 
 /**
  * This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
@@ -14,16 +15,13 @@ export async function imageSegmentation(
 	args: ImageSegmentationArgs,
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
-	const payload = preparePayload(args);
-	const res = await request<ImageSegmentationOutput>(payload, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "image-segmentation");
+	const payload = await providerHelper.preparePayloadAsync(args);
+	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, providerHelper, {
 		...options,
 		task: "image-segmentation",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every((x) => typeof x.label === "string" && typeof x.mask === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, mask: string, score: number}>");
-	}
-	return res;
+	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "image-segmentation" });
+	return providerHelper.getResponse(res, url, info.headers as Record<string, string>);
 }

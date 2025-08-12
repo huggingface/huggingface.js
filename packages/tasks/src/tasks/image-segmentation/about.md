@@ -43,9 +43,9 @@ model("cat.png")
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer image segmentation models on Hugging Face Hub.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.imageSegmentation({
 	data: await (await fetch("https://picsum.photos/300/300")).blob(),
 	model: "facebook/mask2former-swin-base-coco-panoptic",

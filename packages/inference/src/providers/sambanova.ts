@@ -14,31 +14,55 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { FeatureExtractionOutput } from "@huggingface/tasks";
+import type { BodyParams } from "../types.js";
+import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
+import { BaseConversationalTask, TaskProviderHelper } from "./providerHelper.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
+import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 
-const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
-
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		...(params.chatCompletion ? { model: params.model } : undefined),
-	};
-};
-
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
-
-const makeUrl = (params: UrlParams): string => {
-	if (params.task === "text-generation" && params.chatCompletion) {
-		return `${params.baseUrl}/v1/chat/completions`;
+export class SambanovaConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("sambanova", "https://api.sambanova.ai");
 	}
-	return params.baseUrl;
-};
 
-export const SAMBANOVA_CONFIG: ProviderConfig = {
-	baseUrl: SAMBANOVA_API_BASE_URL,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+	override preparePayload(params: BodyParams<ChatCompletionInput>): Record<string, unknown> {
+		const responseFormat = params.args.response_format;
+
+		if (responseFormat?.type === "json_schema" && responseFormat.json_schema) {
+			if (responseFormat.json_schema.strict ?? true) {
+				responseFormat.json_schema.strict = false;
+			}
+		}
+		const payload = super.preparePayload(params) as Record<string, unknown>;
+
+		return payload;
+	}
+}
+
+export class SambanovaFeatureExtractionTask extends TaskProviderHelper implements FeatureExtractionTaskHelper {
+	constructor() {
+		super("sambanova", "https://api.sambanova.ai");
+	}
+
+	override makeRoute(): string {
+		return `/v1/embeddings`;
+	}
+
+	override async getResponse(response: FeatureExtractionOutput): Promise<FeatureExtractionOutput> {
+		if (typeof response === "object" && "data" in response && Array.isArray(response.data)) {
+			return response.data.map((item) => item.embedding);
+		}
+		throw new InferenceClientProviderOutputError(
+			"Received malformed response from Sambanova feature-extraction (embeddings) API"
+		);
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			model: params.model,
+			input: params.args.inputs,
+			...params.args,
+		};
+	}
+}

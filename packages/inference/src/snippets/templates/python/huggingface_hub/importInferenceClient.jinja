@@ -1,0 +1,12 @@
+from huggingface_hub import InferenceClient
+
+client = InferenceClient(
+{% if endpointUrl %}
+    base_url="{{ baseUrl }}",
+{% endif %}
+    provider="{{ provider }}",
+    api_key="{{ accessToken }}",
+{% if billTo %}
+    bill_to="{{ billTo }}",
+{% endif %}
+)

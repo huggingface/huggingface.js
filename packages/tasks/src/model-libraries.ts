@@ -32,7 +32,7 @@ export interface LibraryUiElement {
 	 * Elastic query used to count this library's model downloads
 	 *
 	 * By default, those files are counted:
-	 * "config.json", "config.yaml", "hyperparams.yaml", "meta.yaml"
+	 * "config.json", "config.yaml", "hyperparams.yaml", "params.json", "meta.yaml"
 	 */
 	countDownloads?: ElasticSearchQuery;
 	/**
@@ -58,6 +58,13 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	acestep: {
+		prettyLabel: "ACE-Step",
+		repoName: "ACE-Step",
+		repoUrl: "https://github.com/ace-step/ACE-Step",
+		filter: false,
+		countDownloads: `path:"ace_step_transformer/config.json"`,
+	},
 	"adapter-transformers": {
 		prettyLabel: "Adapters",
 		repoName: "adapters",
@@ -79,10 +86,17 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "AnemoI",
 		repoName: "AnemoI",
 		repoUrl: "https://github.com/ecmwf/anemoi-inference",
-		docsUrl: "https://anemoi-docs.readthedocs.io/en/latest/",
+		docsUrl: "https://anemoi.readthedocs.io/en/latest/",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
+	},
+	araclip: {
+		prettyLabel: "AraClip",
+		repoName: "AraClip",
+		repoUrl: "https://huggingface.co/Arabic-Clip/araclip",
+		filter: false,
+		snippets: snippets.araclip,
 	},
 	asteroid: {
 		prettyLabel: "Asteroid",
@@ -108,6 +122,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.audioseal,
+	},
+	"bagel-mot": {
+		prettyLabel: "Bagel",
+		repoName: "Bagel",
+		repoUrl: "https://github.com/ByteDance-Seed/Bagel/",
+		filter: false,
+		countDownloads: `path:"llm_config.json"`,
 	},
 	ben2: {
 		prettyLabel: "BEN2",
@@ -158,6 +179,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/champ",
 		countDownloads: `path:"champ/motion_module.pth"`,
 	},
+	chatterbox: {
+		prettyLabel: "Chatterbox",
+		repoName: "Chatterbox",
+		repoUrl: "https://github.com/resemble-ai/chatterbox",
+		snippets: snippets.chatterbox,
+		countDownloads: `path:"tokenizer.json"`,
+		filter: false,
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
@@ -178,6 +207,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "COMET",
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
+	},
+	contexttab: {
+		prettyLabel: "ConTextTab",
+		repoName: "ConTextTab",
+		repoUrl: "https://github.com/SAP-samples/contexttab",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.contexttab,
 	},
 	cosmos: {
 		prettyLabel: "Cosmos",
@@ -222,6 +258,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.derm_foundation,
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
+	},
+	"describe-anything": {
+		prettyLabel: "Describe Anything",
+		repoName: "Describe Anything",
+		repoUrl: "https://github.com/NVlabs/describe-anything",
+		snippets: snippets.describe_anything,
+		filter: false,
+	},
+	"dia-tts": {
+		prettyLabel: "Dia",
+		repoName: "Dia",
+		repoUrl: "https://github.com/nari-labs/dia",
+		snippets: snippets.dia,
+		filter: false,
 	},
 	diffree: {
 		prettyLabel: "Diffree",
@@ -339,12 +389,26 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	fme: {
+		prettyLabel: "Full Model Emulation",
+		repoName: "Full Model Emulation",
+		repoUrl: "https://github.com/ai2cm/ace",
+		docsUrl: "https://ai2-climate-emulator.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_extension:"tar"`,
+	},
 	"gemma.cpp": {
 		prettyLabel: "gemma.cpp",
 		repoName: "gemma.cpp",
 		repoUrl: "https://github.com/google/gemma.cpp",
 		filter: false,
 		countDownloads: `path_extension:"sbs"`,
+	},
+	"geometry-crafter": {
+		prettyLabel: "GeometryCrafter",
+		repoName: "GeometryCrafter",
+		repoUrl: "https://github.com/TencentARC/GeometryCrafter",
+		countDownloads: `path:"point_map_vae/diffusion_pytorch_model.safetensors"`,
 	},
 	gliner: {
 		prettyLabel: "GLiNER",
@@ -374,6 +438,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+	hermes: {
+		prettyLabel: "HERMES",
+		repoName: "HERMES",
+		repoUrl: "https://github.com/LMD0311/HERMES",
+		filter: false,
+		countDownloads: `path:"ckpt/hermes_final.pth"`,
+	},
 	hezar: {
 		prettyLabel: "Hezar",
 		repoName: "Hezar",
@@ -394,11 +465,31 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
 	},
+	"hunyuan3d-2": {
+		prettyLabel: "Hunyuan3D-2",
+		repoName: "Hunyuan3D-2",
+		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
+		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
+	},
+	"index-tts": {
+		prettyLabel: "IndexTTS",
+		repoName: "IndexTTS",
+		repoUrl: "https://github.com/index-tts/index-tts",
+		snippets: snippets.indextts,
+		filter: false,
+	},
+	"infinite-you": {
+		prettyLabel: "InfiniteYou",
+		repoName: "InfiniteYou",
+		repoUrl: "https://github.com/bytedance/InfiniteYou",
+		filter: false,
+		countDownloads: `path:"infu_flux_v1.0/sim_stage1/image_proj_model.bin" OR path:"infu_flux_v1.0/aes_stage2/image_proj_model.bin"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -426,10 +517,45 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras_hub,
 		filter: true,
 	},
+	"kimi-audio": {
+		prettyLabel: "KimiAudio",
+		repoName: "KimiAudio",
+		repoUrl: "https://github.com/MoonshotAI/Kimi-Audio",
+		snippets: snippets.kimi_audio,
+		filter: false,
+	},
+	kronos: {
+		prettyLabel: "KRONOS",
+		repoName: "KRONOS",
+		repoUrl: "https://github.com/mahmoodlab/KRONOS",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
+	},
+	"lightning-ir": {
+		prettyLabel: "Lightning IR",
+		repoName: "Lightning IR",
+		repoUrl: "https://github.com/webis-de/lightning-ir",
+		snippets: snippets.lightning_ir,
+	},
+	"litert-lm": {
+		prettyLabel: "LiteRT-LM",
+		repoName: "LiteRT-LM",
+		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
+		filter: false,
+		countDownloads: `path_extension:"litertlm"`,
+	},
+	lerobot: {
+		prettyLabel: "LeRobot",
+		repoName: "LeRobot",
+		repoUrl: "https://github.com/huggingface/lerobot",
+		docsUrl: "https://huggingface.co/docs/lerobot",
+		filter: false,
+		snippets: snippets.lerobot,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
@@ -455,6 +581,18 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
 	},
+	"magi-1": {
+		prettyLabel: "MAGI-1",
+		repoName: "MAGI-1",
+		repoUrl: "https://github.com/SandAI-org/MAGI-1",
+		countDownloads: `path:"ckpt/vae/config.json"`,
+	},
+	"magenta-realtime": {
+		prettyLabel: "Magenta RT",
+		repoName: "Magenta RT",
+		repoUrl: "https://github.com/magenta/magenta-realtime",
+		countDownloads: `path:"checkpoints/llm_base_x4286_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k/checkpoint"`,
+	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
 		repoName: "MambaSSM",
@@ -470,6 +608,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"mars5_ar.safetensors"`,
 		snippets: snippets.mars5_tts,
 	},
+	matanyone: {
+		prettyLabel: "MatAnyone",
+		repoName: "MatAnyone",
+		repoUrl: "https://github.com/pq-yang/MatAnyone",
+		snippets: snippets.matanyone,
+		filter: false,
+	},
 	"mesh-anything": {
 		prettyLabel: "MeshAnything",
 		repoName: "MeshAnything",
@@ -484,6 +629,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/StanfordMIMI/Merlin",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	medvae: {
+		prettyLabel: "MedVAE",
+		repoName: "MedVAE",
+		repoUrl: "https://github.com/StanfordMIMI/MedVAE",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
@@ -538,13 +690,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
 	},
+	mtvcraft: {
+		prettyLabel: "MTVCraft",
+		repoName: "MTVCraft",
+		repoUrl: "https://github.com/baaivision/MTVCraft",
+		filter: false,
+		countDownloads: `path:"vae/3d-vae.pt"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
 		repoUrl: "https://github.com/NVIDIA/NeMo",
 		snippets: snippets.nemo,
 		filter: true,
-		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
+		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
 	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
@@ -563,6 +722,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			OR path:"open_clip_pytorch_model.bin"
 			OR path:"pytorch_model.bin"`,
 	},
+	"open-sora": {
+		prettyLabel: "Open-Sora",
+		repoName: "Open-Sora",
+		repoUrl: "https://github.com/hpcaitech/Open-Sora",
+		filter: false,
+		countDownloads: `path:"Open_Sora_v2.safetensors"`,
+	},
+	outetts: {
+		prettyLabel: "OuteTTS",
+		repoName: "OuteTTS",
+		repoUrl: "https://github.com/edwko/OuteTTS",
+		snippets: snippets.outetts,
+		filter: false,
+	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
 		repoName: "PaddleNLP",
@@ -572,6 +745,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"model_config.json"`,
 	},
+	PaddleOCR: {
+		prettyLabel: "PaddleOCR",
+		repoName: "PaddleOCR",
+		repoUrl: "https://github.com/PaddlePaddle/PaddleOCR",
+		snippets: snippets.paddleocr,
+		filter: true,
+	},
 	peft: {
 		prettyLabel: "PEFT",
 		repoName: "PEFT",
@@ -579,6 +759,22 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.peft,
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
+	},
+	"perception-encoder": {
+		prettyLabel: "PerceptionEncoder",
+		repoName: "PerceptionModels",
+		repoUrl: "https://github.com/facebookresearch/perception_models",
+		filter: false,
+		snippets: snippets.perception_encoder,
+		countDownloads: `path_extension:"pt"`,
+	},
+	"phantom-wan": {
+		prettyLabel: "Phantom",
+		repoName: "Phantom",
+		repoUrl: "https://github.com/Phantom-video/Phantom",
+		snippets: snippets.phantom_wan,
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	pxia: {
 		prettyLabel: "pxia",
@@ -630,6 +826,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
 	},
+	renderformer: {
+		prettyLabel: "RenderFormer",
+		repoName: "RenderFormer",
+		repoUrl: "https://github.com/microsoft/renderformer",
+		snippets: snippets.renderformer,
+		filter: false,
+	},
 	reverb: {
 		prettyLabel: "Reverb",
 		repoName: "Reverb",
@@ -666,6 +869,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/sapiens",
 		filter: false,
 		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
+	},
+	seedvr: {
+		prettyLabel: "SeedVR",
+		repoName: "SeedVR",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
@@ -732,6 +942,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model.safetensors"`,
 		snippets: snippets.stable_audio_tools,
 	},
+	monkeyocr: {
+		prettyLabel: "MonkeyOCR",
+		repoName: "monkeyocr",
+		repoUrl: "https://github.com/Yuliang-Liu/MonkeyOCR",
+		filter: false,
+		countDownloads: `path:"Recognition/config.json"`,
+	},
 	"diffusion-single-file": {
 		prettyLabel: "Diffusion Single File",
 		repoName: "diffusion-single-file",
@@ -753,6 +970,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/WangHelin1997/SoloAudio",
 		filter: false,
 		countDownloads: `path:"soloaudio_v2.pt"`,
+	},
+	songbloom: {
+		prettyLabel: "SongBloom",
+		repoName: "SongBloom",
+		repoUrl: "https://github.com/Cypress-Yang/SongBloom",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
@@ -793,6 +1017,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"vae_stats.json"`,
 	},
+	"tencent-song-generation": {
+		prettyLabel: "SongGeneration",
+		repoName: "SongGeneration",
+		repoUrl: "https://github.com/tencent-ailab/songgeneration",
+		filter: false,
+		countDownloads: `path:"ckpt/songgeneration_base/model.pt"`,
+	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
 		repoName: "TensorFlowTTS",
@@ -825,7 +1056,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "timesfm",
 		repoUrl: "https://github.com/google-research/timesfm",
 		filter: false,
-		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint"`,
+		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint" OR path:"checkpoints/checkpoint_2150000/state/checkpoint" OR path_extension:"ckpt"`,
 	},
 	timm: {
 		prettyLabel: "timm",
@@ -835,6 +1066,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.timm,
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
+	},
+	tirex: {
+		prettyLabel: "TiRex",
+		repoName: "TiRex",
+		repoUrl: "https://github.com/NX-AI/tirex",
+		countDownloads: `path_extension:"ckpt"`,
+	},
+	torchgeo: {
+		prettyLabel: "TorchGeo",
+		repoName: "TorchGeo",
+		repoUrl: "https://github.com/microsoft/torchgeo",
+		docsUrl: "https://torchgeo.readthedocs.io/",
+		filter: false,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth"`,
 	},
 	transformers: {
 		prettyLabel: "Transformers",
@@ -867,6 +1112,21 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
+	univa: {
+		prettyLabel: "univa",
+		repoName: "univa",
+		repoUrl: "https://github.com/PKU-YuanGroup/UniWorld-V1",
+		snippets: snippets.univa,
+		filter: true,
+		countDownloads: `path:"config.json"`,
+	},
+	"uni-3dar": {
+		prettyLabel: "Uni-3DAR",
+		repoName: "Uni-3DAR",
+		repoUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		docsUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		countDownloads: `path_extension:"pt"`,
+	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
 		repoName: "unity-sentis",
@@ -882,6 +1142,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.sana,
 	},
+	videoprism: {
+		prettyLabel: "VideoPrism",
+		repoName: "VideoPrism",
+		repoUrl: "https://github.com/google-deepmind/videoprism",
+		countDownloads: `path_extension:"npz"`,
+		snippets: snippets.videoprism,
+	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
 		repoName: "VFIMamba",
@@ -895,6 +1162,26 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
+	},
+	vui: {
+		prettyLabel: "Vui",
+		repoName: "Vui",
+		repoUrl: "https://github.com/vui-ai/vui",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.vui,
+	},
+	"wan2.2": {
+		prettyLabel: "Wan2.2",
+		repoName: "Wan2.2",
+		repoUrl: "https://github.com/Wan-Video/Wan2.2",
+		countDownloads: `path_filename:"config" AND path_extension:"json"`,
+	},
+	wham: {
+		prettyLabel: "WHAM",
+		repoName: "wham",
+		repoUrl: "https://huggingface.co/microsoft/wham",
+		docsUrl: "https://huggingface.co/microsoft/wham/blob/main/README.md",
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
@@ -912,6 +1199,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/THU-MIG/yolov10",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
+	},
+	zonos: {
+		prettyLabel: "Zonos",
+		repoName: "Zonos",
+		repoUrl: "https://github.com/Zyphra/Zonos",
+		docsUrl: "https://github.com/Zyphra/Zonos",
+		snippets: snippets.zonos,
+		filter: false,
 	},
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",

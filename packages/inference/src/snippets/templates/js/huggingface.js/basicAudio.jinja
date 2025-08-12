@@ -1,0 +1,18 @@
+import { InferenceClient } from "@huggingface/inference";
+
+const client = new InferenceClient("{{ accessToken }}");
+
+const data = fs.readFileSync({{inputs.asObj.inputs}});
+
+const output = await client.{{ methodName }}({
+{% if endpointUrl %}
+    endpointUrl: "{{ endpointUrl }}",
+{% endif %}
+	data,
+	model: "{{ model.id }}",
+	provider: "{{ provider }}",
+}{% if billTo %}, {
+	billTo: "{{ billTo }}",
+}{% endif %});
+
+console.log(output);

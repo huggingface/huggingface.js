@@ -287,6 +287,11 @@ for (const { task, dirPath } of allTasks) {
 	}
 	console.debug(`✨ Generating types for task`, task);
 
+	if (task === "chat-completion") {
+		console.debug("   🙈 Skipping chat-completion (maintained manually)");
+		continue;
+	}
+
 	console.debug("   📦 Building input data");
 	const inputData = await buildInputData(task, taskSpecDir, allSpecFiles);
 

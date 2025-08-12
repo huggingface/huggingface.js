@@ -12,29 +12,29 @@ const inputsSummarization = () =>
 
 const inputsTableQuestionAnswering = () =>
 	`{
-	"query": "How many stars does the transformers repository have?",
-	"table": {
-		"Repository": ["Transformers", "Datasets", "Tokenizers"],
-		"Stars": ["36542", "4512", "3934"],
-		"Contributors": ["651", "77", "34"],
-		"Programming language": [
-			"Python",
-			"Python",
-			"Rust, Python and NodeJS"
-		]
-	}
+    "query": "How many stars does the transformers repository have?",
+    "table": {
+        "Repository": ["Transformers", "Datasets", "Tokenizers"],
+        "Stars": ["36542", "4512", "3934"],
+        "Contributors": ["651", "77", "34"],
+        "Programming language": [
+            "Python",
+            "Python",
+            "Rust, Python and NodeJS"
+        ]
+    }
 }`;
 
 const inputsVisualQuestionAnswering = () =>
 	`{
-	"image": "cat.png",
-	"question": "What is in this image?"
-}`;
+        "image": "cat.png",
+        "question": "What is in this image?"
+    }`;
 
 const inputsQuestionAnswering = () =>
 	`{
-	"question": "What is my name?",
-	"context": "My name is Clara and I live in Berkeley."
+    "question": "What is my name?",
+    "context": "My name is Clara and I live in Berkeley."
 }`;
 
 const inputsTextClassification = () => `"I like you. I love you"`;
@@ -66,18 +66,16 @@ const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionI
 	return `"Can you please let us know more details about your "`;
 };
 
-const inputsText2TextGeneration = () => `"The answer to the universe is"`;
-
 const inputsFillMask = (model: ModelDataMinimal) => `"The answer to the universe is ${model.mask_token}."`;
 
 const inputsSentenceSimilarity = () =>
 	`{
-	"source_sentence": "That is a happy person",
-	"sentences": [
-		"That is a happy dog",
-		"That is a very happy person",
-		"Today is a sunny day"
-	]
+    "source_sentence": "That is a happy person",
+    "sentences": [
+        "That is a happy dog",
+        "That is a very happy person",
+        "Today is a sunny day"
+    ]
 }`;
 
 const inputsFeatureExtraction = () => `"Today is a sunny day and I will get some ice cream."`;
@@ -85,6 +83,16 @@ const inputsFeatureExtraction = () => `"Today is a sunny day and I will get some
 const inputsImageClassification = () => `"cats.jpg"`;
 
 const inputsImageToText = () => `"cats.jpg"`;
+
+const inputsImageToImage = () => `{
+    "image": "cat.png",
+    "prompt": "Turn the cat into a tiger."
+}`;
+
+const inputsImageToVideo = () => `{
+    "image": "cat.png",
+    "prompt": "The cat starts to dance"
+}`;
 
 const inputsImageSegmentation = () => `"cats.jpg"`;
 
@@ -95,6 +103,8 @@ const inputsAudioToAudio = () => `"sample1.flac"`;
 const inputsAudioClassification = () => `"sample1.flac"`;
 
 const inputsTextToImage = () => `"Astronaut riding a horse"`;
+
+const inputsTextToVideo = () => `"A young man walking on the street"`;
 
 const inputsTextToSpeech = () => `"The answer to the universe is 42"`;
 
@@ -118,6 +128,8 @@ const modelInputSnippets: {
 	"fill-mask": inputsFillMask,
 	"image-classification": inputsImageClassification,
 	"image-to-text": inputsImageToText,
+	"image-to-image": inputsImageToImage,
+	"image-to-video": inputsImageToVideo,
 	"image-segmentation": inputsImageSegmentation,
 	"object-detection": inputsObjectDetection,
 	"question-answering": inputsQuestionAnswering,
@@ -130,9 +142,9 @@ const modelInputSnippets: {
 	"text-generation": inputsTextGeneration,
 	"image-text-to-text": inputsTextGeneration,
 	"text-to-image": inputsTextToImage,
+	"text-to-video": inputsTextToVideo,
 	"text-to-speech": inputsTextToSpeech,
 	"text-to-audio": inputsTextToAudio,
-	"text2text-generation": inputsText2TextGeneration,
 	"token-classification": inputsTokenClassification,
 	translation: inputsTranslation,
 	"zero-shot-classification": inputsZeroShotClassification,

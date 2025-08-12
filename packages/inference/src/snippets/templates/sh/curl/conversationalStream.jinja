@@ -1,0 +1,10 @@
+curl {{ fullUrl }} \
+    -H 'Authorization: {{ authorizationHeader }}' \
+    -H 'Content-Type: application/json' \
+{% if billTo %}
+    -H 'X-HF-Bill-To: {{ billTo }}' \
+{% endif %}
+    -d '{
+{{ autoInputs.asCurlString }},
+        "stream": true
+    }'

@@ -1,9 +1,17 @@
-import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
+import type { ChatCompletionInput, PipelineType, WidgetType } from "@huggingface/tasks";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
  */
 export type ModelId = string;
+
+export interface Logger {
+	debug: (message: string, ...args: unknown[]) => void;
+	info: (message: string, ...args: unknown[]) => void;
+	warn: (message: string, ...args: unknown[]) => void;
+	error: (message: string, ...args: unknown[]) => void;
+	log: (message: string, ...args: unknown[]) => void;
+}
 
 export interface Options {
 	/**
@@ -24,25 +32,55 @@ export interface Options {
 	 * (Default: "same-origin"). String | Boolean. Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all.
 	 */
 	includeCredentials?: string | boolean;
+
+	/**
+	 * The billing account to use for the requests.
+	 *
+	 * By default the requests are billed on the user's account.
+	 * Requests can only be billed to an organization the user is a member of, and which has subscribed to Enterprise Hub.
+	 */
+	billTo?: string;
 }
 
-export type InferenceTask = Exclude<PipelineType, "other">;
+export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",
+	"cerebras",
 	"cohere",
 	"fal-ai",
+	"featherless-ai",
 	"fireworks-ai",
+	"groq",
 	"hf-inference",
 	"hyperbolic",
 	"nebius",
 	"novita",
+	"nscale",
+	"openai",
+	"ovhcloud",
 	"replicate",
 	"sambanova",
+	"scaleway",
 	"together",
 ] as const;
 
+export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
+
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
+
+export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
+
+export interface InferenceProviderMappingEntry {
+	adapter?: string;
+	adapterWeightsPath?: string;
+	hfModelId: ModelId;
+	provider: string;
+	providerId: string;
+	status: "live" | "staging";
+	task: WidgetType;
+	type?: "single-model" | "tag-filter";
+}
 
 export interface BaseArgs {
 	/**
@@ -65,18 +103,18 @@ export interface BaseArgs {
 	model?: ModelId;
 
 	/**
-	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 * The URL of the endpoint to use.
 	 *
-	 * If specified, will use this URL instead of the default one.
+	 * If not specified, will call the default router.huggingface.co Inference Providers endpoint.
 	 */
 	endpointUrl?: string;
 
 	/**
 	 * Set an Inference provider to run this model on.
 	 *
-	 * Defaults to the first provider in your user settings that is compatible with this model.
+	 * Defaults to "auto" i.e. the first of the providers available for the model, sorted by the user's order in https://hf.co/settings/inference-providers.
 	 */
-	provider?: InferenceProvider;
+	provider?: InferenceProviderOrPolicy;
 }
 
 export type RequestArgs = BaseArgs &
@@ -91,28 +129,22 @@ export type RequestArgs = BaseArgs &
 		parameters?: Record<string, unknown>;
 	};
 
-export interface ProviderConfig {
-	baseUrl: string;
-	makeBody: (params: BodyParams) => Record<string, unknown>;
-	makeHeaders: (params: HeaderParams) => Record<string, string>;
-	makeUrl: (params: UrlParams) => string;
-}
+export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
 
 export interface HeaderParams {
 	accessToken?: string;
-	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
+	authMethod: AuthMethod;
 }
 
 export interface UrlParams {
-	baseUrl: string;
+	authMethod: AuthMethod;
 	model: string;
 	task?: InferenceTask;
-	chatCompletion?: boolean;
 }
 
-export interface BodyParams {
-	args: Record<string, unknown>;
-	chatCompletion?: boolean;
+export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
+	args: T;
 	model: string;
+	mapping?: InferenceProviderMappingEntry | undefined;
 	task?: InferenceTask;
 }

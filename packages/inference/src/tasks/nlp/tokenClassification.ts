@@ -1,8 +1,8 @@
 import type { TokenClassificationInput, TokenClassificationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { toArray } from "../../utils/toArray";
-import { request } from "../custom/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type TokenClassificationArgs = BaseArgs & TokenClassificationInput;
 
@@ -13,26 +13,15 @@ export async function tokenClassification(
 	args: TokenClassificationArgs,
 	options?: Options
 ): Promise<TokenClassificationOutput> {
-	const res = toArray(
-		await request<TokenClassificationOutput[number] | TokenClassificationOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "token-classification");
+	const { data: res } = await innerRequest<TokenClassificationOutput[number] | TokenClassificationOutput>(
+		args,
+		providerHelper,
+		{
 			...options,
 			task: "token-classification",
-		})
+		}
 	);
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) =>
-				typeof x.end === "number" &&
-				typeof x.entity_group === "string" &&
-				typeof x.score === "number" &&
-				typeof x.start === "number" &&
-				typeof x.word === "string"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError(
-			"Expected Array<{end: number, entity_group: string, score: number, start: number, word: string}>"
-		);
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

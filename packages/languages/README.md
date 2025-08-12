@@ -21,6 +21,6 @@ import { language, wikiLink, type Language } from "https://esm.sh/@huggingface/l
 import { language, wikiLink, type Language } from "npm:@huggingface/languages"
 ```
 
-Check out the [full documentation](https://huggingface.co/docs/huggingface.js/languages/README).
+Check out the [full documentation](https://huggingface.co/docs/huggingface.js/index).
 
-Acknowledging Loïck Bourdois (https://github.com/lbourdois)'s help with this package and more generally supporting languages on the HF Hub.
+Acknowledging Loïck Bourdois (https://github.com/lbourdois) for his help with this package and more generally supporting languages on the HF Hub.

@@ -47,11 +47,19 @@ export class For extends Statement {
 	}
 }
 
+export class Break extends Statement {
+	override type = "Break";
+}
+export class Continue extends Statement {
+	override type = "Continue";
+}
+
 export class SetStatement extends Statement {
 	override type = "Set";
 	constructor(
 		public assignee: Expression,
-		public value: Expression
+		public value: Expression | null,
+		public body: Statement[]
 	) {
 		super();
 	}
@@ -65,6 +73,13 @@ export class Macro extends Statement {
 		public args: Expression[],
 		public body: Statement[]
 	) {
+		super();
+	}
+}
+
+export class Comment extends Statement {
+	override type = "Comment";
+	constructor(public value: string) {
 		super();
 	}
 }
@@ -125,11 +140,12 @@ abstract class Literal<T> extends Expression {
 	}
 }
 
-/**
- * Represents a numeric constant in the template.
- */
-export class NumericLiteral extends Literal<number> {
-	override type = "NumericLiteral";
+export class IntegerLiteral extends Literal<number> {
+	override type = "IntegerLiteral";
+}
+
+export class FloatLiteral extends Literal<number> {
+	override type = "FloatLiteral";
 }
 
 /**
@@ -137,20 +153,6 @@ export class NumericLiteral extends Literal<number> {
  */
 export class StringLiteral extends Literal<string> {
 	override type = "StringLiteral";
-}
-
-/**
- * Represents a boolean constant in the template.
- */
-export class BooleanLiteral extends Literal<boolean> {
-	override type = "BooleanLiteral";
-}
-
-/**
- * Represents null (none) in the template.
- */
-export class NullLiteral extends Literal<null> {
-	override type = "NullLiteral";
 }
 
 /**
@@ -206,15 +208,28 @@ export class FilterExpression extends Expression {
 	}
 }
 
+export class FilterStatement extends Statement {
+	override type = "FilterStatement";
+
+	constructor(
+		public filter: Identifier | CallExpression,
+		public body: Statement[]
+	) {
+		super();
+	}
+}
+
 /**
  * An operation which filters a sequence of objects by applying a test to each object,
  * and only selecting the objects with the test succeeding.
+ *
+ * It may also be used as a shortcut for a ternary operator.
  */
 export class SelectExpression extends Expression {
 	override type = "SelectExpression";
 
 	constructor(
-		public iterable: Expression,
+		public lhs: Expression,
 		public test: Expression
 	) {
 		super();
@@ -250,17 +265,6 @@ export class UnaryExpression extends Expression {
 	}
 }
 
-/**
- * Logical negation of an expression.
- */
-export class LogicalNegationExpression extends Expression {
-	override type = "LogicalNegationExpression";
-
-	constructor(public argument: Expression) {
-		super();
-	}
-}
-
 export class SliceExpression extends Expression {
 	override type = "SliceExpression";
 
@@ -279,6 +283,37 @@ export class KeywordArgumentExpression extends Expression {
 	constructor(
 		public key: Identifier,
 		public value: Expression
+	) {
+		super();
+	}
+}
+
+export class SpreadExpression extends Expression {
+	override type = "SpreadExpression";
+
+	constructor(public argument: Expression) {
+		super();
+	}
+}
+
+export class CallStatement extends Statement {
+	override type = "CallStatement";
+
+	constructor(
+		public call: CallExpression,
+		public callerArgs: Expression[] | null,
+		public body: Statement[]
+	) {
+		super();
+	}
+}
+
+export class Ternary extends Expression {
+	override type = "Ternary";
+	constructor(
+		public condition: Expression,
+		public trueExpr: Expression,
+		public falseExpr: Expression
 	) {
 		super();
 	}
