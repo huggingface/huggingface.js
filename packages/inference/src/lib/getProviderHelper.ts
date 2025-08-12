@@ -47,6 +47,7 @@ import type {
 } from "../providers/providerHelper.js";
 import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
+import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
@@ -147,6 +148,11 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	sambanova: {
 		conversational: new Sambanova.SambanovaConversationalTask(),
 		"feature-extraction": new Sambanova.SambanovaFeatureExtractionTask(),
+	},
+	scaleway: {
+		conversational: new Scaleway.ScalewayConversationalTask(),
+		"text-generation": new Scaleway.ScalewayTextGenerationTask(),
+		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
 	},
 	together: {
 		"text-to-image": new Together.TogetherTextToImageTask(),
