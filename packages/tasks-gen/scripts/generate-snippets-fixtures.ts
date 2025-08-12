@@ -370,9 +370,9 @@ function generateInferenceSnippet(
 			task,
 			...(lora && task === "text-to-image"
 				? {
-					adapter: "lora",
-					adapterWeightsPath: `<path to LoRA weights in .safetensors format>`,
-				}
+						adapter: "lora",
+						adapterWeightsPath: `<path to LoRA weights in .safetensors format>`,
+				  }
 				: {}),
 		},
 		opts
