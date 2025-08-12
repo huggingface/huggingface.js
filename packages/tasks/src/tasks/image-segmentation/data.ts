@@ -44,8 +44,8 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			// TO DO: write description
-			description: "Solid semantic segmentation model trained on ADE20k.",
-			id: "openmmlab/upernet-convnext-small",
+			description: "Solid panoptic segmentation model trained on COCO.",
+			id: "tue-mps/coco_panoptic_eomt_large_640",
 		},
 		{
 			description: "Background removal model.",

@@ -80,7 +80,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A robust model for video generation.",
-			id: "Wan-AI/Wan2.1-T2V-1.3B",
+			id: "Wan-AI/Wan2.2-TI2V-5B",
 		},
 	],
 	spaces: [
@@ -99,7 +99,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Text-to-video models can be used in any application that requires generating consistent sequence of images from text. ",
-	widgetModels: ["Wan-AI/Wan2.1-T2V-14B"],
+	widgetModels: ["Wan-AI/Wan2.2-TI2V-5B"],
 	youtubeId: undefined,
 };
 
