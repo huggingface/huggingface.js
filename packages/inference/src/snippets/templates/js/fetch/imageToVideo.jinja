@@ -12,8 +12,8 @@ async function query(data) {
 {% endif %}			},
 			method: "POST",
 			body: {
-				"inputs": `data:image/png;base64,${data.inputs.encode("base64")}`,
-				"parameters": data.parameters,
+				"image_url": `data:image/png;base64,${data.image.encode("base64")}`,
+				"prompt": data.prompt,
 			}
 		}
 	);
@@ -22,10 +22,8 @@ async function query(data) {
 }
 
 query({
-	"inputs": image,
-	"parameters": {
-		"prompt": "{{inputs.asObj.parameters.prompt}}",
-	}
+	"image": image,
+	"prompt": "{{inputs.asObj.parameters.prompt}}",
 }).then((response) => {
     // Use video
 });

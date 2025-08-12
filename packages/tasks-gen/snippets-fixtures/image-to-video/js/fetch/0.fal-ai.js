@@ -10,8 +10,8 @@ async function query(data) {
 			},
 			method: "POST",
 			body: {
-				"inputs": `data:image/png;base64,${data.inputs.encode("base64")}`,
-				"parameters": data.parameters,
+				"image_url": `data:image/png;base64,${data.image.encode("base64")}`,
+				"prompt": data.prompt,
 			}
 		}
 	);
@@ -20,10 +20,8 @@ async function query(data) {
 }
 
 query({
-	"inputs": image,
-	"parameters": {
-		"prompt": "The cat starts to dance",
-	}
+	"image": image,
+	"prompt": "The cat starts to dance",
 }).then((response) => {
     // Use video
 });
