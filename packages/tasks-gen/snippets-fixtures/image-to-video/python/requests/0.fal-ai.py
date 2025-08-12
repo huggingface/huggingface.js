@@ -7,9 +7,6 @@ headers = {
     "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
 
-with open("cat.png", "rb") as image_file:
-    image_base_64 = base64.b64encode(image_file.read()).decode('utf-8')
-
 def query(payload):
     with open(payload["inputs"], "rb") as f:
         img = f.read()
@@ -18,5 +15,8 @@ def query(payload):
     return response.content
 
 video_bytes = query({
-    "prompt": "The cat starts to dance"
+    "inputs": "cat.png",
+    "parameters": {
+        "prompt": "The cat starts to dance"
+    }
 })
