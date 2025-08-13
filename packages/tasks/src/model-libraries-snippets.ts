@@ -1703,6 +1703,24 @@ export const vfimamba = (model: ModelData): string[] => [
 model = Model.from_pretrained("${model.id}")`,
 ];
 
+export const lvface = (model: ModelData): string[] => [
+	`## Initialize the inferencer from inference_onnx.py
+	inferencer = LVFaceONNXInferencer(
+	   model_path=${model.id},  # Path to your ONNX model
+	   use_gpu=True  # Set to False for CPU-only inference
+	)
+	
+	## Extract feature from local image
+	feat1 = inferencer.infer_from_image("path/to/image1.jpg")
+	
+	## Extract feature from URL
+	feat2 = inferencer.infer_from_url("https://example.com/image1.jpg")
+	
+	## Calculate cosine similarity
+	similarity = inferencer.calculate_similarity(feat1, feat2)
+	print(f"Similarity score: {similarity:.6f}")  # Output example: 0.872345`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
