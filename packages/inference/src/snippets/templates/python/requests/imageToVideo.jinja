@@ -6,11 +6,6 @@ def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload)
     return response.content
 
-image_bytes = query({
-{{ providerInputs.asJsonString }}
+video_bytes = query({
+{{ inputs.asJsonString }}
 })
-
-# You can access the image with PIL.Image for example
-import io
-from PIL import Image
-image = Image.open(io.BytesIO(image_bytes)) 

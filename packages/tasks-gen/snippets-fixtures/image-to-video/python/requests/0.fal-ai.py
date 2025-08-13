@@ -2,7 +2,7 @@ import os
 import base64
 import requests
 
-API_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-Kontext-dev"
+API_URL = "https://router.huggingface.co/fal-ai/<fal-ai alias for Wan-AI/Wan2.2-I2V-A14B>?_subdomain=queue"
 headers = {
     "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
@@ -14,14 +14,9 @@ def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload)
     return response.content
 
-image_bytes = query({
+video_bytes = query({
     "inputs": "cat.png",
     "parameters": {
-        "prompt": "Turn the cat into a tiger."
+        "prompt": "The cat starts to dance"
     }
 })
-
-# You can access the image with PIL.Image for example
-import io
-from PIL import Image
-image = Image.open(io.BytesIO(image_bytes))
