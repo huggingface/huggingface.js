@@ -93,7 +93,7 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "An application that writes and executes codes from text instructions with many models.",
+			description: "An application that writes and executes code from text instructions and supports many models.",
 			id: "akhaliq/anycoder",
 		},
 		{
