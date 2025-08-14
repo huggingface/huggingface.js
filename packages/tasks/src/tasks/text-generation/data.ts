@@ -97,6 +97,10 @@ const taskData: TaskDataCustom = {
 			id: "akhaliq/anycoder",
 		},
 		{
+			description: "An application that builds websites from natural language prompts.",
+			id: "enzostvs/deepsite",
+		},
+		{
 			description: "A leaderboard for comparing chain-of-thought performance of models.",
 			id: "logikon/open_cot_leaderboard",
 		},
