@@ -67,7 +67,7 @@ const taskData: TaskDataCustom = {
 			id: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
 		},
 		{
-			description: "Great text generation model.",
+			description: "Great text generation model with top-notch tool calling capabilities.",
 			id: "openai/gpt-oss-20b",
 		},
 		{
