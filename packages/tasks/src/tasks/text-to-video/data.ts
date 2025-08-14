@@ -79,8 +79,8 @@ const taskData: TaskDataCustom = {
 			id: "nvidia/Cosmos-1.0-Diffusion-7B-Text2World",
 		},
 		{
-			description: "A robust model for video generation.",
-			id: "Wan-AI/Wan2.2-TI2V-5B",
+			description: "Very fast model for video generation.",
+			id: "Lightricks/LTX-Video-0.9.8-13B-distilled",
 		},
 	],
 	spaces: [
