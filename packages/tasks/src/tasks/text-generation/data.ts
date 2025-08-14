@@ -68,7 +68,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Great text generation model with top-notch tool calling capabilities.",
-			id: "openai/gpt-oss-20b",
+			id: "openai/gpt-oss-120b",
 		},
 		{
 			description: "Powerful text generation model.",
