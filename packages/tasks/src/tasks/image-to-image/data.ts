@@ -80,7 +80,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Image relighting application.",
-			id: "kontext-community/kontext-relight",
+			id: "lllyasviel/iclight-v2-vary",
 		},
 		{
 			description: "An application for image upscaling.",
