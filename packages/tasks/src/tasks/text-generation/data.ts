@@ -75,7 +75,7 @@ const taskData: TaskDataCustom = {
 			id: "zai-org/GLM-4.5",
 		},
 		{
-			description: "A very powerful model with reasoning capabilities.",
+			description: "A powerful small model with reasoning capabilities.",
 			id: "Qwen/Qwen3-4B-Thinking-2507",
 		},
 		{
