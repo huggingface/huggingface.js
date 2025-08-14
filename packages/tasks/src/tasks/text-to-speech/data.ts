@@ -52,7 +52,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A text-to-dialogue model.",
-			id: "nari-labs/Dia-1.6B",
+			id: "nari-labs/Dia-1.6B-0626",
 		},
 	],
 	spaces: [
