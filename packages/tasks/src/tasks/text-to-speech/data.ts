@@ -70,7 +70,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "An application to compare different TTS models.",
-			id: "Pendrokar/TTS-Spaces-Arena",
+			id: "TTS-AGI/TTS-Arena-V2",
 		},
 		{
 			description: "An application that generates podcast episodes.",
