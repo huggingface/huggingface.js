@@ -1156,7 +1156,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pkl"`,
 		snippets: snippets.vfimamba,
 	},
-	"LVFace": {
+	"lvface": {
 		prettyLabel: "LVFace",
 		repoName: "LVFace",
 		repoUrl: "https://github.com/bytedance/LVFace",
