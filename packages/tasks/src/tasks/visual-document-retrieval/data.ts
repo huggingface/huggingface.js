@@ -52,7 +52,8 @@ const taskData: TaskDataCustom = {
 			id: "vidore/colqwen2-v1.0",
 		},
 		{
-			description: "Very fast and efficient visual document retrieval model that can also take in other modalities like audio.",
+			description:
+				"Very fast and efficient visual document retrieval model that can also take in other modalities like audio.",
 			id: "Tevatron/OmniEmbed-v0.1",
 		},
 	],
