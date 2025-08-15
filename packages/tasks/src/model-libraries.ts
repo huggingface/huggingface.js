@@ -130,6 +130,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
 	},
+	bboxmaskpose: {
+		prettyLabel: "BBoxMaskPose",
+		repoName: "BBoxMaskPose",
+		repoUrl: "https://github.com/MiraPurkrabek/BBoxMaskPose",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	ben2: {
 		prettyLabel: "BEN2",
 		repoName: "BEN2",
