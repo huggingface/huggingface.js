@@ -20,11 +20,14 @@ import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types.
 import { omit } from "../utils/omit.js";
 import {
 	TaskProviderHelper,
+	type AutomaticSpeechRecognitionTaskHelper,
 	type ImageToImageTaskHelper,
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
 } from "./providerHelper.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 export interface ReplicateOutput {
 	output?: string | string[];
@@ -160,6 +163,64 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-video API");
+	}
+}
+
+export class ReplicateAutomaticSpeechRecognitionTask
+	extends ReplicateTask
+	implements AutomaticSpeechRecognitionTaskHelper
+{
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			input: {
+				...omit(params.args, ["inputs", "parameters"]),
+				...(params.args.parameters as Record<string, unknown>),
+				audio: params.args.inputs, // This will be processed in preparePayloadAsync
+			},
+			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		};
+	}
+
+	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+
+		if (!blob || !(blob instanceof Blob)) {
+			throw new Error("Audio input must be a Blob");
+		}
+
+		// Convert Blob to base64 data URL
+		const bytes = new Uint8Array(await blob.arrayBuffer());
+		const base64 = base64FromBytes(bytes);
+		const audioInput = `data:${blob.type || "audio/wav"};base64,${base64}`;
+
+		return {
+			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
+			inputs: audioInput,
+		};
+	}
+
+	override async getResponse(response: ReplicateOutput): Promise<AutomaticSpeechRecognitionOutput> {
+		if (typeof response?.output === "string") return { text: response.output };
+		if (Array.isArray(response?.output) && typeof response.output[0] === "string") return { text: response.output[0] };
+
+		const out = response?.output as
+			| undefined
+			| {
+					transcription?: string;
+					translation?: string;
+					txt_file?: string;
+			  };
+		if (out && typeof out === "object") {
+			if (typeof out.transcription === "string") return { text: out.transcription };
+			if (typeof out.translation === "string") return { text: out.translation };
+			if (typeof out.txt_file === "string") {
+				const r = await fetch(out.txt_file);
+				return { text: await r.text() };
+			}
+		}
+		throw new InferenceClientProviderOutputError(
+			"Received malformed response from Replicate automatic-speech-recognition API"
+		);
 	}
 }
 
