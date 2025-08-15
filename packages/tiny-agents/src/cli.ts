@@ -110,14 +110,14 @@ async function main() {
 			for (const server of config.servers) {
 				if (server.type === "stdio" && server.env) {
 					for (const [key, value] of Object.entries(server.env)) {
-						if (value === envSpecialValue) {
+						if (value.includes(envSpecialValue)) {
 							inputVars.add(key);
 						}
 					}
 				}
 				if ((server.type === "http" || server.type === "sse") && server.headers) {
 					for (const [key, value] of Object.entries(server.headers)) {
-						if (value === envSpecialValue) {
+						if (value.includes(envSpecialValue)) {
 							inputVars.add(key);
 						}
 					}
@@ -165,14 +165,14 @@ async function main() {
 			for (const server of config.servers) {
 				if (server.type === "stdio" && server.env) {
 					for (const [key, value] of Object.entries(server.env)) {
-						if (value === envSpecialValue) {
+						if (value.includes(envSpecialValue)) {
 							server.env[key] = value.replace(envSpecialValue, finalValue);
 						}
 					}
 				}
 				if ((server.type === "http" || server.type === "sse") && server.headers) {
 					for (const [key, value] of Object.entries(server.headers)) {
-						if (value === envSpecialValue) {
+						if (value.includes(envSpecialValue)) {
 							server.headers[key] = value.replace(envSpecialValue, finalValue);
 						}
 					}
@@ -188,6 +188,14 @@ async function main() {
 		rl.close();
 	}
 
+	// Debug: Log the processed servers config
+	debug("Processed servers configuration:");
+	for (const server of config.servers) {
+		if ((server.type === "http" || server.type === "sse") && server.headers) {
+			debug(`${server.type} server headers:`, server.headers);
+		}
+	}
+
 	const formattedServers: ServerConfig[] = config.servers.map((server) => {
 		switch (server.type) {
 			case "stdio":
@@ -201,16 +209,21 @@ async function main() {
 					},
 				};
 			case "http":
-			case "sse":
-				return {
+			case "sse": {
+				const formatted = {
 					type: server.type,
 					config: {
 						url: server.url,
-						requestInit: {
-							headers: server.headers,
+						options: {
+							requestInit: {
+								headers: server.headers,
+							},
 						},
 					},
 				};
+				debug(`Formatted ${server.type} server:`, formatted);
+				return formatted;
+			}
 		}
 	});
 
