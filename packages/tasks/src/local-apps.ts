@@ -94,6 +94,10 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
+function isMNNModel(model: ModelData) {
+	return model.tags.includes("mnn");
+}
+
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -315,6 +319,22 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
+const snippetMNN = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	return [
+		{
+			title: "Build from source code",
+			setup: [
+				"git clone https://github.com/alibaba/MNN.git",
+				"cd MNN",
+				"cmake -B build",
+				"cmake --build build -j -DMNN_LOW_MEMORY=ON -DMNN_CPU_WEIGHT_DEQUANT_GEMM=ON -DMNN_BUILD_LLM=ON -DMNN_SUPPORT_TRANSFORMER_FUSE=ON",
+			].join("\n"),
+			content: `./build/llm_demo ${model.id}`,
+		},
+	];
+};
+
+
 /**
  * Add your new local app here.
  *
@@ -491,6 +511,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetDockerModelRunner,
+	},
+	"MNN": {
+		prettyLabel: "MNN",
+		docsUrl: "https://github.com/alibaba/MNN",
+		mainTask: "text-generation",
+		displayOnModelPage: isMNNModel,
+		snippet: snippetMNN,
 	},
 } satisfies Record<string, LocalApp>;
 
