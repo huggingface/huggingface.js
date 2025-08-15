@@ -662,8 +662,6 @@ async function getAccessToken(
 		const jwt = {
 			accessToken: json.accessToken,
 			expiresAt: new Date(json.exp * 1000),
-			initialAccessToken,
-			refreshUrl,
 			casUrl: json.casUrl,
 		};
 
