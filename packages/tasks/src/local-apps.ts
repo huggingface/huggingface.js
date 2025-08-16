@@ -492,6 +492,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetDockerModelRunner,
 	},
+	aifx: {
+		prettyLabel: "AIFX",
+		docsUrl: "https://aifxart.com",
+		mainTask: "text-to-image",
+		macOSOnly: false,
+		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
+		deeplink: (model) => new URL(`https://aifxart.com/pages/model-view?model=${model.id}`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
