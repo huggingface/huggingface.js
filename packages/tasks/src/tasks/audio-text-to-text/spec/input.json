@@ -1,0 +1,24 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "AudioTextToTextInput",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"type": "string",
+			"format": "binary",
+			"description": "The audio input to be processed."
+		},
+		"parameters": {
+			"type": "object",
+			"properties": {
+				"generate_kwargs": {
+					"type": "object",
+					"description": "Keyword arguments to control generation. Varies by model."
+				}
+			}
+		}
+	},
+	"required": [
+		"inputs"
+	]
+}
