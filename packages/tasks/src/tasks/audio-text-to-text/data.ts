@@ -6,6 +6,10 @@ const taskData: TaskDataCustom = {
       id: "mozilla-foundation/common_voice_13_0",
       description: "Multilingual dataset for speech recognition.",
     },
+    {
+      id: "open-slr/slr85",
+      description: "Large-scale Mandarin speech dataset.",
+    },
   ],
   demo: {
     inputs: [
@@ -16,8 +20,8 @@ const taskData: TaskDataCustom = {
     ],
     outputs: [
       {
-        content: "This is the transcribed text from the audio.",
         label: "Transcription",
+        content: "This is the transcribed text from the audio.",
         type: "text",
       },
     ],
@@ -29,12 +33,22 @@ const taskData: TaskDataCustom = {
   models: [
     {
       id: "openai/whisper-small",
-      description: "Small Whisper model for ASR.",
+      description: "Small Whisper model for automatic speech recognition (ASR).",
+    },
+    {
+      id: "openai/whisper-medium",
+      description: "Medium Whisper model for more accurate ASR transcription.",
     },
   ],
-  spaces: [],
-  summary: "Convert audio input into text using speech-to-text models.",
+  spaces: [
+    {
+      id: "openai/whisper-demo",
+      description: "Demo space to try Whisper speech-to-text models.",
+    },
+  ],
+  summary: "Transcribe spoken audio into text using automatic speech recognition (ASR) models.",
   widgetModels: ["openai/whisper-small"],
+  youtubeId: "",
 };
 
 export default taskData;
