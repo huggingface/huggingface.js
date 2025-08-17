@@ -94,6 +94,14 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
+function isMnnModel(model: ModelData): boolean {
+	// Check for MNN models using multiple criteria:
+	// 1. Models from the taobao-mnn organization
+	// 2. Model IDs ending with -MNN suffix (naming convention)
+	// 3. Models tagged with "mnn" (future-proofing)
+	return model.id.startsWith("taobao-mnn/") || model.id.endsWith("-MNN") || model.tags.includes("mnn");
+}
+
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -484,6 +492,44 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
+	},
+	secretai: {
+		prettyLabel: "Secret AI",
+		docsUrl: "https://secretai.io",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => {
+			// Display for text-generation models that support GGUF, MLX, or MNN formats
+			return (
+				model.pipeline_tag === "text-generation" &&
+				(isLlamaCppGgufModel(model) || isMlxModel(model) || isMnnModel(model))
+			);
+		},
+		deeplink: (model, filepath) => {
+			// Determine format parameter based on model type
+			let format: string;
+			if (isLlamaCppGgufModel(model)) {
+				format = "gguf";
+			} else if (isMlxModel(model)) {
+				format = "mlx";
+			} else if (isMnnModel(model)) {
+				format = "mnn";
+			} else {
+				// Default to gguf for compatibility
+				format = "gguf";
+			}
+
+			// Build deeplink URL following Secret AI's protocol
+			// Format: secret-ai://pages/huggingface/repos/{model_id}?format={format}
+			const baseUrl = `secret-ai://pages/huggingface/repos/${model.id}`;
+			const params = new URLSearchParams({ format });
+
+			// Add file parameter if a specific file is selected
+			if (filepath) {
+				params.append("file", filepath);
+			}
+
+			return new URL(`${baseUrl}?${params.toString()}`);
+		},
 	},
 	"docker-model-runner": {
 		prettyLabel: "Docker Model Runner",
