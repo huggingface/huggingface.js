@@ -1,0 +1,45 @@
+{
+  "$id": "/inference/schemas/audio-text-to-text/input.json",
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "description": "Inputs for Audio + Text → Text inference",
+  "title": "AudioTextToTextInput",
+  "type": "object",
+  "properties": {
+    "inputs": {
+      "type": "object",
+      "properties": {
+        "audio": {
+          "description": "Input audio data as a base64-encoded string.",
+          "type": "string",
+          "comment": "type=binary"
+        },
+        "text": {
+          "description": "A text instruction, prompt, or question related to the audio.",
+          "type": "string"
+        }
+      },
+      "required": ["audio", "text"]
+    },
+    "parameters": {
+      "description": "Optional generation parameters.",
+      "$ref": "#/$defs/AudioTextToTextParameters"
+    }
+  },
+  "$defs": {
+    "AudioTextToTextParameters": {
+      "title": "AudioTextToTextParameters",
+      "type": "object",
+      "properties": {
+        "max_new_tokens": {
+          "type": "integer",
+          "description": "Maximum number of tokens to generate."
+        },
+        "temperature": {
+          "type": "number",
+          "description": "Sampling temperature for generation."
+        }
+      }
+    }
+  },
+  "required": ["inputs"]
+}
