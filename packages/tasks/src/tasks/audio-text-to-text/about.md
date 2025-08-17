@@ -12,7 +12,7 @@ Example: “Make this melody sound more jazzy”
 Go beyond transcription to capture meaning, intent, and emotion.
 Example: Understanding uncertainty in “I’m not sure I can finish this on time.”
 
-## Meeting Minutes
+### Meeting Minutes
 Summarize meetings into action items.
 Example: Audio: job interview → Prompt: “List strengths and weaknesses”
 
