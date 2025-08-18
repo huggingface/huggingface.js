@@ -1707,7 +1707,7 @@ export const lvface = (model: ModelData): string[] => [
 	`from huggingface_hub import hf_hub_download
 	 from inference_onnx import LVFaceONNXInferencer
 
-model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K.onnx")
+model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K/LVFace-L_Glint360K.onnx")
 inferencer = LVFaceONNXInferencer(model_path, use_gpu=True, timeout=300)
 embedding = inferencer.infer_from_image(img_path)`,
 ];
