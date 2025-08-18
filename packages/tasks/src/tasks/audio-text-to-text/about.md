@@ -1,6 +1,6 @@
 # 🎧 Audio-Text-to-Text Task for Hugging Face
 
-This task page introduces **Audio-Text-to-Text models**, which take **both audio and optional text input** to generate text output. This is a **multimodal task** combining **speech understanding** and **text generation**.
+This task page introduces **Audio-Text-to-Text models**, which take **both audio and text input** to generate text output. This is a **multimodal task** combining **speech understanding** and **text generation**.
 
 ---
 
@@ -29,24 +29,32 @@ Audio-Text-to-Text extends traditional automatic speech recognition (ASR) by all
 
 ```json
 {
-  "audio": "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen2-Audio/audio/1272-128104-0000.flac",
-  "text": "What does the person say?"
+  "inputs": {
+    "audio": "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen2-Audio/audio/1272-128104-0000.flac",
+    "text": "What does the person say?"
+  },
+  "parameters": {
+    "max_new_tokens": 128,
+    "temperature": 0.7
+  }
 }
 ```
 
 **Outputs:**
 
 ```json
-{
-  "generated_text": "The original content of this audio is:'Mister Quiller is the apostle of the middle classes and we are glad to welcome his gospel.'"
-}
+[
+  {
+    "generated_text": "The original content of this audio is: 'Mister Quiller is the apostle of the middle classes and we are glad to welcome his gospel.'"
+  }
+]
 ```
 
-> The input audio can be from a URL or a local file path. The text field is optional, but it can guide the response.
+> The input audio can be from a URL or a local file path. The text field is optional but can guide the response.
 
 ---
 
-## 💻 Raw Model Approach
+## 💻 Raw Model Approach (Qwen2)
 
 ```python
 from io import BytesIO
@@ -97,14 +105,67 @@ response = processor.batch_decode(generate_ids, skip_special_tokens=True, clean_
 print(response)
 ```
 
-> This approach allows **audio+text input** for text generation, without relying on pipelines.
+## 💻 Raw Model Approach (Voxtral Quantized 4bit)
+
+```python
+from transformers import VoxtralForConditionalGeneration, AutoProcessor, BitsAndBytesConfig
+import torch
+
+device = "cuda"
+repo_id = "dignity045/Voxtral-Mini-3B-2507-4bit"
+
+# Load processor
+processor = AutoProcessor.from_pretrained(repo_id)
+
+quant_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4"
+)
+
+# Load model in 4-bit using bitsandbytes
+model = VoxtralForConditionalGeneration.from_pretrained(
+    repo_id,
+    device_map="auto",
+    quantization_config=quant_config
+)
+
+# Example conversation
+conversation = [
+    {
+        "role": "user",
+        "content": [
+            {
+                "type": "audio",
+                "path": "https://huggingface.co/datasets/hf-internal-testing/dummy-audio-samples/resolve/main/winning_call.mp3",
+            },
+        ],
+    }
+]
+
+# Preprocess inputs
+inputs = processor.apply_chat_template(conversation)
+inputs = inputs.to(device)
+
+outputs = model.generate(**inputs, max_new_tokens=500)
+decoded_outputs = processor.batch_decode(outputs[:, inputs.input_ids.shape[1]:], skip_special_tokens=True)
+
+print("\nGenerated response:")
+print("=" * 80)
+print(decoded_outputs[0])
+print("=" * 80)
+```
+
+> These approaches allow **audio+text input** for text generation, without relying on pipelines.
 
 ---
 
 ## 🔗 Resources
 
-* [Speech processing tasks in Transformers](https://huggingface.co/docs/transformers/tasks/audio)
-* [Whisper models for transcription & translation](https://huggingface.co/models?search=whisper)
+* [Audio-Text-To-Text Models](https://huggingface.co/models?pipeline_tag=audio-text-to-text&sort=trending)
+* [Qwen Audio Text Model Collection](https://huggingface.co/collections/Qwen/qwen2-audio-66b628d694096020e0c52ff6)
+* [Voxtral Audio Model Quantized](https://huggingface.co/dignity045/Voxtral-Mini-3B-2507-4bit)
 * [SpeechT5: speech-to-text & text-to-speech](https://huggingface.co/microsoft/speecht5_asr)
 * [SeamlessM4T: multilingual speech+text](https://huggingface.co/facebook/seamless-m4t-v2-large)
 * [How to fine-tune speech models](https://huggingface.co/docs/transformers/training)
@@ -119,15 +180,23 @@ The HF Hub can show **interactive inputs/outputs** like below for this task:
 
 ```json
 {
-  "audio": "<audio URL or file>",
-  "text": "Optional instruction or question about the audio"
+  "inputs": {
+    "audio": "<audio URL or file>",
+    "text": "Optional instruction or question about the audio"
+  },
+  "parameters": {
+    "max_new_tokens": 128,
+    "temperature": 0.7
+  }
 }
 ```
 
 **Outputs:**
 
 ```json
-{
-  "generated_text": "Model-generated answer or transcription based on the audio and text instruction."
-}
+[
+  {
+    "generated_text": "Model-generated answer or transcription based on the audio and text instruction."
+  }
+]
 ```

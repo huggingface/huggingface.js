@@ -1,8 +1,8 @@
 {
   "$id": "/inference/schemas/audio-text-to-text/input.json",
   "$schema": "http://json-schema.org/draft-06/schema#",
-  "description": "Inputs for Audio + Text → Text inference",
   "title": "AudioTextToTextInput",
+  "description": "Inputs for Audio + Text → Text inference",
   "type": "object",
   "properties": {
     "inputs": {
@@ -11,7 +11,8 @@
         "audio": {
           "description": "Input audio data as a base64-encoded string.",
           "type": "string",
-          "comment": "type=binary"
+          "contentEncoding": "base64",
+          "contentMediaType": "audio/wav"
         },
         "text": {
           "description": "A text instruction, prompt, or question related to the audio.",

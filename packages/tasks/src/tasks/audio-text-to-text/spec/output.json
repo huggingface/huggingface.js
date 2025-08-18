@@ -2,16 +2,13 @@
   "$id": "/inference/schemas/audio-text-to-text/output.json",
   "$schema": "http://json-schema.org/draft-06/schema#",
   "title": "AudioTextToTextOutput",
-  "description": "Outputs for Audio + Text → Text inference",
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "generated_text": {
-        "type": "string",
-        "description": "The generated text output from the model."
-      }
-    },
-    "required": ["generated_text"]
-  }
+  "description": "Output for Audio + Text → Text inference",
+  "type": "object",
+  "properties": {
+    "generated_text": {
+      "type": "string",
+      "description": "The generated text output from the model."
+    }
+  },
+  "required": ["generated_text"]
 }

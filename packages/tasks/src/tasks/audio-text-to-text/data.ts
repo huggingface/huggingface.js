@@ -14,7 +14,7 @@ const taskData: TaskDataCustom = {
   demo: {
     inputs: [
       {
-        filename: "demo.wav",
+        filename: "https://huggingface.co/datasets/hf-internal-testing/dummy-audio-samples/resolve/main/winning_call.mp3",
         type: "audio",
       },
     ],
@@ -32,22 +32,35 @@ const taskData: TaskDataCustom = {
   ],
   models: [
     {
-      id: "openai/whisper-small",
-      description: "Small Whisper model for automatic speech recognition (ASR).",
+      id: "Qwen/Qwen2-Audio-7B-Instruct",
+      description: "Multimodal LLM that accepts audio + text and outputs text.",
     },
     {
-      id: "openai/whisper-medium",
-      description: "Medium Whisper model for more accurate ASR transcription.",
+      id: "mistralai/Voxtral-Small-24B-2507",
+      description: "Voxtral model for audio-to-text generation with multimodal capabilities.",
+    },
+    {
+      id: "onnx-community/Voxtral-Mini-3B-2507-ONNX",
+      description: "ONNX optimized Voxtral Mini model for fast inference in JS.",
     },
   ],
   spaces: [
     {
-      id: "openai/whisper-demo",
-      description: "Demo space to try Whisper speech-to-text models.",
+      id: "Qwen/Qwen2-Audio-Demo",
+      description: "Interactive demo Space for Qwen2-Audio with audio input.",
+    },
+    {
+      id: "mistralai/voxtral-demo",
+      description: "Demo Space for Voxtral Small audio-to-text model.",
     },
   ],
-  summary: "Transcribe spoken audio into text using automatic speech recognition (ASR) models.",
-  widgetModels: ["openai/whisper-small"],
+  summary:
+    "Audio-Text-to-Text tasks involve giving a model audio input to generate textual responses, such as transcription or audio-based question answering.",
+  widgetModels: [
+    "Qwen/Qwen2-Audio-7B-Instruct",
+    "mistralai/Voxtral-Small-24B-2507",
+    "onnx-community/Voxtral-Mini-3B-2507-ONNX",
+  ],
   youtubeId: "",
 };
 
