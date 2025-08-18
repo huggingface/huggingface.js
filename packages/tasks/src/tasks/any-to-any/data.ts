@@ -40,7 +40,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Robust model that can take in image and text and generate image and text.",
-			id: "deepseek-ai/Janus-Pro-7B",
+			id: "OmniGen2/OmniGen2",
 		},
 		{
 			description: "Any-to-any model with speech, video, audio, image and text understanding capabilities.",
@@ -48,13 +48,13 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A model that can understand image and text and generate image and text.",
-			id: "EPFL-VILAB/4M-21_XL",
+			id: "ByteDance-Seed/BAGEL-7B-MoT",
 		},
 	],
 	spaces: [
 		{
 			description: "An application to chat with an any-to-any (image & text) model.",
-			id: "deepseek-ai/Janus-Pro-7B",
+			id: "OmniGen2/OmniGen2",
 		},
 	],
 	summary: "Any-to-any models can understand two or more modalities and output two or more modalities.",
