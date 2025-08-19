@@ -33,8 +33,8 @@ const taskData: TaskDataCustom = {
 			id: "TencentARC/InstantMesh",
 		},
 		{
-			description: "Fast image-to-3D mesh model by StabilityAI",
-			id: "stabilityai/TripoSR",
+			description: "3D world generation model.",
+			id: "tencent/HunyuanWorld-1",
 		},
 		{
 			description: "A scaled up image-to-3D mesh model derived from TripoSR.",

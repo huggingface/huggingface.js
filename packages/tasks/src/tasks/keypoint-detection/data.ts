@@ -33,11 +33,11 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Strong keypoint detection model used to detect human pose.",
-			id: "facebook/sapiens-pose-1b",
+			id: "qualcomm/RTMPose-Body2d",
 		},
 		{
-			description: "Powerful keypoint detection model used to detect human pose.",
-			id: "usyd-community/vitpose-plus-base",
+			description: "Powerful keypoint matching model.",
+			id: "ETH-CVG/lightglue_disk",
 		},
 	],
 	spaces: [
@@ -46,8 +46,8 @@ const taskData: TaskDataCustom = {
 			id: "datasciencedojo/Hand-Keypoint-Detection-Realtime",
 		},
 		{
-			description: "An application to try a universal keypoint detection model.",
-			id: "merve/SuperPoint",
+			description: "An application for keypoint detection and matching.",
+			id: "ETH-CVG/LightGlue",
 		},
 	],
 	summary: "Keypoint detection is the task of identifying meaningful distinctive points or features in an image.",
