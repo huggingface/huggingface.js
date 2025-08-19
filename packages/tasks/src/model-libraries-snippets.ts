@@ -133,8 +133,7 @@ ta.save("test-2.wav", wav, model.sr)`,
 ];
 
 export const contexttab = (): string[] => {
-	const preInstallSnippet = `# Optional, remove incompatible packages
- pip uninstall torch torchvision torchaudio -y`;
+	const preInstallSnippet = `pip uninstall torch torchvision torchaudio -y`;
 	
 	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
 
