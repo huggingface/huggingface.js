@@ -1885,25 +1885,26 @@ export const model2vec = (model: ModelData): string[] => [
 model = StaticModel.from_pretrained("${model.id}")`,
 ];
 
-// Main entry point for generating Pruna code snippets based on the model's library
+export const pruna_pro = (model: ModelData): string[] => {
+	const prunaSnippets = pruna(model);
+	return prunaSnippets.map((snippet) =>
+		snippet.replace(/\bpruna\b/g, "pruna_pro").replace(/\bPrunaModel\b/g, "PrunaProModel")
+	);
+};
+
 export const pruna = (model: ModelData): string[] => {
-	// If the model uses diffusers, use the diffusers-specific snippet
 	if (model.library_name === "diffusers") {
 		return pruna_diffusers(model);
-	// If the model uses transformers, use the transformers-specific snippet
 	} else if (model.library_name === "transformers") {
 		return pruna_transformers(model);
 	}
-	// Fallback to a default snippet
 	return pruna_default(model);
 };
 
-// Generates Pruna code snippets for diffusers models
 export const pruna_diffusers = (model: ModelData): string[] => {
 	const diffusersSnippets = diffusers(model);
-
 	// Replace all pipeline class names with PrunaModel
-	const rewrittenSnippets = diffusersSnippets.map(snippet =>
+	const rewrittenSnippets = diffusersSnippets.map((snippet) =>
 		snippet
 			// First, replace ALL pipeline class references (including in imports)
 			// Handle classes that end with "Pipeline" (like DiffusionPipeline)
@@ -1925,15 +1926,13 @@ export const pruna_diffusers = (model: ModelData): string[] => {
 			.replace(/from diffusers import PrunaModel, ([^,\n]+)/g, "from diffusers import $1")
 			.trim()
 	);
-
 	// Always add the PrunaModel import at the beginning of each snippet
-	const finalSnippets = rewrittenSnippets.map(snippet => {
+	const finalSnippets = rewrittenSnippets.map((snippet) => {
 		if (!/^from pruna import PrunaModel/m.test(snippet)) {
 			return `from pruna import PrunaModel\n${snippet}`;
 		}
 		return snippet;
 	});
-
 	return finalSnippets;
 };
 
@@ -1941,58 +1940,45 @@ export const pruna_diffusers = (model: ModelData): string[] => {
 export const pruna_transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	const transformersSnippets = transformers(model);
-
 	// Replace pipeline import and usage with PrunaModel
-	const rewrittenSnippets = transformersSnippets.map(snippet =>
+	const rewrittenSnippets = transformersSnippets.map((snippet) =>
 		snippet.replace(/from transformers import pipeline/g, "from pruna import PrunaModel")
 	);
-	const prunaSnippets = rewrittenSnippets.map(snippet =>
-		snippet.replace(/pipeline\([^\)]*\)/g, `PrunaModel.from_pretrained("${model.id}")`)
+	const prunaSnippets = rewrittenSnippets.map((snippet) =>
+		snippet.replace(/pipeline\([^)]*\)/g, `PrunaModel.from_pretrained("${model.id}")`)
 	);
-
-	// If transformersInfo is not available, just return the basic replacements
 	if (!info) {
 		return prunaSnippets;
 	}
-
 	// Further clean up the snippet to remove references to the original auto_model
-	const cleanedSnippets = prunaSnippets.map(snippet => {
-		let s = snippet
+	const cleanedSnippets = prunaSnippets.map((snippet) => {
+		const s = snippet
 			// Remove any import statements for the original auto_model
-			.replace(new RegExp(`from transformers import ${info.auto_model}\\n?`, "g"), "")
+			.replace(new RegExp(`from transformers import ${info.auto_model}\n?`, "g"), "")
 			// Replace original from_pretrained calls with Pruna's
 			.replace(new RegExp(`${info.auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
 			// Remove any extra auto_model arguments in function imports
 			// Only remove ", auto_model" if it's in a line with both "from" and "import"
-			.replace(
-				new RegExp(
-					`^.*from.*import.*(, *${info.auto_model})+.*$`,
-					"gm"
-				),
-				line => line.replace(new RegExp(`, *${info.auto_model}`, "g"), "")
+			.replace(new RegExp(`^.*from.*import.*(, *${info.auto_model})+.*$`, "gm"), (line) =>
+				line.replace(new RegExp(`, *${info.auto_model}`, "g"), "")
 			);
 		return s;
 	});
-
-	// Add 'from pruna import PrunaModel' at the top if not present
-	const finalSnippets = cleanedSnippets.map(snippet => {
+	const finalSnippets = cleanedSnippets.map((snippet) => {
 		if (!/^from pruna import PrunaModel/m.test(snippet)) {
 			return `from pruna import PrunaModel\n${snippet}`;
 		}
 		return snippet;
 	});
-
 	return finalSnippets;
 };
 
-// Default Pruna snippet for unsupported or unknown libraries
 export const pruna_default = (model: ModelData): string[] => [
 	`from pruna import PrunaModel
 
 model = PrunaModel.from_pretrained("${model.id}")
 `,
 ];
-
 
 export const nemo = (model: ModelData): string[] => {
 	let command: string[] | undefined = undefined;
