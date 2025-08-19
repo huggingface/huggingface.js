@@ -1901,7 +1901,7 @@ export const pruna = (model: ModelData): string[] => {
 	return pruna_default(model);
 };
 
-export const pruna_diffusers = (model: ModelData): string[] => {
+const pruna_diffusers = (model: ModelData): string[] => {
 	const diffusersSnippets = diffusers(model);
 	// Replace all pipeline class names with PrunaModel
 	const rewrittenSnippets = diffusersSnippets.map((snippet) =>
@@ -1936,8 +1936,7 @@ export const pruna_diffusers = (model: ModelData): string[] => {
 	return finalSnippets;
 };
 
-// Generates Pruna code snippets for transformers models
-export const pruna_transformers = (model: ModelData): string[] => {
+const pruna_transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	const transformersSnippets = transformers(model);
 	// Replace pipeline import and usage with PrunaModel
@@ -1973,7 +1972,7 @@ export const pruna_transformers = (model: ModelData): string[] => {
 	return finalSnippets;
 };
 
-export const pruna_default = (model: ModelData): string[] => [
+const pruna_default = (model: ModelData): string[] => [
 	`from pruna import PrunaModel
 
 model = PrunaModel.from_pretrained("${model.id}")
