@@ -776,6 +776,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	pxia: {
+		prettyLabel: "pxia",
+		repoName: "pxia",
+		repoUrl: "https://github.com/not-lain/pxia",
+		snippets: snippets.pxia,
+		filter: false,
+	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
 		repoName: "Pruna AI",
