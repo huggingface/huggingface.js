@@ -39,24 +39,20 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A prompt based, powerful TTS model.",
-			id: "parler-tts/parler-tts-large-v1",
+			description: "Small yet powerful TTS model.",
+			id: "KittenML/kitten-tts-nano-0.1",
 		},
 		{
-			description: "A powerful TTS model that supports English and Chinese.",
-			id: "SWivid/F5-TTS",
+			description: "Bleeding edge TTS model.",
+			id: "ResembleAI/chatterbox",
 		},
 		{
 			description: "A massively multi-lingual TTS model.",
 			id: "fishaudio/fish-speech-1.5",
 		},
 		{
-			description: "A powerful TTS model.",
-			id: "OuteAI/OuteTTS-0.1-350M",
-		},
-		{
-			description: "Small yet powerful TTS model.",
-			id: "hexgrad/Kokoro-82M",
+			description: "A text-to-dialogue model.",
+			id: "nari-labs/Dia-1.6B-0626",
 		},
 	],
 	spaces: [
@@ -69,12 +65,12 @@ const taskData: TaskDataCustom = {
 			id: "fishaudio/fish-speech-1",
 		},
 		{
-			description: "An application that generates speech in different styles in English and Chinese.",
-			id: "mrfakename/E2-F5-TTS",
+			description: "Performant TTS application.",
+			id: "ResembleAI/Chatterbox",
 		},
 		{
-			description: "An application that synthesizes emotional speech for diverse speaker prompts.",
-			id: "parler-tts/parler-tts-expresso",
+			description: "An application to compare different TTS models.",
+			id: "TTS-AGI/TTS-Arena-V2",
 		},
 		{
 			description: "An application that generates podcast episodes.",

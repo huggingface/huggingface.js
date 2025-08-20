@@ -1163,6 +1163,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pkl"`,
 		snippets: snippets.vfimamba,
 	},
+	lvface: {
+		prettyLabel: "LVFace",
+		repoName: "LVFace",
+		repoUrl: "https://github.com/bytedance/LVFace",
+		countDownloads: `path_extension:"pt" OR path_extension:"onnx"`,
+		snippets: snippets.lvface,
+	},
 	voicecraft: {
 		prettyLabel: "VoiceCraft",
 		repoName: "VoiceCraft",
