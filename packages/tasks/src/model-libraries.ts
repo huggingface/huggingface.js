@@ -32,7 +32,7 @@ export interface LibraryUiElement {
 	 * Elastic query used to count this library's model downloads
 	 *
 	 * By default, those files are counted:
-	 * "config.json", "config.yaml", "hyperparams.yaml", "meta.yaml"
+	 * "config.json", "config.yaml", "hyperparams.yaml", "params.json", "meta.yaml"
 	 */
 	countDownloads?: ElasticSearchQuery;
 	/**
@@ -129,6 +129,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ByteDance-Seed/Bagel/",
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
+	},
+	bboxmaskpose: {
+		prettyLabel: "BBoxMaskPose",
+		repoName: "BBoxMaskPose",
+		repoUrl: "https://github.com/MiraPurkrabek/BBoxMaskPose",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	ben2: {
 		prettyLabel: "BEN2",
@@ -473,6 +480,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
 	},
+	"hunyuan3d-2": {
+		prettyLabel: "Hunyuan3D-2",
+		repoName: "Hunyuan3D-2",
+		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
+		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
@@ -639,14 +652,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 	},
-	mistral_common: {
-		prettyLabel: "mistral-common",
-		repoName: "mistral-common",
-		repoUrl: "https://github.com/mistralai/mistral-common",
-		docsUrl: "https://mistralai.github.io/mistral-common/",
-		snippets: snippets.mistral_common,
-		countDownloads: `path:"config.json" OR path:"params.json"`,
-	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
@@ -713,7 +718,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVIDIA/NeMo",
 		snippets: snippets.nemo,
 		filter: true,
-		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
+		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
 	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
@@ -981,6 +986,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"soloaudio_v2.pt"`,
 	},
+	songbloom: {
+		prettyLabel: "SongBloom",
+		repoName: "SongBloom",
+		repoUrl: "https://github.com/Cypress-Yang/SongBloom",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
 		repoName: "stable-baselines3",
@@ -1159,6 +1171,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pkl"`,
 		snippets: snippets.vfimamba,
 	},
+	lvface: {
+		prettyLabel: "LVFace",
+		repoName: "LVFace",
+		repoUrl: "https://github.com/bytedance/LVFace",
+		countDownloads: `path_extension:"pt" OR path_extension:"onnx"`,
+		snippets: snippets.lvface,
+	},
 	voicecraft: {
 		prettyLabel: "VoiceCraft",
 		repoName: "VoiceCraft",
@@ -1172,6 +1191,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/vui-ai/vui",
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.vui,
+	},
+	"wan2.2": {
+		prettyLabel: "Wan2.2",
+		repoName: "Wan2.2",
+		repoUrl: "https://github.com/Wan-Video/Wan2.2",
+		countDownloads: `path_filename:"config" AND path_extension:"json"`,
 	},
 	wham: {
 		prettyLabel: "WHAM",

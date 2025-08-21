@@ -77,17 +77,26 @@ export interface UserInfo {
 		 */
 		roleInOrg?: string;
 		/**
+		 * @deprecated Use securityRestrictions instead with "sso"
 		 * HuggingFace field. When the user granted the oauth app access to the org, but didn't complete SSO.
 		 *
 		 * Should never happen directly after the oauth flow.
 		 */
 		pendingSSO?: boolean;
 		/**
+		 * @deprecated Use securityRestrictions instead with "mfa"
+		 *
 		 * HuggingFace field. When the user granted the oauth app access to the org, but didn't complete MFA.
 		 *
 		 * Should never happen directly after the oauth flow.
 		 */
 		missingMFA?: boolean;
+		/**
+		 * HuggingFace field. When the user granted the oauth app access to the org, but didn't complete following security restrictions.
+		 *
+		 * Should never happen directly after the oauth flow.
+		 */
+		securityRestrictions?: ("mfa" | "sso" | "ip" | "token-policy")[];
 	}>;
 }
 
