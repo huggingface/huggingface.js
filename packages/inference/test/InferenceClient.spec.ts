@@ -1310,6 +1310,18 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
+
+			it("imageToVideo - MeiGen-AI/MeiGen-MultiTalk", async () => {
+				const res = await client.imageToVideo({
+					model: "MeiGen-AI/MeiGen-MultiTalk",
+					provider: "replicate",
+					inputs: new Blob([readTestFile("bird_canny.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "A bird flying in the sky",
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
 		},
 		TIMEOUT
 	);
