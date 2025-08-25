@@ -1703,6 +1703,16 @@ export const vfimamba = (model: ModelData): string[] => [
 model = Model.from_pretrained("${model.id}")`,
 ];
 
+export const lvface = (model: ModelData): string[] => [
+	`from huggingface_hub import hf_hub_download
+	 from inference_onnx import LVFaceONNXInferencer
+
+model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K/LVFace-L_Glint360K.onnx")
+inferencer = LVFaceONNXInferencer(model_path, use_gpu=True, timeout=300)
+img_path = 'path/to/image1.jpg'
+embedding = inferencer.infer_from_image(img_path)`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
