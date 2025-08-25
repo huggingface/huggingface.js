@@ -133,6 +133,9 @@ ta.save("test-2.wav", wav, model.sr)`,
 ];
 
 export const contexttab = (): string[] => {
+	const preInstallSnippet = `# On Colab, uninstall existing packages
+ pip uninstall torch torchvision torchaudio -y`;
+	
 	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
 
 	const classificationSnippet = `# Run a classification task
@@ -185,7 +188,7 @@ predictions = regressor.predict(X_test)
 
 r2 = r2_score(y_test, predictions)
 print("R² Score:", r2)`;
-	return [installSnippet, classificationSnippet, regressionsSnippet];
+	return [preInstallSnippet, installSnippet, classificationSnippet, regressionsSnippet];
 };
 
 export const cxr_foundation = (): string[] => [
