@@ -346,7 +346,7 @@ function writeChunk(xorb: Uint8Array, offset: number, chunk: Uint8Array): number
 	const regularCompressedChunk = lz4_compress(chunk);
 	const bgCompressedChunk = lz4_compress(bg4_split_bytes(chunk));
 	const compressedChunk =
-		regularCompressedChunk.length < bgCompressedChunk.length ? regularCompressedChunk : bgCompressedChunk;
+		bgCompressedChunk.length < regularCompressedChunk.length ? bgCompressedChunk : regularCompressedChunk;
 	const chunkToWrite = compressedChunk.length < chunk.length ? compressedChunk : chunk;
 
 	if (offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length > XORB_SIZE) {
@@ -359,7 +359,7 @@ function writeChunk(xorb: Uint8Array, offset: number, chunk: Uint8Array): number
 	xorb[offset + 3] = (chunkToWrite.length >> 16) & 0xff;
 	xorb[offset + 4] =
 		chunkToWrite.length < chunk.length
-			? bgCompressedChunk.length < chunk.length
+			? bgCompressedChunk.length < regularCompressedChunk.length
 				? XetChunkCompressionScheme.ByteGroupingLZ4
 				: XetChunkCompressionScheme.LZ4
 			: XetChunkCompressionScheme.None;
