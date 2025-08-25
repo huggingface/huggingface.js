@@ -15,12 +15,25 @@
  * Thanks!
  */
 import type { TextToImageInput } from "@huggingface/tasks";
+import type { TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
-import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
+import {
+	BaseConversationalTask,
+	BaseTextGenerationTask,
+	TaskProviderHelper,
+	type TextToImageTaskHelper,
+} from "./providerHelper.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
 
 const NSCALE_API_BASE_URL = "https://inference.api.nscale.com";
+
+interface NscaleTextGenerationOutput extends Omit<TextGenerationOutput, "choices"> {
+	choices: Array<{
+		text: string;
+		finish_reason: TextGenerationOutputFinishReason;
+	}>;
+}
 
 interface NscaleCloudBase64ImageGeneration {
 	data: Array<{
@@ -31,6 +44,39 @@ interface NscaleCloudBase64ImageGeneration {
 export class NscaleConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("nscale", NSCALE_API_BASE_URL);
+	}
+}
+
+export class NscaleTextGenerationTask extends BaseTextGenerationTask {
+	constructor() {
+		super("nscale", NSCALE_API_BASE_URL);
+	}
+
+	override makeRoute(): string {
+		return "v1/completions";
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			model: params.model,
+			prompt: params.args.inputs,
+			...(params.args.parameters || {}),
+		};
+	}
+
+	override async getResponse(response: NscaleTextGenerationOutput): Promise<TextGenerationOutput> {
+		if (
+			typeof response === "object" &&
+			"choices" in response &&
+			Array.isArray(response?.choices) &&
+			response.choices.length > 0 &&
+			typeof response.choices[0]?.text === "string"
+		) {
+			return {
+				generated_text: response.choices[0].text,
+			};
+		}
+		throw new InferenceClientProviderOutputError("Received malformed response from Nscale text generation API");
 	}
 }
 
