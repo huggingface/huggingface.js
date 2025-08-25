@@ -5,19 +5,19 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/minicpm-v:latest
- * - library/qwen2:latest
- * - library/qwen2.5:0.5b
- * - library/llama4:latest
- * - library/command-r:latest
- * - library/phi4-reasoning:latest
+ * - library/llama3.2:latest
+ * - library/llama2:latest
+ * - library/llama3.1:latest
+ * - library/deepseek-v3:latest
  * - library/cogito:3b
- * - library/starcoder:latest
- * - library/mistral-small3.1:latest
- * - library/cogito:latest
- * - library/aya-expanse:latest
- * - library/smallthinker:3b
- * - library/command-r7b:7b
+ * - library/phi4-mini:latest
+ * - library/qwen3-coder:latest
+ * - library/granite3.2-vision:latest
+ * - library/opencoder:latest
+ * - library/opencoder:1.5b
+ * - library/phind-codellama:latest
+ * - library/yarn-mistral:latest
+ * - library/stablelm-zephyr:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
@@ -500,6 +500,20 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 			params: {
 				stop: ["<end_of_turn>"],
 				temperature: 0.1,
+			},
+		},
+	},
+	{
+		model: "library/gemma3:270m",
+		gguf: "{{ bos_token }}\n{%- if messages[0]['role'] == 'system' -%}\n    {%- if messages[0]['content'] is string -%}\n        {%- set first_user_prefix = messages[0]['content'] + '\n\n' -%}\n    {%- else -%}\n        {%- set first_user_prefix = messages[0]['content'][0]['text'] + '\n\n' -%}\n    {%- endif -%}\n    {%- set loop_messages = messages[1:] -%}\n{%- else -%}\n    {%- set first_user_prefix = \"\" -%}\n    {%- set loop_messages = messages -%}\n{%- endif -%}\n{%- for message in loop_messages -%}\n    {%- if (message['role'] == 'user') != (loop.index0 % 2 == 0) -%}\n        {{ raise_exception(\"Conversation roles must alternate user/assistant/user/assistant/...\") }}\n    {%- endif -%}\n    {%- if (message['role'] == 'assistant') -%}\n        {%- set role = \"model\" -%}\n    {%- else -%}\n        {%- set role = message['role'] -%}\n    {%- endif -%}\n    {{ '<start_of_turn>' + role + '\n' + (first_user_prefix if loop.first else \"\") }}\n    {%- if message['content'] is string -%}\n        {{ message['content'] | trim }}\n    {%- elif message['content'] is iterable -%}\n        {%- for item in message['content'] -%}\n            {%- if item['type'] == 'image' -%}\n                {{ '<start_of_image>' }}\n            {%- elif item['type'] == 'text' -%}\n                {{ item['text'] | trim }}\n            {%- endif -%}\n        {%- endfor -%}\n    {%- else -%}\n        {{ raise_exception(\"Invalid content type\") }}\n    {%- endif -%}\n    {{ '<end_of_turn>\n' }}\n{%- endfor -%}\n{%- if add_generation_prompt -%}\n    {{'<start_of_turn>model\n'}}\n{%- endif -%}\n",
+		ollama: {
+			template:
+				'{{- $systemPromptAdded := false }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role "user" }}<start_of_turn>user\n{{- if (and (not $systemPromptAdded) $.System) }}\n{{- $systemPromptAdded = true }}\n{{ $.System }}\n{{ end }}\n{{ .Content }}<end_of_turn>\n{{ if $last }}<start_of_turn>model\n{{ end }}\n{{- else if eq .Role "assistant" }}<start_of_turn>model\n{{ .Content }}{{ if not $last }}<end_of_turn>\n{{ end }}\n{{- end }}\n{{- end }}',
+			tokens: ["<start_of_turn>", "<start_of_image>", "<end_of_turn>"],
+			params: {
+				stop: ["<end_of_turn>"],
+				top_k: 64,
+				top_p: 0.95,
 			},
 		},
 	},

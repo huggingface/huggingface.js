@@ -1523,7 +1523,7 @@ export const transformers = (model: ModelData): string[] => {
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto"),'
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto")'
 		);
 	}
 
