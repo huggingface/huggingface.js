@@ -27,6 +27,7 @@ import {
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
+	type ImageToVideoTaskHelper,
 } from "./providerHelper.js";
 import { HF_HUB_URL } from "../config.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
@@ -35,7 +36,7 @@ import {
 	InferenceClientProviderApiError,
 	InferenceClientProviderOutputError,
 } from "../errors.js";
-import type { ImageToImageArgs } from "../tasks/index.js";
+import type { ImageToImageArgs, ImageToVideoArgs } from "../tasks/index.js";
 import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 
 export interface FalAiQueueOutput {
@@ -326,6 +327,73 @@ export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoT
 				)}`
 			);
 		}
+	}
+}
+
+export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVideoTaskHelper {
+	task: InferenceTask;
+
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "image-to-video";
+	}
+
+	/** Same queue routing rule as the other Fal queue tasks */
+	override makeRoute(params: UrlParams): string {
+		return params.authMethod !== "provider-key" ? `/${params.model}?_subdomain=queue` : `/${params.model}`;
+	}
+
+	/** Synchronous case – caller already gave us base64 or a URL */
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			// args.inputs is expected to be a base64 data URI or an URL
+			image_url: params.args.image_url,
+		};
+	}
+
+	/** Asynchronous helper – caller gave us a Blob */
+	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
+		const mimeType = args.inputs instanceof Blob ? args.inputs.type : "image/png";
+		return {
+			...omit(args, ["inputs", "parameters"]),
+			image_url: `data:${mimeType};base64,${base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			)}`,
+			...args.parameters,
+			...args,
+		};
+	}
+
+	/** Queue polling + final download – mirrors Text‑to‑Video */
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<Blob> {
+		const result = await this.getResponseFromQueueApi(response, url, headers);
+
+		if (
+			typeof result === "object" &&
+			result !== null &&
+			"video" in result &&
+			typeof result.video === "object" &&
+			result.video !== null &&
+			"url" in result.video &&
+			typeof result.video.url === "string" &&
+			"url" in result.video &&
+			isUrl(result.video.url)
+		) {
+			const urlResponse = await fetch(result.video.url);
+			return await urlResponse.blob();
+		}
+
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from Fal.ai image‑to‑video API: expected { video: { url: string } }, got: ${JSON.stringify(
+				result
+			)}`
+		);
 	}
 }
 

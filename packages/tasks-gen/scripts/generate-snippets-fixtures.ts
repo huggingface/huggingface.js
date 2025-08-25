@@ -141,6 +141,17 @@ const TEST_CASES: {
 		providers: ["fal-ai", "replicate", "hf-inference"],
 	},
 	{
+		testName: "image-to-video",
+		task: "image-to-video",
+		model: {
+			id: "Wan-AI/Wan2.2-I2V-A14B",
+			pipeline_tag: "image-to-video",
+			tags: [],
+			inference: "",
+		},
+		providers: ["fal-ai"],
+	},
+	{
 		testName: "tabular",
 		task: "tabular-classification",
 		model: {

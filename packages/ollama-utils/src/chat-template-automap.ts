@@ -5,14 +5,19 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/llama4:16x17b
- * - library/llama3.3:latest
- * - library/dolphin3:8b
- * - library/qwen2-math:latest
- * - library/qwen2-math:1.5b
- * - library/marco-o1:latest
- * - library/bespoke-minicheck:7b
- * - library/falcon2:11b
+ * - library/llama3.2:latest
+ * - library/llama2:latest
+ * - library/llama3.1:latest
+ * - library/deepseek-v3:latest
+ * - library/cogito:3b
+ * - library/phi4-mini:latest
+ * - library/qwen3-coder:latest
+ * - library/granite3.2-vision:latest
+ * - library/opencoder:latest
+ * - library/opencoder:1.5b
+ * - library/phind-codellama:latest
+ * - library/yarn-mistral:latest
+ * - library/stablelm-zephyr:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
@@ -495,6 +500,20 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 			params: {
 				stop: ["<end_of_turn>"],
 				temperature: 0.1,
+			},
+		},
+	},
+	{
+		model: "library/gemma3:270m",
+		gguf: "{{ bos_token }}\n{%- if messages[0]['role'] == 'system' -%}\n    {%- if messages[0]['content'] is string -%}\n        {%- set first_user_prefix = messages[0]['content'] + '\n\n' -%}\n    {%- else -%}\n        {%- set first_user_prefix = messages[0]['content'][0]['text'] + '\n\n' -%}\n    {%- endif -%}\n    {%- set loop_messages = messages[1:] -%}\n{%- else -%}\n    {%- set first_user_prefix = \"\" -%}\n    {%- set loop_messages = messages -%}\n{%- endif -%}\n{%- for message in loop_messages -%}\n    {%- if (message['role'] == 'user') != (loop.index0 % 2 == 0) -%}\n        {{ raise_exception(\"Conversation roles must alternate user/assistant/user/assistant/...\") }}\n    {%- endif -%}\n    {%- if (message['role'] == 'assistant') -%}\n        {%- set role = \"model\" -%}\n    {%- else -%}\n        {%- set role = message['role'] -%}\n    {%- endif -%}\n    {{ '<start_of_turn>' + role + '\n' + (first_user_prefix if loop.first else \"\") }}\n    {%- if message['content'] is string -%}\n        {{ message['content'] | trim }}\n    {%- elif message['content'] is iterable -%}\n        {%- for item in message['content'] -%}\n            {%- if item['type'] == 'image' -%}\n                {{ '<start_of_image>' }}\n            {%- elif item['type'] == 'text' -%}\n                {{ item['text'] | trim }}\n            {%- endif -%}\n        {%- endfor -%}\n    {%- else -%}\n        {{ raise_exception(\"Invalid content type\") }}\n    {%- endif -%}\n    {{ '<end_of_turn>\n' }}\n{%- endfor -%}\n{%- if add_generation_prompt -%}\n    {{'<start_of_turn>model\n'}}\n{%- endif -%}\n",
+		ollama: {
+			template:
+				'{{- $systemPromptAdded := false }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role "user" }}<start_of_turn>user\n{{- if (and (not $systemPromptAdded) $.System) }}\n{{- $systemPromptAdded = true }}\n{{ $.System }}\n{{ end }}\n{{ .Content }}<end_of_turn>\n{{ if $last }}<start_of_turn>model\n{{ end }}\n{{- else if eq .Role "assistant" }}<start_of_turn>model\n{{ .Content }}{{ if not $last }}<end_of_turn>\n{{ end }}\n{{- end }}\n{{- end }}',
+			tokens: ["<start_of_turn>", "<start_of_image>", "<end_of_turn>"],
+			params: {
+				stop: ["<end_of_turn>"],
+				top_k: 64,
+				top_p: 0.95,
 			},
 		},
 	},
@@ -1060,6 +1079,36 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 			tokens: ["<|im_start|>", "<|im_end|>", "<|vision_start|>", "<|image_pad|>", "<|vision_end|>", "<|video_pad|>"],
 			params: {
 				temperature: 0.0001,
+			},
+		},
+	},
+	{
+		model: "library/qwen3-coder:30b",
+		gguf: "{% macro render_item_list(item_list, tag_name='required') %}\n    {%- if item_list is defined and item_list is iterable and item_list | length > 0 %}\n        {%- if tag_name %}{{- '\\n<' ~ tag_name ~ '>' -}}{% endif %}\n            {{- '[' }}\n                {%- for item in item_list -%}\n                    {%- if loop.index > 1 %}{{- \", \"}}{% endif -%}\n                    {%- if item is string -%}\n                        {{ \"`\" ~ item ~ \"`\" }}\n                    {%- else -%}\n                        {{ item }}\n                    {%- endif -%}\n                {%- endfor -%}\n            {{- ']' }}\n        {%- if tag_name %}{{- '</' ~ tag_name ~ '>' -}}{% endif %}\n    {%- endif %}\n{% endmacro %}\n\n{%- if messages[0][\"role\"] == \"system\" %}\n    {%- set system_message = messages[0][\"content\"] %}\n    {%- set loop_messages = messages[1:] %}\n{%- else %}\n    {%- set loop_messages = messages %}\n{%- endif %}\n\n{%- if not tools is defined %}\n    {%- set tools = [] %}\n{%- endif %}\n\n{%- if system_message is defined %}\n    {{- \"<|im_start|>system\\n\" + system_message }}\n{%- else %}\n    {%- if tools is iterable and tools | length > 0 %}\n        {{- \"<|im_start|>system\\nYou are Qwen, a helpful AI assistant that can interact with a computer to solve tasks.\" }}\n    {%- endif %}\n{%- endif %}\n{%- if tools is iterable and tools | length > 0 %}\n    {{- \"\\n\\nYou have access to the following functions:\\n\\n\" }}\n    {{- \"<tools>\" }}\n    {%- for tool in tools %}\n        {%- if tool.function is defined %}\n            {%- set tool = tool.function %}\n        {%- endif %}\n        {{- \"\\n<function>\\n<name>\" ~ tool.name ~ \"</name>\" }}\n        {{- '\\n<description>' ~ (tool.description | trim) ~ '</description>' }}\n        {{- '\\n<parameters>' }}\n        {%- for param_name, param_fields in tool.parameters.properties|items %}\n            {{- '\\n<parameter>' }}\n            {{- '\\n<name>' ~ param_name ~ '</name>' }}\n            {%- if param_fields.type is defined %}\n                {{- '\\n<type>' ~ (param_fields.type | string) ~ '</type>' }}\n            {%- endif %}\n            {%- if param_fields.description is defined %}\n                {{- '\\n<description>' ~ (param_fields.description | trim) ~ '</description>' }}\n            {%- endif %}\n            {{- render_item_list(param_fields.enum, 'enum') }}\n            {%- set handled_keys = ['type', 'description', 'enum', 'required'] %}\n            {%- for json_key in param_fields.keys() | reject(\"in\", handled_keys) %}\n                {%- set normed_json_key = json_key | replace(\"-\", \"_\") | replace(\" \", \"_\") | replace(\"$\", \"\") %}\n                {%- if param_fields[json_key] is mapping %}\n                    {{- '\\n<' ~ normed_json_key ~ '>' ~ (param_fields[json_key] | tojson | safe) ~ '</' ~ normed_json_key ~ '>' }}\n                {%- else %}\n                    {{-'\\n<' ~ normed_json_key ~ '>' ~ (param_fields[json_key] | string) ~ '</' ~ normed_json_key ~ '>' }}\n                {%- endif %}\n            {%- endfor %}\n            {{- render_item_list(param_fields.required, 'required') }}\n            {{- '\\n</parameter>' }}\n        {%- endfor %}\n        {{- render_item_list(tool.parameters.required, 'required') }}\n        {{- '\\n</parameters>' }}\n        {%- if tool.return is defined %}\n            {%- if tool.return is mapping %}\n                {{- '\\n<return>' ~ (tool.return | tojson | safe) ~ '</return>' }}\n            {%- else %}\n                {{- '\\n<return>' ~ (tool.return | string) ~ '</return>' }}\n            {%- endif %}\n        {%- endif %}\n        {{- '\\n</function>' }}\n    {%- endfor %}\n    {{- \"\\n</tools>\" }}\n    {{- '\\n\\nIf you choose to call a function ONLY reply in the following format with NO suffix:\\n\\n<tool_call>\\n<function=example_function_name>\\n<parameter=example_parameter_1>\\nvalue_1\\n</parameter>\\n<parameter=example_parameter_2>\\nThis is the value for the second parameter\\nthat can span\\nmultiple lines\\n</parameter>\\n</function>\\n</tool_call>\\n\\n<IMPORTANT>\\nReminder:\\n- Function calls MUST follow the specified format: an inner <function=...></function> block must be nested within <tool_call></tool_call> XML tags\\n- Required parameters MUST be specified\\n- You may provide optional reasoning for your function call in natural language BEFORE the function call, but NOT after\\n- If there is no function call available, answer the question like normal with your current knowledge and do not tell the user about function calls\\n</IMPORTANT>' }}\n{%- endif %}\n{%- if system_message is defined %}\n    {{- '<|im_end|>\\n' }}\n{%- else %}\n    {%- if tools is iterable and tools | length > 0 %}\n        {{- '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in loop_messages %}\n    {%- if message.role == \"assistant\" and message.tool_calls is defined and message.tool_calls is iterable and message.tool_calls | length > 0 %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content is defined and message.content is string and message.content | trim | length > 0 %}\n            {{- '\\n' + message.content | trim + '\\n' }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n<function=' + tool_call.name + '>\\n' }}\n            {%- if tool_call.arguments is defined %}\n                {%- for args_name, args_value in tool_call.arguments|items %}\n                    {{- '<parameter=' + args_name + '>\\n' }}\n                    {%- set args_value = args_value if args_value is string else args_value | string %}\n                    {{- args_value }}\n                    {{- '\\n</parameter>\\n' }}\n                {%- endfor %}\n            {%- endif %}\n            {{- '</function>\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"user\" or message.role == \"system\" or message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.previtem and loop.previtem.role != \"tool\" %}\n            {{- '<|im_start|>user\\n' }}\n        {%- endif %}\n        {{- '<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>\\n' }}\n        {%- if not loop.last and loop.nextitem.role != \"tool\" %}\n            {{- '<|im_end|>\\n' }}\n        {%- elif loop.last %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- else %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n",
+		ollama: {
+			template:
+				'{{- if .System }}<|im_start|>system\n{{ .System }}<|im_end|>\n{{ end }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 -}}\n{{- if eq .Role "user" }}<|im_start|>user\n{{ .Content }}<|im_end|>\n{{ else if eq .Role "assistant" }}<|im_start|>assistant\n{{ .Content }}{{ if not $last }}<|im_end|>\n{{ end }}\n{{- end }}\n{{- if and (ne .Role "assistant") $last }}<|im_start|>assistant\n{{ end }}\n{{- end }}',
+			tokens: [
+				"<|im_start|>",
+				"<tools>",
+				"<function>",
+				"<name>",
+				"<description>",
+				"<parameters>",
+				"<parameter>",
+				"<type>",
+				"<return>",
+				"<tool_call>",
+				"<IMPORTANT>",
+				"<|im_end|>",
+				"<tool_response>",
+			],
+			params: {
+				repeat_penalty: 1.05,
+				stop: ["<|im_start|>", "<|im_end|>", "<|endoftext|>"],
+				temperature: 0.7,
+				top_k: 20,
+				top_p: 0.8,
 			},
 		},
 	},

@@ -7,9 +7,6 @@ headers = {
     "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
 
-with open("cat.png", "rb") as image_file:
-    image_base_64 = base64.b64encode(image_file.read()).decode('utf-8')
-
 def query(payload):
     with open(payload["inputs"], "rb") as f:
         img = f.read()

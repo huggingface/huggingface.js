@@ -1038,7 +1038,7 @@ export const paddleocr = (model: ModelData): string[] => {
 		return [
 			`# pip install paddleocr
 from paddleocr import DocVLM
-model = DocVLM(model_name="${model.id}")
+model = DocVLM(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(
     input={"image": "path/to/image.png", "query": "Parsing this image and output the content in Markdown format."},
     batch_size=1
@@ -1056,7 +1056,7 @@ for res in output:
 			return [
 				`# pip install paddleocr
 from paddleocr import ${className}
-model = ${className}(model_name="${model.id}")
+model = ${className}(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(input="path/to/image.png", batch_size=1)
 for res in output:
     res.print()
@@ -1523,7 +1523,7 @@ export const transformers = (model: ModelData): string[] => {
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto"),'
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto")'
 		);
 	}
 
@@ -1703,6 +1703,16 @@ export const vfimamba = (model: ModelData): string[] => [
 model = Model.from_pretrained("${model.id}")`,
 ];
 
+export const lvface = (model: ModelData): string[] => [
+	`from huggingface_hub import hf_hub_download
+	 from inference_onnx import LVFaceONNXInferencer
+
+model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K/LVFace-L_Glint360K.onnx")
+inferencer = LVFaceONNXInferencer(model_path, use_gpu=True, timeout=300)
+img_path = 'path/to/image1.jpg'
+embedding = inferencer.infer_from_image(img_path)`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
@@ -1804,6 +1814,7 @@ huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.i
 const mlxlm = (model: ModelData): string[] => [
 	`# Make sure mlx-lm is installed
 # pip install --upgrade mlx-lm
+# if on a CUDA device, also pip install mlx[cuda]
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
@@ -2022,25 +2033,6 @@ codes = model.generate(model.prepare_conditioning(cond))
 audio = model.autoencoder.decode(codes)[0].cpu()
 torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 `,
-];
-
-export const mistral_common = (model: ModelData): string[] => [
-	`# We recommend to use vLLM to serve Mistral AI models.
-pip install vllm
-
-# Make sure to have installed the latest version of mistral-common.
-pip install --upgrade mistral-common[image,audio]
-
-# Serve the model with an OpenAI-compatible API.
-vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice
-
-# Query the model with curl in a separate terminal.
-curl http://localhost:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "${model.id}",
-    "messages": [{"role": "user", "content": "What is the capital of France?"}]
-  }'`,
 ];
 
 //#endregion

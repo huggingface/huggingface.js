@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import type { GGUFParseOutput } from "./gguf";
+import type { GGUFParseOutput, MetadataValue } from "./gguf";
 import {
 	GGMLFileQuantizationType,
 	GGMLQuantizationType,
+	GGUFValueType,
 	gguf,
 	ggufAllShards,
 	parseGgufShardFilename,
@@ -293,8 +294,8 @@ describe("gguf", () => {
 
 	// Quantization handler
 
-	it("should have GGUF_QUANT_ORDER in sync with GGMLQuantizationType enum", () => {
-		const enumValues = Object.values(GGMLQuantizationType).filter((value) => typeof value === "number") as number[];
+	it("should have GGUF_QUANT_ORDER in sync with GGMLFileQuantizationType enum", () => {
+		const enumValues = Object.values(GGMLFileQuantizationType).filter((value) => typeof value === "number") as number[];
 		const checkValues = new Set(GGUF_QUANT_ORDER);
 		for (const value of enumValues) {
 			expect(checkValues).toContain(value);
@@ -324,5 +325,153 @@ describe("gguf", () => {
 		// text = F16
 		nearestQuant = findNearestQuantType(GGMLFileQuantizationType.F16, visionQuants);
 		expect(nearestQuant).toEqual(GGMLFileQuantizationType.F16);
+	});
+
+	it("should not return typedMetadata by default", async () => {
+		const result = await gguf(URL_LLAMA);
+		expect(result).not.toHaveProperty("typedMetadata");
+		expect(result).toHaveProperty("metadata");
+		expect(result).toHaveProperty("tensorInfos");
+		expect(result).toHaveProperty("tensorDataOffset");
+	});
+
+	it("should return typedMetadata when requested", async () => {
+		const { metadata, typedMetadata, tensorInfos } = await gguf(URL_LLAMA, { typedMetadata: true });
+
+		// Should have both metadata and typedMetadata
+		expect(metadata).toBeDefined();
+		expect(typedMetadata).toBeDefined();
+		expect(tensorInfos).toBeDefined();
+
+		// Basic structure checks
+		expect(typedMetadata.version).toEqual({
+			value: 2,
+			type: GGUFValueType.UINT32,
+		});
+		expect(typedMetadata.tensor_count).toEqual({
+			value: 291n,
+			type: GGUFValueType.UINT64,
+		});
+		expect(typedMetadata.kv_count).toEqual({
+			value: 19n,
+			type: GGUFValueType.UINT64,
+		});
+
+		// Check string metadata
+		expect(typedMetadata["general.architecture"]).toEqual({
+			value: "llama",
+			type: GGUFValueType.STRING,
+		});
+		expect(typedMetadata["general.name"]).toEqual({
+			value: "LLaMA v2",
+			type: GGUFValueType.STRING,
+		});
+
+		// Check numeric metadata
+		expect(typedMetadata["general.file_type"]).toEqual({
+			value: GGMLFileQuantizationType.Q2_K,
+			type: GGUFValueType.UINT32,
+		});
+		expect(typedMetadata["llama.attention.head_count"]).toEqual({
+			value: 32,
+			type: GGUFValueType.UINT32,
+		});
+
+		// Check float metadata
+		expect(typedMetadata["llama.attention.layer_norm_rms_epsilon"]).toEqual({
+			value: 9.999999974752427e-7,
+			type: GGUFValueType.FLOAT32,
+		});
+	});
+
+	it("should return typedMetadata with parameter count", async () => {
+		const { metadata, typedMetadata, tensorInfos, parameterCount } = await gguf(URL_LLAMA, {
+			typedMetadata: true,
+			computeParametersCount: true,
+		});
+
+		expect(metadata).toBeDefined();
+		expect(typedMetadata).toBeDefined();
+		expect(tensorInfos).toBeDefined();
+		expect(parameterCount).toEqual(6_738_415_616);
+
+		// Verify typedMetadata structure is still correct
+		expect(typedMetadata.version).toEqual({
+			value: 2,
+			type: GGUFValueType.UINT32,
+		});
+		expect(typedMetadata["general.architecture"]).toEqual({
+			value: "llama",
+			type: GGUFValueType.STRING,
+		});
+	});
+
+	it("should handle typedMetadata for V1 files", async () => {
+		const { typedMetadata } = await gguf(URL_V1, { typedMetadata: true });
+
+		// V1 files use UINT32 for counts instead of UINT64
+		expect(typedMetadata.version).toEqual({
+			value: 1,
+			type: GGUFValueType.UINT32,
+		});
+		expect(typedMetadata.tensor_count).toEqual({
+			value: 48n,
+			type: GGUFValueType.UINT32,
+		});
+		expect(typedMetadata.kv_count).toEqual({
+			value: 18n,
+			type: GGUFValueType.UINT32,
+		});
+
+		// Check other fields are properly typed
+		expect(typedMetadata["general.architecture"]).toEqual({
+			value: "llama",
+			type: GGUFValueType.STRING,
+		});
+		expect(typedMetadata["llama.attention.head_count"]).toEqual({
+			value: 8,
+			type: GGUFValueType.UINT32,
+		});
+	});
+
+	it("should handle array metadata types in typedMetadata", async () => {
+		const { typedMetadata } = await gguf(URL_LLAMA, { typedMetadata: true });
+
+		// Check if tokens array is properly handled
+		if (typedMetadata["tokenizer.ggml.tokens"]) {
+			expect(typedMetadata["tokenizer.ggml.tokens"].type).toEqual(GGUFValueType.ARRAY);
+			expect(typedMetadata["tokenizer.ggml.tokens"].subType).toEqual(GGUFValueType.STRING);
+			expect(Array.isArray(typedMetadata["tokenizer.ggml.tokens"].value)).toBe(true);
+		}
+
+		// Check if scores array is properly handled
+		if (typedMetadata["tokenizer.ggml.scores"]) {
+			expect(typedMetadata["tokenizer.ggml.scores"].type).toEqual(GGUFValueType.ARRAY);
+			expect(typedMetadata["tokenizer.ggml.scores"].subType).toEqual(GGUFValueType.FLOAT32);
+			expect(Array.isArray(typedMetadata["tokenizer.ggml.scores"].value)).toBe(true);
+		}
+
+		// Check if token_type array is properly handled
+		if (typedMetadata["tokenizer.ggml.token_type"]) {
+			expect(typedMetadata["tokenizer.ggml.token_type"].type).toEqual(GGUFValueType.ARRAY);
+			expect(typedMetadata["tokenizer.ggml.token_type"].subType).toEqual(GGUFValueType.INT32);
+			expect(Array.isArray(typedMetadata["tokenizer.ggml.token_type"].value)).toBe(true);
+		}
+	});
+
+	it("should maintain consistency between metadata and typedMetadata values", async () => {
+		const { metadata, typedMetadata } = await gguf(URL_LLAMA, { typedMetadata: true });
+
+		// All keys should be present in both
+		const metadataKeys = Object.keys(metadata);
+		const typedMetadataKeys = Object.keys(typedMetadata);
+
+		expect(metadataKeys.sort()).toEqual(typedMetadataKeys.sort());
+
+		// Values should match for all keys
+		const metadataAsRecord = metadata as Record<string, MetadataValue>;
+		for (const key of metadataKeys) {
+			expect(typedMetadata[key].value).toEqual(metadataAsRecord[key]);
+		}
 	});
 });
