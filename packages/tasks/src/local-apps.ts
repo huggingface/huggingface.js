@@ -531,7 +531,7 @@ export const LOCAL_APPS = {
 		macOSOnly: false,
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://aifxart.com/pages/model-view?model=${model.id}`),
-	},
+	}
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
