@@ -47,7 +47,7 @@ export async function createRepo(
 			...(repoId.type === "space"
 				? {
 						type: "space",
-						sdk: sdk || "static",
+						sdk: sdk ?? "static",
 				  }
 				: {
 						type: repoId.type,
