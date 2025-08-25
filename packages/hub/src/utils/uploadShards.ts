@@ -387,7 +387,7 @@ async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: Uplo
 async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
 	const token = await xetWriteToken(params);
 
-	const resp = await params.customFetch(`${token.casUrl}/v1/shard/default-merkledb`, {
+	const resp = await params.customFetch(`${token.casUrl}/v1/shard`, {
 		method: "POST",
 		body: shard,
 		headers: {
