@@ -6,7 +6,7 @@ import { xetWriteToken } from "./xetWriteToken";
 
 const SHARD_MAX_SIZE = 64 * 1024 * 1024;
 const SHARD_HEADER_SIZE = 48;
-const SHARD_FOOTER_SIZE = 192;
+const SHARD_FOOTER_SIZE = 200;
 const HASH_LENGTH = 32;
 const XORB_FOOTER_LENGTH = 48;
 const FILE_FOOTER_LENGTH = 48;
@@ -278,32 +278,20 @@ export async function* uploadShards(
 		shardOffset += 8;
 		shardView.setBigUint64(shardOffset, BigInt(SHARD_HEADER_SIZE), true); // beginning of fileinfo section
 		shardOffset += 8;
-		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileInfoSection.byteLength), true); // beginning of xorbinfo section
+		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileViewOffset), true); // beginning of xorbinfo section
 		shardOffset += 8;
-		shardView.setBigUint64(
-			shardOffset,
-			BigInt(SHARD_FOOTER_SIZE + fileInfoSection.byteLength + xorbInfoSection.byteLength),
-			true
-		); // beginning of file lookup table
+		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileViewOffset + xorbViewOffset), true); // beginning of file lookup table
 		shardOffset += 8;
 		shardView.setBigUint64(shardOffset, BigInt(0), true); // num entries in file lookup table
 		shardOffset += 8;
 
-		shardView.setBigUint64(
-			shardOffset,
-			BigInt(SHARD_FOOTER_SIZE + fileInfoSection.byteLength + xorbInfoSection.byteLength + 8),
-			true
-		); // beginning of cas lookup table
+		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileViewOffset + xorbViewOffset + 8), true); // beginning of cas lookup table
 		shardOffset += 8;
 		shardView.setBigUint64(shardOffset, BigInt(0), true); // num entries in cas lookup table
 		shardOffset += 8;
 
 		// Footer
-		shardView.setBigUint64(
-			shardOffset,
-			BigInt(SHARD_FOOTER_SIZE + fileInfoSection.byteLength + xorbInfoSection.byteLength + 16),
-			true
-		); // beginning of chunk lookup table
+		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileViewOffset + xorbViewOffset + 16), true); // beginning of chunk lookup table
 		shardOffset += 8;
 		shardView.setBigUint64(shardOffset, BigInt(0), true); // num entries in chunk lookup table
 		shardOffset += 8;
@@ -336,7 +324,7 @@ export async function* uploadShards(
 		shardView.setBigUint64(shardOffset, xorbTotalUnpackedSize, true);
 		shardOffset += 8;
 
-		shardView.setBigUint64(footerOffset, BigInt(footerOffset), true);
+		shardView.setBigUint64(shardOffset, BigInt(footerOffset), true);
 
 		xorbViewOffset = 0;
 		fileViewOffset = 0;
