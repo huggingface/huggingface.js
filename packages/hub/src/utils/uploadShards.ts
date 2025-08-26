@@ -119,9 +119,11 @@ export async function* uploadShards(
 				for (const chunk of output.chunks) {
 					writeHashToArray(chunk.hash, xorbInfoSection, xorbViewOffset);
 					xorbViewOffset += HASH_LENGTH;
+					// start offset
 					xorbView.setUint32(xorbViewOffset, chunkBytes, true);
 					xorbViewOffset += 4;
-					xorbView.setUint32(xorbViewOffset, chunkBytes + chunk.length, true);
+					// chunk length
+					xorbView.setUint32(xorbViewOffset, chunk.length, true);
 					xorbViewOffset += 4;
 					xorbView.setBigUint64(xorbViewOffset, 0n, true); // reserved
 					xorbViewOffset += 8;
