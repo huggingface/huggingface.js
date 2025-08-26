@@ -240,6 +240,7 @@ export async function* uploadShards(
 		shardOffset += 16;
 
 		// XORB Info Section
+		const xorbInfoOffset = shardOffset;
 		shard.set(xorbInfoSection.slice(0, xorbViewOffset), shardOffset);
 		shardOffset += xorbViewOffset;
 
@@ -259,12 +260,7 @@ export async function* uploadShards(
 		// version: u64,                    // Footer version (must be 1)
 		// file_info_offset: u64,           // Offset to file info section
 		// cas_info_offset: u64,            // Offset to CAS info section
-		// file_lookup_offset: u64,         // Offset to file lookup table
-		// file_lookup_num_entry: u64,      // Number of file lookup entries
-		// cas_lookup_offset: u64,          // Offset to CAS lookup table
-		// cas_lookup_num_entry: u64,       // Number of CAS lookup entries
-		// chunk_lookup_offset: u64,        // Offset to chunk lookup table
-		// chunk_lookup_num_entry: u64,     // Number of chunk lookup entries
+		// reserved 48 bytes
 		// chunk_hash_hmac_key: [u64; 4],   // HMAC key for chunk hashes (32 bytes)
 		// shard_creation_timestamp: u64,   // Creation time (seconds since epoch)
 		// shard_key_expiry: u64,           // Expiry time (seconds since epoch)
@@ -278,23 +274,13 @@ export async function* uploadShards(
 		shardOffset += 8;
 		shardView.setBigUint64(shardOffset, BigInt(SHARD_HEADER_SIZE), true); // beginning of fileinfo section
 		shardOffset += 8;
-		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileViewOffset), true); // beginning of xorbinfo section
-		shardOffset += 8;
-		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileViewOffset + xorbViewOffset), true); // beginning of file lookup table
-		shardOffset += 8;
-		shardView.setBigUint64(shardOffset, BigInt(0), true); // num entries in file lookup table
+		shardView.setBigUint64(shardOffset, BigInt(xorbInfoOffset), true); // beginning of xorbinfo section
 		shardOffset += 8;
 
-		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileViewOffset + xorbViewOffset + 8), true); // beginning of cas lookup table
-		shardOffset += 8;
-		shardView.setBigUint64(shardOffset, BigInt(0), true); // num entries in cas lookup table
-		shardOffset += 8;
-
-		// Footer
-		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileViewOffset + xorbViewOffset + 16), true); // beginning of chunk lookup table
-		shardOffset += 8;
-		shardView.setBigUint64(shardOffset, BigInt(0), true); // num entries in chunk lookup table
-		shardOffset += 8;
+		for (let i = 0; i < 48; i++) {
+			shardView.setUint8(shardOffset + i, 0);
+		}
+		shardOffset += 48;
 
 		// Chunk HMAC
 		for (let i = 0; i < 32; i++) {

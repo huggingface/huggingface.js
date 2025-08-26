@@ -117,7 +117,7 @@ function createMockFetch(): {
 			});
 		}
 
-		if (url.includes("/shard/")) {
+		if (url.endsWith("/shard")) {
 			shardCount++;
 			const bodySize = getBodySize(init?.body);
 			shardBytes += parseInt(bodySize);
