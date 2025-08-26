@@ -187,7 +187,7 @@ export async function* uploadShards(
 					fileViewOffset += HASH_LENGTH;
 					// reserved in file verification data
 					for (let i = 0; i < 16; i++) {
-						fileInfoSection[i] = 0;
+						fileInfoSection[fileViewOffset + i] = 0;
 					}
 					fileViewOffset += 16;
 				}
@@ -198,7 +198,7 @@ export async function* uploadShards(
 
 				// reserved in file metadata ext
 				for (let i = 0; i < 16; i++) {
-					fileInfoSection[i] = 0;
+					fileInfoSection[fileViewOffset + i] = 0;
 				}
 				fileViewOffset += 16;
 
