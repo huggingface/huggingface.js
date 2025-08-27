@@ -133,7 +133,7 @@ export async function* createXorbs(
 			// todo: have the wasm function to compute file hash be able to take data chunk by chunk instead of all at once
 			const fileChunks: Array<{ hash: string; length: number }> = [];
 			// Collect chunk metadata to build representation at the end
-			// todo: build representation at the end of each xorb
+			// todo: build partial representation at the end of each xorb, to avoid having to store all chunks in memory
 			const chunkMetadata: Array<{
 				xorbId: number | string;
 				chunkIndex: number;
