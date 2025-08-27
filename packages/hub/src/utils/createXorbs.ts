@@ -253,7 +253,6 @@ export async function* createXorbs(
 						}
 
 						chunkCache.addChunkToCache(chunk.hash, xorbId, chunkIndex, null);
-						xorb.chunks.push({ hash: chunk.hash, length: chunk.length, offset: xorb.offset });
 					} else {
 						chunkXorbId = cacheData.xorbIndex;
 						chunkIndex = cacheData.chunkIndex;
@@ -402,6 +401,7 @@ function backtrackDedup(
 		currentOffset += range.end - range.start;
 	}
 	const newXorbChunks: Array<{ hash: string; length: number; offset: number }> = [];
+	const oldIndexToNewIndex = new Map<number, number>();
 	let erasedOffset = 0;
 	for (let i = 0; i < xorb.chunks.length; i++) {
 		const chunk = xorb.chunks[i];
@@ -415,10 +415,22 @@ function backtrackDedup(
 				length: chunk.length,
 				offset: chunk.offset - erasedOffset,
 			});
+			// Only need a mapping if index changed (at least one previous chunk was erased)
+			if (erasedOffset > 0) {
+				oldIndexToNewIndex.set(i, newXorbChunks.length - 1);
+			}
 		}
 	}
 	xorb.chunks = newXorbChunks;
 	xorb.offset = currentOffset;
+	for (const chunk of chunkMetadata) {
+		if (chunk.xorbId === xorb.id) {
+			const newIndex = oldIndexToNewIndex.get(chunk.chunkIndex);
+			if (newIndex !== undefined) {
+				chunk.chunkIndex = newIndex;
+			}
+		}
+	}
 	return dedupedBytes;
 }
 
