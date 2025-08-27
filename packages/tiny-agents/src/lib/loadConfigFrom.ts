@@ -6,7 +6,7 @@ import type { TinyAgentConfig } from "./types";
 import { debug, error } from "./utils";
 
 const FILENAME_CONFIG = "agent.json";
-const FILENAME_PROMPT = "PROMPT.md";
+const PROMPT_FILENAMES = ["PROMPT.md", "AGENTS.md"] as const;
 
 const TINY_AGENTS_HUB_REPO: RepoDesignation = {
 	name: "tiny-agents/tiny-agents",
@@ -29,10 +29,13 @@ async function tryLoadFromDirectory(dirPath: string): Promise<TinyAgentConfig | 
 	}
 
 	let prompt: string | undefined;
-	try {
-		prompt = await readFile(join(dirPath, FILENAME_PROMPT), { encoding: "utf8" });
-	} catch {
-		debug(`PROMPT.md not found in ${dirPath}, continuing without prompt template`);
+	for (const filename of PROMPT_FILENAMES) {
+		try {
+			prompt = await readFile(join(dirPath, filename), { encoding: "utf8" });
+			break;
+		} catch {
+			debug(`${filename} not found in ${dirPath}, continuing without prompt template`);
+		}
 	}
 
 	try {
@@ -60,17 +63,20 @@ async function tryLoadFromHub(agentId: string): Promise<TinyAgentConfig | undefi
 	}
 
 	let prompt: string | undefined;
-	try {
-		const promptPath = await downloadFileToCacheDir({
-			repo: TINY_AGENTS_HUB_REPO,
-			path: `${agentId}/${FILENAME_PROMPT}`,
-			accessToken: process.env.HF_TOKEN,
-		});
-		prompt = await readFile(promptPath, { encoding: "utf8" });
-	} catch {
-		debug(
-			`PROMPT.md not found in https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/${agentId}, continuing without prompt template`
-		);
+	for (const filename of PROMPT_FILENAMES) {
+		try {
+			const promptPath = await downloadFileToCacheDir({
+				repo: TINY_AGENTS_HUB_REPO,
+				path: `${agentId}/${filename}`,
+				accessToken: process.env.HF_TOKEN,
+			});
+			prompt = await readFile(promptPath, { encoding: "utf8" });
+			break;
+		} catch {
+			debug(
+				`${filename} not found in https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/${agentId}, continuing without prompt template`
+			);
+		}
 	}
 
 	return {
