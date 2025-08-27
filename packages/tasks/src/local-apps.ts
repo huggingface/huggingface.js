@@ -90,6 +90,10 @@ function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
+function isAmdRyzenModel(model: ModelData) {
+	return model.tags.includes("ryzenai-hybrid") || model.tags.includes("ryzenai-npu");
+}
+
 function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
@@ -316,22 +320,36 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 };
 
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const tagName = getQuantTag(filepath);
-	const modelName = model.id.split("/")[1];
-	return [
+    const tagName = getQuantTag(filepath);
+    const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
+
+    // Get recipe according to model type
+    const simplifiedModelName = modelName.split("-awq-g128-int4-asym-")[0];
+    let recipe: string;
+    let checkpoint: string;
+    let requirements: string;
+    if (model.tags.some(tag => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag))) {
+        recipe = model.tags.includes("ryzenai-npu") ? "oga-npu" : "oga-hybrid";
+        checkpoint = model.id;
+        requirements = " (requires RyzenAI 300 series)";
+    } else {
+        recipe = "llamacpp";
+        checkpoint = `${model.id}${tagName}`;
+        requirements = "";
+    }
+
+    return [
 		{
 			title: "Pull the model",
 			setup: "# Download Lemonade from https://lemonade-server.ai/",
 			content: [
-				`lemonade-server pull user.${modelName} \\
-	--checkpoint ${model.id}${tagName} \\
-	--recipe llamacpp`,
+				`lemonade-server pull user.${simplifiedModelName} --checkpoint ${checkpoint} --recipe ${recipe}`,
 				"# Note: If you installed from source, use the lemonade-server-dev command instead.",
 			].join("\n"),
 		},
 		{
-			title: "Run and chat with the model",
-			content: `lemonade-server run user.${modelName}`,
+			title: `Run and chat with the model${requirements}`,
+			content: `lemonade-server run user.${simplifiedModelName}`,
 		},
 		{
 			title: "List all available models",
