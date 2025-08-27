@@ -8,6 +8,7 @@ import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } fr
 import { compress as lz4_compress } from "../vendor/lz4js";
 import { ChunkCache } from "./ChunkCache";
 import { xetWriteToken, type XetWriteTokenParams } from "./xetWriteToken";
+import type { ShardData } from "./shardParser";
 import { parseShardData } from "./shardParser";
 
 const TARGET_CHUNK_SIZE = 64 * 1024;
@@ -27,6 +28,55 @@ interface XorbEvent {
 		path: string;
 		progress: number;
 	}>;
+}
+
+class CurrentXorbInfo {
+	id: number;
+	offset: number;
+	chunks: Array<{ hash: string; length: number; offset: number }>;
+
+	/**
+	 * path => 0..1 mapping of the current xorb
+	 *
+	 * eg
+	 *
+	 * A => 1
+	 * B => 1
+	 * C => 0.345
+	 *
+	 * If the xorb contains the end of file A, B, and up to 34.5% of file C
+	 */
+	fileProgress: Record<string, number>;
+	data: Uint8Array;
+	immutableData: {
+		chunkIndex: number;
+		offset: number;
+	} | null;
+
+	constructor() {
+		this.id = 0;
+		this.offset = 0;
+		this.chunks = [];
+		this.fileProgress = {};
+		this.data = new Uint8Array(XORB_SIZE);
+		this.immutableData = null;
+	}
+
+	event(computeXorbHash: (chunks: { hash: string; length: number }[]) => string): XorbEvent {
+		const xorbChunksCleaned = this.chunks.map((chunk) => ({
+			hash: chunk.hash,
+			length: chunk.length,
+		}));
+
+		return {
+			event: "xorb" as const,
+			xorb: this.data.subarray(0, this.offset),
+			hash: computeXorbHash(xorbChunksCleaned),
+			chunks: xorbChunksCleaned,
+			id: this.id,
+			files: Object.entries(this.fileProgress).map(([path, progress]) => ({ path, progress })),
+		};
+	}
 }
 
 export async function* createXorbs(
@@ -59,49 +109,16 @@ export async function* createXorbs(
 	await chunkModule.init();
 	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 	const chunkCache = new ChunkCache();
-	let xorb = new Uint8Array(XORB_SIZE);
-	let xorbOffset = 0;
-	let xorbChunks = Array<{ hash: string; length: number; offset: number }>();
-	let xorbImmutableData = null as null | {
-		chunkIndex: number;
-		offset: number;
-	};
-
-	/**
-	 * path => 0..1 mapping of the current xorb
-	 *
-	 * eg
-	 *
-	 * A => 1
-	 * B => 1
-	 * C => 0.345
-	 *
-	 * If the xorb contains the end of file A, B, and up to 34.5% of file C
-	 */
-	let xorbFileProgress: Record<string, number> = {};
+	let xorb = new CurrentXorbInfo();
 
 	const nextXorb = (): XorbEvent => {
+		const event = xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
+
 		xorbId++;
-		xorbOffset = 0;
-		xorbChunks = [];
-		xorbFileProgress = {};
-		xorb = new Uint8Array(XORB_SIZE);
-		xorbImmutableData = null;
+		xorb = new CurrentXorbInfo();
+		xorb.id = xorbId;
 
-		// Remove "offset" + clone
-		const xorbChunksCleaned = xorbChunks.map((chunk) => ({
-			hash: chunk.hash,
-			length: chunk.length,
-		}));
-
-		return {
-			event: "xorb" as const,
-			xorb: xorb.subarray(0, xorbOffset),
-			hash: chunkModule.compute_xorb_hash(xorbChunksCleaned),
-			chunks: xorbChunksCleaned,
-			id: xorbId,
-			files: Object.entries(xorbFileProgress).map(([path, progress]) => ({ path, progress })),
-		};
+		return event;
 	};
 
 	const pendingFileEvents: Array<{
@@ -142,7 +159,7 @@ export async function* createXorbs(
 
 			const addChunks = async function* (chunks: Array<{ hash: string; length: number; dedup: boolean }>) {
 				for (const chunk of chunks) {
-					let chunkIndex = xorbChunks.length;
+					let chunkIndex = xorb.chunks.length;
 					let chunkXorbId = xorbId;
 					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 
@@ -203,91 +220,18 @@ export async function* createXorbs(
 							cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
 
 							// We backtrack a bit to check if new dedup info contains older chunks
-							const chunkIndexesToBacktrackFor = new Map<number, { xorbId: number; chunkIndex: number }>();
-							for (
-								let chunkToRecheckIndex = xorbImmutableData?.chunkIndex ?? 0;
-								chunkToRecheckIndex < xorbChunks.length;
-								chunkToRecheckIndex++
-							) {
-								const chunk = xorbChunks[chunkToRecheckIndex];
-								const hmacHash = chunkModule.compute_hmac(chunk.hash, shardData.hmacKey);
-								const cacheData = chunkCache.getChunk(hmacHash, null);
-								if (cacheData !== undefined) {
-									chunkIndexesToBacktrackFor.set(chunkToRecheckIndex, {
-										xorbId: cacheData.xorbIndex,
-										chunkIndex: cacheData.chunkIndex,
-									});
-									chunkCache.removeChunkFromCache(chunk.hash);
-								}
-							}
-
-							// Use remote dedup info to update chunk metadata for file representation
-							for (const metadata of chunkMetadata) {
-								if (metadata.xorbId === xorbId && chunkIndexesToBacktrackFor.has(metadata.chunkIndex)) {
-									const backtrackData = chunkIndexesToBacktrackFor.get(metadata.chunkIndex);
-									if (backtrackData !== undefined) {
-										metadata.xorbId = backtrackData.xorbId;
-										metadata.chunkIndex = backtrackData.chunkIndex;
-										dedupedBytes += metadata.length;
-									}
-								}
-							}
-
-							// Remove chunks that were backtracked from xorbChunks
-							const xorbRangesToErase: Array<{ start: number; end: number }> = [];
-							for (let i = 0; i < xorbChunks.length; i++) {
-								const chunk = xorbChunks[i];
-								if (chunkIndexesToBacktrackFor.has(i)) {
-									xorbRangesToErase.push({
-										start: chunk.offset,
-										end: i < xorbChunks.length - 1 ? xorbChunks[i + 1].offset : xorbOffset,
-									});
-								}
-							}
-							const xorbRangesToKeep: Array<{ start: number; end: number }> = [];
-							let currentStart = 0;
-							for (let i = 0; i < xorbRangesToErase.length; i++) {
-								const range = xorbRangesToErase[i];
-								if (currentStart !== range.start) {
-									xorbRangesToKeep.push({ start: currentStart, end: range.start });
-								}
-								currentStart = range.end;
-							}
-							if (currentStart !== xorbOffset) {
-								xorbRangesToKeep.push({ start: currentStart, end: xorbOffset });
-							}
-
-							let currentOffset = 0;
-							for (const range of xorbRangesToKeep) {
-								if (range.start !== currentOffset) {
-									xorb.set(xorb.subarray(range.start, range.end), currentOffset);
-								}
-								currentOffset += range.end - range.start;
-							}
-							const newXorbChunks: Array<{ hash: string; length: number; offset: number }> = [];
-							let erasedOffset = 0;
-							for (let i = 0; i < xorbChunks.length; i++) {
-								const chunk = xorbChunks[i];
-								if (chunkIndexesToBacktrackFor.has(i)) {
-									if (i < xorbChunks.length - 1) {
-										erasedOffset += xorbChunks[i + 1].offset - chunk.offset;
-									}
-								} else {
-									newXorbChunks.push({
-										hash: chunk.hash,
-										length: chunk.length,
-										offset: chunk.offset - erasedOffset,
-									});
-								}
-							}
-							xorbChunks = newXorbChunks;
-							xorbOffset = currentOffset;
+							dedupedBytes = backtrackDedup(
+								xorb,
+								chunkModule.compute_hmac.bind(chunkModule),
+								shardData,
+								chunkCache,
+								chunkMetadata,
+								dedupedBytes
+							);
 						}
 					}
 					if (cacheData === undefined) {
-						xorbOffset = writeChunk(xorb, xorbOffset, chunkToCopy);
-
-						if (xorbOffset === 0) {
+						if (!writeChunk(xorb, chunkToCopy, chunk.hash)) {
 							// Failure to write chunk, maybe because it went over xorb size limit
 							yield nextXorb();
 
@@ -303,15 +247,13 @@ export async function* createXorbs(
 							}
 							pendingFileEvents.length = 0;
 
-							xorbOffset = writeChunk(xorb, 0, chunkToCopy);
-
-							if (xorbOffset === 0) {
+							if (!writeChunk(xorb, chunkToCopy, chunk.hash)) {
 								throw new Error("Failed to write chunk into xorb");
 							}
 						}
 
 						chunkCache.addChunkToCache(chunk.hash, xorbId, chunkIndex, null);
-						xorbChunks.push({ hash: chunk.hash, length: chunk.length, offset: xorbOffset });
+						xorb.chunks.push({ hash: chunk.hash, length: chunk.length, offset: xorb.offset });
 					} else {
 						chunkXorbId = cacheData.xorbIndex;
 						chunkIndex = cacheData.chunkIndex;
@@ -325,8 +267,8 @@ export async function* createXorbs(
 						chunkIndex: chunkIndex,
 						length: chunk.length,
 					});
-					xorbFileProgress[fileSource.path] = processedBytes / fileSource.content.size;
-					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
+					xorb.fileProgress[fileSource.path] = processedBytes / fileSource.content.size;
+					if (xorb.chunks.length >= MAX_XORB_CHUNKS) {
 						yield nextXorb();
 
 						for (const event of pendingFileEvents) {
@@ -357,9 +299,9 @@ export async function* createXorbs(
 				fileChunks,
 				chunkModule.compute_verification_hash.bind(chunkModule)
 			);
-			xorbImmutableData = {
-				chunkIndex: xorbChunks.length,
-				offset: xorbOffset,
+			xorb.immutableData = {
+				chunkIndex: xorb.chunks.length,
+				offset: xorb.offset,
 			};
 			const dedupRatio = fileSource.content.size > 0 ? dedupedBytes / fileSource.content.size : 0;
 
@@ -373,15 +315,8 @@ export async function* createXorbs(
 			});
 		}
 
-		if (xorbOffset > 0) {
-			yield {
-				event: "xorb" as const,
-				xorb: xorb.subarray(0, xorbOffset),
-				hash: chunkModule.compute_xorb_hash(xorbChunks),
-				chunks: [...xorbChunks],
-				id: xorbId,
-				files: Object.entries(xorbFileProgress).map(([path, progress]) => ({ path, progress })),
-			};
+		if (xorb.offset > 0) {
+			yield xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
 		}
 
 		for (const event of pendingFileEvents) {
@@ -397,6 +332,96 @@ export async function* createXorbs(
 	}
 }
 
+function backtrackDedup(
+	xorb: CurrentXorbInfo,
+	computeHmac: (hash: string, key: string) => string,
+	shardData: ShardData,
+	chunkCache: ChunkCache,
+	chunkMetadata: { xorbId: number | string; chunkIndex: number; length: number }[],
+	dedupedBytes: number
+) {
+	const chunkIndexesToBacktrackFor = new Map<number, { xorbId: number; chunkIndex: number }>();
+	for (
+		let chunkToRecheckIndex = xorb.immutableData?.chunkIndex ?? 0;
+		chunkToRecheckIndex < xorb.chunks.length;
+		chunkToRecheckIndex++
+	) {
+		const chunk = xorb.chunks[chunkToRecheckIndex];
+		const hmacHash = computeHmac(chunk.hash, shardData.hmacKey);
+		const cacheData = chunkCache.getChunk(hmacHash, null);
+		if (cacheData !== undefined) {
+			chunkIndexesToBacktrackFor.set(chunkToRecheckIndex, {
+				xorbId: cacheData.xorbIndex,
+				chunkIndex: cacheData.chunkIndex,
+			});
+			chunkCache.removeChunkFromCache(chunk.hash);
+		}
+	}
+
+	// Use remote dedup info to update chunk metadata for file representation
+	for (const metadata of chunkMetadata) {
+		if (metadata.xorbId === xorb.id && chunkIndexesToBacktrackFor.has(metadata.chunkIndex)) {
+			const backtrackData = chunkIndexesToBacktrackFor.get(metadata.chunkIndex);
+			if (backtrackData !== undefined) {
+				metadata.xorbId = backtrackData.xorbId;
+				metadata.chunkIndex = backtrackData.chunkIndex;
+				dedupedBytes += metadata.length;
+			}
+		}
+	}
+
+	// Remove chunks that were backtracked from xorbChunks
+	const xorbRangesToErase: Array<{ start: number; end: number }> = [];
+	for (let i = 0; i < xorb.chunks.length; i++) {
+		const chunk = xorb.chunks[i];
+		if (chunkIndexesToBacktrackFor.has(i)) {
+			xorbRangesToErase.push({
+				start: chunk.offset,
+				end: i < xorb.chunks.length - 1 ? xorb.chunks[i + 1].offset : xorb.offset,
+			});
+		}
+	}
+	const xorbRangesToKeep: Array<{ start: number; end: number }> = [];
+	let currentStart = 0;
+	for (let i = 0; i < xorbRangesToErase.length; i++) {
+		const range = xorbRangesToErase[i];
+		if (currentStart !== range.start) {
+			xorbRangesToKeep.push({ start: currentStart, end: range.start });
+		}
+		currentStart = range.end;
+	}
+	if (currentStart !== xorb.offset) {
+		xorbRangesToKeep.push({ start: currentStart, end: xorb.offset });
+	}
+
+	let currentOffset = 0;
+	for (const range of xorbRangesToKeep) {
+		if (range.start !== currentOffset) {
+			xorb.data.set(xorb.data.subarray(range.start, range.end), currentOffset);
+		}
+		currentOffset += range.end - range.start;
+	}
+	const newXorbChunks: Array<{ hash: string; length: number; offset: number }> = [];
+	let erasedOffset = 0;
+	for (let i = 0; i < xorb.chunks.length; i++) {
+		const chunk = xorb.chunks[i];
+		if (chunkIndexesToBacktrackFor.has(i)) {
+			if (i < xorb.chunks.length - 1) {
+				erasedOffset += xorb.chunks[i + 1].offset - chunk.offset;
+			}
+		} else {
+			newXorbChunks.push({
+				hash: chunk.hash,
+				length: chunk.length,
+				offset: chunk.offset - erasedOffset,
+			});
+		}
+	}
+	xorb.chunks = newXorbChunks;
+	xorb.offset = currentOffset;
+	return dedupedBytes;
+}
+
 // interface ChunkHeader {
 // 	version: number; // u8, 1 byte
 // 	compressed_length: number; // 3 * u8, 3 bytes
@@ -410,36 +435,37 @@ export async function* createXorbs(
  * Write a chunk header to the xorb and return the offset of where to write the next chunk
  *
  * If it returns 0, it means there wasn't enough space in the xorb
- *
- * Todo: add bg4 compression maybe?
  */
-function writeChunk(xorb: Uint8Array, offset: number, chunk: Uint8Array): number {
+function writeChunk(xorb: CurrentXorbInfo, chunk: Uint8Array, hash: string): boolean {
 	const regularCompressedChunk = lz4_compress(chunk);
 	const bgCompressedChunk = lz4_compress(bg4_split_bytes(chunk));
 	const compressedChunk =
 		bgCompressedChunk.length < regularCompressedChunk.length ? bgCompressedChunk : regularCompressedChunk;
 	const chunkToWrite = compressedChunk.length < chunk.length ? compressedChunk : chunk;
 
-	if (offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length > XORB_SIZE) {
-		return 0;
+	if (xorb.offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length > XORB_SIZE) {
+		return false;
 	}
 
-	xorb[offset] = 0;
-	xorb[offset + 1] = chunkToWrite.length & 0xff;
-	xorb[offset + 2] = (chunkToWrite.length >> 8) & 0xff;
-	xorb[offset + 3] = (chunkToWrite.length >> 16) & 0xff;
-	xorb[offset + 4] =
+	xorb.data[xorb.offset] = 0;
+	xorb.data[xorb.offset + 1] = chunkToWrite.length & 0xff;
+	xorb.data[xorb.offset + 2] = (chunkToWrite.length >> 8) & 0xff;
+	xorb.data[xorb.offset + 3] = (chunkToWrite.length >> 16) & 0xff;
+	xorb.data[xorb.offset + 4] =
 		chunkToWrite.length < chunk.length
 			? bgCompressedChunk.length < regularCompressedChunk.length
 				? XetChunkCompressionScheme.ByteGroupingLZ4
 				: XetChunkCompressionScheme.LZ4
 			: XetChunkCompressionScheme.None;
-	xorb[offset + 5] = chunk.length & 0xff;
-	xorb[offset + 6] = (chunk.length >> 8) & 0xff;
-	xorb[offset + 7] = (chunk.length >> 16) & 0xff;
+	xorb.data[xorb.offset + 5] = chunk.length & 0xff;
+	xorb.data[xorb.offset + 6] = (chunk.length >> 8) & 0xff;
+	xorb.data[xorb.offset + 7] = (chunk.length >> 16) & 0xff;
 
-	xorb.set(chunkToWrite, offset + XET_CHUNK_HEADER_BYTES);
-	return offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length;
+	xorb.data.set(chunkToWrite, xorb.offset + XET_CHUNK_HEADER_BYTES);
+
+	xorb.chunks.push({ hash, length: chunk.length, offset: xorb.offset });
+	xorb.offset += XET_CHUNK_HEADER_BYTES + chunkToWrite.length;
+	return true;
 }
 
 // Build file representation from collected metadata
