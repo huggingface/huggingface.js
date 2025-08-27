@@ -17,7 +17,7 @@ Audio-text-to-text models can be categorized into two main types:
 - **Speech Transcription and Analysis:**  
   Beyond converting spoken words to text, these models capture prosody, emotion, and speaker characteristics. This enriched transcription can be used for applications such as sentiment analysis and speaker profiling.
 
-You can try this with [Voxtral Mini](https://huggingface.co/mistralai/Voxtral-Mini-3B-2507) with this code snippet:
+You can transcribe audio with [Voxtral Mini](https://huggingface.co/mistralai/Voxtral-Mini-3B-2507) with this code snippet:
 ```python
 from transformers import VoxtralForConditionalGeneration, AutoProcessor
 import torch
