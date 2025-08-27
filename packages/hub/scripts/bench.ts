@@ -109,7 +109,7 @@ function getBodySize(body: RequestInit["body"]): string {
 	return "unknown size";
 }
 
-function createMockFetch(): {
+function createMockFetch(args: { write: boolean }): {
 	fetch: typeof fetch;
 	getStats: () => { xorbCount: number; shardCount: number; xorbBytes: number; shardBytes: number };
 } {
@@ -128,6 +128,11 @@ function createMockFetch(): {
 			xorbBytes += parseInt(bodySize);
 			console.log(`[MOCK] Xorb upload ${xorbCount}: ${init?.method || "GET"} ${url} (${bodySize})`);
 
+			if (args.write) {
+				// Write the body to a file
+				await writeFile("xorb.bin", init?.body as Uint8Array);
+			}
+
 			return new Response(null, {
 				status: 200,
 				statusText: "OK",
@@ -139,6 +144,11 @@ function createMockFetch(): {
 			const bodySize = getBodySize(init?.body);
 			shardBytes += parseInt(bodySize);
 			console.log(`[MOCK] Shard upload ${shardCount}: ${init?.method || "GET"} ${url} (${bodySize})`);
+
+			if (args.write) {
+				// Write the body to a file
+				await writeFile("shard.bin", init?.body as Uint8Array);
+			}
 
 			return new Response(null, {
 				status: 200,
@@ -175,6 +185,11 @@ async function main() {
 				short: "c",
 				default: false,
 			},
+			write: {
+				type: "boolean",
+				short: "w",
+				default: false,
+			},
 		},
 	});
 
@@ -206,7 +221,7 @@ async function main() {
 	const repo: RepoId = toRepoId(repoName);
 
 	// Create mock fetch
-	const mockFetchObj = createMockFetch();
+	const mockFetchObj = createMockFetch({ write: args.write });
 
 	// Setup upload parameters
 	const uploadParams = {
