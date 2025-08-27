@@ -60,6 +60,11 @@ export async function* createXorbs(
 	let xorb = new Uint8Array(XORB_SIZE);
 	let xorbOffset = 0;
 	let xorbChunks = Array<{ hash: string; length: number }>();
+	let xorbImmutableData = null as null | {
+		chunkIndex: number;
+		offset: number;
+	};
+
 	/**
 	 * path => 0..1 mapping of the current xorb
 	 *
@@ -73,12 +78,13 @@ export async function* createXorbs(
 	 */
 	let xorbFileProgress: Record<string, number> = {};
 
-	const resetXorb = () => {
+	const nextXorb = () => {
 		xorbId++;
 		xorbOffset = 0;
 		xorbChunks = [];
 		xorbFileProgress = {};
 		xorb = new Uint8Array(XORB_SIZE);
+		xorbImmutableData = null;
 	};
 
 	const pendingFileEvents: Array<{
@@ -190,7 +196,7 @@ export async function* createXorbs(
 								id: xorbId,
 								files: Object.entries(xorbFileProgress).map(([path, progress]) => ({ path, progress })),
 							};
-							resetXorb();
+							nextXorb();
 							chunkIndex = 0;
 							chunkXorbId = xorbId;
 
@@ -235,7 +241,7 @@ export async function* createXorbs(
 							id: xorbId,
 							files: Object.entries(xorbFileProgress).map(([path, progress]) => ({ path, progress })),
 						};
-						resetXorb();
+						nextXorb();
 
 						for (const event of pendingFileEvents) {
 							event.representation = event.representation.map((rep) => ({
@@ -265,6 +271,10 @@ export async function* createXorbs(
 				fileChunks,
 				chunkModule.compute_verification_hash.bind(chunkModule)
 			);
+			xorbImmutableData = {
+				chunkIndex: xorbChunks.length,
+				offset: xorbOffset,
+			};
 			const dedupRatio = fileSource.content.size > 0 ? dedupedBytes / fileSource.content.size : 0;
 
 			pendingFileEvents.push({
@@ -358,7 +368,9 @@ const buildFileRepresentation = (
 	length: number;
 	rangeHash: string;
 }> => {
-	if (metadata.length === 0) return [];
+	if (metadata.length === 0) {
+		return [];
+	}
 
 	const representation: Array<{
 		xorbId: number | string;
