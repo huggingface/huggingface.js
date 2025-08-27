@@ -8,6 +8,7 @@ import type { RepoId } from "../src/types/public.js";
 import { toRepoId } from "../src/utils/toRepoId.js";
 import { commitIter } from "../src/index.js";
 import { pathToFileURL } from "node:url";
+import { WebBlob } from "../src/utils/WebBlob.js";
 
 /**
  * This script downloads the files from openai-community/gpt2 and simulates an upload to a xet repo.
@@ -75,6 +76,15 @@ async function* createFileSource(
 		const sha256Hash = res.value;
 
 		console.log(`SHA256 for ${file.filename}: ${sha256Hash}`);
+
+		if (sha256Hash !== FILES_TO_DOWNLOAD.find((f) => f.filename === file.filename)?.sha256) {
+			throw new Error(
+				`SHA256 mismatch for ${file.filename}: ${sha256Hash} !== ${FILES_TO_DOWNLOAD.find(
+					(f) => f.filename === file.filename
+				)?.sha256}`
+			);
+		}
+
 		yield {
 			content: blob,
 			path: file.filename,
@@ -297,6 +307,19 @@ async function main() {
 		}
 
 		console.log("Done committing");
+
+		console.log("Redownloading files and verifying SHA256 integrity");
+		for (const file of FILES_TO_DOWNLOAD) {
+			const fileBlob = await WebBlob.create(new URL(file.url));
+			const sha256Hash = sha256(fileBlob, { useWebWorker: false });
+			let res: IteratorResult<number, string>;
+			do {
+				res = await sha256Hash.next();
+			} while (!res.done);
+			const finalHash = res.value;
+
+			console.log(`${file.filename}: ${finalHash} === ${file.sha256} ${finalHash === file.sha256 ? "✅" : "❌"}`);
+		}
 	}
 }
 
