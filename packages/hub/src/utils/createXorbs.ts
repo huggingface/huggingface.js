@@ -73,6 +73,14 @@ export async function* createXorbs(
 	 */
 	let xorbFileProgress: Record<string, number> = {};
 
+	const resetXorb = () => {
+		xorbId++;
+		xorbOffset = 0;
+		xorbChunks = [];
+		xorbFileProgress = {};
+		xorb = new Uint8Array(XORB_SIZE);
+	};
+
 	const pendingFileEvents: Array<{
 		event: "file";
 		path: string;
@@ -182,11 +190,9 @@ export async function* createXorbs(
 								id: xorbId,
 								files: Object.entries(xorbFileProgress).map(([path, progress]) => ({ path, progress })),
 							};
-							xorbId++;
-							xorb = new Uint8Array(XORB_SIZE);
+							resetXorb();
 							chunkIndex = 0;
 							chunkXorbId = xorbId;
-							xorbFileProgress = {};
 
 							for (const event of pendingFileEvents) {
 								event.representation = event.representation.map((rep) => ({
@@ -229,11 +235,7 @@ export async function* createXorbs(
 							id: xorbId,
 							files: Object.entries(xorbFileProgress).map(([path, progress]) => ({ path, progress })),
 						};
-						xorbId++;
-						xorbOffset = 0;
-						xorbChunks = [];
-						xorbFileProgress = {};
-						xorb = new Uint8Array(XORB_SIZE);
+						resetXorb();
 
 						for (const event of pendingFileEvents) {
 							event.representation = event.representation.map((rep) => ({
