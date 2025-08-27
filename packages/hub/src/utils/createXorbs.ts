@@ -228,12 +228,60 @@ export async function* createXorbs(
 									if (backtrackData !== undefined) {
 										metadata.xorbId = backtrackData.xorbId;
 										metadata.chunkIndex = backtrackData.chunkIndex;
+										dedupedBytes += metadata.length;
 									}
 								}
 							}
 
 							// Remove chunks that were backtracked from xorbChunks
-							// todo
+							const xorbRangesToErase: Array<{ start: number; end: number }> = [];
+							for (let i = 0; i < xorbChunks.length; i++) {
+								const chunk = xorbChunks[i];
+								if (chunkIndexesToBacktrackFor.has(i)) {
+									xorbRangesToErase.push({
+										start: chunk.offset,
+										end: i < xorbChunks.length - 1 ? xorbChunks[i + 1].offset : xorbOffset,
+									});
+								}
+							}
+							const xorbRangesToKeep: Array<{ start: number; end: number }> = [];
+							let currentStart = 0;
+							for (let i = 0; i < xorbRangesToErase.length; i++) {
+								const range = xorbRangesToErase[i];
+								if (currentStart !== range.start) {
+									xorbRangesToKeep.push({ start: currentStart, end: range.start });
+								}
+								currentStart = range.end;
+							}
+							if (currentStart !== xorbOffset) {
+								xorbRangesToKeep.push({ start: currentStart, end: xorbOffset });
+							}
+
+							let currentOffset = 0;
+							for (const range of xorbRangesToKeep) {
+								if (range.start !== currentOffset) {
+									xorb.set(xorb.subarray(range.start, range.end), currentOffset);
+								}
+								currentOffset += range.end - range.start;
+							}
+							const newXorbChunks: Array<{ hash: string; length: number; offset: number }> = [];
+							let erasedOffset = 0;
+							for (let i = 0; i < xorbChunks.length; i++) {
+								const chunk = xorbChunks[i];
+								if (chunkIndexesToBacktrackFor.has(i)) {
+									if (i < xorbChunks.length - 1) {
+										erasedOffset += xorbChunks[i + 1].offset - chunk.offset;
+									}
+								} else {
+									newXorbChunks.push({
+										hash: chunk.hash,
+										length: chunk.length,
+										offset: chunk.offset - erasedOffset,
+									});
+								}
+							}
+							xorbChunks = newXorbChunks;
+							xorbOffset = currentOffset;
 						}
 					}
 					if (cacheData === undefined) {
