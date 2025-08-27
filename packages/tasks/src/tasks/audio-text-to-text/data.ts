@@ -10,19 +10,19 @@ const taskData: TaskDataCustom = {
 	demo: {
 		inputs: [
 			{
-				filename: "sample-audio.wav",
+				filename: "sample1.flac",
 				type: "audio",
 			},
 			{
 				label: "Text Prompt",
-				content: "Transcribe and describe what is being said in the audio.",
+				content: "Transcribe this audio.",
 				type: "text",
 			},
 		],
 		outputs: [
 			{
 				label: "Answer",
-				content: "The audio contains a person explaining a recipe for chocolate chip cookies. They describe mixing butter and sugar first, then adding eggs and vanilla extract, followed by the dry ingredients.",
+				content: "Going along slushy country roads and speaking to damp audiences in...",
 				type: "text",
 			},
 		],
