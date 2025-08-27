@@ -324,7 +324,7 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
     const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
 
     // Get recipe according to model type
-    const simplifiedModelName = modelName.split("-awq-g128-int4-asym-")[0];
+	let simplifiedModelName: string;
     let recipe: string;
     let checkpoint: string;
     let requirements: string;
@@ -332,10 +332,12 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
         recipe = model.tags.includes("ryzenai-npu") ? "oga-npu" : "oga-hybrid";
         checkpoint = model.id;
         requirements = " (requires RyzenAI 300 series)";
+		simplifiedModelName = modelName.split("-awq-g128-int4-asym-")[0];
     } else {
         recipe = "llamacpp";
         checkpoint = `${model.id}${tagName}`;
         requirements = "";
+		simplifiedModelName = modelName;
     }
 
     return [
