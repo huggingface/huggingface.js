@@ -99,13 +99,11 @@ export async function* createXorbs(
 			let processedBytes = 0;
 			let dedupedBytes = 0; // Track bytes that were deduplicated
 			const fileChunks: Array<{ hash: string; length: number }> = [];
-			let currentChunkRangeBeginning = 0;
-			const fileRepresentation: Array<{
+			// Collect chunk metadata to build representation at the end
+			const chunkMetadata: Array<{
 				xorbId: number | string;
-				indexStart: number;
-				indexEnd: number;
+				chunkIndex: number;
 				length: number;
-				rangeHash: string;
 			}> = [];
 
 			const addChunks = async function* (chunks: Array<{ hash: string; length: number; dedup: boolean }>) {
@@ -215,35 +213,12 @@ export async function* createXorbs(
 					}
 					bytesSinceRemoteDedup += chunk.length;
 
-					const lastRep = fileRepresentation.at(-1);
-
-					if (!lastRep) {
-						fileRepresentation.push({
-							xorbId: chunkXorbId,
-							indexStart: chunkIndex,
-							indexEnd: chunkIndex + 1,
-							length: chunk.length,
-							rangeHash: "",
-						});
-						currentChunkRangeBeginning = fileChunks.length - 1;
-					} else {
-						if (lastRep.xorbId === chunkXorbId && lastRep.indexEnd === chunkIndex) {
-							lastRep.indexEnd = chunkIndex + 1;
-							lastRep.length += chunk.length;
-						} else {
-							lastRep.rangeHash = chunkModule.compute_verification_hash(
-								fileChunks.slice(currentChunkRangeBeginning, -1).map((x) => x.hash, -1)
-							);
-							fileRepresentation.push({
-								xorbId: chunkXorbId,
-								indexStart: chunkIndex,
-								indexEnd: chunkIndex + 1,
-								length: chunk.length,
-								rangeHash: "",
-							});
-							currentChunkRangeBeginning = fileChunks.length - 1;
-						}
-					}
+					// Collect metadata for building representation at the end
+					chunkMetadata.push({
+						xorbId: chunkXorbId,
+						chunkIndex: chunkIndex,
+						length: chunk.length,
+					});
 					xorbFileProgress[fileSource.path] = processedBytes / fileSource.content.size;
 					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
 						yield {
@@ -283,13 +258,11 @@ export async function* createXorbs(
 				yield* addChunks(chunker.add_data(value));
 			}
 
-			const lastRep = fileRepresentation.at(-1);
-			if (lastRep) {
-				lastRep.rangeHash = chunkModule.compute_verification_hash(
-					fileChunks.slice(currentChunkRangeBeginning).map((x) => x.hash)
-				);
-			}
-
+			const fileRepresentation = buildFileRepresentation(
+				chunkMetadata,
+				fileChunks,
+				chunkModule.compute_verification_hash.bind(chunkModule)
+			);
 			const dedupRatio = fileSource.content.size > 0 ? dedupedBytes / fileSource.content.size : 0;
 
 			pendingFileEvents.push({
@@ -370,3 +343,75 @@ function writeChunk(xorb: Uint8Array, offset: number, chunk: Uint8Array): number
 	xorb.set(chunkToWrite, offset + XET_CHUNK_HEADER_BYTES);
 	return offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length;
 }
+
+// Build file representation from collected metadata
+const buildFileRepresentation = (
+	metadata: Array<{ xorbId: number | string; chunkIndex: number; length: number }>,
+	chunks: Array<{ hash: string; length: number }>,
+	computeVerificationHash: (hashes: string[]) => string
+): Array<{
+	xorbId: number | string;
+	indexStart: number;
+	indexEnd: number;
+	length: number;
+	rangeHash: string;
+}> => {
+	if (metadata.length === 0) return [];
+
+	const representation: Array<{
+		xorbId: number | string;
+		indexStart: number;
+		indexEnd: number;
+		length: number;
+		rangeHash: string;
+	}> = [];
+
+	let currentRange = {
+		xorbId: metadata[0].xorbId,
+		indexStart: metadata[0].chunkIndex,
+		indexEnd: metadata[0].chunkIndex + 1,
+		length: metadata[0].length,
+		chunkHashStart: 0,
+	};
+
+	for (let i = 1; i < metadata.length; i++) {
+		const chunk = metadata[i];
+
+		// Check if this chunk continues the current range
+		if (currentRange.xorbId === chunk.xorbId && currentRange.indexEnd === chunk.chunkIndex) {
+			// Extend current range
+			currentRange.indexEnd = chunk.chunkIndex + 1;
+			currentRange.length += chunk.length;
+		} else {
+			// Finalize current range and start a new one
+			const rangeHash = computeVerificationHash(chunks.slice(currentRange.chunkHashStart, i).map((x) => x.hash));
+			representation.push({
+				xorbId: currentRange.xorbId,
+				indexStart: currentRange.indexStart,
+				indexEnd: currentRange.indexEnd,
+				length: currentRange.length,
+				rangeHash,
+			});
+
+			currentRange = {
+				xorbId: chunk.xorbId,
+				indexStart: chunk.chunkIndex,
+				indexEnd: chunk.chunkIndex + 1,
+				length: chunk.length,
+				chunkHashStart: i,
+			};
+		}
+	}
+
+	// Finalize the last range
+	const rangeHash = computeVerificationHash(chunks.slice(currentRange.chunkHashStart).map((x) => x.hash));
+	representation.push({
+		xorbId: currentRange.xorbId,
+		indexStart: currentRange.indexStart,
+		indexEnd: currentRange.indexEnd,
+		length: currentRange.length,
+		rangeHash,
+	});
+
+	return representation;
+};
