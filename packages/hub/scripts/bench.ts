@@ -23,10 +23,17 @@ const FILES_TO_DOWNLOAD = [
 	{
 		url: "https://huggingface.co/openai-community/gpt2/resolve/main/64-8bits.tflite?download=true",
 		filename: "64-8bits.tflite",
+		sha256: "c966da3b74697803352ca7c6f2f220e7090a557b619de9da0c6b34d89f7825c1",
 	},
 	{
 		url: "https://huggingface.co/openai-community/gpt2/resolve/main/64-fp16.tflite?download=true",
 		filename: "64-fp16.tflite",
+		sha256: "1ceafd82e733dd4b21570b2a86cf27556a983041806c033a55d086e0ed782cd3",
+	},
+	{
+		url: "https://huggingface.co/openai-community/gpt2/resolve/main/64.tflite?download=true",
+		filename: "64.tflite",
+		sha256: "cfcd510b239d90b71ee87d4e57a5a8c2d55b2a941e5d9fe5852298268ddbe61b",
 	},
 ];
 
