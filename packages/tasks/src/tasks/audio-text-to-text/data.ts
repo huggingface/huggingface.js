@@ -6,6 +6,14 @@ const taskData: TaskDataCustom = {
 			description: "Instructions composed of audio and text.",
 			id: "homebrewltd/instruction-speech-encodec-v1.5",
 		},
+		{
+			description: "A large-scale long audio question-answering (AQA) dataset",
+			id: "https://huggingface.co/datasets/nvidia/LongAudio",
+		},
+		{
+			description: "A audio-text dataset for chain-of-thought (CoT)-type reasoning.",
+			id: "https://huggingface.co/datasets/nvidia/AF-Think",
+		},
 	],
 	demo: {
 		inputs: [
