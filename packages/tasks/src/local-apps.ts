@@ -311,6 +311,46 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const snippetMlxKnife = (model: ModelData): LocalAppSnippet[] => {
+	return [
+		{
+			title: "Terminal Usage",
+			setup: [],
+			content: [
+				"# Install MLX Knife",
+				"pip install mlx-knife",
+				"",
+				"# Check available models",
+				"mlxk list",
+				"",
+				"# Run model (if already installed)",
+				`mlxk run ${model.id.replace('mlx-community/', '')} "Hello!"`,
+				"",
+				"# Interactive chat",
+				`mlxk run ${model.id.replace('mlx-community/', '')}`,
+				"",
+				"# Download if needed",
+				`mlxk pull ${model.id}`,
+			].join("\n"),
+		},
+		{
+			title: "Web Interface", 
+			setup: [],
+			content: [
+				"# Install MLX Knife",
+				"pip install mlx-knife",
+				"",
+				"# Start server",
+				"mlxk server --port 8000",
+				"",
+				"# Download web interface",
+				"curl -O https://raw.githubusercontent.com/mzau/mlx-knife/main/simple_chat.html",
+				"open simple_chat.html",
+			].join("\n"),
+		}
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
@@ -386,6 +426,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
 		snippet: snippetMlxLm,
+	},
+	"mlx-knife": {
+		prettyLabel: "MLX Knife",
+    	docsUrl: "https://github.com/mzau/mlx-knife",
+    	mainTask: "text-generation",
+		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
+		snippet: snippetMlxKnife,
 	},
 	tgi: {
 		prettyLabel: "TGI",
