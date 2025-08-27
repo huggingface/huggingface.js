@@ -13,42 +13,18 @@ Audio-text-to-text models can be categorized into two main types:
 - **Multimodal Audio Dialogue:**  
   These models can engage in real-time, multi-turn conversations by processing audio inputs and generating text responses. They are the backbone of advanced voice assistants and interactive dialogue systems.
 
-  **Example with [fixie-ai/ultravox-v0_5-llama-3_2-1b](https://huggingface.co/fixie-ai/ultravox-v0_5-llama-3_2-1b):**
-  ```
-  Audio: [User speaking] "Hi there, can you help me plan a dinner party for 8 people?"
-  Text Response: "I'd be happy to help you plan a dinner party for 8 people! Let's start with the basics. What's your budget range, and do any of your guests have dietary restrictions I should know about?"
-  
-  Audio: [User speaking] "My budget is around $200, and two guests are vegetarian."
-  Text Response: "Perfect! With a $200 budget for 8 people and 2 vegetarians, I can suggest a menu that works for everyone. How about a Mediterranean theme with options like stuffed bell peppers, grilled vegetables, and a mixed grill for the meat-eaters?"
-  ```
-
 - **Speech Transcription and Analysis:**  
   Beyond converting spoken words to text, these models capture prosody, emotion, and speaker characteristics. This enriched transcription can be used for applications such as sentiment analysis and speaker profiling.
 
-  **Example with [Qwen/Qwen2-Audio-7B](https://huggingface.co/Qwen/Qwen2-Audio-7B):**
-  ```
-  Audio: [Customer service call with frustrated tone] "I've been waiting on hold for 45 minutes and still haven't gotten help with my billing issue!"
-  
-  Prompt: "Transcribe this audio and analyze the speaker's emotional state and urgency level."
-  
-  Response: "Transcription: 'I've been waiting on hold for 45 minutes and still haven't gotten help with my billing issue!'
-  
-  Analysis: The speaker exhibits high frustration and urgency. Their tone indicates stress and impatience, likely due to prolonged wait time. The emphasis on '45 minutes' suggests they feel their time has been wasted. Priority level: High - requires immediate attention to de-escalate the situation."
-  ```
-
 - **Audio Question Answering:**  
   By directly processing audio inputs, the models can answer questions about the content of an audio clip—whether it’s a podcast excerpt or a recorded conversation.
-
-- **Audio Command Recognition and Automation:**  
-  Voice-controlled applications, from smart home devices to computer interfaces, benefit from models that can understand and execute complex spoken commands.
-
-- **Voice-Based Computer Use:**  
-  Models can control computing workflows by parsing spoken instructions, making interactions more natural and accessible.
 
 
 ### Useful Resources
 
 Here are some useful resources:
+
+- [Audio Flamingo, an Large Audio-Language Model that that unifies speech, sound, and music understanding with long-context reasoning, multi-turn dialogue, and voice-to-voice interaction.](https://huggingface.co/nvidia/audio-flamingo-3)
 
 - [Ultravox, a fast multimodal large language model designed for real-time voice interactions-.](https://github.com/fixie-ai/ultravox)
 
