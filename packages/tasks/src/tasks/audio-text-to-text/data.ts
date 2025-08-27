@@ -38,6 +38,10 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
+			description: "A large audio-language model that unifies speech, sound, and music understanding with long-context reasoning, multi-turn dialogue, and voice-to-voice interaction.",
+			id: "nvidia/audio-flamingo-3",
+		},
+		{
 			description: "Small yet powerful audio language model.",
 			id: "fixie-ai/ultravox-v0_5-llama-3_2-1b",
 		},
