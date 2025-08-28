@@ -529,8 +529,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "KittenTTS",
 		repoUrl: "https://github.com/KittenML/KittenTTS",
 		snippets: snippets.kittentts,
-		filter: false,
-		countDownloads: `path:"config.json"`,
 	},
 	kronos: {
 		prettyLabel: "KRONOS",
