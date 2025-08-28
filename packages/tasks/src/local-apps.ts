@@ -333,7 +333,7 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
         checkpoint = model.id;
         requirements = " (requires RyzenAI 300 series)";
 		simplifiedModelName = modelName.split("-awq-g128-int4-asym-")[0];
-		simplifiedModelName += recipe === "oga-npu" ? "-Npu" : "-Hybrid";
+		simplifiedModelName += recipe === "oga-npu" ? "-NPU" : "-Hybrid";
     } else {
         recipe = "llamacpp";
         checkpoint = `${model.id}${tagName}`;
