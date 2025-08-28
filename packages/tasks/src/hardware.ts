@@ -374,6 +374,10 @@ export const SKUS = {
 				tflops: 19.05,
 				memory: [16],
 			},
+			"Jetson AGX Thor": {
+				tflops: 517, //2070 TFLOPS (Sparse FP4); 1035 TFLOPS (Dense FP4 | Sparse FP8 | Sparse INT8); 517 TFLOPs (Dense FP8 | Sparse FP16) 
+				memory: [128],
+			},
 			"Jetson AGX Orin 64GB": {
 				tflops: 10.65,
 				memory: [64],
