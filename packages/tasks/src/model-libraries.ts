@@ -533,7 +533,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	kittentts: {
 		prettyLabel: "KittenTTS",
-		repoName: "KittenTTS",
+		repoName: "kittentts",
 		repoUrl: "https://github.com/KittenML/KittenTTS",
 		snippets: snippets.kittentts,
 	},
