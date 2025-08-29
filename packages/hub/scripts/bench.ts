@@ -8,6 +8,7 @@ import type { RepoId } from "../src/types/public.js";
 import { toRepoId } from "../src/utils/toRepoId.js";
 import { commitIter } from "../src/index.js";
 import { pathToFileURL } from "node:url";
+import { WebBlob } from "../src/utils/WebBlob.js";
 
 /**
  * This script downloads the files from openai-community/gpt2 and simulates an upload to a xet repo.
@@ -23,10 +24,17 @@ const FILES_TO_DOWNLOAD = [
 	{
 		url: "https://huggingface.co/openai-community/gpt2/resolve/main/64-8bits.tflite?download=true",
 		filename: "64-8bits.tflite",
+		sha256: "c966da3b74697803352ca7c6f2f220e7090a557b619de9da0c6b34d89f7825c1",
 	},
 	{
 		url: "https://huggingface.co/openai-community/gpt2/resolve/main/64-fp16.tflite?download=true",
 		filename: "64-fp16.tflite",
+		sha256: "1ceafd82e733dd4b21570b2a86cf27556a983041806c033a55d086e0ed782cd3",
+	},
+	{
+		url: "https://huggingface.co/openai-community/gpt2/resolve/main/64.tflite?download=true",
+		filename: "64.tflite",
+		sha256: "cfcd510b239d90b71ee87d4e57a5a8c2d55b2a941e5d9fe5852298268ddbe61b",
 	},
 ];
 
@@ -68,6 +76,15 @@ async function* createFileSource(
 		const sha256Hash = res.value;
 
 		console.log(`SHA256 for ${file.filename}: ${sha256Hash}`);
+
+		if (sha256Hash !== FILES_TO_DOWNLOAD.find((f) => f.filename === file.filename)?.sha256) {
+			throw new Error(
+				`SHA256 mismatch for ${file.filename}: ${sha256Hash} !== ${FILES_TO_DOWNLOAD.find(
+					(f) => f.filename === file.filename
+				)?.sha256}`
+			);
+		}
+
 		yield {
 			content: blob,
 			path: file.filename,
@@ -92,7 +109,7 @@ function getBodySize(body: RequestInit["body"]): string {
 	return "unknown size";
 }
 
-function createMockFetch(): {
+function createMockFetch(args: { write: boolean }): {
 	fetch: typeof fetch;
 	getStats: () => { xorbCount: number; shardCount: number; xorbBytes: number; shardBytes: number };
 } {
@@ -111,6 +128,11 @@ function createMockFetch(): {
 			xorbBytes += parseInt(bodySize);
 			console.log(`[MOCK] Xorb upload ${xorbCount}: ${init?.method || "GET"} ${url} (${bodySize})`);
 
+			if (args.write) {
+				// Write the body to a file
+				await writeFile("xorb.bin", init?.body as Uint8Array);
+			}
+
 			return new Response(null, {
 				status: 200,
 				statusText: "OK",
@@ -122,6 +144,11 @@ function createMockFetch(): {
 			const bodySize = getBodySize(init?.body);
 			shardBytes += parseInt(bodySize);
 			console.log(`[MOCK] Shard upload ${shardCount}: ${init?.method || "GET"} ${url} (${bodySize})`);
+
+			if (args.write) {
+				// Write the body to a file
+				await writeFile("shard.bin", init?.body as Uint8Array);
+			}
 
 			return new Response(null, {
 				status: 200,
@@ -158,6 +185,11 @@ async function main() {
 				short: "c",
 				default: false,
 			},
+			write: {
+				type: "boolean",
+				short: "w",
+				default: false,
+			},
 		},
 	});
 
@@ -189,7 +221,7 @@ async function main() {
 	const repo: RepoId = toRepoId(repoName);
 
 	// Create mock fetch
-	const mockFetchObj = createMockFetch();
+	const mockFetchObj = createMockFetch({ write: args.write });
 
 	// Setup upload parameters
 	const uploadParams = {
@@ -290,6 +322,19 @@ async function main() {
 		}
 
 		console.log("Done committing");
+
+		console.log("Redownloading files and verifying SHA256 integrity");
+		for (const file of FILES_TO_DOWNLOAD) {
+			const fileBlob = await WebBlob.create(new URL(file.url));
+			const sha256Hash = sha256(fileBlob, { useWebWorker: false });
+			let res: IteratorResult<number, string>;
+			do {
+				res = await sha256Hash.next();
+			} while (!res.done);
+			const finalHash = res.value;
+
+			console.log(`${file.filename}: ${finalHash} === ${file.sha256} ${finalHash === file.sha256 ? "✅" : "❌"}`);
+		}
 	}
 }
 
