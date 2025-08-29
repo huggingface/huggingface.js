@@ -21,7 +21,6 @@ Example: Audio: job interview → Prompt: “List strengths and weaknesses”
 You can use transformers library, and your audio file to any of the `audio-text-to-text` model, with instructions and get text responses. Following code shows how to do so.
 
 ```python
-
 import transformers
 import numpy as np
 import librosa
