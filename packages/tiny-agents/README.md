@@ -73,7 +73,7 @@ Or using a local or remote endpoint URL:
 
 Where `servers` is a list of MCP servers (we support Stdio, SSE, and HTTP servers).
 
-Optionally, you can add a `PROMPT.md` or [`AGENTS.md`](https://agents.md/) file to override the default Agent prompt.
+Optionally, you can add an [`AGENTS.md`](https://agents.md/) (or `PROMPT.md`) file to override the default Agent prompt.
 
 Then just point tiny-agents to your local folder:
 

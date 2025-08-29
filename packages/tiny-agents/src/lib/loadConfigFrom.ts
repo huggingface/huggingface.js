@@ -6,7 +6,7 @@ import type { TinyAgentConfig } from "./types";
 import { debug, error } from "./utils";
 
 const FILENAME_CONFIG = "agent.json";
-const PROMPT_FILENAMES = ["PROMPT.md", "AGENTS.md"] as const;
+const PROMPT_FILENAMES = ["AGENTS.md", "PROMPT.md"] as const;
 
 const TINY_AGENTS_HUB_REPO: RepoDesignation = {
 	name: "tiny-agents/tiny-agents",
