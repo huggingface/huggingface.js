@@ -18,7 +18,7 @@ Example: Audio: job interview → Prompt: “List strengths and weaknesses”
 
 
 ## Inference
-You can use transformers library, and your audio file to any of the audio-text-to-text model, with insturctions and get text responses. Following code shows how to do so.
+You can use transformers library, and your audio file to any of the `audio-text-to-text` model, with instructions and get text responses. Following code shows how to do so.
 
 ```python
 
