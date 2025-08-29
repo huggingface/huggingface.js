@@ -34,8 +34,13 @@ async function tryLoadFromDirectory(dirPath: string): Promise<TinyAgentConfig | 
 			prompt = await readFile(join(dirPath, filename), { encoding: "utf8" });
 			break;
 		} catch {
-			debug(`${filename} not found in ${dirPath}, continuing without prompt template`);
+			/* empty */
 		}
+	}
+	if (undefined == prompt) {
+		debug(
+			`${PROMPT_FILENAMES.join(", ")} could not be loaded locally from ${dirPath}, continuing without prompt template`
+		);
 	}
 
 	try {
@@ -73,10 +78,15 @@ async function tryLoadFromHub(agentId: string): Promise<TinyAgentConfig | undefi
 			prompt = await readFile(promptPath, { encoding: "utf8" });
 			break;
 		} catch {
-			debug(
-				`${filename} not found in https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/${agentId}, continuing without prompt template`
-			);
+			/* empty */
 		}
+	}
+	if (undefined == prompt) {
+		debug(
+			`${PROMPT_FILENAMES.join(
+				", "
+			)}  not found in https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/${agentId}, continuing without prompt template`
+		);
 	}
 
 	return {
