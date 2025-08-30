@@ -49,6 +49,7 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
+import * as WavespeedAI from "../providers/wavespeed-ai.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
 
@@ -159,6 +160,11 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Together.TogetherTextToImageTask(),
 		conversational: new Together.TogetherConversationalTask(),
 		"text-generation": new Together.TogetherTextGenerationTask(),
+	},
+	"wavespeed-ai": {
+		"text-to-image": new WavespeedAI.WavespeedAITextToImageTask(),
+		"text-to-video": new WavespeedAI.WavespeedAITextToVideoTask(),
+		"image-to-image": new WavespeedAI.WavespeedAIImageToImageTask(),
 	},
 };
 
