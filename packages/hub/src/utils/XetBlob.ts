@@ -1,6 +1,7 @@
 import { createApiError } from "../error";
 import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "./checkCredentials";
+import { combineUint8Arrays } from "./combineUint8Arrays";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
 
@@ -201,7 +202,7 @@ export class XetBlob extends Blob {
 			rangeList.add(term.range.start, term.range.end);
 		}
 		const listener = this.listener;
-		const log = this.internalLogging ? (...args: unknown[]) => console.log(...args) : () => {};
+		const log = this.internalLogging ? (...args: unknown[]) => console.log(...args) : () => { };
 
 		async function* readData(
 			reconstructionInfo: ReconstructionInfo,
@@ -327,14 +328,11 @@ export class XetBlob extends Blob {
 					totalFetchBytes += result.value.byteLength;
 
 					if (leftoverBytes) {
-						const leftoverBytesLength: number = leftoverBytes.length;
-						const combinedBytes = new Uint8Array(leftoverBytesLength + result.value.length);
-						combinedBytes.set(leftoverBytes);
-						combinedBytes.set(result.value, leftoverBytesLength);
-						result.value = combinedBytes;
+						result.value = combineUint8Arrays(leftoverBytes, result.value);
+						leftoverBytes = undefined;
 					}
 
-					while (totalBytesRead < maxBytes && result.value.byteLength) {
+					while (totalBytesRead < maxBytes && result.value?.byteLength) {
 						if (result.value.byteLength < 8) {
 							// We need 8 bytes to parse the chunk header
 							leftoverBytes = result.value;
@@ -361,8 +359,7 @@ export class XetBlob extends Blob {
 							chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
 						) {
 							throw new Error(
-								`Unsupported compression scheme ${
-									compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
+								`Unsupported compression scheme ${compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
 								}`
 							);
 						}
@@ -379,13 +376,13 @@ export class XetBlob extends Blob {
 							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
 								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
 								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
-								  ? bg4_regroup_bytes(
-											lz4_decompress(
-												result.value.slice(0, chunkHeader.compressed_length),
-												chunkHeader.uncompressed_length
-											)
-								    )
-								  : result.value.slice(0, chunkHeader.compressed_length);
+									? bg4_regroup_bytes(
+										lz4_decompress(
+											result.value.slice(0, chunkHeader.compressed_length),
+											chunkHeader.uncompressed_length
+										)
+									)
+									: result.value.slice(0, chunkHeader.compressed_length);
 
 						const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
 						const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
@@ -439,8 +436,7 @@ export class XetBlob extends Blob {
 					log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
 					log("failed to fetch all data for term", term.hash);
 					throw new Error(
-						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
-							fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${fetchInfo.url_range.end - fetchInfo.url_range.start + 1
 						}`
 					);
 				}
@@ -651,8 +647,8 @@ async function getAccessToken(
 			headers: {
 				...(initialAccessToken
 					? {
-							Authorization: `Bearer ${initialAccessToken}`,
-					  }
+						Authorization: `Bearer ${initialAccessToken}`,
+					}
 					: {}),
 			},
 		});
