@@ -14,10 +14,6 @@ Turn multi-speaker meetings into concise minutes with decisions, owners, and dea
 Go beyond transcription to extract intent, sentiment, uncertainty, or emotion from spoken language.
 **Example:** “I’m not sure I can finish this on time.” → Prompt: “Describe speaker intent and confidence.”
 
-### Lecture/podcast summarization with follow-ups
-Produce a brief summary, then answer follow-up questions that reference the audio.
-**Example:** Audio: 30-min podcast → Prompt: “Give a 5-bullet summary, then explain the guest’s main argument.”
-
 ### Music & sound analysis (textual)
 Describe instrumentation, genre, tempo, or sections, and suggest edits or techniques (text output only).
 **Example:** Song demo → Prompt: “Identify key and tempo, then suggest jazz reharmonization ideas for the chorus.”
