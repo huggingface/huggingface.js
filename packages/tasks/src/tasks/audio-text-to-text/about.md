@@ -1,6 +1,6 @@
 ## Use Cases
 
-> This task takes **audio** and an optional **text prompt** and returns **text** (answers, summaries, structured notes, etc.).
+> This task takes `audio` and a `text prompt` and returns `text` (answers, summaries, structured notes, etc.).
 
 ### Audio question answering
 Ask targeted questions about lectures, podcasts, or calls and get prices, and context-aware answers.
