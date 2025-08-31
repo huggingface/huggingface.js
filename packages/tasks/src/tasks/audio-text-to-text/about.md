@@ -3,7 +3,7 @@
 > This task takes `audio` and a `text prompt` and returns `text` (answers, summaries, structured notes, etc.).
 
 ### Audio question answering
-Ask targeted questions about lectures, podcasts, or calls and get prices, and context-aware answers.
+Ask targeted questions about lectures, podcasts, or calls and get context-aware answers.
 **Example:** Audio: physics lecture → Prompt: “What did the teacher say about gravity and how is it measured?”
 
 ### Meeting notes & action items
