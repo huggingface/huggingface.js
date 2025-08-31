@@ -165,7 +165,7 @@ If you want to learn more about this concept, here are some useful links:
 - [SpeechGPT (Paper)](https://huggingface.co/papers/2507.13264)
 - [Voxtral (Paper)](https://huggingface.co/papers/2507.13264)
 - [Qwen2-audio-instruct (Paper)](https://huggingface.co/papers/2407.10759)
-- [AudioPaLM (Paper)](https://arxiv.org/pdf/2306.12925)
+- [AudioPaLM (Paper)](https://huggingface.co/papers/2306.12925)
 
 ### Blogs
 - [Qwen2-audio-instruct (Blog)](https://qwenlm.github.io/blog/qwen2-audio/)
