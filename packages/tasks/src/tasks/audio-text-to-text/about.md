@@ -164,7 +164,7 @@ If you want to learn more about this concept, here are some useful links:
 ### Papers
 - [SpeechGPT (Paper)](https://huggingface.co/papers/2507.13264)
 - [Voxtral (Paper)](https://huggingface.co/papers/2507.13264)
-- [Qwen2-audio-instruct (Paper)](https://arxiv.org/pdf/2407.10759)
+- [Qwen2-audio-instruct (Paper)](https://huggingface.co/papers/2407.10759)
 - [AudioPaLM (Paper)](https://arxiv.org/pdf/2306.12925)
 
 ### Blogs
