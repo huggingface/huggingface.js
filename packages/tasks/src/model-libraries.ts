@@ -796,6 +796,21 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pxia,
 		filter: false,
 	},
+	"pruna-ai": {
+		prettyLabel: "Pruna AI",
+		repoName: "Pruna AI",
+		repoUrl: "https://github.com/Pruna-AI/pruna-ai",
+		snippets: snippets.pruna,
+		docsUrl: "https://docs.pruna.ai",
+		filter: false,
+	},
+	"pruna_pro-ai": {
+		prettyLabel: "Pruna AI (pro)",
+		repoName: "Pruna AI (pro)",
+		repoUrl: "https://github.com/Pruna-AI/pruna-ai",
+		snippets: snippets.pruna_pro,
+		docsUrl: "https://docs.pruna.ai",
+	},
 	"pyannote-audio": {
 		prettyLabel: "pyannote.audio",
 		repoName: "pyannote-audio",
