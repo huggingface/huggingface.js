@@ -336,7 +336,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						}
 					})(),
 					{
-						customFetch: params.fetch ?? fetch,
+						fetch: params.fetch,
 						accessToken,
 						hubUrl: params.hubUrl ?? HUB_URL,
 						repo: repoId,

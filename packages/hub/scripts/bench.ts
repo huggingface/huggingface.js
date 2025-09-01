@@ -227,7 +227,7 @@ async function main() {
 	const uploadParams = {
 		accessToken: args.token,
 		hubUrl: "https://huggingface.co",
-		customFetch: mockFetchObj.fetch,
+		fetch: mockFetchObj.fetch,
 		repo,
 		rev: "main",
 	};
@@ -311,7 +311,7 @@ async function main() {
 			})),
 			accessToken: args.token,
 			title: "Upload xet files with JS lib",
-			xet: true,
+			useXet: true,
 		});
 		for await (const event of iterator) {
 			if (event.event === "fileProgress" && event.state === "hashing") {
