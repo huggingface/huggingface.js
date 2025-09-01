@@ -23,6 +23,8 @@ import { base64FromBytes } from "../utils/base64FromBytes";
 import { isFrontend } from "../utils/isFrontend";
 import { createBlobs } from "../utils/createBlobs";
 import { uploadShards } from "../utils/uploadShards";
+import { splitAsyncGenerator } from "../utils/splitAsyncGenerator";
+import { mergeAsyncGenerators } from "../utils/mergeAsyncGenerators";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -323,43 +325,46 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						};
 					}
 				}
-				for await (const event of uploadShards(
-					(async function* () {
-						for (const obj of json.objects) {
-							const op = shaToOperation.get(obj.oid);
-							if (!op || !obj.actions?.upload) {
-								continue;
-							}
-							abortSignal?.throwIfAborted();
-
-							yield { content: op.content, path: op.path, sha256: obj.oid };
+				const source = (async function* () {
+					for (const obj of json.objects) {
+						const op = shaToOperation.get(obj.oid);
+						if (!op || !obj.actions?.upload) {
+							continue;
 						}
-					})(),
-					{
-						fetch: params.fetch,
-						accessToken,
-						hubUrl: params.hubUrl ?? HUB_URL,
-						repo: repoId,
-						// todo: maybe leave empty if PR?
-						rev: params.branch ?? "main",
+						abortSignal?.throwIfAborted();
+
+						yield { content: op.content, path: op.path, sha256: obj.oid };
 					}
-				)) {
-					if (event.event === "file") {
-						yield {
-							event: "fileProgress",
-							path: event.path,
-							progress: 1,
-							state: "uploading",
-						};
-					} else if (event.event === "fileProgress") {
-						yield {
-							event: "fileProgress",
-							path: event.path,
-							progress: event.progress,
-							state: "uploading",
-						};
-					}
-				}
+				})();
+				const sources = splitAsyncGenerator(source, 5);
+				yield* mergeAsyncGenerators(
+					sources.map(async function* (source) {
+						for await (const event of uploadShards(source, {
+							fetch: params.fetch,
+							accessToken,
+							hubUrl: params.hubUrl ?? HUB_URL,
+							repo: repoId,
+							// todo: maybe leave empty if PR?
+							rev: params.branch ?? "main",
+						})) {
+							if (event.event === "file") {
+								yield {
+									event: "fileProgress" as const,
+									path: event.path,
+									progress: 1,
+									state: "uploading" as const,
+								};
+							} else if (event.event === "fileProgress") {
+								yield {
+									event: "fileProgress" as const,
+									path: event.path,
+									progress: event.progress,
+									state: "uploading" as const,
+								};
+							}
+						}
+					})
+				);
 			} else {
 				yield* eventToGenerator<CommitProgressEvent, void>((yieldCallback, returnCallback, rejectCallback) => {
 					return promisesQueueStreaming(
