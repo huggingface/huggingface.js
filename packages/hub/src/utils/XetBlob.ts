@@ -202,7 +202,7 @@ export class XetBlob extends Blob {
 			rangeList.add(term.range.start, term.range.end);
 		}
 		const listener = this.listener;
-		const log = this.internalLogging ? (...args: unknown[]) => console.log(...args) : () => { };
+		const log = this.internalLogging ? (...args: unknown[]) => console.log(...args) : () => {};
 
 		async function* readData(
 			reconstructionInfo: ReconstructionInfo,
@@ -359,7 +359,8 @@ export class XetBlob extends Blob {
 							chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
 						) {
 							throw new Error(
-								`Unsupported compression scheme ${compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
+								`Unsupported compression scheme ${
+									compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
 								}`
 							);
 						}
@@ -376,13 +377,13 @@ export class XetBlob extends Blob {
 							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
 								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
 								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
-									? bg4_regroup_bytes(
-										lz4_decompress(
-											result.value.slice(0, chunkHeader.compressed_length),
-											chunkHeader.uncompressed_length
-										)
-									)
-									: result.value.slice(0, chunkHeader.compressed_length);
+								  ? bg4_regroup_bytes(
+											lz4_decompress(
+												result.value.slice(0, chunkHeader.compressed_length),
+												chunkHeader.uncompressed_length
+											)
+								    )
+								  : result.value.slice(0, chunkHeader.compressed_length);
 
 						const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
 						const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
@@ -436,7 +437,8 @@ export class XetBlob extends Blob {
 					log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
 					log("failed to fetch all data for term", term.hash);
 					throw new Error(
-						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
+							fetchInfo.url_range.end - fetchInfo.url_range.start + 1
 						}`
 					);
 				}
@@ -647,8 +649,8 @@ async function getAccessToken(
 			headers: {
 				...(initialAccessToken
 					? {
-						Authorization: `Bearer ${initialAccessToken}`,
-					}
+							Authorization: `Bearer ${initialAccessToken}`,
+					  }
 					: {}),
 			},
 		});
