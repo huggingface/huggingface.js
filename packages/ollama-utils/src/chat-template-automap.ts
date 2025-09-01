@@ -5,19 +5,20 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/llama3.2:latest
- * - library/llama2:latest
- * - library/llama3.1:latest
- * - library/deepseek-v3:latest
- * - library/cogito:3b
- * - library/phi4-mini:latest
- * - library/qwen3-coder:latest
- * - library/granite3.2-vision:latest
- * - library/opencoder:latest
- * - library/opencoder:1.5b
- * - library/phind-codellama:latest
- * - library/yarn-mistral:latest
- * - library/stablelm-zephyr:latest
+ * - library/llama3.3:latest
+ * - library/llama3.2-vision:latest
+ * - library/dolphin3:latest
+ * - library/llama3:latest
+ * - library/gemma:2b
+ * - library/dolphin-llama3:8b
+ * - library/gemma:latest
+ * - library/granite3.3:2b
+ * - library/gemma:latest
+ * - library/falcon:latest
+ * - library/tulu3:latest
+ * - library/dbrx:latest
+ * - library/smallthinker:latest
+ * - library/command-r7b:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
@@ -361,6 +362,31 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 			],
 			params: {
 				stop: ["<｜begin▁of▁sentence｜>", "<｜end▁of▁sentence｜>", "<｜User｜>", "<｜Assistant｜>"],
+			},
+		},
+	},
+	{
+		model: "library/deepseek-v3.1:latest",
+		gguf: "{% if not add_generation_prompt is defined %}{% set add_generation_prompt = false %}{% endif %}{% if not thinking is defined %}{% set thinking = false %}{% endif %}{% set ns = namespace(is_first=false, is_tool=false, system_prompt='', is_first_sp=true, is_last_user=false) %}{%- for message in messages %}{%- if message['role'] == 'system' %}{%- if ns.is_first_sp %}{% set ns.system_prompt = ns.system_prompt + message['content'] %}{% set ns.is_first_sp = false %}{%- else %}{% set ns.system_prompt = ns.system_prompt + '\n\n' + message['content'] %}{%- endif %}{%- endif %}{%- endfor %}{{ bos_token }}{{ ns.system_prompt }}{%- for message in messages %}{%- if message['role'] == 'user' %}{%- set ns.is_tool = false -%}{%- set ns.is_first = false -%}{%- set ns.is_last_user = true -%}{{'<｜User｜>' + message['content']}}{%- endif %}{%- if message['role'] == 'assistant' and message['tool_calls'] is defined and message['tool_calls'] is not none %}{%- if ns.is_last_user %}{{'<｜Assistant｜></think>'}}{%- endif %}{%- set ns.is_last_user = false -%}{%- set ns.is_first = false %}{%- set ns.is_tool = false -%}{%- for tool in message['tool_calls'] %}{%- if not ns.is_first %}{%- if message['content'] is none %}{{'<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>'+ tool['function']['name'] + '<｜tool▁sep｜>' + tool['function']['arguments'] + '<｜tool▁call▁end｜>'}}{%- else %}{{message['content'] + '<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>' + tool['function']['name'] + '<｜tool▁sep｜>' + tool['function']['arguments'] + '<｜tool▁call▁end｜>'}}{%- endif %}{%- set ns.is_first = true -%}{%- else %}{{'<｜tool▁call▁begin｜>'+ tool['function']['name'] + '<｜tool▁sep｜>' + tool['function']['arguments'] + '<｜tool▁call▁end｜>'}}{%- endif %}{%- endfor %}{{'<｜tool▁calls▁end｜><｜end▁of▁sentence｜>'}}{%- endif %}{%- if message['role'] == 'assistant' and (message['tool_calls'] is not defined or message['tool_calls'] is none) %}{%- if ns.is_last_user %}{{'<｜Assistant｜>'}}{%- if message['prefix'] is defined and message['prefix'] and thinking %}{{'<think>'}}  {%- else %}{{'</think>'}}{%- endif %}{%- endif %}{%- set ns.is_last_user = false -%}{%- if ns.is_tool %}{{message['content'] + '<｜end▁of▁sentence｜>'}}{%- set ns.is_tool = false -%}{%- else %}{%- set content = message['content'] -%}{%- if '</think>' in content %}{%- set content = content.split('</think>', 1)[1] -%}{%- endif %}{{content + '<｜end▁of▁sentence｜>'}}{%- endif %}{%- endif %}{%- if message['role'] == 'tool' %}{%- set ns.is_last_user = false -%}{%- set ns.is_tool = true -%}{{'<｜tool▁output▁begin｜>' + message['content'] + '<｜tool▁output▁end｜>'}}{%- endif %}{%- endfor -%}{%- if add_generation_prompt and ns.is_last_user and not ns.is_tool %}{{'<｜Assistant｜>'}}{%- if not thinking %}{{'</think>'}}{%- else %}{{'<think>'}}{%- endif %}{% endif %}",
+		ollama: {
+			template:
+				'{{ .System }}\n{{- if .Tools }}{{ if .System }}\n\n{{ end }}## Tools\nYou have access to the following tools:\n\n{{- range .Tools }}\n\n### {{ .Function.Name }}\nDescription: {{ .Function.Description }}\n\nParameters: {{ .Function.Parameters }}\n{{- end }}\n\nIMPORTANT: ALWAYS adhere to this exact format for tool use:\n<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>tool_call_name<｜tool▁sep｜>tool_call_arguments<｜tool▁call▁end｜>{{ `{{additional_tool_calls}}` }}<｜tool▁calls▁end｜>\n\nWhere:\n- `tool_call_name` must be an exact match to one of the available tools\n- `tool_call_arguments` must be valid JSON that strictly follows the tool\'s Parameters Schema\n- For multiple tool calls, chain them directly without separators or spaces\n{{- end }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1}}\n{{- if eq .Role "user" }}<｜User｜>{{ .Content }}\n{{- else if eq .Role "tool" }}<｜tool▁output▁begin｜>{{ .Content }}<｜tool▁output▁end｜>\n{{- else if eq .Role "assistant" }}<｜Assistant｜>\n{{- if and $.IsThinkSet (and $last .Thinking) -}}\n<think>\n{{ .Thinking }}\n</think>\n{{- end }}\n{{- if .ToolCalls }}<｜tool▁calls▁begin｜>\n{{- range .ToolCalls }}<｜tool▁call▁begin｜>{{ .Function.Name }}<｜tool▁sep｜>{{ .Function.Arguments }}<｜tool▁call▁end｜>{{ end }}<｜tool▁calls▁end｜>\n{{- else if .Content }}{{ .Content }}{{- end }}\n{{- if not $last }}<｜end▁of▁sentence｜>{{ end }}\n{{- end }}\n{{- if and $last (ne .Role "assistant") }}<｜Assistant｜>\n{{- if and $.IsThinkSet $.Think (not $.Tools) -}}\n<think>\n{{- else -}}\n</think>\n{{- end }}\n{{- end }}\n{{- end }}',
+			tokens: [
+				"<｜User｜>",
+				"<｜Assistant｜>",
+				"<｜tool▁calls▁begin｜>",
+				"<｜tool▁call▁begin｜>",
+				"<｜tool▁sep｜>",
+				"<｜tool▁call▁end｜>",
+				"<｜tool▁calls▁end｜>",
+				"<｜end▁of▁sentence｜>",
+				"<think>",
+				"<｜tool▁output▁begin｜>",
+				"<｜tool▁output▁end｜>",
+			],
+			params: {
+				temperature: 0.6,
+				top_p: 0.95,
 			},
 		},
 	},
