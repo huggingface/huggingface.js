@@ -4,7 +4,7 @@ import type { RepoId } from "../types/public";
 export interface XetWriteTokenParams {
 	accessToken: string | undefined;
 	hubUrl: string;
-	customFetch: typeof fetch;
+	fetch?: typeof fetch;
 	repo: RepoId;
 	rev: string;
 }
@@ -12,7 +12,7 @@ export interface XetWriteTokenParams {
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
 
-function cacheKey(params: Omit<XetWriteTokenParams, "customFetch">): string {
+function cacheKey(params: Omit<XetWriteTokenParams, "fetch">): string {
 	return JSON.stringify([params.hubUrl, params.repo, params.rev, params.accessToken]);
 }
 
@@ -45,7 +45,7 @@ export async function xetWriteToken(params: XetWriteTokenParams): Promise<{ acce
 	}
 
 	const promise = (async () => {
-		const resp = await params.customFetch(
+		const resp = await (params.fetch ?? fetch)(
 			`${params.hubUrl}/api/${params.repo.type}s/${params.repo.name}/xet-write-token/${params.rev}`,
 			{
 				headers: params.accessToken
