@@ -54,7 +54,7 @@ export const SHARD_MAGIC_TAG = new Uint8Array([
 interface UploadShardsParams {
 	accessToken: string | undefined;
 	hubUrl: string;
-	customFetch: typeof fetch;
+	fetch?: typeof fetch;
 	repo: RepoId;
 	rev: string;
 }
@@ -347,7 +347,7 @@ function writeHashToArray(hash: string, array: Uint8Array, offset: number) {
 async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: UploadShardsParams) {
 	const token = await xetWriteToken(params);
 
-	const resp = await params.customFetch(`${token.casUrl}/v1/xorb/default/${xorb.hash}`, {
+	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorb/default/${xorb.hash}`, {
 		method: "POST",
 		body: xorb.xorb,
 		headers: {
@@ -363,7 +363,7 @@ async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: Uplo
 async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
 	const token = await xetWriteToken(params);
 
-	const resp = await params.customFetch(`${token.casUrl}/v1/shard`, {
+	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/shard`, {
 		method: "POST",
 		body: shard,
 		headers: {
