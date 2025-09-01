@@ -24,7 +24,7 @@ You can use the 'transformers' library, and your audio file to any of the `audio
 ### Speech Transcription and Analysis
 These models don’t just turn speech into text—they also capture tone, emotion, and speaker traits. This makes them useful for tasks like sentiment analysis or identifying speaker profiles.
 
-You can try audio transcription with [Voxtral Mini](https://huggingface.co/mistralai/Voxtral-Mini-3B-2507) using following code.
+You can try audio transcription with [Voxtral Mini](https://huggingface.co/mistralai/Voxtral-Mini-3B-2507) using the following code.
 
 ```python
 from transformers import VoxtralForConditionalGeneration, AutoProcessor
