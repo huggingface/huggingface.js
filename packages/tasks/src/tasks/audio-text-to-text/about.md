@@ -19,7 +19,7 @@ Describe instrumentation, genre, tempo, or sections, and suggest edits or techni
 **Example:** Song demo → Prompt: “Identify key and tempo, then suggest jazz reharmonization ideas for the chorus.”
 
 ## Inference
-You can use 'transformers' library, and your audio file to any of the `audio-text-to-text` model, with instructions and get text responses. Following code examples show how to do so.
+You can use the 'transformers' library, and your audio file to any of the `audio-text-to-text` model, with instructions and get text responses. Following code examples show how to do so.
 
 ### Speech Transcription and Analysis
 These models don’t just turn speech into text—they also capture tone, emotion, and speaker traits. This makes them useful for tasks like sentiment analysis or identifying speaker profiles.
