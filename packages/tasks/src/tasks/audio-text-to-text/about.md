@@ -52,7 +52,7 @@ for decoded_output in decoded_outputs:
 ### Audio Question Answering 
 These models can understand audio directly and answer questions about it. For example, summarizing a podcast clip or explaining parts of a recorded conversation.
 
-You can experiment wit [Qwen2-Audio-Instruct-Demo](https://huggingface.co/Qwen/Qwen2-Audio-Instruct-Demo) for conversations with both text and audio inputs, letting you ask follow-up questions about different sounds or speech clips.
+You can experiment with [Qwen2-Audio-Instruct-Demo](https://huggingface.co/Qwen/Qwen2-Audio-Instruct-Demo) for conversations with both text and audio inputs, letting you ask follow-up questions about different sounds or speech clips.
 
 ```python
 from io import BytesIO
