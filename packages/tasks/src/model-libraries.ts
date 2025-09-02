@@ -857,6 +857,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/revdotcom/reverb",
 		filter: false,
 	},
+	rkllm: {
+		prettyLabel: "RKLLM",
+		repoName: "RKLLM",
+		repoUrl: "https://github.com/airockchip/rknn-llm",
+		countDownloads: `path_extension:"rkllm"`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
