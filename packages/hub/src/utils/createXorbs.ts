@@ -145,12 +145,15 @@ export async function* createXorbs(
 				await loadDedupInfoToCache(
 					fileSource.content.originalBlob.slice(fileSource.content.spliceStart),
 					fileSource.content.spliceEnd,
+					remoteXorbHashes,
 					params,
 					chunkCache,
+					fileSource.content.spliceStart === 0,
 					chunkModule
 				);
 			}
 			let bytesSinceRemoteDedup = Infinity;
+			let isFirstFileChunk = true;
 			const sourceChunks: Array<Uint8Array> = [];
 
 			const reader = fileSource.content.stream().getReader();
@@ -169,6 +172,10 @@ export async function* createXorbs(
 
 			const addChunks = async function* (chunks: Array<{ hash: string; length: number; dedup: boolean }>) {
 				for (const chunk of chunks) {
+					if (isFirstFileChunk) {
+						chunk.dedup = true;
+						isFirstFileChunk = false;
+					}
 					let chunkIndex = xorb.chunks.length;
 					let chunkXorbId = xorbId;
 					fileChunks.push({ hash: chunk.hash, length: chunk.length });
@@ -581,13 +588,13 @@ async function loadDedupInfoToCache(
 	 * Will process content up to the end of the chunk after this position
 	 */
 	end: number,
+	remoteXorbHashes: string[],
 	params: XetWriteTokenParams,
 	chunkCache: ChunkCache,
+	isAtBeginning: boolean,
 	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 	chunkModule: typeof import("../vendor/xet-chunk/chunker_wasm")
 ): Promise<{
-	/** Array of chunk metadata with hashes and lengths */
-	chunks: Array<{ hash: string; length: number }>;
 	/** Number of bytes that were deduplicated (found in cache) */
 	dedupedBytes: number;
 	/** Total number of bytes processed */
@@ -599,7 +606,6 @@ async function loadDedupInfoToCache(
 	let dedupedBytes = 0;
 	let totalBytes = 0;
 	let bytesSinceRemoteDedup = Infinity;
-	const chunks: Array<{ hash: string; length: number }> = [];
 	const sourceChunks: Array<Uint8Array> = [];
 
 	try {
@@ -607,7 +613,9 @@ async function loadDedupInfoToCache(
 
 		const processChunks = async (chunkData: Array<{ hash: string; length: number; dedup: boolean }>) => {
 			for (const chunk of chunkData) {
-				chunks.push({ hash: chunk.hash, length: chunk.length });
+				if (isAtBeginning) {
+					chunk.dedup ||= totalBytes === 0;
+				}
 				totalBytes += chunk.length;
 
 				// Remove chunks from source data (similar to createXorbs logic)
@@ -666,9 +674,8 @@ async function loadDedupInfoToCache(
 						const shardData = await parseShardData(shard);
 
 						// Load remote dedup info into cache
-						const remoteXorbHashes: string[] = [];
 						for (const xorb of shardData.xorbs) {
-							const remoteXorbId = -remoteXorbHashes.length - 1;
+							const remoteXorbId = -remoteXorbHashes.length;
 							remoteXorbHashes.push(xorb.hash);
 							let i = 0;
 							for (const xorbChunk of xorb.chunks) {
@@ -682,10 +689,6 @@ async function loadDedupInfoToCache(
 				if (cacheData !== undefined) {
 					// Chunk found in cache after remote lookup - it's deduplicated
 					dedupedBytes += chunk.length;
-				} else {
-					// Chunk not in cache - add it as a local chunk (using a dummy xorb index)
-					// We use -999 as a placeholder since we're not actually creating xorbs
-					cache.addChunkToCache(chunk.hash, -999, chunks.length - 1, null);
 				}
 
 				bytesSinceRemoteDedup += chunk.length;
@@ -704,7 +707,6 @@ async function loadDedupInfoToCache(
 		}
 
 		return {
-			chunks,
 			dedupedBytes,
 			totalBytes,
 		};
