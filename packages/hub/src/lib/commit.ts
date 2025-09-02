@@ -50,15 +50,27 @@ export interface CommitFile {
  *
  * todo: handle other cases
  */
-export interface SpliceFile {
-	operation: "splice";
+export interface CommitEditFile {
+	operation: "edit";
 	path: string;
 	/** Later, will be ContentSource. For now simpler to just handle blobs */
-	content: Blob;
-	splice: Array<{
-		/** Later, will be ContentSource. For now simpler to just handle blobs */
+	originalContent: Blob;
+	edits: Array<{
+		/**
+		 * Later, will be ContentSource. For now simpler to just handle blobs
+		 *
+		 * originalContent from [start, end) will be replaced by this
+		 */
 		content: Blob;
+		/**
+		 * The start position of the edit in the original content
+		 */
 		start: number;
+		/**
+		 * The end position of the edit in the original content
+		 *
+		 * originalContent from [start, end) will be replaced by the edit
+		 */
 		end: number;
 	}>;
 }
@@ -73,7 +85,7 @@ type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
 // 	content?:  ContentSource;
 // };
 
-export type CommitOperation = CommitDeletedEntry | CommitFile | SpliceFile /* | CommitRenameFile */;
+export type CommitOperation = CommitDeletedEntry | CommitFile | CommitEditFile /* | CommitRenameFile */;
 type CommitBlobOperation = Exclude<CommitOperation, CommitFile> | CommitBlob;
 
 export type CommitParams = {
@@ -198,15 +210,15 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 		const allOperations = (
 			await Promise.all(
 				params.operations.map(async (operation) => {
-					if (operation.operation === "splice" && !useXet) {
-						throw new Error("Splice operation is not supported when Xet is disabled");
+					if (operation.operation === "edit" && !useXet) {
+						throw new Error("Edit operation is not supported when Xet is disabled");
 					}
 
-					if (operation.operation === "splice") {
-						// Convert SpliceFile operation to a file operation with SplicedBlob
+					if (operation.operation === "edit") {
+						// Convert EditFile operation to a file operation with SplicedBlob
 						const splicedBlob = SplicedBlob.create(
-							operation.content,
-							operation.splice.map((splice) => ({ insert: splice.content, start: splice.start, end: splice.end }))
+							operation.originalContent,
+							operation.edits.map((splice) => ({ insert: splice.content, start: splice.start, end: splice.end }))
 						);
 						return {
 							operation: "addOrUpdate" as const,
@@ -733,11 +745,11 @@ async function convertOperationToNdJson(operation: CommitBlobOperation): Promise
 				},
 			};
 		}
-		case "splice": {
+		case "edit": {
 			// Note: By the time we get here, splice operations should have been converted to addOrUpdate operations with SplicedBlob
 			// But we handle this case for completeness
 			throw new Error(
-				"Splice operations should be converted to addOrUpdate operations before reaching convertOperationToNdJson"
+				"Edit operations should be converted to addOrUpdate operations before reaching convertOperationToNdJson"
 			);
 		}
 		default:
