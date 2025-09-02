@@ -478,6 +478,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
 		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
 	},
+	"hunyuanworld-voyager": {
+		prettyLabel: "HunyuanWorld-voyager",
+		repoName: "HunyuanWorld-voyager",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
@@ -851,6 +856,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Reverb",
 		repoUrl: "https://github.com/revdotcom/reverb",
 		filter: false,
+	},
+	rkllm: {
+		prettyLabel: "RKLLM",
+		repoName: "RKLLM",
+		repoUrl: "https://github.com/airockchip/rknn-llm",
+		countDownloads: `path_extension:"rkllm"`,
 	},
 	saelens: {
 		prettyLabel: "SAELens",
