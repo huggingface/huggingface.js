@@ -25,6 +25,7 @@ import { createBlobs } from "../utils/createBlobs";
 import { uploadShards } from "../utils/uploadShards";
 import { splitAsyncGenerator } from "../utils/splitAsyncGenerator";
 import { mergeAsyncGenerators } from "../utils/mergeAsyncGenerators";
+import { SplicedBlob } from "../utils/SplicedBlob";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -44,6 +45,11 @@ export interface CommitFile {
 	// forceLfs?: boolean
 }
 
+/**
+ * Opitmized when only the beginning or the end of the file is replaced
+ *
+ * todo: handle other cases
+ */
 export interface SpliceFile {
 	operation: "splice";
 	path: string;
@@ -192,6 +198,16 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 				params.operations.map(async (operation) => {
 					if (operation.operation === "splice" && !useXet) {
 						throw new Error("Splice operation is not supported when Xet is disabled");
+					}
+
+					if (operation.operation === "splice") {
+						// Convert SpliceFile operation to a file operation with SplicedBlob
+						const splicedBlob = SplicedBlob.create(operation.content, operation.insert, operation.start, operation.end);
+						return {
+							operation: "addOrUpdate" as const,
+							path: operation.path,
+							content: splicedBlob,
+						};
 					}
 
 					if (operation.operation !== "addOrUpdate") {
@@ -711,6 +727,13 @@ async function convertOperationToNdJson(operation: CommitBlobOperation): Promise
 					path: operation.path,
 				},
 			};
+		}
+		case "splice": {
+			// Note: By the time we get here, splice operations should have been converted to addOrUpdate operations with SplicedBlob
+			// But we handle this case for completeness
+			throw new Error(
+				"Splice operations should be converted to addOrUpdate operations before reaching convertOperationToNdJson"
+			);
 		}
 		default:
 			throw new TypeError("Unknown operation: " + (operation as { operation: string }).operation);

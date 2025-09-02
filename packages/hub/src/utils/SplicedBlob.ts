@@ -32,12 +32,12 @@ export class SplicedBlob extends Blob {
 		return new SplicedBlob(originalBlob, insertBlob, start, end);
 	}
 
-	private originalBlob: Blob;
-	private insertBlob: Blob;
-	private spliceStart: number;
-	private spliceEnd: number;
+	public originalBlob: Blob;
+	public insertBlob: Blob;
+	public spliceStart: number;
+	public spliceEnd: number;
 
-	private constructor(originalBlob: Blob, insertBlob: Blob, start: number, end: number) {
+	constructor(originalBlob: Blob, insertBlob: Blob, start: number, end: number) {
 		super();
 
 		this.originalBlob = originalBlob;
