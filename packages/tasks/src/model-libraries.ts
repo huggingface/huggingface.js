@@ -852,7 +852,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/revdotcom/reverb",
 		filter: false,
 	},
-	"rkllm": {
+	rkllm: {
 		prettyLabel: "RKLLM",
 		repoName: "rknn-llm",
 		repoUrl: "https://github.com/airockchip/rknn-llm",
