@@ -6,9 +6,10 @@ import { join } from "node:path";
 import { writeFile, readFile, stat, mkdir } from "node:fs/promises";
 import type { RepoId } from "../src/types/public.js";
 import { toRepoId } from "../src/utils/toRepoId.js";
-import { commitIter } from "../src/index.js";
+import type { CommitOperation } from "../src/index.js";
+import { commitIter, downloadFile } from "../src/index.js";
+import { SplicedBlob } from "../src/utils/SplicedBlob.js";
 import { pathToFileURL } from "node:url";
-import { WebBlob } from "../src/utils/WebBlob.js";
 
 /**
  * This script downloads the files from openai-community/gpt2 and simulates an upload to a xet repo.
@@ -38,6 +39,23 @@ const FILES_TO_DOWNLOAD = [
 	},
 ];
 
+const FILES_TO_EDIT = [
+	{
+		url: "https://huggingface.co/openai-community/gpt2/resolve/main/64-8bits.tflite?download=true",
+		filename: "64-8bits.tflite.edited",
+		sha256: "c2b116ccc9e5362d55dd60b344a4b93156594feeef312b5b8833151f0732aa0a",
+		edits: [
+			{
+				start: 0,
+				end: 1000,
+				content: new Blob([
+					"Adding a new prefix to this TFLite file. Will xet still be efficient in deduplicating the file?",
+				]),
+			},
+		],
+	},
+];
+
 async function downloadFileIfNotExists(url: string, filepath: string): Promise<void> {
 	try {
 		await stat(filepath);
@@ -58,13 +76,25 @@ async function downloadFileIfNotExists(url: string, filepath: string): Promise<v
 	console.log(`Downloaded ${filepath} (${buffer.byteLength} bytes)`);
 }
 
-async function* createFileSource(
-	files: Array<{ filepath: string; filename: string }>
-): AsyncGenerator<{ content: Blob; path: string; sha256: string }> {
+async function* createFileSource(files: Array<{ filepath: string; filename: string }>): AsyncGenerator<{
+	content: Blob;
+	path: string;
+	sha256: string;
+	edits?: Array<{ start: number; end: number; content: Blob }>;
+}> {
 	for (const file of files) {
 		console.log(`Processing ${file.filename}...`);
 		const buffer = await readFile(file.filepath);
-		const blob = new Blob([buffer]);
+		let blob = new Blob([buffer]);
+
+		if (file.filename.endsWith(".edited")) {
+			const edits = FILES_TO_EDIT.find((f) => f.filename === file.filename)?.edits;
+			if (edits !== undefined) {
+				for (const edit of edits) {
+					blob = SplicedBlob.create(blob, [{ insert: edit.content, start: edit.start, end: edit.end }]);
+				}
+			}
+		}
 
 		// Calculate sha256
 		console.log(`Calculating SHA256 for ${file.filename}...`);
@@ -77,12 +107,11 @@ async function* createFileSource(
 
 		console.log(`SHA256 for ${file.filename}: ${sha256Hash}`);
 
-		if (sha256Hash !== FILES_TO_DOWNLOAD.find((f) => f.filename === file.filename)?.sha256) {
-			throw new Error(
-				`SHA256 mismatch for ${file.filename}: ${sha256Hash} !== ${FILES_TO_DOWNLOAD.find(
-					(f) => f.filename === file.filename
-				)?.sha256}`
-			);
+		const sha256ToCheck =
+			FILES_TO_DOWNLOAD.find((f) => f.filename === file.filename)?.sha256 ||
+			FILES_TO_EDIT.find((f) => f.filename === file.filename)?.sha256;
+		if (sha256Hash !== sha256ToCheck) {
+			throw new Error(`SHA256 mismatch for ${file.filename}: ${sha256Hash} !== ${sha256ToCheck}`);
 		}
 
 		yield {
@@ -215,6 +244,12 @@ async function main() {
 		files.push({ filepath, filename: fileInfo.filename });
 	}
 
+	for (const fileInfo of FILES_TO_EDIT) {
+		const filepath = join(downloadDir, fileInfo.filename);
+		await downloadFileIfNotExists(fileInfo.url, filepath);
+		files.push({ filepath, filename: fileInfo.filename });
+	}
+
 	// Parse repo
 	const repoName = args.repo;
 
@@ -302,13 +337,25 @@ async function main() {
 
 	if (args.commit) {
 		console.log("\n=== Committing files ===");
+		const operations: CommitOperation[] = [];
+		for (const fileInfo of FILES_TO_DOWNLOAD) {
+			operations.push({
+				operation: "addOrUpdate",
+				content: pathToFileURL(join(downloadDir, fileInfo.filename)),
+				path: fileInfo.filename,
+			});
+		}
+		for (const fileInfo of FILES_TO_EDIT) {
+			operations.push({
+				operation: "edit",
+				originalContent: new Blob([await readFile(join(downloadDir, fileInfo.filename))]),
+				edits: fileInfo.edits,
+				path: fileInfo.filename,
+			});
+		}
 		const iterator = commitIter({
 			repo,
-			operations: files.map((file) => ({
-				operation: "addOrUpdate",
-				content: pathToFileURL(file.filepath),
-				path: file.filename,
-			})),
+			operations,
 			accessToken: args.token,
 			title: "Upload xet files with JS lib",
 			useXet: true,
@@ -325,7 +372,16 @@ async function main() {
 
 		console.log("Redownloading files and verifying SHA256 integrity");
 		for (const file of FILES_TO_DOWNLOAD) {
-			const fileBlob = await WebBlob.create(new URL(file.url));
+			const fileBlob = await downloadFile({
+				repo,
+				path: file.filename,
+				accessToken: args.token,
+			});
+
+			if (!fileBlob) {
+				throw new Error(`Failed to download ${file.filename}`);
+			}
+
 			const sha256Hash = sha256(fileBlob, { useWebWorker: false });
 			let res: IteratorResult<number, string>;
 			do {
@@ -333,6 +389,26 @@ async function main() {
 			} while (!res.done);
 			const finalHash = res.value;
 
+			console.log(`${file.filename}: ${finalHash} === ${file.sha256} ${finalHash === file.sha256 ? "✅" : "❌"}`);
+		}
+
+		for (const file of FILES_TO_EDIT) {
+			const fileBlob = await downloadFile({
+				repo,
+				path: file.filename,
+				accessToken: args.token,
+			});
+
+			if (!fileBlob) {
+				throw new Error(`Failed to download ${file.filename}`);
+			}
+
+			const sha256Hash = sha256(fileBlob, { useWebWorker: false });
+			let res: IteratorResult<number, string>;
+			do {
+				res = await sha256Hash.next();
+			} while (!res.done);
+			const finalHash = res.value;
 			console.log(`${file.filename}: ${finalHash} === ${file.sha256} ${finalHash === file.sha256 ? "✅" : "❌"}`);
 		}
 	}

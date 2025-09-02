@@ -1,15 +1,10 @@
-/**
- * Todo: add dedup: we actually need to remember chunks already written, and not add them to the xorb, and also
- *  take that into account for file reconstruction
- * Todo: byte grouping?
- */
-
 import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } from "./XetBlob";
 import { compress as lz4_compress } from "../vendor/lz4js";
 import { ChunkCache } from "./ChunkCache";
 import { xetWriteToken, type XetWriteTokenParams } from "./xetWriteToken";
 import type { ShardData } from "./shardParser";
 import { parseShardData } from "./shardParser";
+import { SplicedBlob } from "./SplicedBlob";
 
 const TARGET_CHUNK_SIZE = 64 * 1024;
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -140,7 +135,22 @@ export async function* createXorbs(
 
 	try {
 		for await (const fileSource of fileSources) {
+			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
+			if (fileSource.content instanceof SplicedBlob && fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE) {
+				await loadDedupInfoToCache(
+					fileSource.content.originalBlob.slice(0, fileSource.content.firstSpliceIndex),
+					remoteXorbHashes,
+					params,
+					chunkCache,
+					chunkModule,
+					{
+						maxChunks: 1,
+						isAtBeginning: true,
+					}
+				);
+			}
 			let bytesSinceRemoteDedup = Infinity;
+			let isFirstFileChunk = true;
 			const sourceChunks: Array<Uint8Array> = [];
 
 			const reader = fileSource.content.stream().getReader();
@@ -159,39 +169,16 @@ export async function* createXorbs(
 
 			const addChunks = async function* (chunks: Array<{ hash: string; length: number; dedup: boolean }>) {
 				for (const chunk of chunks) {
+					if (isFirstFileChunk) {
+						chunk.dedup = true;
+						isFirstFileChunk = false;
+					}
 					let chunkIndex = xorb.chunks.length;
 					let chunkXorbId = xorbId;
 					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 
 					// Remove chunks from source data
-					let chunkToCopy: Uint8Array;
-					if (chunk.length === sourceChunks[0].length) {
-						chunkToCopy = sourceChunks[0];
-						sourceChunks.shift();
-					} else if (chunk.length < sourceChunks[0].length) {
-						chunkToCopy = sourceChunks[0].subarray(0, chunk.length);
-						sourceChunks[0] = sourceChunks[0].subarray(chunk.length);
-					} else {
-						chunkToCopy = new Uint8Array(chunk.length);
-						let copyOffset = 0;
-						let index = 0;
-						let toSlice = -1;
-						while (copyOffset < chunk.length) {
-							const nToCopy = Math.min(sourceChunks[index].length, chunk.length - copyOffset);
-							chunkToCopy.set(sourceChunks[index].subarray(0, nToCopy), copyOffset);
-							copyOffset += nToCopy;
-
-							if (nToCopy === sourceChunks[index].length) {
-								index++;
-							} else {
-								toSlice = nToCopy;
-							}
-						}
-						sourceChunks.splice(0, index);
-						if (toSlice !== -1) {
-							sourceChunks[0] = sourceChunks[0].subarray(toSlice);
-						}
-					}
+					const chunkToCopy = removeChunkFromSourceData(sourceChunks, chunk.length);
 
 					let cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
 					if (cacheData === undefined && chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
@@ -434,14 +421,41 @@ function backtrackDedup(
 	return dedupedBytes;
 }
 
-// interface ChunkHeader {
-// 	version: number; // u8, 1 byte
-// 	compressed_length: number; // 3 * u8, 3 bytes
-// 	compression_scheme: CompressionScheme; // u8, 1 byte
-// 	uncompressed_length: number; // 3 * u8, 3 bytes
-// }
+/**
+ * Removes and returns a chunk of the specified length from the sourceChunks array.
+ */
+function removeChunkFromSourceData(sourceChunks: Array<Uint8Array>, chunkLength: number): Uint8Array {
+	if (chunkLength === sourceChunks[0].length) {
+		const chunkToCopy = sourceChunks[0];
+		sourceChunks.shift();
+		return chunkToCopy;
+	} else if (chunkLength < sourceChunks[0].length) {
+		const chunkToCopy = sourceChunks[0].subarray(0, chunkLength);
+		sourceChunks[0] = sourceChunks[0].subarray(chunkLength);
+		return chunkToCopy;
+	} else {
+		const chunkToCopy = new Uint8Array(chunkLength);
+		let copyOffset = 0;
+		let index = 0;
+		let toSlice = -1;
+		while (copyOffset < chunkLength) {
+			const nToCopy = Math.min(sourceChunks[index].length, chunkLength - copyOffset);
+			chunkToCopy.set(sourceChunks[index].subarray(0, nToCopy), copyOffset);
+			copyOffset += nToCopy;
 
-// const CHUNK_HEADER_BYTES = 8;
+			if (nToCopy === sourceChunks[index].length) {
+				index++;
+			} else {
+				toSlice = nToCopy;
+			}
+		}
+		sourceChunks.splice(0, index);
+		if (toSlice !== -1) {
+			sourceChunks[0] = sourceChunks[0].subarray(toSlice);
+		}
+		return chunkToCopy;
+	}
+}
 
 /**
  * Write a chunk header to the xorb and return the offset of where to write the next chunk
@@ -553,3 +567,128 @@ const buildFileRepresentation = (
 
 	return representation;
 };
+
+/**
+ * Helper to load dedup info for blob contents into cache.
+ * Processes the blob's contents, chunks it, and loads dedup info into cache without writing to xorb.
+ *
+ * For now this is optimized for when the replacement data is at the very beginning of the file
+ *
+ * todo: handle when it's not at the beginning of the file by backingtracking xorb contents
+ * todo: handle when it's not at the beginning of the file by using previous content to chunk at the same boundaries as it would have in the original file
+ */
+async function loadDedupInfoToCache(
+	content: Blob,
+	/** Will be mutated */
+	remoteXorbHashes: string[],
+	params: XetWriteTokenParams,
+	chunkCache: ChunkCache,
+	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+	chunkModule: typeof import("../vendor/xet-chunk/chunker_wasm"),
+
+	opts?: {
+		isAtBeginning?: boolean;
+		/**
+		 * The end position of the content to process
+		 *
+		 * Will process content up to the end of the chunk after this position
+		 */
+		end?: number;
+		/**
+		 * The maximum number of chunks to process
+		 *
+		 * Will process content up to the end of the chunk after this position
+		 */
+		maxChunks?: number;
+	}
+): Promise<void> {
+	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
+	const cache = chunkCache;
+
+	let dedupedBytes = 0;
+	let chunksProcessed = 0;
+	let totalBytes = 0;
+	let bytesSinceRemoteDedup = Infinity;
+	const sourceChunks: Array<Uint8Array> = [];
+
+	try {
+		const reader = content.stream().getReader();
+
+		const processChunks = async (chunkData: Array<{ hash: string; length: number; dedup: boolean }>) => {
+			for (const chunk of chunkData) {
+				chunksProcessed++;
+				if (opts?.isAtBeginning && chunksProcessed === 1) {
+					chunk.dedup = true;
+				}
+				totalBytes += chunk.length;
+
+				// Remove chunks from source data
+				removeChunkFromSourceData(sourceChunks, chunk.length);
+
+				// Check if chunk is already in cache
+				let cacheData = cache.getChunk(chunk.hash, chunkModule.compute_hmac);
+
+				// Early return if already cached - no need for remote lookup
+				if (cacheData !== undefined) {
+					dedupedBytes += chunk.length;
+					bytesSinceRemoteDedup += chunk.length;
+					continue;
+				}
+
+				// Try remote dedup lookup if conditions are met
+				if (chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
+					const token = await xetWriteToken(params);
+					bytesSinceRemoteDedup = 0;
+
+					const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunk/default/" + chunk.hash, {
+						headers: {
+							Authorization: `Bearer ${token.accessToken}`,
+						},
+					});
+
+					if (shardResp.ok) {
+						const shard = await shardResp.blob();
+						const shardData = await parseShardData(shard);
+
+						// Load remote dedup info into cache
+						for (const xorb of shardData.xorbs) {
+							const remoteXorbId = -remoteXorbHashes.length;
+							remoteXorbHashes.push(xorb.hash);
+							let i = 0;
+							for (const xorbChunk of xorb.chunks) {
+								cache.addChunkToCache(xorbChunk.hash, remoteXorbId, i++, shardData.hmacKey);
+							}
+						}
+						cacheData = cache.getChunk(chunk.hash, chunkModule.compute_hmac);
+					}
+				}
+
+				if (cacheData !== undefined) {
+					// Chunk found in cache after remote lookup - it's deduplicated
+					dedupedBytes += chunk.length;
+				}
+
+				bytesSinceRemoteDedup += chunk.length;
+			}
+		};
+
+		// Read and process blob content
+		while (true) {
+			if (opts?.end !== undefined && totalBytes >= opts.end) {
+				break;
+			}
+			if (opts?.maxChunks !== undefined && chunksProcessed >= opts.maxChunks) {
+				break;
+			}
+			const { done, value } = await reader.read();
+			if (done) {
+				await processChunks(chunker.finish());
+				break;
+			}
+			sourceChunks.push(value);
+			await processChunks(chunker.add_data(value));
+		}
+	} finally {
+		chunker.free();
+	}
+}

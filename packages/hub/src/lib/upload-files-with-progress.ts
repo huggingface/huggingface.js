@@ -29,9 +29,6 @@ export async function* uploadFilesWithProgress(
 		parentCommit?: CommitParams["parentCommit"];
 		abortSignal?: CommitParams["abortSignal"];
 		maxFolderDepth?: CommitParams["maxFolderDepth"];
-		/**
-		 * @deprecated Not yet ready for production use
-		 */
 		useXet?: CommitParams["useXet"];
 		/**
 		 * Set this to true in order to have progress events for hashing
