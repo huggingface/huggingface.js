@@ -122,9 +122,6 @@ export type CommitParams = {
 	fetch?: typeof fetch;
 	abortSignal?: AbortSignal;
 	// Credentials are optional due to custom fetch functions or cookie auth
-	/**
-	 * @deprecated Not yet ready for production use
-	 */
 	useXet?: boolean;
 } & Partial<CredentialsParams>;
 
