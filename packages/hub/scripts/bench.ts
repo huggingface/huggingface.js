@@ -8,7 +8,6 @@ import type { RepoId } from "../src/types/public.js";
 import { toRepoId } from "../src/utils/toRepoId.js";
 import type { CommitOperation } from "../src/index.js";
 import { commitIter, downloadFile } from "../src/index.js";
-import { WebBlob } from "../src/utils/WebBlob.js";
 import { SplicedBlob } from "../src/utils/SplicedBlob.js";
 import { pathToFileURL } from "node:url";
 
