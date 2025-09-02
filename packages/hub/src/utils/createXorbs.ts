@@ -1,9 +1,3 @@
-/**
- * Todo: add dedup: we actually need to remember chunks already written, and not add them to the xorb, and also
- *  take that into account for file reconstruction
- * Todo: byte grouping?
- */
-
 import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } from "./XetBlob";
 import { compress as lz4_compress } from "../vendor/lz4js";
 import { ChunkCache } from "./ChunkCache";
@@ -181,34 +175,7 @@ export async function* createXorbs(
 					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 
 					// Remove chunks from source data
-					let chunkToCopy: Uint8Array;
-					if (chunk.length === sourceChunks[0].length) {
-						chunkToCopy = sourceChunks[0];
-						sourceChunks.shift();
-					} else if (chunk.length < sourceChunks[0].length) {
-						chunkToCopy = sourceChunks[0].subarray(0, chunk.length);
-						sourceChunks[0] = sourceChunks[0].subarray(chunk.length);
-					} else {
-						chunkToCopy = new Uint8Array(chunk.length);
-						let copyOffset = 0;
-						let index = 0;
-						let toSlice = -1;
-						while (copyOffset < chunk.length) {
-							const nToCopy = Math.min(sourceChunks[index].length, chunk.length - copyOffset);
-							chunkToCopy.set(sourceChunks[index].subarray(0, nToCopy), copyOffset);
-							copyOffset += nToCopy;
-
-							if (nToCopy === sourceChunks[index].length) {
-								index++;
-							} else {
-								toSlice = nToCopy;
-							}
-						}
-						sourceChunks.splice(0, index);
-						if (toSlice !== -1) {
-							sourceChunks[0] = sourceChunks[0].subarray(toSlice);
-						}
-					}
+					const chunkToCopy = removeChunkFromSourceData(sourceChunks, chunk.length);
 
 					let cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
 					if (cacheData === undefined && chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
@@ -461,6 +428,46 @@ function backtrackDedup(
 // const CHUNK_HEADER_BYTES = 8;
 
 /**
+ * Removes and returns a chunk of the specified length from the sourceChunks array.
+ * This function handles three cases:
+ * 1. Chunk length equals first source chunk length - removes entire first chunk
+ * 2. Chunk length is smaller than first source chunk - extracts from beginning of first chunk
+ * 3. Chunk length spans multiple source chunks - combines data from multiple chunks
+ */
+function removeChunkFromSourceData(sourceChunks: Array<Uint8Array>, chunkLength: number): Uint8Array {
+	if (chunkLength === sourceChunks[0].length) {
+		const chunkToCopy = sourceChunks[0];
+		sourceChunks.shift();
+		return chunkToCopy;
+	} else if (chunkLength < sourceChunks[0].length) {
+		const chunkToCopy = sourceChunks[0].subarray(0, chunkLength);
+		sourceChunks[0] = sourceChunks[0].subarray(chunkLength);
+		return chunkToCopy;
+	} else {
+		const chunkToCopy = new Uint8Array(chunkLength);
+		let copyOffset = 0;
+		let index = 0;
+		let toSlice = -1;
+		while (copyOffset < chunkLength) {
+			const nToCopy = Math.min(sourceChunks[index].length, chunkLength - copyOffset);
+			chunkToCopy.set(sourceChunks[index].subarray(0, nToCopy), copyOffset);
+			copyOffset += nToCopy;
+
+			if (nToCopy === sourceChunks[index].length) {
+				index++;
+			} else {
+				toSlice = nToCopy;
+			}
+		}
+		sourceChunks.splice(0, index);
+		if (toSlice !== -1) {
+			sourceChunks[0] = sourceChunks[0].subarray(toSlice);
+		}
+		return chunkToCopy;
+	}
+}
+
+/**
  * Write a chunk header to the xorb and return the offset of where to write the next chunk
  *
  * If it returns 0, it means there wasn't enough space in the xorb
@@ -618,35 +625,8 @@ async function loadDedupInfoToCache(
 				}
 				totalBytes += chunk.length;
 
-				// Remove chunks from source data (similar to createXorbs logic)
-				let chunkToCopy: Uint8Array;
-				if (chunk.length === sourceChunks[0].length) {
-					chunkToCopy = sourceChunks[0];
-					sourceChunks.shift();
-				} else if (chunk.length < sourceChunks[0].length) {
-					chunkToCopy = sourceChunks[0].subarray(0, chunk.length);
-					sourceChunks[0] = sourceChunks[0].subarray(chunk.length);
-				} else {
-					chunkToCopy = new Uint8Array(chunk.length);
-					let copyOffset = 0;
-					let index = 0;
-					let toSlice = -1;
-					while (copyOffset < chunk.length) {
-						const nToCopy = Math.min(sourceChunks[index].length, chunk.length - copyOffset);
-						chunkToCopy.set(sourceChunks[index].subarray(0, nToCopy), copyOffset);
-						copyOffset += nToCopy;
-
-						if (nToCopy === sourceChunks[index].length) {
-							index++;
-						} else {
-							toSlice = nToCopy;
-						}
-					}
-					sourceChunks.splice(0, index);
-					if (toSlice !== -1) {
-						sourceChunks[0] = sourceChunks[0].subarray(toSlice);
-					}
-				}
+				// Remove chunks from source data
+				removeChunkFromSourceData(sourceChunks, chunk.length);
 
 				// Check if chunk is already in cache
 				let cacheData = cache.getChunk(chunk.hash, chunkModule.compute_hmac);
