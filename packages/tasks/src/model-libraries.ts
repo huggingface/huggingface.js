@@ -482,7 +482,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "HunyuanWorld-voyager",
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
-		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
 	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
