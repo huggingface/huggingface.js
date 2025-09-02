@@ -1056,7 +1056,6 @@ output = model.predict(
 )
 for res in output:
     res.print()
-    res.save_to_img(save_path="./output/")
     res.save_to_json(save_path="./output/res.json")`,
 		];
 	}
