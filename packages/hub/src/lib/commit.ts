@@ -202,7 +202,9 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 					if (operation.operation === "splice") {
 						// Convert SpliceFile operation to a file operation with SplicedBlob
-						const splicedBlob = SplicedBlob.create(operation.content, operation.insert, operation.start, operation.end);
+						const splicedBlob = SplicedBlob.create(operation.content, [
+							{ insert: operation.insert, start: operation.start, end: operation.end },
+						]);
 						return {
 							operation: "addOrUpdate" as const,
 							path: operation.path,

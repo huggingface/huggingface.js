@@ -1,10 +1,19 @@
 import { sum } from "./sum";
 
 /**
+ * Represents a single splice operation
+ */
+interface SpliceOperation {
+	insert: Blob;
+	start: number;
+	end: number;
+}
+
+/**
  * @internal
  *
- * A SplicedBlob is a Blob that represents the result of splicing an insert blob
- * into an original blob at a specified position, replacing content between start and end.
+ * A SplicedBlob is a Blob that represents the result of splicing one or more insert blobs
+ * into an original blob at specified positions, replacing content between start and end.
  *
  * It is a drop-in replacement for the Blob class, so you can use it as a Blob.
  * The splicing is done virtually without copying data until accessed.
@@ -16,42 +25,55 @@ import { sum } from "./sum";
  * // Result represents: "Hello, Beautiful World!"
  */
 export class SplicedBlob extends Blob {
-	/**
-	 * Creates a new SplicedBlob by splicing an insert blob into an original blob.
-	 *
-	 * @param originalBlob The original blob to splice into
-	 * @param insertBlob The blob to insert
-	 * @param start The position where splicing starts (inclusive)
-	 * @param end The position where splicing ends (exclusive). Content between start and end is replaced.
-	 */
-	static create(originalBlob: Blob, insertBlob: Blob, start: number, end: number): SplicedBlob {
-		if (start < 0 || end < 0 || start > originalBlob.size || end > originalBlob.size || start > end) {
-			throw new TypeError("Invalid start/end positions for SplicedBlob");
-		}
-
-		return new SplicedBlob(originalBlob, insertBlob, start, end);
-	}
-
 	public originalBlob: Blob;
-	public insertBlob: Blob;
-	public spliceStart: number;
-	public spliceEnd: number;
+	public spliceOperations: SpliceOperation[];
 
-	constructor(originalBlob: Blob, insertBlob: Blob, start: number, end: number) {
+	private constructor(originalBlob: Blob, spliceOperations: SpliceOperation[]) {
 		super();
 
 		this.originalBlob = originalBlob;
-		this.insertBlob = insertBlob;
-		this.spliceStart = start;
-		this.spliceEnd = end;
+		this.spliceOperations = spliceOperations; // Create a copy to prevent external mutation
+	}
+
+	static create(originalBlob: Blob, operations: SpliceOperation[]): SplicedBlob {
+		// Validate all operations
+		for (const op of operations) {
+			if (op.start < 0 || op.end < 0) {
+				throw new Error("Invalid start/end positions for SplicedBlob");
+			}
+			if (op.start > originalBlob.size || op.end > originalBlob.size) {
+				throw new Error("Invalid start/end positions for SplicedBlob");
+			}
+			if (op.start > op.end) {
+				throw new Error("Invalid start/end positions for SplicedBlob");
+			}
+		}
+
+		// Sort operations by start position and validate no overlaps
+		const sortedOps = [...operations].sort((a, b) => a.start - b.start);
+		for (let i = 0; i < sortedOps.length - 1; i++) {
+			if (sortedOps[i].end > sortedOps[i + 1].start) {
+				throw new Error("Overlapping splice operations are not supported");
+			}
+		}
+
+		return new SplicedBlob(originalBlob, sortedOps);
 	}
 
 	/**
 	 * Returns the size of the spliced blob.
-	 * Size = (original size - replaced segment size) + insert size
+	 * Size = original size - total replaced size + total insert size
 	 */
 	override get size(): number {
-		return this.originalBlob.size - (this.spliceEnd - this.spliceStart) + this.insertBlob.size;
+		let totalReplacedSize = 0;
+		let totalInsertSize = 0;
+
+		for (const op of this.spliceOperations) {
+			totalReplacedSize += op.end - op.start;
+			totalInsertSize += op.insert.size;
+		}
+
+		return this.originalBlob.size - totalReplacedSize + totalInsertSize;
 	}
 
 	/**
@@ -82,52 +104,47 @@ export class SplicedBlob extends Blob {
 			return new Blob([]);
 		}
 
-		// Calculate segment boundaries
-		const beforeSegmentSize = this.spliceStart;
-		const insertSegmentSize = this.insertBlob.size;
-		const afterSegmentStart = beforeSegmentSize + insertSegmentSize;
+		// Get all segments and calculate their cumulative positions
+		const segments = this.segments;
+		const segmentBoundaries: number[] = [0];
+		let cumulativeSize = 0;
 
-		// Determine which segments the slice spans
-		if (end <= beforeSegmentSize) {
-			// Slice is entirely in the before segment
-			return this.originalBlob.slice(start, end);
+		for (const segment of segments) {
+			cumulativeSize += segment.size;
+			segmentBoundaries.push(cumulativeSize);
 		}
 
-		if (start >= afterSegmentStart) {
-			// Slice is entirely in the after segment
-			const afterStart = start - afterSegmentStart + this.spliceEnd;
-			const afterEnd = end - afterSegmentStart + this.spliceEnd;
-			return this.originalBlob.slice(afterStart, afterEnd);
+		// Find which segments the slice spans
+		const resultSegments: Blob[] = [];
+
+		for (let i = 0; i < segments.length; i++) {
+			const segmentStart = segmentBoundaries[i];
+			const segmentEnd = segmentBoundaries[i + 1];
+
+			// Skip segments that are entirely before the slice
+			if (segmentEnd <= start) {
+				continue;
+			}
+
+			// Skip segments that are entirely after the slice
+			if (segmentStart >= end) {
+				break;
+			}
+
+			// Calculate slice bounds within this segment
+			const sliceStart = Math.max(0, start - segmentStart);
+			const sliceEnd = Math.min(segments[i].size, end - segmentStart);
+
+			if (sliceStart < sliceEnd) {
+				resultSegments.push(segments[i].slice(sliceStart, sliceEnd));
+			}
 		}
 
-		if (start >= beforeSegmentSize && end <= afterSegmentStart) {
-			// Slice is entirely in the insert segment
-			return this.insertBlob.slice(start - beforeSegmentSize, end - beforeSegmentSize);
-		}
+		return new Blob(resultSegments);
+	}
 
-		// Slice spans multiple segments - need to create a new SplicedBlob or combine blobs
-		const segments: Blob[] = [];
-
-		if (start < beforeSegmentSize) {
-			// Include part of before segment
-			segments.push(this.originalBlob.slice(start, Math.min(end, beforeSegmentSize)));
-		}
-
-		if (start < afterSegmentStart && end > beforeSegmentSize) {
-			// Include part of insert segment
-			const insertStart = Math.max(0, start - beforeSegmentSize);
-			const insertEnd = Math.min(insertSegmentSize, end - beforeSegmentSize);
-			segments.push(this.insertBlob.slice(insertStart, insertEnd));
-		}
-
-		if (end > afterSegmentStart) {
-			// Include part of after segment
-			const afterStart = Math.max(this.spliceEnd, this.spliceEnd + (start - afterSegmentStart));
-			const afterEnd = this.spliceEnd + (end - afterSegmentStart);
-			segments.push(this.originalBlob.slice(afterStart, afterEnd));
-		}
-
-		return new Blob(segments);
+	get firstSpliceIndex(): number {
+		return this.spliceOperations[0]?.start ?? Infinity;
 	}
 
 	/**
@@ -194,24 +211,34 @@ export class SplicedBlob extends Blob {
 	}
 
 	/**
-	 * Get the three segments that make up the spliced blob.
+	 * Get all segments that make up the spliced blob.
+	 * This includes original blob segments between splice operations and insert blobs.
 	 */
 	private get segments(): Blob[] {
 		const segments: Blob[] = [];
+		let currentPosition = 0;
 
-		// Before segment (0 to start)
-		if (this.spliceStart > 0) {
-			segments.push(this.originalBlob.slice(0, this.spliceStart));
+		// Sort operations by start position to ensure correct order
+		const sortedOps = [...this.spliceOperations].sort((a, b) => a.start - b.start);
+
+		for (const op of sortedOps) {
+			// Add segment from current position to start of this operation
+			if (currentPosition < op.start) {
+				segments.push(this.originalBlob.slice(currentPosition, op.start));
+			}
+
+			// Add the insert blob (if it has content)
+			if (op.insert.size > 0) {
+				segments.push(op.insert);
+			}
+
+			// Move current position to end of this operation
+			currentPosition = op.end;
 		}
 
-		// Insert segment (entire insert blob)
-		if (this.insertBlob.size > 0) {
-			segments.push(this.insertBlob);
-		}
-
-		// After segment (end to original.size)
-		if (this.spliceEnd < this.originalBlob.size) {
-			segments.push(this.originalBlob.slice(this.spliceEnd));
+		// Add remaining segment after last operation
+		if (currentPosition < this.originalBlob.size) {
+			segments.push(this.originalBlob.slice(currentPosition));
 		}
 
 		return segments;

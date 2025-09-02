@@ -135,15 +135,17 @@ export async function* createXorbs(
 
 	try {
 		for await (const fileSource of fileSources) {
-			if (fileSource.content instanceof SplicedBlob) {
+			if (fileSource.content instanceof SplicedBlob && fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE) {
 				await loadDedupInfoToCache(
-					fileSource.content.originalBlob.slice(fileSource.content.spliceStart),
-					fileSource.content.spliceEnd,
+					fileSource.content.originalBlob.slice(0, fileSource.content.firstSpliceIndex),
 					remoteXorbHashes,
 					params,
 					chunkCache,
-					fileSource.content.spliceStart === 0,
-					chunkModule
+					chunkModule,
+					{
+						maxChunks: 1,
+						isAtBeginning: true,
+					}
 				);
 			}
 			let bytesSinceRemoteDedup = Infinity;
@@ -418,21 +420,8 @@ function backtrackDedup(
 	return dedupedBytes;
 }
 
-// interface ChunkHeader {
-// 	version: number; // u8, 1 byte
-// 	compressed_length: number; // 3 * u8, 3 bytes
-// 	compression_scheme: CompressionScheme; // u8, 1 byte
-// 	uncompressed_length: number; // 3 * u8, 3 bytes
-// }
-
-// const CHUNK_HEADER_BYTES = 8;
-
 /**
  * Removes and returns a chunk of the specified length from the sourceChunks array.
- * This function handles three cases:
- * 1. Chunk length equals first source chunk length - removes entire first chunk
- * 2. Chunk length is smaller than first source chunk - extracts from beginning of first chunk
- * 3. Chunk length spans multiple source chunks - combines data from multiple chunks
  */
 function removeChunkFromSourceData(sourceChunks: Array<Uint8Array>, chunkLength: number): Uint8Array {
 	if (chunkLength === sourceChunks[0].length) {
@@ -589,28 +578,34 @@ const buildFileRepresentation = (
  */
 async function loadDedupInfoToCache(
 	content: Blob,
-	/**
-	 * The end position of the content to process
-	 *
-	 * Will process content up to the end of the chunk after this position
-	 */
-	end: number,
+	/** Will be mutated */
 	remoteXorbHashes: string[],
 	params: XetWriteTokenParams,
 	chunkCache: ChunkCache,
-	isAtBeginning: boolean,
 	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-	chunkModule: typeof import("../vendor/xet-chunk/chunker_wasm")
-): Promise<{
-	/** Number of bytes that were deduplicated (found in cache) */
-	dedupedBytes: number;
-	/** Total number of bytes processed */
-	totalBytes: number;
-}> {
+	chunkModule: typeof import("../vendor/xet-chunk/chunker_wasm"),
+
+	opts?: {
+		isAtBeginning?: boolean;
+		/**
+		 * The end position of the content to process
+		 *
+		 * Will process content up to the end of the chunk after this position
+		 */
+		end?: number;
+		/**
+		 * The maximum number of chunks to process
+		 *
+		 * Will process content up to the end of the chunk after this position
+		 */
+		maxChunks?: number;
+	}
+): Promise<void> {
 	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 	const cache = chunkCache;
 
 	let dedupedBytes = 0;
+	let chunksProcessed = 0;
 	let totalBytes = 0;
 	let bytesSinceRemoteDedup = Infinity;
 	const sourceChunks: Array<Uint8Array> = [];
@@ -620,8 +615,9 @@ async function loadDedupInfoToCache(
 
 		const processChunks = async (chunkData: Array<{ hash: string; length: number; dedup: boolean }>) => {
 			for (const chunk of chunkData) {
-				if (isAtBeginning) {
-					chunk.dedup ||= totalBytes === 0;
+				chunksProcessed++;
+				if (opts?.isAtBeginning && chunksProcessed === 1) {
+					chunk.dedup = true;
 				}
 				totalBytes += chunk.length;
 
@@ -676,7 +672,13 @@ async function loadDedupInfoToCache(
 		};
 
 		// Read and process blob content
-		while (totalBytes < end) {
+		while (true) {
+			if (opts?.end !== undefined && totalBytes >= opts.end) {
+				break;
+			}
+			if (opts?.maxChunks !== undefined && chunksProcessed >= opts.maxChunks) {
+				break;
+			}
 			const { done, value } = await reader.read();
 			if (done) {
 				await processChunks(chunker.finish());
@@ -685,11 +687,6 @@ async function loadDedupInfoToCache(
 			sourceChunks.push(value);
 			await processChunks(chunker.add_data(value));
 		}
-
-		return {
-			dedupedBytes,
-			totalBytes,
-		};
 	} finally {
 		chunker.free();
 	}
