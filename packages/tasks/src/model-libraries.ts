@@ -537,6 +537,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.kimi_audio,
 		filter: false,
 	},
+	kittentts: {
+		prettyLabel: "KittenTTS",
+		repoName: "KittenTTS",
+		repoUrl: "https://github.com/KittenML/KittenTTS",
+		snippets: snippets.kittentts,
+	},
 	kronos: {
 		prettyLabel: "KRONOS",
 		repoName: "KRONOS",

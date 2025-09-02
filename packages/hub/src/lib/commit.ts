@@ -92,7 +92,7 @@ export type CommitParams = {
 	/**
 	 * @deprecated Not yet ready for production use
 	 */
-	xet?: boolean;
+	useXet?: boolean;
 } & Partial<CredentialsParams>;
 
 export interface CommitOutput {
@@ -298,7 +298,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
 
-			if (params.xet) {
+			if (params.useXet) {
 				// First get all the files that are already uploaded out of the way
 				for (const obj of json.objects) {
 					const op = shaToOperation.get(obj.oid);
@@ -336,7 +336,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						}
 					})(),
 					{
-						customFetch: params.fetch ?? fetch,
+						fetch: params.fetch,
 						accessToken,
 						hubUrl: params.hubUrl ?? HUB_URL,
 						repo: repoId,
