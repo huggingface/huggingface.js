@@ -44,6 +44,17 @@ export interface CommitFile {
 	// forceLfs?: boolean
 }
 
+export interface SpliceFile {
+	operation: "splice";
+	path: string;
+	/** Later, will be ContentSource. For now simpler to just handle blobs */
+	content: Blob;
+	start: number;
+	end: number;
+	/** Later, will be ContentSource. For now simpler to just handle blobs */
+	insert: Blob;
+}
+
 type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
 
 // TODO: find a nice way to handle LFS & non-LFS files in an uniform manner, see https://github.com/huggingface/moon-landing/issues/4370
@@ -54,7 +65,7 @@ type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
 // 	content?:  ContentSource;
 // };
 
-export type CommitOperation = CommitDeletedEntry | CommitFile /* | CommitRenameFile */;
+export type CommitOperation = CommitDeletedEntry | CommitFile | SpliceFile /* | CommitRenameFile */;
 type CommitBlobOperation = Exclude<CommitOperation, CommitFile> | CommitBlob;
 
 export type CommitParams = {
@@ -138,6 +149,25 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 	const repoId = toRepoId(params.repo);
 	yield { event: "phase", phase: "preuploading" };
 
+	let useXet = params.useXet;
+	if (useXet) {
+		const info = await (params.fetch ?? fetch)(
+			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}?expand[]=xetEnabled`,
+			{
+				headers: {
+					...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+				},
+			}
+		);
+
+		if (!info.ok) {
+			throw await createApiError(info);
+		}
+
+		const data = await info.json();
+		useXet = !!data.xetEnabled;
+	}
+
 	const lfsShas = new Map<string, string | null>();
 
 	const abortController = new AbortController();
@@ -160,6 +190,10 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 		const allOperations = (
 			await Promise.all(
 				params.operations.map(async (operation) => {
+					if (operation.operation === "splice" && !useXet) {
+						throw new Error("Splice operation is not supported when Xet is disabled");
+					}
+
 					if (operation.operation !== "addOrUpdate") {
 						return operation;
 					}
