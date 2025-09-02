@@ -6,10 +6,11 @@ import { join } from "node:path";
 import { writeFile, readFile, stat, mkdir } from "node:fs/promises";
 import type { RepoId } from "../src/types/public.js";
 import { toRepoId } from "../src/utils/toRepoId.js";
-import { commitIter } from "../src/index.js";
-import { pathToFileURL } from "node:url";
+import type { CommitOperation } from "../src/index.js";
+import { commitIter, downloadFile } from "../src/index.js";
 import { WebBlob } from "../src/utils/WebBlob.js";
 import { SplicedBlob } from "../src/utils/SplicedBlob.js";
+import { pathToFileURL } from "node:url";
 
 /**
  * This script downloads the files from openai-community/gpt2 and simulates an upload to a xet repo.
@@ -337,13 +338,25 @@ async function main() {
 
 	if (args.commit) {
 		console.log("\n=== Committing files ===");
+		const operations: CommitOperation[] = [];
+		for (const fileInfo of FILES_TO_DOWNLOAD) {
+			operations.push({
+				operation: "addOrUpdate",
+				content: pathToFileURL(join(downloadDir, fileInfo.filename)),
+				path: fileInfo.filename,
+			});
+		}
+		for (const fileInfo of FILES_TO_EDIT) {
+			operations.push({
+				operation: "edit",
+				originalContent: new Blob([await readFile(join(downloadDir, fileInfo.filename))]),
+				edits: fileInfo.edits,
+				path: fileInfo.filename,
+			});
+		}
 		const iterator = commitIter({
 			repo,
-			operations: files.map((file) => ({
-				operation: "addOrUpdate",
-				content: pathToFileURL(file.filepath),
-				path: file.filename,
-			})),
+			operations,
 			accessToken: args.token,
 			title: "Upload xet files with JS lib",
 			useXet: true,
@@ -360,7 +373,16 @@ async function main() {
 
 		console.log("Redownloading files and verifying SHA256 integrity");
 		for (const file of FILES_TO_DOWNLOAD) {
-			const fileBlob = await WebBlob.create(new URL(file.url));
+			const fileBlob = await downloadFile({
+				repo,
+				path: file.filename,
+				accessToken: args.token,
+			});
+
+			if (!fileBlob) {
+				throw new Error(`Failed to download ${file.filename}`);
+			}
+
 			const sha256Hash = sha256(fileBlob, { useWebWorker: false });
 			let res: IteratorResult<number, string>;
 			do {
@@ -372,7 +394,16 @@ async function main() {
 		}
 
 		for (const file of FILES_TO_EDIT) {
-			const fileBlob = await WebBlob.create(new URL(file.url));
+			const fileBlob = await downloadFile({
+				repo,
+				path: file.filename,
+				accessToken: args.token,
+			});
+
+			if (!fileBlob) {
+				throw new Error(`Failed to download ${file.filename}`);
+			}
+
 			const sha256Hash = sha256(fileBlob, { useWebWorker: false });
 			let res: IteratorResult<number, string>;
 			do {
