@@ -16,9 +16,6 @@ export function uploadFiles(
 		useWebWorkers?: CommitParams["useWebWorkers"];
 		maxFolderDepth?: CommitParams["maxFolderDepth"];
 		abortSignal?: CommitParams["abortSignal"];
-		/**
-		 * @deprecated Not yet ready for production use
-		 */
 		useXet?: CommitParams["useXet"];
 	} & Partial<CredentialsParams>
 ): Promise<CommitOutput> {

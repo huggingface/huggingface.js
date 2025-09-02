@@ -38,7 +38,6 @@ export async function modelInfo<
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-				Accepts: "application/json",
 			},
 		}
 	);
