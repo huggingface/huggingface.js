@@ -854,7 +854,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	rkllm: {
 		prettyLabel: "RKLLM",
-		repoName: "rknn-llm",
+		repoName: "RKLLM",
 		repoUrl: "https://github.com/airockchip/rknn-llm",
 		countDownloads: `path_extension:"rkllm"`,
 	},
