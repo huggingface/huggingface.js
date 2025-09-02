@@ -55,10 +55,12 @@ export interface SpliceFile {
 	path: string;
 	/** Later, will be ContentSource. For now simpler to just handle blobs */
 	content: Blob;
-	start: number;
-	end: number;
-	/** Later, will be ContentSource. For now simpler to just handle blobs */
-	insert: Blob;
+	splice: Array<{
+		/** Later, will be ContentSource. For now simpler to just handle blobs */
+		content: Blob;
+		start: number;
+		end: number;
+	}>;
 }
 
 type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
@@ -202,9 +204,10 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 					if (operation.operation === "splice") {
 						// Convert SpliceFile operation to a file operation with SplicedBlob
-						const splicedBlob = SplicedBlob.create(operation.content, [
-							{ insert: operation.insert, start: operation.start, end: operation.end },
-						]);
+						const splicedBlob = SplicedBlob.create(
+							operation.content,
+							operation.splice.map((splice) => ({ insert: splice.content, start: splice.start, end: splice.end }))
+						);
 						return {
 							operation: "addOrUpdate" as const,
 							path: operation.path,
