@@ -58,6 +58,13 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	infinitetalk: {
+		prettyLabel: "InfiniteTalk",
+		repoName: "InfiniteTalk",
+		repoUrl: "https://github.com/MeiGen-AI/InfiniteTalk",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	acestep: {
 		prettyLabel: "ACE-Step",
 		repoName: "ACE-Step",
