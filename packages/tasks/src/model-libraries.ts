@@ -496,6 +496,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.indextts,
 		filter: false,
 	},
+	infinitetalk: {
+		prettyLabel: "InfiniteTalk",
+		repoName: "InfiniteTalk",
+		repoUrl: "https://github.com/MeiGen-AI/InfiniteTalk",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
 		repoName: "InfiniteYou",
