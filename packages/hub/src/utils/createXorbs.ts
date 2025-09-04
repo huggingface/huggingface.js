@@ -40,6 +40,7 @@ class CurrentXorbInfo {
 
 	fileProcessedBytes: Record<string, number>;
 	fileUploadedBytes: Record<string, number>;
+	fileSize: Record<string, number>;
 	data: Uint8Array;
 	immutableData: {
 		chunkIndex: number;
@@ -52,6 +53,7 @@ class CurrentXorbInfo {
 		this.chunks = [];
 		this.fileProcessedBytes = {};
 		this.fileUploadedBytes = {};
+		this.fileSize = {};
 		this.data = new Uint8Array(XORB_SIZE);
 		this.immutableData = null;
 	}
@@ -70,8 +72,8 @@ class CurrentXorbInfo {
 			id: this.id,
 			files: Object.entries(this.fileProcessedBytes).map(([path, progress]) => ({
 				path,
-				progress,
-				lastSentProgress: this.fileUploadedBytes[path] ?? 0,
+				progress: progress / this.fileSize[path],
+				lastSentProgress: (this.fileUploadedBytes[path] ?? 0) / this.fileSize[path],
 			})),
 		};
 	}
@@ -111,7 +113,7 @@ export async function* createXorbs(
 	const chunkCache = new ChunkCache();
 	let xorb = new CurrentXorbInfo();
 
-	const nextXorb = (currentFile: { path: string; uploadedBytes: number }): XorbEvent => {
+	const nextXorb = (currentFile: { path: string; uploadedBytes: number; size: number }): XorbEvent => {
 		const event = xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
 
 		xorbId++;
@@ -120,6 +122,7 @@ export async function* createXorbs(
 		xorb.fileUploadedBytes = {
 			[currentFile.path]: currentFile.uploadedBytes,
 		};
+		xorb.fileSize[currentFile.path] = currentFile.size;
 
 		return event;
 	};
@@ -143,6 +146,8 @@ export async function* createXorbs(
 
 	try {
 		for await (const fileSource of fileSources) {
+			xorb.fileSize[fileSource.path] = fileSource.content.size;
+
 			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
 			if (fileSource.content instanceof SplicedBlob && fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE) {
 				await loadDedupInfoToCache(
@@ -235,7 +240,7 @@ export async function* createXorbs(
 					if (cacheData === undefined) {
 						if (!writeChunk(xorb, chunkToCopy, chunk.hash)) {
 							// Failure to write chunk, maybe because it went over xorb size limit
-							yield nextXorb({ path: fileSource.path, uploadedBytes: processedBytes / fileSource.content.size });
+							yield nextXorb({ path: fileSource.path, uploadedBytes: processedBytes, size: fileSource.content.size });
 
 							chunkIndex = 0;
 							chunkXorbId = xorbId;
@@ -290,7 +295,7 @@ export async function* createXorbs(
 					}
 
 					if (xorb.chunks.length >= MAX_XORB_CHUNKS) {
-						yield nextXorb({ path: fileSource.path, uploadedBytes: processedBytes });
+						yield nextXorb({ path: fileSource.path, uploadedBytes: processedBytes, size: fileSource.content.size });
 
 						for (const event of pendingFileEvents) {
 							event.representation = event.representation.map((rep) => ({

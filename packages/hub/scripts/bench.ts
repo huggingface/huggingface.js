@@ -2,7 +2,7 @@ import { uploadShards } from "../src/utils/uploadShards.js";
 import { sha256 } from "../src/utils/sha256.js";
 import { parseArgs } from "node:util";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import path, { join } from "node:path";
 import { writeFile, readFile, stat, mkdir } from "node:fs/promises";
 import type { RepoId } from "../src/types/public.js";
 import { toRepoId } from "../src/utils/toRepoId.js";
@@ -10,6 +10,8 @@ import type { CommitOperation } from "../src/index.js";
 import { commitIter, downloadFile } from "../src/index.js";
 import { SplicedBlob } from "../src/utils/SplicedBlob.js";
 import { pathToFileURL } from "node:url";
+import { existsSync } from "node:fs";
+import { FileBlob } from "../src/utils/FileBlob.js";
 
 /**
  * This script downloads the files from openai-community/gpt2 and simulates an upload to a xet repo.
@@ -36,6 +38,11 @@ const FILES_TO_DOWNLOAD = [
 		url: "https://huggingface.co/openai-community/gpt2/resolve/main/64.tflite?download=true",
 		filename: "64.tflite",
 		sha256: "cfcd510b239d90b71ee87d4e57a5a8c2d55b2a941e5d9fe5852298268ddbe61b",
+	},
+	{
+		url: "https://huggingface.co/openai-community/gpt2/resolve/main/model.safetensors?download=true",
+		filename: "model.safetensors",
+		sha256: "248dfc3911869ec493c76e65bf2fcf7f615828b0254c12b473182f0f81d3a707",
 	},
 ];
 
@@ -84,8 +91,7 @@ async function* createFileSource(files: Array<{ filepath: string; filename: stri
 }> {
 	for (const file of files) {
 		console.log(`Processing ${file.filename}...`);
-		const buffer = await readFile(file.filepath);
-		let blob = new Blob([buffer]);
+		let blob: Blob = await FileBlob.create(file.filepath);
 
 		if (file.filename.endsWith(".edited")) {
 			const edits = FILES_TO_EDIT.find((f) => f.filename === file.filename)?.edits;
@@ -110,7 +116,7 @@ async function* createFileSource(files: Array<{ filepath: string; filename: stri
 		const sha256ToCheck =
 			FILES_TO_DOWNLOAD.find((f) => f.filename === file.filename)?.sha256 ||
 			FILES_TO_EDIT.find((f) => f.filename === file.filename)?.sha256;
-		if (sha256Hash !== sha256ToCheck) {
+		if (sha256ToCheck !== undefined && sha256Hash !== sha256ToCheck) {
 			throw new Error(`SHA256 mismatch for ${file.filename}: ${sha256Hash} !== ${sha256ToCheck}`);
 		}
 
@@ -214,6 +220,10 @@ async function main() {
 				short: "c",
 				default: false,
 			},
+			localFilePath: {
+				type: "string",
+				short: "f",
+			},
 			write: {
 				type: "boolean",
 				short: "w",
@@ -250,6 +260,13 @@ async function main() {
 		files.push({ filepath, filename: fileInfo.filename });
 	}
 
+	if (args.localFilePath) {
+		if (!existsSync(args.localFilePath)) {
+			throw new Error(`Local file ${args.localFilePath} does not exist`);
+		}
+		files.push({ filepath: args.localFilePath, filename: path.basename(args.localFilePath) });
+	}
+
 	// Parse repo
 	const repoName = args.repo;
 
@@ -279,7 +296,20 @@ async function main() {
 	// Process files through uploadShards
 	const fileSource = createFileSource(files);
 
-	for await (const event of uploadShards(fileSource, uploadParams)) {
+	const fileProgress: Record<string, number> = {};
+
+	for await (const event of uploadShards(fileSource, {
+		...uploadParams,
+		yieldCallback: (event) => {
+			if (!fileProgress[event.path]) {
+				fileProgress[event.path] = event.progress;
+			}
+			if (event.progress < fileProgress[event.path]) {
+				throw new Error(`Progress for ${event.path} went down from ${fileProgress[event.path]} to ${event.progress}`);
+			}
+			fileProgress[event.path] = event.progress;
+		},
+	})) {
 		switch (event.event) {
 			case "file": {
 				console.log(`\n📁 Processed file: ${event.path}`);
