@@ -73,7 +73,9 @@ class CurrentXorbInfo {
 			files: Object.entries(this.fileProcessedBytes).map(([path, progress]) => ({
 				path,
 				progress: progress / this.fileSize[path],
-				lastSentProgress: (this.fileUploadedBytes[path] ?? 0) / this.fileSize[path],
+				lastSentProgress:
+					(this.fileUploadedBytes[path] ??
+						0 + (progress - (this.fileUploadedBytes[path] ?? 0)) * PROCESSING_PROGRESS_RATIO) / this.fileSize[path],
 			})),
 		};
 	}
