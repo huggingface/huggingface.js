@@ -57,6 +57,7 @@ interface UploadShardsParams {
 	fetch?: typeof fetch;
 	repo: RepoId;
 	rev: string;
+	yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => void;
 }
 
 /**
@@ -128,6 +129,14 @@ export async function* uploadShards(
 					xorbView.setBigUint64(xorbViewOffset, 0n, true); // reserved
 					xorbViewOffset += 8;
 					chunkBytes += chunk.length;
+				}
+
+				for (const file of output.files) {
+					yield {
+						event: "fileProgress",
+						path: file.path,
+						progress: file.initialProgress + (file.progress - file.initialProgress) * 0.5,
+					};
 				}
 
 				await uploadXorb(output, params);
@@ -344,7 +353,10 @@ function writeHashToArray(hash: string, array: Uint8Array, offset: number) {
 	}
 }
 
-async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: UploadShardsParams) {
+async function uploadXorb(
+	xorb: { hash: string; xorb: Uint8Array; files: Array<{ path: string; progress: number; initialProgress: number }> },
+	params: UploadShardsParams
+) {
 	const token = await xetWriteToken(params);
 
 	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorb/default/${xorb.hash}`, {
@@ -352,6 +364,19 @@ async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: Uplo
 		body: xorb.xorb,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
+		},
+		...{
+			progressHint: {
+				progressCallback: (progress: number) => {
+					for (const file of xorb.files) {
+						params.yieldCallback({
+							event: "fileProgress",
+							path: file.path,
+							progress: file.initialProgress + (file.progress - file.initialProgress) * (0.5 + progress * 0.5),
+						});
+					}
+				},
+			},
 		},
 	});
 

@@ -22,6 +22,7 @@ interface XorbEvent {
 	files: Array<{
 		path: string;
 		progress: number;
+		initialProgress: number;
 	}>;
 }
 
@@ -42,6 +43,7 @@ class CurrentXorbInfo {
 	 * If the xorb contains the end of file A, B, and up to 34.5% of file C
 	 */
 	fileProgress: Record<string, number>;
+	initialFileProgress: Record<string, number>;
 	data: Uint8Array;
 	immutableData: {
 		chunkIndex: number;
@@ -53,6 +55,7 @@ class CurrentXorbInfo {
 		this.offset = 0;
 		this.chunks = [];
 		this.fileProgress = {};
+		this.initialFileProgress = {};
 		this.data = new Uint8Array(XORB_SIZE);
 		this.immutableData = null;
 	}
@@ -69,14 +72,20 @@ class CurrentXorbInfo {
 			hash: computeXorbHash(xorbChunksCleaned),
 			chunks: xorbChunksCleaned,
 			id: this.id,
-			files: Object.entries(this.fileProgress).map(([path, progress]) => ({ path, progress })),
+			files: Object.entries(this.fileProgress).map(([path, progress]) => ({
+				path,
+				progress,
+				initialProgress: this.initialFileProgress[path] ?? 0,
+			})),
 		};
 	}
 }
 
 export async function* createXorbs(
 	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
-	params: XetWriteTokenParams
+	params: XetWriteTokenParams & {
+		yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => void;
+	}
 ): AsyncGenerator<
 	| XorbEvent
 	| {
@@ -106,12 +115,15 @@ export async function* createXorbs(
 	const chunkCache = new ChunkCache();
 	let xorb = new CurrentXorbInfo();
 
-	const nextXorb = (): XorbEvent => {
+	const nextXorb = (currentFile: { path: string; progress: number }): XorbEvent => {
 		const event = xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
 
 		xorbId++;
 		xorb = new CurrentXorbInfo();
 		xorb.id = xorbId;
+		xorb.initialFileProgress = {
+			[currentFile.path]: currentFile.progress,
+		};
 
 		return event;
 	};
@@ -150,6 +162,7 @@ export async function* createXorbs(
 				);
 			}
 			let bytesSinceRemoteDedup = Infinity;
+			let bytesSinceLastProgressEvent = 0;
 			let isFirstFileChunk = true;
 			const sourceChunks: Array<Uint8Array> = [];
 
@@ -220,7 +233,7 @@ export async function* createXorbs(
 					if (cacheData === undefined) {
 						if (!writeChunk(xorb, chunkToCopy, chunk.hash)) {
 							// Failure to write chunk, maybe because it went over xorb size limit
-							yield nextXorb();
+							yield nextXorb({ path: fileSource.path, progress: processedBytes / fileSource.content.size });
 
 							chunkIndex = 0;
 							chunkXorbId = xorbId;
@@ -246,6 +259,7 @@ export async function* createXorbs(
 						dedupedBytes += chunk.length; // Track deduplicated bytes
 					}
 					bytesSinceRemoteDedup += chunk.length;
+					bytesSinceLastProgressEvent += chunk.length;
 
 					// Collect metadata for building representation at the end
 					chunkMetadata.push({
@@ -253,9 +267,23 @@ export async function* createXorbs(
 						chunkIndex: chunkIndex,
 						length: chunk.length,
 					});
+
 					xorb.fileProgress[fileSource.path] = processedBytes / fileSource.content.size;
+
+					if (bytesSinceLastProgressEvent >= 1_000_000) {
+						// Emit half of the progress when processed locally, other half when uploading the xorb
+						bytesSinceLastProgressEvent = 0;
+						params.yieldCallback({
+							event: "fileProgress",
+							path: fileSource.path,
+							progress:
+								(xorb.initialFileProgress[fileSource.path] ?? 0) +
+								(xorb.fileProgress[fileSource.path] - (xorb.initialFileProgress[fileSource.path] ?? 0)) * 0.5,
+						});
+					}
+
 					if (xorb.chunks.length >= MAX_XORB_CHUNKS) {
-						yield nextXorb();
+						yield nextXorb({ path: fileSource.path, progress: processedBytes / fileSource.content.size });
 
 						for (const event of pendingFileEvents) {
 							event.representation = event.representation.map((rep) => ({

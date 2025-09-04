@@ -74,25 +74,14 @@ export async function* uploadFilesWithProgress(
 
 			const progressHint = init.progressHint as {
 				progressCallback: (progress: number) => void;
-			} & (
-				| Record<string, never>
-				| { part: number; numParts: number; start: undefined }
-				| { start: number; end: number; part: undefined }
-			);
+			} & (Record<string, never> | { part: number; numParts: number });
 			const progressCallback = progressHint.progressCallback;
 
 			const xhr = new XMLHttpRequest();
 
 			xhr.upload.addEventListener("progress", (event) => {
 				if (event.lengthComputable) {
-					if (progressHint.start !== undefined) {
-						progressCallback(
-							Math.min(
-								0.9999999999,
-								progressHint.start + (event.loaded / event.total) * (progressHint.end - progressHint.start)
-							)
-						);
-					} else if (progressHint.part !== undefined) {
+					if (progressHint.part !== undefined) {
 						let tracking = multipartUploadTracking.get(progressCallback);
 						if (!tracking) {
 							tracking = { numParts: progressHint.numParts, partsProgress: {} };
