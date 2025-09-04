@@ -542,7 +542,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Lemonade",
 		docsUrl: "https://lemonade-server.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
 	},
 } satisfies Record<string, LocalApp>;
