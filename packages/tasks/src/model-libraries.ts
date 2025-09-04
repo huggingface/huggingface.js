@@ -58,13 +58,6 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
-	infinitetalk: {
-		prettyLabel: "InfiniteTalk",
-		repoName: "InfiniteTalk",
-		repoUrl: "https://github.com/MeiGen-AI/InfiniteTalk",
-		filter: false,
-		countDownloads: `path_extension:"safetensors"`,
-	},
 	acestep: {
 		prettyLabel: "ACE-Step",
 		repoName: "ACE-Step",
@@ -502,6 +495,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/index-tts/index-tts",
 		snippets: snippets.indextts,
 		filter: false,
+	},
+	infinitetalk: {
+		prettyLabel: "InfiniteTalk",
+		repoName: "InfiniteTalk",
+		repoUrl: "https://github.com/MeiGen-AI/InfiniteTalk",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
