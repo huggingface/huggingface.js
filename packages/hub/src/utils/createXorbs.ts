@@ -70,12 +70,13 @@ class CurrentXorbInfo {
 			hash: computeXorbHash(xorbChunksCleaned),
 			chunks: xorbChunksCleaned,
 			id: this.id,
-			files: Object.entries(this.fileProcessedBytes).map(([path, progress]) => ({
+			files: Object.entries(this.fileProcessedBytes).map(([path, processedBytes]) => ({
 				path,
-				progress: progress / this.fileSize[path],
+				progress: processedBytes / this.fileSize[path],
 				lastSentProgress:
-					(this.fileUploadedBytes[path] ??
-						0 + (progress - (this.fileUploadedBytes[path] ?? 0)) * PROCESSING_PROGRESS_RATIO) / this.fileSize[path],
+					((this.fileUploadedBytes[path] ?? 0) +
+						(processedBytes - (this.fileUploadedBytes[path] ?? 0)) * PROCESSING_PROGRESS_RATIO) /
+					this.fileSize[path],
 			})),
 		};
 	}

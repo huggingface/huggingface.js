@@ -333,6 +333,14 @@ async function main() {
 			case "fileProgress": {
 				const progress = (event.progress * 100).toFixed(1);
 				console.log(`   📈 Progress for ${event.path}: ${progress}%`);
+
+				if (!fileProgress[event.path]) {
+					fileProgress[event.path] = event.progress;
+				}
+				if (event.progress < fileProgress[event.path]) {
+					throw new Error(`Progress for ${event.path} went down from ${fileProgress[event.path]} to ${event.progress}`);
+				}
+				fileProgress[event.path] = event.progress;
 				break;
 			}
 		}
