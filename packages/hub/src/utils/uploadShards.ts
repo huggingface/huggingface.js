@@ -135,7 +135,7 @@ export async function* uploadShards(
 					yield {
 						event: "fileProgress",
 						path: file.path,
-						progress: file.initialProgress + (file.progress - file.initialProgress) * 0.5,
+						progress: file.lastSentProgress,
 					};
 				}
 
@@ -354,7 +354,7 @@ function writeHashToArray(hash: string, array: Uint8Array, offset: number) {
 }
 
 async function uploadXorb(
-	xorb: { hash: string; xorb: Uint8Array; files: Array<{ path: string; progress: number; initialProgress: number }> },
+	xorb: { hash: string; xorb: Uint8Array; files: Array<{ path: string; progress: number; lastSentProgress: number }> },
 	params: UploadShardsParams
 ) {
 	const token = await xetWriteToken(params);
@@ -372,7 +372,7 @@ async function uploadXorb(
 						params.yieldCallback({
 							event: "fileProgress",
 							path: file.path,
-							progress: file.initialProgress + (file.progress - file.initialProgress) * (0.5 + progress * 0.5),
+							progress: file.lastSentProgress + (file.progress - file.lastSentProgress) * progress,
 						});
 					}
 				},
