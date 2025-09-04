@@ -1,6 +1,7 @@
 import { createApiError } from "../error";
 import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "./checkCredentials";
+import { combineUint8Arrays } from "./combineUint8Arrays";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
 
@@ -327,11 +328,11 @@ export class XetBlob extends Blob {
 					totalFetchBytes += result.value.byteLength;
 
 					if (leftoverBytes) {
-						result.value = new Uint8Array([...leftoverBytes, ...result.value]);
+						result.value = combineUint8Arrays(leftoverBytes, result.value);
 						leftoverBytes = undefined;
 					}
 
-					while (totalBytesRead < maxBytes && result.value.byteLength) {
+					while (totalBytesRead < maxBytes && result.value?.byteLength) {
 						if (result.value.byteLength < 8) {
 							// We need 8 bytes to parse the chunk header
 							leftoverBytes = result.value;

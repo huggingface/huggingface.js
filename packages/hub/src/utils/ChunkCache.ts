@@ -43,7 +43,10 @@ export class ChunkCache {
 
 	getChunk(
 		hash: string,
-		hmacFunction: (hash: string, key: string) => string
+		/**
+		 * Set to null if you only want to check against locally created chunks, or the hash is already a hmac
+		 */
+		hmacFunction: ((hash: string, key: string) => string) | null
 	):
 		| {
 				xorbIndex: number;
@@ -51,7 +54,7 @@ export class ChunkCache {
 		  }
 		| undefined {
 		let index = this.map.get(hash);
-		if (index === undefined) {
+		if (index === undefined && hmacFunction !== null) {
 			for (const hmac of this.hmacs) {
 				index = this.map.get(hmacFunction(hash, hmac));
 				if (index !== undefined) {
@@ -66,5 +69,9 @@ export class ChunkCache {
 			xorbIndex: this.xorbIndices[index],
 			chunkIndex: this.chunkIndices[index],
 		};
+	}
+
+	removeChunkFromCache(hash: string): void {
+		this.map.delete(hash);
 	}
 }

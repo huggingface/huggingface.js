@@ -478,6 +478,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
 		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
 	},
+	"hunyuanworld-voyager": {
+		prettyLabel: "HunyuanWorld-voyager",
+		repoName: "HunyuanWorld-voyager",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
@@ -490,6 +495,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/index-tts/index-tts",
 		snippets: snippets.indextts,
 		filter: false,
+	},
+	infinitetalk: {
+		prettyLabel: "InfiniteTalk",
+		repoName: "InfiniteTalk",
+		repoUrl: "https://github.com/MeiGen-AI/InfiniteTalk",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
@@ -530,6 +542,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/MoonshotAI/Kimi-Audio",
 		snippets: snippets.kimi_audio,
 		filter: false,
+	},
+	kittentts: {
+		prettyLabel: "KittenTTS",
+		repoName: "KittenTTS",
+		repoUrl: "https://github.com/KittenML/KittenTTS",
+		snippets: snippets.kittentts,
 	},
 	kronos: {
 		prettyLabel: "KRONOS",
@@ -845,6 +863,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Reverb",
 		repoUrl: "https://github.com/revdotcom/reverb",
 		filter: false,
+	},
+	rkllm: {
+		prettyLabel: "RKLLM",
+		repoName: "RKLLM",
+		repoUrl: "https://github.com/airockchip/rknn-llm",
+		countDownloads: `path_extension:"rkllm"`,
 	},
 	saelens: {
 		prettyLabel: "SAELens",

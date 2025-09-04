@@ -841,6 +841,17 @@ print(text)
 `,
 ];
 
+export const kittentts = (model: ModelData): string[] => [
+	`from kittentts import KittenTTS
+m = KittenTTS("${model.id}")
+
+audio = m.generate("This high quality TTS model works without a GPU")
+
+# Save the audio
+import soundfile as sf
+sf.write('output.wav', audio, 24000)`,
+];
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
@@ -1045,7 +1056,6 @@ output = model.predict(
 )
 for res in output:
     res.print()
-    res.save_to_img(save_path="./output/")
     res.save_to_json(save_path="./output/res.json")`,
 		];
 	}

@@ -23,6 +23,8 @@ import { base64FromBytes } from "../utils/base64FromBytes";
 import { isFrontend } from "../utils/isFrontend";
 import { createBlobs } from "../utils/createBlobs";
 import { uploadShards } from "../utils/uploadShards";
+import { splitAsyncGenerator } from "../utils/splitAsyncGenerator";
+import { SplicedBlob } from "../utils/SplicedBlob";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -42,6 +44,36 @@ export interface CommitFile {
 	// forceLfs?: boolean
 }
 
+/**
+ * Opitmized when only the beginning or the end of the file is replaced
+ *
+ * todo: handle other cases
+ */
+export interface CommitEditFile {
+	operation: "edit";
+	path: string;
+	/** Later, will be ContentSource. For now simpler to just handle blobs */
+	originalContent: Blob;
+	edits: Array<{
+		/**
+		 * Later, will be ContentSource. For now simpler to just handle blobs
+		 *
+		 * originalContent from [start, end) will be replaced by this
+		 */
+		content: Blob;
+		/**
+		 * The start position of the edit in the original content
+		 */
+		start: number;
+		/**
+		 * The end position of the edit in the original content
+		 *
+		 * originalContent from [start, end) will be replaced by the edit
+		 */
+		end: number;
+	}>;
+}
+
 type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
 
 // TODO: find a nice way to handle LFS & non-LFS files in an uniform manner, see https://github.com/huggingface/moon-landing/issues/4370
@@ -52,7 +84,7 @@ type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
 // 	content?:  ContentSource;
 // };
 
-export type CommitOperation = CommitDeletedEntry | CommitFile /* | CommitRenameFile */;
+export type CommitOperation = CommitDeletedEntry | CommitFile | CommitEditFile /* | CommitRenameFile */;
 type CommitBlobOperation = Exclude<CommitOperation, CommitFile> | CommitBlob;
 
 export type CommitParams = {
@@ -89,10 +121,7 @@ export type CommitParams = {
 	fetch?: typeof fetch;
 	abortSignal?: AbortSignal;
 	// Credentials are optional due to custom fetch functions or cookie auth
-	/**
-	 * @deprecated Not yet ready for production use
-	 */
-	xet?: boolean;
+	useXet?: boolean;
 } & Partial<CredentialsParams>;
 
 export interface CommitOutput {
@@ -136,6 +165,25 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 	const repoId = toRepoId(params.repo);
 	yield { event: "phase", phase: "preuploading" };
 
+	let useXet = params.useXet;
+	if (useXet) {
+		const info = await (params.fetch ?? fetch)(
+			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}?expand[]=xetEnabled`,
+			{
+				headers: {
+					...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+				},
+			}
+		);
+
+		if (!info.ok) {
+			throw await createApiError(info);
+		}
+
+		const data = await info.json();
+		useXet = !!data.xetEnabled;
+	}
+
 	const lfsShas = new Map<string, string | null>();
 
 	const abortController = new AbortController();
@@ -158,6 +206,23 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 		const allOperations = (
 			await Promise.all(
 				params.operations.map(async (operation) => {
+					if (operation.operation === "edit" && !useXet) {
+						throw new Error("Edit operation is not supported when Xet is disabled");
+					}
+
+					if (operation.operation === "edit") {
+						// Convert EditFile operation to a file operation with SplicedBlob
+						const splicedBlob = SplicedBlob.create(
+							operation.originalContent,
+							operation.edits.map((splice) => ({ insert: splice.content, start: splice.start, end: splice.end }))
+						);
+						return {
+							operation: "addOrUpdate" as const,
+							path: operation.path,
+							content: splicedBlob,
+						};
+					}
+
 					if (operation.operation !== "addOrUpdate") {
 						return operation;
 					}
@@ -298,7 +363,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
 
-			if (params.xet) {
+			if (params.useXet) {
 				// First get all the files that are already uploaded out of the way
 				for (const obj of json.objects) {
 					const op = shaToOperation.get(obj.oid);
@@ -323,43 +388,49 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						};
 					}
 				}
-				for await (const event of uploadShards(
-					(async function* () {
-						for (const obj of json.objects) {
-							const op = shaToOperation.get(obj.oid);
-							if (!op || !obj.actions?.upload) {
-								continue;
-							}
-							abortSignal?.throwIfAborted();
-
-							yield { content: op.content, path: op.path, sha256: obj.oid };
+				const source = (async function* () {
+					for (const obj of json.objects) {
+						const op = shaToOperation.get(obj.oid);
+						if (!op || !obj.actions?.upload) {
+							continue;
 						}
-					})(),
-					{
-						customFetch: params.fetch ?? fetch,
-						accessToken,
-						hubUrl: params.hubUrl ?? HUB_URL,
-						repo: repoId,
-						// todo: maybe leave empty if PR?
-						rev: params.branch ?? "main",
+						abortSignal?.throwIfAborted();
+
+						yield { content: op.content, path: op.path, sha256: obj.oid };
 					}
-				)) {
-					if (event.event === "file") {
-						yield {
-							event: "fileProgress",
-							path: event.path,
-							progress: 1,
-							state: "uploading",
-						};
-					} else if (event.event === "fileProgress") {
-						yield {
-							event: "fileProgress",
-							path: event.path,
-							progress: event.progress,
-							state: "uploading",
-						};
-					}
-				}
+				})();
+				const sources = splitAsyncGenerator(source, 5);
+				yield* eventToGenerator((yieldCallback, returnCallback, rejectCallback) =>
+					Promise.all(
+						sources.map(async function (source) {
+							for await (const event of uploadShards(source, {
+								fetch: params.fetch,
+								accessToken,
+								hubUrl: params.hubUrl ?? HUB_URL,
+								repo: repoId,
+								// todo: maybe leave empty if PR?
+								rev: params.branch ?? "main",
+								yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
+							})) {
+								if (event.event === "file") {
+									yieldCallback({
+										event: "fileProgress" as const,
+										path: event.path,
+										progress: 1,
+										state: "uploading" as const,
+									});
+								} else if (event.event === "fileProgress") {
+									yieldCallback({
+										event: "fileProgress" as const,
+										path: event.path,
+										progress: event.progress,
+										state: "uploading" as const,
+									});
+								}
+							}
+						})
+					).then(() => returnCallback(undefined), rejectCallback)
+				);
 			} else {
 				yield* eventToGenerator<CommitProgressEvent, void>((yieldCallback, returnCallback, rejectCallback) => {
 					return promisesQueueStreaming(
@@ -672,6 +743,13 @@ async function convertOperationToNdJson(operation: CommitBlobOperation): Promise
 					path: operation.path,
 				},
 			};
+		}
+		case "edit": {
+			// Note: By the time we get here, splice operations should have been converted to addOrUpdate operations with SplicedBlob
+			// But we handle this case for completeness
+			throw new Error(
+				"Edit operations should be converted to addOrUpdate operations before reaching convertOperationToNdJson"
+			);
 		}
 		default:
 			throw new TypeError("Unknown operation: " + (operation as { operation: string }).operation);
