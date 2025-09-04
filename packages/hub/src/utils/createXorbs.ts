@@ -146,7 +146,7 @@ export async function* createXorbs(
 			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
 			if (fileSource.content instanceof SplicedBlob && fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE) {
 				await loadDedupInfoToCache(
-					fileSource.content.originalBlob.slice(0, fileSource.content.firstSpliceIndex),
+					fileSource.content.originalBlob.slice(0, MAX_CHUNK_SIZE),
 					remoteXorbHashes,
 					params,
 					chunkCache,
