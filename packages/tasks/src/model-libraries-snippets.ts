@@ -1498,7 +1498,7 @@ export const transformers = (model: ModelData): string[] => {
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
 			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")"
 		);
-		if (model.tags.includes("conversational")) {
+		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
 			if (model.tags.includes("image-text-to-text")) {
 				autoSnippet.push(
 					"messages = [",
