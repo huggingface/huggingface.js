@@ -224,4 +224,3 @@ Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the f
 ## Dependencies
 
 - `@huggingface/tasks` : Typings only
-- `@huggingface/lz4` : URL join utility
