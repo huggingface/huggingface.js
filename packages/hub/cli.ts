@@ -17,7 +17,6 @@ class UploadProgressManager {
 	private fileBars: Map<string, SingleBar> = new Map();
 	private readonly isQuiet: boolean;
 	private cliProgressAvailable: boolean = false;
-	private events: Array<CommitProgressEvent> = [];
 
 	constructor(isQuiet: boolean = false) {
 		this.isQuiet = isQuiet;
@@ -53,7 +52,6 @@ class UploadProgressManager {
 		} else if (event.event === "fileProgress") {
 			this.updateFileProgress(event.path, event.progress, event.state);
 		}
-		this.events.push(event);
 	}
 
 	private logPhase(phase: string): void {
@@ -210,6 +208,12 @@ const commands = {
 				description:
 					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
 				default: process.env.HF_TOKEN,
+			},
+			{
+				name: "xet" as const,
+				short: "x",
+				description: "Use Xet to upload files",
+				boolean: true,
 			},
 		] as const,
 	} satisfies SingleCommand,
@@ -420,6 +424,7 @@ async function run() {
 				commitMessage,
 				pathInRepo,
 				private: isPrivate,
+				xet,
 			} = parsedArgs;
 
 			const repoId = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
@@ -460,6 +465,7 @@ async function run() {
 					commitTitle: commitMessage?.trim().split("\n")[0],
 					commitDescription: commitMessage?.trim().split("\n").slice(1).join("\n").trim(),
 					hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+					useXet: xet ?? false,
 				})) {
 					progressManager.handleEvent(event);
 				}
