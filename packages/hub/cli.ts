@@ -11,15 +11,10 @@ import { version } from "./package.json";
 import type { CommitProgressEvent } from "./src/lib/commit";
 import type { MultiBar, SingleBar } from "cli-progress";
 
-// Import types for cli-progress (available at compile time even with dynamic imports)
-// type MultiBar = import("cli-progress").MultiBar;
-// type SingleBar = import("cli-progress").SingleBar;
-
 // Progress bar manager for handling multiple file uploads
 class UploadProgressManager {
 	private multibar: MultiBar | null = null;
 	private fileBars: Map<string, SingleBar> = new Map();
-	private currentPhase: string = "";
 	private readonly isQuiet: boolean;
 	private cliProgressAvailable: boolean = false;
 	private events: Array<CommitProgressEvent> = [];
@@ -54,7 +49,6 @@ class UploadProgressManager {
 		if (this.isQuiet) return;
 
 		if (event.event === "phase") {
-			this.currentPhase = event.phase;
 			this.logPhase(event.phase);
 		} else if (event.event === "fileProgress") {
 			this.updateFileProgress(event.path, event.progress, event.state);
@@ -120,9 +114,6 @@ class UploadProgressManager {
 	stop(): void {
 		if (!this.isQuiet && this.cliProgressAvailable && this.multibar) {
 			this.multibar.stop();
-		}
-		for (const event of this.events) {
-			console.log(event);
 		}
 	}
 }
