@@ -75,7 +75,7 @@ class UploadProgressManager {
 
 			if (!bar) {
 				bar = this.multibar.create(100, 0, {
-					filename: this.truncateFilename(path, 25),
+					filename: this.truncateFilename(path, 100),
 					state: state,
 				});
 				this.fileBars.set(path, bar);
@@ -92,7 +92,7 @@ class UploadProgressManager {
 		} else {
 			// Fall back to simple console logging
 			const percentage = Math.round(progress * 100);
-			const truncatedPath = this.truncateFilename(path, 50);
+			const truncatedPath = this.truncateFilename(path, 100);
 
 			if (progress >= 1) {
 				const statusIcon = state === "hashing" ? "✓ hashed" : "✓ uploaded";
