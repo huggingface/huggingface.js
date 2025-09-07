@@ -1916,6 +1916,14 @@ export const pruna = (model: ModelData): string[] => {
 		snippets = pruna_default(model);
 	}
 
+	const ensurePrunaModelImport = (snippet: string): string => {
+		if (!/^from pruna import PrunaModel/m.test(snippet)) {
+			return `from pruna import PrunaModel\n${snippet}`;
+		}
+		return snippet;
+	};
+	snippets = snippets.map(ensurePrunaModelImport);
+
 	if (model.tags.includes("pruna_pro-ai")) {
 		return snippets.map((snippet) =>
 			snippet.replace(/\bpruna\b/g, "pruna_pro").replace(/\bPrunaModel\b/g, "PrunaProModel")
@@ -1928,7 +1936,7 @@ export const pruna = (model: ModelData): string[] => {
 const pruna_diffusers = (model: ModelData): string[] => {
 	const diffusersSnippets = diffusers(model);
 
-	const rewrittenSnippets = diffusersSnippets.map((snippet) =>
+	return diffusersSnippets.map((snippet) =>
 		snippet
 			// Replace pipeline classes with PrunaModel
 			.replace(/\b\w*Pipeline\w*\b/g, "PrunaModel")
@@ -1944,14 +1952,6 @@ const pruna_diffusers = (model: ModelData): string[] => {
 			.replace(/\n\n+/g, "\n")
 			.trim()
 	);
-
-	// Ensure PrunaModel import
-	return rewrittenSnippets.map((snippet) => {
-		if (!/^from pruna import PrunaModel/m.test(snippet)) {
-			return `from pruna import PrunaModel\n${snippet}`;
-		}
-		return snippet;
-	});
 };
 
 const pruna_transformers = (model: ModelData): string[] => {
@@ -1977,13 +1977,7 @@ const pruna_transformers = (model: ModelData): string[] => {
 		);
 	}
 
-	// Ensure PrunaModel import
-	return processedSnippets.map((snippet) => {
-		if (!/^from pruna import PrunaModel/m.test(snippet)) {
-			return `from pruna import PrunaModel\n${snippet}`;
-		}
-		return snippet;
-	});
+	return processedSnippets;
 };
 
 const pruna_default = (model: ModelData): string[] => [
