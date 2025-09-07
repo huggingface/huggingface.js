@@ -130,6 +130,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
 	},
+	bboxmaskpose: {
+		prettyLabel: "BBoxMaskPose",
+		repoName: "BBoxMaskPose",
+		repoUrl: "https://github.com/MiraPurkrabek/BBoxMaskPose",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	ben2: {
 		prettyLabel: "BEN2",
 		repoName: "BEN2",
@@ -471,6 +478,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
 		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
 	},
+	"hunyuanworld-voyager": {
+		prettyLabel: "HunyuanWorld-voyager",
+		repoName: "HunyuanWorld-voyager",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
@@ -483,6 +495,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/index-tts/index-tts",
 		snippets: snippets.indextts,
 		filter: false,
+	},
+	infinitetalk: {
+		prettyLabel: "InfiniteTalk",
+		repoName: "InfiniteTalk",
+		repoUrl: "https://github.com/MeiGen-AI/InfiniteTalk",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
@@ -523,6 +542,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/MoonshotAI/Kimi-Audio",
 		snippets: snippets.kimi_audio,
 		filter: false,
+	},
+	kittentts: {
+		prettyLabel: "KittenTTS",
+		repoName: "KittenTTS",
+		repoUrl: "https://github.com/KittenML/KittenTTS",
+		snippets: snippets.kittentts,
 	},
 	kronos: {
 		prettyLabel: "KRONOS",
@@ -854,6 +879,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/revdotcom/reverb",
 		filter: false,
 	},
+	rkllm: {
+		prettyLabel: "RKLLM",
+		repoName: "RKLLM",
+		repoUrl: "https://github.com/airockchip/rknn-llm",
+		countDownloads: `path_extension:"rkllm"`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
@@ -1170,6 +1201,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/MCG-NJU/VFIMamba",
 		countDownloads: `path_extension:"pkl"`,
 		snippets: snippets.vfimamba,
+	},
+	lvface: {
+		prettyLabel: "LVFace",
+		repoName: "LVFace",
+		repoUrl: "https://github.com/bytedance/LVFace",
+		countDownloads: `path_extension:"pt" OR path_extension:"onnx"`,
+		snippets: snippets.lvface,
 	},
 	voicecraft: {
 		prettyLabel: "VoiceCraft",

@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/hub",
 	"packageManager": "pnpm@10.10.0",
-	"version": "2.4.1",
+	"version": "2.6.2",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -42,7 +42,8 @@
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
 		"check": "tsc",
-		"build:xet-wasm": "./scripts/build-xet-wasm.sh -t bundler -c -b hoytak/250714-eliminate-mdb-v1"
+		"build:xet-wasm": "./scripts/build-xet-wasm.sh -t bundler --clean",
+		"bench": "tsx scripts/bench.ts"
 	},
 	"files": [
 		"src",

@@ -47,32 +47,20 @@ const taskData: TaskDataCustom = {
 			id: "HuggingFaceTB/SmolVLM-Instruct",
 		},
 		{
-			description: "A screenshot understanding model used to control computers.",
-			id: "microsoft/OmniParser-v2.0",
+			description: "Cutting-edge reasoning vision language model.",
+			id: "zai-org/GLM-4.5V",
 		},
 		{
-			description: "Cutting-edge vision language model.",
-			id: "allenai/Molmo-7B-D-0924",
+			description: "Cutting-edge small vision language model to convert documents to text.",
+			id: "rednote-hilab/dots.ocr",
 		},
 		{
 			description: "Small yet powerful model.",
-			id: "vikhyatk/moondream2",
-		},
-		{
-			description: "Strong image-text-to-text model.",
-			id: "Qwen/Qwen2.5-VL-7B-Instruct",
+			id: "Qwen/Qwen2.5-VL-3B-Instruct",
 		},
 		{
 			description: "Image-text-to-text model with agentic capabilities.",
 			id: "microsoft/Magma-8B",
-		},
-		{
-			description: "Strong image-text-to-text model focused on documents.",
-			id: "allenai/olmOCR-7B-0225-preview",
-		},
-		{
-			description: "Small yet strong image-text-to-text model.",
-			id: "ibm-granite/granite-vision-3.2-2b",
 		},
 	],
 	spaces: [
@@ -81,33 +69,17 @@ const taskData: TaskDataCustom = {
 			id: "opencompass/open_vlm_leaderboard",
 		},
 		{
-			description: "Vision language models arena, where models are ranked by votes of users.",
-			id: "WildVision/vision-arena",
+			description: "An application that compares object detection capabilities of different vision language models.",
+			id: "sergiopaniego/vlm_object_understanding",
 		},
 		{
-			description: "Powerful vision-language model assistant.",
-			id: "akhaliq/Molmo-7B-D-0924",
-		},
-		{
-			description: "Powerful vision language assistant that can understand multiple images.",
-			id: "HuggingFaceTB/SmolVLM2",
-		},
-		{
-			description: "An application for chatting with an image-text-to-text model.",
-			id: "GanymedeNil/Qwen2-VL-7B",
-		},
-		{
-			description: "An application that parses screenshots into actions.",
-			id: "showlab/ShowUI",
-		},
-		{
-			description: "An application that detects gaze.",
-			id: "moondream/gaze-demo",
+			description: "An application to compare different OCR models.",
+			id: "prithivMLmods/Multimodal-OCR",
 		},
 	],
 	summary:
 		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision-language models, or VLMs. The difference from image-to-text models is that these models take an additional text input, not restricting the model to certain use cases like image captioning, and may also be trained to accept a conversation as input.",
-	widgetModels: ["Qwen/Qwen2-VL-7B-Instruct"],
+	widgetModels: ["zai-org/GLM-4.5V"],
 	youtubeId: "IoGaGfU1CIg",
 };
 

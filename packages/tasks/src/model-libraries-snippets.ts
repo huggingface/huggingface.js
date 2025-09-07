@@ -841,6 +841,17 @@ print(text)
 `,
 ];
 
+export const kittentts = (model: ModelData): string[] => [
+	`from kittentts import KittenTTS
+m = KittenTTS("${model.id}")
+
+audio = m.generate("This high quality TTS model works without a GPU")
+
+# Save the audio
+import soundfile as sf
+sf.write('output.wav', audio, 24000)`,
+];
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
@@ -1045,7 +1056,6 @@ output = model.predict(
 )
 for res in output:
     res.print()
-    res.save_to_img(save_path="./output/")
     res.save_to_json(save_path="./output/res.json")`,
 		];
 	}
@@ -1523,7 +1533,7 @@ export const transformers = (model: ModelData): string[] => {
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto"),'
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto")'
 		);
 	}
 
@@ -1701,6 +1711,16 @@ export const vfimamba = (model: ModelData): string[] => [
 	`from Trainer_finetune import Model
 
 model = Model.from_pretrained("${model.id}")`,
+];
+
+export const lvface = (model: ModelData): string[] => [
+	`from huggingface_hub import hf_hub_download
+	 from inference_onnx import LVFaceONNXInferencer
+
+model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K/LVFace-L_Glint360K.onnx")
+inferencer = LVFaceONNXInferencer(model_path, use_gpu=True, timeout=300)
+img_path = 'path/to/image1.jpg'
+embedding = inferencer.infer_from_image(img_path)`,
 ];
 
 export const voicecraft = (model: ModelData): string[] => [
