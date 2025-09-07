@@ -815,6 +815,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pyannote_audio,
 		filter: true,
 	},
+	"pruna-ai": {
+		prettyLabel: "Pruna AI",
+		repoName: "Pruna AI",
+		repoUrl: "https://github.com/PrunaAI/pruna",
+		snippets: snippets.pruna,
+		docsUrl: "https://docs.pruna.ai",
+	},
 	"py-feat": {
 		prettyLabel: "Py-Feat",
 		repoName: "Py-Feat",

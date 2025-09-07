@@ -1905,6 +1905,93 @@ export const model2vec = (model: ModelData): string[] => [
 model = StaticModel.from_pretrained("${model.id}")`,
 ];
 
+export const pruna = (model: ModelData): string[] => {
+	let snippets: string[];
+
+	if (model.library_name === "diffusers") {
+		snippets = pruna_diffusers(model);
+	} else if (model.library_name === "transformers") {
+		snippets = pruna_transformers(model);
+	} else {
+		snippets = pruna_default(model);
+	}
+
+	if (model.tags.includes("pruna_pro-ai")) {
+		return snippets.map((snippet) =>
+			snippet.replace(/\bpruna\b/g, "pruna_pro").replace(/\bPrunaModel\b/g, "PrunaProModel")
+		);
+	}
+
+	return snippets;
+};
+
+const pruna_diffusers = (model: ModelData): string[] => {
+	const diffusersSnippets = diffusers(model);
+
+	const rewrittenSnippets = diffusersSnippets.map((snippet) =>
+		snippet
+			// Replace pipeline classes with PrunaModel
+			.replace(/\b\w*Pipeline\w*\b/g, "PrunaModel")
+			// Clean up diffusers imports containing PrunaModel
+			.replace(/from diffusers import ([^,\n]*PrunaModel[^,\n]*)/g, "")
+			.replace(/from diffusers import ([^,\n]+),?\s*([^,\n]*PrunaModel[^,\n]*)/g, "from diffusers import $1")
+			.replace(/from diffusers import\s*(\n|$)/g, "")
+			// Fix PrunaModel imports
+			.replace(/from diffusers import PrunaModel/g, "from pruna import PrunaModel")
+			.replace(/from diffusers import ([^,\n]+), PrunaModel/g, "from diffusers import $1")
+			.replace(/from diffusers import PrunaModel, ([^,\n]+)/g, "from diffusers import $1")
+			// Clean up whitespace
+			.replace(/\n\n+/g, "\n")
+			.trim()
+	);
+
+	// Ensure PrunaModel import
+	return rewrittenSnippets.map((snippet) => {
+		if (!/^from pruna import PrunaModel/m.test(snippet)) {
+			return `from pruna import PrunaModel\n${snippet}`;
+		}
+		return snippet;
+	});
+};
+
+const pruna_transformers = (model: ModelData): string[] => {
+	const info = model.transformersInfo;
+	const transformersSnippets = transformers(model);
+
+	// Replace pipeline with PrunaModel
+	let processedSnippets = transformersSnippets.map((snippet) =>
+		snippet
+			.replace(/from transformers import pipeline/g, "from pruna import PrunaModel")
+			.replace(/pipeline\([^)]*\)/g, `PrunaModel.from_pretrained("${model.id}")`)
+	);
+
+	// Additional cleanup if auto_model info is available
+	if (info?.auto_model) {
+		processedSnippets = processedSnippets.map((snippet) =>
+			snippet
+				.replace(new RegExp(`from transformers import ${info.auto_model}\n?`, "g"), "")
+				.replace(new RegExp(`${info.auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
+				.replace(new RegExp(`^.*from.*import.*(, *${info.auto_model})+.*$`, "gm"), (line) =>
+					line.replace(new RegExp(`, *${info.auto_model}`, "g"), "")
+				)
+		);
+	}
+
+	// Ensure PrunaModel import
+	return processedSnippets.map((snippet) => {
+		if (!/^from pruna import PrunaModel/m.test(snippet)) {
+			return `from pruna import PrunaModel\n${snippet}`;
+		}
+		return snippet;
+	});
+};
+
+const pruna_default = (model: ModelData): string[] => [
+	`from pruna import PrunaModel
+model = PrunaModel.from_pretrained("${model.id}")
+`,
+];
+
 export const nemo = (model: ModelData): string[] => {
 	let command: string[] | undefined = undefined;
 	// Resolve the tag to a nemo domain/sub-domain
