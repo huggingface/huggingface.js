@@ -114,10 +114,6 @@ class UploadProgressManager {
 			this.multibar.stop();
 		}
 	}
-
-	[Symbol.dispose](): void {
-		this.stop();
-	}
 }
 
 // Didn't find the import from "node:util", so duplicated it here
@@ -478,7 +474,10 @@ async function run() {
 					console.log("\n✅ Upload completed successfully!");
 				}
 			} catch (error) {
+				progressManager.stop();
 				throw error;
+			} finally {
+				progressManager.stop();
 			}
 			break;
 		}
