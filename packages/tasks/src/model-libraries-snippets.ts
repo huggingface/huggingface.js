@@ -1476,7 +1476,7 @@ export const terratorch = (model: ModelData): string[] => [
 model = BACKBONE_REGISTRY.build("${model.id}")`,
 ];
 
-const has_chat_template = (model: ModelData): boolean =>
+const hasChatTemplate = (model: ModelData): boolean =>
 	model.config?.tokenizer_config?.chat_template !== undefined ||
 	model.config?.processor_config?.chat_template !== undefined ||
 	model.config?.chat_template_jinja !== undefined;
@@ -1503,7 +1503,7 @@ export const transformers = (model: ModelData): string[] => {
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
 			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")"
 		);
-		if (model.tags.includes("conversational") && has_chat_template(model)) {
+		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
 				autoSnippet.push(
 					"messages = [",
