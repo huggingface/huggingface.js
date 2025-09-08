@@ -30,10 +30,3 @@ export interface TokenizerConfig extends SpecialTokensMap {
 	use_default_system_prompt?: boolean;
 	chat_template?: string | Array<{ name: string; template: string }>;
 }
-
-/**
- * Minimalistic interface for ProcessorConfig
- */
-export interface ProcessorConfig {
-	chat_template?: string | Array<{ name: string; template: string }>;
-}
