@@ -1908,9 +1908,9 @@ model = StaticModel.from_pretrained("${model.id}")`,
 export const pruna = (model: ModelData): string[] => {
 	let snippets: string[];
 
-	if (model.library_name === "diffusers") {
+	if (model.tags.includes("diffusers")) {
 		snippets = pruna_diffusers(model);
-	} else if (model.library_name === "transformers") {
+	} else if (model.tags.includes("transformers")) {
 		snippets = pruna_transformers(model);
 	} else {
 		snippets = pruna_default(model);
