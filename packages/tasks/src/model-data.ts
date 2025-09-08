@@ -1,6 +1,6 @@
 import type { PipelineType } from "./pipelines.js";
 import type { WidgetExample } from "./widget-example.js";
-import type { ProcessorConfig, TokenizerConfig } from "./tokenizer-data.js";
+import type { TokenizerConfig } from "./tokenizer-data.js";
 
 /**
  * Public interface for model metadata
