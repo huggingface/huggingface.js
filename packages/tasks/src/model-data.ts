@@ -1,6 +1,6 @@
 import type { PipelineType } from "./pipelines.js";
 import type { WidgetExample } from "./widget-example.js";
-import type { TokenizerConfig } from "./tokenizer-data.js";
+import type { ProcessorConfig, TokenizerConfig } from "./tokenizer-data.js";
 
 /**
  * Public interface for model metadata
@@ -44,6 +44,8 @@ export interface ModelData {
 			quant_method?: string;
 		};
 		tokenizer_config?: TokenizerConfig;
+		processor_config?: ProcessorConfig;
+		chat_template_jinja?: string;
 		adapter_transformers?: {
 			model_name?: string;
 			model_class?: string;
