@@ -496,6 +496,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.indextts,
 		filter: false,
 	},
+	infinitetalk: {
+		prettyLabel: "InfiniteTalk",
+		repoName: "InfiniteTalk",
+		repoUrl: "https://github.com/MeiGen-AI/InfiniteTalk",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
 		repoName: "InfiniteYou",
@@ -1065,7 +1072,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/IBM/terratorch",
 		docsUrl: "https://ibm.github.io/terratorch/",
 		filter: false,
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"ckpt"`,
 		snippets: snippets.terratorch,
 	},
 	"tic-clip": {

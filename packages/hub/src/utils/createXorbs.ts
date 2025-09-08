@@ -12,6 +12,13 @@ const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
 const INTERVAL_BETWEEN_REMOTE_DEDUP = 4_000_000; // 4MB
+/**
+ * 0 = only show progress when uploading the xorb
+ * 1 = only show progress when processing the file
+ * 0.5 = show progress when uploading the xorb and when processing the file
+ */
+const PROCESSING_PROGRESS_RATIO = 0.1;
+const UPLOADING_PROGRESS_RATIO = 1 - PROCESSING_PROGRESS_RATIO;
 
 interface XorbEvent {
 	event: "xorb";
@@ -22,6 +29,7 @@ interface XorbEvent {
 	files: Array<{
 		path: string;
 		progress: number;
+		lastSentProgress: number;
 	}>;
 }
 
@@ -30,18 +38,9 @@ class CurrentXorbInfo {
 	offset: number;
 	chunks: Array<{ hash: string; length: number; offset: number }>;
 
-	/**
-	 * path => 0..1 mapping of the current xorb
-	 *
-	 * eg
-	 *
-	 * A => 1
-	 * B => 1
-	 * C => 0.345
-	 *
-	 * If the xorb contains the end of file A, B, and up to 34.5% of file C
-	 */
-	fileProgress: Record<string, number>;
+	fileProcessedBytes: Record<string, number>;
+	fileUploadedBytes: Record<string, number>;
+	fileSize: Record<string, number>;
 	data: Uint8Array;
 	immutableData: {
 		chunkIndex: number;
@@ -52,7 +51,9 @@ class CurrentXorbInfo {
 		this.id = 0;
 		this.offset = 0;
 		this.chunks = [];
-		this.fileProgress = {};
+		this.fileProcessedBytes = {};
+		this.fileUploadedBytes = {};
+		this.fileSize = {};
 		this.data = new Uint8Array(XORB_SIZE);
 		this.immutableData = null;
 	}
@@ -69,14 +70,23 @@ class CurrentXorbInfo {
 			hash: computeXorbHash(xorbChunksCleaned),
 			chunks: xorbChunksCleaned,
 			id: this.id,
-			files: Object.entries(this.fileProgress).map(([path, progress]) => ({ path, progress })),
+			files: Object.entries(this.fileProcessedBytes).map(([path, processedBytes]) => ({
+				path,
+				progress: processedBytes / this.fileSize[path],
+				lastSentProgress:
+					((this.fileUploadedBytes[path] ?? 0) +
+						(processedBytes - (this.fileUploadedBytes[path] ?? 0)) * PROCESSING_PROGRESS_RATIO) /
+					this.fileSize[path],
+			})),
 		};
 	}
 }
 
 export async function* createXorbs(
 	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
-	params: XetWriteTokenParams
+	params: XetWriteTokenParams & {
+		yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => void;
+	}
 ): AsyncGenerator<
 	| XorbEvent
 	| {
@@ -106,12 +116,16 @@ export async function* createXorbs(
 	const chunkCache = new ChunkCache();
 	let xorb = new CurrentXorbInfo();
 
-	const nextXorb = (): XorbEvent => {
+	const nextXorb = (currentFile: { path: string; uploadedBytes: number; size: number }): XorbEvent => {
 		const event = xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
 
 		xorbId++;
 		xorb = new CurrentXorbInfo();
 		xorb.id = xorbId;
+		xorb.fileUploadedBytes = {
+			[currentFile.path]: currentFile.uploadedBytes,
+		};
+		xorb.fileSize[currentFile.path] = currentFile.size;
 
 		return event;
 	};
@@ -135,10 +149,12 @@ export async function* createXorbs(
 
 	try {
 		for await (const fileSource of fileSources) {
+			xorb.fileSize[fileSource.path] = fileSource.content.size;
+
 			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
 			if (fileSource.content instanceof SplicedBlob && fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE) {
 				await loadDedupInfoToCache(
-					fileSource.content.originalBlob.slice(0, fileSource.content.firstSpliceIndex),
+					fileSource.content.originalBlob.slice(0, MAX_CHUNK_SIZE),
 					remoteXorbHashes,
 					params,
 					chunkCache,
@@ -150,6 +166,7 @@ export async function* createXorbs(
 				);
 			}
 			let bytesSinceRemoteDedup = Infinity;
+			let bytesSinceLastProgressEvent = 0;
 			let isFirstFileChunk = true;
 			const sourceChunks: Array<Uint8Array> = [];
 
@@ -207,6 +224,7 @@ export async function* createXorbs(
 							cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
 
 							// We backtrack a bit to check if new dedup info contains older chunks
+							const oldDedupedBytes = dedupedBytes;
 							dedupedBytes = backtrackDedup(
 								xorb,
 								chunkModule.compute_hmac.bind(chunkModule),
@@ -215,12 +233,17 @@ export async function* createXorbs(
 								chunkMetadata,
 								dedupedBytes
 							);
+
+							if (dedupedBytes > oldDedupedBytes) {
+								xorb.fileUploadedBytes[fileSource.path] ??= 0;
+								xorb.fileUploadedBytes[fileSource.path] += dedupedBytes - oldDedupedBytes;
+							}
 						}
 					}
 					if (cacheData === undefined) {
 						if (!writeChunk(xorb, chunkToCopy, chunk.hash)) {
 							// Failure to write chunk, maybe because it went over xorb size limit
-							yield nextXorb();
+							yield nextXorb({ path: fileSource.path, uploadedBytes: processedBytes, size: fileSource.content.size });
 
 							chunkIndex = 0;
 							chunkXorbId = xorbId;
@@ -244,8 +267,12 @@ export async function* createXorbs(
 						chunkXorbId = cacheData.xorbIndex;
 						chunkIndex = cacheData.chunkIndex;
 						dedupedBytes += chunk.length; // Track deduplicated bytes
+						xorb.fileUploadedBytes[fileSource.path] ??= 0;
+						xorb.fileUploadedBytes[fileSource.path] += chunk.length;
 					}
+
 					bytesSinceRemoteDedup += chunk.length;
+					bytesSinceLastProgressEvent += chunk.length;
 
 					// Collect metadata for building representation at the end
 					chunkMetadata.push({
@@ -253,9 +280,25 @@ export async function* createXorbs(
 						chunkIndex: chunkIndex,
 						length: chunk.length,
 					});
-					xorb.fileProgress[fileSource.path] = processedBytes / fileSource.content.size;
+
+					xorb.fileProcessedBytes[fileSource.path] = processedBytes;
+
+					if (bytesSinceLastProgressEvent >= 1_000_000) {
+						// Emit half of the progress when processed locally, other half when uploading the xorb
+						bytesSinceLastProgressEvent = 0;
+						params.yieldCallback({
+							event: "fileProgress",
+							path: fileSource.path,
+							progress:
+								((xorb.fileUploadedBytes[fileSource.path] ?? 0) +
+									(xorb.fileProcessedBytes[fileSource.path] - (xorb.fileUploadedBytes[fileSource.path] ?? 0)) *
+										PROCESSING_PROGRESS_RATIO) /
+								fileSource.content.size,
+						});
+					}
+
 					if (xorb.chunks.length >= MAX_XORB_CHUNKS) {
-						yield nextXorb();
+						yield nextXorb({ path: fileSource.path, uploadedBytes: processedBytes, size: fileSource.content.size });
 
 						for (const event of pendingFileEvents) {
 							event.representation = event.representation.map((rep) => ({
