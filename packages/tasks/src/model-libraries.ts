@@ -801,6 +801,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"pruna-ai": {
+		prettyLabel: "Pruna AI",
+		repoName: "Pruna AI",
+		repoUrl: "https://github.com/PrunaAI/pruna",
+		snippets: snippets.pruna,
+		docsUrl: "https://docs.pruna.ai",
+	},
 	pxia: {
 		prettyLabel: "pxia",
 		repoName: "pxia",
@@ -1072,7 +1079,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/IBM/terratorch",
 		docsUrl: "https://ibm.github.io/terratorch/",
 		filter: false,
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"ckpt"`,
 		snippets: snippets.terratorch,
 	},
 	"tic-clip": {
