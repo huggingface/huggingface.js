@@ -801,6 +801,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"pruna-ai": {
+		prettyLabel: "Pruna AI",
+		repoName: "Pruna AI",
+		repoUrl: "https://github.com/PrunaAI/pruna",
+		snippets: snippets.pruna,
+		docsUrl: "https://docs.pruna.ai",
+	},
 	pxia: {
 		prettyLabel: "pxia",
 		repoName: "pxia",
