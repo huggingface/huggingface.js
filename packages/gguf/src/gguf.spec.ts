@@ -762,8 +762,7 @@ describe("gguf", () => {
 
 		it("should exactly match original file serialization", async () => {
 			// Use a real GGUF file to test exact serialization matching
-			const testUrl =
-				"https://huggingface.co/mishig/tinyllamastories-test/resolve/020974f381438307a5407d3e006ba0806f5fd37e/tinyllamas-stories-15m-f32.gguf";
+			const testUrl = URL_GEMMA_2B;
 
 			// Parse the original file
 			const {
@@ -866,8 +865,7 @@ describe("gguf", () => {
 
 		it("should create complete GGUF header with serializeGgufHeader", async () => {
 			// Use a real GGUF file to test complete serialization
-			const testUrl =
-				"https://huggingface.co/mishig/tinyllamastories-test/resolve/020974f381438307a5407d3e006ba0806f5fd37e/tinyllamas-stories-15m-f32.gguf";
+			const testUrl = URL_GEMMA_2B;
 
 			// Parse the original file
 			const {
