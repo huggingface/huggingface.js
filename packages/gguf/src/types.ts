@@ -145,4 +145,6 @@ export interface GGUFParseOutput<Options extends GGUFMetadataOptions = { strict:
 	metadata: GGUFMetadata<Options>;
 	tensorInfos: GGUFTensorInfo[];
 	tensorDataOffset: bigint;
+	/** Whether the file uses little-endian byte order */
+	littleEndian: boolean;
 }

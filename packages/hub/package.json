@@ -65,6 +65,7 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^"
+		"@huggingface/tasks": "workspace:^",
+		"@huggingface/gguf": "workspace:^"
 	}
 }

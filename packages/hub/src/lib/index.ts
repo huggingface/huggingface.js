@@ -32,4 +32,5 @@ export * from "./space-info";
 export * from "./upload-file";
 export * from "./upload-files";
 export * from "./upload-files-with-progress";
+export * from "./update-gguf-metadata";
 export * from "./who-am-i";
