@@ -11,8 +11,7 @@ const taskData: TaskDataCustom = {
 			id: "tsinghua-ee/QualiSpeech",
 		},
 	],
-	demo: 
-	 {
+	demo: {
 		inputs: [
 			{
 				filename: "audio.wav",
@@ -27,8 +26,7 @@ const taskData: TaskDataCustom = {
 		outputs: [
 			{
 				label: "Generated Text",
-				content:
-					"The gender of the speaker is female.",
+				content: "The gender of the speaker is female.",
 				type: "text",
 			},
 		],
@@ -36,7 +34,8 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "A lightweight model that has capabilities of taking both audio and text as inputs and generating responses.",
+			description:
+				"A lightweight model that has capabilities of taking both audio and text as inputs and generating responses.",
 			id: "fixie-ai/ultravox-v0_5-llama-3_2-1b",
 		},
 		{
@@ -62,7 +61,8 @@ const taskData: TaskDataCustom = {
 			id: "freddyaboulton/talk-to-qwen-webrtc",
 		},
 	],
-	summary: "Audio-text-to-text models take both an audio clip and a text prompt as input, and generate natural language text as output. These models can answer questions about spoken content, summarize meetings, analyze music, or interpret speech beyond simple transcription. They are useful for applications that combine speech understanding with reasoning or conversation.",
+	summary:
+		"Audio-text-to-text models take both an audio clip and a text prompt as input, and generate natural language text as output. These models can answer questions about spoken content, summarize meetings, analyze music, or interpret speech beyond simple transcription. They are useful for applications that combine speech understanding with reasoning or conversation.",
 	widgetModels: [],
 	youtubeId: "",
 };
