@@ -137,21 +137,15 @@ export async function updateGgufMetadata(
 		littleEndian: params.littleEndian ?? littleEndian,
 		alignment,
 	});
-	const modifiedHeaderBytes = new Uint8Array(await completeHeaderBlob.arrayBuffer());
 
-	// Step 4: Get the tensor data from the original file
-	const tensorDataResponse = await (params.fetch ?? fetch)(remoteUrl, {
-		headers: {
-			...(params.accessToken ? { Authorization: `Bearer ${params.accessToken}` } : {}),
-			Range: `bytes=${tensorDataOffset}-`,
-		},
+	// Create WebBlob for the original file to use with edit API
+	const { WebBlob } = await import("../utils/WebBlob");
+	const originalFileBlob = await WebBlob.create(new URL(remoteUrl), {
+		fetch: params.fetch,
+		accessToken: params.accessToken,
 	});
-	const tensorDataBlob = new Blob([await tensorDataResponse.arrayBuffer()]);
 
-	// Step 5: Combine complete header + tensor data
-	const completeFileBlob = new Blob([modifiedHeaderBytes, tensorDataBlob]);
-
-	// Use a simple addOrUpdate operation instead of edit
+	// Use the edit API as required
 	return await commit({
 		...params,
 		repo: params.repo,
@@ -161,13 +155,20 @@ export async function updateGgufMetadata(
 		isPullRequest: params.isPullRequest,
 		hubUrl: params.hubUrl,
 		fetch: params.fetch,
-		useXet: params.useXet ?? true,
+		useXet: params.useXet ?? true, // Required for edit operations
 		operations: [
 			{
-				operation: "addOrUpdate",
+				operation: "edit",
 				path: params.path,
-				content: completeFileBlob,
-			},
+				originalContent: originalFileBlob,
+				edits: [
+					{
+						start: 0,
+						end: Number(tensorDataOffset),
+						content: completeHeaderBlob,
+					},
+				],
+			} as any, // Type assertion needed for edit operation
 		],
 	});
 }
