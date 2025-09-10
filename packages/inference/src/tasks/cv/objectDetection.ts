@@ -14,7 +14,10 @@ export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImage
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "object-detection");
-	const payload = preparePayload(args);
+	const payload = providerHelper.preparePayloadAsync
+		? await providerHelper.preparePayloadAsync(args)
+		: preparePayload(args);
+
 	const { data: res } = await innerRequest<ObjectDetectionOutput>(payload, providerHelper, {
 		...options,
 		task: "object-detection",

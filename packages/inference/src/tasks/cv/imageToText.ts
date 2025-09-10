@@ -13,11 +13,15 @@ export type ImageToTextArgs = BaseArgs & (ImageToTextInput | LegacyImageInput);
 export async function imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "image-to-text");
-	const payload = preparePayload(args);
+	const payload = providerHelper.preparePayloadAsync
+		? await providerHelper.preparePayloadAsync(args)
+		: preparePayload(args);
 	const { data: res } = await innerRequest<[ImageToTextOutput]>(payload, providerHelper, {
 		...options,
 		task: "image-to-text",
 	});
 
-	return providerHelper.getResponse(res[0]);
+	// TODO the huggingface impl for this needs to be updated, used to be
+	// return providerHelper.getResponse(res[0]);
+	return providerHelper.getResponse(res);
 }
