@@ -320,28 +320,28 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 };
 
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-    const tagName = getQuantTag(filepath);
-    const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
+	const tagName = getQuantTag(filepath);
+	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
 
-    // Get recipe according to model type
+	// Get recipe according to model type
 	let simplifiedModelName: string;
-    let recipe: string;
-    let checkpoint: string;
-    let requirements: string;
-    if (model.tags.some(tag => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag))) {
-        recipe = model.tags.includes("ryzenai-npu") ? "oga-npu" : "oga-hybrid";
-        checkpoint = model.id;
-        requirements = " (requires RyzenAI 300 series)";
+	let recipe: string;
+	let checkpoint: string;
+	let requirements: string;
+	if (model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag))) {
+		recipe = model.tags.includes("ryzenai-npu") ? "oga-npu" : "oga-hybrid";
+		checkpoint = model.id;
+		requirements = " (requires RyzenAI 300 series)";
 		simplifiedModelName = modelName.split("-awq-")[0];
 		simplifiedModelName += recipe === "oga-npu" ? "-NPU" : "-Hybrid";
-    } else {
-        recipe = "llamacpp";
-        checkpoint = `${model.id}${tagName}`;
-        requirements = "";
+	} else {
+		recipe = "llamacpp";
+		checkpoint = `${model.id}${tagName}`;
+		requirements = "";
 		simplifiedModelName = modelName;
-    }
+	}
 
-    return [
+	return [
 		{
 			title: "Pull the model",
 			setup: "# Download Lemonade from https://lemonade-server.ai/",
