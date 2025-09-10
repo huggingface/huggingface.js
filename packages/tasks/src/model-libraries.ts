@@ -1261,6 +1261,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
+	"HunyuanImage-2.1":{
+		prettyLabel: "HunyuanImage-2.1",
+		repoName: "HunyuanImage-2.1",
+		repoUrl: "https://huggingface.co/tencent/HunyuanImage-2.1",
+		countDownloads: `path_filename:"hunyuanimage2.1.safetensors"`,
+		snippets: snippets.hunyuanimage_2_1,
+	}
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
