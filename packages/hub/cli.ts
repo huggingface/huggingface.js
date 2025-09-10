@@ -81,13 +81,13 @@ class UploadProgressManager {
 				this.fileBars.set(path, bar);
 			}
 
-			// Update the progress (convert 0-1 to 0-100)
-			const percentage = Math.round(progress * 100);
-			bar.update(percentage, { state: state });
-
-			// If complete, mark it as done
 			if (progress >= 1) {
+				// If complete, mark it as done
 				bar.update(100, { state: state === "hashing" ? "✓ hashed" : "✓ uploaded" });
+			} else {
+				// Update the progress (convert 0-1 to 0-100)
+				const percentage = Math.round(progress * 100);
+				bar.update(percentage, { state: state });
 			}
 		} else {
 			// Fall back to simple console logging
