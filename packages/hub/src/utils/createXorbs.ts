@@ -112,7 +112,6 @@ export async function* createXorbs(
 	let xorbId = 0;
 
 	await chunkModule.init();
-	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 	const chunkCache = new ChunkCache();
 	let xorb = new CurrentXorbInfo();
 
@@ -147,8 +146,9 @@ export async function* createXorbs(
 
 	const remoteXorbHashes: string[] = [""]; // starts at index 1 (to simplify implem a bit)
 
-	try {
-		for await (const fileSource of fileSources) {
+	for await (const fileSource of fileSources) {
+		const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
+		try {
 			xorb.fileSize[fileSource.path] = fileSource.content.size;
 
 			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
@@ -342,22 +342,22 @@ export async function* createXorbs(
 				dedupRatio,
 				representation: fileRepresentation,
 			});
+		} finally {
+			chunker.free();
+			// ^ is this really needed ?
 		}
+	}
 
-		if (xorb.offset > 0) {
-			yield xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
-		}
+	if (xorb.offset > 0) {
+		yield xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
+	}
 
-		for (const event of pendingFileEvents) {
-			event.representation = event.representation.map((rep) => ({
-				...rep,
-				xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
-			}));
-			yield event;
-		}
-	} finally {
-		chunker.free();
-		// ^ is this really needed ?
+	for (const event of pendingFileEvents) {
+		event.representation = event.representation.map((rep) => ({
+			...rep,
+			xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
+		}));
+		yield event;
 	}
 }
 
