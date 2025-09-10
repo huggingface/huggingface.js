@@ -359,7 +359,7 @@ async function uploadXorb(
 ) {
 	const token = await xetWriteToken(params);
 
-	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorb/default/${xorb.hash}`, {
+	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorbs/default/${xorb.hash}`, {
 		method: "POST",
 		body: xorb.xorb,
 		headers: {
@@ -388,7 +388,7 @@ async function uploadXorb(
 async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
 	const token = await xetWriteToken(params);
 
-	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/shard`, {
+	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/shards`, {
 		method: "POST",
 		body: shard,
 		headers: {
