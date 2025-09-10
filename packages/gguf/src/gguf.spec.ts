@@ -11,6 +11,7 @@ import {
 	GGUF_QUANT_ORDER,
 	findNearestQuantType,
 	serializeTypedMetadata,
+	serializeGgufHeader,
 } from "./gguf";
 import fs from "node:fs";
 import { tmpdir } from "node:os";
@@ -860,7 +861,9 @@ describe("gguf", () => {
 				}
 			}
 		}, 30000);
+	});
 
+	describe("serializeGgufHeader", () => {
 		it("should create complete GGUF header with serializeGgufHeader", async () => {
 			// Use a real GGUF file to test complete serialization
 			const testUrl = URL_GEMMA_2B;
@@ -884,8 +887,6 @@ describe("gguf", () => {
 			});
 			const originalHeaderBytes = new Uint8Array(await originalHeaderResponse.arrayBuffer());
 
-			// Use the complete serializer
-			const { serializeGgufHeader } = await import("./gguf");
 			const alignment = Number(originalMetadata["general.alignment"] ?? 32);
 			const completeHeaderBlob = serializeGgufHeader(originalMetadata, tensorInfos, {
 				littleEndian,
