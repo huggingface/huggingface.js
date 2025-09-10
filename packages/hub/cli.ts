@@ -209,12 +209,6 @@ const commands = {
 					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
 				default: process.env.HF_TOKEN,
 			},
-			{
-				name: "xet" as const,
-				short: "x",
-				description: "Use Xet to upload files",
-				boolean: true,
-			},
 		] as const,
 	} satisfies SingleCommand,
 	branch: {
@@ -424,7 +418,6 @@ async function run() {
 				commitMessage,
 				pathInRepo,
 				private: isPrivate,
-				xet,
 			} = parsedArgs;
 
 			const repoId = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
@@ -465,7 +458,7 @@ async function run() {
 					commitTitle: commitMessage?.trim().split("\n")[0],
 					commitDescription: commitMessage?.trim().split("\n").slice(1).join("\n").trim(),
 					hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
-					useXet: xet ?? false,
+					useXet: true,
 				})) {
 					progressManager.handleEvent(event);
 				}
