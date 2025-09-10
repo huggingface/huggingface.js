@@ -159,10 +159,10 @@ export class XetBlob extends Blob {
 			const connParams = await getAccessToken(this.accessToken, this.fetch, this.refreshUrl);
 
 			// debug(
-			// 	`curl '${connParams.casUrl}/v1/reconstruction/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
+			// 	`curl '${connParams.casUrl}/v1/reconstructions/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
 			// );
 
-			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/v1/reconstruction/${this.hash}`, {
+			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/v1/reconstructions/${this.hash}`, {
 				headers: {
 					Authorization: `Bearer ${connParams.accessToken}`,
 					Range: `bytes=${this.start}-${this.end - 1}`,

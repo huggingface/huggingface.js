@@ -202,7 +202,7 @@ export async function* createXorbs(
 						const token = await xetWriteToken(params);
 						bytesSinceRemoteDedup = 0;
 
-						const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunk/default/" + chunk.hash, {
+						const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {
 							headers: {
 								Authorization: `Bearer ${token.accessToken}`,
 							},
@@ -683,7 +683,7 @@ async function loadDedupInfoToCache(
 					const token = await xetWriteToken(params);
 					bytesSinceRemoteDedup = 0;
 
-					const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunk/default/" + chunk.hash, {
+					const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {
 						headers: {
 							Authorization: `Bearer ${token.accessToken}`,
 						},
