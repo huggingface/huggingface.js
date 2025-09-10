@@ -507,7 +507,7 @@ describe("gguf", () => {
 
 	// Serialization tests
 	describe("serializeTypedMetadata", () => {
-		it("should serialize basic typedMetadata to Blob", () => {
+		it("should serialize basic typedMetadata to Uint8Array", () => {
 			const typedMetadata: GGUFTypedMetadata = {
 				version: { value: 2, type: GGUFValueType.UINT32 },
 				tensor_count: { value: 10n, type: GGUFValueType.UINT64 },
@@ -517,11 +517,10 @@ describe("gguf", () => {
 				"general.file_type": { value: 1, type: GGUFValueType.UINT32 },
 			};
 
-			const blob = serializeTypedMetadata(typedMetadata);
+			const result = serializeTypedMetadata(typedMetadata);
 
-			expect(blob).toBeInstanceOf(Blob);
-			expect(blob.type).toBe("application/octet-stream");
-			expect(blob.size).toBeGreaterThan(0);
+			expect(result).toBeInstanceOf(Uint8Array);
+			expect(result.length).toBeGreaterThan(0);
 		});
 
 		it("should serialize typedMetadata with arrays", () => {
@@ -541,11 +540,10 @@ describe("gguf", () => {
 				},
 			};
 
-			const blob = serializeTypedMetadata(typedMetadata);
+			const result = serializeTypedMetadata(typedMetadata);
 
-			expect(blob).toBeInstanceOf(Blob);
-			expect(blob.type).toBe("application/octet-stream");
-			expect(blob.size).toBeGreaterThan(0);
+			expect(result).toBeInstanceOf(Uint8Array);
+			expect(result.length).toBeGreaterThan(0);
 		});
 
 		it("should handle different value types", () => {
@@ -561,11 +559,10 @@ describe("gguf", () => {
 				"test.int64": { value: -9223372036854775808n, type: GGUFValueType.INT64 },
 			};
 
-			const blob = serializeTypedMetadata(typedMetadata);
+			const result = serializeTypedMetadata(typedMetadata);
 
-			expect(blob).toBeInstanceOf(Blob);
-			expect(blob.type).toBe("application/octet-stream");
-			expect(blob.size).toBeGreaterThan(0);
+			expect(result).toBeInstanceOf(Uint8Array);
+			expect(result.length).toBeGreaterThan(0);
 		});
 
 		it("should handle different endianness", () => {
@@ -576,12 +573,12 @@ describe("gguf", () => {
 				"test.value": { value: 42, type: GGUFValueType.UINT32 },
 			};
 
-			const littleEndianBlob = serializeTypedMetadata(typedMetadata, { littleEndian: true });
-			const bigEndianBlob = serializeTypedMetadata(typedMetadata, { littleEndian: false });
+			const littleEndianResult = serializeTypedMetadata(typedMetadata, { littleEndian: true });
+			const bigEndianResult = serializeTypedMetadata(typedMetadata, { littleEndian: false });
 
-			expect(littleEndianBlob.size).toBe(bigEndianBlob.size);
-			expect(littleEndianBlob).toBeInstanceOf(Blob);
-			expect(bigEndianBlob).toBeInstanceOf(Blob);
+			expect(littleEndianResult.length).toBe(bigEndianResult.length);
+			expect(littleEndianResult).toBeInstanceOf(Uint8Array);
+			expect(bigEndianResult).toBeInstanceOf(Uint8Array);
 		});
 
 		it("should throw error for array without subType", () => {
@@ -614,13 +611,12 @@ describe("gguf", () => {
 				},
 			};
 
-			// Serialize to blob
-			const serializedBlob = serializeTypedMetadata(originalTypedMetadata);
+			// Serialize to Uint8Array
+			const serializedArray = serializeTypedMetadata(originalTypedMetadata);
 
-			// Convert blob to array buffer and create a temporary file for testing
-			const arrayBuffer = await serializedBlob.arrayBuffer();
+			// Create a temporary file for testing
 			const tempFilePath = join(tmpdir(), `test-gguf-${Date.now()}.gguf`);
-			fs.writeFileSync(tempFilePath, Buffer.from(arrayBuffer));
+			fs.writeFileSync(tempFilePath, Buffer.from(serializedArray));
 
 			try {
 				// Deserialize back using the gguf function
@@ -668,13 +664,12 @@ describe("gguf", () => {
 				"test.int64": { value: -9223372036854775808n, type: GGUFValueType.INT64 },
 			};
 
-			// Serialize to blob
-			const serializedBlob = serializeTypedMetadata(originalTypedMetadata);
+			// Serialize to Uint8Array
+			const serializedArray = serializeTypedMetadata(originalTypedMetadata);
 
-			// Convert blob to array buffer and create a temporary file for testing
-			const arrayBuffer = await serializedBlob.arrayBuffer();
+			// Create a temporary file for testing
 			const tempFilePath = join(tmpdir(), `test-gguf-${Date.now()}.gguf`);
-			fs.writeFileSync(tempFilePath, Buffer.from(arrayBuffer));
+			fs.writeFileSync(tempFilePath, Buffer.from(serializedArray));
 
 			try {
 				// Deserialize back using the gguf function
@@ -726,14 +721,13 @@ describe("gguf", () => {
 			} as GGUFTypedMetadata;
 
 			// Serialize using the detected endianness
-			const serializedBlob = serializeTypedMetadata(testMetadata, {
+			const serializedArray = serializeTypedMetadata(testMetadata, {
 				littleEndian: detectedEndianness,
 			});
 
-			// Convert blob to array buffer and create a temporary file for testing
-			const arrayBuffer = await serializedBlob.arrayBuffer();
+			// Create a temporary file for testing
 			const tempFilePath = join(tmpdir(), `test-gguf-endian-${Date.now()}.gguf`);
-			fs.writeFileSync(tempFilePath, Buffer.from(arrayBuffer));
+			fs.writeFileSync(tempFilePath, Buffer.from(serializedArray));
 
 			try {
 				// Deserialize back using the gguf function
@@ -791,10 +785,9 @@ describe("gguf", () => {
 			const originalHeaderBytes = new Uint8Array(await originalHeaderResponse.arrayBuffer());
 
 			// Serialize the metadata using our function - NOTE: This only serializes KV metadata, not tensor info!
-			const serializedBlob = serializeTypedMetadata(originalMetadata, {
+			const ourBytes = serializeTypedMetadata(originalMetadata, {
 				littleEndian,
 			});
-			const ourBytes = new Uint8Array(await serializedBlob.arrayBuffer());
 
 			// Compare sizes
 			console.log(`Original header size: ${originalHeaderBytes.length} bytes`);
@@ -888,11 +881,10 @@ describe("gguf", () => {
 			const originalHeaderBytes = new Uint8Array(await originalHeaderResponse.arrayBuffer());
 
 			const alignment = Number(originalMetadata["general.alignment"] ?? 32);
-			const completeHeaderBlob = serializeGgufHeader(originalMetadata, tensorInfos, {
+			const completeHeaderBytes = serializeGgufHeader(originalMetadata, tensorInfos, {
 				littleEndian,
 				alignment,
 			});
-			const completeHeaderBytes = new Uint8Array(await completeHeaderBlob.arrayBuffer());
 
 			console.log(`📊 Complete serialization comparison:`);
 			console.log(`  Original header size: ${originalHeaderBytes.length} bytes`);

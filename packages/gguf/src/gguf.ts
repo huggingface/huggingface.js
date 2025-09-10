@@ -650,12 +650,12 @@ function writeMetadataValue(
 }
 
 /**
- * Serialize GGUFTypedMetadata into a Blob that represents the GGUF header format.
- * This creates a binary blob containing the GGUF magic number, version, and metadata.
+ * Serialize GGUFTypedMetadata into a Uint8Array that represents the GGUF header format.
+ * This creates a binary array containing the GGUF magic number, version, and metadata.
  *
  * @param typedMetadata - The typed metadata to serialize
  * @param options - Serialization options
- * @returns A Blob containing the serialized GGUF header data
+ * @returns A Uint8Array containing the serialized GGUF header data
  */
 export function serializeTypedMetadata(
 	typedMetadata: GGUFTypedMetadata,
@@ -666,7 +666,7 @@ export function serializeTypedMetadata(
 		 */
 		littleEndian?: boolean;
 	} = {}
-): Blob {
+): Uint8Array {
 	const littleEndian = options.littleEndian ?? true;
 	const version = typedMetadata.version.value;
 
@@ -753,7 +753,7 @@ export function serializeTypedMetadata(
 		offset += bytes.length;
 	}
 
-	return new Blob([result], { type: "application/octet-stream" });
+	return result;
 }
 
 /**
@@ -763,7 +763,7 @@ export function serializeTypedMetadata(
  * @param typedMetadata - The typed metadata to serialize
  * @param tensorInfos - The tensor information array
  * @param options - Serialization options
- * @returns A Blob containing the complete GGUF header with proper alignment
+ * @returns A Uint8Array containing the complete GGUF header with proper alignment
  */
 export function serializeGgufHeader(
 	typedMetadata: GGUFTypedMetadata,
@@ -780,7 +780,7 @@ export function serializeGgufHeader(
 		 */
 		alignment?: number;
 	} = {}
-): Blob {
+): Uint8Array {
 	const littleEndian = options.littleEndian ?? true;
 	const alignment = options.alignment ?? 32; // GGUF_DEFAULT_ALIGNMENT
 	const version = typedMetadata.version.value;
@@ -917,7 +917,7 @@ export function serializeGgufHeader(
 	}
 
 	// Padding bytes (zeros) are already initialized in the Uint8Array
-	return new Blob([result], { type: "application/octet-stream" });
+	return result;
 }
 
 export async function ggufAllShards(
