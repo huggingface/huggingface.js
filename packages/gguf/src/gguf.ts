@@ -883,7 +883,6 @@ export function serializeGgufHeader(
 	// Calculate aligned size
 	const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1);
 	const alignedSize = GGML_PAD(preAlignmentSize, alignment);
-	const paddingSize = alignedSize - preAlignmentSize;
 
 	// Create result array with padding
 	const result = new Uint8Array(alignedSize);
@@ -918,7 +917,6 @@ export function serializeGgufHeader(
 	}
 
 	// Padding bytes (zeros) are already initialized in the Uint8Array
-
 	return new Blob([result], { type: "application/octet-stream" });
 }
 
