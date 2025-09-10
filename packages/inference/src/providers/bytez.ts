@@ -219,7 +219,7 @@ abstract class BytezTask extends TaskProviderHelper {
 
 	handleError(error: string) {
 		if (error) {
-			throw new Error(`There was a problem with the bytez API: ${error}`);
+			throw new Error(`There was a problem with the Bytez API: ${error}`);
 		}
 	}
 }
