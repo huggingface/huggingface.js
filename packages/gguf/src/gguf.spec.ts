@@ -10,7 +10,7 @@ import {
 	parseGGUFQuantLabel,
 	GGUF_QUANT_ORDER,
 	findNearestQuantType,
-	serializeGgufHeader,
+	serializeGgufMetadata,
 } from "./gguf";
 import fs from "node:fs";
 import { tmpdir } from "node:os";
@@ -505,7 +505,7 @@ describe("gguf", () => {
 	});
 
 	// Serialization tests
-	describe("serializeGgufHeader", () => {
+	describe("serializeGgufMetadata", () => {
 		it("should serialize basic typedMetadata to Uint8Array", () => {
 			const typedMetadata: GGUFTypedMetadata = {
 				version: { value: 2, type: GGUFValueType.UINT32 },
@@ -516,7 +516,7 @@ describe("gguf", () => {
 				"general.file_type": { value: 1, type: GGUFValueType.UINT32 },
 			};
 
-			const result = serializeGgufHeader(typedMetadata, []);
+			const result = serializeGgufMetadata(typedMetadata);
 
 			expect(result).toBeInstanceOf(Uint8Array);
 			expect(result.length).toBeGreaterThan(0);
@@ -539,7 +539,7 @@ describe("gguf", () => {
 				},
 			};
 
-			const result = serializeGgufHeader(typedMetadata, []);
+			const result = serializeGgufMetadata(typedMetadata);
 
 			expect(result).toBeInstanceOf(Uint8Array);
 			expect(result.length).toBeGreaterThan(0);
@@ -558,7 +558,7 @@ describe("gguf", () => {
 				"test.int64": { value: -9223372036854775808n, type: GGUFValueType.INT64 },
 			};
 
-			const result = serializeGgufHeader(typedMetadata, []);
+			const result = serializeGgufMetadata(typedMetadata);
 
 			expect(result).toBeInstanceOf(Uint8Array);
 			expect(result.length).toBeGreaterThan(0);
@@ -572,8 +572,8 @@ describe("gguf", () => {
 				"test.value": { value: 42, type: GGUFValueType.UINT32 },
 			};
 
-			const littleEndianResult = serializeGgufHeader(typedMetadata, [], { littleEndian: true });
-			const bigEndianResult = serializeGgufHeader(typedMetadata, [], { littleEndian: false });
+			const littleEndianResult = serializeGgufMetadata(typedMetadata, { littleEndian: true });
+			const bigEndianResult = serializeGgufMetadata(typedMetadata, { littleEndian: false });
 
 			expect(littleEndianResult.length).toBe(bigEndianResult.length);
 			expect(littleEndianResult).toBeInstanceOf(Uint8Array);
@@ -592,7 +592,7 @@ describe("gguf", () => {
 				},
 			} as GGUFTypedMetadata;
 
-			expect(() => serializeGgufHeader(typedMetadata, [])).toThrow("Array type requires subType to be specified");
+			expect(() => serializeGgufMetadata(typedMetadata)).toThrow("Array type requires subType to be specified");
 		});
 
 		it("should round-trip: serialize then deserialize back to same metadata", async () => {
@@ -611,7 +611,7 @@ describe("gguf", () => {
 			};
 
 			// Serialize to Uint8Array
-			const serializedArray = serializeGgufHeader(originalTypedMetadata, []);
+			const serializedArray = serializeGgufMetadata(originalTypedMetadata);
 
 			// Create a temporary file for testing
 			const tempFilePath = join(tmpdir(), `test-gguf-${Date.now()}.gguf`);
@@ -664,7 +664,7 @@ describe("gguf", () => {
 			};
 
 			// Serialize to Uint8Array
-			const serializedArray = serializeGgufHeader(originalTypedMetadata, []);
+			const serializedArray = serializeGgufMetadata(originalTypedMetadata);
 
 			// Create a temporary file for testing
 			const tempFilePath = join(tmpdir(), `test-gguf-${Date.now()}.gguf`);
@@ -720,7 +720,7 @@ describe("gguf", () => {
 			} as GGUFTypedMetadata;
 
 			// Serialize using the detected endianness
-			const serializedArray = serializeGgufHeader(testMetadata, [], {
+			const serializedArray = serializeGgufMetadata(testMetadata, {
 				littleEndian: detectedEndianness,
 			});
 
@@ -789,7 +789,7 @@ describe("gguf", () => {
 				tensor_count: { value: 0n, type: GGUFValueType.UINT64 },
 			};
 
-			const ourBytes = serializeGgufHeader(modifiedMetadata as GGUFTypedMetadata, [], {
+			const ourBytes = serializeGgufMetadata(modifiedMetadata as GGUFTypedMetadata, {
 				littleEndian,
 			});
 
@@ -834,7 +834,7 @@ describe("gguf", () => {
 			}
 		}, 30000);
 
-		it("should create complete GGUF header with serializeGgufHeader", async () => {
+		it("should create complete GGUF header with serializeGgufMetadata", async () => {
 			// Use a real GGUF file to test complete serialization
 			const testUrl = URL_GEMMA_2B;
 
@@ -858,17 +858,17 @@ describe("gguf", () => {
 			const originalHeaderBytes = new Uint8Array(await originalHeaderResponse.arrayBuffer());
 
 			const alignment = Number(originalMetadata["general.alignment"] ?? 32);
-			const completeHeaderBytes = serializeGgufHeader(originalMetadata, tensorInfos, {
+			const completeHeaderBytes = serializeGgufMetadata(originalMetadata, {
 				littleEndian,
 				alignment,
 			});
 
-			console.log(`📊 Complete serialization comparison:`);
+			console.log(`📊 Metadata-only serialization comparison:`);
 			console.log(`  Original header size: ${originalHeaderBytes.length} bytes`);
-			console.log(`  Complete serialized size: ${completeHeaderBytes.length} bytes`);
+			console.log(`  Metadata-only serialized size: ${completeHeaderBytes.length} bytes`);
 			console.log(`  Difference: ${Math.abs(originalHeaderBytes.length - completeHeaderBytes.length)} bytes`);
 
-			// Test that our complete serialized header parses correctly
+			// Test that our metadata-only serialized header parses correctly
 			const tempFilePath = join(tmpdir(), `test-complete-${Date.now()}.gguf`);
 			fs.writeFileSync(tempFilePath, Buffer.from(completeHeaderBytes));
 
@@ -883,17 +883,20 @@ describe("gguf", () => {
 				});
 
 				console.log(`✅ Complete header parses successfully!`);
-				console.log(`📋 Tensor count matches: ${deserializedTensorInfos.length} === ${tensorInfos.length}`);
+				console.log(
+					`📋 Tensor count matches: ${deserializedTensorInfos.length} === ${originalMetadata.tensor_count.value}`
+				);
 				console.log(`📊 Tensor data offset: ${deserializedOffset}`);
 
 				// Verify the structure is correct
 				expect(deserializedMetadata.version).toEqual(originalMetadata.version);
-				expect(deserializedMetadata.tensor_count.value).toBe(BigInt(tensorInfos.length));
-				expect(deserializedTensorInfos.length).toBe(tensorInfos.length);
+				expect(deserializedMetadata.tensor_count.value).toBe(originalMetadata.tensor_count.value);
+				expect(deserializedTensorInfos.length).toBe(Number(originalMetadata.tensor_count.value));
 				expect(deserializedMetadata["general.name"]).toEqual(originalMetadata["general.name"]);
 
-				// The sizes should be very close (might differ slightly due to alignment)
-				expect(Math.abs(originalHeaderBytes.length - completeHeaderBytes.length)).toBeLessThan(64); // Allow up to 64 bytes difference for alignment
+				// Since we're now serializing metadata only, the size difference should be significant
+				expect(completeHeaderBytes.length).toBeGreaterThan(0);
+				expect(completeHeaderBytes.length).toBeLessThan(originalHeaderBytes.length); // Should be smaller without tensor info
 			} finally {
 				try {
 					fs.unlinkSync(tempFilePath);

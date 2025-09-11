@@ -648,17 +648,14 @@ function writeMetadataValue(
 }
 
 /**
- * Serialize a complete GGUF file including metadata, tensor info, and alignment.
- * This creates a complete GGUF header that can be combined with tensor data.
+ * Serialize GGUF header including metadata and alignment.
  *
  * @param typedMetadata - The typed metadata to serialize
- * @param tensorInfos - The tensor information array
  * @param options - Serialization options
- * @returns A Uint8Array containing the complete GGUF header with proper alignment
+ * @returns A Uint8Array containing the GGUF header with proper alignment
  */
-export function serializeGgufHeader(
+export function serializeGgufMetadata(
 	typedMetadata: GGUFTypedMetadata,
-	tensorInfos: GGUFTensorInfo[],
 	options: {
 		/**
 		 * Whether to use little endian byte order
@@ -685,7 +682,7 @@ export function serializeGgufHeader(
 	const versionBytes = new Uint8Array(versionBuffer);
 
 	// Write tensor count
-	const tensorCountBytes = writeVersionedSize(version, BigInt(tensorInfos.length), littleEndian);
+	const tensorCountBytes = writeVersionedSize(version, typedMetadata.tensor_count.value, littleEndian);
 
 	// Count key-value pairs (excluding the built-in fields: version, tensor_count, kv_count)
 	const kvEntries = Object.entries(typedMetadata).filter(
@@ -725,50 +722,13 @@ export function serializeGgufHeader(
 		kvBytes.push(valueBytes);
 	}
 
-	// Write tensor info section
-	const tensorInfoBytes: Uint8Array[] = [];
-
-	for (const tensorInfo of tensorInfos) {
-		// Write tensor name
-		const nameBytes = writeString(tensorInfo.name, version, littleEndian);
-		tensorInfoBytes.push(nameBytes);
-
-		// Write n_dims (4 bytes, UINT32)
-		const nDimsBuffer = new ArrayBuffer(4);
-		const nDimsView = new DataView(nDimsBuffer);
-		nDimsView.setUint32(0, tensorInfo.n_dims, littleEndian);
-		const nDimsBytes = new Uint8Array(nDimsBuffer);
-		tensorInfoBytes.push(nDimsBytes);
-
-		// Write shape dimensions
-		for (const dim of tensorInfo.shape) {
-			const dimBytes = writeVersionedSize(version, dim, littleEndian);
-			tensorInfoBytes.push(dimBytes);
-		}
-
-		// Write dtype (4 bytes, UINT32)
-		const dtypeBuffer = new ArrayBuffer(4);
-		const dtypeView = new DataView(dtypeBuffer);
-		dtypeView.setUint32(0, tensorInfo.dtype, littleEndian);
-		const dtypeBytes = new Uint8Array(dtypeBuffer);
-		tensorInfoBytes.push(dtypeBytes);
-
-		// Write offset (8 bytes, UINT64)
-		const offsetBuffer = new ArrayBuffer(8);
-		const offsetView = new DataView(offsetBuffer);
-		offsetView.setBigUint64(0, tensorInfo.offset, littleEndian);
-		const offsetBytes = new Uint8Array(offsetBuffer);
-		tensorInfoBytes.push(offsetBytes);
-	}
-
 	// Calculate total size before alignment
 	const preAlignmentSize =
 		GGUF_MAGIC_NUMBER.length +
 		versionBytes.length +
 		tensorCountBytes.length +
 		kvCountBytes.length +
-		kvBytes.reduce((sum, bytes) => sum + bytes.length, 0) +
-		tensorInfoBytes.reduce((sum, bytes) => sum + bytes.length, 0);
+		kvBytes.reduce((sum, bytes) => sum + bytes.length, 0);
 
 	// Calculate aligned size
 	const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1);
@@ -796,12 +756,6 @@ export function serializeGgufHeader(
 
 	// All key-value pairs
 	for (const bytes of kvBytes) {
-		result.set(bytes, offset);
-		offset += bytes.length;
-	}
-
-	// All tensor info
-	for (const bytes of tensorInfoBytes) {
 		result.set(bytes, offset);
 		offset += bytes.length;
 	}
