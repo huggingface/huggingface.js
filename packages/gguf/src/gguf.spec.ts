@@ -480,27 +480,16 @@ describe("gguf", () => {
 
 	it("should return littleEndian property", async () => {
 		const result = await gguf(URL_LLAMA);
-
-		expect(result).toHaveProperty("littleEndian");
-		expect(typeof result.littleEndian).toBe("boolean");
-		// Most modern GGUF files should be little-endian
 		expect(result.littleEndian).toBe(true);
 	});
 
 	it("should return littleEndian with typedMetadata", async () => {
 		const result = await gguf(URL_LLAMA, { typedMetadata: true });
-
-		expect(result).toHaveProperty("littleEndian");
-		expect(typeof result.littleEndian).toBe("boolean");
 		expect(result.littleEndian).toBe(true);
 	});
 
 	it("should detect big-endian files correctly", async () => {
 		const result = await gguf(URL_BIG_ENDIAN);
-
-		expect(result).toHaveProperty("littleEndian");
-		expect(typeof result.littleEndian).toBe("boolean");
-		// This is a big-endian test file
 		expect(result.littleEndian).toBe(false);
 	});
 
