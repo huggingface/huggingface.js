@@ -157,7 +157,7 @@ function createMockFetch(args: { write: boolean }): {
 		const url = typeof input === "string" ? input : input.toString();
 
 		// Mock successful responses for xorb and shard uploads
-		if (url.includes("/xorb/")) {
+		if (url.includes("/xorbs/")) {
 			xorbCount++;
 			const bodySize = getBodySize(init?.body);
 			xorbBytes += parseInt(bodySize);
@@ -174,7 +174,7 @@ function createMockFetch(args: { write: boolean }): {
 			});
 		}
 
-		if (url.endsWith("/shard")) {
+		if (url.endsWith("/shards")) {
 			shardCount++;
 			const bodySize = getBodySize(init?.body);
 			shardBytes += parseInt(bodySize);
