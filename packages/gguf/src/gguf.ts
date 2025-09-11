@@ -30,6 +30,12 @@ const GGUF_DEFAULT_ALIGNMENT = 32; // defined in ggml.h
 const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); // defined in ggml.h
 const PARALLEL_DOWNLOADS = 20;
 
+/**
+ * GGUF magic number: "GGUF" in bytes
+ * Must be `GGUF` at the byte level: `0x47` `0x47` `0x55` `0x46`.
+ */
+const GGUF_MAGIC_NUMBER = new Uint8Array([0x47, 0x47, 0x55, 0x46]);
+
 export interface GgufShardFileInfo {
 	prefix: string;
 	shard: string;
@@ -49,14 +55,6 @@ export function parseGgufShardFilename(filename: string): GgufShardFileInfo | nu
 }
 
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
-
-/**
- * Must be `GGUF` at the byte level: `0x47` `0x47` `0x55` `0x46`.
- * Your executor might do little-endian byte order, so it might be
- * check for 0x46554747 and letting the endianness cancel out.
- * Consider being *very* explicit about the byte order here.
- */
-const ggufMagicNumber = new Uint8Array([0x47, 0x47, 0x55, 0x46]); /// "GGUF"
 
 function isGGUFValueType(n: number): n is GGUFValueType {
 	return typeof GGUFValueType[n] === "string";
@@ -320,7 +318,7 @@ export async function gguf(
 		return true;
 	};
 
-	if (!checkBuffer(new Uint8Array(r.view.buffer.slice(0, 4)), ggufMagicNumber)) {
+	if (!checkBuffer(new Uint8Array(r.view.buffer.slice(0, 4)), GGUF_MAGIC_NUMBER)) {
 		throw new Error("not a valid gguf file: not starting with GGUF magic number");
 	}
 
@@ -671,7 +669,6 @@ export function serializeTypedMetadata(
 	const version = typedMetadata.version.value;
 
 	// Start with GGUF magic number: "GGUF"
-	const magicNumber = new Uint8Array([0x47, 0x47, 0x55, 0x46]);
 
 	// Write version (4 bytes, UINT32)
 	const versionBuffer = new ArrayBuffer(4);
@@ -722,7 +719,7 @@ export function serializeTypedMetadata(
 
 	// Calculate total size and combine all parts
 	const totalSize =
-		magicNumber.length +
+		GGUF_MAGIC_NUMBER.length +
 		versionBytes.length +
 		tensorCountBytes.length +
 		kvCountBytes.length +
@@ -732,8 +729,8 @@ export function serializeTypedMetadata(
 	let offset = 0;
 
 	// Magic number
-	result.set(magicNumber, offset);
-	offset += magicNumber.length;
+	result.set(GGUF_MAGIC_NUMBER, offset);
+	offset += GGUF_MAGIC_NUMBER.length;
 
 	// Version
 	result.set(versionBytes, offset);
@@ -786,7 +783,6 @@ export function serializeGgufHeader(
 	const version = typedMetadata.version.value;
 
 	// Start with GGUF magic number: "GGUF"
-	const magicNumber = new Uint8Array([0x47, 0x47, 0x55, 0x46]);
 
 	// Write version (4 bytes, UINT32)
 	const versionBuffer = new ArrayBuffer(4);
@@ -873,7 +869,7 @@ export function serializeGgufHeader(
 
 	// Calculate total size before alignment
 	const preAlignmentSize =
-		magicNumber.length +
+		GGUF_MAGIC_NUMBER.length +
 		versionBytes.length +
 		tensorCountBytes.length +
 		kvCountBytes.length +
@@ -889,8 +885,8 @@ export function serializeGgufHeader(
 	let offset = 0;
 
 	// Magic number
-	result.set(magicNumber, offset);
-	offset += magicNumber.length;
+	result.set(GGUF_MAGIC_NUMBER, offset);
+	offset += GGUF_MAGIC_NUMBER.length;
 
 	// Version
 	result.set(versionBytes, offset);
