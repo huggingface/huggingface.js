@@ -141,6 +141,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new OvhCloud.OvhCloudConversationalTask(),
 		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
 	},
+	publicai: {
+		conversational: new PublicAI.PublicAIConversationalTask(),
+	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
 		"text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
