@@ -13,6 +13,7 @@ import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
+import * as Corvex from "../providers/corvex.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -163,6 +164,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Together.TogetherTextToImageTask(),
 		conversational: new Together.TogetherConversationalTask(),
 		"text-generation": new Together.TogetherTextGenerationTask(),
+	},
+	corvex: {
+		conversational: new Corvex.CorvexConversationalTask(),
 	},
 };
 

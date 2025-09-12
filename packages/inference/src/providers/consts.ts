@@ -37,4 +37,13 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	sambanova: {},
 	scaleway: {},
 	together: {},
+	corvex: {
+	  tinyllama: {
+		hfModelId: "tinyllama",
+		provider: "corvex",
+		providerId: "tinyllama",
+		status: "staging",
+		task: "conversational"
+	  },
+	},
 };
