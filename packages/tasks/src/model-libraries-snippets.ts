@@ -2112,6 +2112,12 @@ export const hezar = (model: ModelData): string[] => [
 model = Model.load("${model.id}")`,
 ];
 
+export const hunyuanimage_2_1 = (model: ModelData): string[] => [
+	`from hyimage.diffusion.pipelines.hunyuanimage_pipeline import HunyuanImagePipeline
+pipe = HunyuanImagePipeline.from_pretrained("${model.id}")`,
+];
+
+
 export const zonos = (model: ModelData): string[] => [
 	`# pip install git+https://github.com/Zyphra/Zonos.git
 import torchaudio
