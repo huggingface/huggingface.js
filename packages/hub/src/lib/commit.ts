@@ -410,6 +410,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								repo: repoId,
 								// todo: maybe leave empty if PR?
 								rev: params.branch ?? "main",
+								isPullRequest: params.isPullRequest,
 								yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
 							})) {
 								if (event.event === "file") {
