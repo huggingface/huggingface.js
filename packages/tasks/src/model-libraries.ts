@@ -1258,7 +1258,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "OpenPeerLLM",
 		repoUrl: "https://huggingface.co/openpeerai/openpeerllm",
 		docsUrl: "https://huggingface.co/OpenPeerAI/OpenPeerLLM/blob/main/README.md",
-		countDownloads:  `path:".meta-huggingface.json" OR path_extension:".py"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"py"`,
 		filter: false,
 	},	
 	"3dtopia-xl": {
