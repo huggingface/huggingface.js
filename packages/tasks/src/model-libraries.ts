@@ -1253,6 +1253,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.zonos,
 		filter: false,
 	},
+	openpeerllm: {
+		prettyLabel: "OpenPeerLLM",
+		repoName: "OpenPeerLLM",
+		repoUrl: "https://huggingface.co/openpeerai/openpeerllm",
+		docsUrl: "https://huggingface.co/OpenPeerAI/OpenPeerLLM/blob/main/README.md",
+		countDownloads:  `path:".meta-huggingface.json" OR path_extension:".py"`,
+		filter: false,
+	},	
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",
 		repoName: "3DTopia-XL",
