@@ -747,6 +747,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			OR path:"open_clip_pytorch_model.bin"
 			OR path:"pytorch_model.bin"`,
 	},
+	openpeerllm: {
+		prettyLabel: "OpenPeerLLM",
+		repoName: "OpenPeerLLM",
+		repoUrl: "https://huggingface.co/openpeerai/openpeerllm",
+		docsUrl: "https://huggingface.co/OpenPeerAI/OpenPeerLLM/blob/main/README.md",
+		countDownloads: `path:".meta-huggingface.json"`,
+		filter: false,
+	},
 	"open-sora": {
 		prettyLabel: "Open-Sora",
 		repoName: "Open-Sora",
