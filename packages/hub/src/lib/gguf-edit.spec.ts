@@ -83,7 +83,7 @@ describe("GGUF Metadata Update via Direct Commit - Local Integration Test", () =
 				"Testing array field modification via direct commit call - keeping only first 2 elements of tokens array",
 			branch: "main",
 			isPullRequest: true, // Create a pull request
-			accessToken: process.env.HF_TOKEN,
+			accessToken: process.env.HF_TOKEN, // fiengrained token that can open PR on https://huggingface.co/reach-vb/TinyLlama-1.1B-Chat-v1.0-q4_k_m-GGUF
 			useXet: true, // Required for edit operations
 			operations: [
 				{
