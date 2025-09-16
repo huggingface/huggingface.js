@@ -754,7 +754,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/OpenPeerAI/OpenPeerLLM/blob/main/README.md",
 		countDownloads: `path:".meta-huggingface.json"`,
 		filter: false,
-	},		
+	},
 	"open-sora": {
 		prettyLabel: "Open-Sora",
 		repoName: "Open-Sora",
