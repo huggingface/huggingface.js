@@ -47,6 +47,7 @@ Your access token should be kept private. If you need to protect it in front-end
 You can send inference requests to third-party providers with the inference client.
 
 Currently, we support the following providers:
+- [BagelNet](https://bagel.net)
 - [Fal.ai](https://fal.ai)
 - [Featherless AI](https://featherless.ai)
 - [Fireworks AI](https://fireworks.ai)
@@ -84,6 +85,7 @@ When authenticated with a Hugging Face access token, the request is routed throu
 When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
 
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
+- [BagelNet supported models](https://huggingface.co/api/partners/bagelnet/models)
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
 - [Featherless AI supported models](https://huggingface.co/api/partners/featherless-ai/models)
 - [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)

@@ -1,3 +1,4 @@
+import * as BagelNet from "../providers/bagelnet.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
@@ -54,6 +55,9 @@ import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from
 import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
+	bagelnet: {
+		conversational: new BagelNet.BagelNetConversational(),
+	},
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
 	},
