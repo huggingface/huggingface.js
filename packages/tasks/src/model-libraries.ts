@@ -1163,6 +1163,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
+	voxcpm: {
+		prettyLabel: "VoxCPM",
+		repoName: "VoxCPM",
+		repoUrl: "https://github.com/OpenBMB/VoxCPM",
+		snippets: snippets.voxcpm,
+		filter: false,
+	},
 	vui: {
 		prettyLabel: "Vui",
 		repoName: "Vui",
