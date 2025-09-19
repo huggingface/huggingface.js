@@ -3,6 +3,7 @@ import { PIPELINE_DATA } from "../pipelines.js";
 
 import anyToAny from "./any-to-any/data.js";
 import audioClassification from "./audio-classification/data.js";
+import audioTextToText from "./audio-text-to-text/data.js";
 import audioToAudio from "./audio-to-audio/data.js";
 import automaticSpeechRecognition from "./automatic-speech-recognition/data.js";
 import documentQuestionAnswering from "./document-question-answering/data.js";
@@ -205,7 +206,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"any-to-any": getData("any-to-any", anyToAny),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
-	"audio-text-to-text": getData("audio-text-to-text", placeholder),
+	"audio-text-to-text": getData("audio-text-to-text", audioTextToText),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
