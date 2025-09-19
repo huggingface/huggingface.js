@@ -12,6 +12,7 @@ import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
+import * as PublicAI from "../providers/publicai.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -47,6 +48,7 @@ import type {
 } from "../providers/providerHelper.js";
 import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
+import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
@@ -138,15 +140,24 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new OvhCloud.OvhCloudConversationalTask(),
 		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
 	},
+	publicai: {
+		conversational: new PublicAI.PublicAIConversationalTask(),
+	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
 		"text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
 		"text-to-video": new Replicate.ReplicateTextToVideoTask(),
 		"image-to-image": new Replicate.ReplicateImageToImageTask(),
+		"automatic-speech-recognition": new Replicate.ReplicateAutomaticSpeechRecognitionTask(),
 	},
 	sambanova: {
 		conversational: new Sambanova.SambanovaConversationalTask(),
 		"feature-extraction": new Sambanova.SambanovaFeatureExtractionTask(),
+	},
+	scaleway: {
+		conversational: new Scaleway.ScalewayConversationalTask(),
+		"text-generation": new Scaleway.ScalewayTextGenerationTask(),
+		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
 	},
 	together: {
 		"text-to-image": new Together.TogetherTextToImageTask(),

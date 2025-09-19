@@ -8,6 +8,113 @@ import { stat } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { HUB_URL } from "./src/consts";
 import { version } from "./package.json";
+import type { CommitProgressEvent } from "./src/lib/commit";
+import type { MultiBar, SingleBar } from "cli-progress";
+
+// Progress bar manager for handling multiple file uploads
+class UploadProgressManager {
+	private multibar: MultiBar | null = null;
+	private fileBars: Map<string, SingleBar> = new Map();
+	private readonly isQuiet: boolean;
+	private cliProgressAvailable: boolean = false;
+
+	constructor(isQuiet: boolean = false) {
+		this.isQuiet = isQuiet;
+	}
+
+	async initialize(): Promise<void> {
+		if (this.isQuiet) return;
+
+		try {
+			const cliProgress = await import("cli-progress");
+			this.cliProgressAvailable = true;
+			this.multibar = new cliProgress.MultiBar(
+				{
+					clearOnComplete: false,
+					hideCursor: true,
+					format: " {bar} | {filename} | {percentage}% | {state}",
+					barCompleteChar: "\u2588",
+					barIncompleteChar: "\u2591",
+				},
+				cliProgress.Presets.shades_grey
+			);
+		} catch (error) {
+			// cli-progress is not available, fall back to simple logging
+			this.cliProgressAvailable = false;
+		}
+	}
+
+	handleEvent(event: CommitProgressEvent): void {
+		if (this.isQuiet) return;
+
+		if (event.event === "phase") {
+			this.logPhase(event.phase);
+		} else if (event.event === "fileProgress") {
+			this.updateFileProgress(event.path, event.progress, event.state);
+		}
+	}
+
+	private logPhase(phase: string): void {
+		if (this.isQuiet) return;
+
+		const phaseMessages = {
+			preuploading: "📋 Preparing files for upload...",
+			uploadingLargeFiles: "⬆️  Uploading files...",
+			committing: "✨ Finalizing commit...",
+		};
+
+		console.log(`\n${phaseMessages[phase as keyof typeof phaseMessages] || phase}`);
+	}
+
+	private updateFileProgress(path: string, progress: number, state: string): void {
+		if (this.isQuiet) return;
+
+		if (this.cliProgressAvailable && this.multibar) {
+			// Use progress bars
+			let bar = this.fileBars.get(path);
+
+			if (!bar) {
+				bar = this.multibar.create(100, 0, {
+					filename: this.truncateFilename(path, 100),
+					state: state,
+				});
+				this.fileBars.set(path, bar);
+			}
+
+			if (progress >= 1) {
+				// If complete, mark it as done
+				bar.update(100, { state: state === "hashing" ? "✓ hashed" : "✓ uploaded" });
+			} else {
+				// Update the progress (convert 0-1 to 0-100)
+				const percentage = Math.round(progress * 100);
+				bar.update(percentage, { state: state });
+			}
+		} else {
+			// Fall back to simple console logging
+			const percentage = Math.round(progress * 100);
+			const truncatedPath = this.truncateFilename(path, 100);
+
+			if (progress >= 1) {
+				const statusIcon = state === "hashing" ? "✓ hashed" : "✓ uploaded";
+				console.log(`${statusIcon}: ${truncatedPath}`);
+			} else if (percentage % 25 === 0) {
+				// Only log every 25% to avoid spam
+				console.log(`${state}: ${truncatedPath} (${percentage}%)`);
+			}
+		}
+	}
+
+	private truncateFilename(filename: string, maxLength: number): string {
+		if (filename.length <= maxLength) return filename;
+		return "..." + filename.slice(-(maxLength - 3));
+	}
+
+	stop(): void {
+		if (!this.isQuiet && this.cliProgressAvailable && this.multibar) {
+			this.multibar.stop();
+		}
+	}
+}
 
 // Didn't find the import from "node:util", so duplicated it here
 type OptionToken =
@@ -339,18 +446,31 @@ async function run() {
 				  ]
 				: [{ content: pathToFileURL(localFolder), path: pathInRepo.replace(/^[.]?\//, "") }];
 
-			for await (const event of uploadFilesWithProgress({
-				repo: repoId,
-				files,
-				branch: revision,
-				accessToken: token,
-				commitTitle: commitMessage?.trim().split("\n")[0],
-				commitDescription: commitMessage?.trim().split("\n").slice(1).join("\n").trim(),
-				hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
-			})) {
-				if (!quiet) {
-					console.log(event);
+			const progressManager = new UploadProgressManager(!!quiet);
+			await progressManager.initialize();
+
+			try {
+				for await (const event of uploadFilesWithProgress({
+					repo: repoId,
+					files,
+					branch: revision,
+					accessToken: token,
+					commitTitle: commitMessage?.trim().split("\n")[0],
+					commitDescription: commitMessage?.trim().split("\n").slice(1).join("\n").trim(),
+					hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+					useXet: true,
+				})) {
+					progressManager.handleEvent(event);
 				}
+
+				if (!quiet) {
+					console.log("\n✅ Upload completed successfully!");
+				}
+			} catch (error) {
+				progressManager.stop();
+				throw error;
+			} finally {
+				progressManager.stop();
 			}
 			break;
 		}

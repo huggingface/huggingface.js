@@ -1,6 +1,7 @@
 import { createApiError } from "../error";
 import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "./checkCredentials";
+import { combineUint8Arrays } from "./combineUint8Arrays";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
 
@@ -158,10 +159,10 @@ export class XetBlob extends Blob {
 			const connParams = await getAccessToken(this.accessToken, this.fetch, this.refreshUrl);
 
 			// debug(
-			// 	`curl '${connParams.casUrl}/v1/reconstruction/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
+			// 	`curl '${connParams.casUrl}/v1/reconstructions/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
 			// );
 
-			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/v1/reconstruction/${this.hash}`, {
+			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/v1/reconstructions/${this.hash}`, {
 				headers: {
 					Authorization: `Bearer ${connParams.accessToken}`,
 					Range: `bytes=${this.start}-${this.end - 1}`,
@@ -327,11 +328,11 @@ export class XetBlob extends Blob {
 					totalFetchBytes += result.value.byteLength;
 
 					if (leftoverBytes) {
-						result.value = new Uint8Array([...leftoverBytes, ...result.value]);
+						result.value = combineUint8Arrays(leftoverBytes, result.value);
 						leftoverBytes = undefined;
 					}
 
-					while (totalBytesRead < maxBytes && result.value.byteLength) {
+					while (totalBytesRead < maxBytes && result.value?.byteLength) {
 						if (result.value.byteLength < 8) {
 							// We need 8 bytes to parse the chunk header
 							leftoverBytes = result.value;
@@ -662,8 +663,6 @@ async function getAccessToken(
 		const jwt = {
 			accessToken: json.accessToken,
 			expiresAt: new Date(json.exp * 1000),
-			initialAccessToken,
-			refreshUrl,
 			casUrl: json.casUrl,
 		};
 
