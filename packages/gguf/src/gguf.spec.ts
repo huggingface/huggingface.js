@@ -11,6 +11,7 @@ import {
 	GGUF_QUANT_ORDER,
 	findNearestQuantType,
 	serializeGgufMetadata,
+	buildGgufHeader,
 } from "./gguf";
 import fs from "node:fs";
 import { tmpdir } from "node:os";
@@ -832,7 +833,6 @@ describe("gguf", () => {
 				typedMetadata: originalMetadata,
 				tensorDataOffset,
 				littleEndian,
-				tensorInfos,
 			} = await gguf(testUrl, {
 				typedMetadata: true,
 			});
@@ -894,5 +894,289 @@ describe("gguf", () => {
 				}
 			}
 		}, 30000);
+	});
+
+	describe("buildGgufHeader", () => {
+		it("should rebuild GGUF header with updated metadata", async () => {
+			// Parse a smaller GGUF file to get original metadata and structure
+			const {
+				typedMetadata: originalMetadata,
+				tensorInfoByteRange,
+				littleEndian,
+			} = await gguf(URL_V1, {
+				typedMetadata: true,
+			});
+
+			// Get only the header portion of the original file to avoid memory issues
+			const headerSize = tensorInfoByteRange[1] + 1000; // Add some padding
+			const originalResponse = await fetch(URL_V1, {
+				headers: { Range: `bytes=0-${headerSize - 1}` },
+			});
+			const originalBlob = new Blob([await originalResponse.arrayBuffer()]);
+
+			// Create updated metadata with a modified name
+			const updatedMetadata = {
+				...originalMetadata,
+				"general.name": {
+					value: "Modified Test Model",
+					type: GGUFValueType.STRING,
+				},
+			} as GGUFTypedMetadata;
+
+			// Build the new header
+			const newHeaderBlob = await buildGgufHeader(originalBlob, updatedMetadata, {
+				littleEndian,
+				tensorInfoByteRange,
+				alignment: Number(originalMetadata["general.alignment"]?.value ?? 32),
+			});
+
+			expect(newHeaderBlob).toBeInstanceOf(Blob);
+			expect(newHeaderBlob.size).toBeGreaterThan(0);
+
+			// Test that the new header can be parsed by creating a minimal test file
+			const tempFilePath = join(tmpdir(), `test-build-header-${Date.now()}.gguf`);
+
+			// Just write the header to test parsing (without tensor data to avoid size issues)
+			fs.writeFileSync(tempFilePath, Buffer.from(await newHeaderBlob.arrayBuffer()));
+
+			try {
+				const { typedMetadata: parsedMetadata } = await gguf(tempFilePath, {
+					typedMetadata: true,
+					allowLocalFile: true,
+				});
+
+				// Verify the updated metadata is preserved
+				expect(parsedMetadata["general.name"]).toEqual({
+					value: "Modified Test Model",
+					type: GGUFValueType.STRING,
+				});
+
+				// Verify other metadata fields are preserved
+				expect(parsedMetadata.version).toEqual(originalMetadata.version);
+				expect(parsedMetadata.tensor_count).toEqual(originalMetadata.tensor_count);
+				expect(parsedMetadata["general.architecture"]).toEqual(originalMetadata["general.architecture"]);
+			} finally {
+				try {
+					fs.unlinkSync(tempFilePath);
+				} catch (error) {
+					// Ignore cleanup errors
+				}
+			}
+		}, 30_000);
+
+		it("should handle metadata with array modifications", async () => {
+			// Parse a smaller GGUF file
+			const {
+				typedMetadata: originalMetadata,
+				tensorInfoByteRange,
+				littleEndian,
+			} = await gguf(URL_V1, {
+				typedMetadata: true,
+			});
+
+			// Get only the header portion
+			const headerSize = tensorInfoByteRange[1] + 1000;
+			const originalResponse = await fetch(URL_V1, {
+				headers: { Range: `bytes=0-${headerSize - 1}` },
+			});
+			const originalBlob = new Blob([await originalResponse.arrayBuffer()]);
+
+			// Create updated metadata with a simple array
+			const updatedMetadata = {
+				...originalMetadata,
+				"test.array": {
+					value: ["item1", "item2", "item3"],
+					type: GGUFValueType.ARRAY,
+					subType: GGUFValueType.STRING,
+				},
+				kv_count: {
+					value: originalMetadata.kv_count.value + 1n,
+					type: originalMetadata.kv_count.type,
+				},
+			} as GGUFTypedMetadata;
+
+			// Build the new header
+			const newHeaderBlob = await buildGgufHeader(originalBlob, updatedMetadata, {
+				littleEndian,
+				tensorInfoByteRange,
+				alignment: Number(originalMetadata["general.alignment"]?.value ?? 32),
+			});
+
+			expect(newHeaderBlob).toBeInstanceOf(Blob);
+			expect(newHeaderBlob.size).toBeGreaterThan(0);
+
+			// Test that the new header can be parsed
+			const tempFilePath = join(tmpdir(), `test-build-header-array-${Date.now()}.gguf`);
+			fs.writeFileSync(tempFilePath, Buffer.from(await newHeaderBlob.arrayBuffer()));
+
+			try {
+				const { typedMetadata: parsedMetadata } = await gguf(tempFilePath, {
+					typedMetadata: true,
+					allowLocalFile: true,
+				});
+
+				// Verify the array was added correctly
+				expect(parsedMetadata["test.array"]).toEqual({
+					value: ["item1", "item2", "item3"],
+					type: GGUFValueType.ARRAY,
+					subType: GGUFValueType.STRING,
+				});
+
+				// Verify structure integrity
+				expect(parsedMetadata.version).toEqual(originalMetadata.version);
+				expect(parsedMetadata.tensor_count).toEqual(originalMetadata.tensor_count);
+				expect(parsedMetadata.kv_count.value).toBe(originalMetadata.kv_count.value + 1n);
+			} finally {
+				try {
+					fs.unlinkSync(tempFilePath);
+				} catch (error) {
+					// Ignore cleanup errors
+				}
+			}
+		}, 30_000);
+
+		it("should preserve tensor info correctly", async () => {
+			// Parse a smaller GGUF file
+			const {
+				typedMetadata: originalMetadata,
+				tensorInfoByteRange,
+				tensorInfos: originalTensorInfos,
+				littleEndian,
+			} = await gguf(URL_V1, {
+				typedMetadata: true,
+			});
+
+			// Get only the header portion
+			const headerSize = tensorInfoByteRange[1] + 1000;
+			const originalResponse = await fetch(URL_V1, {
+				headers: { Range: `bytes=0-${headerSize - 1}` },
+			});
+			const originalBlob = new Blob([await originalResponse.arrayBuffer()]);
+
+			// Create updated metadata with minor changes
+			const updatedMetadata = {
+				...originalMetadata,
+				"test.custom": {
+					value: "custom_value",
+					type: GGUFValueType.STRING,
+				},
+				kv_count: {
+					value: originalMetadata.kv_count.value + 1n,
+					type: originalMetadata.kv_count.type,
+				},
+			} as GGUFTypedMetadata;
+
+			// Build the new header
+			const newHeaderBlob = await buildGgufHeader(originalBlob, updatedMetadata, {
+				littleEndian,
+				tensorInfoByteRange,
+				alignment: Number(originalMetadata["general.alignment"]?.value ?? 32),
+			});
+
+			// Test that the new header can be parsed
+			const tempFilePath = join(tmpdir(), `test-build-header-tensors-${Date.now()}.gguf`);
+			fs.writeFileSync(tempFilePath, Buffer.from(await newHeaderBlob.arrayBuffer()));
+
+			try {
+				const { typedMetadata: parsedMetadata, tensorInfos: parsedTensorInfos } = await gguf(tempFilePath, {
+					typedMetadata: true,
+					allowLocalFile: true,
+				});
+
+				// Verify tensor info is preserved exactly
+				expect(parsedTensorInfos.length).toBe(originalTensorInfos.length);
+				expect(parsedTensorInfos[0]).toEqual(originalTensorInfos[0]);
+				expect(parsedTensorInfos[parsedTensorInfos.length - 1]).toEqual(
+					originalTensorInfos[originalTensorInfos.length - 1]
+				);
+
+				// Verify our custom metadata was added
+				expect(parsedMetadata["test.custom"]).toEqual({
+					value: "custom_value",
+					type: GGUFValueType.STRING,
+				});
+
+				// Verify kv_count was updated
+				expect(parsedMetadata.kv_count.value).toBe(originalMetadata.kv_count.value + 1n);
+			} finally {
+				try {
+					fs.unlinkSync(tempFilePath);
+				} catch (error) {
+					// Ignore cleanup errors
+				}
+			}
+		}, 30_000);
+
+		it("should handle different alignment values", async () => {
+			// Parse a smaller GGUF file
+			const {
+				typedMetadata: originalMetadata,
+				tensorInfoByteRange,
+				littleEndian,
+			} = await gguf(URL_V1, {
+				typedMetadata: true,
+			});
+
+			// Get only the header portion
+			const headerSize = tensorInfoByteRange[1] + 1000;
+			const originalResponse = await fetch(URL_V1, {
+				headers: { Range: `bytes=0-${headerSize - 1}` },
+			});
+			const originalBlob = new Blob([await originalResponse.arrayBuffer()]);
+
+			// Create updated metadata
+			const updatedMetadata = {
+				...originalMetadata,
+				"general.name": {
+					value: "Alignment Test Model",
+					type: GGUFValueType.STRING,
+				},
+			} as GGUFTypedMetadata;
+
+			// Test different alignment values
+			const alignments = [16, 32, 64];
+
+			for (const alignment of alignments) {
+				const newHeaderBlob = await buildGgufHeader(originalBlob, updatedMetadata, {
+					littleEndian,
+					tensorInfoByteRange,
+					alignment,
+				});
+
+				expect(newHeaderBlob).toBeInstanceOf(Blob);
+				expect(newHeaderBlob.size).toBeGreaterThan(0);
+
+				// Verify the header size is aligned correctly
+				expect(newHeaderBlob.size % alignment).toBe(0);
+			}
+		}, 15_000);
+
+		it("should validate tensorInfoByteRange parameters", async () => {
+			// Parse a smaller GGUF file
+			const { typedMetadata: originalMetadata, littleEndian } = await gguf(URL_V1, {
+				typedMetadata: true,
+			});
+
+			// Create a small test blob
+			const testBlob = new Blob([new Uint8Array(1000)]);
+
+			// Test with valid range first to ensure function works
+			const validResult = await buildGgufHeader(testBlob, originalMetadata, {
+				littleEndian,
+				tensorInfoByteRange: [100, 200], // Valid: start < end
+				alignment: 32,
+			});
+
+			expect(validResult).toBeInstanceOf(Blob);
+
+			// Test with edge case: start == end (should work as empty range)
+			const emptyRangeResult = await buildGgufHeader(testBlob, originalMetadata, {
+				littleEndian,
+				tensorInfoByteRange: [100, 100], // Edge case: empty range
+				alignment: 32,
+			});
+
+			expect(emptyRangeResult).toBeInstanceOf(Blob);
+		}, 15_000);
 	});
 });
