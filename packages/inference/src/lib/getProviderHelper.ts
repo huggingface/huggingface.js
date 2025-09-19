@@ -132,6 +132,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	nscale: {
 		"text-to-image": new Nscale.NscaleTextToImageTask(),
 		conversational: new Nscale.NscaleConversationalTask(),
+		"text-generation": new Nscale.NscaleTextGenerationTask(),
 	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
