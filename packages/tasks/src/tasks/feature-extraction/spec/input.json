@@ -6,6 +6,14 @@
 	"type": "object",
 	"required": ["inputs"],
 	"properties": {
+		"dimensions": {
+			"type": "integer",
+			"description": "The number of dimensions that the output embeddings should have. If not set, the original\nshape of the representation will be returned instead.",
+			"default": "null",
+			"example": "null",
+			"nullable": true,
+			"minimum": 0
+		},
 		"inputs": {
 			"title": "FeatureExtractionInputs",
 			"description": "The text or list of texts to embed.",
