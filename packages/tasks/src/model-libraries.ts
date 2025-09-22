@@ -1176,7 +1176,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/microsoft/VibeVoice",
 		snippets: snippets.vibevoice,
 		filter: false,
-		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
 	},
 	"wan2.2": {
 		prettyLabel: "Wan2.2",
