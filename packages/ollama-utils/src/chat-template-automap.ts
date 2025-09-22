@@ -5,20 +5,33 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/llama3.3:latest
- * - library/llama3.2-vision:latest
- * - library/dolphin3:latest
- * - library/llama3:latest
- * - library/gemma:2b
- * - library/dolphin-llama3:8b
- * - library/gemma:latest
- * - library/granite3.3:2b
- * - library/gemma:latest
- * - library/falcon:latest
- * - library/tulu3:latest
- * - library/dbrx:latest
- * - library/smallthinker:latest
- * - library/command-r7b:latest
+ * - library/gemma2:latest
+ * - library/gpt-oss:latest
+ * - library/qwen2.5:0.5b
+ * - library/llama3:8b
+ * - library/mxbai-embed-large:latest
+ * - library/llama3.2:latest
+ * - library/gemma2:2b
+ * - library/qwen2.5-coder:latest
+ * - library/mistral-nemo:latest
+ * - library/smollm2:latest
+ * - library/dolphin3:8b
+ * - library/llava-llama3:8b
+ * - library/llama3.2:latest
+ * - library/llava-llama3:latest
+ * - library/mistral-small:latest
+ * - library/codegemma:2b
+ * - library/qwq:latest
+ * - library/smollm:latest
+ * - library/phi4-mini:latest
+ * - library/phi4-reasoning:14b
+ * - library/granite3.2:2b
+ * - library/stablelm2:1.6b
+ * - library/llama3-chatqa:latest
+ * - library/granite3-dense:latest
+ * - library/meditron:latest
+ * - library/aya-expanse:8b
+ * - library/llama-guard3:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
