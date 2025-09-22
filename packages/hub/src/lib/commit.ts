@@ -120,8 +120,13 @@ export type CommitParams = {
 	 */
 	fetch?: typeof fetch;
 	abortSignal?: AbortSignal;
-	// Credentials are optional due to custom fetch functions or cookie auth
+	/**
+	 * @default true
+	 *
+	 * Use xet protocol: https://huggingface.co/blog/xet-on-the-hub to upload, rather than a basic S3 PUT
+	 */
 	useXet?: boolean;
+	// Credentials are optional due to custom fetch functions or cookie auth
 } & Partial<CredentialsParams>;
 
 export interface CommitOutput {
@@ -165,24 +170,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 	const repoId = toRepoId(params.repo);
 	yield { event: "phase", phase: "preuploading" };
 
-	let useXet = params.useXet;
-	if (useXet) {
-		const info = await (params.fetch ?? fetch)(
-			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}?expand[]=xetEnabled`,
-			{
-				headers: {
-					...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-				},
-			}
-		);
-
-		if (!info.ok) {
-			throw await createApiError(info);
-		}
-
-		const data = await info.json();
-		useXet = !!data.xetEnabled;
-	}
+	let useXet = params.useXet ?? true;
 
 	const lfsShas = new Map<string, string | null>();
 
@@ -206,10 +194,6 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 		const allOperations = (
 			await Promise.all(
 				params.operations.map(async (operation) => {
-					if (operation.operation === "edit" && !useXet) {
-						throw new Error("Edit operation is not supported when Xet is disabled");
-					}
-
 					if (operation.operation === "edit") {
 						// Convert EditFile operation to a file operation with SplicedBlob
 						const splicedBlob = SplicedBlob.create(
@@ -325,7 +309,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			const payload: ApiLfsBatchRequest = {
 				operation: "upload",
 				// multipart is a custom protocol for HF
-				transfers: ["basic", "multipart"],
+				transfers: ["basic", "multipart", ...(useXet ? ["xet" as const] : [])],
 				hash_algo: "sha_256",
 				...(!params.isPullRequest && {
 					ref: {
@@ -363,6 +347,10 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
 
+			if (useXet && json.transfer !== "xet") {
+				useXet = false;
+			}
+
 			if (useXet) {
 				// First get all the files that are already uploaded out of the way
 				for (const obj of json.objects) {
@@ -396,6 +384,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						}
 						abortSignal?.throwIfAborted();
 
+						// todo: load writeTokenUrl from obj.actions.upload.header or obj.actions.upload.href
 						yield { content: op.content, path: op.path, sha256: obj.oid };
 					}
 				})();
