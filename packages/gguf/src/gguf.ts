@@ -827,6 +827,11 @@ export async function buildGgufHeader(
 	const [tensorInfoStartOffset, tensorInfoEndBeforePadOffset] = options.tensorInfoByteRange;
 	const originalTensorInfoBlob = originalFileBlob.slice(tensorInfoStartOffset, tensorInfoEndBeforePadOffset);
 
+	// For streaming blobs (WebBlob/XetBlob), we need to await the arrayBuffer() to get the actual data
+	// This ensures the tensor info is properly extracted before combining with the new header
+	const tensorInfoData = await originalTensorInfoBlob.arrayBuffer();
+	const tensorInfoBlob = new Blob([tensorInfoData], { type: "application/octet-stream" });
+
 	// Calculate final header with proper padding
 	const prePadLenNew = kvEndOffset + (tensorInfoEndBeforePadOffset - tensorInfoStartOffset);
 	const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1);
@@ -834,7 +839,7 @@ export async function buildGgufHeader(
 	const padLen = targetTensorDataOffset - prePadLenNew;
 
 	// Reconstruct final header
-	return new Blob([newHeaderBytes.slice(0, kvEndOffset), originalTensorInfoBlob, new Uint8Array(padLen)], {
+	return new Blob([newHeaderBytes.slice(0, kvEndOffset), tensorInfoBlob, new Uint8Array(padLen)], {
 		type: "application/octet-stream",
 	});
 }
