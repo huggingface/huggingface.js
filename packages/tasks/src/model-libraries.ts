@@ -202,6 +202,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	cloud_agents: {
+		prettyLabel: "Cloud Agents",
+		repoName: "Cloud-Agents",
+		repoUrl: "https://huggingface.co/OpenPeerAI/Cloud-Agents",
+		filter: false,
+		countDownloads: `path:"setup.py"`,
+	},	
 	colpali: {
 		prettyLabel: "ColPali",
 		repoName: "ColPali",
