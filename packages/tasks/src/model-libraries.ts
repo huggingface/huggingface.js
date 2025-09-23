@@ -208,7 +208,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://huggingface.co/OpenPeerAI/Cloud-Agents",
 		filter: false,
 		countDownloads: `path:"setup.py"`,
-	},	
+	},
 	colpali: {
 		prettyLabel: "ColPali",
 		repoName: "ColPali",
