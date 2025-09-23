@@ -923,6 +923,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"self-forcing": {
+		prettyLabel: "SelfForcing",
+		repoName: "SelfForcing",
+		repoUrl: "https://github.com/guandeh17/Self-Forcing",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
 		repoName: "sentence-transformers",
