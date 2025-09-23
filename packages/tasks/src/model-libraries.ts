@@ -204,7 +204,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"cloud-agents": {
 		prettyLabel: "Cloud Agents",
-		repoName: "Cloud-Agents",
+		repoName: "Cloud Agents",
 		repoUrl: "https://huggingface.co/OpenPeerAI/Cloud-Agents",
 		filter: false,
 		countDownloads: `path:"setup.py"`,
