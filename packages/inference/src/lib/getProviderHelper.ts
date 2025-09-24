@@ -50,8 +50,10 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
+import * as Dat1 from "../providers/dat1";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
+
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	"black-forest-labs": {
@@ -62,6 +64,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
+	},
+	dat1: {
+		"text-to-image": new Dat1.Dat1TextToImageTask(),
+		conversational: new Dat1.Dat1ConversationalTask(),
 	},
 	"fal-ai": {
 		"text-to-image": new FalAI.FalAITextToImageTask(),
