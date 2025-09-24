@@ -64,6 +64,7 @@ Currently, we support the following providers:
 - [Cohere](https://cohere.com)
 - [Cerebras](https://cerebras.ai/)
 - [Groq](https://groq.com)
+- [ZAI](https://z.ai/)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. The default value of the `provider` parameter is "auto", which will select the first of the providers available for the model, sorted by your preferred order in https://hf.co/settings/inference-providers.
 
