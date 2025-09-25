@@ -85,7 +85,7 @@ class CurrentXorbInfo {
 export async function* createXorbs(
 	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
 	params: XetWriteTokenParams & {
-		yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => void;
+		yieldCallback?: (event: { event: "fileProgress"; path: string; progress: number }) => void;
 	}
 ): AsyncGenerator<
 	| XorbEvent
@@ -286,7 +286,7 @@ export async function* createXorbs(
 					if (bytesSinceLastProgressEvent >= 1_000_000) {
 						// Emit half of the progress when processed locally, other half when uploading the xorb
 						bytesSinceLastProgressEvent = 0;
-						params.yieldCallback({
+						params.yieldCallback?.({
 							event: "fileProgress",
 							path: fileSource.path,
 							progress:

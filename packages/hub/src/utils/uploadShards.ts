@@ -58,7 +58,7 @@ interface UploadShardsParams {
 	repo: RepoId;
 	rev: string;
 	isPullRequest?: boolean;
-	yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => void;
+	yieldCallback?: (event: { event: "fileProgress"; path: string; progress: number }) => void;
 }
 
 /**
@@ -370,7 +370,7 @@ async function uploadXorb(
 			progressHint: {
 				progressCallback: (progress: number) => {
 					for (const file of xorb.files) {
-						params.yieldCallback({
+						params.yieldCallback?.({
 							event: "fileProgress",
 							path: file.path,
 							progress: file.lastSentProgress + (file.progress - file.lastSentProgress) * progress,
