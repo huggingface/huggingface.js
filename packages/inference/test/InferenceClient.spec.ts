@@ -2140,9 +2140,9 @@ describe.skip("InferenceClient", () => {
 			const client = new InferenceClient(env.HF_ZAI_KEY ?? "dummy");
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["zai"] = {
-				"zai-org/glm-4.5": {
+				"zai-org/GLM-4.5": {
 					provider: "zai",
-					hfModelId: "zai-org/glm-4.5",
+					hfModelId: "zai-org/GLM-4.5",
 					providerId: "glm-4.5",
 					status: "live",
 					task: "conversational",
@@ -2151,7 +2151,7 @@ describe.skip("InferenceClient", () => {
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
-					model: "zai-org/glm-4.5",
+					model: "zai-org/GLM-4.5",
 					provider: "zai",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
 				});
@@ -2163,7 +2163,7 @@ describe.skip("InferenceClient", () => {
 
 			it("chatCompletion stream", async () => {
 				const stream = client.chatCompletionStream({
-					model: "zai-org/glm-4.5",
+					model: "zai-org/GLM-4.5",
 					provider: "zai",
 					messages: [{ role: "user", content: "Say 'this is a test'" }],
 					stream: true,
