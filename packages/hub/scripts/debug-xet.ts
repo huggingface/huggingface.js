@@ -15,6 +15,9 @@ import { existsSync } from "node:fs";
  * - Uploaded xorbs as uploaded_xorb_1.bin, uploaded_xorb_2.bin, etc.
  * - Uploaded shards as uploaded_shard_1.bin, uploaded_shard_2.bin, etc.
  *
+ * Normal mode: Captures all upload data to upload_[filename]/ directory
+ * Replay mode: Validates upload data matches previously captured local files
+ *
  * Usage:
  * pnpm --filter hub debug-xet -f <local_file> -t <write_token> -r <xet_repo>
  * pnpm --filter hub debug-xet -f <local_file> -t <write_token> -r <xet_repo> --replay
@@ -44,8 +47,24 @@ function createDebugFetch(args: { debugDir: string; replay?: boolean }): {
 			const xorbPath = join(args.debugDir, xorbFilename);
 
 			if (init?.body) {
-				await writeFile(xorbPath, init.body as Uint8Array);
-				console.log(`💾 Saved xorb to ${xorbFilename} (${(init.body as Uint8Array).length} bytes)`);
+				const uploadData = init.body as Uint8Array;
+
+				if (args.replay) {
+					// In replay mode, compare with existing local file
+
+					const localData = await readFile(xorbPath);
+					if (localData.length !== uploadData.length || !localData.every((byte, i) => byte === uploadData[i])) {
+						console.error(`❌ Xorb data mismatch: ${xorbFilename}`);
+						console.error(`   Local size: ${localData.length}, Upload size: ${uploadData.length}`);
+						throw new Error(`Xorb validation failed for ${xorbFilename}`);
+					}
+					console.log(`✅ Xorb validation passed: ${xorbFilename}`);
+					return new Response(null, { status: 200 });
+				} else {
+					// In normal mode, save the data
+					await writeFile(xorbPath, uploadData);
+					console.log(`💾 Saved xorb to ${xorbFilename} (${uploadData.length} bytes)`);
+				}
 			}
 
 			// Forward the real request to backend
@@ -61,8 +80,23 @@ function createDebugFetch(args: { debugDir: string; replay?: boolean }): {
 			const shardPath = join(args.debugDir, shardFilename);
 
 			if (init?.body) {
-				await writeFile(shardPath, init.body as Uint8Array);
-				console.log(`💾 Saved shard to ${shardFilename} (${(init.body as Uint8Array).length} bytes)`);
+				const uploadData = init.body as Uint8Array;
+
+				if (args.replay) {
+					// In replay mode, compare with existing local file
+					const localData = await readFile(shardPath);
+					if (localData.length !== uploadData.length || !localData.every((byte, i) => byte === uploadData[i])) {
+						console.error(`❌ Shard data mismatch: ${shardFilename}`);
+						console.error(`   Local size: ${localData.length}, Upload size: ${uploadData.length}`);
+						throw new Error(`Shard validation failed for ${shardFilename}`);
+					}
+					console.log(`✅ Shard validation passed: ${shardFilename}`);
+					return new Response(null, { status: 200 });
+				} else {
+					// In normal mode, save the data
+					await writeFile(shardPath, uploadData);
+					console.log(`💾 Saved shard to ${shardFilename} (${uploadData.length} bytes)`);
+				}
 			}
 
 			// Forward the real request to backend
@@ -191,16 +225,27 @@ async function main() {
 	const filename = basename(args.file);
 	const debugDir = `upload_${filename}`;
 
-	// Check if debug directory already exists
-	if (existsSync(debugDir)) {
-		console.error(`❌ Debug directory ${debugDir} already exists`);
-		console.error(`   Please remove it first: rm -rf ${debugDir}`);
-		process.exit(1);
-	}
+	// Handle debug directory based on mode
+	if (args.replay) {
+		// In replay mode, directory must exist
+		if (!existsSync(debugDir)) {
+			console.error(`❌ Debug directory ${debugDir} does not exist`);
+			console.error(`   Run without --replay first to capture upload data`);
+			process.exit(1);
+		}
+		console.log(`📁 Using existing debug directory: ${debugDir}`);
+	} else {
+		// In normal mode, directory must not exist
+		if (existsSync(debugDir)) {
+			console.error(`❌ Debug directory ${debugDir} already exists`);
+			console.error(`   Please remove it first: rm -rf ${debugDir}`);
+			process.exit(1);
+		}
 
-	// Create debug directory
-	await mkdir(debugDir, { recursive: true });
-	console.log(`📁 Created debug directory: ${debugDir}`);
+		// Create debug directory
+		await mkdir(debugDir, { recursive: true });
+		console.log(`📁 Created debug directory: ${debugDir}`);
+	}
 
 	// Parse repo
 	const repo: RepoId = toRepoId(args.repo);
@@ -280,8 +325,13 @@ async function main() {
 		console.log(`   - ${file} (${fileInfo.size.toLocaleString()} bytes)`);
 	}
 
-	console.log(`\n🚀 Debug upload completed successfully!`);
-	console.log(`   Use --replay flag to test with local dedup data`);
+	if (args.replay) {
+		console.log(`\n✅ Replay validation completed successfully!`);
+		console.log(`   All uploaded data matched local files`);
+	} else {
+		console.log(`\n🚀 Debug upload completed successfully!`);
+		console.log(`   Use --replay flag to test with local dedup data`);
+	}
 }
 
 main().catch((error) => {
