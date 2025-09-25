@@ -27,6 +27,7 @@ export class ZaiConversationalTask extends BaseConversationalTask {
 	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
 		const headers = super.prepareHeaders(params, binary);
 		headers["x-source-channel"] = "hugging_face";
+		headers["accept-language"] = "en-US,en";
 		return headers;
 	}
 
