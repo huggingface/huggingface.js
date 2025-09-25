@@ -32,6 +32,6 @@ export class ZaiConversationalTask extends BaseConversationalTask {
 	}
 
 	override makeRoute(): string {
-		return "/chat/completions";
+		return "/api/paas/v4/chat/completions";
 	}
 }
