@@ -58,7 +58,7 @@ function createDebugFetch(args: { debugDir: string; replay?: boolean }): {
 						console.error(`   Local size: ${localData.length}, Upload size: ${uploadData.length}`);
 						throw new Error(`Xorb validation failed for ${xorbFilename}`);
 					}
-					console.log(`✅ Xorb validation passed: ${xorbFilename}`);
+					console.log(`✅ Xorb validation passed: ${xorbFilename} - xorb file is the same as generated previously`);
 					return new Response(null, { status: 200 });
 				} else {
 					// In normal mode, save the data
@@ -85,13 +85,36 @@ function createDebugFetch(args: { debugDir: string; replay?: boolean }): {
 				if (args.replay) {
 					// In replay mode, compare with existing local file
 					const localData = await readFile(shardPath);
-					if (localData.length !== uploadData.length || !localData.every((byte, i) => byte === uploadData[i])) {
+					if (localData.length !== uploadData.length) {
 						console.error(`❌ Shard data mismatch: ${shardFilename}`);
 						console.error(`   Local size: ${localData.length}, Upload size: ${uploadData.length}`);
 						throw new Error(`Shard validation failed for ${shardFilename}`);
 					}
-					console.log(`✅ Shard validation passed: ${shardFilename}`);
-					return new Response(null, { status: 200 });
+
+					// Compare all bytes except footer bytes 104-112 (9 bytes from positions 104-112 inclusive)
+					const footerStart = Number(
+						new DataView(localData.buffer).getBigUint64(localData.buffer.byteLength - 8, true)
+					);
+					// This is the shard timestamp
+					const toIgnoreStart = footerStart + 104;
+					const toIgnoreEnd = footerStart + 112;
+
+					const mismatch = localData.some((byte, i) => {
+						if (i >= toIgnoreStart && i < toIgnoreEnd) {
+							return false;
+						}
+						return byte !== uploadData[i];
+					});
+
+					if (mismatch) {
+						console.error(`❌ Shard data mismatch: ${shardFilename}`);
+						console.error(`   Local size: ${localData.length}, Upload size: ${uploadData.length}`);
+						throw new Error(`Shard validation failed for ${shardFilename}`);
+					}
+					console.log(`✅ Shard validation passed: ${shardFilename} - shard file is the same as generated previously`);
+
+					// Do not mock the shard call
+					//return new Response(null, { status: 200 });
 				} else {
 					// In normal mode, save the data
 					await writeFile(shardPath, uploadData);
@@ -263,10 +286,6 @@ async function main() {
 		fetch: debugFetchObj.fetch,
 		repo,
 		rev: "main",
-		yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => {
-			const progress = (event.progress * 100).toFixed(1);
-			console.log(`📈 Progress for ${event.path}: ${progress}%`);
-		},
 	};
 
 	console.log(`\n=== Starting debug upload for ${filename} ===`);
