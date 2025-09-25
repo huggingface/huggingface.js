@@ -17,7 +17,7 @@
 import { BaseConversationalTask } from "./providerHelper.js";
 import type { HeaderParams } from "../types.js";
 
-const ZAI_API_BASE_URL = "https://api.z.ai/api/paas/v4";
+const ZAI_API_BASE_URL = "https://api.z.ai";
 
 export class ZaiConversationalTask extends BaseConversationalTask {
 	constructor() {
