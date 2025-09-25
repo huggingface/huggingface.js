@@ -167,7 +167,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	zai: {
 		conversational: new Zai.ZaiConversationalTask(),
-		"text-generation": new Zai.ZaiTextGenerationTask(),
 	},
 };
 
