@@ -15,12 +15,19 @@
  * Thanks!
  */
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
+import type { HeaderParams } from "../types.js";
 
 const ZAI_API_BASE_URL = "https://api.z.ai/api/paas/v4";
 
 export class ZaiTextGenerationTask extends BaseTextGenerationTask {
 	constructor() {
 		super("zai", ZAI_API_BASE_URL);
+	}
+
+	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+		const headers = super.prepareHeaders(params, binary);
+		headers["x-source-channel"] = "hugging_face";
+		return headers;
 	}
 
 	override makeRoute(): string {
