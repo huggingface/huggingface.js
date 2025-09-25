@@ -56,6 +56,7 @@ Currently, we support the following providers:
 - [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
 - [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
+- [Public AI](https://publicai.co)
 - [Replicate](https://replicate.com)
 - [Sambanova](https://sambanova.ai)
 - [Scaleway](https://www.scaleway.com/en/generative-apis/)

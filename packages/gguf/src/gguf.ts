@@ -30,6 +30,12 @@ const GGUF_DEFAULT_ALIGNMENT = 32; // defined in ggml.h
 const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); // defined in ggml.h
 const PARALLEL_DOWNLOADS = 20;
 
+/**
+ * GGUF magic number: "GGUF" in bytes
+ * Must be `GGUF` at the byte level: `0x47` `0x47` `0x55` `0x46`.
+ */
+const GGUF_MAGIC_NUMBER = new Uint8Array([0x47, 0x47, 0x55, 0x46]);
+
 export interface GgufShardFileInfo {
 	prefix: string;
 	shard: string;
@@ -49,14 +55,6 @@ export function parseGgufShardFilename(filename: string): GgufShardFileInfo | nu
 }
 
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
-
-/**
- * Must be `GGUF` at the byte level: `0x47` `0x47` `0x55` `0x46`.
- * Your executor might do little-endian byte order, so it might be
- * check for 0x46554747 and letting the endianness cancel out.
- * Consider being *very* explicit about the byte order here.
- */
-const ggufMagicNumber = new Uint8Array([0x47, 0x47, 0x55, 0x46]); /// "GGUF"
 
 function isGGUFValueType(n: number): n is GGUFValueType {
 	return typeof GGUFValueType[n] === "string";
@@ -320,7 +318,7 @@ export async function gguf(
 		return true;
 	};
 
-	if (!checkBuffer(new Uint8Array(r.view.buffer.slice(0, 4)), ggufMagicNumber)) {
+	if (!checkBuffer(new Uint8Array(r.view.buffer.slice(0, 4)), GGUF_MAGIC_NUMBER)) {
 		throw new Error("not a valid gguf file: not starting with GGUF magic number");
 	}
 
@@ -421,6 +419,7 @@ export async function gguf(
 		}
 	}
 
+	const tensorInfoStartOffset = offset;
 	const tensorInfos: GGUFTensorInfo[] = [];
 
 	for (let i = 0; i < tensorCount.value; i++) {
@@ -456,6 +455,7 @@ export async function gguf(
 
 	// calculate absolute offset of tensor data
 	const alignment: number = Number(metadata["general.alignment"] ?? GGUF_DEFAULT_ALIGNMENT);
+	const tensorInfoEndBeforePadOffset = offset;
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
 	if (params?.computeParametersCount && params?.typedMetadata) {
@@ -467,8 +467,10 @@ export async function gguf(
 			metadata,
 			tensorInfos,
 			tensorDataOffset,
+			littleEndian,
 			parameterCount,
 			typedMetadata: typedMetadata as GGUFTypedMetadata,
+			tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset],
 		} as GGUFParseOutput & { parameterCount: number; typedMetadata: GGUFTypedMetadata };
 	} else if (params?.computeParametersCount) {
 		const parameterCount = tensorInfos
@@ -479,18 +481,367 @@ export async function gguf(
 			metadata,
 			tensorInfos,
 			tensorDataOffset,
+			littleEndian,
 			parameterCount,
+			tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset],
 		} as GGUFParseOutput & { parameterCount: number };
 	} else if (params?.typedMetadata) {
 		return {
 			metadata,
 			tensorInfos,
 			tensorDataOffset,
+			littleEndian,
 			typedMetadata: typedMetadata as GGUFTypedMetadata,
+			tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset],
 		} as GGUFParseOutput & { typedMetadata: GGUFTypedMetadata };
 	} else {
-		return { metadata, tensorInfos, tensorDataOffset } as GGUFParseOutput;
+		return {
+			metadata,
+			tensorInfos,
+			tensorDataOffset,
+			littleEndian,
+			tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset],
+		} as GGUFParseOutput;
 	}
+}
+
+/**
+ * Helper functions for serializing GGUF data to binary format
+ */
+
+function writeVersionedSize(version: Version, value: bigint, littleEndian: boolean): Uint8Array {
+	switch (version) {
+		case 1: {
+			const buffer = new ArrayBuffer(4);
+			const view = new DataView(buffer);
+			view.setUint32(0, Number(value), littleEndian);
+			return new Uint8Array(buffer);
+		}
+		case 2:
+		case 3: {
+			const buffer = new ArrayBuffer(8);
+			const view = new DataView(buffer);
+			view.setBigUint64(0, value, littleEndian);
+			return new Uint8Array(buffer);
+		}
+	}
+}
+
+function writeString(value: string, version: Version, littleEndian: boolean): Uint8Array {
+	const stringBytes = new TextEncoder().encode(value);
+	const lengthBytes = writeVersionedSize(version, BigInt(stringBytes.length), littleEndian);
+
+	const result = new Uint8Array(lengthBytes.length + stringBytes.length);
+	result.set(lengthBytes, 0);
+	result.set(stringBytes, lengthBytes.length);
+	return result;
+}
+
+function writeMetadataValue(
+	value: MetadataValue,
+	type: GGUFValueType,
+	version: Version,
+	littleEndian: boolean,
+	subType?: GGUFValueType
+): Uint8Array {
+	switch (type) {
+		case GGUFValueType.UINT8: {
+			const buffer = new ArrayBuffer(1);
+			const view = new DataView(buffer);
+			view.setUint8(0, value as number);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.INT8: {
+			const buffer = new ArrayBuffer(1);
+			const view = new DataView(buffer);
+			view.setInt8(0, value as number);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.UINT16: {
+			const buffer = new ArrayBuffer(2);
+			const view = new DataView(buffer);
+			view.setUint16(0, value as number, littleEndian);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.INT16: {
+			const buffer = new ArrayBuffer(2);
+			const view = new DataView(buffer);
+			view.setInt16(0, value as number, littleEndian);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.UINT32: {
+			const buffer = new ArrayBuffer(4);
+			const view = new DataView(buffer);
+			view.setUint32(0, value as number, littleEndian);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.INT32: {
+			const buffer = new ArrayBuffer(4);
+			const view = new DataView(buffer);
+			view.setInt32(0, value as number, littleEndian);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.FLOAT32: {
+			const buffer = new ArrayBuffer(4);
+			const view = new DataView(buffer);
+			view.setFloat32(0, value as number, littleEndian);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.BOOL: {
+			const buffer = new ArrayBuffer(1);
+			const view = new DataView(buffer);
+			view.setUint8(0, value ? 1 : 0);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.STRING: {
+			return writeString(value as string, version, littleEndian);
+		}
+		case GGUFValueType.ARRAY: {
+			if (!subType) {
+				throw new Error("Array type requires subType to be specified");
+			}
+			const arrayValue = value as MetadataValue[];
+
+			// Write array type (4 bytes)
+			const arrayTypeBuffer = new ArrayBuffer(4);
+			const arrayTypeView = new DataView(arrayTypeBuffer);
+			arrayTypeView.setUint32(0, subType, littleEndian);
+			const arrayTypeBytes = new Uint8Array(arrayTypeBuffer);
+
+			// Write array length
+			const lengthBytes = writeVersionedSize(version, BigInt(arrayValue.length), littleEndian);
+
+			// Write array elements
+			const elementBytes: Uint8Array[] = [];
+			for (const element of arrayValue) {
+				elementBytes.push(writeMetadataValue(element, subType, version, littleEndian));
+			}
+
+			// Combine all parts
+			const totalLength =
+				arrayTypeBytes.length + lengthBytes.length + elementBytes.reduce((sum, bytes) => sum + bytes.length, 0);
+			const result = new Uint8Array(totalLength);
+			let offset = 0;
+
+			result.set(arrayTypeBytes, offset);
+			offset += arrayTypeBytes.length;
+			result.set(lengthBytes, offset);
+			offset += lengthBytes.length;
+
+			for (const bytes of elementBytes) {
+				result.set(bytes, offset);
+				offset += bytes.length;
+			}
+
+			return result;
+		}
+		case GGUFValueType.UINT64: {
+			const buffer = new ArrayBuffer(8);
+			const view = new DataView(buffer);
+			view.setBigUint64(0, value as bigint, littleEndian);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.INT64: {
+			const buffer = new ArrayBuffer(8);
+			const view = new DataView(buffer);
+			view.setBigInt64(0, value as bigint, littleEndian);
+			return new Uint8Array(buffer);
+		}
+		case GGUFValueType.FLOAT64: {
+			const buffer = new ArrayBuffer(8);
+			const view = new DataView(buffer);
+			view.setFloat64(0, value as number, littleEndian);
+			return new Uint8Array(buffer);
+		}
+		default:
+			throw new Error(`Unsupported value type: ${type}`);
+	}
+}
+
+/**
+ * Serialize GGUF header including metadata and alignment.
+ *
+ * @param typedMetadata - The typed metadata to serialize
+ * @param options - Serialization options
+ * @returns A Uint8Array containing the GGUF header with proper alignment
+ */
+export function serializeGgufMetadata(
+	typedMetadata: GGUFTypedMetadata,
+	options: {
+		/**
+		 * Whether to use little endian byte order
+		 * @default true
+		 */
+		littleEndian?: boolean;
+		/**
+		 * Alignment for tensor data
+		 * @default GGUF_DEFAULT_ALIGNMENT (32)
+		 */
+		alignment?: number;
+	} = {}
+): Uint8Array {
+	const littleEndian = options.littleEndian ?? true;
+	const alignment = options.alignment ?? GGUF_DEFAULT_ALIGNMENT;
+	const version = typedMetadata.version.value;
+
+	// Start with GGUF magic number: "GGUF"
+
+	// Write version (4 bytes, UINT32)
+	const versionBuffer = new ArrayBuffer(4);
+	const versionView = new DataView(versionBuffer);
+	versionView.setUint32(0, version, littleEndian);
+	const versionBytes = new Uint8Array(versionBuffer);
+
+	// Write tensor count
+	const tensorCountBytes = writeVersionedSize(version, typedMetadata.tensor_count.value, littleEndian);
+
+	// Count key-value pairs (excluding the built-in fields: version, tensor_count, kv_count)
+	const kvEntries = Object.entries(typedMetadata).filter(
+		([key]) => !["version", "tensor_count", "kv_count"].includes(key)
+	);
+	const kvCount = BigInt(kvEntries.length);
+
+	// Write kv count
+	const kvCountBytes = writeVersionedSize(version, kvCount, littleEndian);
+
+	// Write all key-value pairs
+	const kvBytes: Uint8Array[] = [];
+
+	for (const [key, entry] of kvEntries) {
+		// Write key (string)
+		const keyBytes = writeString(key, version, littleEndian);
+		kvBytes.push(keyBytes);
+
+		// Write value type (4 bytes, UINT32)
+		const valueTypeBuffer = new ArrayBuffer(4);
+		const valueTypeView = new DataView(valueTypeBuffer);
+		valueTypeView.setUint32(0, entry.type, littleEndian);
+		const valueTypeBytes = new Uint8Array(valueTypeBuffer);
+		kvBytes.push(valueTypeBytes);
+
+		// Write value
+		if (entry.value === undefined) {
+			throw new Error(`Value for key "${key}" is undefined`);
+		}
+		const valueBytes = writeMetadataValue(
+			entry.value,
+			entry.type,
+			version,
+			littleEndian,
+			"subType" in entry ? entry.subType : undefined
+		);
+		kvBytes.push(valueBytes);
+	}
+
+	// Calculate total size before alignment
+	const preAlignmentSize =
+		GGUF_MAGIC_NUMBER.length +
+		versionBytes.length +
+		tensorCountBytes.length +
+		kvCountBytes.length +
+		kvBytes.reduce((sum, bytes) => sum + bytes.length, 0);
+
+	// Calculate aligned size
+	const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1);
+	const alignedSize = GGML_PAD(preAlignmentSize, alignment);
+
+	// Create result array with padding
+	const result = new Uint8Array(alignedSize);
+	let offset = 0;
+
+	// Magic number
+	result.set(GGUF_MAGIC_NUMBER, offset);
+	offset += GGUF_MAGIC_NUMBER.length;
+
+	// Version
+	result.set(versionBytes, offset);
+	offset += versionBytes.length;
+
+	// Tensor count
+	result.set(tensorCountBytes, offset);
+	offset += tensorCountBytes.length;
+
+	// KV count
+	result.set(kvCountBytes, offset);
+	offset += kvCountBytes.length;
+
+	// All key-value pairs
+	for (const bytes of kvBytes) {
+		result.set(bytes, offset);
+		offset += bytes.length;
+	}
+
+	// Padding bytes (zeros) are already initialized in the Uint8Array
+	return result;
+}
+
+/**
+ * Reconstructs a complete GGUF header by combining updated metadata with original tensor info.
+ * This function handles the entire process of serializing new metadata, extracting original tensor info,
+ * and properly padding the final header for alignment.
+ *
+ * @param originalFileBlob - The original GGUF file blob
+ * @param updatedMetadata - The updated typed metadata
+ * @param options - Reconstruction options
+ * @returns Promise resolving to the new header blob ready for file editing
+ */
+export async function buildGgufHeader(
+	originalFileBlob: Blob,
+	updatedMetadata: GGUFTypedMetadata,
+	options: {
+		/** Whether to use little endian byte order */
+		littleEndian: boolean;
+		/** Tensor info byte range [start, endBeforePad] from parsing */
+		tensorInfoByteRange: [number, number];
+		/** Alignment for tensor data (default: GGUF_DEFAULT_ALIGNMENT (32)) */
+		alignment?: number;
+	}
+): Promise<Blob> {
+	const alignment = options.alignment ?? GGUF_DEFAULT_ALIGNMENT;
+	const version = updatedMetadata.version.value;
+
+	// Serialize the new metadata
+	const newHeaderBytes = serializeGgufMetadata(updatedMetadata, {
+		littleEndian: options.littleEndian,
+		alignment,
+	});
+
+	// Calculate KV end offset by parsing the serialized header
+	const view = new DataView(newHeaderBytes.buffer, newHeaderBytes.byteOffset, newHeaderBytes.byteLength);
+	let offset = 8; // magic+version
+	const tensorCount = readVersionedSize(view, offset, version, options.littleEndian);
+	offset += tensorCount.length;
+	const kvCount = readVersionedSize(view, offset, version, options.littleEndian);
+	offset += kvCount.length;
+	for (let i = BigInt(0); i < kvCount.value; i++) {
+		const key = readString(view, offset, version, options.littleEndian);
+		offset += key.length;
+		const valueType = view.getUint32(offset, options.littleEndian);
+		offset += 4;
+		const value = readMetadataValue(view, valueType, offset, version, options.littleEndian);
+		offset += value.length;
+	}
+	const kvEndOffset = offset;
+
+	// Extract original tensor info section
+	const [tensorInfoStartOffset, tensorInfoEndBeforePadOffset] = options.tensorInfoByteRange;
+	const originalTensorInfoBlob = originalFileBlob.slice(tensorInfoStartOffset, tensorInfoEndBeforePadOffset);
+
+	// For streaming blobs (WebBlob/XetBlob), we need to await the arrayBuffer() to get the actual data
+	// This ensures the tensor info is properly extracted before combining with the new header
+	const tensorInfoData = await originalTensorInfoBlob.arrayBuffer();
+	const tensorInfoBlob = new Blob([tensorInfoData], { type: "application/octet-stream" });
+
+	// Calculate final header with proper padding
+	const prePadLenNew = kvEndOffset + (tensorInfoEndBeforePadOffset - tensorInfoStartOffset);
+	const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1);
+	const targetTensorDataOffset = GGML_PAD(prePadLenNew, alignment);
+	const padLen = targetTensorDataOffset - prePadLenNew;
+
+	// Reconstruct final header
+	return new Blob([newHeaderBytes.slice(0, kvEndOffset), tensorInfoBlob, new Uint8Array(padLen)], {
+		type: "application/octet-stream",
+	});
 }
 
 export async function ggufAllShards(
@@ -528,10 +879,13 @@ export async function ggufAllShards(
 			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
 		};
 	} else {
-		const { metadata, tensorInfos, tensorDataOffset, parameterCount } = await gguf(url, {
-			...params,
-			computeParametersCount: true,
-		});
-		return { shards: [{ metadata, tensorInfos, tensorDataOffset }], parameterCount };
+		const { metadata, tensorInfos, tensorDataOffset, littleEndian, parameterCount, tensorInfoByteRange } = await gguf(
+			url,
+			{
+				...params,
+				computeParametersCount: true,
+			}
+		);
+		return { shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }], parameterCount };
 	}
 }

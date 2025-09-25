@@ -202,6 +202,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	"cloud-agents": {
+		prettyLabel: "Cloud Agents",
+		repoName: "Cloud Agents",
+		repoUrl: "https://huggingface.co/OpenPeerAI/Cloud-Agents",
+		filter: false,
+		countDownloads: `path:"setup.py"`,
+	},
 	colpali: {
 		prettyLabel: "ColPali",
 		repoName: "ColPali",
@@ -496,6 +503,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.indextts,
 		filter: false,
 	},
+	infinitetalk: {
+		prettyLabel: "InfiniteTalk",
+		repoName: "InfiniteTalk",
+		repoUrl: "https://github.com/MeiGen-AI/InfiniteTalk",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
 		repoName: "InfiniteYou",
@@ -740,6 +754,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			OR path:"open_clip_pytorch_model.bin"
 			OR path:"pytorch_model.bin"`,
 	},
+	openpeerllm: {
+		prettyLabel: "OpenPeerLLM",
+		repoName: "OpenPeerLLM",
+		repoUrl: "https://huggingface.co/openpeerai/openpeerllm",
+		docsUrl: "https://huggingface.co/OpenPeerAI/OpenPeerLLM/blob/main/README.md",
+		countDownloads: `path:".meta-huggingface.json"`,
+		filter: false,
+	},
 	"open-sora": {
 		prettyLabel: "Open-Sora",
 		repoName: "Open-Sora",
@@ -793,6 +815,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.phantom_wan,
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	"pruna-ai": {
+		prettyLabel: "Pruna AI",
+		repoName: "Pruna AI",
+		repoUrl: "https://github.com/PrunaAI/pruna",
+		snippets: snippets.pruna,
+		docsUrl: "https://docs.pruna.ai",
 	},
 	pxia: {
 		prettyLabel: "pxia",
@@ -900,6 +929,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ByteDance-Seed/SeedVR",
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	"self-forcing": {
+		prettyLabel: "SelfForcing",
+		repoName: "SelfForcing",
+		repoUrl: "https://github.com/guandeh17/Self-Forcing",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
@@ -1065,7 +1101,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/IBM/terratorch",
 		docsUrl: "https://ibm.github.io/terratorch/",
 		filter: false,
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"ckpt"`,
 		snippets: snippets.terratorch,
 	},
 	"tic-clip": {
@@ -1193,6 +1229,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
+	},
+	voxcpm: {
+		prettyLabel: "VoxCPM",
+		repoName: "VoxCPM",
+		repoUrl: "https://github.com/OpenBMB/VoxCPM",
+		snippets: snippets.voxcpm,
+		filter: false,
 	},
 	vui: {
 		prettyLabel: "Vui",

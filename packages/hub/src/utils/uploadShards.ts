@@ -57,6 +57,8 @@ interface UploadShardsParams {
 	fetch?: typeof fetch;
 	repo: RepoId;
 	rev: string;
+	isPullRequest?: boolean;
+	yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => void;
 }
 
 /**
@@ -128,6 +130,14 @@ export async function* uploadShards(
 					xorbView.setBigUint64(xorbViewOffset, 0n, true); // reserved
 					xorbViewOffset += 8;
 					chunkBytes += chunk.length;
+				}
+
+				for (const file of output.files) {
+					yield {
+						event: "fileProgress",
+						path: file.path,
+						progress: file.lastSentProgress,
+					};
 				}
 
 				await uploadXorb(output, params);
@@ -344,14 +354,30 @@ function writeHashToArray(hash: string, array: Uint8Array, offset: number) {
 	}
 }
 
-async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: UploadShardsParams) {
-	const token = await xetWriteToken(params);
+async function uploadXorb(
+	xorb: { hash: string; xorb: Uint8Array; files: Array<{ path: string; progress: number; lastSentProgress: number }> },
+	params: UploadShardsParams
+) {
+	const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
 
-	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorb/default/${xorb.hash}`, {
+	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorbs/default/${xorb.hash}`, {
 		method: "POST",
 		body: xorb.xorb,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
+		},
+		...{
+			progressHint: {
+				progressCallback: (progress: number) => {
+					for (const file of xorb.files) {
+						params.yieldCallback({
+							event: "fileProgress",
+							path: file.path,
+							progress: file.lastSentProgress + (file.progress - file.lastSentProgress) * progress,
+						});
+					}
+				},
+			},
 		},
 	});
 
@@ -361,9 +387,9 @@ async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: Uplo
 }
 
 async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
-	const token = await xetWriteToken(params);
+	const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
 
-	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/shard`, {
+	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/shards`, {
 		method: "POST",
 		body: shard,
 		headers: {

@@ -24,7 +24,6 @@ import { isFrontend } from "../utils/isFrontend";
 import { createBlobs } from "../utils/createBlobs";
 import { uploadShards } from "../utils/uploadShards";
 import { splitAsyncGenerator } from "../utils/splitAsyncGenerator";
-import { mergeAsyncGenerators } from "../utils/mergeAsyncGenerators";
 import { SplicedBlob } from "../utils/SplicedBlob";
 
 const CONCURRENT_SHAS = 5;
@@ -364,7 +363,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
 
-			if (params.useXet) {
+			if (useXet) {
 				// First get all the files that are already uploaded out of the way
 				for (const obj of json.objects) {
 					const op = shaToOperation.get(obj.oid);
@@ -401,33 +400,37 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					}
 				})();
 				const sources = splitAsyncGenerator(source, 5);
-				yield* mergeAsyncGenerators(
-					sources.map(async function* (source) {
-						for await (const event of uploadShards(source, {
-							fetch: params.fetch,
-							accessToken,
-							hubUrl: params.hubUrl ?? HUB_URL,
-							repo: repoId,
-							// todo: maybe leave empty if PR?
-							rev: params.branch ?? "main",
-						})) {
-							if (event.event === "file") {
-								yield {
-									event: "fileProgress" as const,
-									path: event.path,
-									progress: 1,
-									state: "uploading" as const,
-								};
-							} else if (event.event === "fileProgress") {
-								yield {
-									event: "fileProgress" as const,
-									path: event.path,
-									progress: event.progress,
-									state: "uploading" as const,
-								};
+				yield* eventToGenerator((yieldCallback, returnCallback, rejectCallback) =>
+					Promise.all(
+						sources.map(async function (source) {
+							for await (const event of uploadShards(source, {
+								fetch: params.fetch,
+								accessToken,
+								hubUrl: params.hubUrl ?? HUB_URL,
+								repo: repoId,
+								// todo: maybe leave empty if PR?
+								rev: params.branch ?? "main",
+								isPullRequest: params.isPullRequest,
+								yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
+							})) {
+								if (event.event === "file") {
+									yieldCallback({
+										event: "fileProgress" as const,
+										path: event.path,
+										progress: 1,
+										state: "uploading" as const,
+									});
+								} else if (event.event === "fileProgress") {
+									yieldCallback({
+										event: "fileProgress" as const,
+										path: event.path,
+										progress: event.progress,
+										state: "uploading" as const,
+									});
+								}
 							}
-						}
-					})
+						})
+					).then(() => returnCallback(undefined), rejectCallback)
 				);
 			} else {
 				yield* eventToGenerator<CommitProgressEvent, void>((yieldCallback, returnCallback, rejectCallback) => {
