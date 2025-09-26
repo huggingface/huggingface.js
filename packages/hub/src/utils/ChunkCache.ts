@@ -12,6 +12,14 @@ export class ChunkCache {
 	hmacs = new Set<string>(); // todo : remove old hmacs
 
 	addChunkToCache(hash: string, xorbIndex: number, chunkIndex: number, hmac: string | null): void {
+		if (this.map.has(hash)) {
+			// Happens when we receive an existing chunk from remote dedup info (duplicate chunk in shard? Or shards with same hmac key?)
+			// processing this chunk again would desync the cache, as `this.map.size` would not increase, as opposed to `this.index`
+
+			// Ideally we'd still process it to evict it later ("refresh it") but would need more complex handling, or stop using
+			// the Uint16Array / Int32Array which are optimized for memory usage
+			return;
+		}
 		this.map.set(hash, this.index);
 		if (hmac !== null) {
 			this.hmacs.add(hmac);
