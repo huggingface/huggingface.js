@@ -50,7 +50,7 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
-import * as Zai from "../providers/zai.js";
+import * as Zai from "../providers/zai-org.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
 

@@ -1,7 +1,7 @@
 /**
  * See the registered mapping of HF model ID => ZAI model ID here:
  *
- * https://huggingface.co/api/partners/zai/models
+ * https://huggingface.co/api/partners/zai-org/models
  *
  * This is a publicly available mapping.
  *
