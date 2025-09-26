@@ -13,7 +13,9 @@ export class ChunkCache {
 
 	addChunkToCache(hash: string, xorbIndex: number, chunkIndex: number, hmac: string | null): void {
 		if (this.map.has(hash)) {
-			// Happens when we receive an existing chunk from remote dedup info (duplicate chunk in shard? Or shards with same hmac key?)
+			// Happens when we receive an existing chunk from remote dedup info (eg duplicate chunk in shard? Or shards with same hmac key
+			// sharing chunks/xorbs)
+
 			// processing this chunk again would desync the cache, as `this.map.size` would not increase, as opposed to `this.index`
 
 			// Ideally we'd still process it to evict it later ("refresh it") but would need more complex handling, or stop using
