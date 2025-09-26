@@ -21,7 +21,7 @@ const ZAI_API_BASE_URL = "https://api.z.ai";
 
 export class ZaiConversationalTask extends BaseConversationalTask {
 	constructor() {
-		super("zai", ZAI_API_BASE_URL);
+		super("zai-org", ZAI_API_BASE_URL);
 	}
 
 	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
