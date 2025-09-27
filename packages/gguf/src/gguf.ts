@@ -419,6 +419,7 @@ export async function gguf(
 		}
 	}
 
+	const tensorInfoStartOffset = offset;
 	const tensorInfos: GGUFTensorInfo[] = [];
 
 	for (let i = 0; i < tensorCount.value; i++) {
@@ -454,6 +455,7 @@ export async function gguf(
 
 	// calculate absolute offset of tensor data
 	const alignment: number = Number(metadata["general.alignment"] ?? GGUF_DEFAULT_ALIGNMENT);
+	const tensorInfoEndBeforePadOffset = offset;
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
 	if (params?.computeParametersCount && params?.typedMetadata) {
@@ -468,6 +470,7 @@ export async function gguf(
 			littleEndian,
 			parameterCount,
 			typedMetadata: typedMetadata as GGUFTypedMetadata,
+			tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset],
 		} as GGUFParseOutput & { parameterCount: number; typedMetadata: GGUFTypedMetadata };
 	} else if (params?.computeParametersCount) {
 		const parameterCount = tensorInfos
@@ -480,6 +483,7 @@ export async function gguf(
 			tensorDataOffset,
 			littleEndian,
 			parameterCount,
+			tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset],
 		} as GGUFParseOutput & { parameterCount: number };
 	} else if (params?.typedMetadata) {
 		return {
@@ -488,9 +492,16 @@ export async function gguf(
 			tensorDataOffset,
 			littleEndian,
 			typedMetadata: typedMetadata as GGUFTypedMetadata,
+			tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset],
 		} as GGUFParseOutput & { typedMetadata: GGUFTypedMetadata };
 	} else {
-		return { metadata, tensorInfos, tensorDataOffset, littleEndian } as GGUFParseOutput;
+		return {
+			metadata,
+			tensorInfos,
+			tensorDataOffset,
+			littleEndian,
+			tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset],
+		} as GGUFParseOutput;
 	}
 }
 
@@ -664,13 +675,13 @@ export function serializeGgufMetadata(
 		littleEndian?: boolean;
 		/**
 		 * Alignment for tensor data
-		 * @default 32
+		 * @default GGUF_DEFAULT_ALIGNMENT (32)
 		 */
 		alignment?: number;
 	} = {}
 ): Uint8Array {
 	const littleEndian = options.littleEndian ?? true;
-	const alignment = options.alignment ?? 32; // GGUF_DEFAULT_ALIGNMENT
+	const alignment = options.alignment ?? GGUF_DEFAULT_ALIGNMENT;
 	const version = typedMetadata.version.value;
 
 	// Start with GGUF magic number: "GGUF"
@@ -764,6 +775,75 @@ export function serializeGgufMetadata(
 	return result;
 }
 
+/**
+ * Reconstructs a complete GGUF header by combining updated metadata with original tensor info.
+ * This function handles the entire process of serializing new metadata, extracting original tensor info,
+ * and properly padding the final header for alignment.
+ *
+ * @param originalFileBlob - The original GGUF file blob
+ * @param updatedMetadata - The updated typed metadata
+ * @param options - Reconstruction options
+ * @returns Promise resolving to the new header blob ready for file editing
+ */
+export async function buildGgufHeader(
+	originalFileBlob: Blob,
+	updatedMetadata: GGUFTypedMetadata,
+	options: {
+		/** Whether to use little endian byte order */
+		littleEndian: boolean;
+		/** Tensor info byte range [start, endBeforePad] from parsing */
+		tensorInfoByteRange: [number, number];
+		/** Alignment for tensor data (default: GGUF_DEFAULT_ALIGNMENT (32)) */
+		alignment?: number;
+	}
+): Promise<Blob> {
+	const alignment = options.alignment ?? GGUF_DEFAULT_ALIGNMENT;
+	const version = updatedMetadata.version.value;
+
+	// Serialize the new metadata
+	const newHeaderBytes = serializeGgufMetadata(updatedMetadata, {
+		littleEndian: options.littleEndian,
+		alignment,
+	});
+
+	// Calculate KV end offset by parsing the serialized header
+	const view = new DataView(newHeaderBytes.buffer, newHeaderBytes.byteOffset, newHeaderBytes.byteLength);
+	let offset = 8; // magic+version
+	const tensorCount = readVersionedSize(view, offset, version, options.littleEndian);
+	offset += tensorCount.length;
+	const kvCount = readVersionedSize(view, offset, version, options.littleEndian);
+	offset += kvCount.length;
+	for (let i = BigInt(0); i < kvCount.value; i++) {
+		const key = readString(view, offset, version, options.littleEndian);
+		offset += key.length;
+		const valueType = view.getUint32(offset, options.littleEndian);
+		offset += 4;
+		const value = readMetadataValue(view, valueType, offset, version, options.littleEndian);
+		offset += value.length;
+	}
+	const kvEndOffset = offset;
+
+	// Extract original tensor info section
+	const [tensorInfoStartOffset, tensorInfoEndBeforePadOffset] = options.tensorInfoByteRange;
+	const originalTensorInfoBlob = originalFileBlob.slice(tensorInfoStartOffset, tensorInfoEndBeforePadOffset);
+
+	// For streaming blobs (WebBlob/XetBlob), we need to await the arrayBuffer() to get the actual data
+	// This ensures the tensor info is properly extracted before combining with the new header
+	const tensorInfoData = await originalTensorInfoBlob.arrayBuffer();
+	const tensorInfoBlob = new Blob([tensorInfoData], { type: "application/octet-stream" });
+
+	// Calculate final header with proper padding
+	const prePadLenNew = kvEndOffset + (tensorInfoEndBeforePadOffset - tensorInfoStartOffset);
+	const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1);
+	const targetTensorDataOffset = GGML_PAD(prePadLenNew, alignment);
+	const padLen = targetTensorDataOffset - prePadLenNew;
+
+	// Reconstruct final header
+	return new Blob([newHeaderBytes.slice(0, kvEndOffset), tensorInfoBlob, new Uint8Array(padLen)], {
+		type: "application/octet-stream",
+	});
+}
+
 export async function ggufAllShards(
 	url: string,
 	params?: {
@@ -799,10 +879,13 @@ export async function ggufAllShards(
 			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
 		};
 	} else {
-		const { metadata, tensorInfos, tensorDataOffset, littleEndian, parameterCount } = await gguf(url, {
-			...params,
-			computeParametersCount: true,
-		});
-		return { shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian }], parameterCount };
+		const { metadata, tensorInfos, tensorDataOffset, littleEndian, parameterCount, tensorInfoByteRange } = await gguf(
+			url,
+			{
+				...params,
+				computeParametersCount: true,
+			}
+		);
+		return { shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }], parameterCount };
 	}
 }
