@@ -386,6 +386,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.fastai,
 		filter: true,
 	},
+	fastprint: {
+		prettyLabel: "Fast Print",
+		repoName: "FastPrint",
+		repoUrl: "https://huggingface.co/OpenPeerAI/FastPrint",
+		filter: true,
+		countDownloads: `path:"README.md"`,
+	},	
 	fasttext: {
 		prettyLabel: "fastText",
 		repoName: "fastText",
