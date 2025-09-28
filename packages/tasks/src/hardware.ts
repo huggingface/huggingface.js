@@ -176,7 +176,7 @@ export const SKUS = {
 			},
 			"RTX 4090D": {
 				tflops: 79.49,
-				memory: [24],
+				memory: [24, 48],
 			},
 			"RTX 4090 Mobile": {
 				tflops: 32.98,
