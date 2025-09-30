@@ -16,9 +16,10 @@
  */
 import {
 	BaseConversationalTask,
+	BaseTextGenerationTask,
 } from "./providerHelper.js";
 
-const BASETEN_API_BASE_URL = "https://inference.baseten.co/v1";
+const BASETEN_API_BASE_URL = "https://inference.baseten.co";
 
 export class BasetenConversationalTask extends BaseConversationalTask {
 	constructor() {

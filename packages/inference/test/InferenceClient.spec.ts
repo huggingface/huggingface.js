@@ -22,7 +22,7 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
-describe.skip("InferenceClient", () => {
+describe("InferenceClient", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
 	describe("backward compatibility", () => {
@@ -2339,6 +2339,316 @@ describe.skip("InferenceClient", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Baseten",
+		() => {
+			const client = new InferenceClient(env.HF_BASETEN_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["baseten"] = {
+				"deepseek-ai/DeepSeek-V3.1": {
+					provider: "baseten",
+					hfModelId: "deepseek-ai/DeepSeek-V3.1",
+					providerId: "deepseek-ai/DeepSeek-V3.1",
+					status: "live",
+					task: "conversational",
+				},
+				"meta-llama/Llama-3.3-70B-Instruct": {
+					provider: "baseten",
+					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
+					providerId: "meta-llama/Llama-3.3-70B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"Qwen/Qwen3-235B-A22B-Instruct-2507": {
+					provider: "baseten",
+					hfModelId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					providerId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					status: "live",
+					task: "conversational",
+				},
+				"openai/gpt-oss-120b": {
+					provider: "baseten",
+					hfModelId: "openai/gpt-oss-120b",
+					providerId: "openai/gpt-oss-120b",
+					status: "live",
+					task: "conversational",
+				},
+				"moonshotai/Kimi-K2-Instruct-0905": {
+					provider: "baseten",
+					hfModelId: "moonshotai/Kimi-K2-Instruct-0905",
+					providerId: "moonshotai/Kimi-K2-Instruct-0905",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-V3.1",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-V3.1",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+				expect(fullResponse).toMatch(/(two|2)/i);
+			});
+
+			it("chatCompletion - Llama model", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.3-70B-Instruct",
+					provider: "baseten",
+					messages: [{ role: "user", content: "What is the capital of France?" }],
+					temperature: 0.1,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/paris/i);
+				}
+			});
+
+			it("chatCompletion - Qwen model", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Write a simple hello world in Python" }],
+					max_tokens: 100,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/print.*hello.*world/i);
+				}
+			});
+
+			it("chatCompletion - OpenAI GPT OSS model", async () => {
+				const res = await client.chatCompletion({
+					model: "openai/gpt-oss-120b",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Explain what AI is in one sentence." }],
+					max_tokens: 50,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion?.length).toBeGreaterThan(10);
+				}
+			});
+
+			it("chatCompletion - Kimi model", async () => {
+				const res = await client.chatCompletion({
+					model: "moonshotai/Kimi-K2-Instruct-0905",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Count from 1 to 5" }],
+					temperature: 0,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/1.*2.*3.*4.*5/);
+				}
+			});
+
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Baseten",
+		() => {
+			const client = new InferenceClient(env.HF_BASETEN_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["baseten"] = {
+				"Qwen/Qwen3-235B-A22B-Instruct-2507": {
+					provider: "baseten",
+					hfModelId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					providerId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					status: "live",
+					task: "conversational",
+				},
+				"Qwen/Qwen3-Coder-480B-A35B-Instruct": {
+					provider: "baseten",
+					hfModelId: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+					providerId: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"moonshotai/Kimi-K2-Instruct-0905": {
+					provider: "baseten",
+					hfModelId: "moonshotai/Kimi-K2-Instruct-0905",
+					providerId: "moonshotai/Kimi-K2-Instruct-0905",
+					status: "live",
+					task: "conversational",
+				},
+				"deepseek-ai/DeepSeek-V3.1": {
+					provider: "baseten",
+					hfModelId: "deepseek-ai/DeepSeek-V3.1",
+					providerId: "deepseek-ai/DeepSeek-V3.1",
+					status: "live",
+					task: "conversational",
+				},
+				"deepseek-ai/DeepSeek-V3-0324": {
+					provider: "baseten",
+					hfModelId: "deepseek-ai/DeepSeek-V3-0324",
+					providerId: "deepseek-ai/DeepSeek-V3-0324",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion - Qwen3 235B Instruct", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					provider: "baseten",
+					messages: [{ role: "user", content: "What is 5 + 3?" }],
+					max_tokens: 20,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/(eight|8)/i);
+				}
+			});
+
+			it("chatCompletion - Qwen3 Coder 480B", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Write a simple Python function to add two numbers" }],
+					max_tokens: 100,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/def.*add/i);
+				}
+			});
+
+			it("chatCompletion - Kimi K2 Instruct", async () => {
+				const res = await client.chatCompletion({
+					model: "moonshotai/Kimi-K2-Instruct-0905",
+					provider: "baseten",
+					messages: [{ role: "user", content: "What is the capital of Japan?" }],
+					temperature: 0.1,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/tokyo/i);
+				}
+			});
+
+			it("chatCompletion - DeepSeek V3.1", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-V3.1",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion - DeepSeek V3", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-V3-0324",
+					provider: "baseten",
+					messages: [{ role: "user", content: "What is 2 * 3?" }],
+					temperature: 0.1,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/(six|6)/i);
+				}
+			});
+
+			it("chatCompletion stream - Qwen3 235B", async () => {
+				const stream = client.chatCompletionStream({
+					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Count from 1 to 3" }],
+					stream: true,
+					max_tokens: 20,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+				expect(fullResponse).toMatch(/1.*2.*3/);
+			});
+
+			it("chatCompletion stream - DeepSeek V3.1", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-V3.1",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+				expect(fullResponse).toMatch(/(two|2)/i);
 			});
 		},
 		TIMEOUT
