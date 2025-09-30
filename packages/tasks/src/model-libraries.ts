@@ -391,7 +391,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Fast Print",
 		repoUrl: "https://huggingface.co/OpenPeerAI/FastPrint",
 		countDownloads: `path_extension:"cs"`,
-	},	
+	},
 	fasttext: {
 		prettyLabel: "fastText",
 		repoName: "fastText",
