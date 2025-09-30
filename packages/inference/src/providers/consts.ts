@@ -18,6 +18,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	 * Example:
 	 * "Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",
 	 */
+	baseten: {},
 	"black-forest-labs": {},
 	cerebras: {},
 	cohere: {},
