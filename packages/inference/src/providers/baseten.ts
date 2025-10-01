@@ -14,9 +14,7 @@
  *
  * Thanks!
  */
-import {
-	BaseConversationalTask,
-} from "./providerHelper.js";
+import { BaseConversationalTask } from "./providerHelper.js";
 
 const BASETEN_API_BASE_URL = "https://inference.baseten.co";
 

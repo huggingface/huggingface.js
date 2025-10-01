@@ -2357,34 +2357,6 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "conversational",
 				},
-				"Qwen/Qwen3-Coder-480B-A35B-Instruct": {
-					provider: "baseten",
-					hfModelId: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
-					providerId: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
-					status: "live",
-					task: "conversational",
-				},
-				"moonshotai/Kimi-K2-Instruct-0905": {
-					provider: "baseten",
-					hfModelId: "moonshotai/Kimi-K2-Instruct-0905",
-					providerId: "moonshotai/Kimi-K2-Instruct-0905",
-					status: "live",
-					task: "conversational",
-				},
-				"deepseek-ai/DeepSeek-V3.1": {
-					provider: "baseten",
-					hfModelId: "deepseek-ai/DeepSeek-V3.1",
-					providerId: "deepseek-ai/DeepSeek-V3.1",
-					status: "live",
-					task: "conversational",
-				},
-				"deepseek-ai/DeepSeek-V3-0324": {
-					provider: "baseten",
-					hfModelId: "deepseek-ai/DeepSeek-V3-0324",
-					providerId: "deepseek-ai/DeepSeek-V3-0324",
-					status: "live",
-					task: "conversational",
-				},
 			};
 
 			it("chatCompletion - Qwen3 235B Instruct", async () => {
@@ -2399,63 +2371,6 @@ describe.skip("InferenceClient", () => {
 					expect(completion).toBeDefined();
 					expect(typeof completion).toBe("string");
 					expect(completion).toMatch(/(eight|8)/i);
-				}
-			});
-
-			it("chatCompletion - Qwen3 Coder 480B", async () => {
-				const res = await client.chatCompletion({
-					model: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
-					provider: "baseten",
-					messages: [{ role: "user", content: "Write a simple Python function to add two numbers" }],
-					max_tokens: 100,
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toBeDefined();
-					expect(typeof completion).toBe("string");
-					expect(completion).toMatch(/def.*add/i);
-				}
-			});
-
-			it("chatCompletion - Kimi K2 Instruct", async () => {
-				const res = await client.chatCompletion({
-					model: "moonshotai/Kimi-K2-Instruct-0905",
-					provider: "baseten",
-					messages: [{ role: "user", content: "What is the capital of Japan?" }],
-					temperature: 0.1,
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toBeDefined();
-					expect(typeof completion).toBe("string");
-					expect(completion).toMatch(/tokyo/i);
-				}
-			});
-
-			it("chatCompletion - DeepSeek V3.1", async () => {
-				const res = await client.chatCompletion({
-					model: "deepseek-ai/DeepSeek-V3.1",
-					provider: "baseten",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion - DeepSeek V3", async () => {
-				const res = await client.chatCompletion({
-					model: "deepseek-ai/DeepSeek-V3-0324",
-					provider: "baseten",
-					messages: [{ role: "user", content: "What is 2 * 3?" }],
-					temperature: 0.1,
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toBeDefined();
-					expect(typeof completion).toBe("string");
-					expect(completion).toMatch(/(six|6)/i);
 				}
 			});
 
@@ -2482,30 +2397,6 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
 				expect(fullResponse).toMatch(/1.*2.*3/);
-			});
-
-			it("chatCompletion stream - DeepSeek V3.1", async () => {
-				const stream = client.chatCompletionStream({
-					model: "deepseek-ai/DeepSeek-V3.1",
-					provider: "baseten",
-					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-				expect(fullResponse).toMatch(/(two|2)/i);
 			});
 		},
 		TIMEOUT
