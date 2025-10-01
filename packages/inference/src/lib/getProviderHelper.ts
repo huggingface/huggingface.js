@@ -1,3 +1,4 @@
+import * as Baseten from "../providers/baseten.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
@@ -55,6 +56,9 @@ import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from
 import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
+	baseten: {
+		conversational: new Baseten.BasetenConversationalTask(),
+	},
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
 	},
