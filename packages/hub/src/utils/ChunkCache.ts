@@ -85,6 +85,14 @@ export class ChunkCache {
 		};
 	}
 
+	updateChunkIndex(hash: string, chunkIndex: number): void {
+		const index = this.map.get(hash);
+		if (index === undefined) {
+			throw new Error(`Chunk not found in cache: ${hash}`);
+		}
+		this.chunkIndices[index] = chunkIndex;
+	}
+
 	removeChunkFromCache(hash: string): void {
 		this.map.delete(hash);
 	}
