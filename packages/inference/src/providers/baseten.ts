@@ -24,8 +24,4 @@ export class BasetenConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("baseten", BASETEN_API_BASE_URL);
 	}
-
-	override makeRoute(): string {
-		return "v1/chat/completions";
-	}
 }
