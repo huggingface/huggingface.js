@@ -16,10 +16,14 @@
  */
 import { BaseConversationalTask } from "./providerHelper.js";
 
-const CLARIFAI_API_BASE_URL = "https://api.clarifai.com/v2/ext/openai";
+const CLARIFAI_API_BASE_URL = "https://api.clarifai.com";
 
 export class ClarifaiConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("clarifai", CLARIFAI_API_BASE_URL);
+	}
+
+	override makeRoute(): string {
+		return "/v2/ext/openai/v1/chat/completions";
 	}
 }
