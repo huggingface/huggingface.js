@@ -10,17 +10,22 @@ import { existsSync } from "node:fs";
 
 /**
  * This script debugs xet uploads by capturing all network data locally
- * It takes a local file, repo, and token, then uploads while saving:
+ * It takes one or more local files, repo, and token, then uploads while saving:
  * - Dedup shards as dedup_[chunk_hash]_shard.bin
  * - Uploaded xorbs as uploaded_xorb_1.bin, uploaded_xorb_2.bin, etc.
  * - Uploaded shards as uploaded_shard_1.bin, uploaded_shard_2.bin, etc.
  *
- * Normal mode: Captures all upload data to upload_[filename]/ directory
+ * Normal mode: Captures all upload data to upload_[filename]/ directory (single file) or multiple-files/ directory (multiple files)
  * Replay mode: Validates upload data matches previously captured local files
  *
  * Usage:
+ * Single file:
  * pnpm --filter hub debug-xet -f <local_file> -t <write_token> -r <xet_repo>
  * pnpm --filter hub debug-xet -f <local_file> -t <write_token> -r <xet_repo> --replay
+ *
+ * Multiple files (comma-separated):
+ * pnpm --filter hub debug-xet -f <file1,file2,file3> -t <write_token> -r <xet_repo>
+ * pnpm --filter hub debug-xet -f <file1,file2,file3> -t <write_token> -r <xet_repo> --replay
  */
 
 interface DebugFetchStats {
@@ -182,32 +187,34 @@ function createDebugFetch(args: { debugDir: string; replay?: boolean }): {
 	};
 }
 
-async function* createFileSource(filepath: string): AsyncGenerator<{
+async function* createMultiFileSource(filepaths: string[]): AsyncGenerator<{
 	content: Blob;
 	path: string;
 	sha256: string;
 }> {
-	const filename = basename(filepath);
-	console.log(`Processing ${filename}...`);
+	for (const filepath of filepaths) {
+		const filename = basename(filepath);
+		console.log(`Processing ${filename}...`);
 
-	const blob: Blob = await FileBlob.create(filepath);
+		const blob: Blob = await FileBlob.create(filepath);
 
-	// Calculate sha256
-	console.log(`Calculating SHA256 for ${filename}...`);
-	const sha256Iterator = sha256(blob, { useWebWorker: false });
-	let res: IteratorResult<number, string>;
-	do {
-		res = await sha256Iterator.next();
-	} while (!res.done);
-	const sha256Hash = res.value;
+		// Calculate sha256
+		console.log(`Calculating SHA256 for ${filename}...`);
+		const sha256Iterator = sha256(blob, { useWebWorker: false });
+		let res: IteratorResult<number, string>;
+		do {
+			res = await sha256Iterator.next();
+		} while (!res.done);
+		const sha256Hash = res.value;
 
-	console.log(`SHA256 for ${filename}: ${sha256Hash}`);
+		console.log(`SHA256 for ${filename}: ${sha256Hash}`);
 
-	yield {
-		content: blob,
-		path: filename,
-		sha256: sha256Hash,
-	};
+		yield {
+			content: blob,
+			path: filename,
+			sha256: sha256Hash,
+		};
+	}
 }
 
 async function main() {
@@ -233,20 +240,27 @@ async function main() {
 	});
 
 	if (!args.token || !args.repo || !args.file) {
-		console.error("Usage: pnpm --filter hub debug-xet -f <local_file> -t <write_token> -r <xet_repo>");
+		console.error("Usage: pnpm --filter hub debug-xet -f <file1,file2,file3> -t <write_token> -r <xet_repo>");
 		console.error("Example: pnpm --filter hub debug-xet -f ./model.bin -t hf_... -r myuser/myrepo");
+		console.error("Example: pnpm --filter hub debug-xet -f ./model1.bin,./model2.bin -t hf_... -r myuser/myrepo");
 		console.error("Options:");
 		console.error("  --replay    Use local dedup info instead of remote");
 		process.exit(1);
 	}
 
-	if (!existsSync(args.file)) {
-		console.error(`❌ File ${args.file} does not exist`);
-		process.exit(1);
+	// Parse comma-separated file paths
+	const filePaths = args.file.split(",").map((f) => f.trim());
+
+	// Validate all files exist
+	for (const filePath of filePaths) {
+		if (!existsSync(filePath)) {
+			console.error(`❌ File ${filePath} does not exist`);
+			process.exit(1);
+		}
 	}
 
-	const filename = basename(args.file);
-	const debugDir = `upload_${filename}`;
+	// Determine debug directory name
+	const debugDir = filePaths.length > 1 ? "multiple-files" : `upload_${basename(filePaths[0])}`;
 
 	// Handle debug directory based on mode
 	if (args.replay) {
@@ -288,20 +302,30 @@ async function main() {
 		rev: "main",
 	};
 
-	console.log(`\n=== Starting debug upload for ${filename} ===`);
+	console.log(
+		`\n=== Starting debug upload for ${filePaths.length > 1 ? `${filePaths.length} files` : basename(filePaths[0])} ===`
+	);
 	if (args.replay) {
 		console.log("🔄 Replay mode: Using local dedup info when available");
 	}
 
-	// Get file stats
-	const fileStats = await stat(args.file);
-	console.log(`📄 File size: ${(fileStats.size / 1024 / 1024).toFixed(2)} MB`);
+	// Get total file stats
+	let totalSize = 0;
+	for (const filePath of filePaths) {
+		const fileStats = await stat(filePath);
+		totalSize += fileStats.size;
+		console.log(`📄 ${basename(filePath)}: ${(fileStats.size / 1_000_000).toFixed(2)} MB`);
+	}
+	console.log(`📊 Total size: ${(totalSize / 1_000_000).toFixed(2)} MB`);
 
-	// Process file through uploadShards
-	const fileSource = createFileSource(args.file);
+	// Process files through uploadShards
+	const fileSource = createMultiFileSource(filePaths);
 
-	let dedupRatio = 0;
-	let fileSha256 = "";
+	const processedFiles: Array<{
+		path: string;
+		sha256: string;
+		dedupRatio: number;
+	}> = [];
 
 	for await (const event of uploadShards(fileSource, uploadParams)) {
 		switch (event.event) {
@@ -310,8 +334,11 @@ async function main() {
 				console.log(`   SHA256: ${event.sha256}`);
 				console.log(`   Dedup ratio: ${(event.dedupRatio * 100).toFixed(2)}%`);
 
-				dedupRatio = event.dedupRatio;
-				fileSha256 = event.sha256;
+				processedFiles.push({
+					path: event.path,
+					sha256: event.sha256,
+					dedupRatio: event.dedupRatio,
+				});
 				break;
 			}
 
@@ -327,9 +354,21 @@ async function main() {
 
 	console.log("\n=== DEBUG UPLOAD RESULTS ===");
 	console.log(`📁 Debug directory: ${debugDir}`);
-	console.log(`📄 Original file: ${filename} (${(fileStats.size / 1024 / 1024).toFixed(2)} MB)`);
-	console.log(`🔒 SHA256: ${fileSha256}`);
-	console.log(`📊 Deduplication: ${(dedupRatio * 100).toFixed(2)}%`);
+	console.log(`📄 Processed files: ${processedFiles.length}`);
+	console.log(`📊 Total size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
+
+	// Show details for each file
+	for (const file of processedFiles) {
+		console.log(`\n🔒 ${file.path}:`);
+		console.log(`   SHA256: ${file.sha256}`);
+		console.log(`   Deduplication: ${(file.dedupRatio * 100).toFixed(2)}%`);
+	}
+
+	// Calculate average dedup ratio
+	const avgDedupRatio =
+		processedFiles.length > 0 ? processedFiles.reduce((sum, f) => sum + f.dedupRatio, 0) / processedFiles.length : 0;
+
+	console.log(`\n📊 Average deduplication: ${(avgDedupRatio * 100).toFixed(2)}%`);
 	console.log(`📤 Network calls:`);
 	console.log(`   - ${stats.xorbCount} xorb uploads`);
 	console.log(`   - ${stats.shardCount} shard uploads`);
