@@ -60,14 +60,14 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	baseten: {
 		conversational: new Baseten.BasetenConversationalTask(),
 	},
-	clarifai: {
-		conversational: new Clarifai.ClarifaiConversationalTask(),
-	},
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
+	},
+	clarifai: {
+		conversational: new Clarifai.ClarifaiConversationalTask(),
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),

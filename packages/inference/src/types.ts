@@ -48,6 +48,7 @@ export const INFERENCE_PROVIDERS = [
 	"baseten",
 	"black-forest-labs",
 	"cerebras",
+	"clarifai",
 	"cohere",
 	"fal-ai",
 	"featherless-ai",
@@ -64,7 +65,6 @@ export const INFERENCE_PROVIDERS = [
 	"replicate",
 	"sambanova",
 	"scaleway",
-	"clarifai",
 	"together",
 	"zai-org",
 ] as const;

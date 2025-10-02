@@ -98,7 +98,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Sambanova supported models](https://huggingface.co/api/partners/sambanova/models)
 - [Scaleway supported models](https://huggingface.co/api/partners/scaleway/models)
-- [Clarifai Supported models](https://huggingface.co/api/partners/clarifai/models)
+- [Clarifai supported models](https://huggingface.co/api/partners/clarifai/models)
 - [Together supported models](https://huggingface.co/api/partners/together/models)
 - [Baseten supported models](https://huggingface.co/api/partners/baseten/models)
 - [Cohere supported models](https://huggingface.co/api/partners/cohere/models)

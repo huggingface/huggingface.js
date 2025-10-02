@@ -21,6 +21,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	baseten: {},
 	"black-forest-labs": {},
 	cerebras: {},
+	clarifai: {},
 	cohere: {},
 	"fal-ai": {},
 	"featherless-ai": {},
@@ -37,7 +38,6 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	replicate: {},
 	sambanova: {},
 	scaleway: {},
-	clarifai: {},
 	together: {},
 	"zai-org": {},
 };
