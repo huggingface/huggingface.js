@@ -2401,4 +2401,62 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT
 	);
+
+	describe.concurrent(
+		"clarifai",
+		() => {
+			const client = new InferenceClient(env.HF_CLARIFAI_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["clarifai"] = {
+				"Qwen/Qwen3-235B-A22B-Instruct-2507": {
+					provider: "clarifai",
+					hfModelId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					providerId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion - Qwen3 235B Instruct", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					provider: "clarifai",
+					messages: [{ role: "user", content: "What is 5 + 3?" }],
+					max_tokens: 20,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/(eight|8)/i);
+				}
+			});
+
+			it("chatCompletion stream - Qwen3 235B", async () => {
+				const stream = client.chatCompletionStream({
+					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					provider: "clarifai",
+					messages: [{ role: "user", content: "Count from 1 to 3" }],
+					stream: true,
+					max_tokens: 20,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+				expect(fullResponse).toMatch(/1.*2.*3/);
+			});
+		},
+		TIMEOUT
+	);
 });

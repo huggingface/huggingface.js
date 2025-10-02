@@ -1,4 +1,5 @@
 import * as Baseten from "../providers/baseten.js";
+import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
@@ -58,6 +59,9 @@ import { InferenceClientInputError } from "../errors.js";
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	baseten: {
 		conversational: new Baseten.BasetenConversationalTask(),
+	},
+	clarifai: {
+		conversational: new Clarifai.ClarifaiConversationalTask(),
 	},
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),

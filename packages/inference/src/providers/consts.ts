@@ -37,6 +37,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	replicate: {},
 	sambanova: {},
 	scaleway: {},
+	clarifai: {},
 	together: {},
 	"zai-org": {},
 };
