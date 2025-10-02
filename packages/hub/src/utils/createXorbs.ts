@@ -274,6 +274,7 @@ export async function* createXorbs(
 					bytesSinceLastProgressEvent += chunk.length;
 
 					// Collect metadata for building representation at the end
+					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 					chunkMetadata.push({
 						xorbId: chunkXorbId,
 						chunkIndex: chunkIndex,
