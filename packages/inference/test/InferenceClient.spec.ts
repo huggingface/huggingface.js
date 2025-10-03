@@ -2408,9 +2408,9 @@ describe.skip("InferenceClient", () => {
 			const client = new InferenceClient(env.HF_CLARIFAI_KEY ?? "dummy");
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["clarifai"] = {
-				"clarifai/DeepSeek-V3_1": {
+				"deepseek-ai/DeepSeek-V3.1": {
 					provider: "clarifai",
-					hfModelId: "clarifai/DeepSeek-V3_1",
+					hfModelId: "deepseek-ai/DeepSeek-V3.1",
 					providerId: "deepseek-ai/deepseek-chat/models/DeepSeek-V3_1",
 					status: "live",
 					task: "conversational",
@@ -2419,7 +2419,7 @@ describe.skip("InferenceClient", () => {
 
 			it("chatCompletion - DeepSeek-V3_1", async () => {
 				const res = await client.chatCompletion({
-					model: "clarifai/DeepSeek-V3_1",
+					model: "deepseek-ai/DeepSeek-V3.1",
 					provider: "clarifai",
 					messages: [{ role: "user", content: "What is 5 + 3?" }],
 					max_tokens: 20,
@@ -2434,7 +2434,7 @@ describe.skip("InferenceClient", () => {
 
 			it("chatCompletion stream - DeepSeek-V3_1", async () => {
 				const stream = client.chatCompletionStream({
-					model: "clarifai/DeepSeek-V3_1",
+					model: "deepseek-ai/DeepSeek-V3.1",
 					provider: "clarifai",
 					messages: [{ role: "user", content: "Count from 1 to 3" }],
 					stream: true,
