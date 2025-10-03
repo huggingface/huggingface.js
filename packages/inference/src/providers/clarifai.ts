@@ -15,6 +15,7 @@
  * Thanks!
  */
 import { BaseConversationalTask } from "./providerHelper.js";
+import type { HeaderParams } from "../types.js";
 
 const CLARIFAI_API_BASE_URL = "https://api.clarifai.com";
 
@@ -25,5 +26,16 @@ export class ClarifaiConversationalTask extends BaseConversationalTask {
 
 	override makeRoute(): string {
 		return "/v2/ext/openai/v1/chat/completions";
+	}
+
+	override prepareHeaders(params: HeaderParams, isBinary: boolean): Record<string, string> {
+		const headers: Record<string, string> = {};
+		if (params.authMethod !== "none") {
+			headers["Authorization"] = `Key ${params.accessToken}`;
+		}
+		if (!isBinary) {
+			headers["Content-Type"] = "application/json";
+		}
+		return headers;
 	}
 }
