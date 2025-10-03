@@ -29,10 +29,10 @@ export class ClarifaiConversationalTask extends BaseConversationalTask {
 	}
 
 	override prepareHeaders(params: HeaderParams, isBinary: boolean): Record<string, string> {
-		const headers: Record<string, string> = {};
-		if (params.authMethod !== "none") {
-			headers["Authorization"] = `Key ${params.accessToken}`;
-		}
+		const headers: Record<string, string> = {
+			Authorization:
+				params.authMethod !== "provider-key" ? `Bearer ${params.accessToken}` : `Key ${params.accessToken}`,
+		};
 		if (!isBinary) {
 			headers["Content-Type"] = "application/json";
 		}
