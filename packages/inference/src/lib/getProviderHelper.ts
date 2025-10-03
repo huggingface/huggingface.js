@@ -1,4 +1,5 @@
 import * as Baseten from "../providers/baseten.js";
+import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
@@ -64,6 +65,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
+	},
+	clarifai: {
+		conversational: new Clarifai.ClarifaiConversationalTask(),
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
