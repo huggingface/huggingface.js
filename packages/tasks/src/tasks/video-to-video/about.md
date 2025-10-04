@@ -88,7 +88,6 @@ import torch
             # base_model_id = "Lightricks/LTX-Video-0.9.7-dev"
             base_model_id = "Lightricks/LTX-Video-0.9.7-distilled" # Using distilled for this example
 
-            # 0. Load base model and upsampler
             pipe = LTXConditionPipeline.from_pretrained(base_model_id, torch_dtype=torch.bfloat16)
             pipe_upsample = LTXLatentUpsamplePipeline.from_pretrained(
                 "Lightricks/ltxv-spatial-upscaler-0.9.7",
