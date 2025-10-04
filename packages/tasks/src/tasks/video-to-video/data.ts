@@ -39,7 +39,7 @@ const taskData: TaskDataCustom = {
 			id: "LeoLau/Shape-for-Motion",
 		},
 		{
-			description: "A model to upscale videos at input. This is a video upscaler model to be used with ComfyUI.",
+			description: "A model to upscale videos at input, designed for seamless use with ComfyUI.",
 			id: "numz/SeedVR2_comfyUI",
 		},
 		{
