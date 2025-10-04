@@ -27,7 +27,6 @@ We will show a few examples for different use cases.
 Try Lucy-Edit-Dev to edit costume of a character.
 
 ```python
-from typing import List
 
 import torch
 from PIL import Image
