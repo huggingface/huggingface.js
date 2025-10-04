@@ -7,7 +7,7 @@ const taskData: TaskDataCustom = {
 			id: "suimu/VIRESET",
 		},
 		{
-			description: "Benchmark dataset for long video generation and understanding.",
+			description: "Dataset to evaluate models on long video generation and understanding.",
 			id: "zhangsh2001/LongV-EVAL",
 		},
 		{
