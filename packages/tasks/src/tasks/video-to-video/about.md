@@ -76,7 +76,6 @@ export_to_video(output, "output.mp4", fps=24)
 
 ---
 
-### Example 2
 Video Style Transfer with LTX-Video
 
 ```python
