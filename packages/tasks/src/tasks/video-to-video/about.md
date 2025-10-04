@@ -111,7 +111,6 @@ import torch
             downscale_factor = 2 / 3
             num_frames = 161
 
-            # Part 1. Generate video at smaller resolution
             downscaled_height, downscaled_width = int(expected_height * downscale_factor), int(expected_width * downscale_factor)
             downscaled_height, downscaled_width = round_to_nearest_resolution_acceptable_by_vae(downscaled_height, downscaled_width)
 
