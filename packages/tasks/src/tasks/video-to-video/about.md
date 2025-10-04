@@ -23,7 +23,7 @@ Change clothing or appearance in video while preserving identity and motion.
 
 
 ## Inference
-
+We will show a few examples for different use cases.
 Try Lucy-Edit-Dev to edit costume of a character.
 
 ```python
