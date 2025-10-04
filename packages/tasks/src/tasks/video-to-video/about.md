@@ -24,7 +24,6 @@ Change clothing or appearance in video while preserving identity and motion.
 
 ## Inference
 
-### Example 1:
 Try Lucy-Edit-Dev to edit costume of a character.
 
 ```python
