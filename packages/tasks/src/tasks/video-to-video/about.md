@@ -168,7 +168,7 @@ import torch
 - [Shape-for-Motion](https://huggingface.co/papers/2506.22432) - A video editing framework that uses time-consistent 3D meshes and dual-propagation to apply precise single-frame edits across entire videos.
 - [Generative Video Propagation](https://arxiv.org/html/2412.19761v1) - A framework that propagates first-frame edits across videos, enabling insertion, removal, background replacement, and multi-edit consistency.
 
-### Codes
+### Repositories 
 - [Lumen](https://github.com/Kunbyte-AI/Lumen) - Official implementation of Lumen for text-guided video editing.
 - [VIRES](https://github.com/suimuc/VIRES) - Implementation for sketch- and text-guided video instance repainting.
 - [ECCV2022-RIFE: Video Frame Interpolation](https://github.com/hzwer/ECCV2022-RIFE)- Real-time video frame interpolation via intermediate flow estimation.
