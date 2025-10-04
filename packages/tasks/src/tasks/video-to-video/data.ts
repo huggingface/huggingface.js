@@ -16,8 +16,18 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	demo: {
-		inputs: [],
-		outputs: [],
+		inputs: [
+			{
+				filename: "input.gif",
+				type: "img",
+			},
+		],
+		outputs: [
+			{
+				filename: "output.gif",
+				type: "img",
+			},
+		],
 	},
 	metrics: [],
 	models: [
