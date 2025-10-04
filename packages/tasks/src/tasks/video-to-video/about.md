@@ -36,7 +36,6 @@ from diffusers import AutoencoderKLWan, LucyEditPipeline
 from diffusers.utils import export_to_video, load_video
 
 
-# Arguments
 url = "https://d2drjpuinn46lb.cloudfront.net/painter_original_edit.mp4"
 prompt = "Change the apron and blouse to a classic clown costume: satin polka-dot jumpsuit in bright primary colors, ruffled white collar, oversized pom-pom buttons, white gloves, oversized red shoes, red foam nose; soft window light from left, eye-level medium shot, natural folds and fabric highlights."
 negative_prompt = ""
