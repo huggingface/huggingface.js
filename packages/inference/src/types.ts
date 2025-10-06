@@ -46,7 +46,7 @@ export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",
-	"bytez",
+	"bytez-ai",
 	"cerebras",
 	"cohere",
 	"fal-ai",

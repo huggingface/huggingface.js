@@ -180,7 +180,7 @@ const BASE_URL = "http://localhost:8080";
 
 abstract class BytezTask extends TaskProviderHelper {
 	constructor(url?: string) {
-		super("bytez", url || BASE_URL);
+		super("bytez-ai", url || BASE_URL);
 	}
 
 	makeRoute(params: UrlParams): string {

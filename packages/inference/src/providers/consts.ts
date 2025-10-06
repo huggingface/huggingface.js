@@ -19,7 +19,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	 * "Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",
 	 */
 	"black-forest-labs": {},
-	bytez: {},
+	["bytez-ai"]: {},
 	cerebras: {},
 	cohere: {},
 	"fal-ai": {},

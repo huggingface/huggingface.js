@@ -352,6 +352,7 @@ describe("InferenceClient", () => {
 				).toMatchObject({
 					answer: "us-001",
 					score: expect.any(Number),
+					// not sure what start/end refers to in this case
 					start: expect.any(Number),
 					end: expect.any(Number),
 				});
@@ -2241,6 +2242,7 @@ describe("InferenceClient", () => {
 		"Bytez",
 		() => {
 			const client = new InferenceClient(env.HF_BYTEZ_KEY ?? "dummy");
+			const provider = "bytez-ai";
 
 			const tests: { task: WidgetType; modelId: string; test: (modelId: string) => Promise<void>; stream: boolean }[] =
 				[
@@ -2250,7 +2252,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const { generated_text } = await client.textGeneration({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: "Hello",
 							});
 							expect(typeof generated_text).toBe("string");
@@ -2263,7 +2265,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const response = client.textGenerationStream({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: "Please answer the following question: complete one two and ____.",
 								parameters: {
 									max_new_tokens: 50,
@@ -2292,7 +2294,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const { choices } = await client.chatCompletion({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								messages: [
 									{
 										role: "system",
@@ -2312,7 +2314,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const stream = client.chatCompletionStream({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								messages: [
 									{
 										role: "system",
@@ -2343,7 +2345,7 @@ describe("InferenceClient", () => {
 								"The tower is 324 metres (1,063 ft) tall, about the same height as an 81-storey building, and the tallest structure in Paris...";
 							const { summary_text } = await client.summarization({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: input,
 								parameters: { max_length: 40 },
 							});
@@ -2357,7 +2359,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const { translation_text } = await client.translation({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: "Hello",
 							});
 							expect(typeof translation_text).toBe("string");
@@ -2371,7 +2373,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const res = await client.textToImage({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: "A cat in the hat",
 							});
 							expect(res).toBeInstanceOf(Blob);
@@ -2384,7 +2386,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const res = await client.textToVideo({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: "A cat in the hat",
 							});
 							expect(res).toBeInstanceOf(Blob);
@@ -2397,7 +2399,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const { generated_text } = await client.imageToText({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								data: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 							});
 							expect(typeof generated_text).toBe("string");
@@ -2410,7 +2412,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const { answer, score, start, end } = await client.questionAnswering({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: {
 									question: "Where do I live?",
 									context: "My name is Merve and I live in İstanbul.",
@@ -2429,7 +2431,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.visualQuestionAnswering({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: {
 									image: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 									question: "What kind of animal is this?",
@@ -2451,7 +2453,7 @@ describe("InferenceClient", () => {
 							const blob = await response.blob();
 							const output = await client.documentQuestionAnswering({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: {
 									//
 									image: blob,
@@ -2474,7 +2476,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.imageSegmentation({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 							});
 							expect(output).toEqual(
@@ -2496,7 +2498,7 @@ describe("InferenceClient", () => {
 							const output = await client.imageClassification({
 								//
 								model: modelId,
-								provider: "bytez",
+								provider,
 								data: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 							});
 							expect(output).toEqual(
@@ -2516,7 +2518,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.zeroShotImageClassification({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: { image: new Blob([readTestFile("cheetah.png")], { type: "image/png" }) },
 								parameters: {
 									candidate_labels: ["animal", "toy", "car"],
@@ -2539,7 +2541,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.objectDetection({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 							});
 							expect(output).toEqual(
@@ -2565,7 +2567,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.featureExtraction({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: "That is a happy person",
 							});
 							expect(output).toEqual(expect.arrayContaining([expect.any(Number)]));
@@ -2578,7 +2580,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.sentenceSimilarity({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: {
 									source_sentence: "That is a happy person",
 									sentences: ["That is a happy dog", "That is a very happy person", "Today is a sunny day"],
@@ -2592,7 +2594,7 @@ describe("InferenceClient", () => {
 						task: "fill-mask",
 						modelId: "almanach/camembert-base",
 						test: async (modelId: string) => {
-							const output = await client.fillMask({ model: modelId, provider: "bytez", inputs: "Hello <mask>" });
+							const output = await client.fillMask({ model: modelId, provider, inputs: "Hello <mask>" });
 							expect(output).toEqual(
 								expect.arrayContaining([
 									expect.objectContaining({
@@ -2612,7 +2614,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.textClassification({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: "I am a special unicorn",
 							});
 							expect(output.every((entry) => entry.label && entry.score)).toBe(true);
@@ -2625,7 +2627,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.tokenClassification({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: "John went to NYC",
 							});
 							expect(output).toEqual(
@@ -2650,7 +2652,7 @@ describe("InferenceClient", () => {
 							const testCandidateLabels = ["positive", "negative"];
 							const output = await client.zeroShotClassification({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								inputs: [
 									testInput,
 									// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -2675,7 +2677,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.audioClassification({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
 							});
 							expect(output).toEqual(
@@ -2693,7 +2695,7 @@ describe("InferenceClient", () => {
 						task: "text-to-speech",
 						modelId: "facebook/mms-tts-eng",
 						test: async (modelId: string) => {
-							const output = await client.textToSpeech({ model: modelId, provider: "bytez", inputs: "Hello" });
+							const output = await client.textToSpeech({ model: modelId, provider, inputs: "Hello" });
 							expect(output).toBeInstanceOf(Blob);
 						},
 						stream: false,
@@ -2704,7 +2706,7 @@ describe("InferenceClient", () => {
 						test: async (modelId: string) => {
 							const output = await client.automaticSpeechRecognition({
 								model: modelId,
-								provider: "bytez",
+								provider,
 								data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
 							});
 							expect(output).toMatchObject({
@@ -2717,8 +2719,8 @@ describe("InferenceClient", () => {
 
 			// bootstrap the inference mappings for testing
 			for (const { task, modelId } of tests) {
-				HARDCODED_MODEL_INFERENCE_MAPPING.bytez[modelId] = {
-					provider: "bytez",
+				HARDCODED_MODEL_INFERENCE_MAPPING["bytez-ai"][modelId] = {
+					provider,
 					hfModelId: modelId,
 					providerId: modelId,
 					status: "live",

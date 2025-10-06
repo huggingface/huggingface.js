@@ -1,7 +1,7 @@
 /// This list is for illustration purposes only.
 /// in the `tasks` sub-package, we do not need actual strong typing of the inference providers.
 const INFERENCE_PROVIDERS = [
-	"bytez",
+	"bytez-ai",
 	"cerebras",
 	"cohere",
 	"fal-ai",

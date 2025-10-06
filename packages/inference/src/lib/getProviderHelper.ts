@@ -57,7 +57,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
 	},
-	bytez: {
+	["bytez-ai"]: {
 		"text-generation": new Bytez.BytezTextGenerationTask(),
 		conversational: new Bytez.BytezConversationalTask(),
 		summarization: new Bytez.BytezSummarizationTask(),
