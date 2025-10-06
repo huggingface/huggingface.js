@@ -7,13 +7,14 @@ export interface XetWriteTokenParams {
 	fetch?: typeof fetch;
 	repo: RepoId;
 	rev: string;
+	isPullRequest?: boolean;
 }
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
 
 function cacheKey(params: Omit<XetWriteTokenParams, "fetch">): string {
-	return JSON.stringify([params.hubUrl, params.repo, params.rev, params.accessToken]);
+	return JSON.stringify([params.hubUrl, params.repo, params.rev, params.accessToken, params.isPullRequest]);
 }
 
 const jwtPromises: Map<string, Promise<{ accessToken: string; casUrl: string }>> = new Map();
@@ -46,7 +47,9 @@ export async function xetWriteToken(params: XetWriteTokenParams): Promise<{ acce
 
 	const promise = (async () => {
 		const resp = await (params.fetch ?? fetch)(
-			`${params.hubUrl}/api/${params.repo.type}s/${params.repo.name}/xet-write-token/${params.rev}`,
+			`${params.hubUrl}/api/${params.repo.type}s/${params.repo.name}/xet-write-token/${encodeURIComponent(
+				params.rev
+			)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 			{
 				headers: params.accessToken
 					? {

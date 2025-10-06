@@ -33,7 +33,7 @@ interface XorbEvent {
 	}>;
 }
 
-class CurrentXorbInfo {
+export class CurrentXorbInfo {
 	id: number;
 	offset: number;
 	chunks: Array<{ hash: string; length: number; offset: number }>;
@@ -85,7 +85,7 @@ class CurrentXorbInfo {
 export async function* createXorbs(
 	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
 	params: XetWriteTokenParams & {
-		yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => void;
+		yieldCallback?: (event: { event: "fileProgress"; path: string; progress: number }) => void;
 	}
 ): AsyncGenerator<
 	| XorbEvent
@@ -112,7 +112,6 @@ export async function* createXorbs(
 	let xorbId = 0;
 
 	await chunkModule.init();
-	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 	const chunkCache = new ChunkCache();
 	let xorb = new CurrentXorbInfo();
 
@@ -147,8 +146,9 @@ export async function* createXorbs(
 
 	const remoteXorbHashes: string[] = [""]; // starts at index 1 (to simplify implem a bit)
 
-	try {
-		for await (const fileSource of fileSources) {
+	for await (const fileSource of fileSources) {
+		const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
+		try {
 			xorb.fileSize[fileSource.path] = fileSource.content.size;
 
 			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
@@ -192,17 +192,16 @@ export async function* createXorbs(
 					}
 					let chunkIndex = xorb.chunks.length;
 					let chunkXorbId = xorbId;
-					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 
 					// Remove chunks from source data
 					const chunkToCopy = removeChunkFromSourceData(sourceChunks, chunk.length);
 
 					let cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
 					if (cacheData === undefined && chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
-						const token = await xetWriteToken(params);
+						const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
 						bytesSinceRemoteDedup = 0;
 
-						const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunk/default/" + chunk.hash, {
+						const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {
 							headers: {
 								Authorization: `Bearer ${token.accessToken}`,
 							},
@@ -275,6 +274,7 @@ export async function* createXorbs(
 					bytesSinceLastProgressEvent += chunk.length;
 
 					// Collect metadata for building representation at the end
+					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 					chunkMetadata.push({
 						xorbId: chunkXorbId,
 						chunkIndex: chunkIndex,
@@ -286,7 +286,7 @@ export async function* createXorbs(
 					if (bytesSinceLastProgressEvent >= 1_000_000) {
 						// Emit half of the progress when processed locally, other half when uploading the xorb
 						bytesSinceLastProgressEvent = 0;
-						params.yieldCallback({
+						params.yieldCallback?.({
 							event: "fileProgress",
 							path: fileSource.path,
 							progress:
@@ -342,33 +342,33 @@ export async function* createXorbs(
 				dedupRatio,
 				representation: fileRepresentation,
 			});
+		} finally {
+			chunker.free();
+			// ^ is this really needed ?
 		}
+	}
 
-		if (xorb.offset > 0) {
-			yield xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
-		}
+	if (xorb.offset > 0) {
+		yield xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
+	}
 
-		for (const event of pendingFileEvents) {
-			event.representation = event.representation.map((rep) => ({
-				...rep,
-				xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
-			}));
-			yield event;
-		}
-	} finally {
-		chunker.free();
-		// ^ is this really needed ?
+	for (const event of pendingFileEvents) {
+		event.representation = event.representation.map((rep) => ({
+			...rep,
+			xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
+		}));
+		yield event;
 	}
 }
 
-function backtrackDedup(
+export function backtrackDedup(
 	xorb: CurrentXorbInfo,
 	computeHmac: (hash: string, key: string) => string,
 	shardData: ShardData,
 	chunkCache: ChunkCache,
 	chunkMetadata: { xorbId: number | string; chunkIndex: number; length: number }[],
 	dedupedBytes: number
-) {
+): number {
 	const chunkIndexesToBacktrackFor = new Map<number, { xorbId: number; chunkIndex: number }>();
 	for (
 		let chunkToRecheckIndex = xorb.immutableData?.chunkIndex ?? 0;
@@ -453,10 +453,15 @@ function backtrackDedup(
 	}
 	xorb.chunks = newXorbChunks;
 	xorb.offset = currentOffset;
+	// Update chunkMetadata and chunkCache with new chunk indexes for the current xorb chunks
 	for (const chunk of chunkMetadata) {
 		if (chunk.xorbId === xorb.id) {
 			const newIndex = oldIndexToNewIndex.get(chunk.chunkIndex);
 			if (newIndex !== undefined) {
+				const cached = chunkCache.getChunk(xorb.chunks[newIndex].hash, null);
+				if (cached !== undefined && cached.xorbIndex === chunk.xorbId && cached.chunkIndex === chunk.chunkIndex) {
+					chunkCache.updateChunkIndex(xorb.chunks[newIndex].hash, newIndex);
+				}
 				chunk.chunkIndex = newIndex;
 			}
 		}
@@ -680,10 +685,10 @@ async function loadDedupInfoToCache(
 
 				// Try remote dedup lookup if conditions are met
 				if (chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
-					const token = await xetWriteToken(params);
+					const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
 					bytesSinceRemoteDedup = 0;
 
-					const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunk/default/" + chunk.hash, {
+					const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {
 						headers: {
 							Authorization: `Bearer ${token.accessToken}`,
 						},

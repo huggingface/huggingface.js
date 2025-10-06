@@ -57,7 +57,8 @@ interface UploadShardsParams {
 	fetch?: typeof fetch;
 	repo: RepoId;
 	rev: string;
-	yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => void;
+	isPullRequest?: boolean;
+	yieldCallback?: (event: { event: "fileProgress"; path: string; progress: number }) => void;
 }
 
 /**
@@ -357,9 +358,9 @@ async function uploadXorb(
 	xorb: { hash: string; xorb: Uint8Array; files: Array<{ path: string; progress: number; lastSentProgress: number }> },
 	params: UploadShardsParams
 ) {
-	const token = await xetWriteToken(params);
+	const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
 
-	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorb/default/${xorb.hash}`, {
+	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorbs/default/${xorb.hash}`, {
 		method: "POST",
 		body: xorb.xorb,
 		headers: {
@@ -369,7 +370,7 @@ async function uploadXorb(
 			progressHint: {
 				progressCallback: (progress: number) => {
 					for (const file of xorb.files) {
-						params.yieldCallback({
+						params.yieldCallback?.({
 							event: "fileProgress",
 							path: file.path,
 							progress: file.lastSentProgress + (file.progress - file.lastSentProgress) * progress,
@@ -386,9 +387,9 @@ async function uploadXorb(
 }
 
 async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
-	const token = await xetWriteToken(params);
+	const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
 
-	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/shard`, {
+	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/shards`, {
 		method: "POST",
 		body: shard,
 		headers: {

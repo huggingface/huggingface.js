@@ -207,6 +207,31 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(parameterCount.E8M0, 24);
 	});
 
+	it("fetch info for GPTQ quantized 8B model", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16",
+			revision: "3921b6aee65496a708b0af456c964ceca7423193",
+			computeParametersCount: true,
+		});
+
+		const parameterCount = parse.parameterCount;
+		assert.ok(parameterCount);
+		assert.ok(parameterCount.I32);
+		assert.ok(parameterCount.F16);
+		assert.strictEqual(parameterCount.I32, 6_979_321_856);
+		assert.strictEqual(parameterCount.F16, 1_052_315_648);
+
+		const parameterCountTotal =
+			parse.parameterTotal ??
+			sum(
+				Object.entries(parameterCount)
+					.filter(([, value]) => typeof value === "number")
+					.map(([, value]) => value as number)
+			);
+
+		assert.strictEqual(parameterCountTotal, 8_031_637_504);
+	});
+
 	it("fetch info for openai/gpt-oss-20b (large sharded model)", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "openai/gpt-oss-20b",

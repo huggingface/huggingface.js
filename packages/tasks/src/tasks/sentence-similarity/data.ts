@@ -98,7 +98,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Sentence Similarity is the task of determining how similar two texts are. Sentence similarity models convert input texts into vectors (embeddings) that capture semantic information and calculate how close (similar) they are between them. This task is particularly useful for information retrieval and clustering/grouping.",
-	widgetModels: ["BAAI/bge-small-en-v1.5"],
+	widgetModels: ["sentence-transformers/all-MiniLM-L6-v2"],
 	youtubeId: "VCZq5AkbNEU",
 };
 

@@ -45,9 +45,11 @@ export interface Options {
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
+	"baseten",
 	"black-forest-labs",
 	"bytez-ai",
 	"cerebras",
+	"clarifai",
 	"cohere",
 	"fal-ai",
 	"featherless-ai",
@@ -60,10 +62,12 @@ export const INFERENCE_PROVIDERS = [
 	"nscale",
 	"openai",
 	"ovhcloud",
+	"publicai",
 	"replicate",
 	"sambanova",
 	"scaleway",
 	"together",
+	"zai-org",
 ] as const;
 
 export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;

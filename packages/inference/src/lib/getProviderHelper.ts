@@ -1,3 +1,5 @@
+import * as Baseten from "../providers/baseten.js";
+import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Bytez from "../providers/bytez-ai.js";
 import * as Cerebras from "../providers/cerebras.js";
@@ -13,6 +15,7 @@ import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
+import * as PublicAI from "../providers/publicai.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -50,10 +53,14 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
+import * as Zai from "../providers/zai-org.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
+	baseten: {
+		conversational: new Baseten.BasetenConversationalTask(),
+	},
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
 	},
@@ -85,6 +92,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
+	},
+	clarifai: {
+		conversational: new Clarifai.ClarifaiConversationalTask(),
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
@@ -166,6 +176,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new OvhCloud.OvhCloudConversationalTask(),
 		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
 	},
+	publicai: {
+		conversational: new PublicAI.PublicAIConversationalTask(),
+	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
 		"text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
@@ -186,6 +199,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Together.TogetherTextToImageTask(),
 		conversational: new Together.TogetherConversationalTask(),
 		"text-generation": new Together.TogetherTextGenerationTask(),
+	},
+	"zai-org": {
+		conversational: new Zai.ZaiConversationalTask(),
 	},
 };
 

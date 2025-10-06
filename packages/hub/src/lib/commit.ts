@@ -363,7 +363,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
 
-			if (params.useXet) {
+			if (useXet) {
 				// First get all the files that are already uploaded out of the way
 				for (const obj of json.objects) {
 					const op = shaToOperation.get(obj.oid);
@@ -410,6 +410,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								repo: repoId,
 								// todo: maybe leave empty if PR?
 								rev: params.branch ?? "main",
+								isPullRequest: params.isPullRequest,
 								yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
 							})) {
 								if (event.event === "file") {
