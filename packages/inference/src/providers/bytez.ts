@@ -1,3 +1,12 @@
+/**
+ * See the registered mapping of HF model ID => Bytez model ID here:
+ *
+ * https://huggingface.co/api/partners/bytez-ai/models
+ *
+ * Note, HF model IDs are 1-1 with Bytez model IDs. This is a publicly available mapping.
+ *
+ **/
+
 import type {
 	ChatCompletionOutput,
 	SummarizationOutput,

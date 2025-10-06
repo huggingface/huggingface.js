@@ -21,7 +21,5 @@ export async function imageToText(args: ImageToTextArgs, options?: Options): Pro
 		task: "image-to-text",
 	});
 
-	// TODO the huggingface impl for this needs to be updated, used to be
-	// return providerHelper.getResponse(res[0]);
 	return providerHelper.getResponse(res);
 }
