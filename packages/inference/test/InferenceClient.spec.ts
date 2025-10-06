@@ -2238,7 +2238,7 @@ describe("InferenceClient", () => {
 		},
 		TIMEOUT
 	);
-	describe.only(
+	describe.concurrent(
 		"Bytez",
 		() => {
 			const client = new InferenceClient(env.HF_BYTEZ_KEY ?? "dummy");
