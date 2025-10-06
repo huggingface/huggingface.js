@@ -90,6 +90,10 @@ function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
+function isAmdRyzenModel(model: ModelData) {
+	return model.tags.includes("ryzenai-hybrid") || model.tags.includes("ryzenai-npu");
+}
+
 function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
@@ -315,6 +319,48 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
+const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const tagName = getQuantTag(filepath);
+	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
+
+	// Get recipe according to model type
+	let simplifiedModelName: string;
+	let recipe: string;
+	let checkpoint: string;
+	let requirements: string;
+	if (model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag))) {
+		recipe = model.tags.includes("ryzenai-npu") ? "oga-npu" : "oga-hybrid";
+		checkpoint = model.id;
+		requirements = " (requires RyzenAI 300 series)";
+		simplifiedModelName = modelName.split("-awq-")[0];
+		simplifiedModelName += recipe === "oga-npu" ? "-NPU" : "-Hybrid";
+	} else {
+		recipe = "llamacpp";
+		checkpoint = `${model.id}${tagName}`;
+		requirements = "";
+		simplifiedModelName = modelName;
+	}
+
+	return [
+		{
+			title: "Pull the model",
+			setup: "# Download Lemonade from https://lemonade-server.ai/",
+			content: [
+				`lemonade-server pull user.${simplifiedModelName} --checkpoint ${checkpoint} --recipe ${recipe}`,
+				"# Note: If you installed from source, use the lemonade-server-dev command instead.",
+			].join("\n"),
+		},
+		{
+			title: `Run and chat with the model${requirements}`,
+			content: `lemonade-server run user.${simplifiedModelName}`,
+		},
+		{
+			title: "List all available models",
+			content: "lemonade-server list",
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -491,6 +537,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetDockerModelRunner,
+	},
+	lemonade: {
+		prettyLabel: "Lemonade",
+		docsUrl: "https://lemonade-server.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
+		snippet: snippetLemonade,
 	},
 } satisfies Record<string, LocalApp>;
 

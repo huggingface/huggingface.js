@@ -1,1 +1,3 @@
 xet-core-wasm-build
+*.bin
+.debug

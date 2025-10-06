@@ -44,6 +44,10 @@ export interface ModelData {
 			quant_method?: string;
 		};
 		tokenizer_config?: TokenizerConfig;
+		processor_config?: {
+			chat_template?: string;
+		};
+		chat_template_jinja?: string;
 		adapter_transformers?: {
 			model_name?: string;
 			model_class?: string;

@@ -841,6 +841,17 @@ print(text)
 `,
 ];
 
+export const kittentts = (model: ModelData): string[] => [
+	`from kittentts import KittenTTS
+m = KittenTTS("${model.id}")
+
+audio = m.generate("This high quality TTS model works without a GPU")
+
+# Save the audio
+import soundfile as sf
+sf.write('output.wav', audio, 24000)`,
+];
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
@@ -1045,7 +1056,6 @@ output = model.predict(
 )
 for res in output:
     res.print()
-    res.save_to_img(save_path="./output/")
     res.save_to_json(save_path="./output/res.json")`,
 		];
 	}
@@ -1466,6 +1476,11 @@ export const terratorch = (model: ModelData): string[] => [
 model = BACKBONE_REGISTRY.build("${model.id}")`,
 ];
 
+const hasChatTemplate = (model: ModelData): boolean =>
+	model.config?.tokenizer_config?.chat_template !== undefined ||
+	model.config?.processor_config?.chat_template !== undefined ||
+	model.config?.chat_template_jinja !== undefined;
+
 export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	if (!info) {
@@ -1488,7 +1503,7 @@ export const transformers = (model: ModelData): string[] => {
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
 			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")"
 		);
-		if (model.tags.includes("conversational")) {
+		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
 				autoSnippet.push(
 					"messages = [",
@@ -1523,7 +1538,7 @@ export const transformers = (model: ModelData): string[] => {
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto"),'
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto")'
 		);
 	}
 
@@ -1726,10 +1741,43 @@ export const vfimamba = (model: ModelData): string[] => [
 model = Model.from_pretrained("${model.id}")`,
 ];
 
+export const lvface = (model: ModelData): string[] => [
+	`from huggingface_hub import hf_hub_download
+	 from inference_onnx import LVFaceONNXInferencer
+
+model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K/LVFace-L_Glint360K.onnx")
+inferencer = LVFaceONNXInferencer(model_path, use_gpu=True, timeout=300)
+img_path = 'path/to/image1.jpg'
+embedding = inferencer.infer_from_image(img_path)`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
 model = VoiceCraft.from_pretrained("${model.id}")`,
+];
+
+export const voxcpm = (model: ModelData): string[] => [
+	`import soundfile as sf
+from voxcpm import VoxCPM
+
+model = VoxCPM.from_pretrained("${model.id}")
+
+wav = model.generate(
+    text="VoxCPM is an innovative end-to-end TTS model from ModelBest, designed to generate highly expressive speech.",
+    prompt_wav_path=None,      # optional: path to a prompt speech for voice cloning
+    prompt_text=None,          # optional: reference text
+    cfg_value=2.0,             # LM guidance on LocDiT, higher for better adherence to the prompt, but maybe worse
+    inference_timesteps=10,   # LocDiT inference timesteps, higher for better result, lower for fast speed
+    normalize=True,           # enable external TN tool
+    denoise=True,             # enable external Denoise tool
+    retry_badcase=True,        # enable retrying mode for some bad cases (unstoppable)
+    retry_badcase_max_times=3,  # maximum retrying times
+    retry_badcase_ratio_threshold=6.0, # maximum length restriction for bad case detection (simple but effective), it could be adjusted for slow pace speech
+)
+
+sf.write("output.wav", wav, 16000)
+print("saved: output.wav")`,
 ];
 
 export const vui = (): string[] => [
@@ -1906,6 +1954,87 @@ export const model2vec = (model: ModelData): string[] => [
 	`from model2vec import StaticModel
 
 model = StaticModel.from_pretrained("${model.id}")`,
+];
+
+export const pruna = (model: ModelData): string[] => {
+	let snippets: string[];
+
+	if (model.tags.includes("diffusers")) {
+		snippets = pruna_diffusers(model);
+	} else if (model.tags.includes("transformers")) {
+		snippets = pruna_transformers(model);
+	} else {
+		snippets = pruna_default(model);
+	}
+
+	const ensurePrunaModelImport = (snippet: string): string => {
+		if (!/^from pruna import PrunaModel/m.test(snippet)) {
+			return `from pruna import PrunaModel\n${snippet}`;
+		}
+		return snippet;
+	};
+	snippets = snippets.map(ensurePrunaModelImport);
+
+	if (model.tags.includes("pruna_pro-ai")) {
+		return snippets.map((snippet) =>
+			snippet.replace(/\bpruna\b/g, "pruna_pro").replace(/\bPrunaModel\b/g, "PrunaProModel")
+		);
+	}
+
+	return snippets;
+};
+
+const pruna_diffusers = (model: ModelData): string[] => {
+	const diffusersSnippets = diffusers(model);
+
+	return diffusersSnippets.map((snippet) =>
+		snippet
+			// Replace pipeline classes with PrunaModel
+			.replace(/\b\w*Pipeline\w*\b/g, "PrunaModel")
+			// Clean up diffusers imports containing PrunaModel
+			.replace(/from diffusers import ([^,\n]*PrunaModel[^,\n]*)/g, "")
+			.replace(/from diffusers import ([^,\n]+),?\s*([^,\n]*PrunaModel[^,\n]*)/g, "from diffusers import $1")
+			.replace(/from diffusers import\s*(\n|$)/g, "")
+			// Fix PrunaModel imports
+			.replace(/from diffusers import PrunaModel/g, "from pruna import PrunaModel")
+			.replace(/from diffusers import ([^,\n]+), PrunaModel/g, "from diffusers import $1")
+			.replace(/from diffusers import PrunaModel, ([^,\n]+)/g, "from diffusers import $1")
+			// Clean up whitespace
+			.replace(/\n\n+/g, "\n")
+			.trim()
+	);
+};
+
+const pruna_transformers = (model: ModelData): string[] => {
+	const info = model.transformersInfo;
+	const transformersSnippets = transformers(model);
+
+	// Replace pipeline with PrunaModel
+	let processedSnippets = transformersSnippets.map((snippet) =>
+		snippet
+			.replace(/from transformers import pipeline/g, "from pruna import PrunaModel")
+			.replace(/pipeline\([^)]*\)/g, `PrunaModel.from_pretrained("${model.id}")`)
+	);
+
+	// Additional cleanup if auto_model info is available
+	if (info?.auto_model) {
+		processedSnippets = processedSnippets.map((snippet) =>
+			snippet
+				.replace(new RegExp(`from transformers import ${info.auto_model}\n?`, "g"), "")
+				.replace(new RegExp(`${info.auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
+				.replace(new RegExp(`^.*from.*import.*(, *${info.auto_model})+.*$`, "gm"), (line) =>
+					line.replace(new RegExp(`, *${info.auto_model}`, "g"), "")
+				)
+		);
+	}
+
+	return processedSnippets;
+};
+
+const pruna_default = (model: ModelData): string[] => [
+	`from pruna import PrunaModel
+model = PrunaModel.from_pretrained("${model.id}")
+`,
 ];
 
 export const nemo = (model: ModelData): string[] => {
