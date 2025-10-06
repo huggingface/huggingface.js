@@ -1699,6 +1699,29 @@ image = sana(
 ) `,
 ];
 
+export const vibevoice = (model: ModelData): string[] => [
+	`import torch, soundfile as sf, librosa, numpy as np
+from vibevoice.processor.vibevoice_processor import VibeVoiceProcessor
+from vibevoice.modular.modeling_vibevoice_inference import VibeVoiceForConditionalGenerationInference
+
+# Load voice sample (should be 24kHz mono)
+voice, sr = sf.read("path/to/voice_sample.wav")
+if voice.ndim > 1: voice = voice.mean(axis=1)
+if sr != 24000: voice = librosa.resample(voice, sr, 24000)
+
+processor = VibeVoiceProcessor.from_pretrained("${model.id}")
+model = VibeVoiceForConditionalGenerationInference.from_pretrained(
+    "${model.id}", torch_dtype=torch.bfloat16
+).to("cuda").eval()
+model.set_ddpm_inference_steps(5)
+
+inputs = processor(text=["Speaker 0: Hello!\\nSpeaker 1: Hi there!"],
+                   voice_samples=[[voice]], return_tensors="pt")
+audio = model.generate(**inputs, cfg_scale=1.3,
+                       tokenizer=processor.tokenizer).speech_outputs[0]
+sf.write("output.wav", audio.cpu().numpy().squeeze(), 24000)`,
+];
+
 export const videoprism = (model: ModelData): string[] => [
 	`# Install from https://github.com/google-deepmind/videoprism
 import jax
