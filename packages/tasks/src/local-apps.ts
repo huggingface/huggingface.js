@@ -417,15 +417,15 @@ export const LOCAL_APPS = {
 	},
     HugstonOne: {
 		prettyLabel: "HugstonOne",
-		docsUrl: "https://hugston.com",
-		mainTask: "text-generation",
+		docsUrl: "https://hugston.com", 
+		mainTask: "text-generation", "image-processing",
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`https://hugston.com/explore?folder=llm_models}`),
 	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
 		docsUrl: "https://lmstudio.ai",
-		mainTask: "text-generation", "image-processing",
+		mainTask: "text-generation", 
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
