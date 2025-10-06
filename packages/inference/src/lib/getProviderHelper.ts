@@ -1,5 +1,5 @@
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
-import * as Bytez from "../providers/bytez.js";
+import * as Bytez from "../providers/bytez-ai.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
 import * as FalAI from "../providers/fal-ai.js";

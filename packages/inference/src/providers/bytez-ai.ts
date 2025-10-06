@@ -175,8 +175,8 @@ export interface BytezChatLikeOutput {
 	error: string;
 }
 
-// const BASE_URL = "https://api.bytez.com"
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = "https://api.bytez.com";
+// const BASE_URL = "http://localhost:8080";
 
 abstract class BytezTask extends TaskProviderHelper {
 	constructor(url?: string) {
