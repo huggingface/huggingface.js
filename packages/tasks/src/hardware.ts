@@ -617,70 +617,73 @@ export const SKUS = {
 			},
 		},
 		AMD: {
-			"EPYC 5th Generation Zen5 (Turin)": {
+			"EPYC 5th Generation Zen 5 (Turin)": {
 				tflops: 13.8,
 			},
-			"EPYC 4th Generation Zen4 (Genoa)": {
+			"EPYC 4th Generation Zen 4 (Genoa)": {
 				tflops: 5,
 			},
-			"EPYC 3th Generation Zen3 (Milan)": {
+			"EPYC 3th Generation Zen 3 (Milan)": {
 				tflops: 2.4,
 			},
-			"EPYC 2th Generation Zen2 (Rome)": {
+			"EPYC 2th Generation Zen 2 (Rome)": {
 				tflops: 0.6,
 			},
 			"EPYC 1st Generation Zen (Naples)": {
 				tflops: 0.6,
 			},
-			"Ryzen Threadripper Zen5 9000 (Shimada Peak)": {
+			"Ryzen Threadripper Zen 5 9000 (Shimada Peak)": {
 				tflops: 14.0,
 			},
-			"Ryzen Threadripper Zen4 7000 (Storm Peak)": {
+			"Ryzen Threadripper Zen 4 7000 (Storm Peak)": {
 				tflops: 10.0,
 			},
-			"Ryzen Threadripper Zen3 5000 (Chagall)": {
+			"Ryzen Threadripper Zen 3 5000 (Chagall)": {
 				tflops: 4.6,
 			},
-			"Ryzen Threadripper Zen2 3000 (Castle Peak)": {
+			"Ryzen Threadripper Zen 2 3000 (Castle Peak)": {
 				tflops: 3.2,
 			},
-			"Ryzen Zen5 9000 (Ryzen 9)": {
+			"Ryzen Threadripper Zen 1000 (Whitehaven)": {
+				tflops: 0.6,
+			},
+			"Ryzen Zen 5 9000 (Ryzen 9)": {
 				tflops: 0.56,
 			},
-			"Ryzen Zen5 9000 (Ryzen 7)": {
+			"Ryzen Zen 5 9000 (Ryzen 7)": {
 				tflops: 0.56,
 			},
-			"Ryzen Zen5 9000 (Ryzen 5)": {
+			"Ryzen Zen 5 9000 (Ryzen 5)": {
 				tflops: 0.56,
 			},
-			"Ryzen Zen4 7000 (Ryzen 9)": {
+			"Ryzen Zen 4 7000 (Ryzen 9)": {
 				tflops: 0.56,
 			},
-			"Ryzen Zen4 7000 (Ryzen 7)": {
+			"Ryzen Zen 4 7000 (Ryzen 7)": {
 				tflops: 0.56,
 			},
-			"Ryzen Zen4 7000 (Ryzen 5)": {
+			"Ryzen Zen 4 7000 (Ryzen 5)": {
 				tflops: 0.56,
 			},
-			"Ryzen Zen3 5000 (Ryzen 9)": {
+			"Ryzen Zen 3 5000 (Ryzen 9)": {
 				tflops: 1.33,
 			},
-			"Ryzen Zen3 5000 (Ryzen 7)": {
+			"Ryzen Zen 3 5000 (Ryzen 7)": {
 				tflops: 1.33,
 			},
-			"Ryzen Zen3 5000 (Ryzen 5)": {
+			"Ryzen Zen 3 5000 (Ryzen 5)": {
 				tflops: 0.72,
 			},
-			"Ryzen Zen2 3000 (Ryzen 9)": {
+			"Ryzen Zen 2 3000 (Ryzen 9)": {
 				tflops: 0.72,
 			},
-			"Ryzen Zen2 3000 (Ryzen 7)": {
+			"Ryzen Zen 2 3000 (Ryzen 7)": {
 				tflops: 0.72,
 			},
-			"Ryzen Zen2 3000 (Ryzen 5)": {
+			"Ryzen Zen 2 3000 (Ryzen 5)": {
 				tflops: 0.72,
 			},
-			"Ryzen Zen2 3000 (Ryzen 3)": {
+			"Ryzen Zen 2 3000 (Ryzen 3)": {
 				tflops: 0.72,
 			},
 		},
