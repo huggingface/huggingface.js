@@ -24,8 +24,8 @@ export type InferenceSnippetOptions = {
 	inputs?: Record<string, unknown>; // overrides the default snippet's inputs
 } & Record<string, unknown>;
 
-const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
-const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
+const PYTHON_CLIENTS = ["openai", "huggingface_hub", "fal_client", "requests"] as const;
+const JS_CLIENTS = ["openai", "huggingface.js", "fetch"] as const;
 const SH_CLIENTS = ["curl"] as const;
 
 type Client = (typeof SH_CLIENTS)[number] | (typeof PYTHON_CLIENTS)[number] | (typeof JS_CLIENTS)[number];
