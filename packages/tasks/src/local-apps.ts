@@ -415,6 +415,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isTgiModel,
 		snippet: snippetTgi,
 	},
+    HugstonOne: {
+		prettyLabel: "HugstonOne",
+		docsUrl: "https://hugston.com", 
+		mainTask: "text-generation", "image-processing",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) => new URL(`https://hugston.com/explore?folder=llm_models}`),
+	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
 		docsUrl: "https://lmstudio.ai",
