@@ -1256,6 +1256,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.vui,
 	},
+	vibevoice: {
+		prettyLabel: "VibeVoice",
+		repoName: "VibeVoice",
+		repoUrl: "https://github.com/microsoft/VibeVoice",
+		snippets: snippets.vibevoice,
+		filter: false,
+	},
 	"wan2.2": {
 		prettyLabel: "Wan2.2",
 		repoName: "Wan2.2",

@@ -38,7 +38,7 @@
 				},
 				"target_size": {
 					"type": "object",
-					"description": "The size in pixel of the output image.",
+					"description": "The size in pixels of the output image. This parameter is only supported by some providers and for specific models. It will be ignored when unsupported.",
 					"properties": {
 						"width": {
 							"type": "integer"
