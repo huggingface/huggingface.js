@@ -1096,6 +1096,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
+	tensorrt: {
+		prettyLabel: "TensorRT",
+		repoName: "TensorRT",
+		repoUrl: "https://github.com/NVIDIA/TensorRT",
+		countDownloads: `path_extension:"onnx"`,
+	},	
 	tabpfn: {
 		prettyLabel: "TabPFN",
 		repoName: "TabPFN",
