@@ -23,9 +23,8 @@ Simulate clothing changes or outfit fitting in videos while keeping the person�
 
 
 ## Inference
-We will show a few examples for different use cases.
+Below is an example demonstrating how to use [Lucy-Edit-Dev](https://huggingface.co/decart-ai/Lucy-Edit-Dev) to perform video costume editing, changing a character’s clothing while maintaining identity and motion consistency. Lucy-Edit-Dev is trained on paired video edits, captioned videos, and extended image–text datasets.
 
-Below is an example demonstrating how to use Lucy-Edit-Dev to perform video costume editing — changing a character’s clothing while maintaining identity and motion consistency.
 ```python
 
 import torch
@@ -68,87 +67,11 @@ export_to_video(output, "output.mp4", fps=24)
 
 ```
 
-
-Below is an example demonstrating how to use LTX-Video for cinematic style transfer — transforming the look and feel of an input video while preserving its motion and structure.
-
-```python
-import torch
-from diffusers import LTXConditionPipeline, LTXLatentUpsamplePipeline
-from diffusers.pipelines.ltx.pipeline_ltx_condition import LTXVideoCondition
-from diffusers.utils import export_to_video, load_image
-
-base_model_id = "Lightricks/LTX-Video-0.9.7-distilled" 
-
-pipe = LTXConditionPipeline.from_pretrained(base_model_id, torch_dtype=torch.bfloat16)
-pipe_upsample = LTXLatentUpsamplePipeline.from_pretrained(
-    "Lightricks/ltxv-spatial-upscaler-0.9.7",
-    vae=pipe.vae, 
-    torch_dtype=torch.bfloat16
-)
-pipe.to("cuda")
-pipe_upsample.to("cuda")
-
-def round_to_nearest_resolution_acceptable_by_vae(height, width):
-    height = height - (height % pipe.vae_temporal_compression_ratio)
-    width = width - (width % pipe.vae_temporal_compression_ratio)
-    return height, width
-
-video = load_video(
-    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cosmos/cosmos-video2world-input-vid.mp4"
-)[:21]  
-condition1 = LTXVideoCondition(video=video, frame_index=0)
-
-prompt = "The video depicts a winding mountain road covered in snow, with a single vehicle traveling along it. The road is flanked by steep, rocky cliffs and sparse vegetation. The landscape is characterized by rugged terrain and a river visible in the distance. The scene captures the solitude and beauty of a winter drive through a mountainous region."
-negative_prompt = "worst quality, inconsistent motion, blurry, jittery, distorted"
-expected_height, expected_width = 768, 1152
-downscale_factor = 2 / 3
-num_frames = 161
-
-downscaled_height, downscaled_width = int(expected_height * downscale_factor), int(expected_width * downscale_factor)
-downscaled_height, downscaled_width = round_to_nearest_resolution_acceptable_by_vae(downscaled_height, downscaled_width)
-
-latents = pipe(
-    conditions=[condition1],
-    prompt=prompt,
-    negative_prompt=negative_prompt,
-    width=downscaled_width,
-    height=downscaled_height,
-    num_frames=num_frames,
-    num_inference_steps=30,
-    generator=torch.Generator().manual_seed(0),
-    output_type="latent",
-).frames
-
-upscaled_height, upscaled_width = downscaled_height * 2, downscaled_width * 2
-upscaled_latents = pipe_upsample(
-    latents=latents,
-    output_type="latent"
-).frames
-
-video = pipe(
-    conditions=[condition1],
-    prompt=prompt,
-    negative_prompt=negative_prompt,
-    width=upscaled_width,
-    height=upscaled_height,
-    num_frames=num_frames,
-    denoise_strength=0.4,  
-    num_inference_steps=10,
-    latents=upscaled_latents,
-    decode_timestep=0.05,
-    image_cond_noise_scale=0.025,
-    generator=torch.Generator().manual_seed(0),
-    output_type="pil",
-).frames[0]
-
-video = [frame.resize((expected_width, expected_height)) for frame in video]
-
-export_to_video(video, "output.mp4", fps=24)
-```
+For more inference examples, check out the model cards on Hugging Face, where you can try the provided example code.
 
 ## Useful Resources
-
-### Repositories 
+You can read more about the datasets, model architectures, and open-source implementations in the following repositories:
+ 
 - [Lumen](https://github.com/Kunbyte-AI/Lumen) - Official implementation of Lumen for text-guided video editing.
 - [VIRES](https://github.com/suimuc/VIRES) - Implementation for sketch- and text-guided video instance repainting.
 - [ECCV2022-RIFE: Video Frame Interpolation](https://github.com/hzwer/ECCV2022-RIFE)- Real-time video frame interpolation via intermediate flow estimation.

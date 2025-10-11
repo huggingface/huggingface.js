@@ -37,10 +37,6 @@ const taskData: TaskDataCustom = {
 			id: "decart-ai/Lucy-Edit-Dev",
 		},
 		{
-			description: "Predicts next video frames for frame interpolation and higher FPS.",
-			id: "keras-io/conv-lstm",
-		},
-		{
 			description: "Video upscaling model that enhances resolution while preserving quality.",
 			id: "ByteDance-Seed/SeedVR2-7B",
 		},
