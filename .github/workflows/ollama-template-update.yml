@@ -82,6 +82,8 @@ jobs:
 
             // Filter out lines that are part of the skipped models comment
             const significantChanges = changedLines.filter(line => {
+              // Skip diff header lines (---, +++, @@)
+              if (line.startsWith('---') || line.startsWith('+++') || line.startsWith('@@')) return false;
               // Skip lines that are just adding/removing skipped model entries
               if (line.match(/^[+-]\s*\*\s*-\s*library\//)) return false;
               // Skip empty comment lines or lines with just *
