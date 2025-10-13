@@ -23,11 +23,16 @@ defaults:
   run:
     working-directory: packages/hub
 
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
 jobs:
   version_and_release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           # Needed to push the tag and the commit on the main branch, otherwise we get:
           # > Run git push --follow-tags
@@ -35,15 +40,13 @@ jobs:
           # remote: error: Changes must be made through a pull request. Required status check "lint" is expected.
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
       - run: npm install -g corepack@latest && corepack enable
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "pnpm"
           cache-dependency-path: |
             packages/hub/pnpm-lock.yaml
             packages/doc-internal/pnpm-lock.yaml
-          # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
-          registry-url: "https://registry.npmjs.org"
       - run: pnpm install
       - run: git config --global user.name machineuser
       - run: git config --global user.email infra+machineuser@huggingface.co
@@ -61,19 +64,20 @@ jobs:
         name: "Check Deps are published before publishing this package"
         run: pnpm -w check-deps tasks
 
+      - run: (git pull --rebase && git push --follow-tags) || (git pull --rebase && git push --follow-tags)
+
+      - run: pnpm publish --no-git-checks .
+
+      # hack - reuse actions/setup-node@v3 just to set a new registry
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://npm.pkg.github.com"
+
+      # Disable for now, until github supports PATs for writing github packages (https://github.com/github/roadmap/issues/558)
       - run: pnpm publish --no-git-checks .
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: (git pull --rebase && git push --follow-tags) || (git pull --rebase && git push --follow-tags)
-      # hack - reuse actions/setup-node@v3 just to set a new registry
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          registry-url: "https://npm.pkg.github.com"
-      # Disable for now, until github supports PATs for writing github packages (https://github.com/github/roadmap/issues/558)
-      # - run: pnpm publish --no-git-checks .
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Update Doc"
         uses: peter-evans/repository-dispatch@v2
         with:
