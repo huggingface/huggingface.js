@@ -1364,6 +1364,49 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	
+	if (model.tags.includes("PyLate")) {
+		return [
+			`from pylate import rank, models
+
+queries = [
+	"Which planet is known as the Red Planet?",
+	"What is the largest planet in our solar system?",
+]
+
+documents = [
+	["Venus is often called Earth's twin because of its similar size and proximity.", "Mars, known for its reddish appearance, is often referred to as the Red Planet."],
+	["Jupiter, the largest planet in our solar system, has a prominent red spot.", "Saturn, famous for its rings, is sometimes mistaken for the Red Planet.", "Mars, known for its reddish appearance, is often referred to as the Red Planet."],
+]
+
+documents_ids = [
+	[1, 2],
+	[1, 2],
+]
+
+model = models.ColBERT(
+	model_name_or_path="${model.id}",
+)
+
+queries_embeddings = model.encode(
+	queries,
+	is_query=True,
+)
+
+documents_embeddings = model.encode(
+	documents,
+	is_query=False,
+)
+
+reranked_documents = rank.rerank(
+	documents_ids=documents_ids,
+	queries_embeddings=queries_embeddings,
+	documents_embeddings=documents_embeddings,
+)
+print(reranked_documents)`,
+		];
+	}
+	
 	if (model.tags.includes("cross-encoder") || model.pipeline_tag == "text-ranking") {
 		return [
 			`from sentence_transformers import CrossEncoder
