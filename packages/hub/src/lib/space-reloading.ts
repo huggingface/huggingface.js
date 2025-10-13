@@ -27,15 +27,15 @@ export class ReloadClient {
 	}
 
 	getStatus(req: ApiGetStatusRequest): Promise<ApiGetStatusResponse> {
-		return this.post<ApiGetStatusRequest, ApiGetStatusResponse>("/get-status", req);
+		return this.post("/get-status", req);
 	}
 
 	fetchContents(req: ApiFetchContentsRequest): Promise<ApiFetchContentsResponse> {
-		return this.post<ApiFetchContentsRequest, ApiFetchContentsResponse>("/fetch-contents", req);
+		return this.post("/fetch-contents", req);
 	}
 
 	createReload(req: ApiCreateReloadRequest): Promise<ApiCreateReloadResponse> {
-		return this.post<ApiCreateReloadRequest, ApiCreateReloadResponse>("/create-reload", req);
+		return this.post("/create-reload", req);
 	}
 
 	async *getReload(req: ApiGetReloadRequest): AsyncGenerator<ApiGetReloadEventSourceData, void, void> {
