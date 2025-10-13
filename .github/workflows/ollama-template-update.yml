@@ -47,32 +47,82 @@ jobs:
       - name: Check for changed files
         id: changes
         if: github.repository == 'huggingface/huggingface.js'
-        shell: bash
+        uses: actions/github-script@v6
         env:
           CURRENT_DATE: ${{ steps.prepare.outputs.CURRENT_DATE }}
-        run: |
-          set -x
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const fs = require('fs');
 
-          FILE_TO_ADD="packages/ollama-utils/src/chat-template-automap.ts"
+            const FILE_TO_ADD = "packages/ollama-utils/src/chat-template-automap.ts";
+            const CURRENT_DATE = process.env.CURRENT_DATE;
 
-          git status
-          modified_files="$(git status -s)"
-          echo "Modified files: ${modified_files}"
-          if [ -n "${modified_files}" ]; then
-            NEW_BRANCH="ollama-${CURRENT_DATE}"
-            echo "NEW_BRANCH=${NEW_BRANCH}"
-            echo "Changes detected, will create a new branch:"
-            echo "${modified_files}"
-            git add "${FILE_TO_ADD}"
-            git commit -m "ollama update ${CURRENT_DATE}"
-            git checkout -b "${NEW_BRANCH}"
-            git push -f origin "${NEW_BRANCH}"
-            echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
-            echo "NEW_BRANCH=${NEW_BRANCH}" >> $GITHUB_OUTPUT
-          else
-            echo "No files changed, skipping..."
-            echo "HAS_CHANGES=false" >> $GITHUB_OUTPUT
-          fi
+            // Check git status
+            const gitStatus = execSync('git status -s', { encoding: 'utf8' }).trim();
+            console.log('Modified files:', gitStatus);
+
+            if (!gitStatus) {
+              console.log('No files changed, skipping...');
+              core.setOutput('HAS_CHANGES', 'false');
+              return;
+            }
+
+            // Check if changes are only in the target file
+            const changedFiles = execSync('git diff --name-only', { encoding: 'utf8' }).trim().split('\n').filter(f => f);
+            console.log('Changed files:', changedFiles);
+
+            let shouldCreatePR = true;
+
+            if (changedFiles.length === 1 && changedFiles[0] === FILE_TO_ADD) {
+              console.log('Checking if only comment changed...');
+              
+              // Get the diff output
+              const diffOutput = execSync(`git diff "${FILE_TO_ADD}"`, { encoding: 'utf8' });
+              console.log('Diff output:');
+              console.log(diffOutput);
+              
+              // Check if all changes are within the "Skipped these models due to error:" comment block
+              const diffLines = diffOutput.split('\n');
+              const changedLines = diffLines.filter(line => line.startsWith('+') || line.startsWith('-'));
+              
+              // Filter out lines that are part of the skipped models comment
+              const significantChanges = changedLines.filter(line => {
+                // Skip lines that are just adding/removing skipped model entries
+                if (line.match(/^[+-]\s*\*\s*-\s*library\//)) return false;
+                // Skip empty comment lines or lines with just *
+                if (line.match(/^[+-]\s*\*?\s*$/)) return false;
+                return true;
+              });
+              
+              if (significantChanges.length === 0) {
+                console.log('Only skipped models comment changed, skipping PR creation');
+                shouldCreatePR = false;
+              } else {
+                console.log('Changes found outside of skipped models comment, will create PR');
+                console.log('Significant changes:', significantChanges);
+              }
+            } else {
+              console.log('Multiple files changed or other files changed, will create PR');
+            }
+
+            if (shouldCreatePR) {
+              const newBranch = `ollama-${CURRENT_DATE}`;
+              console.log('NEW_BRANCH:', newBranch);
+              console.log('Changes detected, will create a new branch');
+              
+              // Git operations
+              execSync(`git add "${FILE_TO_ADD}"`);
+              execSync(`git commit -m "ollama update ${CURRENT_DATE}"`);
+              execSync(`git checkout -b "${newBranch}"`);
+              execSync(`git push -f origin "${newBranch}"`);
+              
+              core.setOutput('HAS_CHANGES', 'true');
+              core.setOutput('NEW_BRANCH', newBranch);
+            } else {
+              console.log('Only comment changes detected, skipping PR creation...');
+              core.setOutput('HAS_CHANGES', 'false');
+            }
 
       - name: Create PR
         if: steps.changes.outputs.HAS_CHANGES == 'true' && github.repository == 'huggingface/huggingface.js'
