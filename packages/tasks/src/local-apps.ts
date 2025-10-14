@@ -361,6 +361,42 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetNexaSdk = (model: ModelData): LocalAppSnippet[] => {
+	const command = `nexa infer ${model.id} --prompt "NexaAI embraces HuggingFace and open source."`;
+	const releaseUrl = "https://github.com/NexaAI/nexa-sdk/releases/latest";
+
+	const downloadSetup = (filename: string) => `# Download installer from:\n# ${releaseUrl}/download/${filename}`;
+	const curlSetup = (arch: string) =>
+		`curl -fsSL ${releaseUrl}/download/nexa-cli_linux_${arch}.sh -o install.sh && chmod +x install.sh && ./install.sh && rm install.sh`;
+
+	const platformConfigs = [
+		{ title: "Install on Windows (x86_64)", filename: "nexa-cli_windows_x86_64.exe" },
+		{ title: "Install on Windows (x86_64 CUDA)", filename: "nexa-cli_windows_x86_64_cuda.exe" },
+		{ title: "Install on Windows (arm64)", filename: "nexa-cli_windows_arm64.exe" },
+		{ title: "Install on macOS (arm64)", filename: "nexa-cli_macos_arm64.pkg" },
+		{ title: "Install on macOS (x86_64)", filename: "nexa-cli_macos_x86_64.pkg" },
+	];
+
+	const platforms: LocalAppSnippet[] = [
+		...platformConfigs.map(({ title, filename }) => ({ title, setup: downloadSetup(filename), content: command })),
+		{ title: "Install on Linux (x86_64)", setup: curlSetup("x86_64"), content: command },
+		{ title: "Install on Linux (arm64)", setup: curlSetup("arm64"), content: command },
+	];
+
+	return [
+		...platforms,
+		{
+			title: "OpenAI-compatible Server Mode",
+			content: [
+				"# Start OpenAI-compatible server:",
+				"nexa serve --host 127.0.0.1:8080",
+				"",
+				"# Open the Swagger UI at: http://localhost:8080/docs/ui",
+			].join("\n"),
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -544,6 +580,18 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	"nexa-sdk": {
+		prettyLabel: "Nexa SDK",
+		docsUrl: "https://docs.nexa.ai/",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			(model.id.startsWith("NexaAI/") || isLlamaCppGgufModel(model) || isMlxModel(model) || isAmdRyzenModel(model)) &&
+			(model.pipeline_tag === "text-generation" ||
+				model.pipeline_tag === "text-to-speech" ||
+				model.pipeline_tag === "automatic-speech-recognition" ||
+				model.pipeline_tag === "text-to-image"),
+		snippet: snippetNexaSdk,
 	},
 } satisfies Record<string, LocalApp>;
 

@@ -125,4 +125,19 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 	});
+
+	it("nexa-sdk", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["nexa-sdk"];
+		const model: ModelData = {
+			id: "NexaAI/OmniNeural-4B",
+			tags: [],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet.length).toBe(8);
+		expect(snippet[0].content).toBe(
+			`nexa infer NexaAI/OmniNeural-4B --prompt "NexaAI embraces HuggingFace and open source."`
+		);
+	});
 });
