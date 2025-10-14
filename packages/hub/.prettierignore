@@ -3,5 +3,6 @@ pnpm-lock.yaml
 README.md
 dist
 sha256.js
+src/types/api/api-space-reloading.ts
 src/vendor/xet-chunk/chunker_wasm_bg.js
 src/vendor/fetch-event-source
