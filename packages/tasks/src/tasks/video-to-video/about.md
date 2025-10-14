@@ -76,7 +76,3 @@ You can read more about the datasets, model architectures, and open-source imple
 - [VIRES](https://github.com/suimuc/VIRES) - Implementation for sketch- and text-guided video instance repainting.
 - [ECCV2022-RIFE: Video Frame Interpolation](https://github.com/hzwer/ECCV2022-RIFE)- Real-time video frame interpolation via intermediate flow estimation.
 - [StableVSR: Enhancing Perceptual Quality in Video](https://github.com/claudiom4sir/StableVSR)- Super-resolution method to enhance perceptual video quality.
-
-
-
-

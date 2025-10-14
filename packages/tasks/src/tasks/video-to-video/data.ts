@@ -37,20 +37,16 @@ const taskData: TaskDataCustom = {
 			id: "decart-ai/Lucy-Edit-Dev",
 		},
 		{
-			description: "Video upscaling model that enhances resolution while preserving quality.",
-			id: "ByteDance-Seed/SeedVR2-7B",
-		},
-		{
 			description: "Framework that uses 3D mesh proxies for precise, consistent video editing.",
 			id: "LeoLau/Shape-for-Motion",
 		},
 		{
-			description: "A model to upscale videos at input, designed for seamless use with ComfyUI.",
-			id: "numz/SeedVR2_comfyUI",
+			description: "Model for generating physics-aware videos from input videos and control conditions.",
+			id: "nvidia/Cosmos-Transfer2.5-2B",
 		},
 		{
-			description: "Model for relighting videos by manipulating illumination distributions.",
-			id: "TeslaYang123/TC-Light",
+			description: "A model to upscale videos at input, designed for seamless use with ComfyUI.",
+			id: "numz/SeedVR2_comfyUI",
 		},
 	],
 	spaces: [
