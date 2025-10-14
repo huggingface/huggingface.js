@@ -26,6 +26,7 @@ Simulate clothing changes or outfit fitting in videos while keeping the person�
 Below is an example demonstrating how to use [Lucy-Edit-Dev](https://huggingface.co/decart-ai/Lucy-Edit-Dev) to perform video costume editing, changing a character’s clothing while maintaining identity and motion consistency. Lucy-Edit-Dev is trained on paired video edits, captioned videos, and extended image–text datasets.
 
 ```python
+!pip install torch diffusers
 
 import torch
 from PIL import Image
