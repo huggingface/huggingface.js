@@ -66,7 +66,7 @@ export const INFERENCE_PROVIDERS = [
 	"sambanova",
 	"scaleway",
 	"together",
-	"wavespeed-ai",
+	"wavespeed",
 	"zai-org",
 ] as const;
 

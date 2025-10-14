@@ -2296,30 +2296,30 @@ describe.skip("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_WAVESPEED_KEY ?? "dummy");
 
-			HARDCODED_MODEL_INFERENCE_MAPPING["wavespeed-ai"] = {
+			HARDCODED_MODEL_INFERENCE_MAPPING["wavespeed"] = {
 				"black-forest-labs/FLUX.1-schnell": {
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					hfModelId: "black-forest-labs/FLUX.1-schnell",
 					providerId: "wavespeed-ai/flux-schnell",
 					status: "live",
 					task: "text-to-image",
 				},
 				"Wan-AI/Wan2.1-T2V-14B": {
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					hfModelId: "wavespeed-ai/wan-2.1/t2v-480p",
 					providerId: "wavespeed-ai/wan-2.1/t2v-480p",
 					status: "live",
 					task: "text-to-video",
 				},
 				"HiDream-ai/HiDream-E1-Full": {
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					hfModelId: "wavespeed-ai/hidream-e1-full",
 					providerId: "wavespeed-ai/hidream-e1-full",
 					status: "live",
 					task: "image-to-image",
 				},
 				"openfree/flux-chatgpt-ghibli-lora": {
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					hfModelId: "openfree/flux-chatgpt-ghibli-lora",
 					providerId: "wavespeed-ai/flux-dev-lora",
 					status: "live",
@@ -2328,7 +2328,7 @@ describe.skip("InferenceClient", () => {
 					adapterWeightsPath: "flux-chatgpt-ghibli-lora.safetensors",
 				},
 				"linoyts/yarn_art_Flux_LoRA": {
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					hfModelId: "linoyts/yarn_art_Flux_LoRA",
 					providerId: "wavespeed-ai/flux-dev-lora-ultra-fast",
 					status: "live",
@@ -2340,7 +2340,7 @@ describe.skip("InferenceClient", () => {
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					inputs:
 						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
 				});
@@ -2350,7 +2350,7 @@ describe.skip("InferenceClient", () => {
 			it(`textToImage - openfree/flux-chatgpt-ghibli-lora`, async () => {
 				const res = await client.textToImage({
 					model: "openfree/flux-chatgpt-ghibli-lora",
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					inputs:
 						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
 				});
@@ -2360,7 +2360,7 @@ describe.skip("InferenceClient", () => {
 			it(`textToImage - linoyts/yarn_art_Flux_LoRA`, async () => {
 				const res = await client.textToImage({
 					model: "linoyts/yarn_art_Flux_LoRA",
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					inputs:
 						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
 				});
@@ -2370,7 +2370,7 @@ describe.skip("InferenceClient", () => {
 			it(`textToVideo - Wan-AI/Wan2.1-T2V-14B`, async () => {
 				const res = await client.textToVideo({
 					model: "Wan-AI/Wan2.1-T2V-14B",
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					inputs:
 						"A cool street dancer, wearing a baggy hoodie and hip-hop pants, dancing in front of a graffiti wall, night neon background, quick camera cuts, urban trends.",
 					parameters: {
@@ -2389,7 +2389,7 @@ describe.skip("InferenceClient", () => {
 			it(`imageToImage - HiDream-ai/HiDream-E1-Full`, async () => {
 				const res = await client.imageToImage({
 					model: "HiDream-ai/HiDream-E1-Full",
-					provider: "wavespeed-ai",
+					provider: "wavespeed",
 					inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 					parameters: {
 						prompt: "The leopard chases its prey",

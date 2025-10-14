@@ -52,7 +52,7 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
-import * as WavespeedAI from "../providers/wavespeed-ai.js";
+import * as Wavespeed from "../providers/wavespeed.js";
 import * as Zai from "../providers/zai-org.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
@@ -174,10 +174,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Together.TogetherConversationalTask(),
 		"text-generation": new Together.TogetherTextGenerationTask(),
 	},
-	"wavespeed-ai": {
-		"text-to-image": new WavespeedAI.WavespeedAITextToImageTask(),
-		"text-to-video": new WavespeedAI.WavespeedAITextToVideoTask(),
-		"image-to-image": new WavespeedAI.WavespeedAIImageToImageTask(),
+	wavespeed: {
+		"text-to-image": new Wavespeed.WavespeedAITextToImageTask(),
+		"text-to-video": new Wavespeed.WavespeedAITextToVideoTask(),
+		"image-to-image": new Wavespeed.WavespeedAIImageToImageTask(),
 	},
 	"zai-org": {
 		conversational: new Zai.ZaiConversationalTask(),

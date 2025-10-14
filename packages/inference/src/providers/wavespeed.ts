@@ -65,7 +65,7 @@ interface WaveSpeedAISubmitTaskResponse {
 
 abstract class WavespeedAITask extends TaskProviderHelper {
 	constructor(url?: string) {
-		super("wavespeed-ai", url || WAVESPEEDAI_API_BASE_URL);
+		super("wavespeed", url || WAVESPEEDAI_API_BASE_URL);
 	}
 
 	makeRoute(params: UrlParams): string {

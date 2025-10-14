@@ -106,7 +106,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
 - [Groq supported models](https://console.groq.com/docs/models)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
-- [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed-ai/models)
+- [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
 - [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
