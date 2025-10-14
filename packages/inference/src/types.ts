@@ -50,6 +50,7 @@ export const INFERENCE_PROVIDERS = [
 	"cerebras",
 	"clarifai",
 	"cohere",
+	"deepinfra",
 	"fal-ai",
 	"featherless-ai",
 	"fireworks-ai",
