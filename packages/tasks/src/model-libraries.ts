@@ -287,6 +287,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.dia,
 		filter: false,
 	},
+	"diff-interpretation-tuning": {
+		prettyLabel: "Diff Interpretation Tuning",
+		repoName: "Diff Interpretation Tuning",
+		repoUrl: "https://github.com/Aviously/diff-interpretation-tuning",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	diffree: {
 		prettyLabel: "Diffree",
 		repoName: "Diffree",
