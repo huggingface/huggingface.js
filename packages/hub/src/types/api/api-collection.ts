@@ -21,10 +21,6 @@ export interface ApiCollectionInfo {
 				  }
 		  );
 	owner: ApiAuthor;
-	/*
-	 * The items list per collection is truncated to 4 items maximum.
-	 * To retrieve all items from a collection, you need to make an additional call using its collection slug.
-	 */
 	items: ApiCollectionItem[];
 	theme: "orange" | "blue" | "green" | "purple" | "pink" | "indigo";
 	private: boolean;

@@ -2,12 +2,12 @@ import os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://router.huggingface.co/fireworks-ai/inference/v1",
+    base_url="https://router.huggingface.co/v1",
     api_key=os.environ["HF_TOKEN"],
 )
 
 completion = client.chat.completions.create(
-    model="<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
+    model="meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
     messages=[
         {
             "role": "user",

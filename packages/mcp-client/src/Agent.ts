@@ -27,7 +27,12 @@ const taskCompletionTool: ChatCompletionInputTool = {
 		description: "Call this tool when the task given by the user is complete",
 		parameters: {
 			type: "object",
-			properties: {},
+			properties: {
+				trigger: {
+					type: "boolean",
+					description: "Set to true to trigger this function",
+				},
+			},
 		},
 	},
 };
@@ -38,7 +43,12 @@ const askQuestionTool: ChatCompletionInputTool = {
 		description: "Ask a question to the user to get more info required to solve or clarify their problem.",
 		parameters: {
 			type: "object",
-			properties: {},
+			properties: {
+				trigger: {
+					type: "boolean",
+					description: "Set to true to trigger this function",
+				},
+			},
 		},
 	},
 };

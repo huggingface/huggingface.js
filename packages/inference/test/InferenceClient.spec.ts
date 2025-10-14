@@ -743,7 +743,7 @@ describe.skip("InferenceClient", () => {
 			it("imageSegmentation", async () => {
 				expect(
 					await hf.imageSegmentation({
-						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+						inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50-panoptic",
 					})
 				).toEqual(
@@ -802,6 +802,16 @@ describe.skip("InferenceClient", () => {
 					},
 				});
 				expect(res).toBeInstanceOf(Blob);
+			});
+			it("textToImage with json output", async () => {
+				const res = await hf.textToImage({
+					inputs: "a giant tortoise",
+					model: "stabilityai/stable-diffusion-2",
+					outputType: "json",
+				});
+				expect(res).toMatchObject({
+					output: expect.any(String),
+				});
 			});
 			it("imageToText", async () => {
 				expect(
@@ -1089,6 +1099,17 @@ describe.skip("InferenceClient", () => {
 				expect(res).toMatchObject({
 					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
 				});
+			});
+			it("imageToVideo - fal-ai", async () => {
+				const res = await client.imageToVideo({
+					model: "fal-ai/ltxv-13b-098-distilled/image-to-video",
+					provider: "fal-ai",
+					inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "The cats are jumping around in a playful manner",
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT
@@ -1429,7 +1450,7 @@ describe.skip("InferenceClient", () => {
 					providerId: "mistralai/Devstral-Small-2505",
 					hfModelId: "mistralai/Devstral-Small-2505",
 					status: "live",
-					task: "text2text-generation",
+					task: "text-generation",
 				},
 			};
 
@@ -1479,7 +1500,7 @@ describe.skip("InferenceClient", () => {
 				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
 
-			it("text2textGeneration", async () => {
+			it("textGeneration", async () => {
 				const res = await client.textGeneration({
 					model: "mistralai/Devstral-Small-2505",
 					provider: "nebius",
@@ -1490,6 +1511,116 @@ describe.skip("InferenceClient", () => {
 				expect(res).toMatchObject({
 					generated_text: " in a land far, far away, there lived a king who was very fond of flowers.",
 				});
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Scaleway",
+		() => {
+			const client = new InferenceClient(env.HF_SCALEWAY_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING.scaleway = {
+				"meta-llama/Llama-3.1-8B-Instruct": {
+					provider: "scaleway",
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "llama-3.1-8b-instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"BAAI/bge-multilingual-gemma2": {
+					provider: "scaleway",
+					hfModelId: "BAAI/bge-multilingual-gemma2",
+					providerId: "bge-multilingual-gemma2",
+					task: "feature-extraction",
+					status: "live",
+				},
+				"google/gemma-3-27b-it": {
+					provider: "scaleway",
+					hfModelId: "google/gemma-3-27b-it",
+					providerId: "gemma-3-27b-it",
+					task: "conversational",
+					status: "live",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "scaleway",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					tool_choice: "none",
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toMatch(/(to )?(two|2)/i);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "scaleway",
+					messages: [{ role: "system", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toMatch(/(two|2)/i);
+			});
+
+			it("chatCompletion multimodal", async () => {
+				const res = await client.chatCompletion({
+					model: "google/gemma-3-27b-it",
+					provider: "scaleway",
+					messages: [
+						{
+							role: "user",
+							content: [
+								{
+									type: "image_url",
+									image_url: {
+										url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
+									},
+								},
+								{ type: "text", text: "What is this?" },
+							],
+						},
+					],
+				});
+				expect(res.choices).toBeDefined();
+				expect(res.choices?.length).toBeGreaterThan(0);
+				expect(res.choices?.[0].message?.content).toContain("Statue of Liberty");
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "scaleway",
+					inputs: "Once upon a time,",
+					temperature: 0,
+					max_tokens: 19,
+				});
+
+				expect(res).toMatchObject({
+					generated_text:
+						" in a small village nestled in the rolling hills of the countryside, there lived a young girl named",
+				});
+			});
+
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "BAAI/bge-multilingual-gemma2",
+					provider: "scaleway",
+					inputs: "That is a happy person",
+				});
+
+				expect(res).toBeInstanceOf(Array);
+				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
 		},
 		TIMEOUT
@@ -2004,6 +2135,58 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT
 	);
 	describe.concurrent(
+		"ZAI",
+		() => {
+			const client = new InferenceClient(env.HF_ZAI_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["zai-org"] = {
+				"zai-org/GLM-4.5": {
+					provider: "zai-org",
+					hfModelId: "zai-org/GLM-4.5",
+					providerId: "glm-4.5",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "zai-org/GLM-4.5",
+					provider: "zai-org",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "zai-org/GLM-4.5",
+					provider: "zai-org",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
 		"OVHcloud",
 		() => {
 			const client = new HfInference(env.HF_OVHCLOUD_KEY ?? "dummy");
@@ -2107,6 +2290,7 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT
 	);
+
 	describe.concurrent(
 		"Wavespeed AI",
 		() => {
@@ -2218,5 +2402,174 @@ describe.skip("InferenceClient", () => {
 			});
 		},
 		60000 * 5
+	);
+
+	describe.concurrent(
+		"PublicAI",
+		() => {
+			const client = new InferenceClient(env.HF_PUBLICAI_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["publicai"] = {
+				"swiss-ai/Apertus-8B-Instruct-2509": {
+					provider: "publicai",
+					hfModelId: "swiss-ai/Apertus-8B-Instruct-2509",
+					providerId: "swiss-ai/apertus-8b-instruct",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "swiss-ai/Apertus-8B-Instruct-2509",
+					provider: "publicai",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "swiss-ai/Apertus-8B-Instruct-2509",
+					provider: "publicai",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Baseten",
+		() => {
+			const client = new InferenceClient(env.HF_BASETEN_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["baseten"] = {
+				"Qwen/Qwen3-235B-A22B-Instruct-2507": {
+					provider: "baseten",
+					hfModelId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					providerId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion - Qwen3 235B Instruct", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					provider: "baseten",
+					messages: [{ role: "user", content: "What is 5 + 3?" }],
+					max_tokens: 20,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/(eight|8)/i);
+				}
+			});
+
+			it("chatCompletion stream - Qwen3 235B", async () => {
+				const stream = client.chatCompletionStream({
+					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Count from 1 to 3" }],
+					stream: true,
+					max_tokens: 20,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+				expect(fullResponse).toMatch(/1.*2.*3/);
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"clarifai",
+		() => {
+			const client = new InferenceClient(env.HF_CLARIFAI_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["clarifai"] = {
+				"deepseek-ai/DeepSeek-V3.1": {
+					provider: "clarifai",
+					hfModelId: "deepseek-ai/DeepSeek-V3.1",
+					providerId: "deepseek-ai/deepseek-chat/models/DeepSeek-V3_1",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion - DeepSeek-V3_1", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-V3.1",
+					provider: "clarifai",
+					messages: [{ role: "user", content: "What is 5 + 3?" }],
+					max_tokens: 20,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/(eight|8)/i);
+				}
+			});
+
+			it("chatCompletion stream - DeepSeek-V3_1", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-V3.1",
+					provider: "clarifai",
+					messages: [{ role: "user", content: "Count from 1 to 3" }],
+					stream: true,
+					max_tokens: 20,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+				expect(fullResponse).toMatch(/1.*2.*3/);
+			});
+		},
+		TIMEOUT
 	);
 });

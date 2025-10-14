@@ -52,14 +52,19 @@ const taskData: TaskDataCustom = {
 			id: "vidore/colqwen2-v1.0",
 		},
 		{
-			description: "Very fast and efficient visual document retrieval model that works on five languages.",
-			id: "marco/mcdse-2b-v1",
+			description:
+				"Very fast and efficient visual document retrieval model that can also take in other modalities like audio.",
+			id: "Tevatron/OmniEmbed-v0.1",
 		},
 	],
 	spaces: [
 		{
 			description: "A leaderboard of visual document retrieval models.",
 			id: "vidore/vidore-leaderboard",
+		},
+		{
+			description: "Visual retrieval augmented generation demo based on ColQwen2 model.",
+			id: "vidore/visual-rag-tool",
 		},
 	],
 	summary:

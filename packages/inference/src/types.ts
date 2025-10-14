@@ -5,6 +5,14 @@ import type { ChatCompletionInput, PipelineType, WidgetType } from "@huggingface
  */
 export type ModelId = string;
 
+export interface Logger {
+	debug: (message: string, ...args: unknown[]) => void;
+	info: (message: string, ...args: unknown[]) => void;
+	warn: (message: string, ...args: unknown[]) => void;
+	error: (message: string, ...args: unknown[]) => void;
+	log: (message: string, ...args: unknown[]) => void;
+}
+
 export interface Options {
 	/**
 	 * (Default: true) Boolean. If a request 503s, the request will be retried with the same parameters.
@@ -37,8 +45,10 @@ export interface Options {
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
+	"baseten",
 	"black-forest-labs",
 	"cerebras",
+	"clarifai",
 	"cohere",
 	"fal-ai",
 	"featherless-ai",
@@ -51,10 +61,13 @@ export const INFERENCE_PROVIDERS = [
 	"nscale",
 	"openai",
 	"ovhcloud",
+	"publicai",
 	"replicate",
 	"sambanova",
+	"scaleway",
 	"together",
 	"wavespeed-ai",
+	"zai-org",
 ] as const;
 
 export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;

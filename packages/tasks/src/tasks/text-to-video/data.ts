@@ -79,8 +79,8 @@ const taskData: TaskDataCustom = {
 			id: "nvidia/Cosmos-1.0-Diffusion-7B-Text2World",
 		},
 		{
-			description: "A robust model for video generation.",
-			id: "Wan-AI/Wan2.1-T2V-1.3B",
+			description: "Very fast model for video generation.",
+			id: "Lightricks/LTX-Video-0.9.8-13B-distilled",
 		},
 	],
 	spaces: [
@@ -99,7 +99,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Text-to-video models can be used in any application that requires generating consistent sequence of images from text. ",
-	widgetModels: ["Wan-AI/Wan2.1-T2V-14B"],
+	widgetModels: ["Wan-AI/Wan2.2-TI2V-5B"],
 	youtubeId: undefined,
 };
 

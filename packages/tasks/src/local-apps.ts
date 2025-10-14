@@ -90,6 +90,10 @@ function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
+function isAmdRyzenModel(model: ModelData) {
+	return model.tags.includes("ryzenai-hybrid") || model.tags.includes("ryzenai-npu");
+}
+
 function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
@@ -207,10 +211,27 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 		"temperature": 0.5
 	}'`;
 	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
+
+	let setup;
+	let dockerCommand;
+
+	if (model.tags.includes("mistral-common")) {
+		setup = [
+			"# Install vLLM from pip:",
+			"pip install vllm",
+			"# Make sure you have the latest version of mistral-common installed:",
+			"pip install --upgrade mistral-common",
+		].join("\n");
+		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"`;
+	} else {
+		setup = ["# Install vLLM from pip:", "pip install vllm"].join("\n");
+		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`;
+	}
+
 	return [
 		{
 			title: "Install from pip",
-			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
+			setup: setup,
 			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand],
 		},
 		{
@@ -226,10 +247,7 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 				`	vllm/vllm-openai:latest \\`,
 				`	--model ${model.id}`,
 			].join("\n"),
-			content: [
-				`# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
-				runCommand,
-			],
+			content: [dockerCommand, runCommand],
 		},
 	];
 };
@@ -299,6 +317,48 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
+};
+
+const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const tagName = getQuantTag(filepath);
+	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
+
+	// Get recipe according to model type
+	let simplifiedModelName: string;
+	let recipe: string;
+	let checkpoint: string;
+	let requirements: string;
+	if (model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag))) {
+		recipe = model.tags.includes("ryzenai-npu") ? "oga-npu" : "oga-hybrid";
+		checkpoint = model.id;
+		requirements = " (requires RyzenAI 300 series)";
+		simplifiedModelName = modelName.split("-awq-")[0];
+		simplifiedModelName += recipe === "oga-npu" ? "-NPU" : "-Hybrid";
+	} else {
+		recipe = "llamacpp";
+		checkpoint = `${model.id}${tagName}`;
+		requirements = "";
+		simplifiedModelName = modelName;
+	}
+
+	return [
+		{
+			title: "Pull the model",
+			setup: "# Download Lemonade from https://lemonade-server.ai/",
+			content: [
+				`lemonade-server pull user.${simplifiedModelName} --checkpoint ${checkpoint} --recipe ${recipe}`,
+				"# Note: If you installed from source, use the lemonade-server-dev command instead.",
+			].join("\n"),
+		},
+		{
+			title: `Run and chat with the model${requirements}`,
+			content: `lemonade-server run user.${simplifiedModelName}`,
+		},
+		{
+			title: "List all available models",
+			content: "lemonade-server list",
+		},
+	];
 };
 
 /**
@@ -477,6 +537,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetDockerModelRunner,
+	},
+	lemonade: {
+		prettyLabel: "Lemonade",
+		docsUrl: "https://lemonade-server.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
+		snippet: snippetLemonade,
 	},
 } satisfies Record<string, LocalApp>;
 

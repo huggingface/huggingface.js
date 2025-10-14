@@ -31,46 +31,26 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "A robust image captioning model.",
-			id: "Salesforce/blip2-opt-2.7b",
+			description: "Strong OCR model.",
+			id: "allenai/olmOCR-7B-0725",
 		},
 		{
-			description: "A powerful and accurate image-to-text model that can also localize concepts in images.",
-			id: "microsoft/kosmos-2-patch14-224",
-		},
-		{
-			description: "A strong optical character recognition model.",
-			id: "facebook/nougat-base",
-		},
-		{
-			description: "A powerful model that lets you have a conversation with the image.",
-			id: "llava-hf/llava-1.5-7b-hf",
+			description: "Powerful image captioning model.",
+			id: "fancyfeast/llama-joycaption-beta-one-hf-llava",
 		},
 	],
 	spaces: [
 		{
-			description: "An application that compares various image captioning models.",
-			id: "nielsr/comparing-captioning-models",
+			description: "SVG generator app from images.",
+			id: "multimodalart/OmniSVG-3B",
 		},
 		{
-			description: "A robust image captioning application.",
-			id: "flax-community/image-captioning",
+			description: "An application that converts documents to markdown.",
+			id: "numind/NuMarkdown-8B-Thinking",
 		},
 		{
-			description: "An application that transcribes handwritings into text.",
-			id: "nielsr/TrOCR-handwritten",
-		},
-		{
-			description: "An application that can caption images and answer questions about a given image.",
-			id: "Salesforce/BLIP",
-		},
-		{
-			description: "An application that can caption images and answer questions with a conversational agent.",
-			id: "Salesforce/BLIP2",
-		},
-		{
-			description: "An image captioning application that demonstrates the effect of noise on captions.",
-			id: "johko/capdec-image-captioning",
+			description: "An application that can caption images.",
+			id: "fancyfeast/joy-caption-beta-one",
 		},
 	],
 	summary:

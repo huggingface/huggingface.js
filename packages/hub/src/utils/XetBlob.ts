@@ -1,6 +1,7 @@
 import { createApiError } from "../error";
 import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "./checkCredentials";
+import { combineUint8Arrays } from "./combineUint8Arrays";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
 
@@ -56,26 +57,26 @@ export interface ReconstructionInfo {
 	offset_into_first_range: number;
 }
 
-enum CompressionScheme {
+export enum XetChunkCompressionScheme {
 	None = 0,
 	LZ4 = 1,
 	ByteGroupingLZ4 = 2,
 }
 
-const compressionSchemeLabels: Record<CompressionScheme, string> = {
-	[CompressionScheme.None]: "None",
-	[CompressionScheme.LZ4]: "LZ4",
-	[CompressionScheme.ByteGroupingLZ4]: "ByteGroupingLZ4",
+const compressionSchemeLabels: Record<XetChunkCompressionScheme, string> = {
+	[XetChunkCompressionScheme.None]: "None",
+	[XetChunkCompressionScheme.LZ4]: "LZ4",
+	[XetChunkCompressionScheme.ByteGroupingLZ4]: "ByteGroupingLZ4",
 };
 
 interface ChunkHeader {
 	version: number; // u8, 1 byte
 	compressed_length: number; // 3 * u8, 3 bytes
-	compression_scheme: CompressionScheme; // u8, 1 byte
+	compression_scheme: XetChunkCompressionScheme; // u8, 1 byte
 	uncompressed_length: number; // 3 * u8, 3 bytes
 }
 
-const CHUNK_HEADER_BYTES = 8;
+export const XET_CHUNK_HEADER_BYTES = 8;
 
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
@@ -158,10 +159,10 @@ export class XetBlob extends Blob {
 			const connParams = await getAccessToken(this.accessToken, this.fetch, this.refreshUrl);
 
 			// debug(
-			// 	`curl '${connParams.casUrl}/reconstruction/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
+			// 	`curl '${connParams.casUrl}/v1/reconstructions/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
 			// );
 
-			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/reconstruction/${this.hash}`, {
+			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/v1/reconstructions/${this.hash}`, {
 				headers: {
 					Authorization: `Bearer ${connParams.accessToken}`,
 					Range: `bytes=${this.start}-${this.end - 1}`,
@@ -327,18 +328,18 @@ export class XetBlob extends Blob {
 					totalFetchBytes += result.value.byteLength;
 
 					if (leftoverBytes) {
-						result.value = new Uint8Array([...leftoverBytes, ...result.value]);
+						result.value = combineUint8Arrays(leftoverBytes, result.value);
 						leftoverBytes = undefined;
 					}
 
-					while (totalBytesRead < maxBytes && result.value.byteLength) {
+					while (totalBytesRead < maxBytes && result.value?.byteLength) {
 						if (result.value.byteLength < 8) {
 							// We need 8 bytes to parse the chunk header
 							leftoverBytes = result.value;
 							continue fetchData;
 						}
 
-						const header = new DataView(result.value.buffer, result.value.byteOffset, CHUNK_HEADER_BYTES);
+						const header = new DataView(result.value.buffer, result.value.byteOffset, XET_CHUNK_HEADER_BYTES);
 						const chunkHeader: ChunkHeader = {
 							version: header.getUint8(0),
 							compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
@@ -353,9 +354,9 @@ export class XetBlob extends Blob {
 						}
 
 						if (
-							chunkHeader.compression_scheme !== CompressionScheme.None &&
-							chunkHeader.compression_scheme !== CompressionScheme.LZ4 &&
-							chunkHeader.compression_scheme !== CompressionScheme.ByteGroupingLZ4
+							chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
+							chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
+							chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
 						) {
 							throw new Error(
 								`Unsupported compression scheme ${
@@ -364,19 +365,19 @@ export class XetBlob extends Blob {
 							);
 						}
 
-						if (result.value.byteLength < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
+						if (result.value.byteLength < chunkHeader.compressed_length + XET_CHUNK_HEADER_BYTES) {
 							// We need more data to read the full chunk
 							leftoverBytes = result.value;
 							continue fetchData;
 						}
 
-						result.value = result.value.slice(CHUNK_HEADER_BYTES);
+						result.value = result.value.slice(XET_CHUNK_HEADER_BYTES);
 
 						let uncompressed =
-							chunkHeader.compression_scheme === CompressionScheme.LZ4
+							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
 								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
-								: chunkHeader.compression_scheme === CompressionScheme.ByteGroupingLZ4
-								  ? bg4_regoup_bytes(
+								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
+								  ? bg4_regroup_bytes(
 											lz4_decompress(
 												result.value.slice(0, chunkHeader.compressed_length),
 												chunkHeader.uncompressed_length
@@ -529,7 +530,7 @@ function cacheKey(params: { refreshUrl: string; initialAccessToken: string | und
 }
 
 // exported for testing purposes
-export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
+export function bg4_regroup_bytes(bytes: Uint8Array): Uint8Array {
 	// python code
 
 	// split = len(x) // 4
@@ -590,6 +591,40 @@ export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
 	// }
 }
 
+export function bg4_split_bytes(bytes: Uint8Array): Uint8Array {
+	// This function does the opposite of bg4_regroup_bytes
+	// It takes interleaved bytes and groups them by 4
+
+	const ret = new Uint8Array(bytes.byteLength);
+	const split = Math.floor(bytes.byteLength / 4);
+	const rem = bytes.byteLength % 4;
+
+	// Calculate group positions in the output array
+	const g1_pos = split + (rem >= 1 ? 1 : 0);
+	const g2_pos = g1_pos + split + (rem >= 2 ? 1 : 0);
+	const g3_pos = g2_pos + split + (rem == 3 ? 1 : 0);
+
+	// Extract every 4th byte starting from position 0, 1, 2, 3
+	// and place them in their respective groups
+	for (let i = 0, j = 0; i < bytes.byteLength; i += 4, j++) {
+		ret[j] = bytes[i];
+	}
+
+	for (let i = 1, j = g1_pos; i < bytes.byteLength; i += 4, j++) {
+		ret[j] = bytes[i];
+	}
+
+	for (let i = 2, j = g2_pos; i < bytes.byteLength; i += 4, j++) {
+		ret[j] = bytes[i];
+	}
+
+	for (let i = 3, j = g3_pos; i < bytes.byteLength; i += 4, j++) {
+		ret[j] = bytes[i];
+	}
+
+	return ret;
+}
+
 async function getAccessToken(
 	initialAccessToken: string | undefined,
 	customFetch: typeof fetch,
@@ -628,8 +663,6 @@ async function getAccessToken(
 		const jwt = {
 			accessToken: json.accessToken,
 			expiresAt: new Date(json.exp * 1000),
-			initialAccessToken,
-			refreshUrl,
 			casUrl: json.casUrl,
 		};
 

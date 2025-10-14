@@ -5,6 +5,6 @@ curl {{ fullUrl }} \
     -H 'X-HF-Bill-To: {{ billTo }}' \
 {% endif %}
     -d '{
-{{ providerInputs.asCurlString }},
+{{ autoInputs.asCurlString }},
         "stream": false
     }'

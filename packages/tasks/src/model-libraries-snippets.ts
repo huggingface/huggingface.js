@@ -434,8 +434,63 @@ pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
+const diffusers_flux_fill = (model: ModelData) => [
+	`import torch
+from diffusers import FluxFillPipeline
+from diffusers.utils import load_image
+
+image = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup.png")
+mask = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup_mask.png")
+
+pipe = FluxFillPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16).to("cuda")
+image = pipe(
+    prompt="a white paper cup",
+    image=image,
+    mask_image=mask,
+    height=1632,
+    width=1232,
+    guidance_scale=30,
+    num_inference_steps=50,
+    max_sequence_length=512,
+    generator=torch.Generator("cpu").manual_seed(0)
+).images[0]
+image.save(f"flux-fill-dev.png")`,
+];
+
+const diffusers_inpainting = (model: ModelData) => [
+	`import torch
+from diffusers import AutoPipelineForInpainting
+from diffusers.utils import load_image
+
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", torch_dtype=torch.float16, variant="fp16").to("cuda")
+
+img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
+mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
+
+image = load_image(img_url).resize((1024, 1024))
+mask_image = load_image(mask_url).resize((1024, 1024))
+
+prompt = "a tiger sitting on a park bench"
+generator = torch.Generator(device="cuda").manual_seed(0)
+
+image = pipe(
+  prompt=prompt,
+  image=image,
+  mask_image=mask_image,
+  guidance_scale=8.0,
+  num_inference_steps=20,  # steps between 15 and 30 work well for us
+  strength=0.99,  # make sure to use \`strength\` below 1.0
+  generator=generator,
+).images[0]`,
+];
+
 export const diffusers = (model: ModelData): string[] => {
-	if (model.tags.includes("controlnet")) {
+	if (
+		model.tags.includes("StableDiffusionInpaintPipeline") ||
+		model.tags.includes("StableDiffusionXLInpaintPipeline")
+	) {
+		return diffusers_inpainting(model);
+	} else if (model.tags.includes("controlnet")) {
 		return diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
 		if (model.pipeline_tag === "image-to-image") {
@@ -449,6 +504,8 @@ export const diffusers = (model: ModelData): string[] => {
 		}
 	} else if (model.tags.includes("textual_inversion")) {
 		return diffusers_textual_inversion(model);
+	} else if (model.tags.includes("FluxFillPipeline")) {
+		return diffusers_flux_fill(model);
 	} else if (model.pipeline_tag === "image-to-video") {
 		return diffusers_image_to_video(model);
 	} else if (model.pipeline_tag === "image-to-image") {
@@ -784,6 +841,17 @@ print(text)
 `,
 ];
 
+export const kittentts = (model: ModelData): string[] => [
+	`from kittentts import KittenTTS
+m = KittenTTS("${model.id}")
+
+audio = m.generate("This high quality TTS model works without a GPU")
+
+# Save the audio
+import soundfile as sf
+sf.write('output.wav', audio, 24000)`,
+];
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
@@ -961,6 +1029,59 @@ export const paddlenlp = (model: ModelData): string[] => {
 	}
 };
 
+export const paddleocr = (model: ModelData): string[] => {
+	const mapping: Record<string, { className: string }> = {
+		textline_detection: { className: "TextDetection" },
+		textline_recognition: { className: "TextRecognition" },
+		seal_text_detection: { className: "SealTextDetection" },
+		doc_img_unwarping: { className: "TextImageUnwarping" },
+		doc_img_orientation_classification: { className: "DocImgOrientationClassification" },
+		textline_orientation_classification: { className: "TextLineOrientationClassification" },
+		chart_parsing: { className: "ChartParsing" },
+		formula_recognition: { className: "FormulaRecognition" },
+		layout_detection: { className: "LayoutDetection" },
+		table_cells_detection: { className: "TableCellsDetection" },
+		wired_table_classification: { className: "TableClassification" },
+		table_structure_recognition: { className: "TableStructureRecognition" },
+	};
+
+	if (model.tags.includes("doc_vlm")) {
+		return [
+			`# pip install paddleocr
+from paddleocr import DocVLM
+model = DocVLM(model_name="${nameWithoutNamespace(model.id)}")
+output = model.predict(
+    input={"image": "path/to/image.png", "query": "Parsing this image and output the content in Markdown format."},
+    batch_size=1
+)
+for res in output:
+    res.print()
+    res.save_to_json(save_path="./output/res.json")`,
+		];
+	}
+
+	for (const tag of model.tags) {
+		if (tag in mapping) {
+			const { className } = mapping[tag];
+			return [
+				`# pip install paddleocr
+from paddleocr import ${className}
+model = ${className}(model_name="${nameWithoutNamespace(model.id)}")
+output = model.predict(input="path/to/image.png", batch_size=1)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")`,
+			];
+		}
+	}
+
+	return [
+		`# Please refer to the document for information on how to use the model. 
+# https://paddlepaddle.github.io/PaddleOCR/latest/en/version3.x/module_usage/module_overview.html`,
+	];
+};
+
 export const perception_encoder = (model: ModelData): string[] => {
 	const clip_model = `# Use PE-Core models as CLIP models
 import core.vision_encoder.pe as pe
@@ -1033,6 +1154,13 @@ export const relik = (model: ModelData): string[] => [
 	`from relik import Relik
  
 relik = Relik.from_pretrained("${model.id}")`,
+];
+
+export const renderformer = (model: ModelData): string[] => [
+	`# Install from https://github.com/microsoft/renderformer
+
+from renderformer import RenderFormerRenderingPipeline
+pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
 ];
 
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
@@ -1348,6 +1476,11 @@ export const terratorch = (model: ModelData): string[] => [
 model = BACKBONE_REGISTRY.build("${model.id}")`,
 ];
 
+const hasChatTemplate = (model: ModelData): boolean =>
+	model.config?.tokenizer_config?.chat_template !== undefined ||
+	model.config?.processor_config?.chat_template !== undefined ||
+	model.config?.chat_template_jinja !== undefined;
+
 export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	if (!info) {
@@ -1355,27 +1488,58 @@ export const transformers = (model: ModelData): string[] => {
 	}
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
-	let autoSnippet: string;
+	const autoSnippet = [];
 	if (info.processor) {
-		const varName =
+		const processorVarName =
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
 				  ? "extractor"
 				  : "processor";
-		autoSnippet = [
+		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
 			"",
-			`${varName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-		].join("\n");
+			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")"
+		);
+		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
+			if (model.tags.includes("image-text-to-text")) {
+				autoSnippet.push(
+					"messages = [",
+					[
+						"    {",
+						'        "role": "user",',
+						'        "content": [',
+						'            {"type": "image", "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/p-blog/candy.JPG"},',
+						'            {"type": "text", "text": "What animal is on the candy?"}',
+						"        ]",
+						"    },",
+					].join("\n"),
+					"]"
+				);
+			} else {
+				autoSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+			}
+			autoSnippet.push(
+				`inputs = ${processorVarName}.apply_chat_template(`,
+				"	messages,",
+				"	add_generation_prompt=True,",
+				"	tokenize=True,",
+				"	return_dict=True,",
+				'	return_tensors="pt",',
+				").to(model.device)",
+				"",
+				"outputs = model.generate(**inputs, max_new_tokens=40)",
+				`print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))`
+			);
+		}
 	} else {
-		autoSnippet = [
+		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-		].join("\n");
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto")'
+		);
 	}
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
@@ -1419,9 +1583,9 @@ export const transformers = (model: ModelData): string[] => {
 			);
 		}
 
-		return [pipelineSnippet.join("\n"), autoSnippet];
+		return [pipelineSnippet.join("\n"), autoSnippet.join("\n")];
 	}
-	return [autoSnippet];
+	return [autoSnippet.join("\n")];
 };
 
 export const transformersJS = (model: ModelData): string[] => {
@@ -1535,16 +1699,85 @@ image = sana(
 ) `,
 ];
 
+export const vibevoice = (model: ModelData): string[] => [
+	`import torch, soundfile as sf, librosa, numpy as np
+from vibevoice.processor.vibevoice_processor import VibeVoiceProcessor
+from vibevoice.modular.modeling_vibevoice_inference import VibeVoiceForConditionalGenerationInference
+
+# Load voice sample (should be 24kHz mono)
+voice, sr = sf.read("path/to/voice_sample.wav")
+if voice.ndim > 1: voice = voice.mean(axis=1)
+if sr != 24000: voice = librosa.resample(voice, sr, 24000)
+
+processor = VibeVoiceProcessor.from_pretrained("${model.id}")
+model = VibeVoiceForConditionalGenerationInference.from_pretrained(
+    "${model.id}", torch_dtype=torch.bfloat16
+).to("cuda").eval()
+model.set_ddpm_inference_steps(5)
+
+inputs = processor(text=["Speaker 0: Hello!\\nSpeaker 1: Hi there!"],
+                   voice_samples=[[voice]], return_tensors="pt")
+audio = model.generate(**inputs, cfg_scale=1.3,
+                       tokenizer=processor.tokenizer).speech_outputs[0]
+sf.write("output.wav", audio.cpu().numpy().squeeze(), 24000)`,
+];
+
+export const videoprism = (model: ModelData): string[] => [
+	`# Install from https://github.com/google-deepmind/videoprism
+import jax
+from videoprism import models as vp
+
+flax_model = vp.get_model("${model.id}")
+loaded_state = vp.load_pretrained_weights("${model.id}")
+
+@jax.jit
+def forward_fn(inputs, train=False):
+  return flax_model.apply(loaded_state, inputs, train=train)`,
+];
+
 export const vfimamba = (model: ModelData): string[] => [
 	`from Trainer_finetune import Model
 
 model = Model.from_pretrained("${model.id}")`,
 ];
 
+export const lvface = (model: ModelData): string[] => [
+	`from huggingface_hub import hf_hub_download
+	 from inference_onnx import LVFaceONNXInferencer
+
+model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K/LVFace-L_Glint360K.onnx")
+inferencer = LVFaceONNXInferencer(model_path, use_gpu=True, timeout=300)
+img_path = 'path/to/image1.jpg'
+embedding = inferencer.infer_from_image(img_path)`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
 model = VoiceCraft.from_pretrained("${model.id}")`,
+];
+
+export const voxcpm = (model: ModelData): string[] => [
+	`import soundfile as sf
+from voxcpm import VoxCPM
+
+model = VoxCPM.from_pretrained("${model.id}")
+
+wav = model.generate(
+    text="VoxCPM is an innovative end-to-end TTS model from ModelBest, designed to generate highly expressive speech.",
+    prompt_wav_path=None,      # optional: path to a prompt speech for voice cloning
+    prompt_text=None,          # optional: reference text
+    cfg_value=2.0,             # LM guidance on LocDiT, higher for better adherence to the prompt, but maybe worse
+    inference_timesteps=10,   # LocDiT inference timesteps, higher for better result, lower for fast speed
+    normalize=True,           # enable external TN tool
+    denoise=True,             # enable external Denoise tool
+    retry_badcase=True,        # enable retrying mode for some bad cases (unstoppable)
+    retry_badcase_max_times=3,  # maximum retrying times
+    retry_badcase_ratio_threshold=6.0, # maximum length restriction for bad case detection (simple but effective), it could be adjusted for slow pace speech
+)
+
+sf.write("output.wav", wav, 16000)
+print("saved: output.wav")`,
 ];
 
 export const vui = (): string[] => [
@@ -1642,6 +1875,7 @@ huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.i
 const mlxlm = (model: ModelData): string[] => [
 	`# Make sure mlx-lm is installed
 # pip install --upgrade mlx-lm
+# if on a CUDA device, also pip install mlx[cuda]
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
@@ -1720,6 +1954,87 @@ export const model2vec = (model: ModelData): string[] => [
 	`from model2vec import StaticModel
 
 model = StaticModel.from_pretrained("${model.id}")`,
+];
+
+export const pruna = (model: ModelData): string[] => {
+	let snippets: string[];
+
+	if (model.tags.includes("diffusers")) {
+		snippets = pruna_diffusers(model);
+	} else if (model.tags.includes("transformers")) {
+		snippets = pruna_transformers(model);
+	} else {
+		snippets = pruna_default(model);
+	}
+
+	const ensurePrunaModelImport = (snippet: string): string => {
+		if (!/^from pruna import PrunaModel/m.test(snippet)) {
+			return `from pruna import PrunaModel\n${snippet}`;
+		}
+		return snippet;
+	};
+	snippets = snippets.map(ensurePrunaModelImport);
+
+	if (model.tags.includes("pruna_pro-ai")) {
+		return snippets.map((snippet) =>
+			snippet.replace(/\bpruna\b/g, "pruna_pro").replace(/\bPrunaModel\b/g, "PrunaProModel")
+		);
+	}
+
+	return snippets;
+};
+
+const pruna_diffusers = (model: ModelData): string[] => {
+	const diffusersSnippets = diffusers(model);
+
+	return diffusersSnippets.map((snippet) =>
+		snippet
+			// Replace pipeline classes with PrunaModel
+			.replace(/\b\w*Pipeline\w*\b/g, "PrunaModel")
+			// Clean up diffusers imports containing PrunaModel
+			.replace(/from diffusers import ([^,\n]*PrunaModel[^,\n]*)/g, "")
+			.replace(/from diffusers import ([^,\n]+),?\s*([^,\n]*PrunaModel[^,\n]*)/g, "from diffusers import $1")
+			.replace(/from diffusers import\s*(\n|$)/g, "")
+			// Fix PrunaModel imports
+			.replace(/from diffusers import PrunaModel/g, "from pruna import PrunaModel")
+			.replace(/from diffusers import ([^,\n]+), PrunaModel/g, "from diffusers import $1")
+			.replace(/from diffusers import PrunaModel, ([^,\n]+)/g, "from diffusers import $1")
+			// Clean up whitespace
+			.replace(/\n\n+/g, "\n")
+			.trim()
+	);
+};
+
+const pruna_transformers = (model: ModelData): string[] => {
+	const info = model.transformersInfo;
+	const transformersSnippets = transformers(model);
+
+	// Replace pipeline with PrunaModel
+	let processedSnippets = transformersSnippets.map((snippet) =>
+		snippet
+			.replace(/from transformers import pipeline/g, "from pruna import PrunaModel")
+			.replace(/pipeline\([^)]*\)/g, `PrunaModel.from_pretrained("${model.id}")`)
+	);
+
+	// Additional cleanup if auto_model info is available
+	if (info?.auto_model) {
+		processedSnippets = processedSnippets.map((snippet) =>
+			snippet
+				.replace(new RegExp(`from transformers import ${info.auto_model}\n?`, "g"), "")
+				.replace(new RegExp(`${info.auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
+				.replace(new RegExp(`^.*from.*import.*(, *${info.auto_model})+.*$`, "gm"), (line) =>
+					line.replace(new RegExp(`, *${info.auto_model}`, "g"), "")
+				)
+		);
+	}
+
+	return processedSnippets;
+};
+
+const pruna_default = (model: ModelData): string[] => [
+	`from pruna import PrunaModel
+model = PrunaModel.from_pretrained("${model.id}")
+`,
 ];
 
 export const nemo = (model: ModelData): string[] => {
@@ -1861,4 +2176,5 @@ audio = model.autoencoder.decode(codes)[0].cpu()
 torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 `,
 ];
+
 //#endregion

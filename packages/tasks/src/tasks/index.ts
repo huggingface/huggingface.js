@@ -3,6 +3,7 @@ import { PIPELINE_DATA } from "../pipelines.js";
 
 import anyToAny from "./any-to-any/data.js";
 import audioClassification from "./audio-classification/data.js";
+import audioTextToText from "./audio-text-to-text/data.js";
 import audioToAudio from "./audio-to-audio/data.js";
 import automaticSpeechRecognition from "./automatic-speech-recognition/data.js";
 import documentQuestionAnswering from "./document-question-answering/data.js";
@@ -121,7 +122,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"audio-classification": ["speechbrain", "transformers", "transformers.js"],
 	"audio-to-audio": ["asteroid", "fairseq", "speechbrain"],
 	"automatic-speech-recognition": ["espnet", "nemo", "speechbrain", "transformers", "transformers.js"],
-	"audio-text-to-text": [],
+	"audio-text-to-text": ["transformers"],
 	"depth-estimation": ["transformers", "transformers.js"],
 	"document-question-answering": ["transformers", "transformers.js"],
 	"feature-extraction": ["sentence-transformers", "transformers", "transformers.js"],
@@ -158,7 +159,6 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"text-to-speech": ["espnet", "tensorflowtts", "transformers", "transformers.js"],
 	"text-to-audio": ["transformers", "transformers.js"],
 	"text-to-video": ["diffusers"],
-	"text2text-generation": ["transformers", "transformers.js"],
 	"time-series-forecasting": [],
 	"token-classification": [
 		"adapter-transformers",
@@ -206,7 +206,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"any-to-any": getData("any-to-any", anyToAny),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
-	"audio-text-to-text": getData("audio-text-to-text", placeholder),
+	"audio-text-to-text": getData("audio-text-to-text", audioTextToText),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
@@ -245,7 +245,6 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"text-to-speech": getData("text-to-speech", textToSpeech),
 	"text-to-audio": undefined,
 	"text-to-video": getData("text-to-video", textToVideo),
-	"text2text-generation": undefined,
 	"time-series-forecasting": undefined,
 	"token-classification": getData("token-classification", tokenClassification),
 	translation: getData("translation", translation),

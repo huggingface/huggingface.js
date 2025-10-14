@@ -37,7 +37,6 @@ export async function datasetInfo<
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-				Accepts: "application/json",
 			},
 		}
 	);
