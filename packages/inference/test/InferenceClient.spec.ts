@@ -2325,7 +2325,7 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "text-to-image",
 					adapter: "lora",
-					adapterWeightsPath: "openfree/flux-chatgpt-ghibli-lora",
+					adapterWeightsPath: "flux-chatgpt-ghibli-lora.safetensors",
 				},
 				"linoyts/yarn_art_Flux_LoRA": {
 					provider: "wavespeed-ai",
@@ -2334,7 +2334,7 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "text-to-image",
 					adapter: "lora",
-					adapterWeightsPath: "linoyts/yarn_art_Flux_LoRA",
+					adapterWeightsPath: "pytorch_lora_weights.safetensors",
 				},
 			};
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
@@ -2390,7 +2390,7 @@ describe.skip("InferenceClient", () => {
 				const res = await client.imageToImage({
 					model: "HiDream-ai/HiDream-E1-Full",
 					provider: "wavespeed-ai",
-					inputs: new Blob([readTestFile("cheetah.png")], { type: "image / png" }),
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 					parameters: {
 						prompt: "The leopard chases its prey",
 						guidance_scale: 5,
@@ -2401,7 +2401,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 		},
-		60000 * 5
+		TIMEOUT
 	);
 
 	describe.concurrent(
