@@ -2299,7 +2299,7 @@ describe.skip("InferenceClient", () => {
 			HARDCODED_MODEL_INFERENCE_MAPPING["wavespeed-ai"] = {
 				"black-forest-labs/FLUX.1-schnell": {
 					provider: "wavespeed-ai",
-					hfModelId: "wavespeed-ai/flux-schnell",
+					hfModelId: "black-forest-labs/FLUX.1-schnell",
 					providerId: "wavespeed-ai/flux-schnell",
 					status: "live",
 					task: "text-to-image",
