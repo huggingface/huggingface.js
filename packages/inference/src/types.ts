@@ -76,6 +76,11 @@ export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
 
+/**
+ * The org namespace on the HF Hub i.e. hf.co/…
+ *
+ * Whenever possible, InferenceProvider should == org namespace
+ */
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	baseten: "baseten",
 	"black-forest-labs": "black-forest-labs",
