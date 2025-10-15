@@ -599,7 +599,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "LiteRT-LM",
 		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
 		filter: false,
-		countDownloads: `path_extension:"litertlm"` OR `path_extension:"task"`,
+		countDownloads: `path_extension:"litertlm" OR path_extension:"task"`,
 	},
 	lerobot: {
 		prettyLabel: "LeRobot",
