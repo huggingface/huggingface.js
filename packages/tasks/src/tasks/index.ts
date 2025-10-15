@@ -46,6 +46,7 @@ import imageTo3D from "./image-to-3d/data.js";
 import textTo3D from "./text-to-3d/data.js";
 import keypointDetection from "./keypoint-detection/data.js";
 import videoTextToText from "./video-text-to-text/data.js";
+import videoToVideo from "./video-to-video/data.js";
 
 export type * from "./audio-classification/inference.js";
 export type * from "./automatic-speech-recognition/inference.js";
@@ -250,7 +251,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	translation: getData("translation", translation),
 	"unconditional-image-generation": getData("unconditional-image-generation", unconditionalImageGeneration),
 	"video-text-to-text": getData("video-text-to-text", videoTextToText),
-	"video-to-video": getData("video-to-video", placeholder),
+	"video-to-video": getData("video-to-video", videoToVideo),
 	"visual-question-answering": getData("visual-question-answering", visualQuestionAnswering),
 	"voice-activity-detection": undefined,
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),
