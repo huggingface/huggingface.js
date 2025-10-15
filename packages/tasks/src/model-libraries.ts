@@ -587,7 +587,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/webis-de/lightning-ir",
 		snippets: snippets.lightning_ir,
 	},
-	"litert": {
+	litert: {
 		prettyLabel: "LiteRT",
 		repoName: "LiteRT",
 		repoUrl: "https://github.com/google-ai-edge/LiteRT",
