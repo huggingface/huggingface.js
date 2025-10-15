@@ -1367,43 +1367,22 @@ export const sentenceTransformers = (model: ModelData): string[] => {
 	
 	if (model.tags.includes("PyLate")) {
 		return [
-			`from pylate import rank, models
+			`from pylate import models
 
 queries = [
-	"Which planet is known as the Red Planet?",
-	"What is the largest planet in our solar system?",
+    "Which planet is known as the Red Planet?",
+    "What is the largest planet in our solar system?",
 ]
 
 documents = [
-	["Venus is often called Earth's twin because of its similar size and proximity.", "Mars, known for its reddish appearance, is often referred to as the Red Planet."],
-	["Jupiter, the largest planet in our solar system, has a prominent red spot.", "Saturn, famous for its rings, is sometimes mistaken for the Red Planet.", "Mars, known for its reddish appearance, is often referred to as the Red Planet."],
+    ["Mars is the Red Planet.", "Venus is Earth's twin."],
+    ["Jupiter is the largest planet.", "Saturn has rings."],
 ]
 
-documents_ids = [
-	[1, 2],
-	[1, 2],
-]
+model = models.ColBERT(model_name_or_path="${model.id}")
 
-model = models.ColBERT(
-	model_name_or_path="${model.id}",
-)
-
-queries_embeddings = model.encode(
-	queries,
-	is_query=True,
-)
-
-documents_embeddings = model.encode(
-	documents,
-	is_query=False,
-)
-
-reranked_documents = rank.rerank(
-	documents_ids=documents_ids,
-	queries_embeddings=queries_embeddings,
-	documents_embeddings=documents_embeddings,
-)
-print(reranked_documents)`,
+queries_emb = model.encode(queries, is_query=True)
+docs_emb = model.encode(documents, is_query=False)`,
 		];
 	}
 	
