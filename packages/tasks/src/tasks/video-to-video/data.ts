@@ -32,8 +32,7 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description:
-				"Model for editing outfits, character, and scenery in videos.",
+			description: "Model for editing outfits, character, and scenery in videos.",
 			id: "decart-ai/Lucy-Edit-Dev",
 		},
 		{

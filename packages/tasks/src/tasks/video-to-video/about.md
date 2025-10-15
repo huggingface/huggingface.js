@@ -65,7 +65,6 @@ output = pipe(
 ).frames[0]
 
 export_to_video(output, "output.mp4", fps=24)
-
 ```
 
 For more inference examples, check out the model cards on Hugging Face, where you can try the provided example code.
