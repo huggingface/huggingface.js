@@ -48,7 +48,6 @@ import keypointDetection from "./keypoint-detection/data.js";
 import videoTextToText from "./video-text-to-text/data.js";
 import videoToVideo from "./video-to-video/data.js";
 
-
 export type * from "./audio-classification/inference.js";
 export type * from "./automatic-speech-recognition/inference.js";
 export type {
