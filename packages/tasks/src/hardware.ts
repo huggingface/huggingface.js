@@ -523,7 +523,7 @@ export const SKUS = {
 				memory: [12],
 			},
 			"Arc B50": {
-				tflops: 21.30,
+				tflops: 21.3,
 				memory: [16],
 			},
 			"Arc B60": {
