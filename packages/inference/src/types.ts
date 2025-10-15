@@ -77,7 +77,10 @@ export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
 
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
+	baseten: "baseten",
+	"black-forest-labs": "black-forest-labs",
 	cerebras: "cerebras",
+	clarifai: "clarifai",
 	cohere: "CohereLabs",
 	"fal-ai": "fal",
 	"featherless-ai": "featherless-ai",
@@ -88,11 +91,14 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	nebius: "nebius",
 	novita: "novita",
 	nscale: "nscale",
+	openai: "openai",
+	ovhcloud: "ovhcloud",
 	publicai: "publicai",
 	replicate: "replicate",
 	sambanova: "sambanovasystems",
 	scaleway: "scaleway",
 	together: "togethercomputer",
+	wavespeed: "wavespeed",
 	"zai-org": "zai-org",
 };
 
