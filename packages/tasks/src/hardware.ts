@@ -523,12 +523,12 @@ export const SKUS = {
 				memory: [12],
 			},
 			"Arc B50": {
-				tflops: 21.30, // source: https://www.techpowerup.com/gpu-specs/arc-pro-b50.c4345
+				tflops: 21.30,
 				memory: [16],
 			},
 			"Arc B60": {
 				tflops: 24.58,
-				memory: [24, 48], // source: https://www.techpowerup.com/gpu-specs/arc-pro-b60.c4350
+				memory: [24, 48],
 			},
 		},
 		QUALCOMM: {
