@@ -522,6 +522,14 @@ export const SKUS = {
 				tflops: 27.34,
 				memory: [12],
 			},
+			"Arc B50": {
+				tflops: 21.3,
+				memory: [16],
+			},
+			"Arc B60": {
+				tflops: 24.58,
+				memory: [24, 48],
+			},
 		},
 		QUALCOMM: {
 			"Snapdragon X Elite X1E-00-1DE": {
