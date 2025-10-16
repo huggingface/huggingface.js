@@ -1364,6 +1364,28 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+
+	if (model.tags.includes("PyLate")) {
+		return [
+			`from pylate import models
+
+queries = [
+    "Which planet is known as the Red Planet?",
+    "What is the largest planet in our solar system?",
+]
+
+documents = [
+    ["Mars is the Red Planet.", "Venus is Earth's twin."],
+    ["Jupiter is the largest planet.", "Saturn has rings."],
+]
+
+model = models.ColBERT(model_name_or_path="${model.id}")
+
+queries_emb = model.encode(queries, is_query=True)
+docs_emb = model.encode(documents, is_query=False)`,
+		];
+	}
+
 	if (model.tags.includes("cross-encoder") || model.pipeline_tag == "text-ranking") {
 		return [
 			`from sentence_transformers import CrossEncoder
