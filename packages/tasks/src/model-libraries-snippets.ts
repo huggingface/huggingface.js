@@ -331,9 +331,8 @@ const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
 const diffusersVideoDefaultPrompt = "A man with short gray hair plays a red electric guitar.";
 
 const diffusers_default = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-from diffusers import DiffusionPipeline
+	`pip install -U diffusers transformers`,
+	`from diffusers import DiffusionPipeline
 
 pipe = DiffusionPipeline.from_pretrained("${model.id}")
 
@@ -342,9 +341,8 @@ image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_image_to_image = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-from diffusers import DiffusionPipeline
+	`pip install -U diffusers transformers`,
+	`from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
 pipe = DiffusionPipeline.from_pretrained("${model.id}")
@@ -356,9 +354,8 @@ image = pipe(image=input_image, prompt=prompt).images[0]`,
 ];
 
 const diffusers_image_to_video = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-import torch
+	`pip install -U diffusers transformers`,
+	`import torch
 from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
@@ -375,9 +372,8 @@ export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_controlnet = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-from diffusers import ControlNetModel, StableDiffusionControlNetPipeline
+	`pip install -U diffusers transformers`,
+	`from diffusers import ControlNetModel, StableDiffusionControlNetPipeline
 
 controlnet = ControlNetModel.from_pretrained("${model.id}")
 pipe = StableDiffusionControlNetPipeline.from_pretrained(
@@ -386,9 +382,8 @@ pipe = StableDiffusionControlNetPipeline.from_pretrained(
 ];
 
 const diffusers_lora = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-from diffusers import DiffusionPipeline
+	`pip install -U diffusers transformers`,
+	`from diffusers import DiffusionPipeline
 
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_lora_weights("${model.id}")
@@ -398,9 +393,8 @@ image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_lora_image_to_image = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-from diffusers import DiffusionPipeline
+	`pip install -U diffusers transformers`,
+	`from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
@@ -413,9 +407,8 @@ image = pipe(image=input_image, prompt=prompt).images[0]`,
 ];
 
 const diffusers_lora_text_to_video = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-from diffusers import DiffusionPipeline
+	`pip install -U diffusers transformers`,
+	`from diffusers import DiffusionPipeline
 from diffusers.utils import export_to_video
 
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
@@ -428,9 +421,8 @@ export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_lora_image_to_video = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-from diffusers import DiffusionPipeline
+	`pip install -U diffusers transformers`,
+	`from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
@@ -444,18 +436,16 @@ export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_textual_inversion = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-from diffusers import DiffusionPipeline
+	`pip install -U diffusers transformers`,
+	`from diffusers import DiffusionPipeline
 
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
 const diffusers_flux_fill = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-import torch
+	`pip install -U diffusers transformers`,
+	`import torch
 from diffusers import FluxFillPipeline
 from diffusers.utils import load_image
 
@@ -478,9 +468,8 @@ image.save(f"flux-fill-dev.png")`,
 ];
 
 const diffusers_inpainting = (model: ModelData) => [
-	`!pip install -U transformers diffusers
-
-import torch
+	`pip install -U diffusers transformers`,
+	`import torch
 from diffusers import AutoPipelineForInpainting
 from diffusers.utils import load_image
 
