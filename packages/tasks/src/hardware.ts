@@ -438,7 +438,7 @@ export const SKUS = {
 			},
 			MI50: {
 				tflops: 26.5,
-				memory: [16],
+				memory: [16, 32],
 			},
 			"RX 9070 XT": {
 				tflops: 97.32,
@@ -502,7 +502,7 @@ export const SKUS = {
 			},
 			"Radeon Pro VII": {
 				tflops: 26.11,
-				memory: [16],
+				memory: [16, 32],
 			},
 		},
 		INTEL: {
