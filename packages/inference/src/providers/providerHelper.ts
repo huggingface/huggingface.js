@@ -376,7 +376,7 @@ export class AutoRouterConversationalTask extends BaseConversationalTask {
 	}
 
 	override makeBaseUrl(params: UrlParams): string {
-		if (params.authMethod !== "provider-key") {
+		if (params.authMethod !== "hf-token") {
 			throw new InferenceClientRoutingError("Cannot select auto-router when using non-Hugging Face API key.");
 		}
 		return this.baseUrl;
