@@ -324,6 +324,8 @@ dam = DescribeAnythingModel(
 )`,
 ];
 
+const diffusers_install = "pip install -U diffusers transformers";
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
@@ -331,7 +333,6 @@ const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
 const diffusersVideoDefaultPrompt = "A man with short gray hair plays a red electric guitar.";
 
 const diffusers_default = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`from diffusers import DiffusionPipeline
 
 pipe = DiffusionPipeline.from_pretrained("${model.id}")
@@ -341,7 +342,6 @@ image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_image_to_image = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
@@ -354,7 +354,6 @@ image = pipe(image=input_image, prompt=prompt).images[0]`,
 ];
 
 const diffusers_image_to_video = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`import torch
 from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
@@ -372,7 +371,6 @@ export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_controlnet = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`from diffusers import ControlNetModel, StableDiffusionControlNetPipeline
 
 controlnet = ControlNetModel.from_pretrained("${model.id}")
@@ -382,7 +380,6 @@ pipe = StableDiffusionControlNetPipeline.from_pretrained(
 ];
 
 const diffusers_lora = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`from diffusers import DiffusionPipeline
 
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
@@ -393,7 +390,6 @@ image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_lora_image_to_image = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
@@ -407,7 +403,6 @@ image = pipe(image=input_image, prompt=prompt).images[0]`,
 ];
 
 const diffusers_lora_text_to_video = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`from diffusers import DiffusionPipeline
 from diffusers.utils import export_to_video
 
@@ -421,7 +416,6 @@ export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_lora_image_to_video = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
@@ -436,7 +430,6 @@ export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_textual_inversion = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`from diffusers import DiffusionPipeline
 
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
@@ -444,7 +437,6 @@ pipe.load_textual_inversion("${model.id}")`,
 ];
 
 const diffusers_flux_fill = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`import torch
 from diffusers import FluxFillPipeline
 from diffusers.utils import load_image
@@ -468,7 +460,6 @@ image.save(f"flux-fill-dev.png")`,
 ];
 
 const diffusers_inpainting = (model: ModelData) => [
-	`pip install -U diffusers transformers`,
 	`import torch
 from diffusers import AutoPipelineForInpainting
 from diffusers.utils import load_image
@@ -496,34 +487,37 @@ image = pipe(
 ];
 
 export const diffusers = (model: ModelData): string[] => {
+	let codeSnippets: string[];
 	if (
 		model.tags.includes("StableDiffusionInpaintPipeline") ||
 		model.tags.includes("StableDiffusionXLInpaintPipeline")
 	) {
-		return diffusers_inpainting(model);
+		codeSnippets = diffusers_inpainting(model);
 	} else if (model.tags.includes("controlnet")) {
-		return diffusers_controlnet(model);
+		codeSnippets = diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
 		if (model.pipeline_tag === "image-to-image") {
-			return diffusers_lora_image_to_image(model);
+			codeSnippets = diffusers_lora_image_to_image(model);
 		} else if (model.pipeline_tag === "image-to-video") {
-			return diffusers_lora_image_to_video(model);
+			codeSnippets = diffusers_lora_image_to_video(model);
 		} else if (model.pipeline_tag === "text-to-video") {
-			return diffusers_lora_text_to_video(model);
+			codeSnippets = diffusers_lora_text_to_video(model);
 		} else {
-			return diffusers_lora(model);
+			codeSnippets = diffusers_lora(model);
 		}
 	} else if (model.tags.includes("textual_inversion")) {
-		return diffusers_textual_inversion(model);
+		codeSnippets = diffusers_textual_inversion(model);
 	} else if (model.tags.includes("FluxFillPipeline")) {
-		return diffusers_flux_fill(model);
+		codeSnippets = diffusers_flux_fill(model);
 	} else if (model.pipeline_tag === "image-to-video") {
-		return diffusers_image_to_video(model);
+		codeSnippets = diffusers_image_to_video(model);
 	} else if (model.pipeline_tag === "image-to-image") {
-		return diffusers_image_to_image(model);
+		codeSnippets = diffusers_image_to_image(model);
 	} else {
-		return diffusers_default(model);
+		codeSnippets = diffusers_default(model);
 	}
+
+	return [diffusers_install, ...codeSnippets];
 };
 
 export const diffusionkit = (model: ModelData): string[] => {
