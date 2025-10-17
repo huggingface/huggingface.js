@@ -1052,7 +1052,9 @@ export const paddleocr = (model: ModelData): string[] => {
 
 	if (model.tags.includes("doc_vlm")) {
 		return [
-			`# pip install paddleocr
+			`# 1. See https://www.paddlepaddle.org.cn/en/install to install paddlepaddle
+# 2. pip install paddleocr
+
 from paddleocr import DocVLM
 model = DocVLM(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(
@@ -1065,11 +1067,27 @@ for res in output:
 		];
 	}
 
+	if (model.tags.includes("document-parse")) {
+		return [
+			`# See https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html to installation
+
+from paddleocr import PaddleOCRVL
+pipeline = PaddleOCRVL()
+output = pipeline.predict("path/to/document_image.png")
+for res in output:
+	res.print()
+	res.save_to_json(save_path="output")
+	res.save_to_markdown(save_path="output")`,
+		];
+	}
+
 	for (const tag of model.tags) {
 		if (tag in mapping) {
 			const { className } = mapping[tag];
 			return [
-				`# pip install paddleocr
+				`# 1. See https://www.paddlepaddle.org.cn/en/install to install paddlepaddle
+# 2. pip install paddleocr
+
 from paddleocr import ${className}
 model = ${className}(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(input="path/to/image.png", batch_size=1)
