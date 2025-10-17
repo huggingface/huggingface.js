@@ -14,7 +14,7 @@ import { tokenize } from "./lexer";
 import { parse } from "./parser";
 import { Environment, Interpreter, setupGlobals } from "./runtime";
 import type { Program } from "./ast";
-import type { StringValue } from "./runtime";
+import { StringValue } from "./runtime";
 import { format } from "./format";
 
 export class Template {
@@ -32,11 +32,26 @@ export class Template {
 	}
 
 	render(items?: Record<string, unknown>): string {
-		// Create a new environment for this template
+		const { result } = this.execute(items);
+		return result.value;
+	}
+
+	missingVariables(items?: Record<string, unknown>): string[] {
+		const { interpreter } = this.execute(items, { suppressRuntimeErrors: true });
+		return interpreter.getMissingVariables();
+	}
+
+	format(options?: { indent: string | number }): string {
+		return format(this.parsed, options?.indent || "\t");
+	}
+
+	private execute(
+		items?: Record<string, unknown>,
+		options?: { suppressRuntimeErrors?: boolean }
+	): { result: StringValue; interpreter: Interpreter } {
 		const env = new Environment();
 		setupGlobals(env);
 
-		// Add user-defined variables
 		if (items) {
 			for (const [key, value] of Object.entries(items)) {
 				env.set(key, value);
@@ -44,13 +59,16 @@ export class Template {
 		}
 
 		const interpreter = new Interpreter(env);
-
-		const result = interpreter.run(this.parsed) as StringValue;
-		return result.value;
-	}
-
-	format(options?: { indent: string | number }): string {
-		return format(this.parsed, options?.indent || "\t");
+		let result: StringValue;
+		try {
+			result = interpreter.run(this.parsed) as StringValue;
+		} catch (error) {
+			if (!options?.suppressRuntimeErrors) {
+				throw error;
+			}
+			result = new StringValue("");
+		}
+		return { result, interpreter };
 	}
 }
 

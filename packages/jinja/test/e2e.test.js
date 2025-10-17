@@ -1053,6 +1053,34 @@ describe("End-to-end tests", () => {
 		vi.useRealTimers();
 	});
 
+	describe("Missing variable reporting", () => {
+		it("returns missing variables when rendering via Template", () => {
+			const template = new Template("{{ greeting }}, {{ user.name }}!");
+			const result = template.missingVariables({ greeting: "Hello" });
+			expect(result).toEqual(["user"]);
+		});
+
+		describe("default template data removal", () => {
+			for (const [model_type, test_data] of Object.entries(TEST_DEFAULT_TEMPLATES)) {
+				const requiredKeys = Object.keys(test_data.data).filter((key) => !key.toLowerCase().includes("prompt"));
+				if (requiredKeys.length === 0) continue;
+
+				it(`${model_type} reports removed required data keys`, () => {
+					const template = new Template(test_data.chat_template);
+					const fullMissing = template.missingVariables(test_data.data);
+					expect(fullMissing).toEqual([]);
+
+					for (const key of requiredKeys) {
+						const dataCopy = JSON.parse(JSON.stringify(test_data.data));
+						delete dataCopy[key];
+						const missing = template.missingVariables(dataCopy);
+						expect(missing).toContain(key);
+					}
+				});
+			}
+		});
+	});
+
 	describe("Default templates", () => {
 		for (const [model_type, test_data] of Object.entries(TEST_DEFAULT_TEMPLATES)) {
 			it(model_type, () => {

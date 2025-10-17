@@ -143,3 +143,74 @@ describe("Test interpreter options", () => {
 		}
 	});
 });
+
+describe("Interpreter missing variable tracking", () => {
+	it("collects undefined identifiers encountered during rendering", () => {
+		const template = `Hello {{ name }}!\nUser email: {{ user.email }}`;
+		const env = new Environment();
+
+		const tokens = tokenize(template, {});
+		const parsed = parse(tokens);
+
+		const interpreter = new Interpreter(env);
+		const result = interpreter.run(parsed);
+
+		expect(result.value).toBe("Hello !\nUser email: ");
+		expect(interpreter.getMissingVariables()).toEqual(["name", "user"]);
+	});
+
+	it("resets missing variable list between runs", () => {
+		const template = `{{ primary }} {{ secondary }}`;
+		const env = new Environment();
+
+		const tokens = tokenize(template, {});
+		const parsed = parse(tokens);
+
+		const interpreter = new Interpreter(env);
+		interpreter.run(parsed);
+		expect(interpreter.getMissingVariables()).toEqual(["primary", "secondary"]);
+
+		env.set("primary", "Ready");
+		const secondRun = interpreter.run(parsed);
+		expect(secondRun.value).toBe("Ready ");
+		expect(interpreter.getMissingVariables()).toEqual(["secondary"]);
+	});
+
+	it("does not accumulate missing variables across different interpreter instances", () => {
+		const template = `{{ first }} {{ second }}`;
+		const tokens = tokenize(template, {});
+		const parsed = parse(tokens);
+
+		const envOne = new Environment();
+		const firstInterpreter = new Interpreter(envOne);
+		firstInterpreter.run(parsed);
+		expect(firstInterpreter.getMissingVariables()).toEqual(["first", "second"]);
+
+		const envTwo = new Environment();
+		envTwo.set("first", "ok");
+		const secondInterpreter = new Interpreter(envTwo);
+		secondInterpreter.run(parsed);
+		expect(secondInterpreter.getMissingVariables()).toEqual(["second"]);
+	});
+
+	it("collects missing member property separately from base identifier", () => {
+		const tokens = tokenize(`{{ user.name }}`, {});
+		const parsed = parse(tokens);
+		const env = new Environment();
+		env.set("user", {});
+
+		const interpreter = new Interpreter(env);
+		interpreter.run(parsed);
+		expect(interpreter.getMissingVariables()).toEqual(["name"]);
+	});
+
+	it("records base identifier when member access fails because object is undefined", () => {
+		const tokens = tokenize(`{{ profile.email }}`, {});
+		const parsed = parse(tokens);
+		const env = new Environment();
+
+		const interpreter = new Interpreter(env);
+		interpreter.run(parsed);
+		expect(interpreter.getMissingVariables()).toEqual(["profile"]);
+	});
+});

@@ -530,6 +530,8 @@ export function setupGlobals(env: Environment): void {
 
 export class Interpreter {
 	global: Environment;
+	private missingVariables: string[] = [];
+	private missingVariablesSet: Set<string> = new Set();
 
 	constructor(env?: Environment) {
 		this.global = env ?? new Environment();
@@ -539,7 +541,23 @@ export class Interpreter {
 	 * Run the program.
 	 */
 	run(program: Program): AnyRuntimeValue {
+		this.resetMissingVariables();
 		return this.evaluate(program, this.global);
+	}
+
+	getMissingVariables(): string[] {
+		return [...this.missingVariables];
+	}
+
+	private recordMissingVariable(name: string): void {
+		if (this.missingVariablesSet.has(name)) return;
+		this.missingVariablesSet.add(name);
+		this.missingVariables.push(name);
+	}
+
+	private resetMissingVariables(): void {
+		this.missingVariables = [];
+		this.missingVariablesSet.clear();
 	}
 
 	/**
@@ -1082,7 +1100,11 @@ export class Interpreter {
 	}
 
 	private evaluateIdentifier(node: Identifier, environment: Environment): AnyRuntimeValue {
-		return environment.lookupVariable(node.value);
+		const value = environment.lookupVariable(node.value);
+		if (value instanceof UndefinedValue) {
+			this.recordMissingVariable(node.value);
+		}
+		return value;
 	}
 
 	private evaluateCallExpression(expr: CallExpression, environment: Environment): AnyRuntimeValue {
@@ -1170,7 +1192,22 @@ export class Interpreter {
 			value = object.builtins.get(property.value);
 		}
 
-		return value instanceof RuntimeValue ? value : new UndefinedValue();
+		if (value instanceof RuntimeValue) {
+			return value;
+		}
+
+		// track missing identifers for base object
+		if (expr.object.type === "Identifier") {
+			const baseName = (expr.object as Identifier).value;
+			if (object instanceof UndefinedValue) {
+				this.recordMissingVariable(baseName);
+			}
+		}
+
+		if (!expr.computed && expr.property.type === "Identifier" && !(object instanceof UndefinedValue)) {
+			this.recordMissingVariable((expr.property as Identifier).value);
+		}
+		return new UndefinedValue();
 	}
 
 	private evaluateSet(node: SetStatement, environment: Environment): NullValue {
