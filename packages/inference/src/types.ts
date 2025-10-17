@@ -66,6 +66,7 @@ export const INFERENCE_PROVIDERS = [
 	"sambanova",
 	"scaleway",
 	"together",
+	"wavespeed",
 	"zai-org",
 ] as const;
 
@@ -74,6 +75,37 @@ export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
+
+/**
+ * The org namespace on the HF Hub i.e. hf.co/…
+ *
+ * Whenever possible, InferenceProvider should == org namespace
+ */
+export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
+	baseten: "baseten",
+	"black-forest-labs": "black-forest-labs",
+	cerebras: "cerebras",
+	clarifai: "clarifai",
+	cohere: "CohereLabs",
+	"fal-ai": "fal",
+	"featherless-ai": "featherless-ai",
+	"fireworks-ai": "fireworks-ai",
+	groq: "groq",
+	"hf-inference": "hf-inference",
+	hyperbolic: "Hyperbolic",
+	nebius: "nebius",
+	novita: "novita",
+	nscale: "nscale",
+	openai: "openai",
+	ovhcloud: "ovhcloud",
+	publicai: "publicai",
+	replicate: "replicate",
+	sambanova: "sambanovasystems",
+	scaleway: "scaleway",
+	together: "togethercomputer",
+	wavespeed: "wavespeed",
+	"zai-org": "zai-org",
+};
 
 export interface InferenceProviderMappingEntry {
 	adapter?: string;
