@@ -1101,7 +1101,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "TensorRT",
 		repoUrl: "https://github.com/NVIDIA/TensorRT",
 		countDownloads: `path_extension:"onnx"`,
-	},	
+	},
 	tabpfn: {
 		prettyLabel: "TabPFN",
 		repoName: "TabPFN",
