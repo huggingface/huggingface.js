@@ -17,6 +17,13 @@ export class InferenceClientInputError extends InferenceClientError {
 	}
 }
 
+export class InferenceClientRoutingError extends InferenceClientError {
+	constructor(message: string) {
+		super(message);
+		this.name = "RoutingError";
+	}
+}
+
 interface HttpRequest {
 	url: string;
 	method: string;

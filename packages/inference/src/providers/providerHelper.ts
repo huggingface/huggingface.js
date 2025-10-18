@@ -47,7 +47,7 @@ import type {
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
-import { InferenceClientProviderOutputError } from "../errors.js";
+import { InferenceClientProviderOutputError, InferenceClientRoutingError } from "../errors.js";
 import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, RequestArgs, UrlParams } from "../types.js";
 import { toArray } from "../utils/toArray.js";
@@ -62,7 +62,7 @@ import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 export abstract class TaskProviderHelper {
 	constructor(
 		readonly provider: InferenceProvider,
-		private baseUrl: string,
+		protected baseUrl: string,
 		readonly clientSideRoutingOnly: boolean = false
 	) {}
 
@@ -367,5 +367,18 @@ export class BaseTextGenerationTask extends TaskProviderHelper implements TextGe
 		}
 
 		throw new InferenceClientProviderOutputError("Expected Array<{generated_text: string}>");
+	}
+}
+
+export class AutoRouterConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("auto" as InferenceProvider, "https://router.huggingface.co");
+	}
+
+	override makeBaseUrl(params: UrlParams): string {
+		if (params.authMethod !== "hf-token") {
+			throw new InferenceClientRoutingError("Cannot select auto-router when using non-Hugging Face API key.");
+		}
+		return this.baseUrl;
 	}
 }

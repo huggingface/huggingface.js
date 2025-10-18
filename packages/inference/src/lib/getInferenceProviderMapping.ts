@@ -124,6 +124,17 @@ export async function getInferenceProviderMapping(
 	}
 ): Promise<InferenceProviderMappingEntry | null> {
 	const logger = getLogger();
+	if (params.provider === ("auto" as InferenceProvider) && params.task === "conversational") {
+		// Special case for auto + conversational to avoid extra API calls
+		// Call directly the server-side auto router
+		return {
+			hfModelId: params.modelId,
+			provider: "auto",
+			providerId: params.modelId,
+			status: "live",
+			task: "conversational",
+		};
+	}
 	if (HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId]) {
 		return HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId];
 	}
