@@ -324,6 +324,8 @@ dam = DescribeAnythingModel(
 )`,
 ];
 
+const diffusers_install = "pip install -U diffusers transformers";
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
@@ -485,34 +487,37 @@ image = pipe(
 ];
 
 export const diffusers = (model: ModelData): string[] => {
+	let codeSnippets: string[];
 	if (
 		model.tags.includes("StableDiffusionInpaintPipeline") ||
 		model.tags.includes("StableDiffusionXLInpaintPipeline")
 	) {
-		return diffusers_inpainting(model);
+		codeSnippets = diffusers_inpainting(model);
 	} else if (model.tags.includes("controlnet")) {
-		return diffusers_controlnet(model);
+		codeSnippets = diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
 		if (model.pipeline_tag === "image-to-image") {
-			return diffusers_lora_image_to_image(model);
+			codeSnippets = diffusers_lora_image_to_image(model);
 		} else if (model.pipeline_tag === "image-to-video") {
-			return diffusers_lora_image_to_video(model);
+			codeSnippets = diffusers_lora_image_to_video(model);
 		} else if (model.pipeline_tag === "text-to-video") {
-			return diffusers_lora_text_to_video(model);
+			codeSnippets = diffusers_lora_text_to_video(model);
 		} else {
-			return diffusers_lora(model);
+			codeSnippets = diffusers_lora(model);
 		}
 	} else if (model.tags.includes("textual_inversion")) {
-		return diffusers_textual_inversion(model);
+		codeSnippets = diffusers_textual_inversion(model);
 	} else if (model.tags.includes("FluxFillPipeline")) {
-		return diffusers_flux_fill(model);
+		codeSnippets = diffusers_flux_fill(model);
 	} else if (model.pipeline_tag === "image-to-video") {
-		return diffusers_image_to_video(model);
+		codeSnippets = diffusers_image_to_video(model);
 	} else if (model.pipeline_tag === "image-to-image") {
-		return diffusers_image_to_image(model);
+		codeSnippets = diffusers_image_to_image(model);
 	} else {
-		return diffusers_default(model);
+		codeSnippets = diffusers_default(model);
 	}
+
+	return [diffusers_install, ...codeSnippets];
 };
 
 export const diffusionkit = (model: ModelData): string[] => {
@@ -1047,7 +1052,9 @@ export const paddleocr = (model: ModelData): string[] => {
 
 	if (model.tags.includes("doc_vlm")) {
 		return [
-			`# pip install paddleocr
+			`# 1. See https://www.paddlepaddle.org.cn/en/install to install paddlepaddle
+# 2. pip install paddleocr
+
 from paddleocr import DocVLM
 model = DocVLM(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(
@@ -1060,11 +1067,27 @@ for res in output:
 		];
 	}
 
+	if (model.tags.includes("document-parse")) {
+		return [
+			`# See https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html to installation
+
+from paddleocr import PaddleOCRVL
+pipeline = PaddleOCRVL()
+output = pipeline.predict("path/to/document_image.png")
+for res in output:
+	res.print()
+	res.save_to_json(save_path="output")
+	res.save_to_markdown(save_path="output")`,
+		];
+	}
+
 	for (const tag of model.tags) {
 		if (tag in mapping) {
 			const { className } = mapping[tag];
 			return [
-				`# pip install paddleocr
+				`# 1. See https://www.paddlepaddle.org.cn/en/install to install paddlepaddle
+# 2. pip install paddleocr
+
 from paddleocr import ${className}
 model = ${className}(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(input="path/to/image.png", batch_size=1)
@@ -1364,6 +1387,28 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+
+	if (model.tags.includes("PyLate")) {
+		return [
+			`from pylate import models
+
+queries = [
+    "Which planet is known as the Red Planet?",
+    "What is the largest planet in our solar system?",
+]
+
+documents = [
+    ["Mars is the Red Planet.", "Venus is Earth's twin."],
+    ["Jupiter is the largest planet.", "Saturn has rings."],
+]
+
+model = models.ColBERT(model_name_or_path="${model.id}")
+
+queries_emb = model.encode(queries, is_query=True)
+docs_emb = model.encode(documents, is_query=False)`,
+		];
+	}
+
 	if (model.tags.includes("cross-encoder") || model.pipeline_tag == "text-ranking") {
 		return [
 			`from sentence_transformers import CrossEncoder

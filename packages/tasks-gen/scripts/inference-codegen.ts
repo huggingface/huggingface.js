@@ -270,7 +270,7 @@ const allTasks = await Promise.all(
 	(await fs.readdir(tasksDir, { withFileTypes: true }))
 		.filter((entry) => entry.isDirectory())
 		.filter((entry) => entry.name !== "placeholder")
-		.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.path, entry.name) }))
+		.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.parentPath, entry.name) }))
 );
 const allSpecFiles = [
 	path.join(tasksDir, "common-definitions.json"),
