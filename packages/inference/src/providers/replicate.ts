@@ -19,18 +19,57 @@ import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
-	TaskProviderHelper,
-	type AutomaticSpeechRecognitionTaskHelper,
-	type ImageToImageTaskHelper,
-	type TextToImageTaskHelper,
-	type TextToVideoTaskHelper,
+        TaskProviderHelper,
+        type AutomaticSpeechRecognitionTaskHelper,
+        type ImageToImageTaskHelper,
+        type TextGenerationTaskHelper,
+        type TextToImageTaskHelper,
+        type TextToVideoTaskHelper,
 } from "./providerHelper.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
-import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
+import type { AutomaticSpeechRecognitionOutput, TextGenerationOutput } from "@huggingface/tasks";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 export interface ReplicateOutput {
-	output?: string | string[];
+        output?: unknown;
+}
+
+function extractTextFromReplicateResponse(value: unknown): string | undefined {
+        if (value == null) {
+                return undefined;
+        }
+        if (typeof value === "string") {
+                return value;
+        }
+        if (Array.isArray(value)) {
+                for (const item of value) {
+                        const text = extractTextFromReplicateResponse(item);
+                        if (typeof text === "string" && text.length > 0) {
+                                return text;
+                        }
+                }
+                return undefined;
+        }
+        if (typeof value === "object") {
+                const record = value as Record<string, unknown>;
+                const directTextKeys = ["output_text", "generated_text", "text", "content"] as const;
+                for (const key of directTextKeys) {
+                        const maybeText = record[key];
+                        if (typeof maybeText === "string" && maybeText.length > 0) {
+                                return maybeText;
+                        }
+                }
+                const nestedKeys = ["output", "choices", "message", "delta", "content", "data"] as const;
+                for (const key of nestedKeys) {
+                        if (key in record) {
+                                const text = extractTextFromReplicateResponse(record[key]);
+                                if (typeof text === "string" && text.length > 0) {
+                                        return text;
+                                }
+                        }
+                }
+        }
+        return undefined;
 }
 
 abstract class ReplicateTask extends TaskProviderHelper {
@@ -114,6 +153,25 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-image API");
 	}
+}
+
+export class ReplicateTextGenerationTask extends ReplicateTask implements TextGenerationTaskHelper {
+        override async getResponse(response: ReplicateOutput): Promise<TextGenerationOutput> {
+                if (response instanceof Blob) {
+                        throw new InferenceClientProviderOutputError(
+                                "Received malformed response from Replicate text-generation API"
+                        );
+                }
+
+                const text = extractTextFromReplicateResponse(response);
+                if (typeof text === "string") {
+                        return { generated_text: text };
+                }
+
+                throw new InferenceClientProviderOutputError(
+                        "Received malformed response from Replicate text-generation API"
+                );
+        }
 }
 
 export class ReplicateTextToSpeechTask extends ReplicateTask {
