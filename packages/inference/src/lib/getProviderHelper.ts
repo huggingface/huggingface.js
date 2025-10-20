@@ -153,13 +153,13 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	publicai: {
 		conversational: new PublicAI.PublicAIConversationalTask(),
 	},
-        replicate: {
-                "text-generation": new Replicate.ReplicateTextGenerationTask(),
-                "text-to-image": new Replicate.ReplicateTextToImageTask(),
-                "text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
-                "text-to-video": new Replicate.ReplicateTextToVideoTask(),
-                "image-to-image": new Replicate.ReplicateImageToImageTask(),
-                "automatic-speech-recognition": new Replicate.ReplicateAutomaticSpeechRecognitionTask(),
+	replicate: {
+		"text-generation": new Replicate.ReplicateTextGenerationTask(),
+		"text-to-image": new Replicate.ReplicateTextToImageTask(),
+		"text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
+		"text-to-video": new Replicate.ReplicateTextToVideoTask(),
+		"image-to-image": new Replicate.ReplicateImageToImageTask(),
+		"automatic-speech-recognition": new Replicate.ReplicateAutomaticSpeechRecognitionTask(),
 	},
 	sambanova: {
 		conversational: new Sambanova.SambanovaConversationalTask(),

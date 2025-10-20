@@ -1193,27 +1193,27 @@ describe.skip("InferenceClient", () => {
 	describe.concurrent(
 		"Replicate",
 		() => {
-                        const client = new InferenceClient(env.HF_REPLICATE_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_REPLICATE_KEY ?? "dummy");
 
-                        it("textGeneration - akhaliq/gpt-5", async () => {
-                                const res = await client.textGeneration({
-                                        model: "akhaliq/gpt-5",
-                                        provider: "replicate",
-                                        inputs: "The capital city of France is",
-                                        parameters: {
-                                                max_new_tokens: 20,
-                                                temperature: 0.2,
-                                        },
-                                });
+			it("textGeneration - akhaliq/gpt-5", async () => {
+				const res = await client.textGeneration({
+					model: "akhaliq/gpt-5",
+					provider: "replicate",
+					inputs: "The capital city of France is",
+					parameters: {
+						max_new_tokens: 20,
+						temperature: 0.2,
+					},
+				});
 
-                                expect(res).toBeDefined();
-                                expect(typeof res.generated_text).toBe("string");
-                                expect(res.generated_text.length).toBeGreaterThan(0);
-                        });
+				expect(res).toBeDefined();
+				expect(typeof res.generated_text).toBe("string");
+				expect(res.generated_text.length).toBeGreaterThan(0);
+			});
 
-                        it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
-                                const res = await client.textToImage({
-                                        model: "black-forest-labs/FLUX.1-schnell",
+			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "replicate",
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
