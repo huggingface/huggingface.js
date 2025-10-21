@@ -809,8 +809,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "PaddleOCR",
 		repoName: "PaddleOCR",
 		repoUrl: "https://github.com/PaddlePaddle/PaddleOCR",
+		docsUrl: "https://www.paddleocr.ai/",
 		snippets: snippets.paddleocr,
 		filter: true,
+		countDownloads: `path_extension:"safetensors" OR path:"inference.pdiparams"`,
 	},
 	peft: {
 		prettyLabel: "PEFT",
