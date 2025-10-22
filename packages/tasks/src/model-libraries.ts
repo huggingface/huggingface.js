@@ -875,10 +875,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	quantumpeer: {
 		prettyLabel: "QuantumPeer",
-		repoName: "quantumpeer",
+		repoName: "QuantumPeer",
 		repoUrl: "https://github.com/OpenPeer-AI/QuantumPeer",
 		filter: false,
-		countDownloads: `path_extension:"py"`,		
+		countDownloads: `path_extension:"setup.py"`,
 	},	
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
