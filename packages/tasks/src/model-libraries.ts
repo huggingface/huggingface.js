@@ -873,6 +873,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pythae,
 		filter: false,
 	},
+	quantumpeer: {
+		prettyLabel: "QuantumPeer",
+		repoName: "QuantumPeer",
+		repoUrl: "https://github.com/OpenPeer-AI/QuantumPeer",
+		filter: false,
+		countDownloads: `path_extension:"setup.py"`,
+	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
 		repoName: "recurrentgemma",
