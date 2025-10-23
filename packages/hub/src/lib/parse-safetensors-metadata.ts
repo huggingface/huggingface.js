@@ -309,10 +309,10 @@ export async function parseSafetensorsMetadata(
 								? typeof header.__metadata__.total_parameters === "number"
 									? header.__metadata__.total_parameters
 									: typeof header.__metadata__.total_parameters === "string"
-										? parseInt(header.__metadata__.total_parameters)
-										: undefined
+									  ? parseInt(header.__metadata__.total_parameters)
+									  : undefined
 								: undefined,
-					}
+				  }
 				: undefined),
 		};
 	} else if (
@@ -336,10 +336,10 @@ export async function parseSafetensorsMetadata(
 								? typeof index.metadata.total_parameters === "number"
 									? index.metadata.total_parameters
 									: typeof index.metadata.total_parameters === "string"
-										? parseInt(index.metadata.total_parameters)
-										: undefined
+									  ? parseInt(index.metadata.total_parameters)
+									  : undefined
 								: undefined,
-					}
+				  }
 				: undefined),
 		};
 	} else {
