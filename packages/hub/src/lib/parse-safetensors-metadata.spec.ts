@@ -143,6 +143,16 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(safetensorsShardFileInfo?.total, "00072");
 	});
 
+	it("should detect sharded safetensors filename with 6 digits", async () => {
+		const safetensorsFilename = "model-00001-of-000163.safetensors"; // https://huggingface.co/deepseek-ai/DeepSeek-V3.2-Exp/blob/main/model-00001-of-000163.safetensors
+		const safetensorsShardFileInfo = parseSafetensorsShardFilename(safetensorsFilename);
+
+		assert.strictEqual(safetensorsShardFileInfo?.prefix, "model-");
+		assert.strictEqual(safetensorsShardFileInfo?.basePrefix, "model");
+		assert.strictEqual(safetensorsShardFileInfo?.shard, "00001");
+		assert.strictEqual(safetensorsShardFileInfo?.total, "000163");
+	});
+
 	it("should support sub-byte data types", async () => {
 		const newDataTypes: Array<"F4" | "F6_E2M3" | "F6_E3M2" | "E8M0"> = ["F4", "F6_E2M3", "F6_E3M2", "E8M0"];
 
