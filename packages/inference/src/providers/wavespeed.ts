@@ -95,11 +95,17 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		url?: string,
 		headers?: Record<string, string>
 	): Promise<Blob> {
-		if (!headers) {
+		if (!url || !headers) {
 			throw new InferenceClientInputError("Headers are required for WaveSpeed AI API calls");
 		}
 
-		const resultUrl = response.data.urls.get;
+		const parsedUrl = new URL(url);
+		const resultPath = new URL(response.data.urls.get).pathname;
+		/// override the base url to use the router.huggingface.co if going through huggingface router
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.host === "router.huggingface.co" ? "/wavespeed" : ""
+			}`;
+		const resultUrl = `${baseUrl}${resultPath}`;
+
 
 		// Poll for results until completion
 		while (true) {
