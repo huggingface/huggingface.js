@@ -180,6 +180,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
 	},
+	boltzgen: {
+		prettyLabel: "BoltzGen",
+		repoName: "boltzgen",
+		repoUrl: "https://github.com/HannesStark/boltzgen",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
+	},
 	champ: {
 		prettyLabel: "Champ",
 		repoName: "Champ",
