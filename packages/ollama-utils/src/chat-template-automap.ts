@@ -5,54 +5,29 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/qwen:latest
- * - library/gpt-oss:latest
- * - library/gemma2:latest
- * - library/qwen:0.5b
- * - library/minicpm-v:latest
- * - library/gemma3:latest
- * - library/deepseek-v3.1:latest
- * - library/deepseek-v3.1:latest
+ * - library/llama3.2:1b
+ * - library/llama3:latest
  * - library/gemma2:2b
- * - library/qwen2.5-coder:0.5b
- * - library/qwen2.5-coder:latest
- * - library/dolphin3:latest
- * - library/qwen2:latest
- * - library/tinyllama:latest
- * - library/gemma3n:latest
- * - library/phi4-reasoning:latest
- * - library/cogito:latest
- * - library/deepseek-coder-v2:latest
- * - library/deepscaler:1.5b
- * - library/dolphin-phi:2.7b
+ * - library/llama3.3:70b
+ * - library/llama3.3:latest
+ * - library/llava-llama3:latest
+ * - library/deepseek-coder-v2:16b
+ * - library/mistral-small3.2:latest
  * - library/llama4:latest
- * - library/dolphin-mistral:7b
- * - library/devstral:24b
- * - library/command-r:latest
- * - library/deepcoder:1.5b
- * - library/deepcoder:latest
- * - library/deepcoder:latest
- * - library/vicuna:latest
- * - library/codegeex4:latest
- * - library/deepseek-v2:16b
- * - library/qwen2-math:1.5b
- * - library/nous-hermes2:latest
- * - library/granite3.1-dense:latest
+ * - library/llama4:latest
  * - library/command-r-plus:104b
- * - library/stablelm2:1.6b
- * - library/granite3-dense:latest
+ * - library/llama3-chatqa:8b
+ * - library/bakllava:latest
  * - library/reflection:latest
- * - library/exaone3.5:2.4b
- * - library/glm4:latest
- * - library/llama3-gradient:latest
- * - library/athene-v2:72b
- * - library/yi-coder:latest
- * - library/llama3-groq-tool-use:latest
- * - library/nemotron:latest
- * - library/reader-lm:latest
- * - library/falcon2:latest
- * - library/stablelm-zephyr:latest
- * - library/command-r7b-arabic:latest
+ * - library/granite3.1-dense:2b
+ * - library/r1-1776:latest
+ * - library/wizardlm-uncensored:13b
+ * - library/wizardlm-uncensored:latest
+ * - library/smallthinker:latest
+ * - library/command-r7b:7b
+ * - library/solar-pro:latest
+ * - library/command-a:latest
+ * - library/firefunction-v2:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
