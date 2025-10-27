@@ -287,6 +287,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.dia,
 		filter: false,
 	},
+	"diff-interpretation-tuning": {
+		prettyLabel: "Diff Interpretation Tuning",
+		repoName: "Diff Interpretation Tuning",
+		repoUrl: "https://github.com/Aviously/diff-interpretation-tuning",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	diffree: {
 		prettyLabel: "Diffree",
 		repoName: "Diffree",
@@ -580,12 +587,19 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/webis-de/lightning-ir",
 		snippets: snippets.lightning_ir,
 	},
+	litert: {
+		prettyLabel: "LiteRT",
+		repoName: "LiteRT",
+		repoUrl: "https://github.com/google-ai-edge/LiteRT",
+		filter: false,
+		countDownloads: `path_extension:"tflite"`,
+	},
 	"litert-lm": {
 		prettyLabel: "LiteRT-LM",
 		repoName: "LiteRT-LM",
 		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
 		filter: false,
-		countDownloads: `path_extension:"litertlm"`,
+		countDownloads: `path_extension:"litertlm" OR path_extension:"task"`,
 	},
 	lerobot: {
 		prettyLabel: "LeRobot",
@@ -795,8 +809,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "PaddleOCR",
 		repoName: "PaddleOCR",
 		repoUrl: "https://github.com/PaddlePaddle/PaddleOCR",
+		docsUrl: "https://www.paddleocr.ai/",
 		snippets: snippets.paddleocr,
 		filter: true,
+		countDownloads: `path_extension:"safetensors" OR path:"inference.pdiparams"`,
 	},
 	peft: {
 		prettyLabel: "PEFT",
@@ -856,6 +872,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/clementchadebec/benchmark_VAE",
 		snippets: snippets.pythae,
 		filter: false,
+	},
+	quantumpeer: {
+		prettyLabel: "QuantumPeer",
+		repoName: "QuantumPeer",
+		repoUrl: "https://github.com/OpenPeer-AI/QuantumPeer",
+		filter: false,
+		countDownloads: `path_extension:"setup.py"`,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
@@ -1095,6 +1118,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "TensorFlowTTS",
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
+	},
+	tensorrt: {
+		prettyLabel: "TensorRT",
+		repoName: "TensorRT",
+		repoUrl: "https://github.com/NVIDIA/TensorRT",
+		countDownloads: `path_extension:"onnx"`,
 	},
 	tabpfn: {
 		prettyLabel: "TabPFN",

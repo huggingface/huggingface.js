@@ -14,7 +14,7 @@ export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
 export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
 export const RE_SAFETENSORS_SHARD_FILE =
-	/^(?<prefix>(?<basePrefix>.*?)[_-])(?<shard>\d{5})-of-(?<total>\d{5})\.safetensors$/;
+	/^(?<prefix>(?<basePrefix>.*?)[_-])(?<shard>\d{5,6})-of-(?<total>\d{5,6})\.safetensors$/;
 export interface SafetensorsShardFileInfo {
 	prefix: string;
 	basePrefix: string;
