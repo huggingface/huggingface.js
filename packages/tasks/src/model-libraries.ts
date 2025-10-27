@@ -558,7 +558,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	kernels: {
 		prettyLabel: "Kernels",
-		repoName: "🤗/kernels",
+		repoName: "Kernels",
 		repoUrl: "https://github.com/huggingface/kernels",
 		docsUrl: "https://huggingface.co/docs/kernels",
 		snippets: snippets.kernels,
