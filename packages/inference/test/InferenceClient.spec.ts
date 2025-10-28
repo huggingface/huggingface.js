@@ -2572,4 +2572,99 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT
 	);
+	describe.concurrent(
+		"SiliconFlow",
+		() => {
+			const client = new InferenceClient(env.HF_SILICONFLOW_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["siliconflow"] = {
+				"deepseek-ai/DeepSeek-R1": {
+					provider: "siliconflow",
+					hfModelId: "deepseek-ai/DeepSeek-R1",
+					providerId: "deepseek-ai/DeepSeek-R1",
+					status: "live",
+					task: "conversational",
+				},
+				"deepseek-ai/DeepSeek-V3": {
+					provider: "siliconflow",
+					hfModelId: "deepseek-ai/DeepSeek-V3",
+					providerId: "deepseek-ai/DeepSeek-V3",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion - DeepSeek-R1", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-R1",
+					provider: "siliconflow",
+					messages: [{ role: "user", content: "What is the capital of France?" }],
+					max_tokens: 20,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/Paris/i);
+				}
+			});
+
+			it("chatCompletion - DeepSeek-V3", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-V3",
+					provider: "siliconflow",
+					messages: [{ role: "user", content: "The weather today is" }],
+					max_tokens: 10,
+				});
+				expect(res.choices).toBeDefined();
+				expect(res.choices?.length).toBeGreaterThan(0);
+				expect(res.choices?.[0].message?.content).toBeDefined();
+				expect(typeof res.choices?.[0].message?.content).toBe("string");
+				expect(res.choices?.[0].message?.content?.length).toBeGreaterThan(0);
+			});
+
+			it("chatCompletion stream - DeepSeek-R1", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-R1",
+					provider: "siliconflow",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+
+			it("chatCompletion stream - DeepSeek-V3", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-V3",
+					provider: "siliconflow",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
 });

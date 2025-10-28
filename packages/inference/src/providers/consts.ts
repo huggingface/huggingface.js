@@ -38,6 +38,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	replicate: {},
 	sambanova: {},
 	scaleway: {},
+	siliconflow: {},
 	together: {},
 	wavespeed: {},
 	"zai-org": {},

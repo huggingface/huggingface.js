@@ -15,6 +15,7 @@ import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
+import * as SiliconFlow from "../providers/siliconflow.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -168,6 +169,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Scaleway.ScalewayConversationalTask(),
 		"text-generation": new Scaleway.ScalewayTextGenerationTask(),
 		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
+	},
+	siliconflow: {
+		conversational: new SiliconFlow.SiliconFlowConversationalTask(),
 	},
 	together: {
 		"text-to-image": new Together.TogetherTextToImageTask(),
