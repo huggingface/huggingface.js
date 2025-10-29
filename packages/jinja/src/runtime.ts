@@ -687,6 +687,55 @@ export class Interpreter {
 		return [positionalArguments, keywordArguments];
 	}
 
+	/**
+	 * Helper method to apply dictsort filter on an ObjectValue
+	 */
+	private applyDictSort(
+		operand: ObjectValue,
+		caseSensitive: BooleanValue,
+		by: StringValue,
+		reverse: BooleanValue
+	): ArrayValue {
+		// Convert to array of [key, value] pairs
+		const items = Array.from(operand.value.entries()).map(
+			([key, value]) => new ArrayValue([new StringValue(key), value])
+		);
+
+		// Sort the items
+		items.sort((a, b) => {
+			const aItem = a.value[by.value === "key" ? 0 : 1];
+			const bItem = b.value[by.value === "key" ? 0 : 1];
+
+			let aValue: unknown = aItem.value;
+			let bValue: unknown = bItem.value;
+
+			// Handle null/undefined values - put them at the end
+			if (aValue == null && bValue == null) return 0;
+			if (aValue == null) return reverse.value ? -1 : 1;
+			if (bValue == null) return reverse.value ? 1 : -1;
+
+			// For case-insensitive string comparison
+			if (!caseSensitive.value && typeof aValue === "string" && typeof bValue === "string") {
+				aValue = aValue.toLowerCase();
+				bValue = bValue.toLowerCase();
+			}
+
+			// Compare values - TypeScript needs help knowing these are comparable
+			// After the null checks above, we know they're not null
+			const a1 = aValue as string | number | boolean;
+			const b1 = bValue as string | number | boolean;
+
+			if (a1 < b1) {
+				return reverse.value ? 1 : -1;
+			} else if (a1 > b1) {
+				return reverse.value ? -1 : 1;
+			}
+			return 0;
+		});
+
+		return new ArrayValue(items);
+	}
+
 	private applyFilter(operand: AnyRuntimeValue, filterNode: Identifier | CallExpression, environment: Environment) {
 		// For now, we only support the built-in filters
 		// TODO: Add support for non-identifier filters
@@ -818,21 +867,14 @@ export class Interpreter {
 						);
 					case "length":
 						return new IntegerValue(operand.value.size);
-					case "dictsort": {
+					case "dictsort":
 						// Default dictsort behavior (no parameters)
-						// Sort by key, case-insensitive, not reversed
-						const items = Array.from(operand.value.entries()).map(
-							([key, value]) => new ArrayValue([new StringValue(key), value])
+						return this.applyDictSort(
+							operand,
+							new BooleanValue(false), // case_sensitive
+							new StringValue("key"), // by
+							new BooleanValue(false) // reverse
 						);
-
-						items.sort((a, b) => {
-							const aKey = (a.value[0] as StringValue).value.toLowerCase();
-							const bKey = (b.value[0] as StringValue).value.toLowerCase();
-							return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
-						});
-
-						return new ArrayValue(items);
-					}
 					default:
 						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
 				}
@@ -1041,35 +1083,7 @@ export class Interpreter {
 							throw new Error("reverse must be a boolean");
 						}
 
-						// Convert to array of [key, value] pairs
-						const items = Array.from(operand.value.entries()).map(
-							([key, value]) => new ArrayValue([new StringValue(key), value])
-						);
-
-						// Sort the items
-						items.sort((a, b) => {
-							const aItem = a.value[by.value === "key" ? 0 : 1];
-							const bItem = b.value[by.value === "key" ? 0 : 1];
-
-							let aValue: unknown = aItem.value;
-							let bValue: unknown = bItem.value;
-
-							// For case-insensitive string comparison
-							if (!caseSensitive.value && typeof aValue === "string" && typeof bValue === "string") {
-								aValue = aValue.toLowerCase();
-								bValue = bValue.toLowerCase();
-							}
-
-							// Compare values
-							if (aValue != null && bValue != null && aValue < bValue) {
-								return reverse.value ? 1 : -1;
-							} else if (aValue != null && bValue != null && aValue > bValue) {
-								return reverse.value ? -1 : 1;
-							}
-							return 0;
-						});
-
-						return new ArrayValue(items);
+						return this.applyDictSort(operand, caseSensitive, by, reverse);
 					}
 				}
 				throw new Error(`Unknown ObjectValue filter: ${filterName}`);
