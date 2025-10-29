@@ -348,8 +348,9 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 
 				// Sort the items
 				items.sort((a, b) => {
-					const aItem = a.value[by.value === "key" ? 0 : 1];
-					const bItem = b.value[by.value === "key" ? 0 : 1];
+					const index = by.value === "key" ? 0 : 1;
+					const aItem = a.value[index];
+					const bItem = b.value[index];
 
 					let aValue: unknown = aItem.value;
 					let bValue: unknown = bItem.value;
