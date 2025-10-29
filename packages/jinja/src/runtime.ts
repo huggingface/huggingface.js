@@ -818,6 +818,21 @@ export class Interpreter {
 						);
 					case "length":
 						return new IntegerValue(operand.value.size);
+					case "dictsort": {
+						// Default dictsort behavior (no parameters)
+						// Sort by key, case-insensitive, not reversed
+						const items = Array.from(operand.value.entries()).map(
+							([key, value]) => new ArrayValue([new StringValue(key), value])
+						);
+
+						items.sort((a, b) => {
+							const aKey = (a.value[0] as StringValue).value.toLowerCase();
+							const bKey = (b.value[0] as StringValue).value.toLowerCase();
+							return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
+						});
+
+						return new ArrayValue(items);
+					}
 					default:
 						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
 				}
@@ -996,6 +1011,68 @@ export class Interpreter {
 					}
 				}
 				throw new Error(`Unknown StringValue filter: ${filterName}`);
+			} else if (operand instanceof ObjectValue) {
+				switch (filterName) {
+					case "dictsort": {
+						// https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.dictsort
+						// Sort a dictionary and yield (key, value) pairs.
+						// Parameters:
+						//  - case_sensitive: Sort in a case-sensitive manner (default: false)
+						//  - by: Sort by 'key' or 'value' (default: 'key')
+						//  - reverse: Reverse the sort order (default: false)
+
+						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+
+						const caseSensitive = args.at(0) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
+						if (!(caseSensitive instanceof BooleanValue)) {
+							throw new Error("case_sensitive must be a boolean");
+						}
+
+						const by = args.at(1) ?? kwargs.get("by") ?? new StringValue("key");
+						if (!(by instanceof StringValue)) {
+							throw new Error("by must be a string");
+						}
+						if (by.value !== "key" && by.value !== "value") {
+							throw new Error("by must be either 'key' or 'value'");
+						}
+
+						const reverse = args.at(2) ?? kwargs.get("reverse") ?? new BooleanValue(false);
+						if (!(reverse instanceof BooleanValue)) {
+							throw new Error("reverse must be a boolean");
+						}
+
+						// Convert to array of [key, value] pairs
+						const items = Array.from(operand.value.entries()).map(
+							([key, value]) => new ArrayValue([new StringValue(key), value])
+						);
+
+						// Sort the items
+						items.sort((a, b) => {
+							const aItem = a.value[by.value === "key" ? 0 : 1];
+							const bItem = b.value[by.value === "key" ? 0 : 1];
+
+							let aValue: unknown = aItem.value;
+							let bValue: unknown = bItem.value;
+
+							// For case-insensitive string comparison
+							if (!caseSensitive.value && typeof aValue === "string" && typeof bValue === "string") {
+								aValue = aValue.toLowerCase();
+								bValue = bValue.toLowerCase();
+							}
+
+							// Compare values
+							if (aValue != null && bValue != null && aValue < bValue) {
+								return reverse.value ? 1 : -1;
+							} else if (aValue != null && bValue != null && aValue > bValue) {
+								return reverse.value ? -1 : 1;
+							}
+							return 0;
+						});
+
+						return new ArrayValue(items);
+					}
+				}
+				throw new Error(`Unknown ObjectValue filter: ${filterName}`);
 			} else {
 				throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 			}
