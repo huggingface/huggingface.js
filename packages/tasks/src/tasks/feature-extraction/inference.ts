@@ -13,6 +13,11 @@ export type FeatureExtractionOutput = Array<number[]>;
  */
 export interface FeatureExtractionInput {
 	/**
+	 * The number of dimensions that the output embeddings should have. If not set, the original
+	 * shape of the representation will be returned instead.
+	 */
+	dimensions?: number;
+	/**
 	 * The text or list of texts to embed.
 	 */
 	inputs: FeatureExtractionInputs;
