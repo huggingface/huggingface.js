@@ -720,8 +720,11 @@ export class Interpreter {
 				bValue = bValue.toLowerCase();
 			}
 
-			// Compare values - TypeScript needs help knowing these are comparable
-			// After the null checks above, we know they're not null
+			// Compare values
+			// Note: This assumes comparable types (string, number, boolean).
+			// Mixed types (e.g., string vs number) will use JavaScript's default comparison,
+			// which matches Jinja's behavior. Complex types (objects, arrays) are not typically
+			// used as dictionary values in Jinja templates and may produce undefined results.
 			const a1 = aValue as string | number | boolean;
 			const b1 = bValue as string | number | boolean;
 
