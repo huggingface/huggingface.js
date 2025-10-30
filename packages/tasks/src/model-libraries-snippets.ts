@@ -813,6 +813,14 @@ export const keras_hub = (model: ModelData): string[] => {
 	return snippets;
 };
 
+export const kernels = (model: ModelData): string[] => [
+	`# !pip install kernels
+
+from kernels import get_kernel
+
+kernel = get_kernel("${model.id}")`,
+];
+
 export const kimi_audio = (model: ModelData): string[] => [
 	`# Example usage for KimiAudio
 # pip install git+https://github.com/MoonshotAI/Kimi-Audio.git

@@ -1,11 +1,17 @@
 import type { TextToImageArgs } from "../tasks/cv/textToImage.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
+import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
 import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
-import type { TextToImageTaskHelper, TextToVideoTaskHelper, ImageToImageTaskHelper } from "./providerHelper.js";
+import type {
+	TextToImageTaskHelper,
+	TextToVideoTaskHelper,
+	ImageToImageTaskHelper,
+	ImageToVideoTaskHelper,
+} from "./providerHelper.js";
 import { TaskProviderHelper } from "./providerHelper.js";
 import {
 	InferenceClientInputError,
@@ -72,7 +78,9 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		return `/api/v3/${params.model}`;
 	}
 
-	preparePayload(params: BodyParams<ImageToImageArgs | TextToImageArgs | TextToVideoArgs>): Record<string, unknown> {
+	preparePayload(
+		params: BodyParams<ImageToImageArgs | TextToImageArgs | TextToVideoArgs | ImageToVideoArgs>
+	): Record<string, unknown> {
 		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
 			...params.args.parameters,
@@ -95,11 +103,17 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		url?: string,
 		headers?: Record<string, string>
 	): Promise<Blob> {
-		if (!headers) {
+		if (!url || !headers) {
 			throw new InferenceClientInputError("Headers are required for WaveSpeed AI API calls");
 		}
 
-		const resultUrl = response.data.urls.get;
+		const parsedUrl = new URL(url);
+		const resultPath = new URL(response.data.urls.get).pathname;
+		/// override the base url to use the router.huggingface.co if going through huggingface router
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
+			parsedUrl.host === "router.huggingface.co" ? "/wavespeed" : ""
+		}`;
+		const resultUrl = `${baseUrl}${resultPath}`;
 
 		// Poll for results until completion
 		while (true) {
@@ -174,6 +188,22 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 	}
 
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
+		return {
+			...args,
+			inputs: args.parameters?.prompt,
+			image: base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			),
+		};
+	}
+}
+
+export class WavespeedAIImageToVideoTask extends WavespeedAITask implements ImageToVideoTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+
+	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
 		return {
 			...args,
 			inputs: args.parameters?.prompt,

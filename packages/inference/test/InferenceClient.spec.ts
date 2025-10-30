@@ -2412,6 +2412,13 @@ describe.skip("InferenceClient", () => {
 					adapter: "lora",
 					adapterWeightsPath: "pytorch_lora_weights.safetensors",
 				},
+				"Wan-AI/Wan2.1-I2V-14B-480P": {
+					provider: "wavespeed",
+					hfModelId: "Wan-AI/Wan2.1-I2V-14B-480P",
+					providerId: "wavespeed-ai/wan-2.1/i2v-480p",
+					status: "live",
+					task: "image-to-video",
+				},
 			};
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
@@ -2471,6 +2478,20 @@ describe.skip("InferenceClient", () => {
 						prompt: "The leopard chases its prey",
 						guidance_scale: 5,
 						num_inference_steps: 30,
+						seed: -1,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+			it(`imageToVideo - Wan-AI/Wan2.1-I2V-14B-480P`, async () => {
+				const res = await client.imageToVideo({
+					model: "Wan-AI/Wan2.1-I2V-14B-480P",
+					provider: "wavespeed",
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "The leopard chases its prey",
+						guidance_scale: 5,
+						num_inference_steps: 29,
 						seed: -1,
 					},
 				});
