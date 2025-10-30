@@ -563,6 +563,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras_hub,
 		filter: true,
 	},
+	kernels: {
+		prettyLabel: "Kernels",
+		repoName: "Kernels",
+		repoUrl: "https://github.com/huggingface/kernels",
+		docsUrl: "https://huggingface.co/docs/kernels",
+		snippets: snippets.kernels,
+		countDownloads: `path_filename:"_ops" AND path_extension:"py"`,
+	},
 	"kimi-audio": {
 		prettyLabel: "KimiAudio",
 		repoName: "KimiAudio",
