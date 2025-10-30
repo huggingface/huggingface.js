@@ -229,6 +229,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
 	},
+	chronos_forecasting: {
+		prettyLabel: "Chronos",
+		repoName: "chronos-forecasting",
+		repoUrl: "https://github.com/amazon-science/chronos-forecasting",
+		countDownloads: `path:"config.json"`,
+		snippets: snippets.chronos_forecasting,
+	},
 	contexttab: {
 		prettyLabel: "ConTextTab",
 		repoName: "ConTextTab",
