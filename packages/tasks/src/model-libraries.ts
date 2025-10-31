@@ -233,7 +233,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Chronos",
 		repoName: "chronos-forecasting",
 		repoUrl: "https://github.com/amazon-science/chronos-forecasting",
-		countDownloads: `path:"config.json"`,
 		snippets: snippets.chronos_forecasting,
 	},
 	contexttab: {
