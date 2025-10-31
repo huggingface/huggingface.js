@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/hub",
 	"packageManager": "pnpm@10.10.0",
-	"version": "2.6.5",
+	"version": "2.6.12",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -43,7 +43,8 @@
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
 		"check": "tsc",
 		"build:xet-wasm": "./scripts/build-xet-wasm.sh -t bundler --clean",
-		"bench": "tsx scripts/bench.ts"
+		"bench": "tsx scripts/bench.ts",
+		"debug-xet": "tsx scripts/debug-xet.ts"
 	},
 	"files": [
 		"src",

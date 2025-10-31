@@ -132,6 +132,30 @@ wav = model.generate(text, audio_prompt_path=AUDIO_PROMPT_PATH)
 ta.save("test-2.wav", wav, model.sr)`,
 ];
 
+export const chronos_forecasting = (model: ModelData): string[] => {
+	const installSnippet = `pip install chronos-forecasting`;
+
+	const exampleSnippet = `import pandas as pd
+from chronos import BaseChronosPipeline
+
+pipeline = BaseChronosPipeline.from_pretrained("${model.id}", device_map="cuda")
+
+# Load historical data
+context_df = pd.read_csv("https://autogluon.s3.us-west-2.amazonaws.com/datasets/timeseries/misc/AirPassengers.csv")
+
+# Generate predictions
+pred_df = pipeline.predict_df(
+    context_df,
+    prediction_length=36,  # Number of steps to forecast
+    quantile_levels=[0.1, 0.5, 0.9],  # Quantiles for probabilistic forecast
+    id_column="item_id",  # Column identifying different time series
+    timestamp_column="Month",  # Column with datetime information
+    target="#Passengers",  # Column(s) with time series values to predict
+)`;
+
+	return [installSnippet, exampleSnippet];
+};
+
 export const contexttab = (): string[] => {
 	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
 
@@ -324,6 +348,8 @@ dam = DescribeAnythingModel(
 )`,
 ];
 
+const diffusers_install = "pip install -U diffusers transformers";
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
@@ -485,34 +511,37 @@ image = pipe(
 ];
 
 export const diffusers = (model: ModelData): string[] => {
+	let codeSnippets: string[];
 	if (
 		model.tags.includes("StableDiffusionInpaintPipeline") ||
 		model.tags.includes("StableDiffusionXLInpaintPipeline")
 	) {
-		return diffusers_inpainting(model);
+		codeSnippets = diffusers_inpainting(model);
 	} else if (model.tags.includes("controlnet")) {
-		return diffusers_controlnet(model);
+		codeSnippets = diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
 		if (model.pipeline_tag === "image-to-image") {
-			return diffusers_lora_image_to_image(model);
+			codeSnippets = diffusers_lora_image_to_image(model);
 		} else if (model.pipeline_tag === "image-to-video") {
-			return diffusers_lora_image_to_video(model);
+			codeSnippets = diffusers_lora_image_to_video(model);
 		} else if (model.pipeline_tag === "text-to-video") {
-			return diffusers_lora_text_to_video(model);
+			codeSnippets = diffusers_lora_text_to_video(model);
 		} else {
-			return diffusers_lora(model);
+			codeSnippets = diffusers_lora(model);
 		}
 	} else if (model.tags.includes("textual_inversion")) {
-		return diffusers_textual_inversion(model);
+		codeSnippets = diffusers_textual_inversion(model);
 	} else if (model.tags.includes("FluxFillPipeline")) {
-		return diffusers_flux_fill(model);
+		codeSnippets = diffusers_flux_fill(model);
 	} else if (model.pipeline_tag === "image-to-video") {
-		return diffusers_image_to_video(model);
+		codeSnippets = diffusers_image_to_video(model);
 	} else if (model.pipeline_tag === "image-to-image") {
-		return diffusers_image_to_image(model);
+		codeSnippets = diffusers_image_to_image(model);
 	} else {
-		return diffusers_default(model);
+		codeSnippets = diffusers_default(model);
 	}
+
+	return [diffusers_install, ...codeSnippets];
 };
 
 export const diffusionkit = (model: ModelData): string[] => {
@@ -808,6 +837,14 @@ export const keras_hub = (model: ModelData): string[] => {
 	return snippets;
 };
 
+export const kernels = (model: ModelData): string[] => [
+	`# !pip install kernels
+
+from kernels import get_kernel
+
+kernel = get_kernel("${model.id}")`,
+];
+
 export const kimi_audio = (model: ModelData): string[] => [
 	`# Example usage for KimiAudio
 # pip install git+https://github.com/MoonshotAI/Kimi-Audio.git
@@ -1047,7 +1084,9 @@ export const paddleocr = (model: ModelData): string[] => {
 
 	if (model.tags.includes("doc_vlm")) {
 		return [
-			`# pip install paddleocr
+			`# 1. See https://www.paddlepaddle.org.cn/en/install to install paddlepaddle
+# 2. pip install paddleocr
+
 from paddleocr import DocVLM
 model = DocVLM(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(
@@ -1060,11 +1099,27 @@ for res in output:
 		];
 	}
 
+	if (model.tags.includes("document-parse")) {
+		return [
+			`# See https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html to installation
+
+from paddleocr import PaddleOCRVL
+pipeline = PaddleOCRVL()
+output = pipeline.predict("path/to/document_image.png")
+for res in output:
+	res.print()
+	res.save_to_json(save_path="output")
+	res.save_to_markdown(save_path="output")`,
+		];
+	}
+
 	for (const tag of model.tags) {
 		if (tag in mapping) {
 			const { className } = mapping[tag];
 			return [
-				`# pip install paddleocr
+				`# 1. See https://www.paddlepaddle.org.cn/en/install to install paddlepaddle
+# 2. pip install paddleocr
+
 from paddleocr import ${className}
 model = ${className}(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(input="path/to/image.png", batch_size=1)
@@ -1364,6 +1419,28 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+
+	if (model.tags.includes("PyLate")) {
+		return [
+			`from pylate import models
+
+queries = [
+    "Which planet is known as the Red Planet?",
+    "What is the largest planet in our solar system?",
+]
+
+documents = [
+    ["Mars is the Red Planet.", "Venus is Earth's twin."],
+    ["Jupiter is the largest planet.", "Saturn has rings."],
+]
+
+model = models.ColBERT(model_name_or_path="${model.id}")
+
+queries_emb = model.encode(queries, is_query=True)
+docs_emb = model.encode(documents, is_query=False)`,
+		];
+	}
+
 	if (model.tags.includes("cross-encoder") || model.pipeline_tag == "text-ranking") {
 		return [
 			`from sentence_transformers import CrossEncoder
@@ -1697,6 +1774,29 @@ image = sana(
     pag_guidance_scale=2.0,
     num_inference_steps=18,
 ) `,
+];
+
+export const vibevoice = (model: ModelData): string[] => [
+	`import torch, soundfile as sf, librosa, numpy as np
+from vibevoice.processor.vibevoice_processor import VibeVoiceProcessor
+from vibevoice.modular.modeling_vibevoice_inference import VibeVoiceForConditionalGenerationInference
+
+# Load voice sample (should be 24kHz mono)
+voice, sr = sf.read("path/to/voice_sample.wav")
+if voice.ndim > 1: voice = voice.mean(axis=1)
+if sr != 24000: voice = librosa.resample(voice, sr, 24000)
+
+processor = VibeVoiceProcessor.from_pretrained("${model.id}")
+model = VibeVoiceForConditionalGenerationInference.from_pretrained(
+    "${model.id}", torch_dtype=torch.bfloat16
+).to("cuda").eval()
+model.set_ddpm_inference_steps(5)
+
+inputs = processor(text=["Speaker 0: Hello!\\nSpeaker 1: Hi there!"],
+                   voice_samples=[[voice]], return_tensors="pt")
+audio = model.generate(**inputs, cfg_scale=1.3,
+                       tokenizer=processor.tokenizer).speech_outputs[0]
+sf.write("output.wav", audio.cpu().numpy().squeeze(), 24000)`,
 ];
 
 export const videoprism = (model: ModelData): string[] => [

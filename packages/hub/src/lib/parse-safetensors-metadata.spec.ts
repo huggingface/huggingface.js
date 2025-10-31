@@ -143,6 +143,16 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(safetensorsShardFileInfo?.total, "00072");
 	});
 
+	it("should detect sharded safetensors filename with 6 digits", async () => {
+		const safetensorsFilename = "model-00001-of-000163.safetensors"; // https://huggingface.co/deepseek-ai/DeepSeek-V3.2-Exp/blob/main/model-00001-of-000163.safetensors
+		const safetensorsShardFileInfo = parseSafetensorsShardFilename(safetensorsFilename);
+
+		assert.strictEqual(safetensorsShardFileInfo?.prefix, "model-");
+		assert.strictEqual(safetensorsShardFileInfo?.basePrefix, "model");
+		assert.strictEqual(safetensorsShardFileInfo?.shard, "00001");
+		assert.strictEqual(safetensorsShardFileInfo?.total, "000163");
+	});
+
 	it("should support sub-byte data types", async () => {
 		const newDataTypes: Array<"F4" | "F6_E2M3" | "F6_E3M2" | "E8M0"> = ["F4", "F6_E2M3", "F6_E3M2", "E8M0"];
 
@@ -205,6 +215,31 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(parameterCount.F6_E2M3, 50);
 		assert.strictEqual(parameterCount.F6_E3M2, 96);
 		assert.strictEqual(parameterCount.E8M0, 24);
+	});
+
+	it("fetch info for GPTQ quantized 8B model", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16",
+			revision: "3921b6aee65496a708b0af456c964ceca7423193",
+			computeParametersCount: true,
+		});
+
+		const parameterCount = parse.parameterCount;
+		assert.ok(parameterCount);
+		assert.ok(parameterCount.I32);
+		assert.ok(parameterCount.F16);
+		assert.strictEqual(parameterCount.I32, 6_979_321_856);
+		assert.strictEqual(parameterCount.F16, 1_052_315_648);
+
+		const parameterCountTotal =
+			parse.parameterTotal ??
+			sum(
+				Object.entries(parameterCount)
+					.filter(([, value]) => typeof value === "number")
+					.map(([, value]) => value as number)
+			);
+
+		assert.strictEqual(parameterCountTotal, 8_031_637_504);
 	});
 
 	it("fetch info for openai/gpt-oss-20b (large sharded model)", async () => {
@@ -276,5 +311,16 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert.strictEqual(parameterCount.FP4, 20000);
 		assert.strictEqual(parameterCount.UE8, 5000);
+	});
+
+	it("fetch info for large index file (>10MB) with many experts (moonshotai/Kimi-K2-Instruct-0905)", async () => {
+		// This model has a 13.5MB index file due to having 384 experts per layer
+		const parse = await parseSafetensorsMetadata({
+			repo: "moonshotai/Kimi-K2-Instruct-0905",
+			revision: "7152993552508c9f22042b3bb93b5e6acd06ce73",
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 62);
 	});
 });

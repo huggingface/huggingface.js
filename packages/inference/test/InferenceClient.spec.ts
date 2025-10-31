@@ -2135,6 +2135,58 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT
 	);
 	describe.concurrent(
+		"ZAI",
+		() => {
+			const client = new InferenceClient(env.HF_ZAI_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["zai-org"] = {
+				"zai-org/GLM-4.5": {
+					provider: "zai-org",
+					hfModelId: "zai-org/GLM-4.5",
+					providerId: "glm-4.5",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "zai-org/GLM-4.5",
+					provider: "zai-org",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "zai-org/GLM-4.5",
+					provider: "zai-org",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
 		"OVHcloud",
 		() => {
 			const client = new HfInference(env.HF_OVHCLOUD_KEY ?? "dummy");
@@ -2240,6 +2292,140 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
+		"Wavespeed AI",
+		() => {
+			const client = new InferenceClient(env.HF_WAVESPEED_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["wavespeed"] = {
+				"black-forest-labs/FLUX.1-schnell": {
+					provider: "wavespeed",
+					hfModelId: "black-forest-labs/FLUX.1-schnell",
+					providerId: "wavespeed-ai/flux-schnell",
+					status: "live",
+					task: "text-to-image",
+				},
+				"Wan-AI/Wan2.1-T2V-14B": {
+					provider: "wavespeed",
+					hfModelId: "wavespeed-ai/wan-2.1/t2v-480p",
+					providerId: "wavespeed-ai/wan-2.1/t2v-480p",
+					status: "live",
+					task: "text-to-video",
+				},
+				"HiDream-ai/HiDream-E1-Full": {
+					provider: "wavespeed",
+					hfModelId: "wavespeed-ai/hidream-e1-full",
+					providerId: "wavespeed-ai/hidream-e1-full",
+					status: "live",
+					task: "image-to-image",
+				},
+				"openfree/flux-chatgpt-ghibli-lora": {
+					provider: "wavespeed",
+					hfModelId: "openfree/flux-chatgpt-ghibli-lora",
+					providerId: "wavespeed-ai/flux-dev-lora",
+					status: "live",
+					task: "text-to-image",
+					adapter: "lora",
+					adapterWeightsPath: "flux-chatgpt-ghibli-lora.safetensors",
+				},
+				"linoyts/yarn_art_Flux_LoRA": {
+					provider: "wavespeed",
+					hfModelId: "linoyts/yarn_art_Flux_LoRA",
+					providerId: "wavespeed-ai/flux-dev-lora-ultra-fast",
+					status: "live",
+					task: "text-to-image",
+					adapter: "lora",
+					adapterWeightsPath: "pytorch_lora_weights.safetensors",
+				},
+				"Wan-AI/Wan2.1-I2V-14B-480P": {
+					provider: "wavespeed",
+					hfModelId: "Wan-AI/Wan2.1-I2V-14B-480P",
+					providerId: "wavespeed-ai/wan-2.1/i2v-480p",
+					status: "live",
+					task: "image-to-video",
+				},
+			};
+			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "wavespeed",
+					inputs:
+						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`textToImage - openfree/flux-chatgpt-ghibli-lora`, async () => {
+				const res = await client.textToImage({
+					model: "openfree/flux-chatgpt-ghibli-lora",
+					provider: "wavespeed",
+					inputs:
+						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`textToImage - linoyts/yarn_art_Flux_LoRA`, async () => {
+				const res = await client.textToImage({
+					model: "linoyts/yarn_art_Flux_LoRA",
+					provider: "wavespeed",
+					inputs:
+						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`textToVideo - Wan-AI/Wan2.1-T2V-14B`, async () => {
+				const res = await client.textToVideo({
+					model: "Wan-AI/Wan2.1-T2V-14B",
+					provider: "wavespeed",
+					inputs:
+						"A cool street dancer, wearing a baggy hoodie and hip-hop pants, dancing in front of a graffiti wall, night neon background, quick camera cuts, urban trends.",
+					parameters: {
+						guidance_scale: 5,
+						num_inference_steps: 30,
+						seed: -1,
+					},
+					duration: 5,
+					enable_safety_checker: true,
+					flow_shift: 2.9,
+					size: "480*832",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`imageToImage - HiDream-ai/HiDream-E1-Full`, async () => {
+				const res = await client.imageToImage({
+					model: "HiDream-ai/HiDream-E1-Full",
+					provider: "wavespeed",
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "The leopard chases its prey",
+						guidance_scale: 5,
+						num_inference_steps: 30,
+						seed: -1,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+			it(`imageToVideo - Wan-AI/Wan2.1-I2V-14B-480P`, async () => {
+				const res = await client.imageToVideo({
+					model: "Wan-AI/Wan2.1-I2V-14B-480P",
+					provider: "wavespeed",
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "The leopard chases its prey",
+						guidance_scale: 5,
+						num_inference_steps: 29,
+						seed: -1,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
 		"PublicAI",
 		() => {
 			const client = new InferenceClient(env.HF_PUBLICAI_KEY ?? "dummy");
@@ -2287,6 +2473,122 @@ describe.skip("InferenceClient", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Baseten",
+		() => {
+			const client = new InferenceClient(env.HF_BASETEN_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["baseten"] = {
+				"Qwen/Qwen3-235B-A22B-Instruct-2507": {
+					provider: "baseten",
+					hfModelId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					providerId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion - Qwen3 235B Instruct", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					provider: "baseten",
+					messages: [{ role: "user", content: "What is 5 + 3?" }],
+					max_tokens: 20,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/(eight|8)/i);
+				}
+			});
+
+			it("chatCompletion stream - Qwen3 235B", async () => {
+				const stream = client.chatCompletionStream({
+					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+					provider: "baseten",
+					messages: [{ role: "user", content: "Count from 1 to 3" }],
+					stream: true,
+					max_tokens: 20,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+				expect(fullResponse).toMatch(/1.*2.*3/);
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"clarifai",
+		() => {
+			const client = new InferenceClient(env.HF_CLARIFAI_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["clarifai"] = {
+				"deepseek-ai/DeepSeek-V3.1": {
+					provider: "clarifai",
+					hfModelId: "deepseek-ai/DeepSeek-V3.1",
+					providerId: "deepseek-ai/deepseek-chat/models/DeepSeek-V3_1",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion - DeepSeek-V3_1", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-V3.1",
+					provider: "clarifai",
+					messages: [{ role: "user", content: "What is 5 + 3?" }],
+					max_tokens: 20,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/(eight|8)/i);
+				}
+			});
+
+			it("chatCompletion stream - DeepSeek-V3_1", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-V3.1",
+					provider: "clarifai",
+					messages: [{ role: "user", content: "Count from 1 to 3" }],
+					stream: true,
+					max_tokens: 20,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+				expect(fullResponse).toMatch(/1.*2.*3/);
 			});
 		},
 		TIMEOUT

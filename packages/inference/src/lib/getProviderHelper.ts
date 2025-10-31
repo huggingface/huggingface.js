@@ -1,3 +1,5 @@
+import * as Baseten from "../providers/baseten.js";
+import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
@@ -50,15 +52,23 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
+import * as Wavespeed from "../providers/wavespeed.js";
+import * as Zai from "../providers/zai-org.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
+	baseten: {
+		conversational: new Baseten.BasetenConversationalTask(),
+	},
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
+	},
+	clarifai: {
+		conversational: new Clarifai.ClarifaiConversationalTask(),
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
@@ -163,6 +173,15 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Together.TogetherTextToImageTask(),
 		conversational: new Together.TogetherConversationalTask(),
 		"text-generation": new Together.TogetherTextGenerationTask(),
+	},
+	wavespeed: {
+		"text-to-image": new Wavespeed.WavespeedAITextToImageTask(),
+		"text-to-video": new Wavespeed.WavespeedAITextToVideoTask(),
+		"image-to-image": new Wavespeed.WavespeedAIImageToImageTask(),
+		"image-to-video": new Wavespeed.WavespeedAIImageToVideoTask(),
+	},
+	"zai-org": {
+		conversational: new Zai.ZaiConversationalTask(),
 	},
 };
 

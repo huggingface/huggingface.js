@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/ollama-utils",
 	"packageManager": "pnpm@10.10.0",
-	"version": "0.0.14",
+	"version": "0.0.15",
 	"description": "Various utilities for maintaining Ollama compatibility with models on Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {

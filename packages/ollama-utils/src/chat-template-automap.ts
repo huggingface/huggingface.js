@@ -5,20 +5,54 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/llama3.3:latest
- * - library/llama3.2-vision:latest
+ * - library/qwen:latest
+ * - library/gpt-oss:latest
+ * - library/gemma2:latest
+ * - library/qwen:0.5b
+ * - library/minicpm-v:latest
+ * - library/gemma3:latest
+ * - library/deepseek-v3.1:latest
+ * - library/deepseek-v3.1:latest
+ * - library/gemma2:2b
+ * - library/qwen2.5-coder:0.5b
+ * - library/qwen2.5-coder:latest
  * - library/dolphin3:latest
- * - library/llama3:latest
- * - library/gemma:2b
- * - library/dolphin-llama3:8b
- * - library/gemma:latest
- * - library/granite3.3:2b
- * - library/gemma:latest
- * - library/falcon:latest
- * - library/tulu3:latest
- * - library/dbrx:latest
- * - library/smallthinker:latest
- * - library/command-r7b:latest
+ * - library/qwen2:latest
+ * - library/tinyllama:latest
+ * - library/gemma3n:latest
+ * - library/phi4-reasoning:latest
+ * - library/cogito:latest
+ * - library/deepseek-coder-v2:latest
+ * - library/deepscaler:1.5b
+ * - library/dolphin-phi:2.7b
+ * - library/llama4:latest
+ * - library/dolphin-mistral:7b
+ * - library/devstral:24b
+ * - library/command-r:latest
+ * - library/deepcoder:1.5b
+ * - library/deepcoder:latest
+ * - library/deepcoder:latest
+ * - library/vicuna:latest
+ * - library/codegeex4:latest
+ * - library/deepseek-v2:16b
+ * - library/qwen2-math:1.5b
+ * - library/nous-hermes2:latest
+ * - library/granite3.1-dense:latest
+ * - library/command-r-plus:104b
+ * - library/stablelm2:1.6b
+ * - library/granite3-dense:latest
+ * - library/reflection:latest
+ * - library/exaone3.5:2.4b
+ * - library/glm4:latest
+ * - library/llama3-gradient:latest
+ * - library/athene-v2:72b
+ * - library/yi-coder:latest
+ * - library/llama3-groq-tool-use:latest
+ * - library/nemotron:latest
+ * - library/reader-lm:latest
+ * - library/falcon2:latest
+ * - library/stablelm-zephyr:latest
+ * - library/command-r7b-arabic:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
@@ -650,6 +684,23 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 				"<|start_of_role|>",
 				"<|end_of_role|>",
 				"<|end_of_text|>",
+			],
+		},
+	},
+	{
+		model: "library/granite4:latest",
+		gguf: "{%- set tools_system_message_prefix = 'You are a helpful assistant with access to the following tools. You may call one or more tools to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>'  %}\n{%- set tools_system_message_suffix = '\\n</tools>\\n\\nFor each tool call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call>. If a tool does not exist in the provided list of tools, notify the user that you do not have the ability to fulfill the request.' %}\n{%- set documents_system_message_prefix = 'You are a helpful assistant with access to the following documents. You may use one or more documents to assist with the user query.\\n\\nYou are given a list of documents within <documents></documents> XML tags:\\n<documents>' %}\n{%- set documents_system_message_suffix = '\\n</documents>\\n\\nWrite the response to the user\\'s input by strictly aligning with the facts in the provided documents. If the information needed to answer the question is not available in the documents, inform the user that the question cannot be answered based on the available data.' %}\n{%- if available_tools is defined and available_tools %}\n    {%- set tools = available_tools %}\n{%- endif %}\n{%- set ns = namespace(tools_system_message=tools_system_message_prefix,\n                       documents_system_message=documents_system_message_prefix,\n                       system_message=''\n                       ) %}\n{%- if tools %}\n    {%- for tool in tools %}\n        {%- set ns.tools_system_message = ns.tools_system_message + '\\n' + (tool | tojson) %}\n    {%- endfor %}\n    {%- set ns.tools_system_message = ns.tools_system_message + tools_system_message_suffix %}\n{%- else %}\n    {%- set ns.tools_system_message = '' %}\n{%- endif %}\n{%- if documents %}\n    {%- for document in documents %}\n        {%- set ns.documents_system_message = ns.documents_system_message + '\\n' + (document | tojson) %}\n    {%- endfor %}\n    {%- set ns.documents_system_message = ns.documents_system_message + documents_system_message_suffix %}\n{%- else %}\n    {%- set ns.documents_system_message = '' %}\n{%- endif %}\n{%- if messages[0].role == 'system' %}\n    {%- if messages[0].content is string %}\n        {%- set ns.system_message = messages[0].content %}\n    {%- elif messages[0].content is iterable %}\n        {%- for entry in messages[0].content %}\n            {%- if entry.type== 'text' %}\n                {%- if ns.system_message != '' %}\n                    {%- set ns.system_message = ns.system_message + '\\n' %}\n                {%- endif %}\n                {%- set ns.system_message = ns.system_message + entry.text %}\n            {%- endif %}\n        {%- endfor %}\n    {%- endif %}\n    {%- if tools and documents %}\n        {%- set ns.system_message = ns.system_message + '\\n\\n' +  ns.tools_system_message + '\\n\\n' + ns.documents_system_message %}\n    {%- elif tools %}\n        {%- set ns.system_message = ns.system_message + '\\n\\n' + ns.tools_system_message %}\n    {%- elif documents %}\n        {%- set ns.system_message = ns.system_message + '\\n\\n' + ns.documents_system_message %}\n    {%- endif %}\n{%- else %}\n    {%- if tools and documents %}\n        {%- set ns.system_message = ns.tools_system_message + '\\n\\n' + ns.documents_system_message  %}\n    {%- elif tools %}\n        {%- set ns.system_message = ns.tools_system_message %}\n    {%- elif documents %}\n        {%- set ns.system_message = ns.documents_system_message %}\n    {%- endif %}\n{%- endif %}\n{%- if ns.system_message %}\n    {{- '<|start_of_role|>system<|end_of_role|>' + ns.system_message + '<|end_of_text|>\\n' }}\n{%- endif %}\n{%- for message in messages %}\n    {%- set content = namespace(val='') %}\n    {%- if message.content is string %}\n        {%- set content.val = message.content %}\n    {%- else %}\n        {%- if message.content is iterable %}\n            {%- for entry in message.content %}\n                {%- if entry.type== 'text' %}\n                    {%- if content.val != '' %}\n                        {%- set content.val = content.val + '\\n' %}\n                    {%- endif %}\n                    {%- set content.val = content.val + entry.text %}\n                {%- endif %}\n            {%- endfor %}\n        {%- endif %}\n    {%- endif %}\n    {%- if (message.role == 'user') or (message.role == 'system' and not loop.first) %}\n        {{- '<|start_of_role|>' + message.role + '<|end_of_role|>' + content.val + '<|end_of_text|>\\n' }}\n    {%- elif message.role == 'assistant' %}\n        {{- '<|start_of_role|>' + message.role + '<|end_of_role|>' + content.val }}\n        {%- if message.tool_calls %}\n            {%- for tool_call in message.tool_calls %}\n                {%- if (loop.first and content.val) or (not loop.first) %}\n                    {{- '\\n' }}\n                {%- endif %}\n                {%- if tool_call.function %}\n                    {%- set tool_call = tool_call.function %}\n                {%- endif %}\n                {{- '<tool_call>\\n{\"name\": \"' }}\n                {{- tool_call.name }}\n                {{- '\", \"arguments\": ' }}\n                {%- if tool_call.arguments is string %}\n                    {{- tool_call.arguments }}\n                {%- else %}\n                    {{- tool_call.arguments | tojson }}\n                {%- endif %}\n                {{- '}\\n</tool_call>' }}\n            {%- endfor %}\n        {%- endif %}\n        {{- '<|end_of_text|>\\n' }}\n    {%- elif message.role == 'tool' %}\n        {%- if loop.first or (messages[loop.index0 - 1].role != 'tool') %}\n            {{- '<|start_of_role|>user<|end_of_role|>' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- content.val }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != 'tool') %}\n            {{- '<|end_of_text|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|start_of_role|>assistant<|end_of_role|>' }}\n{%- endif %}",
+		ollama: {
+			template:
+				'{{- /*\n\n------ MESSAGE PARSING ------\n\n*/}}\n{{- /*\nDeclare the system prompt chunks used for different features\n*/}}\n{{- $tools_system_message_prefix := "You are a helpful assistant with access to the following tools. You may call one or more tools to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>" }}\n{{- $tools_system_message_suffix := "\\n</tools>\\n\\nFor each tool call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\"name\\": <function-name>, \\"arguments\\": <args-json-object>}\\n</tool_call>. If a tool does not exist in the provided list of tools, notify the user that you do not have the ability to fulfill the request." }}\n{{- $documents_system_message_prefix := "You are a helpful assistant with access to the following documents. You may use one or more documents to assist with the user query.\\n\\nYou are given a list of documents within <documents></documents> XML tags:\\n<documents>" }}\n{{- $documents_system_message_suffix := "\\n</documents>\\n\\nWrite the response to the user\'s input by strictly aligning with the facts in the provided documents. If the information needed to answer the question is not available in the documents, inform the user that the question cannot be answered based on the available data." }}\n\n{{- /*\nDeclare the prompt structure variables to be filled in from messages\n*/}}\n{{- $tools_system_message := "" }}\n{{- $documents_system_message := "" }}\n{{- $system_message := "" }}\n{{- $document_counter := 0 }}\n{{- $last_query_index := 0 }}\n\n{{- /*\nOutput parsing heuristic\n\nOllama has very specific heuristics for parsing the tags for thinking and tool\ncalling. Rather than contorting the actual message expansion to match the\nexpectations, we explicitly put them here behind an unreachable condition.\n*/}}\n{{- if false }}\n    {{- /* tool calls: https://github.com/ollama/ollama/blob/main/tools/template.go#L17 */}}\n    {{- if .ToolCalls }}<tool_call>{{- end }}\n{{- end }}\n\n{{- /*\nCreate tools system message chunk\n*/}}\n{{- if .Tools }}\n    {{- $tools_system_message = print $tools_system_message_prefix }}\n    {{- range $_, $tool_body := .Tools }}\n        {{- $tools_system_message = print $tools_system_message "\\n" (json $tool_body) }}\n    {{- end }}\n    {{- $tools_system_message = print $tools_system_message $tools_system_message_suffix }}\n{{- end }}\n\n\n{{- /*\nLoop over messages to parse variables:\n\n- User provided documents in the "document" role\n- Last user query index\n- Initial system message\n\nNOTE: Since Ollama collates consecutive roles, for documents, we work around\n    this by allowing the role to contain a qualifier after the role string. This\n    is also then used as the title of the document.\n*/ -}}\n{{- range $index, $_ := .Messages }}\n    {{- if (and (eq .Role "system") (eq $index 0)) }}\n        {{- if ne $system_message "" }}\n            {{- $system_message = print $system_message "\\n" }}\n        {{- end }}\n        {{- $system_message = print $system_message .Content }}\n    {{- else if eq .Role "user" }}\n        {{- /*\n        NOTE: 31 == len \'<tool_response></tool_response>\'. We only check the\n            prefix match since go template doesn\'t support negative indexing.\n        */}}\n        {{- if or (lt (len .Content) 31) (ne (slice .Content 0 15) "<tool_response>") }}\n            {{- $last_query_index = $index }}\n        {{- end }}\n    {{- else if (and (ge (len .Role) 8) (eq (slice .Role 0 8) "document")) }}\n        {{- if (eq $document_counter 0)}}\n            {{- $documents_system_message = print $documents_system_message_prefix}}\n        {{- end }}\n        {{- $identifier := ""}}\n        {{- if (ge (len .Role) 9) }}\n            {{- $identifier = slice .Role 9}}\n        {{- end }}\n        {{- if (eq $identifier "") }}\n            {{- $identifier := print $document_counter}}\n        {{- end }}\n        {{- $documents_system_message = print $documents_system_message "\\n{\\"doc_id\\": " $document_counter ", \\"title\\": \\"" $identifier "\\", \\"text\\": \\"" .Content "\\"}"}}\n        {{- $document_counter = len (printf "a%*s" $document_counter "")}}\n    {{- end }}\n{{- end }}\n{{- if (ne $document_counter 0) }}\n{{- $documents_system_message = print $documents_system_message $documents_system_message_suffix}}\n{{- end }}\n\n{{- /*\nConstruct the full system message\n*/}}\n{{- if ne $tools_system_message "" }}\n    {{- if ne $system_message "" }}\n        {{- $system_message = print $system_message "\\n\\n" }}\n    {{- end }}\n    {{- $system_message = print $system_message $tools_system_message }}\n{{- end }}\n{{- if ne $documents_system_message "" }}\n    {{- if ne $system_message "" }}\n        {{- $system_message = print $system_message "\\n\\n" }}\n    {{- end }}\n    {{- $system_message = print $system_message $documents_system_message }}\n{{- end }}\n\n{{- /*\n\n------ TEMPLATE EXPANSION ------\n\n*/}}\n{{- if ne $system_message "" -}}\n<|start_of_role|>system<|end_of_role|>{{ $system_message }}<|end_of_text|>{{ "\\n" }}\n{{- end }}\n{{- $prev_role := "" }}\n{{- range $message_index, $_ := .Messages }}\n    {{- $next_message_index := len (printf "a%*s" $message_index "") }}\n    {{- if or (eq .Role "user") (and (eq .Role "system") (ne $message_index 0)) }}\n        {{- "" }}<|start_of_role|>{{- .Role }}<|end_of_role|>{{- .Content }}<|end_of_text|>{{ "\\n" }}\n    {{- else if eq .Role "assistant" -}}\n        {{- "" }}<|start_of_role|>{{ .Role }}<|end_of_role|>{{ .Content }}\n\n        {{- /* Expand tool calls */}}\n        {{- $content := .Content }}\n        {{- if .ToolCalls }}\n            {{- range $tool_idx, $tool_call := .ToolCalls }}\n                {{- if or (ne $content "") (ne $tool_idx 0) }}\n                   {{- "\\n" }}\n                {{- end }}\n                {{- print "<tool_call>\\n{\\"name\\": \\"" $tool_call.Function.Name "\\", \\"arguments\\": " (json $tool_call.Function.Arguments) "}\\n</tool_call>" }}\n            {{- end }}\n        {{- end }}\n\n        {{- /* End assistant block */}}<|end_of_text|>{{ "\\n" }}\n\n    {{- else if eq .Role "tool" }}\n        {{- if (ne $prev_role "tool") -}}\n            <|start_of_role>user<|end_of_role|>\n        {{- end }}\n        {{- "\\n" }}<tool_response>{{ print "\\n" .Content "\\n" }}</tool_response>\n        {{- if ne $next_message_index (len $.Messages) }}\n            {{- $next_element := index $.Messages $next_message_index }}\n            {{- if ne $next_element.Role "tool" -}}\n                <|end_of_text|>{{ "\\n" }}\n            {{- end }}\n        {{- else -}}\n            <|end_of_text|>{{ "\\n" }}\n        {{- end }}\n    {{- end }}\n\n    {{- /* If not an assistant message at the end, add generation prompt */}}\n    {{- if and (eq $next_message_index (len $.Messages)) (ne .Role "assistant") }}\n        {{- "<|start_of_role|>assistant<|end_of_role|>" }}\n    {{- end }}\n{{- end }}',
+			tokens: [
+				"<tools>",
+				"<tool_call>",
+				"<documents>",
+				"<|start_of_role|>",
+				"<|end_of_role|>",
+				"<|end_of_text|>",
+				"<tool_response>",
 			],
 		},
 	},

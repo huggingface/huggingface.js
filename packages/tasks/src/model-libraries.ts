@@ -180,6 +180,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
 	},
+	boltzgen: {
+		prettyLabel: "BoltzGen",
+		repoName: "BoltzGen",
+		repoUrl: "https://github.com/HannesStark/boltzgen",
+		filter: false,
+		countDownloads: `path:"boltzgen1_diverse.ckpt"`,
+	},
 	champ: {
 		prettyLabel: "Champ",
 		repoName: "Champ",
@@ -201,6 +208,19 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.chattts,
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
+	},
+	"chronos-forecasting": {
+		prettyLabel: "Chronos",
+		repoName: "Chronos",
+		repoUrl: "https://github.com/amazon-science/chronos-forecasting",
+		snippets: snippets.chronos_forecasting,
+	},
+	"cloud-agents": {
+		prettyLabel: "Cloud Agents",
+		repoName: "Cloud Agents",
+		repoUrl: "https://huggingface.co/OpenPeerAI/Cloud-Agents",
+		filter: false,
+		countDownloads: `path:"setup.py"`,
 	},
 	colpali: {
 		prettyLabel: "ColPali",
@@ -279,6 +299,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/nari-labs/dia",
 		snippets: snippets.dia,
 		filter: false,
+	},
+	"diff-interpretation-tuning": {
+		prettyLabel: "Diff Interpretation Tuning",
+		repoName: "Diff Interpretation Tuning",
+		repoUrl: "https://github.com/Aviously/diff-interpretation-tuning",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	diffree: {
 		prettyLabel: "Diffree",
@@ -378,6 +405,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/hub/fastai",
 		snippets: snippets.fastai,
 		filter: true,
+	},
+	fastprint: {
+		prettyLabel: "Fast Print",
+		repoName: "Fast Print",
+		repoUrl: "https://huggingface.co/OpenPeerAI/FastPrint",
+		countDownloads: `path_extension:"cs"`,
 	},
 	fasttext: {
 		prettyLabel: "fastText",
@@ -536,6 +569,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras_hub,
 		filter: true,
 	},
+	kernels: {
+		prettyLabel: "Kernels",
+		repoName: "Kernels",
+		repoUrl: "https://github.com/huggingface/kernels",
+		docsUrl: "https://huggingface.co/docs/kernels",
+		snippets: snippets.kernels,
+		countDownloads: `path_filename:"_ops" AND path_extension:"py"`,
+	},
 	"kimi-audio": {
 		prettyLabel: "KimiAudio",
 		repoName: "KimiAudio",
@@ -567,12 +608,19 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/webis-de/lightning-ir",
 		snippets: snippets.lightning_ir,
 	},
+	litert: {
+		prettyLabel: "LiteRT",
+		repoName: "LiteRT",
+		repoUrl: "https://github.com/google-ai-edge/LiteRT",
+		filter: false,
+		countDownloads: `path_extension:"tflite"`,
+	},
 	"litert-lm": {
 		prettyLabel: "LiteRT-LM",
 		repoName: "LiteRT-LM",
 		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
 		filter: false,
-		countDownloads: `path_extension:"litertlm"`,
+		countDownloads: `path_extension:"litertlm" OR path_extension:"task"`,
 	},
 	lerobot: {
 		prettyLabel: "LeRobot",
@@ -782,8 +830,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "PaddleOCR",
 		repoName: "PaddleOCR",
 		repoUrl: "https://github.com/PaddlePaddle/PaddleOCR",
+		docsUrl: "https://www.paddleocr.ai/",
 		snippets: snippets.paddleocr,
 		filter: true,
+		countDownloads: `path_extension:"safetensors" OR path:"inference.pdiparams"`,
 	},
 	peft: {
 		prettyLabel: "PEFT",
@@ -843,6 +893,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/clementchadebec/benchmark_VAE",
 		snippets: snippets.pythae,
 		filter: false,
+	},
+	quantumpeer: {
+		prettyLabel: "QuantumPeer",
+		repoName: "QuantumPeer",
+		repoUrl: "https://github.com/OpenPeer-AI/QuantumPeer",
+		filter: false,
+		countDownloads: `path_extension:"setup.py"`,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
@@ -922,6 +979,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ByteDance-Seed/SeedVR",
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	"self-forcing": {
+		prettyLabel: "SelfForcing",
+		repoName: "SelfForcing",
+		repoUrl: "https://github.com/guandeh17/Self-Forcing",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
@@ -1076,6 +1140,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
+	tensorrt: {
+		prettyLabel: "TensorRT",
+		repoName: "TensorRT",
+		repoUrl: "https://github.com/NVIDIA/TensorRT",
+		countDownloads: `path_extension:"onnx"`,
+	},
 	tabpfn: {
 		prettyLabel: "TabPFN",
 		repoName: "TabPFN",
@@ -1229,6 +1299,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/vui-ai/vui",
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.vui,
+	},
+	vibevoice: {
+		prettyLabel: "VibeVoice",
+		repoName: "VibeVoice",
+		repoUrl: "https://github.com/microsoft/VibeVoice",
+		snippets: snippets.vibevoice,
+		filter: false,
 	},
 	"wan2.2": {
 		prettyLabel: "Wan2.2",

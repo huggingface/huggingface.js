@@ -33,7 +33,7 @@ interface XorbEvent {
 	}>;
 }
 
-class CurrentXorbInfo {
+export class CurrentXorbInfo {
 	id: number;
 	offset: number;
 	chunks: Array<{ hash: string; length: number; offset: number }>;
@@ -85,7 +85,7 @@ class CurrentXorbInfo {
 export async function* createXorbs(
 	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
 	params: XetWriteTokenParams & {
-		yieldCallback: (event: { event: "fileProgress"; path: string; progress: number }) => void;
+		yieldCallback?: (event: { event: "fileProgress"; path: string; progress: number }) => void;
 	}
 ): AsyncGenerator<
 	| XorbEvent
@@ -192,7 +192,6 @@ export async function* createXorbs(
 					}
 					let chunkIndex = xorb.chunks.length;
 					let chunkXorbId = xorbId;
-					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 
 					// Remove chunks from source data
 					const chunkToCopy = removeChunkFromSourceData(sourceChunks, chunk.length);
@@ -275,6 +274,7 @@ export async function* createXorbs(
 					bytesSinceLastProgressEvent += chunk.length;
 
 					// Collect metadata for building representation at the end
+					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 					chunkMetadata.push({
 						xorbId: chunkXorbId,
 						chunkIndex: chunkIndex,
@@ -286,7 +286,7 @@ export async function* createXorbs(
 					if (bytesSinceLastProgressEvent >= 1_000_000) {
 						// Emit half of the progress when processed locally, other half when uploading the xorb
 						bytesSinceLastProgressEvent = 0;
-						params.yieldCallback({
+						params.yieldCallback?.({
 							event: "fileProgress",
 							path: fileSource.path,
 							progress:
@@ -361,14 +361,14 @@ export async function* createXorbs(
 	}
 }
 
-function backtrackDedup(
+export function backtrackDedup(
 	xorb: CurrentXorbInfo,
 	computeHmac: (hash: string, key: string) => string,
 	shardData: ShardData,
 	chunkCache: ChunkCache,
 	chunkMetadata: { xorbId: number | string; chunkIndex: number; length: number }[],
 	dedupedBytes: number
-) {
+): number {
 	const chunkIndexesToBacktrackFor = new Map<number, { xorbId: number; chunkIndex: number }>();
 	for (
 		let chunkToRecheckIndex = xorb.immutableData?.chunkIndex ?? 0;
@@ -453,10 +453,15 @@ function backtrackDedup(
 	}
 	xorb.chunks = newXorbChunks;
 	xorb.offset = currentOffset;
+	// Update chunkMetadata and chunkCache with new chunk indexes for the current xorb chunks
 	for (const chunk of chunkMetadata) {
 		if (chunk.xorbId === xorb.id) {
 			const newIndex = oldIndexToNewIndex.get(chunk.chunkIndex);
 			if (newIndex !== undefined) {
+				const cached = chunkCache.getChunk(xorb.chunks[newIndex].hash, null);
+				if (cached !== undefined && cached.xorbIndex === chunk.xorbId && cached.chunkIndex === chunk.chunkIndex) {
+					chunkCache.updateChunkIndex(xorb.chunks[newIndex].hash, newIndex);
+				}
 				chunk.chunkIndex = newIndex;
 			}
 		}
