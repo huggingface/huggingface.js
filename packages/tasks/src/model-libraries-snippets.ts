@@ -132,6 +132,30 @@ wav = model.generate(text, audio_prompt_path=AUDIO_PROMPT_PATH)
 ta.save("test-2.wav", wav, model.sr)`,
 ];
 
+export const chronos_forecasting = (model: ModelData): string[] => {
+	const installSnippet = `pip install chronos-forecasting`;
+
+	const exampleSnippet = `import pandas as pd
+from chronos import BaseChronosPipeline
+
+pipeline = BaseChronosPipeline.from_pretrained("${model.id}", device_map="cuda")
+
+# Load historical data
+context_df = pd.read_csv("https://autogluon.s3.us-west-2.amazonaws.com/datasets/timeseries/misc/AirPassengers.csv")
+
+# Generate predictions
+pred_df = pipeline.predict_df(
+    context_df,
+    prediction_length=36,  # Number of steps to forecast
+    quantile_levels=[0.1, 0.5, 0.9],  # Quantiles for probabilistic forecast
+    id_column="item_id",  # Column identifying different time series
+    timestamp_column="Month",  # Column with datetime information
+    target="#Passengers",  # Column(s) with time series values to predict
+)`;
+
+	return [installSnippet, exampleSnippet];
+};
+
 export const contexttab = (): string[] => {
 	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
 

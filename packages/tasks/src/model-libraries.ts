@@ -209,6 +209,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	"chronos-forecasting": {
+		prettyLabel: "Chronos",
+		repoName: "Chronos",
+		repoUrl: "https://github.com/amazon-science/chronos-forecasting",
+		snippets: snippets.chronos_forecasting,
+	},
 	"cloud-agents": {
 		prettyLabel: "Cloud Agents",
 		repoName: "Cloud Agents",
