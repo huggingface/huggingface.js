@@ -8,6 +8,7 @@ export interface XetWriteTokenParams {
 	repo: RepoId;
 	rev: string;
 	isPullRequest?: boolean;
+	xetRefreshWriteTokenUrl: string | undefined;
 }
 
 const JWT_SAFETY_PERIOD = 60_000;
@@ -47,9 +48,10 @@ export async function xetWriteToken(params: XetWriteTokenParams): Promise<{ acce
 
 	const promise = (async () => {
 		const resp = await (params.fetch ?? fetch)(
-			`${params.hubUrl}/api/${params.repo.type}s/${params.repo.name}/xet-write-token/${encodeURIComponent(
-				params.rev
-			)}` + (params.isPullRequest ? "?create_pr=1" : ""),
+			params.xetRefreshWriteTokenUrl ??
+				`${params.hubUrl}/api/${params.repo.type}s/${params.repo.name}/xet-write-token/${encodeURIComponent(
+					params.rev
+				)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 			{
 				headers: params.accessToken
 					? {

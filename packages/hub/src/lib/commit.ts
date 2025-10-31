@@ -350,6 +350,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			if (useXet && json.transfer !== "xet") {
 				useXet = false;
 			}
+			let xetRefreshWriteTokenUrl: string | undefined;
+			let xetSessionId: string | undefined;
 
 			if (useXet) {
 				// First get all the files that are already uploaded out of the way
@@ -374,6 +376,17 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							progress: 1,
 							state: "uploading",
 						};
+					} else {
+						xetRefreshWriteTokenUrl = obj.actions.upload.href;
+						// Also, obj.actions.upload.header: {
+						//   X-Xet-Cas-Url:          string;
+						//   X-Xet-Access-Token:     string;
+						//   X-Xet-Token-Expiration: string;
+						//   X-Xet-Session-Id:       string;
+						// }
+						const headers = new Headers(obj.actions.upload.header);
+						xetSessionId = headers.get("X-Xet-Session-Id") ?? undefined;
+						// todo: use other data, like x-xet-cas-url, ...
 					}
 				}
 				const source = (async function* () {
@@ -383,44 +396,49 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							continue;
 						}
 						abortSignal?.throwIfAborted();
-
-						// todo: load writeTokenUrl from obj.actions.upload.header or obj.actions.upload.href
 						yield { content: op.content, path: op.path, sha256: obj.oid };
 					}
 				})();
-				const sources = splitAsyncGenerator(source, 5);
-				yield* eventToGenerator((yieldCallback, returnCallback, rejectCallback) =>
-					Promise.all(
-						sources.map(async function (source) {
-							for await (const event of uploadShards(source, {
-								fetch: params.fetch,
-								accessToken,
-								hubUrl: params.hubUrl ?? HUB_URL,
-								repo: repoId,
-								// todo: maybe leave empty if PR?
-								rev: params.branch ?? "main",
-								isPullRequest: params.isPullRequest,
-								yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
-							})) {
-								if (event.event === "file") {
-									yieldCallback({
-										event: "fileProgress" as const,
-										path: event.path,
-										progress: 1,
-										state: "uploading" as const,
-									});
-								} else if (event.event === "fileProgress") {
-									yieldCallback({
-										event: "fileProgress" as const,
-										path: event.path,
-										progress: event.progress,
-										state: "uploading" as const,
-									});
+				if (xetRefreshWriteTokenUrl) {
+					const xetRefreshWriteTokenUrlFixed = xetRefreshWriteTokenUrl;
+					const sources = splitAsyncGenerator(source, 5);
+					yield* eventToGenerator((yieldCallback, returnCallback, rejectCallback) =>
+						Promise.all(
+							sources.map(async function (source) {
+								for await (const event of uploadShards(source, {
+									fetch: params.fetch,
+									accessToken,
+									hubUrl: params.hubUrl ?? HUB_URL,
+									repo: repoId,
+									xetRefreshWriteTokenUrl: xetRefreshWriteTokenUrlFixed,
+									xetSessionId,
+									// todo: maybe leave empty if PR?
+									rev: params.branch ?? "main",
+									isPullRequest: params.isPullRequest,
+									yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
+								})) {
+									if (event.event === "file") {
+										yieldCallback({
+											event: "fileProgress" as const,
+											path: event.path,
+											progress: 1,
+											state: "uploading" as const,
+										});
+									} else if (event.event === "fileProgress") {
+										yieldCallback({
+											event: "fileProgress" as const,
+											path: event.path,
+											progress: event.progress,
+											state: "uploading" as const,
+										});
+									}
 								}
-							}
-						})
-					).then(() => returnCallback(undefined), rejectCallback)
-				);
+							})
+						).then(() => returnCallback(undefined), rejectCallback)
+					);
+				} else {
+					// No LFS file to upload
+				}
 			} else {
 				yield* eventToGenerator<CommitProgressEvent, void>((yieldCallback, returnCallback, rejectCallback) => {
 					return promisesQueueStreaming(
