@@ -1,5 +1,9 @@
 completion = client.chat.completions.create(
+{% if directRequest %}
+    model="{{ model.id }}",
+{% else %}
     model="{{ providerModelId }}",
+{% endif %}
 {{ inputs.asPythonString }}
 )
 
