@@ -8,8 +8,10 @@ const chatCompletion = await client.chatCompletion({
 {% endif %}
 {% if directRequest %}
     provider: "{{ provider }}",
-{% endif %}
+    model: "{{ model.id }}",
+{% else %}
     model: "{{ providerModelId }}",
+{% endif %}
 {{ inputs.asTsString }}
 }{% if billTo %}, {
     billTo: "{{ billTo }}",
