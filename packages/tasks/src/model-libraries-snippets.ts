@@ -359,7 +359,7 @@ const diffusersVideoDefaultPrompt = "A man with short gray hair plays a red elec
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipe = DiffusionPipeline.from_pretrained("${model.id}")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16)
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
@@ -519,7 +519,7 @@ export const diffusers = (model: ModelData): string[] => {
 		codeSnippets = diffusers_inpainting(model);
 	} else if (model.tags.includes("controlnet")) {
 		codeSnippets = diffusers_controlnet(model);
-	} else if (model.tags.includes("lora")) {
+	} else if (model.tags.some(t => t.toLowerCase() === "lora")) {
 		if (model.pipeline_tag === "image-to-image") {
 			codeSnippets = diffusers_lora_image_to_image(model);
 		} else if (model.pipeline_tag === "image-to-video") {
