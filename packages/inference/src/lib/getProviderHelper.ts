@@ -316,7 +316,12 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: InferenceTask | undefined
 ): TaskProviderHelper {
-	if ((provider === "hf-inference" && !task) || provider === "auto") {
+	if (
+		(provider === "hf-inference" && !task) ||
+		provider === "auto" ||
+		provider === "cheapest" ||
+		provider === "fastest"
+	) {
 		return new HFInference.HFInferenceTask();
 	}
 	if (!task) {

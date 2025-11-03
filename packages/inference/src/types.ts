@@ -70,9 +70,13 @@ export const INFERENCE_PROVIDERS = [
 	"zai-org",
 ] as const;
 
-export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
+export const INFERENCE_POLICIES = ["auto", "cheapest", "fastest"] as const;
+
+export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, ...INFERENCE_POLICIES] as const;
 
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
+
+export type InferencePolicy = (typeof INFERENCE_POLICIES)[number];
 
 export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
 

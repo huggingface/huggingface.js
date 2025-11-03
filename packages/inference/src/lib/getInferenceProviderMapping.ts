@@ -179,6 +179,10 @@ export async function resolveProvider(
 		);
 		provider = "auto";
 	}
+	if (provider === "cheapest" || provider === "fastest") {
+		// TODO: Implement cheapest and fastest provider selection
+		throw new InferenceClientInputError(`'cheapest' and 'fastest' policies are not supported yet.`);
+	}
 	if (provider === "auto") {
 		if (!modelId) {
 			throw new InferenceClientInputError("Specifying a model is required when provider is 'auto'");
