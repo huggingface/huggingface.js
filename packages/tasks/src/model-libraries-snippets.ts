@@ -384,7 +384,7 @@ const diffusers_image_to_video = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
-pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.float16, device_map="cuda)
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.float16, device_map="cuda")
 pipe.to("cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
