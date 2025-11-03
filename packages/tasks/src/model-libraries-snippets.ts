@@ -526,7 +526,7 @@ export const diffusers = (model: ModelData): string[] => {
 		codeSnippets = diffusers_inpainting(model);
 	} else if (model.tags.includes("controlnet")) {
 		codeSnippets = diffusers_controlnet(model);
-	} else if (model.tags.some(t => t.toLowerCase() === "lora")) {
+	} else if (model.tags.includes("lora")) {
 		if (model.pipeline_tag === "image-to-image") {
 			codeSnippets = diffusers_lora_image_to_image(model);
 		} else if (model.pipeline_tag === "image-to-video") {
