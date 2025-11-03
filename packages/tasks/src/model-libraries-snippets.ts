@@ -348,7 +348,7 @@ dam = DescribeAnythingModel(
 )`,
 ];
 
-const diffusers_install = "pip install -U diffusers transformers";
+const diffusers_install = "pip install -U diffusers transformers accelerate";
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
