@@ -177,8 +177,8 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		const inputs = opts?.inputs
 			? { inputs: opts.inputs }
 			: inputPreparationFn
-				? inputPreparationFn(model, opts)
-				: { inputs: getModelInputSnippet(model) };
+			  ? inputPreparationFn(model, opts)
+			  : { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
 			providerModelId,
 			providerHelper,
@@ -213,13 +213,13 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			!opts?.endpointUrl && !opts?.directRequest
 				? provider !== "auto"
 					? {
-						...inputs,
-						model: `${model.id}:${provider}`,
-					}
+							...inputs,
+							model: `${model.id}:${provider}`,
+					  }
 					: {
-						...inputs,
-						model: `${model.id}`, // if no :provider => auto
-					}
+							...inputs,
+							model: `${model.id}`, // if no :provider => auto
+					  }
 				: providerInputs;
 
 		/// Prepare template injection data
@@ -517,8 +517,8 @@ function replaceAccessTokenPlaceholder(
 	const accessTokenEnvVar = useHfToken
 		? "HF_TOKEN" // e.g. routed request or hf-inference
 		: endpointUrl
-			? "API_TOKEN"
-			: provider.toUpperCase().replace("-", "_") + "_API_KEY"; // e.g. "REPLICATE_API_KEY"
+		  ? "API_TOKEN"
+		  : provider.toUpperCase().replace("-", "_") + "_API_KEY"; // e.g. "REPLICATE_API_KEY"
 
 	// Replace the placeholder with the env variable
 	if (language === "sh") {
