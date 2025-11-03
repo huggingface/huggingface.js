@@ -1,5 +1,5 @@
 stream = client.chat.completions.create(
-    model="{{ model.id }}",
+    model="{{ providerModelId }}",
 {{ inputs.asPythonString }}
     stream=True,
 )

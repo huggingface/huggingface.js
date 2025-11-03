@@ -3,8 +3,7 @@ import { InferenceClient } from "@huggingface/inference";
 const client = new InferenceClient("hf_xxx");
 
 const chatCompletion = await client.chatCompletion({
-    provider: "hf-inference",
-    model: "meta-llama/Llama-3.1-8B-Instruct",
+    model: "meta-llama/Llama-3.1-8B-Instruct:hf-inference",
     messages: [
         {
             role: "user",

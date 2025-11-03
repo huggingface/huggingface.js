@@ -4,7 +4,7 @@ const client = new InferenceClient(process.env.TOGETHER_API_KEY);
 
 const chatCompletion = await client.chatCompletion({
     provider: "together",
-    model: "meta-llama/Llama-3.1-8B-Instruct",
+    model: "<together alias for meta-llama/Llama-3.1-8B-Instruct>",
     messages: [
         {
             role: "user",
