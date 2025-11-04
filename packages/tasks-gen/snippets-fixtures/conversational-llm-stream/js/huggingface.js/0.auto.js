@@ -5,7 +5,6 @@ const client = new InferenceClient(process.env.HF_TOKEN);
 let out = "";
 
 const stream = client.chatCompletionStream({
-    provider: "auto",
     model: "meta-llama/Llama-3.1-8B-Instruct",
     messages: [
         {
