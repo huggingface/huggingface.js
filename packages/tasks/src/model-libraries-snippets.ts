@@ -156,23 +156,22 @@ pred_df = pipeline.predict_df(
 	return [installSnippet, exampleSnippet];
 };
 
-export const contexttab = (): string[] => {
-	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
+export const sap_rpt_one_oss = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/sap-rpt-1-oss`;
 
 	const classificationSnippet = `# Run a classification task
 from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-from contexttab import ConTextTabClassifier
+from sap_rpt_oss import SAP_RPT_OSS_Classifier
 
 # Load sample data
 X, y = load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
 
-# Initialize a classifier
-# You can omit checkpoint and checkpoint_revision to use the default model
-clf = ConTextTabClassifier(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+# Initialize a classifier, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+clf = SAP_RPT_OSS_Classifier(max_context_size=8192, bagging=8)
 
 clf.fit(X_train, y_train)
 
@@ -187,8 +186,7 @@ from sklearn.datasets import fetch_openml
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 
-from contexttab import ConTextTabRegressor
-
+from sap_rpt_oss import SAP_RPT_OSS_Regressor
 
 # Load sample data
 df = fetch_openml(data_id=531, as_frame=True)
@@ -198,9 +196,8 @@ y = df.target.astype(float)
 # Train-test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
 
-# Initialize the regressor
-# You can omit checkpoint and checkpoint_revision to use the default model
-regressor = ConTextTabRegressor(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+# Initialize the regressor, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+regressor = SAP_RPT_OSS_Regressor(max_context_size=8192, bagging=8)
 
 regressor.fit(X_train, y_train)
 
