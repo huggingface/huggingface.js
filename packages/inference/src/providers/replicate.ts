@@ -97,12 +97,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 		void headers;
 
 		// Handle string output
-		if (
-			typeof res === "object" &&
-			"output" in res &&
-			typeof res.output === "string" &&
-			isUrl(res.output)
-		) {
+		if (typeof res === "object" && "output" in res && typeof res.output === "string" && isUrl(res.output)) {
 			if (outputType === "json") {
 				return { ...res };
 			}
