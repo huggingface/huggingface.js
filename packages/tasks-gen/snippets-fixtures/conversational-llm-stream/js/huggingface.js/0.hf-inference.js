@@ -5,8 +5,7 @@ const client = new InferenceClient(process.env.HF_TOKEN);
 let out = "";
 
 const stream = client.chatCompletionStream({
-    provider: "hf-inference",
-    model: "meta-llama/Llama-3.1-8B-Instruct",
+    model: "meta-llama/Llama-3.1-8B-Instruct:hf-inference",
     messages: [
         {
             role: "user",

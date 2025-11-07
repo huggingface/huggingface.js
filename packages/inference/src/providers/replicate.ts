@@ -95,6 +95,20 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 	): Promise<string | Blob | Record<string, unknown>> {
 		void url;
 		void headers;
+
+		// Handle string output
+		if (typeof res === "object" && "output" in res && typeof res.output === "string" && isUrl(res.output)) {
+			if (outputType === "json") {
+				return { ...res };
+			}
+			if (outputType === "url") {
+				return res.output;
+			}
+			const urlResponse = await fetch(res.output);
+			return await urlResponse.blob();
+		}
+
+		// Handle array output
 		if (
 			typeof res === "object" &&
 			"output" in res &&
