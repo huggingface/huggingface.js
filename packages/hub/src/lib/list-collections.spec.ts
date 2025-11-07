@@ -1,185 +1,156 @@
 import { describe, expect, it } from "vitest";
 import { listCollections } from "./list-collections";
 import type { ApiCollectionInfo } from "../types/api/api-collection";
-import { TEST_HUB_URL } from "../test/consts";
 
 describe("listCollections", () => {
 	it("should list collections", async () => {
 		const results: ApiCollectionInfo[] = [];
 
 		for await (const entry of listCollections({
-			search: { owner: ["quanghuynt14"] },
-			hubUrl: TEST_HUB_URL,
+			search: { owner: ["huggingfacejs"] },
 		})) {
-			if (entry.slug !== "quanghuynt14/test-collection-6866ff686ca2d2e0a1931507") {
-				continue;
-			}
-
-			if (typeof entry.lastUpdated === "string") {
-				entry.lastUpdated = "2025-07-03T22:18:56.239Z";
-			}
-
-			if (entry.items && Array.isArray(entry.items)) {
-				entry.items.map((item) => {
-					if ("lastModified" in item && typeof item.lastModified === "string") {
-						item.lastModified = "2025-07-01T00:36:29.000Z";
-					}
-					if ("lastUpdated" in item && typeof item.lastUpdated === "string") {
-						item.lastUpdated = "2025-07-01T00:41:27.525Z";
-					}
-				});
-			}
-
 			results.push(entry);
 		}
 
-		const collection = results[0];
-		const items = collection.items;
-		collection.items = [];
+		expect(results.length).toBe(1);
 
-		// Check all properties of the collection except items
-		expect(collection).deep.equal({
-			slug: "quanghuynt14/test-collection-6866ff686ca2d2e0a1931507",
-			title: "Test Collection",
-			description: "This collection is only for test",
-			gating: false,
-			lastUpdated: "2025-07-03T22:18:56.239Z",
-			owner: {
-				_id: "6866ff3936a7677f427f99e3",
-				avatarUrl: "/avatars/b51088e22fb7194888551365b1bafada.svg",
-				fullname: "Quang-Huy Tran",
-				name: "quanghuynt14",
-				type: "user",
-				isPro: false,
-				isHf: false,
-				isHfAdmin: false,
-				isMod: false,
-			},
-			items: [],
-			theme: "purple",
-			private: false,
-			upvotes: 0,
-			isUpvotedByUser: false,
-		});
+		const itemTypes = results[0].items.map((item) => item.type);
+		expect(itemTypes).toEqual(["dataset", "collection", "space", "paper"]);
 
-		// Check for item type model
-		expect(items[0]).deep.equal({
-			_id: "686700086ca2d2e0a193150b",
-			position: 0,
-			type: "model",
-			author: "quanghuynt14",
-			authorData: {
-				_id: "6866ff3936a7677f427f99e3",
-				avatarUrl: "/avatars/b51088e22fb7194888551365b1bafada.svg",
-				fullname: "Quang-Huy Tran",
-				name: "quanghuynt14",
-				type: "user",
-				isPro: false,
-				isHf: false,
-				isHfAdmin: false,
-				isMod: false,
-			},
-			downloads: 0,
-			gated: false,
-			id: "quanghuynt14/TestModel",
-			availableInferenceProviders: [],
-			lastModified: "2025-07-01T00:36:29.000Z",
-			likes: 0,
-			private: false,
-			repoType: "model",
-			isLikedByUser: false,
-		});
-
-		// Check for item type dataset
-		expect(items[1]).deep.equal({
-			_id: "686701cd86ea6972ba6c9da5",
-			position: 1,
-			type: "dataset",
-			author: "quanghuynt14",
-			downloads: 0,
-			gated: false,
-			id: "quanghuynt14/TestDataset",
-			lastModified: "2025-07-01T00:36:29.000Z",
-			private: false,
-			repoType: "dataset",
-			likes: 0,
-			isLikedByUser: false,
-		});
-
-		// Check for item type space
-		expect(items[2]).deep.equal({
-			_id: "6867000f6ca2d2e0a193150e",
-			position: 2,
-			type: "space",
-			author: "quanghuynt14",
-			authorData: {
-				_id: "6866ff3936a7677f427f99e3",
-				avatarUrl: "/avatars/b51088e22fb7194888551365b1bafada.svg",
-				fullname: "Quang-Huy Tran",
-				name: "quanghuynt14",
-				type: "user",
-				isPro: false,
-				isHf: false,
-				isHfAdmin: false,
-				isMod: false,
-			},
-			colorFrom: "pink",
-			colorTo: "indigo",
-			createdAt: "2025-07-03T22:10:39.000Z",
-			emoji: "🏆",
-			id: "quanghuynt14/TestSpace",
-			lastModified: "2025-07-01T00:36:29.000Z",
-			likes: 0,
-			pinned: false,
-			private: false,
-			sdk: "docker",
-			repoType: "space",
-			runtime: {
-				stage: "BUILDING",
-				hardware: {
-					current: null,
-					requested: "cpu-basic",
+		expect(results).toEqual([
+			{
+				slug: "huggingfacejs/test-collection-690df2897fa1945492b8cf42",
+				title: "Test Collection",
+				description: "Only used in E2E tests",
+				gating: false,
+				lastUpdated: expect.any(String),
+				owner: {
+					_id: "6414d83b385a75d7790d5a58",
+					avatarUrl: expect.any(String),
+					fullname: "Huggingface.js",
+					name: "huggingfacejs",
+					type: "org",
+					followerCount: expect.any(Number),
+					isHf: false,
+					isHfAdmin: false,
+					isMod: false,
+					isEnterprise: false,
 				},
-				storage: null,
-				gcTimeout: 172800,
-				replicas: {
-					current: 0,
-					requested: 1,
-				},
+				items: [
+					{
+						_id: "690df2a467ea25a1a346d0ae",
+						author: "huggingfacejs",
+						datasetsServerInfo: {
+							formats: ["imagefolder"],
+							libraries: ["datasets", "mlcroissant"],
+							modalities: ["audio", "image"],
+							numRows: 38,
+							viewer: "viewer",
+						},
+						downloads: 54013,
+						gated: false,
+						id: "huggingfacejs/tasks",
+						isLikedByUser: false,
+						lastModified: "2025-05-21T10:59:37.000Z",
+						likes: 4,
+						position: 0,
+						private: false,
+						repoType: "dataset",
+						type: "dataset",
+					},
+					{
+						_id: "690df2b1954547dac9727da3",
+						description: "Only used in E2E tests",
+						id: "690df2897fa1945492b8cf42",
+						isUpvotedByUser: false,
+						lastUpdated: "2025-11-07T13:24:26.277Z",
+						numberItems: 5,
+						owner: {
+							_id: "6414d83b385a75d7790d5a58",
+							avatarUrl:
+								"https://cdn-avatars.huggingface.co/v1/production/uploads/1679315631188-61d2f90c3c2083e1c08af22d.png",
+							followerCount: 66,
+							fullname: "Huggingface.js",
+							isEnterprise: false,
+							isHf: false,
+							isHfAdmin: false,
+							isMod: false,
+							name: "huggingfacejs",
+							type: "org",
+						},
+						position: 1,
+						shareUrl: "https://hf.co/collections/huggingfacejs/test-collection",
+						slug: "huggingfacejs/test-collection-690df2897fa1945492b8cf42",
+						theme: "pink",
+						title: "Test Collection",
+						type: "collection",
+						upvotes: 0,
+					},
+					{
+						_id: "690df2c49f252aa897a873b2",
+						ai_category: "Model Benchmarking",
+						ai_short_description: "Upload ML models to Hugging Face Hub from your browser",
+						author: "huggingfacejs",
+						authorData: {
+							_id: "6414d83b385a75d7790d5a58",
+							avatarUrl:
+								"https://cdn-avatars.huggingface.co/v1/production/uploads/1679315631188-61d2f90c3c2083e1c08af22d.png",
+							followerCount: 66,
+							fullname: "Huggingface.js",
+							isEnterprise: false,
+							isHf: false,
+							isHfAdmin: false,
+							isMod: false,
+							name: "huggingfacejs",
+							type: "org",
+						},
+						colorFrom: "green",
+						colorTo: "green",
+						createdAt: "2023-03-17T21:33:16.000Z",
+						emoji: "🌎",
+						id: "huggingfacejs/push-model-from-web",
+						isLikedByUser: false,
+						lastModified: "2023-04-01T15:29:38.000Z",
+						likes: 1,
+						pinned: false,
+						position: 2,
+						private: false,
+						repoType: "space",
+						runtime: {
+							hardware: {
+								current: null,
+								requested: null,
+							},
+							replicas: {
+								current: 1,
+								requested: 1,
+							},
+							stage: "RUNNING",
+							storage: null,
+						},
+						sdk: "static",
+						tags: ["static", "region:us"],
+						title: "Push Model From Web",
+						trendingScore: 0,
+						type: "space",
+					},
+					{
+						_id: "690df2d0c9390ed6ab0f88b1",
+						id: "2510.04871",
+						isUpvotedByUser: false,
+						position: 3,
+						publishedAt: "2025-10-06T14:58:08.000Z",
+						thumbnailUrl: "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2510.04871.png",
+						title: "Less is More: Recursive Reasoning with Tiny Networks",
+						type: "paper",
+						upvotes: expect.any(Number),
+					},
+				],
+				theme: "pink",
+				private: false,
+				upvotes: expect.any(Number),
+				isUpvotedByUser: false,
 			},
-			shortDescription: "This space is only for test",
-			title: "TestSpace",
-			isLikedByUser: false,
-			trendingScore: 0,
-			tags: ["docker", "region:us"],
-		});
-
-		// Check for item type collection
-		expect(items[3]).deep.equal({
-			_id: "68670014f25517a0a7eaf505",
-			position: 3,
-			type: "collection",
-			id: "6866ff686ca2d2e0a1931507",
-			slug: "quanghuynt14/test-collection-6866ff686ca2d2e0a1931507",
-			title: "Test Collection",
-			description: "This collection is only for test",
-			lastUpdated: "2025-07-01T00:41:27.525Z",
-			numberItems: 5,
-			owner: {
-				_id: "6866ff3936a7677f427f99e3",
-				avatarUrl: "/avatars/b51088e22fb7194888551365b1bafada.svg",
-				fullname: "Quang-Huy Tran",
-				name: "quanghuynt14",
-				type: "user",
-				isPro: false,
-				isHf: false,
-				isHfAdmin: false,
-				isMod: false,
-			},
-			theme: "purple",
-			shareUrl: "https://hub-ci.huggingface.co/collections/quanghuynt14/test-collection-6866ff686ca2d2e0a1931507",
-			upvotes: 0,
-			isUpvotedByUser: false,
-		});
+		]);
 	});
 });
