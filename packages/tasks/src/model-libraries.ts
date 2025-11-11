@@ -191,7 +191,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Champ",
 		repoName: "Champ",
 		repoUrl: "https://github.com/fudan-generative-vision/champ",
-		countDownloads: `path:"champ/motion_module.pth"`,
+		countDownloads: `path:"champ/motion_module."`,
 	},
 	chatterbox: {
 		prettyLabel: "Chatterbox",
@@ -255,9 +255,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
 		repoUrl: "https://github.com/weecology/DeepForest",
 	},
-	"depth-anything-v2": {
-		prettyLabel: "DepthAnythingV2",
-		repoName: "Depth Anything V2",
+	"de-anything-v2": {
+		prettyLabel: "DeAnythingV2",
+		repoName: "De Anything V2",
 		repoUrl: "https://github.com/DepthAnything/Depth-Anything-V2",
 		snippets: snippets.depth_anything_v2,
 		filter: false,
@@ -622,6 +622,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/lerobot",
 		filter: false,
 		snippets: snippets.lerobot,
+	},
+	lightglue: {
+		prettyLabel: "LightGlue",
+		repoName: "LightGlue",
+		repoUrl: "https://github.com/cvg/LightGlue",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
