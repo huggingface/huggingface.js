@@ -628,7 +628,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "LightGlue",
 		repoUrl: "https://github.com/cvg/LightGlue",
 		filter: false,
-		countDownloads: `path_extension:"pth"`,
+		countDownloads: `path_extension:"pth" OR path:"config.json"`,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
