@@ -2297,6 +2297,22 @@ describe.skip("InferenceClient", () => {
 			const client = new InferenceClient(env.HF_WAVESPEED_KEY ?? "dummy");
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["wavespeed"] = {
+				"Qwen/Qwen-Image-Edit-2509": {
+					provider: "wavespeed",
+					hfModelId: "Qwen/Qwen-Image-Edit-2509",
+					providerId: "wavespeed-ai/qwen-image/edit-plus-lora",
+					status: "live",
+					task: "image-to-image",
+				},
+				"dx8152/Qwen-Edit-2509-Multiple-angles": {
+					provider: "wavespeed",
+					hfModelId: "dx8152/Qwen-Edit-2509-Multiple-angles",
+					providerId: "wavespeed-ai/qwen-image/edit-plus-lora",
+					status: "live",
+					task: "image-to-image",
+					adapter: "lora",
+					adapterWeightsPath: "镜头转换.safetensors",
+				},
 				"black-forest-labs/FLUX.1-schnell": {
 					provider: "wavespeed",
 					hfModelId: "black-forest-labs/FLUX.1-schnell",
@@ -2417,6 +2433,32 @@ describe.skip("InferenceClient", () => {
 						guidance_scale: 5,
 						num_inference_steps: 29,
 						seed: -1,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+			it(`imageToImage - Qwen/Qwen-Image-Edit-2509`, async () => {
+				const res = await client.imageToImage({
+					model: "Qwen/Qwen-Image-Edit-2509",
+					provider: "wavespeed",
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "Turn the animal's head left",
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+			it(`imageToImage - dx8152/Qwen-Edit-2509-Multiple-angles`, async () => {
+				const res = await client.imageToImage({
+					model: "dx8152/Qwen-Edit-2509-Multiple-angles",
+					provider: "wavespeed",
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "Turn the animal's head left",
+						images: [
+							new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+							new Blob([readTestFile("bird_canny.png")], { type: "image/png" }),
+						],
 					},
 				});
 				expect(res).toBeInstanceOf(Blob);
