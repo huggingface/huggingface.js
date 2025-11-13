@@ -1,6 +1,6 @@
 name: Tasks - Update specs
 
-on:
+on:@ashan
   workflow_dispatch:
   schedule:
     - cron: "0 3 * * *" # Every day at 3am
