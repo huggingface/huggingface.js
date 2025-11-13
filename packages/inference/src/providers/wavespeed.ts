@@ -77,8 +77,8 @@ async function buildImagesField(
 		new Uint8Array(inputs instanceof ArrayBuffer ? inputs : await (inputs as Blob).arrayBuffer())
 	);
 	const images =
-		Array.isArray(hasImages) && (hasImages as unknown[]).every((x) => typeof x === "string")
-			? (hasImages as string[])
+		Array.isArray(hasImages) && hasImages.every((value): value is string => typeof value === "string")
+			? hasImages
 			: [base];
 	return { base, images };
 }
@@ -203,8 +203,7 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
 		const hasImages =
-			(args as Record<string, unknown>)["images"] ??
-			(args.parameters as Record<string, unknown> | undefined)?.["images"];
+			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
 		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
 	}
@@ -217,8 +216,7 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 
 	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
 		const hasImages =
-			(args as Record<string, unknown>)["images"] ??
-			(args.parameters as Record<string, unknown> | undefined)?.["images"];
+			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
 		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
 	}
