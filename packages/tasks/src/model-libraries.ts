@@ -623,6 +623,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.lerobot,
 	},
+	lightglue: {
+		prettyLabel: "LightGlue",
+		repoName: "LightGlue",
+		repoUrl: "https://github.com/cvg/LightGlue",
+		filter: false,
+		countDownloads: `path_extension:"pth" OR path:"config.json"`,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
