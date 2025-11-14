@@ -69,6 +69,20 @@ interface WaveSpeedAISubmitTaskResponse {
 	data: WaveSpeedAISubmitResponse;
 }
 
+async function buildImagesField(
+	inputs: Blob | ArrayBuffer,
+	hasImages: unknown
+): Promise<{ base: string; images: string[] }> {
+	const base = base64FromBytes(
+		new Uint8Array(inputs instanceof ArrayBuffer ? inputs : await (inputs as Blob).arrayBuffer())
+	);
+	const images =
+		Array.isArray(hasImages) && hasImages.every((value): value is string => typeof value === "string")
+			? hasImages
+			: [base];
+	return { base, images };
+}
+
 abstract class WavespeedAITask extends TaskProviderHelper {
 	constructor(url?: string) {
 		super("wavespeed", url || WAVESPEEDAI_API_BASE_URL);
@@ -83,7 +97,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 	): Record<string, unknown> {
 		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
-			...params.args.parameters,
+			...(params.args.parameters ? omit(params.args.parameters as Record<string, unknown>, ["images"]) : undefined),
 			prompt: params.args.inputs,
 		};
 		// Add LoRA support if adapter is specified in the mapping
@@ -188,13 +202,10 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 	}
 
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
-		return {
-			...args,
-			inputs: args.parameters?.prompt,
-			image: base64FromBytes(
-				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
-			),
-		};
+		const hasImages =
+			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
+		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
+		return { ...args, inputs: args.parameters?.prompt, image: base, images };
 	}
 }
 
@@ -204,12 +215,9 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 	}
 
 	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
-		return {
-			...args,
-			inputs: args.parameters?.prompt,
-			image: base64FromBytes(
-				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
-			),
-		};
+		const hasImages =
+			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
+		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
+		return { ...args, inputs: args.parameters?.prompt, image: base, images };
 	}
 }

@@ -108,6 +108,7 @@ export async function* createXorbs(
 	void,
 	undefined
 > {
+	const alreadyDoneFileSha256s: Set<string> = new Set();
 	const chunkModule = await import("../vendor/xet-chunk/chunker_wasm");
 	let xorbId = 0;
 
@@ -147,6 +148,11 @@ export async function* createXorbs(
 	const remoteXorbHashes: string[] = [""]; // starts at index 1 (to simplify implem a bit)
 
 	for await (const fileSource of fileSources) {
+		if (alreadyDoneFileSha256s.has(fileSource.sha256)) {
+			continue;
+		}
+		alreadyDoneFileSha256s.add(fileSource.sha256);
+
 		const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 		try {
 			xorb.fileSize[fileSource.path] = fileSource.content.size;

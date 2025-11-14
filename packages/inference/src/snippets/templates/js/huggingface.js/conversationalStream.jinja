@@ -8,8 +8,7 @@ const stream = client.chatCompletionStream({
 {% if endpointUrl %}
     endpointUrl: "{{ endpointUrl }}",
 {% endif %}
-    provider: "{{ provider }}",
-    model: "{{ model.id }}",
+    model: "{{ providerModelId }}",
 {{ inputs.asTsString }}
 }{% if billTo %}, {
     billTo: "{{ billTo }}",
