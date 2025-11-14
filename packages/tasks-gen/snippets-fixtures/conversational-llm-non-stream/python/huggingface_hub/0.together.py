@@ -2,12 +2,11 @@ import os
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
-    provider="together",
     api_key=os.environ["HF_TOKEN"],
 )
 
 completion = client.chat.completions.create(
-    model="meta-llama/Llama-3.1-8B-Instruct",
+    model="meta-llama/Llama-3.1-8B-Instruct:together",
     messages=[
         {
             "role": "user",

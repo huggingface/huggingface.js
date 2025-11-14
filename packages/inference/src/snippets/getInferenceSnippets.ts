@@ -60,6 +60,8 @@ interface TemplateParams {
 	importBase64?: boolean; // specific to snippetImportRequests
 	importJson?: boolean; // specific to snippetImportRequests
 	endpointUrl?: string;
+	task?: InferenceTask;
+	directRequest?: boolean;
 }
 
 // Helpers to find + load templates
@@ -263,6 +265,8 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 					: providerModelId ?? model.id,
 			billTo: opts?.billTo,
 			endpointUrl: opts?.endpointUrl,
+			task,
+			directRequest: !!opts?.directRequest,
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate

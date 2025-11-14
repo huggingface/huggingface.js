@@ -7,11 +7,13 @@ import { deleteCollection } from "./delete-collection";
 describe("createCollection", () => {
 	it("should create a collection", async () => {
 		let slug: string = "";
+		const randomString = crypto.randomUUID();
+		const title = `Test Collection ${randomString}`;
 
 		try {
 			const result = await createCollection({
 				collection: {
-					title: "Test Collection",
+					title,
 					namespace: TEST_USER,
 					description: "This is a test collection",
 					private: false,
@@ -20,15 +22,17 @@ describe("createCollection", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-			expect(result.slug.startsWith(`${TEST_USER}/test-collection`)).toBe(true);
+			expect(result.slug.startsWith(`${TEST_USER}/test-collection-${randomString}`)).toBe(true);
 
 			slug = result.slug;
 		} finally {
-			await deleteCollection({
-				slug,
-				accessToken: TEST_ACCESS_TOKEN,
-				hubUrl: TEST_HUB_URL,
-			});
+			if (slug) {
+				await deleteCollection({
+					slug,
+					accessToken: TEST_ACCESS_TOKEN,
+					hubUrl: TEST_HUB_URL,
+				});
+			}
 		}
 	});
 });
