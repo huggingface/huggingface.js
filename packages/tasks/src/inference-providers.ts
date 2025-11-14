@@ -3,6 +3,7 @@
 const INFERENCE_PROVIDERS = [
 	"cerebras",
 	"cohere",
+	"deepinfra",
 	"fal-ai",
 	"fireworks-ai",
 	"hf-inference",
