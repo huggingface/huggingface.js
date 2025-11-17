@@ -5,31 +5,34 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/gpt-oss:20b
- * - library/llama3.1:8b
- * - library/llama3.2:latest
- * - library/gemma3:latest
- * - library/qwen2:0.5b
- * - library/tinyllama:1.1b
+ * - library/qwen3:0.6b
+ * - library/embeddinggemma:300m
+ * - library/llava-llama3:8b
+ * - library/mistral-small:latest
+ * - library/llama3.3:latest
+ * - library/llama3.3:latest
  * - library/qwq:latest
- * - library/codegemma:2b
+ * - library/gemma3n:latest
  * - library/cogito:latest
- * - library/cogito:3b
- * - library/smollm:latest
- * - library/devstral:24b
- * - library/dolphin-llama3:8b
- * - library/opencoder:latest
- * - library/codegeex4:9b
- * - library/starcoder:latest
+ * - library/llama4:16x17b
+ * - library/gemma3n:e2b
+ * - library/devstral:latest
+ * - library/zephyr:latest
+ * - library/codegeex4:latest
+ * - library/codeqwen:7b
+ * - library/llama2-chinese:latest
+ * - library/glm4:latest
  * - library/command-r-plus:latest
- * - library/command-r-plus:104b
- * - library/llama3-chatqa:8b
- * - library/tulu3:latest
- * - library/llama3-groq-tool-use:latest
- * - library/yarn-llama2:latest
- * - library/command-r7b:7b
- * - library/phi4-mini-reasoning:latest
- * - library/reader-lm:latest
+ * - library/reflection:70b
+ * - library/r1-1776:latest
+ * - library/dolphincoder:7b
+ * - library/granite3-moe:latest
+ * - library/phi4-mini-reasoning:3.8b
+ * - library/command-r7b:latest
+ * - library/reader-lm:0.5b
+ * - library/everythinglm:13b
+ * - library/marco-o1:latest
+ * - library/notux:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
