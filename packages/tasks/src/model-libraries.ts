@@ -509,6 +509,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
 	},
+	"image-matching-models": {
+		prettyLabel: "image-matching-models",
+		repoName: "image-matching-models",
+		repoUrl: "https://github.com/alexstoken/image-matching-models",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
