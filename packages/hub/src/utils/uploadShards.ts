@@ -54,6 +54,8 @@ export const SHARD_MAGIC_TAG = new Uint8Array([
 interface UploadShardsParams {
 	accessToken: string | undefined;
 	hubUrl: string;
+	xetRefreshWriteTokenUrl: string;
+	xetSessionId: string | undefined;
 	fetch?: typeof fetch;
 	repo: RepoId;
 	rev: string;
@@ -365,6 +367,7 @@ async function uploadXorb(
 		body: xorb.xorb,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
+			...(params.xetSessionId ? { "X-Xet-Session-Id": params.xetSessionId } : {}),
 		},
 		...{
 			progressHint: {
@@ -394,6 +397,7 @@ async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
 		body: shard,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
+			...(params.xetSessionId ? { "X-Xet-Session-Id": params.xetSessionId } : {}),
 		},
 	});
 
