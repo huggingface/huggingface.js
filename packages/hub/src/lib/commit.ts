@@ -418,12 +418,13 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
 								})) {
 									if (event.event === "file") {
-										yieldCallback({
-											event: "fileProgress" as const,
-											path: event.path,
-											progress: 1,
-											state: "uploading" as const,
-										});
+										// No need: uploading xorbs already sent a fileProgress event with progress 1
+										// yieldCallback({
+										// 	event: "fileProgress" as const,
+										// 	path: event.path,
+										// 	progress: 1,
+										// 	state: "uploading" as const,
+										// });
 									} else if (event.event === "fileProgress") {
 										yieldCallback({
 											event: "fileProgress" as const,
