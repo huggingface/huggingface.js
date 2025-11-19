@@ -969,7 +969,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "sam3",
 		repoUrl: "https://github.com/facebookresearch/sam3",
 		filter: false,
-		snippets: snippets.sam3,
 		countDownloads: `path:"config.json" OR path_extension:"pt"`,
 	},
 	"sample-factory": {
