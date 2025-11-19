@@ -509,6 +509,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
 	},
+	"image-matching-models": {
+		prettyLabel: "Image Matching Models",
+		repoName: "Image Matching Models",
+		repoUrl: "https://github.com/alexstoken/image-matching-models",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
@@ -622,6 +629,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/lerobot",
 		filter: false,
 		snippets: snippets.lerobot,
+	},
+	lightglue: {
+		prettyLabel: "LightGlue",
+		repoName: "LightGlue",
+		repoUrl: "https://github.com/cvg/LightGlue",
+		filter: false,
+		countDownloads: `path_extension:"pth" OR path:"config.json"`,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
