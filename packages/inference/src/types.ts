@@ -56,6 +56,7 @@ export const INFERENCE_PROVIDERS = [
 	"groq",
 	"hf-inference",
 	"hyperbolic",
+	"hyperfusion",
 	"nebius",
 	"novita",
 	"nscale",
