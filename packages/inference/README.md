@@ -47,6 +47,7 @@ Your access token should be kept private. If you need to protect it in front-end
 You can send inference requests to third-party providers with the inference client.
 
 Currently, we support the following providers:
+- [Avian](https://avian.io)
 - [Fal.ai](https://fal.ai)
 - [Featherless AI](https://featherless.ai)
 - [Fireworks AI](https://fireworks.ai)
@@ -88,6 +89,7 @@ When authenticated with a Hugging Face access token, the request is routed throu
 When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
 
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
+- [Avian supported models](https://huggingface.co/api/partners/avian/models)
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
 - [Featherless AI supported models](https://huggingface.co/api/partners/featherless-ai/models)
 - [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
@@ -113,6 +115,45 @@ Only a subset of models are supported when requesting third-party providers. You
 This is not an issue for LLMs as everyone converged on the OpenAI API anyways, but can be more tricky for other tasks like "text-to-image" or "automatic-speech-recognition" where there exists no standard API. Let us know if any help is needed or if we can make things easier for you!
 
 👋**Want to add another provider?** Get in touch if you'd like to add support for another Inference provider, and/or request it on https://huggingface.co/spaces/huggingface/HuggingDiscussions/discussions/49
+
+#### Provider Examples
+
+##### Avian
+
+[Avian](https://avian.io) provides high-performance inference for models like GLM-4.6.
+
+```typescript
+import { InferenceClient } from "@huggingface/inference";
+
+const hf = new InferenceClient("your_access_token");
+
+// Text generation
+const result = await hf.textGeneration({
+  provider: "avian",
+  model: "zai-org/GLM-4.6",
+  inputs: "What is machine learning?",
+});
+
+// Chat completion
+const chatResult = await hf.chatCompletion({
+  provider: "avian",
+  model: "zai-org/GLM-4.6",
+  messages: [{ role: "user", content: "Explain quantum computing in simple terms" }],
+  max_tokens: 512,
+});
+
+// Streaming chat completion
+for await (const chunk of hf.chatCompletionStream({
+  provider: "avian",
+  model: "zai-org/GLM-4.6",
+  messages: [{ role: "user", content: "Write a short story about a robot" }],
+  max_tokens: 512,
+})) {
+  if (chunk.choices && chunk.choices.length > 0) {
+    process.stdout.write(chunk.choices[0].delta.content || "");
+  }
+}
+```
 
 ### Tree-shaking
 
