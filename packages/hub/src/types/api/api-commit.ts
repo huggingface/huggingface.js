@@ -143,6 +143,12 @@ export interface ApiCommitHeader {
 	 * - When committing on a branch: Will make sure that there were no intermediate commits
 	 */
 	parentCommit?: string;
+	/**
+	 * queued => commit is pending
+	 * immediate => commit is processed immediately
+	 * flush => all pending commits are processed and merged into one commit
+	 */
+	mode?: "queued" | "immediate" | "flush";
 }
 
 export interface ApiCommitDeletedEntry {
