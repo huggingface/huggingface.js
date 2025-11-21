@@ -16,6 +16,7 @@ export function uploadFile(
 		useWebWorkers?: CommitParams["useWebWorkers"];
 		abortSignal?: CommitParams["abortSignal"];
 		useXet?: CommitParams["useXet"];
+		mode?: CommitParams["mode"];
 	} & Partial<CredentialsParams>
 ): Promise<CommitOutput> {
 	const path =
@@ -45,5 +46,6 @@ export function uploadFile(
 		useWebWorkers: params.useWebWorkers,
 		abortSignal: params.abortSignal,
 		useXet: params.useXet,
+		mode: params.mode,
 	});
 }

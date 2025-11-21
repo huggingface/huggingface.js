@@ -13,6 +13,7 @@ export function deleteFile(
 		branch?: CommitParams["branch"];
 		isPullRequest?: CommitParams["isPullRequest"];
 		parentCommit?: CommitParams["parentCommit"];
+		mode?: CommitParams["mode"];
 	} & CredentialsParams
 ): Promise<CommitOutput> {
 	return commit({
@@ -31,5 +32,6 @@ export function deleteFile(
 		isPullRequest: params.isPullRequest,
 		parentCommit: params.parentCommit,
 		fetch: params.fetch,
+		mode: params.mode,
 	});
 }

@@ -127,15 +127,26 @@ export type CommitParams = {
 	 */
 	useXet?: boolean;
 	// Credentials are optional due to custom fetch functions or cookie auth
+
+	/**
+	 * If queued, will not return commit information in the output
+	 */
+	mode?: "queued" | "immediate";
 } & Partial<CredentialsParams>;
 
 export interface CommitOutput {
 	pullRequestUrl?: string;
-	commit: {
+	/**
+	 * Unset if queued commit, or empty commit
+	 */
+	commit?: {
 		oid: string;
 		url: string;
 	};
-	hookOutput: string;
+	/**
+	 * Unset if queued commit, or empty commit
+	 */
+	hookOutput?: string;
 }
 
 function isFileOperation(op: CommitOperation): op is CommitBlob {
@@ -640,6 +651,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									summary: params.title,
 									description: params.description,
 									parentCommit: params.parentCommit,
+									mode: params.mode,
 								} satisfies ApiCommitHeader,
 							},
 							...((await Promise.all(
@@ -690,6 +702,11 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					.then(async (res) => {
 						if (!res.ok) {
 							throw await createApiError(res);
+						}
+
+						if (res.status === 202) {
+							// Queued commit
+							returnCallback({});
 						}
 
 						const json = await res.json();

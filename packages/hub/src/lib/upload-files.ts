@@ -15,6 +15,7 @@ export function uploadFiles(
 		fetch?: CommitParams["fetch"];
 		useWebWorkers?: CommitParams["useWebWorkers"];
 		maxFolderDepth?: CommitParams["maxFolderDepth"];
+		mode?: CommitParams["mode"];
 		abortSignal?: CommitParams["abortSignal"];
 		useXet?: CommitParams["useXet"];
 	} & Partial<CredentialsParams>
@@ -37,5 +38,6 @@ export function uploadFiles(
 		useWebWorkers: params.useWebWorkers,
 		abortSignal: params.abortSignal,
 		useXet: params.useXet,
+		mode: params.mode,
 	});
 }
