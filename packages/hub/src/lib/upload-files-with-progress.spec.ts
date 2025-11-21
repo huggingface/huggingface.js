@@ -10,120 +10,125 @@ import { uploadFilesWithProgress } from "./upload-files-with-progress";
 import type { CommitOutput, CommitProgressEvent } from "./commit";
 
 describe("uploadFilesWithProgress", () => {
-	it("should upload files", async () => {
-		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
-		const repo = { type: "model", name: repoName } satisfies RepoId;
-		const lfsContent = "O123456789".repeat(100_000);
+	for (const useXet of [false, true]) {
+		describe(`useXet: ${useXet}`, () => {
+			it("should upload files", async () => {
+				const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
+				const repo = { type: "model", name: repoName } satisfies RepoId;
+				const lfsContent = "O123456789".repeat(100_000);
 
-		try {
-			const result = await createRepo({
-				accessToken: TEST_ACCESS_TOKEN,
-				repo,
-				hubUrl: TEST_HUB_URL,
-			});
+				try {
+					const result = await createRepo({
+						accessToken: TEST_ACCESS_TOKEN,
+						repo,
+						hubUrl: TEST_HUB_URL,
+					});
 
-			assert.deepStrictEqual(result, {
-				repoUrl: `${TEST_HUB_URL}/${repoName}`,
-			});
+					assert.deepStrictEqual(result, {
+						repoUrl: `${TEST_HUB_URL}/${repoName}`,
+					});
 
-			const it = uploadFilesWithProgress({
-				accessToken: TEST_ACCESS_TOKEN,
-				repo,
-				files: [
-					{ content: new Blob(["file1"]), path: "file1" },
-					new URL("https://huggingface.co/gpt2/raw/main/config.json"),
-					// Large file
-					{
-						content: new Blob([lfsContent]),
-						path: "test.lfs.txt",
-					},
-				],
-				useWebWorkers: {
-					minSize: 1_000,
-				},
-				hubUrl: TEST_HUB_URL,
-			});
+					const it = uploadFilesWithProgress({
+						accessToken: TEST_ACCESS_TOKEN,
+						repo,
+						files: [
+							{ content: new Blob(["file1"]), path: "file1" },
+							new URL("https://huggingface.co/gpt2/raw/main/config.json"),
+							// Large file
+							{
+								content: new Blob([lfsContent]),
+								path: "test.lfs.txt",
+							},
+						],
+						useWebWorkers: {
+							minSize: 1_000,
+						},
+						hubUrl: TEST_HUB_URL,
+						useXet,
+					});
 
-			let res: IteratorResult<CommitProgressEvent, CommitOutput>;
-			let progressEvents: CommitProgressEvent[] = [];
+					let res: IteratorResult<CommitProgressEvent, CommitOutput>;
+					let progressEvents: CommitProgressEvent[] = [];
 
-			do {
-				res = await it.next();
-				if (!res.done) {
-					progressEvents.push(res.value);
-				}
-			} while (!res.done);
+					do {
+						res = await it.next();
+						if (!res.done) {
+							progressEvents.push(res.value);
+						}
+					} while (!res.done);
 
-			// const intermediateHashingEvents = progressEvents.filter(
-			// 	(e) => e.event === "fileProgress" && e.type === "hashing" && e.progress !== 0 && e.progress !== 1
-			// );
-			// if (isFrontend) {
-			// 	assert(intermediateHashingEvents.length > 0);
-			// }
-			// const intermediateUploadEvents = progressEvents.filter(
-			// 	(e) => e.event === "fileProgress" && e.type === "uploading" && e.progress !== 0 && e.progress !== 1
-			// );
-			// if (isFrontend) {
-			// 	assert(intermediateUploadEvents.length > 0, "There should be at least one intermediate upload event");
-			// }
-			progressEvents = progressEvents.filter((e) => e.event !== "fileProgress" || e.progress === 0 || e.progress === 1);
+					// const intermediateHashingEvents = progressEvents.filter(
+					// 	(e) => e.event === "fileProgress" && e.type === "hashing" && e.progress !== 0 && e.progress !== 1
+					// );
+					// if (isFrontend) {
+					// 	assert(intermediateHashingEvents.length > 0);
+					// }
+					// const intermediateUploadEvents = progressEvents.filter(
+					// 	(e) => e.event === "fileProgress" && e.type === "uploading" && e.progress !== 0 && e.progress !== 1
+					// );
+					// if (isFrontend) {
+					// 	assert(intermediateUploadEvents.length > 0, "There should be at least one intermediate upload event");
+					// }
+					progressEvents = progressEvents.filter(
+						(e) => e.event !== "fileProgress" || e.progress === 0 || e.progress === 1
+					);
 
-			assert.deepStrictEqual(progressEvents, [
-				{
-					event: "phase",
-					phase: "preuploading",
-				},
-				{
-					event: "phase",
-					phase: "uploadingLargeFiles",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 0,
-					state: "hashing",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 1,
-					state: "hashing",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 0,
-					state: "uploading",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 1,
-					state: "uploading",
-				},
-				{
-					event: "phase",
-					phase: "committing",
-				},
-			]);
+					assert.deepStrictEqual(progressEvents, [
+						{
+							event: "phase",
+							phase: "preuploading",
+						},
+						{
+							event: "phase",
+							phase: "uploadingLargeFiles",
+						},
+						{
+							event: "fileProgress",
+							path: "test.lfs.txt",
+							progress: 0,
+							state: "hashing",
+						},
+						{
+							event: "fileProgress",
+							path: "test.lfs.txt",
+							progress: 1,
+							state: "hashing",
+						},
+						{
+							event: "fileProgress",
+							path: "test.lfs.txt",
+							progress: 0,
+							state: "uploading",
+						},
+						{
+							event: "fileProgress",
+							path: "test.lfs.txt",
+							progress: 1,
+							state: "uploading",
+						},
+						{
+							event: "phase",
+							phase: "committing",
+						},
+					]);
 
-			let content = await downloadFile({
-				repo,
-				path: "file1",
-				hubUrl: TEST_HUB_URL,
-			});
+					let content = await downloadFile({
+						repo,
+						path: "file1",
+						hubUrl: TEST_HUB_URL,
+					});
 
-			assert.strictEqual(await content?.text(), "file1");
+					assert.strictEqual(await content?.text(), "file1");
 
-			content = await downloadFile({
-				repo,
-				path: "config.json",
-				hubUrl: TEST_HUB_URL,
-			});
+					content = await downloadFile({
+						repo,
+						path: "config.json",
+						hubUrl: TEST_HUB_URL,
+					});
 
-			assert.strictEqual(
-				(await content?.text())?.trim(),
-				`
+					assert.strictEqual(
+						(await content?.text())?.trim(),
+						`
 {
   "activation_function": "gelu_new",
   "architectures": [
@@ -156,13 +161,15 @@ describe("uploadFilesWithProgress", () => {
   "vocab_size": 50257
 }
       `.trim()
-			);
-		} finally {
-			await deleteRepo({
-				repo,
-				accessToken: TEST_ACCESS_TOKEN,
-				hubUrl: TEST_HUB_URL,
+					);
+				} finally {
+					await deleteRepo({
+						repo,
+						accessToken: TEST_ACCESS_TOKEN,
+						hubUrl: TEST_HUB_URL,
+					});
+				}
 			});
-		}
-	});
+		});
+	}
 });

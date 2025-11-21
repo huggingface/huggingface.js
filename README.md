@@ -99,7 +99,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 ```html
 <script type="module">
     import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@4.13.3/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.6.13/+esm";
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.7.0/+esm";
 </script>
 ```
 
