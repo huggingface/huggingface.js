@@ -407,7 +407,6 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					yield* eventToGenerator((yieldCallback, returnCallback, rejectCallback) =>
 						Promise.all(
 							sources.map(async function (source) {
-								const filesComplete = new Set<string>();
 								for await (const event of uploadShards(source, {
 									fetch: params.fetch,
 									accessToken,
@@ -420,21 +419,13 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
 								})) {
 									if (event.event === "file") {
-										// avoid sending identical fileProgress events
-										if (filesComplete.has(event.path)) {
-											filesComplete.delete(event.path);
-										} else {
-											yieldCallback({
-												event: "fileProgress" as const,
-												path: event.path,
-												progress: 1,
-												state: "uploading" as const,
-											});
-										}
+										yieldCallback({
+											event: "fileProgress" as const,
+											path: event.path,
+											progress: 1,
+											state: "uploading" as const,
+										});
 									} else if (event.event === "fileProgress") {
-										if (event.progress === 1) {
-											filesComplete.add(event.path);
-										}
 										yieldCallback({
 											event: "fileProgress" as const,
 											path: event.path,

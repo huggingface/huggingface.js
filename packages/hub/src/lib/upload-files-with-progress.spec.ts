@@ -70,7 +70,9 @@ describe("uploadFilesWithProgress", () => {
 					// 	assert(intermediateUploadEvents.length > 0, "There should be at least one intermediate upload event");
 					// }
 					progressEvents = progressEvents.filter(
-						(e) => e.event !== "fileProgress" || e.progress === 0 || e.progress === 1
+						(e, i) =>
+							(e.event !== "fileProgress" || e.progress === 0 || e.progress === 1) &&
+							(i === 0 || JSON.stringify(e) !== JSON.stringify(progressEvents[i - 1]))
 					);
 
 					assert.deepStrictEqual(progressEvents, [
