@@ -214,7 +214,7 @@ export async function* createXorbs(
 
 					let cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
 					if (cacheData === undefined && chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
-						const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
+						const token = await xetWriteToken(params);
 						bytesSinceRemoteDedup = 0;
 
 						const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {
@@ -701,7 +701,7 @@ async function loadDedupInfoToCache(
 
 				// Try remote dedup lookup if conditions are met
 				if (chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
-					const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
+					const token = await xetWriteToken(params);
 					bytesSinceRemoteDedup = 0;
 
 					const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {

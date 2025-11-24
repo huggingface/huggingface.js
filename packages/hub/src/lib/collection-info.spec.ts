@@ -103,6 +103,7 @@ describe("collectionInfo", () => {
 					lastModified: "2023-04-01T15:29:38.000Z",
 					likes: expect.any(Number),
 					pinned: false,
+					featured: false,
 					position: 2,
 					private: false,
 					repoType: "space",

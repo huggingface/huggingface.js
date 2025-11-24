@@ -51,11 +51,18 @@ export const SHARD_MAGIC_TAG = new Uint8Array([
 	169,
 ]);
 
+export interface XetTokenParams {
+	sessionId?: string;
+	casUrl?: string;
+	accessToken?: string;
+	expiresAt?: Date;
+	refreshWriteTokenUrl: string;
+}
+
 interface UploadShardsParams {
 	accessToken: string | undefined;
 	hubUrl: string;
-	xetRefreshWriteTokenUrl: string;
-	xetSessionId: string | undefined;
+	xetParams: XetTokenParams;
 	fetch?: typeof fetch;
 	repo: RepoId;
 	rev: string;
@@ -360,14 +367,14 @@ async function uploadXorb(
 	xorb: { hash: string; xorb: Uint8Array; files: Array<{ path: string; progress: number; lastSentProgress: number }> },
 	params: UploadShardsParams
 ) {
-	const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
+	const token = await xetWriteToken(params);
 
 	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorbs/default/${xorb.hash}`, {
 		method: "POST",
 		body: xorb.xorb,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
-			...(params.xetSessionId ? { "X-Xet-Session-Id": params.xetSessionId } : {}),
+			...(params.xetParams.sessionId ? { "X-Xet-Session-Id": params.xetParams.sessionId } : {}),
 		},
 		...{
 			progressHint: {
@@ -390,14 +397,14 @@ async function uploadXorb(
 }
 
 async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
-	const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
+	const token = await xetWriteToken(params);
 
 	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/shards`, {
 		method: "POST",
 		body: shard,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
-			...(params.xetSessionId ? { "X-Xet-Session-Id": params.xetSessionId } : {}),
+			...(params.xetParams.sessionId ? { "X-Xet-Session-Id": params.xetParams.sessionId } : {}),
 		},
 	});
 
