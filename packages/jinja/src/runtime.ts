@@ -718,7 +718,8 @@ export class Interpreter {
 					case "length":
 						return new IntegerValue(operand.value.length);
 					case "reverse":
-						return new ArrayValue(operand.value.reverse());
+						// Create a copy to avoid mutating the original array
+						return new ArrayValue(operand.value.slice().reverse());
 					case "sort": {
 						// Create a copy to avoid mutating the original array
 						const arrayCopy = operand.value.slice();
@@ -957,6 +958,17 @@ export class Interpreter {
 						arrayCopy.sort((a, b) => {
 							const aVal = getSortValue(a);
 							const bVal = getSortValue(b);
+
+							// Handle undefined values - sort them to the end
+							if (aVal instanceof UndefinedValue && bVal instanceof UndefinedValue) {
+								return 0; // Both undefined, keep original order
+							}
+							if (aVal instanceof UndefinedValue) {
+								return 1; // a is undefined, sort to end
+							}
+							if (bVal instanceof UndefinedValue) {
+								return -1; // b is undefined, sort to end
+							}
 
 							if (aVal.type !== bVal.type) {
 								throw new Error(`Cannot compare different types: ${aVal.type} and ${bVal.type}`);
