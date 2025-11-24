@@ -361,7 +361,19 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 							bValue = bValue.toLowerCase();
 						}
 
-						// Compare values
+						// Ensure comparable types:
+						// This is only an potential issue when `by='value'` and the dictionary has mixed value types
+						const isPrimitive = (val: unknown) =>
+							typeof val === "string" || typeof val === "number" || typeof val === "boolean";
+						let firstNonPrimitive = isPrimitive(aValue) ? (isPrimitive(bValue) ? null : bValue) : aValue;
+						if (firstNonPrimitive !== null) {
+							throw new Error(
+								`Cannot sort dictionary with non-primitive value types (found ${typeof firstNonPrimitive})`
+							);
+						} else if (typeof aValue !== typeof bValue) {
+							throw new Error("Cannot sort dictionary with mixed value types");
+						}
+
 						const a1 = aValue as string | number | boolean;
 						const b1 = bValue as string | number | boolean;
 
