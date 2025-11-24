@@ -22,6 +22,7 @@ import { eventToGenerator } from "../utils/eventToGenerator";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { isFrontend } from "../utils/isFrontend";
 import { createBlobs } from "../utils/createBlobs";
+import type { XetTokenParams } from "../utils/uploadShards";
 import { uploadShards } from "../utils/uploadShards";
 import { splitAsyncGenerator } from "../utils/splitAsyncGenerator";
 import { SplicedBlob } from "../utils/SplicedBlob";
@@ -361,8 +362,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			if (useXet && json.transfer !== "xet") {
 				useXet = false;
 			}
-			let xetRefreshWriteTokenUrl: string | undefined;
-			let xetSessionId: string | undefined;
+
+			let xetParams: XetTokenParams | null = null;
 
 			if (useXet) {
 				// First get all the files that are already uploaded out of the way
@@ -388,16 +389,17 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							state: "uploading",
 						};
 					} else {
-						xetRefreshWriteTokenUrl = obj.actions.upload.href;
-						// Also, obj.actions.upload.header: {
-						//   X-Xet-Cas-Url:          string;
-						//   X-Xet-Access-Token:     string;
-						//   X-Xet-Token-Expiration: string;
-						//   X-Xet-Session-Id:       string;
-						// }
 						const headers = new Headers(obj.actions.upload.header);
-						xetSessionId = headers.get("X-Xet-Session-Id") ?? undefined;
-						// todo: use other data, like x-xet-cas-url, ...
+
+						xetParams = {
+							sessionId: headers.get("X-Xet-Session-Id") ?? undefined,
+							casUrl: headers.get("X-Xet-Cas-Url") ?? undefined,
+							accessToken: headers.get("X-Xet-Access-Token") ?? undefined,
+							expiresAt: headers.get("X-Xet-Token-Expiration")
+								? new Date(parseInt(headers.get("X-Xet-Token-Expiration") ?? "0") * 1000)
+								: undefined,
+							refreshWriteTokenUrl: obj.actions.upload.href,
+						};
 					}
 				}
 				const source = (async function* () {
@@ -410,8 +412,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						yield { content: op.content, path: op.path, sha256: obj.oid };
 					}
 				})();
-				if (xetRefreshWriteTokenUrl) {
-					const xetRefreshWriteTokenUrlFixed = xetRefreshWriteTokenUrl;
+				if (xetParams) {
+					const fixedXetParams = xetParams;
 					const sources = splitAsyncGenerator(source, 5);
 					yield* eventToGenerator((yieldCallback, returnCallback, rejectCallback) =>
 						Promise.all(
@@ -421,21 +423,19 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									accessToken,
 									hubUrl: params.hubUrl ?? HUB_URL,
 									repo: repoId,
-									xetRefreshWriteTokenUrl: xetRefreshWriteTokenUrlFixed,
-									xetSessionId,
+									xetParams: fixedXetParams,
 									// todo: maybe leave empty if PR?
 									rev: params.branch ?? "main",
 									isPullRequest: params.isPullRequest,
 									yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
 								})) {
 									if (event.event === "file") {
-										// No need: uploading xorbs already sent a fileProgress event with progress 1
-										// yieldCallback({
-										// 	event: "fileProgress" as const,
-										// 	path: event.path,
-										// 	progress: 1,
-										// 	state: "uploading" as const,
-										// });
+										yieldCallback({
+											event: "fileProgress" as const,
+											path: event.path,
+											progress: 1,
+											state: "uploading" as const,
+										});
 									} else if (event.event === "fileProgress") {
 										yieldCallback({
 											event: "fileProgress" as const,

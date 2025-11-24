@@ -1,22 +1,14 @@
 import { createApiError } from "../error";
-import type { RepoId } from "../types/public";
+import type { XetTokenParams } from "./uploadShards";
 
 export interface XetWriteTokenParams {
 	accessToken: string | undefined;
-	hubUrl: string;
 	fetch?: typeof fetch;
-	repo: RepoId;
-	rev: string;
-	isPullRequest?: boolean;
-	xetRefreshWriteTokenUrl: string | undefined;
+	xetParams: XetTokenParams;
 }
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
-
-function cacheKey(params: Omit<XetWriteTokenParams, "fetch">): string {
-	return JSON.stringify([params.hubUrl, params.repo, params.rev, params.accessToken, params.isPullRequest]);
-}
 
 const jwtPromises: Map<string, Promise<{ accessToken: string; casUrl: string }>> = new Map();
 /**
@@ -32,7 +24,15 @@ const jwts: Map<
 > = new Map();
 
 export async function xetWriteToken(params: XetWriteTokenParams): Promise<{ accessToken: string; casUrl: string }> {
-	const key = cacheKey(params);
+	if (
+		params.xetParams.expiresAt &&
+		params.xetParams.casUrl &&
+		params.xetParams.accessToken &&
+		params.xetParams.expiresAt > new Date(Date.now() + JWT_SAFETY_PERIOD)
+	) {
+		return { accessToken: params.xetParams.accessToken, casUrl: params.xetParams.casUrl };
+	}
+	const key = params.xetParams.refreshWriteTokenUrl;
 
 	const jwt = jwts.get(key);
 
@@ -47,19 +47,16 @@ export async function xetWriteToken(params: XetWriteTokenParams): Promise<{ acce
 	}
 
 	const promise = (async () => {
-		const resp = await (params.fetch ?? fetch)(
-			params.xetRefreshWriteTokenUrl ??
-				`${params.hubUrl}/api/${params.repo.type}s/${params.repo.name}/xet-write-token/${encodeURIComponent(
-					params.rev
-				)}` + (params.isPullRequest ? "?create_pr=1" : ""),
-			{
-				headers: params.accessToken
+		const resp = await (params.fetch ?? fetch)(params.xetParams.refreshWriteTokenUrl, {
+			headers: {
+				...(params.accessToken
 					? {
 							Authorization: `Bearer ${params.accessToken}`,
 					  }
-					: {},
-			}
-		);
+					: {}),
+				...(params.xetParams.sessionId ? { "X-Xet-Session-Id": params.xetParams.sessionId } : {}),
+			},
+		});
 
 		if (!resp.ok) {
 			throw await createApiError(resp);
