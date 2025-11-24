@@ -911,19 +911,19 @@ export class Interpreter {
 						//  - reverse: Sort descending instead of ascending
 						//  - case_sensitive: When sorting strings, sort upper and lower case separately
 						//  - attribute: When sorting objects or dicts, an attribute or key to sort by
-						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+						const [, kwargs] = this.evaluateArguments(filter.args, environment);
 						
-						const reverse = args.at(0) ?? kwargs.get("reverse") ?? new BooleanValue(false);
+						const reverse = kwargs.get("reverse") ?? new BooleanValue(false);
 						if (!(reverse instanceof BooleanValue)) {
 							throw new Error("reverse must be a boolean");
 						}
 
-						const caseSensitive = args.at(1) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
+						const caseSensitive = kwargs.get("case_sensitive") ?? new BooleanValue(false);
 						if (!(caseSensitive instanceof BooleanValue)) {
 							throw new Error("case_sensitive must be a boolean");
 						}
 
-						const attribute = args.at(2) ?? kwargs.get("attribute") ?? new NullValue();
+						const attribute = kwargs.get("attribute") ?? new NullValue();
 						if (!(attribute instanceof StringValue || attribute instanceof NullValue)) {
 							throw new Error("attribute must be a string or null");
 						}
@@ -934,14 +934,8 @@ export class Interpreter {
 								return item;
 							}
 
-							// Support comma-separated attributes (e.g., "age,name")
-							const attributes = attribute.value.split(',').map(a => a.trim());
-							
-							// For a single attribute or first attribute in a list
-							const attr = attributes[0];
-							
 							// Support dot notation (e.g., "address.city")
-							const parts = attr.split('.');
+							const parts = attribute.value.split('.');
 							let value: AnyRuntimeValue = item;
 							
 							for (const part of parts) {
