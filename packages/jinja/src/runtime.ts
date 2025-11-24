@@ -303,6 +303,91 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 		["items", new FunctionValue(() => this.items())],
 		["keys", new FunctionValue(() => this.keys())],
 		["values", new FunctionValue(() => this.values())],
+		[
+			"dictsort",
+			new FunctionValue((args) => {
+				// https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.dictsort
+				// Sort a dictionary and yield (key, value) pairs.
+				// Optional parameters:
+				//  - case_sensitive: Sort in a case-sensitive manner (default: false)
+				//  - by: Sort by 'key' or 'value' (default: 'key')
+				//  - reverse: Reverse the sort order (default: false)
+
+				// Extract keyword arguments if present
+				let kwargs = new Map<string, AnyRuntimeValue>();
+				const positionalArgs = args.filter((arg) => {
+					if (arg instanceof KeywordArgumentsValue) {
+						kwargs = arg.value;
+						return false;
+					}
+					return true;
+				});
+
+				const caseSensitive = positionalArgs.at(0) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
+				if (!(caseSensitive instanceof BooleanValue)) {
+					throw new Error("case_sensitive must be a boolean");
+				}
+
+				const by = positionalArgs.at(1) ?? kwargs.get("by") ?? new StringValue("key");
+				if (!(by instanceof StringValue)) {
+					throw new Error("by must be a string");
+				}
+				if (!["key", "value"].includes(by.value)) {
+					throw new Error("by must be either 'key' or 'value'");
+				}
+
+				const reverse = positionalArgs.at(2) ?? kwargs.get("reverse") ?? new BooleanValue(false);
+				if (!(reverse instanceof BooleanValue)) {
+					throw new Error("reverse must be a boolean");
+				}
+
+				// Convert to array of [key, value] pairs and sort
+				const items = Array.from(this.value.entries())
+					.map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+					.sort((a, b) => {
+						const index = by.value === "key" ? 0 : 1;
+
+						let aValue: unknown = a.value[index].value;
+						let bValue: unknown = b.value[index].value;
+
+						// Handle null/undefined values - put them at the end
+						if (aValue == null && bValue == null) return 0;
+						if (aValue == null) return reverse.value ? -1 : 1;
+						if (bValue == null) return reverse.value ? 1 : -1;
+
+						// For case-insensitive string comparison
+						if (!caseSensitive.value && typeof aValue === "string" && typeof bValue === "string") {
+							aValue = aValue.toLowerCase();
+							bValue = bValue.toLowerCase();
+						}
+
+						// Ensure comparable types:
+						// This is only an potential issue when `by='value'` and the dictionary has mixed value types
+						const isPrimitive = (val: unknown) =>
+							typeof val === "string" || typeof val === "number" || typeof val === "boolean";
+						const firstNonPrimitive = isPrimitive(aValue) ? (isPrimitive(bValue) ? null : bValue) : aValue;
+						if (firstNonPrimitive !== null) {
+							throw new Error(
+								`Cannot sort dictionary with non-primitive value types (found ${typeof firstNonPrimitive})`
+							);
+						} else if (typeof aValue !== typeof bValue) {
+							throw new Error("Cannot sort dictionary with mixed value types");
+						}
+
+						const a1 = aValue as string | number | boolean;
+						const b1 = bValue as string | number | boolean;
+
+						if (a1 < b1) {
+							return reverse.value ? 1 : -1;
+						} else if (a1 > b1) {
+							return reverse.value ? -1 : 1;
+						}
+						return 0;
+					});
+
+				return new ArrayValue(items);
+			}),
+		],
 	]);
 
 	items(): ArrayValue {
@@ -818,8 +903,17 @@ export class Interpreter {
 						);
 					case "length":
 						return new IntegerValue(operand.value.size);
-					default:
+					default: {
+						// Check if the filter exists in builtins
+						const builtin = operand.builtins.get(filter.value);
+						if (builtin) {
+							if (builtin instanceof FunctionValue) {
+								return builtin.value([], environment);
+							}
+							return builtin;
+						}
 						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
+					}
 				}
 			} else if (operand instanceof BooleanValue) {
 				switch (filter.value) {
@@ -996,6 +1090,18 @@ export class Interpreter {
 					}
 				}
 				throw new Error(`Unknown StringValue filter: ${filterName}`);
+			} else if (operand instanceof ObjectValue) {
+				// Check if the filter exists in builtins for ObjectValue
+				const builtin = operand.builtins.get(filterName);
+				if (builtin && builtin instanceof FunctionValue) {
+					const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+					// Pass keyword arguments as the last argument if present
+					if (kwargs.size > 0) {
+						args.push(new KeywordArgumentsValue(kwargs));
+					}
+					return builtin.value(args, environment);
+				}
+				throw new Error(`Unknown ObjectValue filter: ${filterName}`);
 			} else {
 				throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 			}
