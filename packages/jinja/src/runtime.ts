@@ -365,7 +365,7 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 						// This is only an potential issue when `by='value'` and the dictionary has mixed value types
 						const isPrimitive = (val: unknown) =>
 							typeof val === "string" || typeof val === "number" || typeof val === "boolean";
-						let firstNonPrimitive = isPrimitive(aValue) ? (isPrimitive(bValue) ? null : bValue) : aValue;
+						const firstNonPrimitive = isPrimitive(aValue) ? (isPrimitive(bValue) ? null : bValue) : aValue;
 						if (firstNonPrimitive !== null) {
 							throw new Error(
 								`Cannot sort dictionary with non-primitive value types (found ${typeof firstNonPrimitive})`
