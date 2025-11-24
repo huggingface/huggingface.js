@@ -3,7 +3,6 @@ from huggingface_hub import InferenceClient
 
 client = InferenceClient(
     base_url="http://localhost:8080/v1",
-    provider="hf-inference",
     api_key=os.environ["API_TOKEN"],
 )
 

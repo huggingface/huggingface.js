@@ -22,6 +22,7 @@ import { eventToGenerator } from "../utils/eventToGenerator";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { isFrontend } from "../utils/isFrontend";
 import { createBlobs } from "../utils/createBlobs";
+import type { XetTokenParams } from "../utils/uploadShards";
 import { uploadShards } from "../utils/uploadShards";
 import { splitAsyncGenerator } from "../utils/splitAsyncGenerator";
 import { SplicedBlob } from "../utils/SplicedBlob";
@@ -120,8 +121,13 @@ export type CommitParams = {
 	 */
 	fetch?: typeof fetch;
 	abortSignal?: AbortSignal;
-	// Credentials are optional due to custom fetch functions or cookie auth
+	/**
+	 * @default true
+	 *
+	 * Use xet protocol: https://huggingface.co/blog/xet-on-the-hub to upload, rather than a basic S3 PUT
+	 */
 	useXet?: boolean;
+	// Credentials are optional due to custom fetch functions or cookie auth
 } & Partial<CredentialsParams>;
 
 export interface CommitOutput {
@@ -165,24 +171,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 	const repoId = toRepoId(params.repo);
 	yield { event: "phase", phase: "preuploading" };
 
-	let useXet = params.useXet;
-	if (useXet) {
-		const info = await (params.fetch ?? fetch)(
-			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}?expand[]=xetEnabled`,
-			{
-				headers: {
-					...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-				},
-			}
-		);
-
-		if (!info.ok) {
-			throw await createApiError(info);
-		}
-
-		const data = await info.json();
-		useXet = !!data.xetEnabled;
-	}
+	let useXet = params.useXet ?? true;
 
 	const lfsShas = new Map<string, string | null>();
 
@@ -206,10 +195,6 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 		const allOperations = (
 			await Promise.all(
 				params.operations.map(async (operation) => {
-					if (operation.operation === "edit" && !useXet) {
-						throw new Error("Edit operation is not supported when Xet is disabled");
-					}
-
 					if (operation.operation === "edit") {
 						// Convert EditFile operation to a file operation with SplicedBlob
 						const splicedBlob = SplicedBlob.create(
@@ -325,7 +310,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			const payload: ApiLfsBatchRequest = {
 				operation: "upload",
 				// multipart is a custom protocol for HF
-				transfers: ["basic", "multipart"],
+				transfers: ["basic", "multipart", ...(useXet ? ["xet" as const] : [])],
 				hash_algo: "sha_256",
 				...(!params.isPullRequest && {
 					ref: {
@@ -363,6 +348,12 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
 
+			if (useXet && json.transfer !== "xet") {
+				useXet = false;
+			}
+
+			let xetParams: XetTokenParams | null = null;
+
 			if (useXet) {
 				// First get all the files that are already uploaded out of the way
 				for (const obj of json.objects) {
@@ -386,6 +377,18 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							progress: 1,
 							state: "uploading",
 						};
+					} else {
+						const headers = new Headers(obj.actions.upload.header);
+
+						xetParams = {
+							sessionId: headers.get("X-Xet-Session-Id") ?? undefined,
+							casUrl: headers.get("X-Xet-Cas-Url") ?? undefined,
+							accessToken: headers.get("X-Xet-Access-Token") ?? undefined,
+							expiresAt: headers.get("X-Xet-Token-Expiration")
+								? new Date(parseInt(headers.get("X-Xet-Token-Expiration") ?? "0") * 1000)
+								: undefined,
+							refreshWriteTokenUrl: obj.actions.upload.href,
+						};
 					}
 				}
 				const source = (async function* () {
@@ -395,43 +398,48 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							continue;
 						}
 						abortSignal?.throwIfAborted();
-
 						yield { content: op.content, path: op.path, sha256: obj.oid };
 					}
 				})();
-				const sources = splitAsyncGenerator(source, 5);
-				yield* eventToGenerator((yieldCallback, returnCallback, rejectCallback) =>
-					Promise.all(
-						sources.map(async function (source) {
-							for await (const event of uploadShards(source, {
-								fetch: params.fetch,
-								accessToken,
-								hubUrl: params.hubUrl ?? HUB_URL,
-								repo: repoId,
-								// todo: maybe leave empty if PR?
-								rev: params.branch ?? "main",
-								isPullRequest: params.isPullRequest,
-								yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
-							})) {
-								if (event.event === "file") {
-									yieldCallback({
-										event: "fileProgress" as const,
-										path: event.path,
-										progress: 1,
-										state: "uploading" as const,
-									});
-								} else if (event.event === "fileProgress") {
-									yieldCallback({
-										event: "fileProgress" as const,
-										path: event.path,
-										progress: event.progress,
-										state: "uploading" as const,
-									});
+				if (xetParams) {
+					const fixedXetParams = xetParams;
+					const sources = splitAsyncGenerator(source, 5);
+					yield* eventToGenerator((yieldCallback, returnCallback, rejectCallback) =>
+						Promise.all(
+							sources.map(async function (source) {
+								for await (const event of uploadShards(source, {
+									fetch: params.fetch,
+									accessToken,
+									hubUrl: params.hubUrl ?? HUB_URL,
+									repo: repoId,
+									xetParams: fixedXetParams,
+									// todo: maybe leave empty if PR?
+									rev: params.branch ?? "main",
+									isPullRequest: params.isPullRequest,
+									yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
+								})) {
+									if (event.event === "file") {
+										yieldCallback({
+											event: "fileProgress" as const,
+											path: event.path,
+											progress: 1,
+											state: "uploading" as const,
+										});
+									} else if (event.event === "fileProgress") {
+										yieldCallback({
+											event: "fileProgress" as const,
+											path: event.path,
+											progress: event.progress,
+											state: "uploading" as const,
+										});
+									}
 								}
-							}
-						})
-					).then(() => returnCallback(undefined), rejectCallback)
-				);
+							})
+						).then(() => returnCallback(undefined), rejectCallback)
+					);
+				} else {
+					// No LFS file to upload
+				}
 			} else {
 				yield* eventToGenerator<CommitProgressEvent, void>((yieldCallback, returnCallback, rejectCallback) => {
 					return promisesQueueStreaming(

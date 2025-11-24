@@ -209,6 +209,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	"chronos-forecasting": {
+		prettyLabel: "Chronos",
+		repoName: "Chronos",
+		repoUrl: "https://github.com/amazon-science/chronos-forecasting",
+		snippets: snippets.chronos_forecasting,
+	},
 	"cloud-agents": {
 		prettyLabel: "Cloud Agents",
 		repoName: "Cloud Agents",
@@ -228,13 +234,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "COMET",
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
-	},
-	contexttab: {
-		prettyLabel: "ConTextTab",
-		repoName: "ConTextTab",
-		repoUrl: "https://github.com/SAP-samples/contexttab",
-		countDownloads: `path_extension:"pt"`,
-		snippets: snippets.contexttab,
 	},
 	cosmos: {
 		prettyLabel: "Cosmos",
@@ -510,6 +509,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
 	},
+	"image-matching-models": {
+		prettyLabel: "Image Matching Models",
+		repoName: "Image Matching Models",
+		repoUrl: "https://github.com/alexstoken/image-matching-models",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
@@ -623,6 +629,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/lerobot",
 		filter: false,
 		snippets: snippets.lerobot,
+	},
+	lightglue: {
+		prettyLabel: "LightGlue",
+		repoName: "LightGlue",
+		repoUrl: "https://github.com/cvg/LightGlue",
+		filter: false,
+		countDownloads: `path_extension:"pth" OR path:"config.json"`,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
@@ -959,6 +972,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sampleFactory,
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
+	},
+	"sap-rpt-1-oss": {
+		prettyLabel: "sap-rpt-1-oss",
+		repoName: "sap-rpt-1-oss",
+		repoUrl: "https://github.com/SAP-samples/sap-rpt-1-oss",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.sap_rpt_one_oss,
 	},
 	sapiens: {
 		prettyLabel: "sapiens",

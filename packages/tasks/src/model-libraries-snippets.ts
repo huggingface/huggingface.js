@@ -132,23 +132,46 @@ wav = model.generate(text, audio_prompt_path=AUDIO_PROMPT_PATH)
 ta.save("test-2.wav", wav, model.sr)`,
 ];
 
-export const contexttab = (): string[] => {
-	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
+export const chronos_forecasting = (model: ModelData): string[] => {
+	const installSnippet = `pip install chronos-forecasting`;
+
+	const exampleSnippet = `import pandas as pd
+from chronos import BaseChronosPipeline
+
+pipeline = BaseChronosPipeline.from_pretrained("${model.id}", device_map="cuda")
+
+# Load historical data
+context_df = pd.read_csv("https://autogluon.s3.us-west-2.amazonaws.com/datasets/timeseries/misc/AirPassengers.csv")
+
+# Generate predictions
+pred_df = pipeline.predict_df(
+    context_df,
+    prediction_length=36,  # Number of steps to forecast
+    quantile_levels=[0.1, 0.5, 0.9],  # Quantiles for probabilistic forecast
+    id_column="item_id",  # Column identifying different time series
+    timestamp_column="Month",  # Column with datetime information
+    target="#Passengers",  # Column(s) with time series values to predict
+)`;
+
+	return [installSnippet, exampleSnippet];
+};
+
+export const sap_rpt_one_oss = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/sap-rpt-1-oss`;
 
 	const classificationSnippet = `# Run a classification task
 from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-from contexttab import ConTextTabClassifier
+from sap_rpt_oss import SAP_RPT_OSS_Classifier
 
 # Load sample data
 X, y = load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
 
-# Initialize a classifier
-# You can omit checkpoint and checkpoint_revision to use the default model
-clf = ConTextTabClassifier(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+# Initialize a classifier, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+clf = SAP_RPT_OSS_Classifier(max_context_size=8192, bagging=8)
 
 clf.fit(X_train, y_train)
 
@@ -163,8 +186,7 @@ from sklearn.datasets import fetch_openml
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 
-from contexttab import ConTextTabRegressor
-
+from sap_rpt_oss import SAP_RPT_OSS_Regressor
 
 # Load sample data
 df = fetch_openml(data_id=531, as_frame=True)
@@ -174,9 +196,8 @@ y = df.target.astype(float)
 # Train-test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
 
-# Initialize the regressor
-# You can omit checkpoint and checkpoint_revision to use the default model
-regressor = ConTextTabRegressor(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+# Initialize the regressor, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+regressor = SAP_RPT_OSS_Regressor(max_context_size=8192, bagging=8)
 
 regressor.fit(X_train, y_train)
 
@@ -324,7 +345,7 @@ dam = DescribeAnythingModel(
 )`,
 ];
 
-const diffusers_install = "pip install -U diffusers transformers";
+const diffusers_install = "pip install -U diffusers transformers accelerate";
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
@@ -333,19 +354,23 @@ const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
 const diffusersVideoDefaultPrompt = "A man with short gray hair plays a red electric guitar.";
 
 const diffusers_default = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+	`import torch
+from diffusers import DiffusionPipeline
 
-pipe = DiffusionPipeline.from_pretrained("${model.id}")
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_image_to_image = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+	`import torch
+from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
-pipe = DiffusionPipeline.from_pretrained("${model.id}")
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
 input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
@@ -358,7 +383,8 @@ const diffusers_image_to_video = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
-pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.float16)
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
 pipe.to("cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -380,9 +406,11 @@ pipe = StableDiffusionControlNetPipeline.from_pretrained(
 ];
 
 const diffusers_lora = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+	`import torch
+from diffusers import DiffusionPipeline
 
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
@@ -390,10 +418,12 @@ image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_lora_image_to_image = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+	`import torch
+from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
@@ -403,10 +433,12 @@ image = pipe(image=input_image, prompt=prompt).images[0]`,
 ];
 
 const diffusers_lora_text_to_video = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+	`import torch
+from diffusers import DiffusionPipeline
 from diffusers.utils import export_to_video
 
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -416,10 +448,12 @@ export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_lora_image_to_video = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+	`import torch
+from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -430,9 +464,11 @@ export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_textual_inversion = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+	`import torch
+from diffusers import DiffusionPipeline
 
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
@@ -444,7 +480,8 @@ from diffusers.utils import load_image
 image = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup.png")
 mask = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup_mask.png")
 
-pipe = FluxFillPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16).to("cuda")
+# switch to "mps" for apple devices
+pipe = FluxFillPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
 image = pipe(
     prompt="a white paper cup",
     image=image,
@@ -464,7 +501,8 @@ const diffusers_inpainting = (model: ModelData) => [
 from diffusers import AutoPipelineForInpainting
 from diffusers.utils import load_image
 
-pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", torch_dtype=torch.float16, variant="fp16").to("cuda")
+# switch to "mps" for apple devices
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", dtype=torch.float16, variant="fp16", device_map="cuda")
 
 img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
 mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
@@ -1591,7 +1629,7 @@ export const transformers = (model: ModelData): string[] => {
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto")'
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', dtype="auto")'
 		);
 	}
 

@@ -21,6 +21,9 @@ export interface ApiCollectionInfo {
 				  }
 		  );
 	owner: ApiAuthor;
+	/**
+	 * Note that it's limited to 4 items when the listing endpoint is used.
+	 */
 	items: ApiCollectionItem[];
 	theme: "orange" | "blue" | "green" | "purple" | "pink" | "indigo";
 	private: boolean;
@@ -192,6 +195,7 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 	likes: number;
 	pinned: boolean;
 	private: boolean;
+	featured: boolean;
 	repoType: "space";
 	title: string;
 	sdk?: "gradio" | "docker" | "static" | "streamlit";

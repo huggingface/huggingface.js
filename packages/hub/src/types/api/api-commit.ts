@@ -1,7 +1,7 @@
 export interface ApiLfsBatchRequest {
 	/// github.com/git-lfs/git-lfs/blob/master/docs/api/batch.md
 	operation: "download" | "upload";
-	transfers?: string[];
+	transfers?: Array<ApiLfsResponseTransfer>;
 	/**
 	 * Optional object describing the server ref that the objects belong to. Note: Added in v2.4.
 	 *
@@ -29,7 +29,7 @@ export interface ApiLfsBatchResponse {
 	objects: ApiLfsResponseObject[];
 }
 
-export type ApiLfsResponseTransfer = "basic" | "multipart";
+export type ApiLfsResponseTransfer = "basic" | "multipart" | "xet";
 
 export interface ApiLfsCompleteMultipartRequest {
 	oid: string;

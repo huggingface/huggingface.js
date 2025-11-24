@@ -4,7 +4,9 @@ client = InferenceClient(
 {% if endpointUrl %}
     base_url="{{ baseUrl }}",
 {% endif %}
+{% if task != "conversational" or directRequest %}
     provider="{{ provider }}",
+{% endif %}
     api_key="{{ accessToken }}",
 {% if billTo %}
     bill_to="{{ billTo }}",
