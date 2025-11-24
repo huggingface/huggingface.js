@@ -719,9 +719,11 @@ export class Interpreter {
 						return new IntegerValue(operand.value.length);
 					case "reverse":
 						return new ArrayValue(operand.value.reverse());
-					case "sort":
+					case "sort": {
+						// Create a copy to avoid mutating the original array
+						const arrayCopy = operand.value.slice();
 						return new ArrayValue(
-							operand.value.sort((a, b) => {
+							arrayCopy.sort((a, b) => {
 								if (a.type !== b.type) {
 									throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
 								}
@@ -730,12 +732,14 @@ export class Interpreter {
 									case "FloatValue":
 										return (a as IntegerValue | FloatValue).value - (b as IntegerValue | FloatValue).value;
 									case "StringValue":
-										return (a as StringValue).value.localeCompare((b as StringValue).value);
+										// Default to case-insensitive comparison
+										return (a as StringValue).value.localeCompare((b as StringValue).value, undefined, { sensitivity: 'base' });
 									default:
 										throw new Error(`Cannot compare type: ${a.type}`);
 								}
 							})
 						);
+					}
 					case "join":
 						return new StringValue(operand.value.map((x) => x.value).join(""));
 					case "string":
@@ -901,6 +905,96 @@ export class Interpreter {
 
 			if (operand instanceof ArrayValue) {
 				switch (filterName) {
+					case "sort": {
+						// https://jinja.palletsprojects.com/en/3.1.x/templates/#jinja-filters.sort
+						// Parameters:
+						//  - reverse: Sort descending instead of ascending
+						//  - case_sensitive: When sorting strings, sort upper and lower case separately
+						//  - attribute: When sorting objects or dicts, an attribute or key to sort by
+						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+						
+						const reverse = args.at(0) ?? kwargs.get("reverse") ?? new BooleanValue(false);
+						if (!(reverse instanceof BooleanValue)) {
+							throw new Error("reverse must be a boolean");
+						}
+
+						const caseSensitive = args.at(1) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
+						if (!(caseSensitive instanceof BooleanValue)) {
+							throw new Error("case_sensitive must be a boolean");
+						}
+
+						const attribute = args.at(2) ?? kwargs.get("attribute") ?? new NullValue();
+						if (!(attribute instanceof StringValue || attribute instanceof NullValue)) {
+							throw new Error("attribute must be a string or null");
+						}
+
+						// Helper function to get the value to sort by
+						const getSortValue = (item: AnyRuntimeValue): AnyRuntimeValue => {
+							if (attribute instanceof NullValue) {
+								return item;
+							}
+
+							// Support comma-separated attributes (e.g., "age,name")
+							const attributes = attribute.value.split(',').map(a => a.trim());
+							
+							// For a single attribute or first attribute in a list
+							const attr = attributes[0];
+							
+							// Support dot notation (e.g., "address.city")
+							const parts = attr.split('.');
+							let value: AnyRuntimeValue = item;
+							
+							for (const part of parts) {
+								if (value instanceof ObjectValue) {
+									value = value.value.get(part) ?? new UndefinedValue();
+								} else if (value instanceof ArrayValue && !isNaN(parseInt(part))) {
+									value = value.value[parseInt(part)] ?? new UndefinedValue();
+								} else {
+									return new UndefinedValue();
+								}
+							}
+							
+							return value;
+						};
+
+						// Create a copy of the array to sort
+						const arrayCopy = operand.value.slice();
+						
+						arrayCopy.sort((a, b) => {
+							const aVal = getSortValue(a);
+							const bVal = getSortValue(b);
+
+							if (aVal.type !== bVal.type) {
+								throw new Error(`Cannot compare different types: ${aVal.type} and ${bVal.type}`);
+							}
+							
+							let result = 0;
+							switch (aVal.type) {
+								case "IntegerValue":
+								case "FloatValue":
+									result = (aVal as IntegerValue | FloatValue).value - (bVal as IntegerValue | FloatValue).value;
+									break;
+								case "StringValue": {
+									const aStr = (aVal as StringValue).value;
+									const bStr = (bVal as StringValue).value;
+									if (caseSensitive.value) {
+										// Case-sensitive comparison: sort upper and lower case separately
+										result = aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
+									} else {
+										// Case-insensitive comparison
+										result = aStr.localeCompare(bStr, undefined, { sensitivity: 'base' });
+									}
+									break;
+								}
+								default:
+									throw new Error(`Cannot compare type: ${aVal.type}`);
+							}
+							
+							return reverse.value ? -result : result;
+						});
+
+						return new ArrayValue(arrayCopy);
+					}
 					case "selectattr":
 					case "rejectattr": {
 						const select = filterName === "selectattr";
@@ -951,7 +1045,21 @@ export class Interpreter {
 								if (!(item instanceof ObjectValue)) {
 									throw new Error("items in map must be an object");
 								}
-								return item.value.get(attr.value) ?? defaultValue ?? new UndefinedValue();
+								
+								// Support dot notation (e.g., "address.city")
+								const parts = attr.value.split('.');
+								let value: AnyRuntimeValue = item;
+								
+								for (const part of parts) {
+									if (value instanceof ObjectValue) {
+										value = value.value.get(part) ?? new UndefinedValue();
+									} else {
+										value = new UndefinedValue();
+										break;
+									}
+								}
+								
+								return value instanceof UndefinedValue ? (defaultValue ?? new UndefinedValue()) : value;
 							});
 							return new ArrayValue(mapped);
 						} else {
