@@ -528,6 +528,35 @@ export function setupGlobals(env: Environment): void {
 	env.set("None", null);
 }
 
+/**
+ * Helper function to get a nested attribute value from an object using dot notation.
+ * Supports both object properties and array indices.
+ * @param item The item to get the value from
+ * @param attributePath The attribute path (e.g., "details.priority" or "items.0")
+ * @returns The value at the attribute path, or UndefinedValue if not found
+ */
+function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRuntimeValue {
+	const parts = attributePath.split('.');
+	let value: AnyRuntimeValue = item;
+	
+	for (const part of parts) {
+		if (value instanceof ObjectValue) {
+			value = value.value.get(part) ?? new UndefinedValue();
+		} else if (value instanceof ArrayValue) {
+			const index = parseInt(part, 10);
+			if (!isNaN(index) && index >= 0 && index < value.value.length) {
+				value = value.value[index];
+			} else {
+				return new UndefinedValue();
+			}
+		} else {
+			return new UndefinedValue();
+		}
+	}
+	
+	return value;
+}
+
 export class Interpreter {
 	global: Environment;
 
@@ -912,7 +941,7 @@ export class Interpreter {
 						//  - reverse: Sort descending instead of ascending
 						//  - case_sensitive: When sorting strings, sort upper and lower case separately
 						//  - attribute: When sorting objects or dicts, an attribute or key to sort by
-						const [, kwargs] = this.evaluateArguments(filter.args, environment);
+						const [_args, kwargs] = this.evaluateArguments(filter.args, environment);
 						
 						const reverse = kwargs.get("reverse") ?? new BooleanValue(false);
 						if (!(reverse instanceof BooleanValue)) {
@@ -934,22 +963,7 @@ export class Interpreter {
 							if (attribute instanceof NullValue) {
 								return item;
 							}
-
-							// Support dot notation (e.g., "address.city")
-							const parts = attribute.value.split('.');
-							let value: AnyRuntimeValue = item;
-							
-							for (const part of parts) {
-								if (value instanceof ObjectValue) {
-									value = value.value.get(part) ?? new UndefinedValue();
-								} else if (value instanceof ArrayValue && !isNaN(parseInt(part))) {
-									value = value.value[parseInt(part)] ?? new UndefinedValue();
-								} else {
-									return new UndefinedValue();
-								}
-							}
-							
-							return value;
+							return getAttributeValue(item, attribute.value);
 						};
 
 						// Create a copy of the array to sort
@@ -1052,19 +1066,7 @@ export class Interpreter {
 									throw new Error("items in map must be an object");
 								}
 								
-								// Support dot notation (e.g., "address.city")
-								const parts = attr.value.split('.');
-								let value: AnyRuntimeValue = item;
-								
-								for (const part of parts) {
-									if (value instanceof ObjectValue) {
-										value = value.value.get(part) ?? new UndefinedValue();
-									} else {
-										value = new UndefinedValue();
-										break;
-									}
-								}
-								
+								const value = getAttributeValue(item, attr.value);
 								return value instanceof UndefinedValue ? (defaultValue ?? new UndefinedValue()) : value;
 							});
 							return new ArrayValue(mapped);
