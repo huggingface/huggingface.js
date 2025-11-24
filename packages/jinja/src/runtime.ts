@@ -941,6 +941,7 @@ export class Interpreter {
 						//  - reverse: Sort descending instead of ascending
 						//  - case_sensitive: When sorting strings, sort upper and lower case separately
 						//  - attribute: When sorting objects or dicts, an attribute or key to sort by
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const [_args, kwargs] = this.evaluateArguments(filter.args, environment);
 						
 						const reverse = kwargs.get("reverse") ?? new BooleanValue(false);
@@ -998,7 +999,7 @@ export class Interpreter {
 									const aStr = (aVal as StringValue).value;
 									const bStr = (bVal as StringValue).value;
 									if (caseSensitive.value) {
-										// Case-sensitive comparison: sort upper and lower case separately
+										// Case-sensitive comparison respects case differences in sorting
 										result = aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
 									} else {
 										// Case-insensitive comparison
