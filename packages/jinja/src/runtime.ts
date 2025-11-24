@@ -308,7 +308,7 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 			new FunctionValue((args) => {
 				// https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.dictsort
 				// Sort a dictionary and yield (key, value) pairs.
-				// Parameters:
+				// Optional parameters:
 				//  - case_sensitive: Sort in a case-sensitive manner (default: false)
 				//  - by: Sort by 'key' or 'value' (default: 'key')
 				//  - reverse: Reverse the sort order (default: false)
@@ -332,7 +332,7 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 				if (!(by instanceof StringValue)) {
 					throw new Error("by must be a string");
 				}
-				if (by.value !== "key" && by.value !== "value") {
+				if (!["key", "value"].includes(by.value)) {
 					throw new Error("by must be either 'key' or 'value'");
 				}
 
@@ -341,46 +341,37 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 					throw new Error("reverse must be a boolean");
 				}
 
-				// Convert to array of [key, value] pairs
-				const items = Array.from(this.value.entries()).map(
-					([key, value]) => new ArrayValue([new StringValue(key), value])
-				);
+				// Convert to array of [key, value] pairs and sort
+				const items = Array.from(this.value.entries())
+					.map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+					.sort((a, b) => {
+						const index = by.value === "key" ? 0 : 1;
 
-				// Sort the items
-				items.sort((a, b) => {
-					const index = by.value === "key" ? 0 : 1;
-					const aItem = a.value[index];
-					const bItem = b.value[index];
+						let aValue: unknown = a.value[index].value;
+						let bValue: unknown = b.value[index].value;
 
-					let aValue: unknown = aItem.value;
-					let bValue: unknown = bItem.value;
+						// Handle null/undefined values - put them at the end
+						if (aValue == null && bValue == null) return 0;
+						if (aValue == null) return reverse.value ? -1 : 1;
+						if (bValue == null) return reverse.value ? 1 : -1;
 
-					// Handle null/undefined values - put them at the end
-					if (aValue == null && bValue == null) return 0;
-					if (aValue == null) return reverse.value ? -1 : 1;
-					if (bValue == null) return reverse.value ? 1 : -1;
+						// For case-insensitive string comparison
+						if (!caseSensitive.value && typeof aValue === "string" && typeof bValue === "string") {
+							aValue = aValue.toLowerCase();
+							bValue = bValue.toLowerCase();
+						}
 
-					// For case-insensitive string comparison
-					if (!caseSensitive.value && typeof aValue === "string" && typeof bValue === "string") {
-						aValue = aValue.toLowerCase();
-						bValue = bValue.toLowerCase();
-					}
+						// Compare values
+						const a1 = aValue as string | number | boolean;
+						const b1 = bValue as string | number | boolean;
 
-					// Compare values
-					// Note: This assumes comparable types (string, number, boolean).
-					// Mixed types (e.g., string vs number) will use JavaScript's default comparison,
-					// which matches Jinja's behavior. Complex types (objects, arrays) are not typically
-					// used as dictionary values in Jinja templates and may produce undefined results.
-					const a1 = aValue as string | number | boolean;
-					const b1 = bValue as string | number | boolean;
-
-					if (a1 < b1) {
-						return reverse.value ? 1 : -1;
-					} else if (a1 > b1) {
-						return reverse.value ? -1 : 1;
-					}
-					return 0;
-				});
+						if (a1 < b1) {
+							return reverse.value ? 1 : -1;
+						} else if (a1 > b1) {
+							return reverse.value ? -1 : 1;
+						}
+						return 0;
+					});
 
 				return new ArrayValue(items);
 			}),
