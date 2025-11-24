@@ -24,6 +24,14 @@ const jwts: Map<
 > = new Map();
 
 export async function xetWriteToken(params: XetWriteTokenParams): Promise<{ accessToken: string; casUrl: string }> {
+	if (
+		params.xetParams.expiresAt &&
+		params.xetParams.casUrl &&
+		params.xetParams.accessToken &&
+		params.xetParams.expiresAt > new Date(Date.now() + JWT_SAFETY_PERIOD)
+	) {
+		return { accessToken: params.xetParams.accessToken, casUrl: params.xetParams.casUrl };
+	}
 	const key = params.xetParams.refreshWriteTokenUrl;
 
 	const jwt = jwts.get(key);
