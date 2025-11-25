@@ -1744,8 +1744,9 @@ function toJSON(input: AnyRuntimeValue, indent?: number | null, depth?: number):
 	const currentDepth = depth ?? 0;
 	switch (input.type) {
 		case "NullValue":
-		case "UndefinedValue": // JSON.stringify(undefined) -> undefined
 			return "null";
+		case "UndefinedValue":
+			return "undefined";
 		case "IntegerValue":
 		case "FloatValue":
 		case "StringValue":
