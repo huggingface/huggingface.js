@@ -4595,57 +4595,57 @@ const TEST_CONTEXT = {
 	SORT_CASE_INSENSITIVE: {},
 	SORT_ATTRIBUTE_SIMPLE: {
 		users: [
-			{ name: 'Charlie', age: 30 },
-			{ name: 'Alice', age: 25 },
-			{ name: 'Bob', age: 35 }
-		]
+			{ name: "Charlie", age: 30 },
+			{ name: "Alice", age: 25 },
+			{ name: "Bob", age: 35 },
+		],
 	},
 	SORT_ATTRIBUTE_REVERSE: {
 		users: [
-			{ name: 'Charlie', age: 30 },
-			{ name: 'Alice', age: 25 },
-			{ name: 'Bob', age: 35 }
-		]
+			{ name: "Charlie", age: 30 },
+			{ name: "Alice", age: 25 },
+			{ name: "Bob", age: 35 },
+		],
 	},
 	SORT_ATTRIBUTE_DOT_NOTATION: {
 		items: [
-			{ name: 'item1', details: { priority: 3 } },
-			{ name: 'item2', details: { priority: 1 } },
-			{ name: 'item3', details: { priority: 2 } }
-		]
+			{ name: "item1", details: { priority: 3 } },
+			{ name: "item2", details: { priority: 1 } },
+			{ name: "item3", details: { priority: 2 } },
+		],
 	},
 	SORT_CHAINED: {
 		users: [
-			{ name: 'Charlie', age: 30 },
-			{ name: 'Alice', age: 30 },
-			{ name: 'Bob', age: 35 },
-			{ name: 'David', age: 25 }
-		]
+			{ name: "Charlie", age: 30 },
+			{ name: "Alice", age: 30 },
+			{ name: "Bob", age: 35 },
+			{ name: "David", age: 25 },
+		],
 	},
 	SORT_STABLE: {
 		items: [
-			{ name: 'apple', category: 'fruit' },
-			{ name: 'carrot', category: 'vegetable' },
-			{ name: 'banana', category: 'fruit' },
-			{ name: 'broccoli', category: 'vegetable' }
-		]
+			{ name: "apple", category: "fruit" },
+			{ name: "carrot", category: "vegetable" },
+			{ name: "banana", category: "fruit" },
+			{ name: "broccoli", category: "vegetable" },
+		],
 	},
 	// Sort with positional arguments
 	SORT_POSITIONAL_REVERSE: {},
 	SORT_POSITIONAL_REVERSE_CASE: {},
 	SORT_POSITIONAL_ALL: {
 		users: [
-			{ name: 'Charlie', age: 30 },
-			{ name: 'Alice', age: 25 },
-			{ name: 'Bob', age: 35 }
-		]
+			{ name: "Charlie", age: 30 },
+			{ name: "Alice", age: 25 },
+			{ name: "Bob", age: 35 },
+		],
 	},
 	SORT_POSITIONAL_MIXED: {
 		users: [
-			{ name: 'Charlie', age: 30 },
-			{ name: 'Alice', age: 25 },
-			{ name: 'Bob', age: 35 }
-		]
+			{ name: "Charlie", age: 30 },
+			{ name: "Alice", age: 25 },
+			{ name: "Bob", age: 35 },
+		],
 	},
 	// Edge cases for sort
 	SORT_NULL_VALUES: {},

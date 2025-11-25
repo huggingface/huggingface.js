@@ -590,9 +590,9 @@ export function setupGlobals(env: Environment): void {
  * @returns The value at the attribute path, or UndefinedValue if not found
  */
 function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRuntimeValue {
-	const parts = attributePath.split('.');
+	const parts = attributePath.split(".");
 	let value: AnyRuntimeValue = item;
-	
+
 	for (const part of parts) {
 		if (value instanceof ObjectValue) {
 			value = value.value.get(part) ?? new UndefinedValue();
@@ -607,7 +607,7 @@ function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRun
 			return new UndefinedValue();
 		}
 	}
-	
+
 	return value;
 }
 
@@ -641,7 +641,8 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 	}
 
 	// Check if value is numeric-like (IntegerValue, FloatValue, or BooleanValue)
-	const isNumericLike = (v: AnyRuntimeValue): boolean => v instanceof IntegerValue || v instanceof FloatValue || v instanceof BooleanValue;
+	const isNumericLike = (v: AnyRuntimeValue): boolean =>
+		v instanceof IntegerValue || v instanceof FloatValue || v instanceof BooleanValue;
 
 	const getNumericValue = (v: AnyRuntimeValue): number => {
 		if (v instanceof BooleanValue) {
@@ -870,9 +871,7 @@ export class Interpreter {
 						return new ArrayValue(operand.value.slice().reverse());
 					case "sort": {
 						// Default case-insensitive sort using the shared comparison helper
-						return new ArrayValue(
-							operand.value.slice().sort((a, b) => compareRuntimeValues(a, b, false))
-						);
+						return new ArrayValue(operand.value.slice().sort((a, b) => compareRuntimeValues(a, b, false)));
 					}
 					case "join":
 						return new StringValue(operand.value.map((x) => x.value).join(""));
@@ -1067,7 +1066,9 @@ export class Interpreter {
 						}
 
 						const attribute = args.at(2) ?? kwargs.get("attribute") ?? new NullValue();
-						if (!(attribute instanceof StringValue || attribute instanceof IntegerValue || attribute instanceof NullValue)) {
+						if (
+							!(attribute instanceof StringValue || attribute instanceof IntegerValue || attribute instanceof NullValue)
+						) {
 							throw new Error("attribute must be a string, integer, or null");
 						}
 
@@ -1083,7 +1084,7 @@ export class Interpreter {
 
 						// Create a copy of the array to sort
 						const arrayCopy = operand.value.slice();
-						
+
 						arrayCopy.sort((a, b) => {
 							const aVal = getSortValue(a);
 							const bVal = getSortValue(b);
@@ -1145,9 +1146,9 @@ export class Interpreter {
 								if (!(item instanceof ObjectValue)) {
 									throw new Error("items in map must be an object");
 								}
-								
+
 								const value = getAttributeValue(item, attr.value);
-								return value instanceof UndefinedValue ? (defaultValue ?? new UndefinedValue()) : value;
+								return value instanceof UndefinedValue ? defaultValue ?? new UndefinedValue() : value;
 							});
 							return new ArrayValue(mapped);
 						} else {
