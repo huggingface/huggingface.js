@@ -641,12 +641,11 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 	}
 
 	// Check if value is numeric-like (IntegerValue, FloatValue, or BooleanValue)
-	const isNumericLike = (v: AnyRuntimeValue): boolean =>
-		v.type === "IntegerValue" || v.type === "FloatValue" || v.type === "BooleanValue";
-	
+	const isNumericLike = (v: AnyRuntimeValue): boolean => v instanceof IntegerValue || v instanceof FloatValue || v instanceof BooleanValue;
+
 	const getNumericValue = (v: AnyRuntimeValue): number => {
-		if (v.type === "BooleanValue") {
-			return (v as BooleanValue).value ? 1 : 0;
+		if (v instanceof BooleanValue) {
+			return v.value ? 1 : 0;
 		}
 		return (v as IntegerValue | FloatValue).value;
 	};
