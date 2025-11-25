@@ -240,14 +240,16 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
 		const mimeType = args.inputs instanceof Blob ? args.inputs.type : "image/png";
+		const imageDataUrl = `data:${mimeType};base64,${base64FromBytes(
+			new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+		)}`;
 		return {
 			...omit(args, ["inputs", "parameters"]),
-			image_url: `data:${mimeType};base64,${base64FromBytes(
-				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
-			)}`,
 			...args.parameters,
-			...args,
-		};
+			image_url: imageDataUrl,
+			// Some fal endpoints (e.g. FLUX.2-dev) expect `image_urls` (array) instead of `image_url`
+			image_urls: [imageDataUrl],
+		} as RequestArgs;
 	}
 
 	override async getResponse(
