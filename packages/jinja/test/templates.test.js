@@ -132,6 +132,11 @@ const TEST_STRINGS = {
 	SORT_ATTRIBUTE_DOT_NOTATION: `{{ items | sort(attribute='details.priority') | map(attribute='details.priority') | list | tojson }}`,
 	SORT_CHAINED: `{{ users | sort(attribute='name') | sort(reverse=true, attribute='age') | map(attribute='name') | list | tojson }}`,
 	SORT_STABLE: `{{ items | sort(attribute='category') | map(attribute='name') | list | tojson }}`,
+	// Sort with positional arguments
+	SORT_POSITIONAL_REVERSE: `{{ [1, 3, 2] | sort(true) | tojson }}`,
+	SORT_POSITIONAL_REVERSE_CASE: `{{ ['banana', 'Apple', 'cherry'] | sort(false, true) | tojson }}`,
+	SORT_POSITIONAL_ALL: `{{ users | sort(false, false, 'name') | map(attribute='name') | list | tojson }}`,
+	SORT_POSITIONAL_MIXED: `{{ users | sort(true, attribute='age') | map(attribute='age') | list | tojson }}`,
 
 	// Filter statements
 	FILTER_STATEMENTS: `{% filter upper %}text{% endfilter %}`,
@@ -2791,6 +2796,95 @@ const TEST_PARSED = {
 		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	// Sort with positional arguments
+	SORT_POSITIONAL_REVERSE: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "sort", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "true", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	SORT_POSITIONAL_REVERSE_CASE: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "banana", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "Apple", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "cherry", type: "StringLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "sort", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "false", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "true", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	SORT_POSITIONAL_ALL: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "users", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "sort", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "false", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "false", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "name", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "map", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "attribute", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "name", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "list", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	SORT_POSITIONAL_MIXED: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "users", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "sort", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "true", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "attribute", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "age", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "map", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "attribute", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "age", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "list", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Filter statements
 	FILTER_STATEMENTS: [
@@ -4484,6 +4578,23 @@ const TEST_CONTEXT = {
 			{ name: 'broccoli', category: 'vegetable' }
 		]
 	},
+	// Sort with positional arguments
+	SORT_POSITIONAL_REVERSE: {},
+	SORT_POSITIONAL_REVERSE_CASE: {},
+	SORT_POSITIONAL_ALL: {
+		users: [
+			{ name: 'Charlie', age: 30 },
+			{ name: 'Alice', age: 25 },
+			{ name: 'Bob', age: 35 }
+		]
+	},
+	SORT_POSITIONAL_MIXED: {
+		users: [
+			{ name: 'Charlie', age: 30 },
+			{ name: 'Alice', age: 25 },
+			{ name: 'Bob', age: 35 }
+		]
+	},
 
 	// Filter statements
 	FILTER_STATEMENTS: {},
@@ -4718,6 +4829,11 @@ const EXPECTED_OUTPUTS = {
 	SORT_ATTRIBUTE_DOT_NOTATION: `[1, 2, 3]`,
 	SORT_CHAINED: `["Bob", "Alice", "Charlie", "David"]`,
 	SORT_STABLE: `["apple", "banana", "carrot", "broccoli"]`,
+	// Sort with positional arguments
+	SORT_POSITIONAL_REVERSE: `[3, 2, 1]`,
+	SORT_POSITIONAL_REVERSE_CASE: `["Apple", "banana", "cherry"]`,
+	SORT_POSITIONAL_ALL: `["Alice", "Bob", "Charlie"]`,
+	SORT_POSITIONAL_MIXED: `[35, 30, 25]`,
 
 	// Filter statements
 	FILTER_STATEMENTS: `TEXT`,

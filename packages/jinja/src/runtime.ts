@@ -1032,22 +1032,21 @@ export class Interpreter {
 						//  - reverse: Sort descending instead of ascending
 						//  - case_sensitive: When sorting strings, sort upper and lower case separately
 						//  - attribute: When sorting objects or dicts, an attribute or key to sort by
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const [_args, kwargs] = this.evaluateArguments(filter.args, environment);
+						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
 
-						const reverse = kwargs.get("reverse") ?? new BooleanValue(false);
+						const reverse = args.at(0) ?? kwargs.get("reverse") ?? new BooleanValue(false);
 						if (!(reverse instanceof BooleanValue)) {
 							throw new Error("reverse must be a boolean");
 						}
 
-						const caseSensitive = kwargs.get("case_sensitive") ?? new BooleanValue(false);
+						const caseSensitive = args.at(1) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
 						if (!(caseSensitive instanceof BooleanValue)) {
 							throw new Error("case_sensitive must be a boolean");
 						}
 
-						const attribute = kwargs.get("attribute") ?? new NullValue();
-						if (!(attribute instanceof StringValue || attribute instanceof NullValue)) {
-							throw new Error("attribute must be a string or null");
+						const attribute = args.at(2) ?? kwargs.get("attribute") ?? new NullValue();
+						if (!(attribute instanceof StringValue || attribute instanceof IntegerValue || attribute instanceof NullValue)) {
+							throw new Error("attribute must be a string, integer, or null");
 						}
 
 						// Helper function to get the value to sort by
@@ -1055,7 +1054,9 @@ export class Interpreter {
 							if (attribute instanceof NullValue) {
 								return item;
 							}
-							return getAttributeValue(item, attribute.value);
+							// Convert integer attribute to string for getAttributeValue
+							const attrPath = attribute instanceof IntegerValue ? String(attribute.value) : attribute.value;
+							return getAttributeValue(item, attrPath);
 						};
 
 						// Create a copy of the array to sort
