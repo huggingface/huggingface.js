@@ -1140,12 +1140,14 @@ export class Interpreter {
 							return getAttributeValue(item, attrPath);
 						};
 
-						return new ArrayValue(operand.value.slice().sort((a, b) => {
-							const aVal = getSortValue(a);
-							const bVal = getSortValue(b);
-							const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
-							return reverse.value ? -result : result;
-						}));
+						return new ArrayValue(
+							operand.value.slice().sort((a, b) => {
+								const aVal = getSortValue(a);
+								const bVal = getSortValue(b);
+								const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
+								return reverse.value ? -result : result;
+							})
+						);
 					}
 					case "selectattr":
 					case "rejectattr": {
