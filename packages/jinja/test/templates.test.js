@@ -4892,7 +4892,7 @@ const EXPECTED_OUTPUTS = {
 	SORT_POSITIONAL_MIXED: `[35, 30, 25]`,
 	// Edge cases for sort
 	SORT_NULL_VALUES: `[null, null]`,
-	SORT_UNDEFINED_VALUES: `[null, null, null]`,
+	SORT_UNDEFINED_VALUES: `[undefined, undefined, undefined]`,
 	SORT_MIXED_BOOL_NUM: `[0, false, 0.5, true, 1]`,
 
 	// Filter statements
