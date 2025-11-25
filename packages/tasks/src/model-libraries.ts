@@ -273,7 +273,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.dia,
 		filter: false,
 	},
-	"dia2-tts": {
+	"dia2": {
 		prettyLabel: "Dia2",
 		repoName: "Dia2",
 		repoUrl: "https://github.com/nari-labs/dia2",
