@@ -115,6 +115,7 @@ describe("listCollections", () => {
 						pinned: false,
 						position: 2,
 						private: false,
+						featured: false,
 						repoType: "space",
 						runtime: {
 							hardware: {
