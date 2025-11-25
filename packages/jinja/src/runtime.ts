@@ -346,43 +346,12 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 					.map(([key, value]) => new ArrayValue([new StringValue(key), value]))
 					.sort((a, b) => {
 						const index = by.value === "key" ? 0 : 1;
+						const aVal = a.value[index];
+						const bVal = b.value[index];
 
-						let aValue: unknown = a.value[index].value;
-						let bValue: unknown = b.value[index].value;
-
-						// Handle null/undefined values - put them at the end
-						if (aValue == null && bValue == null) return 0;
-						if (aValue == null) return reverse.value ? -1 : 1;
-						if (bValue == null) return reverse.value ? 1 : -1;
-
-						// For case-insensitive string comparison
-						if (!caseSensitive.value && typeof aValue === "string" && typeof bValue === "string") {
-							aValue = aValue.toLowerCase();
-							bValue = bValue.toLowerCase();
-						}
-
-						// Ensure comparable types:
-						// This is only an potential issue when `by='value'` and the dictionary has mixed value types
-						const isPrimitive = (val: unknown) =>
-							typeof val === "string" || typeof val === "number" || typeof val === "boolean";
-						const firstNonPrimitive = isPrimitive(aValue) ? (isPrimitive(bValue) ? null : bValue) : aValue;
-						if (firstNonPrimitive !== null) {
-							throw new Error(
-								`Cannot sort dictionary with non-primitive value types (found ${typeof firstNonPrimitive})`
-							);
-						} else if (typeof aValue !== typeof bValue) {
-							throw new Error("Cannot sort dictionary with mixed value types");
-						}
-
-						const a1 = aValue as string | number | boolean;
-						const b1 = bValue as string | number | boolean;
-
-						if (a1 < b1) {
-							return reverse.value ? 1 : -1;
-						} else if (a1 > b1) {
-							return reverse.value ? -1 : 1;
-						}
-						return 0;
+						// Use the shared comparison helper
+						const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
+						return reverse.value ? -result : result;
 					});
 
 				return new ArrayValue(items);
@@ -642,6 +611,55 @@ function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRun
 	return value;
 }
 
+/**
+ * Helper function to compare two runtime values for sorting.
+ * Enforces strict type checking - types must match exactly.
+ * Does not support null/undefined values - throws error if encountered.
+ * @param a The first value to compare
+ * @param b The second value to compare
+ * @param caseSensitive Whether string comparisons should be case-sensitive (default: false)
+ * @returns -1 if a < b, 1 if a > b, 0 if equal
+ */
+function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensitive = false): number {
+	// Check for null/undefined values - these are not supported in sorting
+	if (a instanceof UndefinedValue || a instanceof NullValue) {
+		throw new Error("Cannot compare undefined or null values");
+	}
+	if (b instanceof UndefinedValue || b instanceof NullValue) {
+		throw new Error("Cannot compare undefined or null values");
+	}
+
+	// Strict type checking - types must match exactly
+	if (a.type !== b.type) {
+		throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
+	}
+
+	switch (a.type) {
+		case "IntegerValue":
+		case "FloatValue": {
+			const aNum = (a as IntegerValue | FloatValue).value;
+			const bNum = (b as IntegerValue | FloatValue).value;
+			return aNum < bNum ? -1 : aNum > bNum ? 1 : 0;
+		}
+		case "StringValue": {
+			let aStr = (a as StringValue).value;
+			let bStr = (b as StringValue).value;
+			if (!caseSensitive) {
+				aStr = aStr.toLowerCase();
+				bStr = bStr.toLowerCase();
+			}
+			return aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
+		}
+		case "BooleanValue": {
+			const aBool = (a as BooleanValue).value;
+			const bBool = (b as BooleanValue).value;
+			return aBool === bBool ? 0 : aBool ? 1 : -1;
+		}
+		default:
+			throw new Error(`Cannot compare type: ${a.type}`);
+	}
+}
+
 export class Interpreter {
 	global: Environment;
 
@@ -834,22 +852,9 @@ export class Interpreter {
 					case "reverse":
 						return new ArrayValue(operand.value.slice().reverse());
 					case "sort": {
+						// Default case-insensitive sort using the shared comparison helper
 						return new ArrayValue(
-							operand.value.slice().sort((a, b) => {
-								if (a.type !== b.type) {
-									throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
-								}
-								switch (a.type) {
-									case "IntegerValue":
-									case "FloatValue":
-										return (a as IntegerValue | FloatValue).value - (b as IntegerValue | FloatValue).value;
-									case "StringValue":
-										// Default to case-insensitive comparison
-										return (a as StringValue).value.localeCompare((b as StringValue).value, undefined, { sensitivity: 'base' });
-									default:
-										throw new Error(`Cannot compare type: ${a.type}`);
-								}
-							})
+							operand.value.slice().sort((a, b) => compareRuntimeValues(a, b, false))
 						);
 					}
 					case "join":
@@ -1066,43 +1071,8 @@ export class Interpreter {
 							const aVal = getSortValue(a);
 							const bVal = getSortValue(b);
 
-							// Handle undefined values - sort them to the end
-							if (aVal instanceof UndefinedValue && bVal instanceof UndefinedValue) {
-								return 0; // Both undefined, keep original order
-							}
-							if (aVal instanceof UndefinedValue) {
-								return 1; // a is undefined, sort to end
-							}
-							if (bVal instanceof UndefinedValue) {
-								return -1; // b is undefined, sort to end
-							}
-
-							if (aVal.type !== bVal.type) {
-								throw new Error(`Cannot compare different types: ${aVal.type} and ${bVal.type}`);
-							}
-							
-							let result = 0;
-							switch (aVal.type) {
-								case "IntegerValue":
-								case "FloatValue":
-									result = (aVal as IntegerValue | FloatValue).value - (bVal as IntegerValue | FloatValue).value;
-									break;
-								case "StringValue": {
-									const aStr = (aVal as StringValue).value;
-									const bStr = (bVal as StringValue).value;
-									if (caseSensitive.value) {
-										// Case-sensitive comparison respects case differences in sorting
-										result = aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
-									} else {
-										// Case-insensitive comparison
-										result = aStr.localeCompare(bStr, undefined, { sensitivity: 'base' });
-									}
-									break;
-								}
-								default:
-									throw new Error(`Cannot compare type: ${aVal.type}`);
-							}
-							
+							// Use the shared comparison helper
+							const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
 							return reverse.value ? -result : result;
 						});
 
