@@ -274,7 +274,6 @@ export class BooleanValue extends RuntimeValue<boolean> {
 
 /**
  * Converts a runtime value to its JSON string representation.
- * Used for both the tojson filter and direct output via {{ value }} syntax.
  * @param input The runtime value to convert
  * @param indent Optional indentation for pretty-printing
  * @param depth Current recursion depth (used for indentation)
@@ -671,7 +670,7 @@ function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRun
 
 /**
  * Helper function to compare two runtime values for sorting.
- * Enforces strict type checking - types must match exactly (with some exceptions):
+ * Enforces strict type checking, i.e., types must match exactly (with some exceptions):
  * - Integers and floats can be compared (both are numeric)
  * - Booleans can be compared with numbers (false=0, true=1)
  * - Null values can be compared with null values (they are equal)
@@ -682,7 +681,7 @@ function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRun
  * @returns -1 if a < b, 1 if a > b, 0 if equal
  */
 function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensitive: boolean = false): number {
-	// Handle null values - can only compare null with null
+	// Handle null values (can only compare null with null)
 	if (a instanceof NullValue && b instanceof NullValue) {
 		return 0; // All null values are equal
 	}
@@ -690,7 +689,7 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 		throw new Error(`Cannot compare ${a.type} with ${b.type}`);
 	}
 
-	// Handle undefined values - can only compare undefined with undefined
+	// Handle undefined values (can only compare undefined with undefined)
 	if (a instanceof UndefinedValue && b instanceof UndefinedValue) {
 		return 0; // All undefined values are equal
 	}
@@ -698,7 +697,6 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 		throw new Error(`Cannot compare ${a.type} with ${b.type}`);
 	}
 
-	// Check if value is numeric-like (IntegerValue, FloatValue, or BooleanValue)
 	const isNumericLike = (v: AnyRuntimeValue): boolean =>
 		v instanceof IntegerValue || v instanceof FloatValue || v instanceof BooleanValue;
 
@@ -1107,7 +1105,7 @@ export class Interpreter {
 				switch (filterName) {
 					case "sort": {
 						// https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.sort
-						// Parameters:
+						// Optional parameters:
 						//  - reverse: Sort descending instead of ascending
 						//  - case_sensitive: When sorting strings, sort upper and lower case separately
 						//  - attribute: When sorting objects or dicts, an attribute or key to sort by
@@ -1135,7 +1133,6 @@ export class Interpreter {
 							if (attribute instanceof NullValue) {
 								return item;
 							}
-							// Convert integer attribute to string for getAttributeValue
 							const attrPath = attribute instanceof IntegerValue ? String(attribute.value) : attribute.value;
 							return getAttributeValue(item, attrPath);
 						};
