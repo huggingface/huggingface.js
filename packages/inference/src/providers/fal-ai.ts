@@ -249,7 +249,8 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 			image_url: imageDataUrl,
 			// Some fal endpoints (e.g. FLUX.2-dev) expect `image_urls` (array) instead of `image_url`
 			image_urls: [imageDataUrl],
-		} as RequestArgs;
+			...args,
+		};
 	}
 
 	override async getResponse(
