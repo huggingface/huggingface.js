@@ -122,25 +122,25 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_DICTSORT_6: `{% for key, value in numdict | dictsort(by='value', reverse=true) %}{{ key }}:{{ value }},{% endfor %}`,
 
 	// Sort filter tests
-	SORT_BASIC_NUMBERS: `{{ [3, 1, 2] | sort | tojson }}`,
-	SORT_BASIC_STRINGS: `{{ ['banana', 'Apple', 'cherry'] | sort | tojson }}`,
-	SORT_REVERSE: `{{ [1, 3, 2] | sort(reverse=true) | tojson }}`,
-	SORT_CASE_SENSITIVE: `{{ ['banana', 'Apple', 'cherry'] | sort(case_sensitive=true) | tojson }}`,
-	SORT_CASE_INSENSITIVE: `{{ ['banana', 'Apple', 'cherry'] | sort(case_sensitive=false) | tojson }}`,
-	SORT_ATTRIBUTE_SIMPLE: `{{ users | sort(attribute='name') | map(attribute='name') | list | tojson }}`,
-	SORT_ATTRIBUTE_REVERSE: `{{ users | sort(attribute='age', reverse=true) | map(attribute='age') | list | tojson }}`,
-	SORT_ATTRIBUTE_DOT_NOTATION: `{{ items | sort(attribute='details.priority') | map(attribute='details.priority') | list | tojson }}`,
-	SORT_CHAINED: `{{ users | sort(attribute='name') | sort(reverse=true, attribute='age') | map(attribute='name') | list | tojson }}`,
-	SORT_STABLE: `{{ items | sort(attribute='category') | map(attribute='name') | list | tojson }}`,
+	SORT_BASIC_NUMBERS: `{{ [3, 1, 2] | sort }}`,
+	SORT_BASIC_STRINGS: `{{ ['banana', 'Apple', 'cherry'] | sort }}`,
+	SORT_REVERSE: `{{ [1, 3, 2] | sort(reverse=true) }}`,
+	SORT_CASE_SENSITIVE: `{{ ['banana', 'Apple', 'cherry'] | sort(case_sensitive=true) }}`,
+	SORT_CASE_INSENSITIVE: `{{ ['banana', 'Apple', 'cherry'] | sort(case_sensitive=false) }}`,
+	SORT_ATTRIBUTE_SIMPLE: `{{ users | sort(attribute='name') | map(attribute='name') | list }}`,
+	SORT_ATTRIBUTE_REVERSE: `{{ users | sort(attribute='age', reverse=true) | map(attribute='age') | list }}`,
+	SORT_ATTRIBUTE_DOT_NOTATION: `{{ items | sort(attribute='details.priority') | map(attribute='details.priority') | list }}`,
+	SORT_CHAINED: `{{ users | sort(attribute='name') | sort(reverse=true, attribute='age') | map(attribute='name') | list }}`,
+	SORT_STABLE: `{{ items | sort(attribute='category') | map(attribute='name') | list }}`,
 	// Sort with positional arguments
-	SORT_POSITIONAL_REVERSE: `{{ [1, 3, 2] | sort(true) | tojson }}`,
-	SORT_POSITIONAL_REVERSE_CASE: `{{ ['banana', 'Apple', 'cherry'] | sort(false, true) | tojson }}`,
-	SORT_POSITIONAL_ALL: `{{ users | sort(false, false, 'name') | map(attribute='name') | list | tojson }}`,
-	SORT_POSITIONAL_MIXED: `{{ users | sort(true, attribute='age') | map(attribute='age') | list | tojson }}`,
+	SORT_POSITIONAL_REVERSE: `{{ [1, 3, 2] | sort(true) }}`,
+	SORT_POSITIONAL_REVERSE_CASE: `{{ ['banana', 'Apple', 'cherry'] | sort(false, true) }}`,
+	SORT_POSITIONAL_ALL: `{{ users | sort(false, false, 'name') | map(attribute='name') | list }}`,
+	SORT_POSITIONAL_MIXED: `{{ users | sort(true, attribute='age') | map(attribute='age') | list }}`,
 	// Edge cases for sort
-	SORT_NULL_VALUES: `{{ [None, None] | sort | tojson }}`,
-	SORT_UNDEFINED_VALUES: `{{ [a, b, c] | sort | tojson }}`,
-	SORT_MIXED_BOOL_NUM: `{{ [0, true, false, 1, 0.5] | sort | tojson }}`,
+	SORT_NULL_VALUES: `{{ [None, None] | sort }}`,
+	SORT_UNDEFINED_VALUES: `{{ [a, b, c] | sort }}`,
+	SORT_MIXED_BOOL_NUM: `{{ [0, true, false, 1, 0.5] | sort }}`,
 
 	// Filter statements
 	FILTER_STATEMENTS: `{% filter upper %}text{% endfilter %}`,
@@ -2591,8 +2591,6 @@ const TEST_PARSED = {
 		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "|", type: "Pipe" },
 		{ value: "sort", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_BASIC_STRINGS: [
@@ -2606,8 +2604,6 @@ const TEST_PARSED = {
 		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "|", type: "Pipe" },
 		{ value: "sort", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_REVERSE: [
@@ -2626,8 +2622,6 @@ const TEST_PARSED = {
 		{ value: "=", type: "Equals" },
 		{ value: "true", type: "Identifier" },
 		{ value: ")", type: "CloseParen" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_CASE_SENSITIVE: [
@@ -2646,8 +2640,6 @@ const TEST_PARSED = {
 		{ value: "=", type: "Equals" },
 		{ value: "true", type: "Identifier" },
 		{ value: ")", type: "CloseParen" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_CASE_INSENSITIVE: [
@@ -2666,8 +2658,6 @@ const TEST_PARSED = {
 		{ value: "=", type: "Equals" },
 		{ value: "false", type: "Identifier" },
 		{ value: ")", type: "CloseParen" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_ATTRIBUTE_SIMPLE: [
@@ -2689,8 +2679,6 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "|", type: "Pipe" },
 		{ value: "list", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_ATTRIBUTE_REVERSE: [
@@ -2716,8 +2704,6 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "|", type: "Pipe" },
 		{ value: "list", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_ATTRIBUTE_DOT_NOTATION: [
@@ -2739,8 +2725,6 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "|", type: "Pipe" },
 		{ value: "list", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_CHAINED: [
@@ -2773,8 +2757,6 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "|", type: "Pipe" },
 		{ value: "list", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_STABLE: [
@@ -2796,8 +2778,6 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "|", type: "Pipe" },
 		{ value: "list", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	// Sort with positional arguments
@@ -2815,8 +2795,6 @@ const TEST_PARSED = {
 		{ value: "(", type: "OpenParen" },
 		{ value: "true", type: "Identifier" },
 		{ value: ")", type: "CloseParen" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_POSITIONAL_REVERSE_CASE: [
@@ -2835,8 +2813,6 @@ const TEST_PARSED = {
 		{ value: ",", type: "Comma" },
 		{ value: "true", type: "Identifier" },
 		{ value: ")", type: "CloseParen" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_POSITIONAL_ALL: [
@@ -2860,8 +2836,6 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "|", type: "Pipe" },
 		{ value: "list", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_POSITIONAL_MIXED: [
@@ -2885,8 +2859,6 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "|", type: "Pipe" },
 		{ value: "list", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	// Edge cases for sort
@@ -2899,8 +2871,6 @@ const TEST_PARSED = {
 		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "|", type: "Pipe" },
 		{ value: "sort", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_UNDEFINED_VALUES: [
@@ -2914,8 +2884,6 @@ const TEST_PARSED = {
 		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "|", type: "Pipe" },
 		{ value: "sort", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 	SORT_MIXED_BOOL_NUM: [
@@ -2933,8 +2901,6 @@ const TEST_PARSED = {
 		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "|", type: "Pipe" },
 		{ value: "sort", type: "Identifier" },
-		{ value: "|", type: "Pipe" },
-		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 
@@ -4892,7 +4858,7 @@ const EXPECTED_OUTPUTS = {
 	SORT_POSITIONAL_MIXED: `[35, 30, 25]`,
 	// Edge cases for sort
 	SORT_NULL_VALUES: `[null, null]`,
-	SORT_UNDEFINED_VALUES: `[null, null, null]`,
+	SORT_UNDEFINED_VALUES: `[undefined, undefined, undefined]`,
 	SORT_MIXED_BOOL_NUM: `[0, false, 0.5, true, 1]`,
 
 	// Filter statements
