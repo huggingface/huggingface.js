@@ -245,11 +245,11 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 		)}`;
 		return {
 			...omit(args, ["inputs", "parameters"]),
-			...args.parameters,
 			image_url: imageDataUrl,
+			...args.parameters,
+			...args,
 			// Some fal endpoints (e.g. FLUX.2-dev) expect `image_urls` (array) instead of `image_url`
 			image_urls: [imageDataUrl],
-			...args,
 		};
 	}
 
