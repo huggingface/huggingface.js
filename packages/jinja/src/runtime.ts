@@ -876,7 +876,7 @@ export class Interpreter {
 					case "join":
 						return new StringValue(operand.value.map((x) => x.value).join(""));
 					case "string":
-						return new StringValue(toJSON(operand));
+						return new StringValue(toJSON(operand, null, 0, false));
 					case "unique": {
 						const seen = new Set();
 						const output: AnyRuntimeValue[] = [];
@@ -1740,13 +1740,20 @@ function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
  * @param {number} [depth] The current depth of the object
  * @returns {string} JSON representation of the input
  */
-function toJSON(input: AnyRuntimeValue, indent?: number | null, depth?: number): string {
+function toJSON(
+	input: AnyRuntimeValue,
+	indent?: number | null,
+	depth?: number,
+	convertUndefinedToNull: boolean = true
+): string {
 	const currentDepth = depth ?? 0;
 	switch (input.type) {
 		case "NullValue":
 			return "null";
 		case "UndefinedValue":
-			return "undefined";
+			// When used for JSON serialization (tojson filter), convert to "null"
+			// When used for string conversion (string filter), keep as "undefined"
+			return convertUndefinedToNull ? "null" : "undefined";
 		case "IntegerValue":
 		case "FloatValue":
 		case "StringValue":
@@ -1759,14 +1766,16 @@ function toJSON(input: AnyRuntimeValue, indent?: number | null, depth?: number):
 			const childrenPadding = basePadding + indentValue; // Depth + 1
 
 			if (input.type === "ArrayValue") {
-				const core = (input as ArrayValue).value.map((x) => toJSON(x, indent, currentDepth + 1));
+				const core = (input as ArrayValue).value.map((x) =>
+					toJSON(x, indent, currentDepth + 1, convertUndefinedToNull)
+				);
 				return indent
 					? `[${childrenPadding}${core.join(`,${childrenPadding}`)}${basePadding}]`
 					: `[${core.join(", ")}]`;
 			} else {
 				// ObjectValue
 				const core = Array.from((input as ObjectValue).value.entries()).map(([key, value]) => {
-					const v = `"${key}": ${toJSON(value, indent, currentDepth + 1)}`;
+					const v = `"${key}": ${toJSON(value, indent, currentDepth + 1, convertUndefinedToNull)}`;
 					return indent ? `${childrenPadding}${v}` : v;
 				});
 				return indent ? `{${core.join(",")}${basePadding}}` : `{${core.join(", ")}}`;

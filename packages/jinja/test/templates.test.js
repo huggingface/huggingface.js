@@ -4856,7 +4856,7 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_4: `2`,
 	FILTER_OPERATOR_5: `1`,
 	FILTER_OPERATOR_6: `|3|2|`,
-	FILTER_OPERATOR_7: `|{"string": "world", "number": 5, "boolean": true, "null": null, "array": [1, 2, 3], "object": {"key": "value"}, "special": "\\"',:[]{}#&*;=?/\\\\\`~@|!^%()-_+<>", "unicode": {"안녕?": "🤗"}}|"test"|1|true|undefined|[1, 2, 3]|`,
+	FILTER_OPERATOR_7: `|{"string": "world", "number": 5, "boolean": true, "null": null, "array": [1, 2, 3], "object": {"key": "value"}, "special": "\\"',:[]{}#&*;=?/\\\\\`~@|!^%()-_+<>", "unicode": {"안녕?": "🤗"}}|"test"|1|true|null|[1, 2, 3]|`,
 	FILTER_OPERATOR_8: `{\n  "a": [\n    1,\n    2,\n    3\n  ],\n  "b": 1,\n  "c": {\n    "d": 2,\n    "e": {\n      "f": 3,\n      "g": {\n        "h": 4,\n        "i": [\n          1,\n          2,\n          3\n        ]\n      }\n    }\n  }\n}`,
 	FILTER_OPERATOR_9: `[1, 2, 3]`,
 	FILTER_OPERATOR_10: `| 1 \n     2 \n     3 \n\n     | 1 \n   2 \n   3 \n\n   |     1 \n     2 \n     3 \n\n     | 1 \n     2 \n     3 \n    \n     |     1 \n     2 \n     3 \n\n     |`,
@@ -4892,7 +4892,7 @@ const EXPECTED_OUTPUTS = {
 	SORT_POSITIONAL_MIXED: `[35, 30, 25]`,
 	// Edge cases for sort
 	SORT_NULL_VALUES: `[null, null]`,
-	SORT_UNDEFINED_VALUES: `[undefined, undefined, undefined]`,
+	SORT_UNDEFINED_VALUES: `[null, null, null]`,
 	SORT_MIXED_BOOL_NUM: `[0, false, 0.5, true, 1]`,
 
 	// Filter statements
