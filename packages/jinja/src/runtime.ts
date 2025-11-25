@@ -349,7 +349,6 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 						const aVal = a.value[index];
 						const bVal = b.value[index];
 
-						// Use the shared comparison helper
 						const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
 						return reverse.value ? -result : result;
 					});
@@ -870,7 +869,7 @@ export class Interpreter {
 					case "reverse":
 						return new ArrayValue(operand.value.slice().reverse());
 					case "sort": {
-						// Default case-insensitive sort using the shared comparison helper
+						// Default to case-insensitive sort
 						return new ArrayValue(operand.value.slice().sort((a, b) => compareRuntimeValues(a, b, false)));
 					}
 					case "join":
@@ -1082,19 +1081,12 @@ export class Interpreter {
 							return getAttributeValue(item, attrPath);
 						};
 
-						// Create a copy of the array to sort
-						const arrayCopy = operand.value.slice();
-
-						arrayCopy.sort((a, b) => {
+						return new ArrayValue(operand.value.slice().sort((a, b) => {
 							const aVal = getSortValue(a);
 							const bVal = getSortValue(b);
-
-							// Use the shared comparison helper
 							const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
 							return reverse.value ? -result : result;
-						});
-
-						return new ArrayValue(arrayCopy);
+						}));
 					}
 					case "selectattr":
 					case "rejectattr": {
@@ -1751,8 +1743,6 @@ function toJSON(
 		case "NullValue":
 			return "null";
 		case "UndefinedValue":
-			// When used for JSON serialization (tojson filter), convert to "null"
-			// When used for string conversion (string filter), keep as "undefined"
 			return convertUndefinedToNull ? "null" : "undefined";
 		case "IntegerValue":
 		case "FloatValue":
