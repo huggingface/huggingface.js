@@ -451,6 +451,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"gliner_config.json"`,
 	},
+	gliner2: {
+		prettyLabel: "GLiNER2",
+		repoName: "GLiNER2",
+		repoUrl: "https://github.com/fastino-ai/GLiNER2",
+		snippets: snippets.gliner2,
+		filter: false,
+		countDownloads: `path:"config.json"`,
+	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
 		repoName: "Glyph-ByT5",
