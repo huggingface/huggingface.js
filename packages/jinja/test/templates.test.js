@@ -137,6 +137,10 @@ const TEST_STRINGS = {
 	SORT_POSITIONAL_REVERSE_CASE: `{{ ['banana', 'Apple', 'cherry'] | sort(false, true) | tojson }}`,
 	SORT_POSITIONAL_ALL: `{{ users | sort(false, false, 'name') | map(attribute='name') | list | tojson }}`,
 	SORT_POSITIONAL_MIXED: `{{ users | sort(true, attribute='age') | map(attribute='age') | list | tojson }}`,
+	// Edge cases for sort
+	SORT_NULL_VALUES: `{{ [None, None] | sort | tojson }}`,
+	SORT_UNDEFINED_VALUES: `{{ [a, b, c] | sort | tojson }}`,
+	SORT_MIXED_BOOL_NUM: `{{ [0, true, false, 1, 0.5] | sort | tojson }}`,
 
 	// Filter statements
 	FILTER_STATEMENTS: `{% filter upper %}text{% endfilter %}`,
@@ -2885,6 +2889,54 @@ const TEST_PARSED = {
 		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	// Edge cases for sort
+	SORT_NULL_VALUES: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "None", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "None", type: "Identifier" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "sort", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	SORT_UNDEFINED_VALUES: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "a", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "c", type: "Identifier" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "sort", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	SORT_MIXED_BOOL_NUM: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "true", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "false", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "0.5", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "sort", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Filter statements
 	FILTER_STATEMENTS: [
@@ -4595,6 +4647,10 @@ const TEST_CONTEXT = {
 			{ name: 'Bob', age: 35 }
 		]
 	},
+	// Edge cases for sort
+	SORT_NULL_VALUES: {},
+	SORT_UNDEFINED_VALUES: {},
+	SORT_MIXED_BOOL_NUM: {},
 
 	// Filter statements
 	FILTER_STATEMENTS: {},
@@ -4834,6 +4890,10 @@ const EXPECTED_OUTPUTS = {
 	SORT_POSITIONAL_REVERSE_CASE: `["Apple", "banana", "cherry"]`,
 	SORT_POSITIONAL_ALL: `["Alice", "Bob", "Charlie"]`,
 	SORT_POSITIONAL_MIXED: `[35, 30, 25]`,
+	// Edge cases for sort
+	SORT_NULL_VALUES: `[null, null]`,
+	SORT_UNDEFINED_VALUES: `[null, null, null]`,
+	SORT_MIXED_BOOL_NUM: `[0, false, 0.5, true, 1]`,
 
 	// Filter statements
 	FILTER_STATEMENTS: `TEXT`,

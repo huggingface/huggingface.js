@@ -613,30 +613,48 @@ function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRun
 
 /**
  * Helper function to compare two runtime values for sorting.
- * Enforces strict type checking - types must match exactly (except integers and floats can be compared).
- * Does not support null/undefined values - throws error if encountered.
+ * Enforces strict type checking - types must match exactly (with some exceptions):
+ * - Integers and floats can be compared (both are numeric)
+ * - Booleans can be compared with numbers (false=0, true=1)
+ * - Null values can be compared with null values (they are equal)
+ * - Undefined values can be compared with undefined values (they are equal)
  * @param a The first value to compare
  * @param b The second value to compare
  * @param caseSensitive Whether string comparisons should be case-sensitive (default: false)
  * @returns -1 if a < b, 1 if a > b, 0 if equal
  */
 function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensitive: boolean = false): number {
-	// Check for null/undefined values - these are not supported in sorting
-	if (a instanceof UndefinedValue || a instanceof NullValue) {
-		throw new Error("Cannot compare undefined or null values");
+	// Handle null values - can only compare null with null
+	if (a instanceof NullValue && b instanceof NullValue) {
+		return 0; // All null values are equal
 	}
-	if (b instanceof UndefinedValue || b instanceof NullValue) {
-		throw new Error("Cannot compare undefined or null values");
+	if (a instanceof NullValue || b instanceof NullValue) {
+		throw new Error(`Cannot compare ${a.type} with ${b.type}`);
 	}
 
-	// Check if both are numeric types (IntegerValue or FloatValue)
-	const aIsNumeric = a.type === "IntegerValue" || a.type === "FloatValue";
-	const bIsNumeric = b.type === "IntegerValue" || b.type === "FloatValue";
+	// Handle undefined values - can only compare undefined with undefined
+	if (a instanceof UndefinedValue && b instanceof UndefinedValue) {
+		return 0; // All undefined values are equal
+	}
+	if (a instanceof UndefinedValue || b instanceof UndefinedValue) {
+		throw new Error(`Cannot compare ${a.type} with ${b.type}`);
+	}
 
-	if (aIsNumeric && bIsNumeric) {
-		// Allow comparing integers and floats
-		const aNum = (a as IntegerValue | FloatValue).value;
-		const bNum = (b as IntegerValue | FloatValue).value;
+	// Check if value is numeric-like (IntegerValue, FloatValue, or BooleanValue)
+	const isNumericLike = (v: AnyRuntimeValue): boolean =>
+		v.type === "IntegerValue" || v.type === "FloatValue" || v.type === "BooleanValue";
+	
+	const getNumericValue = (v: AnyRuntimeValue): number => {
+		if (v.type === "BooleanValue") {
+			return (v as BooleanValue).value ? 1 : 0;
+		}
+		return (v as IntegerValue | FloatValue).value;
+	};
+
+	// Allow comparing numeric-like types (integers, floats, and booleans)
+	if (isNumericLike(a) && isNumericLike(b)) {
+		const aNum = getNumericValue(a);
+		const bNum = getNumericValue(b);
 		return aNum < bNum ? -1 : aNum > bNum ? 1 : 0;
 	}
 
@@ -654,12 +672,6 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 				bStr = bStr.toLowerCase();
 			}
 			return aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
-		}
-		case "BooleanValue": {
-			const aBool = (a as BooleanValue).value;
-			const bBool = (b as BooleanValue).value;
-			// Number(false) = 0, Number(true) = 1, so false < true
-			return Number(aBool) - Number(bBool);
 		}
 		default:
 			throw new Error(`Cannot compare type: ${a.type}`);
