@@ -273,6 +273,40 @@ export class BooleanValue extends RuntimeValue<boolean> {
 }
 
 /**
+ * Helper function to convert a runtime value to its string representation.
+ * Used for direct output via {{ value }} syntax.
+ * This is similar to toJSON but handles undefined differently.
+ */
+function runtimeValueToString(value: RuntimeValue<unknown>): string {
+	switch (value.type) {
+		case "NullValue":
+			return "null";
+		case "UndefinedValue":
+			return "undefined";
+		case "BooleanValue":
+			return (value as BooleanValue).value ? "true" : "false";
+		case "IntegerValue":
+			return String((value as IntegerValue).value);
+		case "FloatValue":
+			return (value as FloatValue).toString();
+		case "StringValue":
+			return JSON.stringify((value as StringValue).value);
+		case "ArrayValue": {
+			const items = (value as ArrayValue).value.map((item) => runtimeValueToString(item));
+			return `[${items.join(", ")}]`;
+		}
+		case "ObjectValue": {
+			const entries = Array.from((value as ObjectValue).value.entries()).map(
+				([key, val]) => `"${key}": ${runtimeValueToString(val)}`
+			);
+			return `{${entries.join(", ")}}`;
+		}
+		default:
+			return String(value.value);
+	}
+}
+
+/**
  * Represents an Object value at runtime.
  */
 export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
@@ -369,6 +403,9 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	values(): ArrayValue {
 		return new ArrayValue(Array.from(this.value.values()));
 	}
+	override toString(): string {
+		return runtimeValueToString(this);
+	}
 }
 
 /**
@@ -395,6 +432,9 @@ export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	 */
 	override __bool__(): BooleanValue {
 		return new BooleanValue(this.value.length > 0);
+	}
+	override toString(): string {
+		return runtimeValueToString(this);
 	}
 }
 
