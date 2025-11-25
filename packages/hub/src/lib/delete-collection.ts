@@ -16,6 +16,10 @@ export async function deleteCollection(
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>
 ): Promise<void> {
+	if (!params.slug) {
+		throw new TypeError("slug is required");
+	}
+
 	const accessToken = checkCredentials(params);
 
 	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.slug}`, {

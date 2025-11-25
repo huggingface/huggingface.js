@@ -3,8 +3,7 @@ import { InferenceClient } from "@huggingface/inference";
 const client = new InferenceClient(process.env.HF_TOKEN);
 
 const chatCompletion = await client.chatCompletion({
-    provider: "fireworks-ai",
-    model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
     messages: [
         {
             role: "user",

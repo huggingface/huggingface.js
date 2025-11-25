@@ -24,8 +24,8 @@ export type InferenceSnippetOptions = {
 	inputs?: Record<string, unknown>; // overrides the default snippet's inputs
 } & Record<string, unknown>;
 
-const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
-const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
+const PYTHON_CLIENTS = ["openai", "huggingface_hub", "fal_client", "requests"] as const;
+const JS_CLIENTS = ["openai", "huggingface.js", "fetch"] as const;
 const SH_CLIENTS = ["curl"] as const;
 
 type Client = (typeof SH_CLIENTS)[number] | (typeof PYTHON_CLIENTS)[number] | (typeof JS_CLIENTS)[number];
@@ -60,6 +60,8 @@ interface TemplateParams {
 	importBase64?: boolean; // specific to snippetImportRequests
 	importJson?: boolean; // specific to snippetImportRequests
 	endpointUrl?: string;
+	task?: InferenceTask;
+	directRequest?: boolean;
 }
 
 // Helpers to find + load templates
@@ -263,6 +265,8 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 					: providerModelId ?? model.id,
 			billTo: opts?.billTo,
 			endpointUrl: opts?.endpointUrl,
+			task,
+			directRequest: !!opts?.directRequest,
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
@@ -389,6 +393,7 @@ const snippets: Partial<
 	"image-text-to-text": snippetGenerator("conversational"),
 	"image-to-image": snippetGenerator("imageToImage", prepareImageToImageInput),
 	"image-to-text": snippetGenerator("basicImage"),
+	"image-to-video": snippetGenerator("imageToVideo", prepareImageToImageInput),
 	"object-detection": snippetGenerator("basicImage"),
 	"question-answering": snippetGenerator("questionAnswering", prepareQuestionAnsweringInput),
 	"sentence-similarity": snippetGenerator("basic"),

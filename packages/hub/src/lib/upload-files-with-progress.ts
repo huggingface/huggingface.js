@@ -29,6 +29,7 @@ export async function* uploadFilesWithProgress(
 		parentCommit?: CommitParams["parentCommit"];
 		abortSignal?: CommitParams["abortSignal"];
 		maxFolderDepth?: CommitParams["maxFolderDepth"];
+		useXet?: CommitParams["useXet"];
 		/**
 		 * Set this to true in order to have progress events for hashing
 		 */
@@ -51,6 +52,7 @@ export async function* uploadFilesWithProgress(
 		parentCommit: params.parentCommit,
 		useWebWorkers: params.useWebWorkers,
 		abortSignal: params.abortSignal,
+		useXet: params.useXet,
 		fetch: async (input, init) => {
 			if (!init) {
 				return fetch(input);

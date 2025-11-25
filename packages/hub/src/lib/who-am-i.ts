@@ -20,6 +20,7 @@ export interface WhoAmIUser {
 	 * Unix timestamp in seconds
 	 */
 	periodEnd: number | null;
+	billingMode: "postpaid" | "prepaid";
 }
 
 export interface WhoAmIOrg {

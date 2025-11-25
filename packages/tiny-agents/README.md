@@ -73,7 +73,7 @@ Or using a local or remote endpoint URL:
 
 Where `servers` is a list of MCP servers (we support Stdio, SSE, and HTTP servers).
 
-Optionally, you can add a `PROMPT.md` file to override the default Agent prompt.
+Optionally, you can add an [`AGENTS.md`](https://agents.md/) (or `PROMPT.md`) file to override the default Agent prompt.
 
 Then just point tiny-agents to your local folder:
 
@@ -93,7 +93,7 @@ npx @huggingface/tiny-agents run "julien-c/flux-schnell-generator"
 ```
 
 > [!NOTE]
-> Want to share your own agent with the community? Submit a PR to the [Tiny Agents](https://huggingface.co/datasets/tiny-agents/tiny-agents/discussions) repository on the Hub. Your submission must include an `agent.json` file, and you can optionally add a `PROMPT.md` file. To help others understand your agent's capabilities, consider including an `EXAMPLES.md` file with sample prompts and use cases.
+> Want to share your own agent with the community? Submit a PR to the [Tiny Agents](https://huggingface.co/datasets/tiny-agents/tiny-agents/discussions) repository on the Hub. Your submission must include an `agent.json` file, and you can optionally add a `PROMPT.md` or [`AGENTS.md`](https://agents.md/) file. To help others understand your agent's capabilities, consider including an `EXAMPLES.md` file with sample prompts and use cases.
 
 ## Advanced: Programmatic Usage
 

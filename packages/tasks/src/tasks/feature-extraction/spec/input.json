@@ -51,7 +51,7 @@
 	"$defs": {
 		"FeatureExtractionInputTruncationDirection": {
 			"type": "string",
-			"enum": ["Left", "Right"],
+			"enum": ["left", "right"],
 			"title": "FeatureExtractionInputTruncationDirection"
 		}
 	}

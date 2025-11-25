@@ -38,4 +38,4 @@ export interface FeatureExtractionInput {
  * The text or list of texts to embed.
  */
 export type FeatureExtractionInputs = string[] | string;
-export type FeatureExtractionInputTruncationDirection = "Left" | "Right";
+export type FeatureExtractionInputTruncationDirection = "left" | "right";

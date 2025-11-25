@@ -14,7 +14,7 @@ export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
 export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
 export const RE_SAFETENSORS_SHARD_FILE =
-	/^(?<prefix>(?<basePrefix>.*?)[_-])(?<shard>\d{5})-of-(?<total>\d{5})\.safetensors$/;
+	/^(?<prefix>(?<basePrefix>.*?)[_-])(?<shard>\d{5,6})-of-(?<total>\d{5,6})\.safetensors$/;
 export interface SafetensorsShardFileInfo {
 	prefix: string;
 	basePrefix: string;
@@ -36,6 +36,7 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 
 const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000;
+const GPTQ_QWEIGHT_SUFFIX = "qweight";
 
 class SafetensorParseError extends Error {}
 
@@ -189,7 +190,7 @@ async function parseShardedIndex(
 
 	try {
 		// no validation for now, we assume it's a valid IndexJson.
-		const index = JSON.parse(await indexBlob.slice(0, 10_000_000).text());
+		const index = JSON.parse(await indexBlob.slice(0, 20_000_000).text());
 		return index;
 	} catch (error) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
@@ -362,8 +363,12 @@ export interface ModelConfig {
  * Determines if a tensor is quantized based on quantization config and tensor name
  */
 function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
-	if (!quantConfig || !quantConfig.modules_to_not_convert) {
+	if (!quantConfig) {
 		return false;
+	}
+
+	if (!quantConfig.modules_to_not_convert || quantConfig.modules_to_not_convert.length === 0) {
+		return true;
 	}
 
 	for (const pattern of quantConfig.modules_to_not_convert) {
@@ -385,7 +390,9 @@ function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig
 		return 1;
 	}
 
-	switch (quantConfig.quant_method) {
+	const quantMethod = quantConfig.quant_method?.toLowerCase();
+
+	switch (quantMethod) {
 		case "mxfp4":
 			if (dtype === "U8" && tensorName.includes("_blocks")) {
 				return 2;
@@ -394,6 +401,10 @@ function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig
 
 		case "gptq":
 		case "awq":
+			if (getTensorSuffix(tensorName) === GPTQ_QWEIGHT_SUFFIX) {
+				const bits = quantConfig.bits && quantConfig.bits > 0 ? quantConfig.bits : 4;
+				return Math.max(1, Math.floor(32 / bits));
+			}
 			if (quantConfig.bits === 4 && dtype === "U8") {
 				return 2;
 			}
@@ -430,12 +441,18 @@ function computeNumOfParamsByDtypeSingleFile(
 	const tensors = omit(header, "__metadata__");
 
 	for (const [tensorName, v] of typedEntries(tensors)) {
+		if (shouldSkipTensor(tensorName, quantConfig)) {
+			continue;
+		}
 		if (v.shape.length === 0) {
 			continue;
 		}
 
 		const elements = v.shape.reduce((a, b) => a * b);
 		const multiplier = quantConfig ? getQuantizationMultiplier(tensorName, v.dtype, quantConfig) : 1;
+		if (multiplier === 0) {
+			continue;
+		}
 		counter[v.dtype] = (counter[v.dtype] ?? 0) + elements * multiplier;
 	}
 	return counter;
@@ -452,4 +469,33 @@ function computeNumOfParamsByDtypeSharded(
 		}
 	}
 	return counter;
+}
+
+function getTensorSuffix(tensorName: string): string {
+	const lastDotIndex = tensorName.lastIndexOf(".");
+	return lastDotIndex === -1 ? tensorName : tensorName.slice(lastDotIndex + 1);
+}
+
+function shouldSkipTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
+	const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
+
+	if (!quantConfig) {
+		return false;
+	}
+
+	const quantMethod = quantConfig.quant_method?.toLowerCase();
+	if (!quantMethod || (quantMethod !== "gptq" && quantMethod !== "awq")) {
+		return false;
+	}
+
+	if (!isQuantizedTensor(tensorName, quantConfig)) {
+		return false;
+	}
+
+	const suffix = getTensorSuffix(tensorName);
+	if (suffix === GPTQ_QWEIGHT_SUFFIX) {
+		return false;
+	}
+
+	return GPTQ_AWQ_AUXILIARY_SUFFIXES.includes(suffix);
 }
