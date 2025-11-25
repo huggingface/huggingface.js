@@ -658,7 +658,7 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 		case "BooleanValue": {
 			const aBool = (a as BooleanValue).value;
 			const bBool = (b as BooleanValue).value;
-			// false < true, so false - true = -1, true - false = 1
+			// Number(false) = 0, Number(true) = 1, so false < true
 			return Number(aBool) - Number(bBool);
 		}
 		default:
