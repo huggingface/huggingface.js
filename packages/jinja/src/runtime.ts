@@ -747,13 +747,10 @@ export class Interpreter {
 					case "length":
 						return new IntegerValue(operand.value.length);
 					case "reverse":
-						// Create a copy to avoid mutating the original array
 						return new ArrayValue(operand.value.slice().reverse());
 					case "sort": {
-						// Create a copy to avoid mutating the original array
-						const arrayCopy = operand.value.slice();
 						return new ArrayValue(
-							arrayCopy.sort((a, b) => {
+							operand.value.slice().sort((a, b) => {
 								if (a.type !== b.type) {
 									throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
 								}
@@ -936,14 +933,14 @@ export class Interpreter {
 			if (operand instanceof ArrayValue) {
 				switch (filterName) {
 					case "sort": {
-						// https://jinja.palletsprojects.com/en/3.1.x/templates/#jinja-filters.sort
+						// https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.sort
 						// Parameters:
 						//  - reverse: Sort descending instead of ascending
 						//  - case_sensitive: When sorting strings, sort upper and lower case separately
 						//  - attribute: When sorting objects or dicts, an attribute or key to sort by
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const [_args, kwargs] = this.evaluateArguments(filter.args, environment);
-						
+
 						const reverse = kwargs.get("reverse") ?? new BooleanValue(false);
 						if (!(reverse instanceof BooleanValue)) {
 							throw new Error("reverse must be a boolean");
