@@ -273,36 +273,55 @@ export class BooleanValue extends RuntimeValue<boolean> {
 }
 
 /**
- * Helper function to convert a runtime value to its string representation.
- * Used for direct output via {{ value }} syntax.
- * This is similar to toJSON but handles undefined differently.
+ * Converts a runtime value to its JSON string representation.
+ * Used for both the tojson filter and direct output via {{ value }} syntax.
+ * @param input The runtime value to convert
+ * @param indent Optional indentation for pretty-printing
+ * @param depth Current recursion depth (used for indentation)
+ * @param convertUndefinedToNull If true, undefined becomes "null" (JSON-safe). If false, undefined becomes "undefined".
  */
-function runtimeValueToString(value: RuntimeValue<unknown>): string {
-	switch (value.type) {
+function toJSON(
+	input: AnyRuntimeValue,
+	indent?: number | null,
+	depth?: number,
+	convertUndefinedToNull: boolean = true
+): string {
+	const currentDepth = depth ?? 0;
+	switch (input.type) {
 		case "NullValue":
 			return "null";
 		case "UndefinedValue":
-			return "undefined";
-		case "BooleanValue":
-			return (value as BooleanValue).value ? "true" : "false";
+			return convertUndefinedToNull ? "null" : "undefined";
 		case "IntegerValue":
-			return String((value as IntegerValue).value);
 		case "FloatValue":
-			return (value as FloatValue).toString();
 		case "StringValue":
-			return JSON.stringify((value as StringValue).value);
-		case "ArrayValue": {
-			const items = (value as ArrayValue).value.map((item) => runtimeValueToString(item));
-			return `[${items.join(", ")}]`;
-		}
+		case "BooleanValue":
+			return JSON.stringify(input.value);
+		case "ArrayValue":
 		case "ObjectValue": {
-			const entries = Array.from((value as ObjectValue).value.entries()).map(
-				([key, val]) => `"${key}": ${runtimeValueToString(val)}`
-			);
-			return `{${entries.join(", ")}}`;
+			const indentValue = indent ? " ".repeat(indent) : "";
+			const basePadding = "\n" + indentValue.repeat(currentDepth);
+			const childrenPadding = basePadding + indentValue; // Depth + 1
+
+			if (input.type === "ArrayValue") {
+				const core = (input as ArrayValue).value.map((x) =>
+					toJSON(x, indent, currentDepth + 1, convertUndefinedToNull)
+				);
+				return indent
+					? `[${childrenPadding}${core.join(`,${childrenPadding}`)}${basePadding}]`
+					: `[${core.join(", ")}]`;
+			} else {
+				// ObjectValue
+				const core = Array.from((input as ObjectValue).value.entries()).map(([key, value]) => {
+					const v = `"${key}": ${toJSON(value, indent, currentDepth + 1, convertUndefinedToNull)}`;
+					return indent ? `${childrenPadding}${v}` : v;
+				});
+				return indent ? `{${core.join(",")}${basePadding}}` : `{${core.join(", ")}}`;
+			}
 		}
 		default:
-			return String(value.value);
+			// e.g., FunctionValue
+			throw new Error(`Cannot convert to JSON: ${input.type}`);
 	}
 }
 
@@ -404,7 +423,7 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 		return new ArrayValue(Array.from(this.value.values()));
 	}
 	override toString(): string {
-		return runtimeValueToString(this);
+		return toJSON(this, null, 0, false);
 	}
 }
 
@@ -434,7 +453,7 @@ export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 		return new BooleanValue(this.value.length > 0);
 	}
 	override toString(): string {
-		return runtimeValueToString(this);
+		return toJSON(this, null, 0, false);
 	}
 }
 
@@ -1762,57 +1781,5 @@ function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 			});
 		default:
 			throw new Error(`Cannot convert to runtime value: ${input}`);
-	}
-}
-
-/**
- * Helper function to convert runtime values to JSON
- * @param {AnyRuntimeValue} input The runtime value to convert
- * @param {number|null} [indent] The number of spaces to indent, or null for no indentation
- * @param {number} [depth] The current depth of the object
- * @returns {string} JSON representation of the input
- */
-function toJSON(
-	input: AnyRuntimeValue,
-	indent?: number | null,
-	depth?: number,
-	convertUndefinedToNull: boolean = true
-): string {
-	const currentDepth = depth ?? 0;
-	switch (input.type) {
-		case "NullValue":
-			return "null";
-		case "UndefinedValue":
-			return convertUndefinedToNull ? "null" : "undefined";
-		case "IntegerValue":
-		case "FloatValue":
-		case "StringValue":
-		case "BooleanValue":
-			return JSON.stringify(input.value);
-		case "ArrayValue":
-		case "ObjectValue": {
-			const indentValue = indent ? " ".repeat(indent) : "";
-			const basePadding = "\n" + indentValue.repeat(currentDepth);
-			const childrenPadding = basePadding + indentValue; // Depth + 1
-
-			if (input.type === "ArrayValue") {
-				const core = (input as ArrayValue).value.map((x) =>
-					toJSON(x, indent, currentDepth + 1, convertUndefinedToNull)
-				);
-				return indent
-					? `[${childrenPadding}${core.join(`,${childrenPadding}`)}${basePadding}]`
-					: `[${core.join(", ")}]`;
-			} else {
-				// ObjectValue
-				const core = Array.from((input as ObjectValue).value.entries()).map(([key, value]) => {
-					const v = `"${key}": ${toJSON(value, indent, currentDepth + 1, convertUndefinedToNull)}`;
-					return indent ? `${childrenPadding}${v}` : v;
-				});
-				return indent ? `{${core.join(",")}${basePadding}}` : `{${core.join(", ")}}`;
-			}
-		}
-		default:
-			// e.g., FunctionValue
-			throw new Error(`Cannot convert to JSON: ${input.type}`);
 	}
 }
