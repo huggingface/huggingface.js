@@ -613,14 +613,14 @@ function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRun
 
 /**
  * Helper function to compare two runtime values for sorting.
- * Enforces strict type checking - types must match exactly.
+ * Enforces strict type checking - types must match exactly (except integers and floats can be compared).
  * Does not support null/undefined values - throws error if encountered.
  * @param a The first value to compare
  * @param b The second value to compare
  * @param caseSensitive Whether string comparisons should be case-sensitive (default: false)
  * @returns -1 if a < b, 1 if a > b, 0 if equal
  */
-function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensitive = false): number {
+function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensitive: boolean = false): number {
 	// Check for null/undefined values - these are not supported in sorting
 	if (a instanceof UndefinedValue || a instanceof NullValue) {
 		throw new Error("Cannot compare undefined or null values");
@@ -629,18 +629,23 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 		throw new Error("Cannot compare undefined or null values");
 	}
 
-	// Strict type checking - types must match exactly
+	// Check if both are numeric types (IntegerValue or FloatValue)
+	const aIsNumeric = a.type === "IntegerValue" || a.type === "FloatValue";
+	const bIsNumeric = b.type === "IntegerValue" || b.type === "FloatValue";
+
+	if (aIsNumeric && bIsNumeric) {
+		// Allow comparing integers and floats
+		const aNum = (a as IntegerValue | FloatValue).value;
+		const bNum = (b as IntegerValue | FloatValue).value;
+		return aNum < bNum ? -1 : aNum > bNum ? 1 : 0;
+	}
+
+	// Strict type checking for non-numeric types
 	if (a.type !== b.type) {
 		throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
 	}
 
 	switch (a.type) {
-		case "IntegerValue":
-		case "FloatValue": {
-			const aNum = (a as IntegerValue | FloatValue).value;
-			const bNum = (b as IntegerValue | FloatValue).value;
-			return aNum < bNum ? -1 : aNum > bNum ? 1 : 0;
-		}
 		case "StringValue": {
 			let aStr = (a as StringValue).value;
 			let bStr = (b as StringValue).value;
@@ -653,7 +658,8 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 		case "BooleanValue": {
 			const aBool = (a as BooleanValue).value;
 			const bBool = (b as BooleanValue).value;
-			return aBool === bBool ? 0 : aBool ? 1 : -1;
+			// false < true, so false - true = -1, true - false = 1
+			return Number(aBool) - Number(bBool);
 		}
 		default:
 			throw new Error(`Cannot compare type: ${a.type}`);
