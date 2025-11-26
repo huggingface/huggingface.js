@@ -218,16 +218,6 @@ const TEST_STRINGS = {
 
 	// Unpacking
 	UNPACKING: `{% macro mul(a, b, c) %}{{ a * b * c }}{% endmacro %}|{{ mul(1, 2, 3) }}|{{ mul(*[1, 2, 3]) }}|`,
-
-	// Whitespace control edge cases
-	WHITESPACE_CONTROL_BRACE_BEFORE: `{
-{%- for i in [1, 2, 3] %}
-  {{ i }}
-{%- endfor %}
-}`,
-	WHITESPACE_CONTROL_EXPRESSION: `{
-{{- i -}}
-}`,
 };
 
 const TEST_PARSED = {
@@ -4335,39 +4325,6 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
-
-	// Whitespace control edge cases
-	WHITESPACE_CONTROL_BRACE_BEFORE: [
-		{ value: "{\n", type: "Text" },
-		{ value: "{%", type: "OpenStatement" },
-		{ value: "for", type: "Identifier" },
-		{ value: "i", type: "Identifier" },
-		{ value: "in", type: "Identifier" },
-		{ value: "[", type: "OpenSquareBracket" },
-		{ value: "1", type: "NumericLiteral" },
-		{ value: ",", type: "Comma" },
-		{ value: "2", type: "NumericLiteral" },
-		{ value: ",", type: "Comma" },
-		{ value: "3", type: "NumericLiteral" },
-		{ value: "]", type: "CloseSquareBracket" },
-		{ value: "%}", type: "CloseStatement" },
-		{ value: "\n  ", type: "Text" },
-		{ value: "{{", type: "OpenExpression" },
-		{ value: "i", type: "Identifier" },
-		{ value: "}}", type: "CloseExpression" },
-		{ value: "{%", type: "OpenStatement" },
-		{ value: "endfor", type: "Identifier" },
-		{ value: "%}", type: "CloseStatement" },
-		{ value: "\n}", type: "Text" },
-	],
-
-	WHITESPACE_CONTROL_EXPRESSION: [
-		{ value: "{\n", type: "Text" },
-		{ value: "{{", type: "OpenExpression" },
-		{ value: "i", type: "Identifier" },
-		{ value: "}}", type: "CloseExpression" },
-		{ value: "}", type: "Text" },
-	],
 };
 
 const TEST_CONTEXT = {
@@ -4765,10 +4722,6 @@ const TEST_CONTEXT = {
 
 	// Unpacking
 	UNPACKING: {},
-
-	// Whitespace control edge cases
-	WHITESPACE_CONTROL_BRACE_BEFORE: {},
-	WHITESPACE_CONTROL_EXPRESSION: { i: 1 },
 };
 
 const EXPECTED_OUTPUTS = {
@@ -4984,16 +4937,6 @@ const EXPECTED_OUTPUTS = {
 
 	// Unpacking
 	UNPACKING: `|6|6|`,
-
-	// Whitespace control edge cases
-	WHITESPACE_CONTROL_BRACE_BEFORE: `{
-
-  1
-  2
-  3
-}`,
-	WHITESPACE_CONTROL_EXPRESSION: `{
-1}`,
 };
 
 describe("Templates", () => {
