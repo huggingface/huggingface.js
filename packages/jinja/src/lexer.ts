@@ -232,7 +232,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				comment = comment.slice(0, -1); // Remove the trailing hyphen
 			}
 			
-			// Apply whitespace stripping
+			// Apply whitespace stripping for leading hyphen
 			if (stripBefore && tokens.length > 0 && tokens[tokens.length - 1].type === TOKEN_TYPES.Text) {
 				const lastToken = tokens[tokens.length - 1];
 				lastToken.value = lastToken.value.replace(/\s+$/, "");
@@ -244,20 +244,14 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			tokens.push(new Token(comment, TOKEN_TYPES.Comment));
 			cursorPosition += 2; // Skip the closing #}
 			
-			// Handle stripAfter by looking ahead - we'll need to modify the next text token
-			// For now, mark it by adding a special tracking mechanism
+			// Apply whitespace stripping for trailing hyphen
+			// We need to consume and skip the following whitespace
 			if (stripAfter) {
-				// We need to strip leading whitespace from the next text token
-				// Save this state for later processing
-				const startPos = cursorPosition;
+				const wsStart = cursorPosition;
 				while (cursorPosition < src.length && /\s/.test(src[cursorPosition])) {
 					cursorPosition++;
 				}
-				// Don't add the whitespace as a text token if we stripped it
-				if (cursorPosition > startPos) {
-					// Whitespace was consumed and stripped
-					// Continue to next token
-				}
+				// The whitespace from wsStart to cursorPosition is now skipped
 			}
 			
 			continue;
@@ -370,22 +364,20 @@ function postProcessWhitespaceControl(tokens: Token[]): Token[] {
 		const prevToken = result[result.length - 1];
 		const nextToken = tokens[i + 1];
 		
-		// Check if this is a leading hyphen (e.g., {%-, {{-, {#-)
+		// Check if this is a leading hyphen (e.g., {%-, {{-)
 		const isLeadingHyphen = 
 			(token.type === TOKEN_TYPES.UnaryOperator && token.value === "-") &&
 			prevToken && (
 				prevToken.type === TOKEN_TYPES.OpenStatement ||
-				prevToken.type === TOKEN_TYPES.OpenExpression ||
-				(prevToken.type === TOKEN_TYPES.Text && prevToken.value === "{#")
+				prevToken.type === TOKEN_TYPES.OpenExpression
 			);
 		
-		// Check if this is a trailing hyphen (e.g., -%}, -}}, -#})
+		// Check if this is a trailing hyphen (e.g., -%}, -}})
 		const isTrailingHyphen =
 			((token.type === TOKEN_TYPES.AdditiveBinaryOperator || token.type === TOKEN_TYPES.UnaryOperator) && token.value === "-") &&
 			nextToken && (
 				nextToken.type === TOKEN_TYPES.CloseStatement ||
-				nextToken.type === TOKEN_TYPES.CloseExpression ||
-				(nextToken.type === TOKEN_TYPES.Text && tokens[i + 1]?.value.startsWith("#}"))
+				nextToken.type === TOKEN_TYPES.CloseExpression
 			);
 		
 		if (isLeadingHyphen) {
@@ -403,9 +395,10 @@ function postProcessWhitespaceControl(tokens: Token[]): Token[] {
 		}
 		
 		if (isTrailingHyphen) {
-			// Strip leading whitespace from the next text token
-			if (i + 2 < tokens.length && tokens[i + 2]?.type === TOKEN_TYPES.Text) {
-				const textToken = tokens[i + 2];
+			// Strip leading whitespace from the next text token (which comes after the closing tag)
+			const textTokenIndex = i + 2; // Skip current hyphen and next closing tag
+			if (textTokenIndex < tokens.length && tokens[textTokenIndex]?.type === TOKEN_TYPES.Text) {
+				const textToken = tokens[textTokenIndex];
 				textToken.value = textToken.value.replace(/^\s+/, "");
 			}
 			// Skip this hyphen token (don't add it to result)
