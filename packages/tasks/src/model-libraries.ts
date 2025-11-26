@@ -299,7 +299,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/nari-labs/dia2",
 		snippets: snippets.dia2,
 		filter: false,
-  },
+    },
 	"diff-interpretation-tuning": {
 		prettyLabel: "Diff Interpretation Tuning",
 		repoName: "Diff Interpretation Tuning",
