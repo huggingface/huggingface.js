@@ -247,11 +247,9 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			// Apply whitespace stripping for trailing hyphen
 			// We need to consume and skip the following whitespace
 			if (stripAfter) {
-				const wsStart = cursorPosition;
 				while (cursorPosition < src.length && /\s/.test(src[cursorPosition])) {
 					cursorPosition++;
 				}
-				// The whitespace from wsStart to cursorPosition is now skipped
 			}
 			
 			continue;
