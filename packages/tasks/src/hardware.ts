@@ -758,6 +758,10 @@ export const SKUS = {
 				tflops: 18.4,
 				memory: [36, 48, 64, 96, 128, 256, 512],
 			},
+			"Apple M5": {
+				tflops: 5.7,
+				memory: [16, 24, 32],
+			},
 		},
 	},
 } satisfies Record<string, Record<string, Record<string, HardwareSpec>>>;
