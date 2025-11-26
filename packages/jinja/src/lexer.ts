@@ -137,11 +137,16 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 	return (
 		template
 			.replace(/-%}\s*/g, "%}")
-			.replace(/\s*{%-/g, "{%")
+			.replace(/(?<!{)\s*{%-/g, "{%") // Remove whitespace and hyphen if not preceded by {
+			.replace(/{%-/g, "{%") // Remove just the hyphen (keeping whitespace to avoid {{)
+
 			.replace(/-}}\s*/g, "}}")
-			.replace(/\s*{{-/g, "{{")
+			.replace(/(?<!{)\s*{{-/g, "{{") // Remove whitespace and hyphen if not preceded by {
+			.replace(/{{-/g, "{{") // Remove just the hyphen
+
 			.replace(/-#}\s*/g, "#}")
-			.replace(/\s*{#-/g, "{#")
+			.replace(/(?<!{)\s*{#-/g, "{#") // Remove whitespace and hyphen if not preceded by {
+			.replace(/{#-/g, "{#") // Remove just the hyphen
 
 			// Handle the custom transformers-specific `generation` tag.
 			// See https://github.com/huggingface/transformers/pull/30650 for more information.
