@@ -174,6 +174,24 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 		return str;
 	};
+	
+	// Helper to strip trailing whitespace from the last text token
+	const stripTrailingWhitespace = () => {
+		if (tokens.length > 0 && tokens[tokens.length - 1].type === TOKEN_TYPES.Text) {
+			const lastToken = tokens[tokens.length - 1];
+			lastToken.value = lastToken.value.replace(/\s+$/, "");
+			if (lastToken.value === "") {
+				tokens.pop(); // Remove empty text token
+			}
+		}
+	};
+	
+	// Helper to skip leading whitespace in source
+	const skipLeadingWhitespace = () => {
+		while (cursorPosition < src.length && /\s/.test(src[cursorPosition])) {
+			cursorPosition++;
+		}
+	};
 
 	// Build each token until end of input
 	main: while (cursorPosition < src.length) {
@@ -233,30 +251,56 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			}
 			
 			// Apply whitespace stripping for leading hyphen
-			if (stripBefore && tokens.length > 0 && tokens[tokens.length - 1].type === TOKEN_TYPES.Text) {
-				const lastToken = tokens[tokens.length - 1];
-				lastToken.value = lastToken.value.replace(/\s+$/, "");
-				if (lastToken.value === "") {
-					tokens.pop(); // Remove empty text token
-				}
+			if (stripBefore) {
+				stripTrailingWhitespace();
 			}
 			
 			tokens.push(new Token(comment, TOKEN_TYPES.Comment));
 			cursorPosition += 2; // Skip the closing #}
 			
 			// Apply whitespace stripping for trailing hyphen
-			// We need to consume and skip the following whitespace
 			if (stripAfter) {
-				while (cursorPosition < src.length && /\s/.test(src[cursorPosition])) {
-					cursorPosition++;
-				}
+				skipLeadingWhitespace();
 			}
 			
+			continue;
+		}
+		
+		// Check for opening statement with whitespace control {%-
+		if (src.slice(cursorPosition, cursorPosition + 3) === "{%-") {
+			stripTrailingWhitespace();
+			tokens.push(new Token("{%", TOKEN_TYPES.OpenStatement));
+			cursorPosition += 3; // Skip {%-
+			continue;
+		}
+		
+		// Check for opening expression with whitespace control {{-
+		if (src.slice(cursorPosition, cursorPosition + 3) === "{{-") {
+			stripTrailingWhitespace();
+			tokens.push(new Token("{{", TOKEN_TYPES.OpenExpression));
+			curlyBracketDepth = 0;
+			cursorPosition += 3; // Skip {{-
 			continue;
 		}
 
 		// Consume (and ignore) all whitespace inside Jinja statements or expressions
 		consumeWhile((char) => /\s/.test(char));
+		
+		// Check for closing statement with whitespace control -%}
+		if (src.slice(cursorPosition, cursorPosition + 3) === "-%}") {
+			tokens.push(new Token("%}", TOKEN_TYPES.CloseStatement));
+			cursorPosition += 3; // Skip -%}
+			skipLeadingWhitespace();
+			continue;
+		}
+		
+		// Check for closing expression with whitespace control -}}
+		if (src.slice(cursorPosition, cursorPosition + 3) === "-}}") {
+			tokens.push(new Token("}}", TOKEN_TYPES.CloseExpression));
+			cursorPosition += 3; // Skip -}}
+			skipLeadingWhitespace();
+			continue;
+		}
 
 		// Handle multi-character tokens
 		const char = src[cursorPosition];
@@ -346,65 +390,5 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		throw new SyntaxError(`Unexpected character: ${char}`);
 	}
 	
-	// Post-process tokens to handle whitespace control
-	return postProcessWhitespaceControl(tokens);
-}
-
-/**
- * Post-process tokens to handle whitespace control markers ({%-, -%}, etc.)
- * This removes the hyphen tokens and strips whitespace from adjacent text tokens.
- */
-function postProcessWhitespaceControl(tokens: Token[]): Token[] {
-	const result: Token[] = [];
-	
-	for (let i = 0; i < tokens.length; i++) {
-		const token = tokens[i];
-		const prevToken = result[result.length - 1];
-		const nextToken = tokens[i + 1];
-		
-		// Check if this is a leading hyphen (e.g., {%-, {{-)
-		const isLeadingHyphen = 
-			(token.type === TOKEN_TYPES.UnaryOperator && token.value === "-") &&
-			prevToken && (
-				prevToken.type === TOKEN_TYPES.OpenStatement ||
-				prevToken.type === TOKEN_TYPES.OpenExpression
-			);
-		
-		// Check if this is a trailing hyphen (e.g., -%}, -}})
-		const isTrailingHyphen =
-			((token.type === TOKEN_TYPES.AdditiveBinaryOperator || token.type === TOKEN_TYPES.UnaryOperator) && token.value === "-") &&
-			nextToken && (
-				nextToken.type === TOKEN_TYPES.CloseStatement ||
-				nextToken.type === TOKEN_TYPES.CloseExpression
-			);
-		
-		if (isLeadingHyphen) {
-			// Strip trailing whitespace from the previous text token
-			if (result.length > 1 && result[result.length - 2]?.type === TOKEN_TYPES.Text) {
-				const textToken = result[result.length - 2];
-				textToken.value = textToken.value.replace(/\s+$/, "");
-				if (textToken.value === "") {
-					// Remove empty text token
-					result.splice(result.length - 2, 1);
-				}
-			}
-			// Skip this hyphen token (don't add it to result)
-			continue;
-		}
-		
-		if (isTrailingHyphen) {
-			// Strip leading whitespace from the next text token (which comes after the closing tag)
-			const textTokenIndex = i + 2; // Skip current hyphen and next closing tag
-			if (textTokenIndex < tokens.length && tokens[textTokenIndex]?.type === TOKEN_TYPES.Text) {
-				const textToken = tokens[textTokenIndex];
-				textToken.value = textToken.value.replace(/^\s+/, "");
-			}
-			// Skip this hyphen token (don't add it to result)
-			continue;
-		}
-		
-		result.push(token);
-	}
-	
-	return result;
+	return tokens;
 }

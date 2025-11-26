@@ -4354,7 +4354,6 @@ const TEST_PARSED = {
 		{ value: "3", type: "NumericLiteral" },
 		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "%}", type: "CloseStatement" },
-		{ value: "", type: "Text" },
 		{ value: "{{", type: "OpenExpression" },
 		{ value: "i", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
@@ -4392,7 +4391,6 @@ const TEST_PARSED = {
 		{ value: "{%", type: "OpenStatement" },
 		{ value: "endif", type: "Identifier" },
 		{ value: "%}", type: "CloseStatement" },
-		{ value: "", type: "Text" },
 	],
 	WHITESPACE_CONTROL_4: [
 		{ value: "A", type: "Text" },
@@ -4416,7 +4414,6 @@ const TEST_PARSED = {
 		{ value: "=", type: "Equals" },
 		{ value: "1", type: "NumericLiteral" },
 		{ value: "%}", type: "CloseStatement" },
-		{ value: "", type: "Text" },
 		{ value: "{{", type: "OpenExpression" },
 		{ value: "x", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
