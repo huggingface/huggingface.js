@@ -218,6 +218,20 @@ const TEST_STRINGS = {
 
 	// Unpacking
 	UNPACKING: `{% macro mul(a, b, c) %}{{ a * b * c }}{% endmacro %}|{{ mul(1, 2, 3) }}|{{ mul(*[1, 2, 3]) }}|`,
+
+	// Whitespace control
+	WHITESPACE_CONTROL_1: `{
+{%- for i in [1, 2, 3] -%}
+  {{ i }}
+{%- endfor -%}
+}`,
+	WHITESPACE_CONTROL_2: `{%- for i in [1, 2, 3] %}{{ i }}{% endfor -%}`,
+	WHITESPACE_CONTROL_3: `  {%- if true -%}  A  {%- endif -%}  `,
+	WHITESPACE_CONTROL_4: `A {{- ' B ' -}} C`,
+	WHITESPACE_CONTROL_5: `{#- comment -#}X`,
+	WHITESPACE_CONTROL_6: `X{#- comment -#}`,
+	WHITESPACE_CONTROL_7: `  {%- set x = 1 -%}  {{ x }}`,
+	WHITESPACE_CONTROL_8: ` \n A \n {%- set x = 1 %} \n {{ x }} \nB \n{% set y = 2 -%} \n\n C {{- y -}}  D  {#-Comment - goes - here--#} \n E \n `,
 };
 
 const TEST_PARSED = {
@@ -4325,6 +4339,113 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+
+	// Whitespace control
+	WHITESPACE_CONTROL_1: [
+		{ value: "{", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "Identifier" },
+		{ value: "i", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "i", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "}", type: "Text" },
+	],
+	WHITESPACE_CONTROL_2: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "Identifier" },
+		{ value: "i", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "i", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+	],
+	WHITESPACE_CONTROL_3: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "Identifier" },
+		{ value: "true", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "A", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+	],
+	WHITESPACE_CONTROL_4: [
+		{ value: "A", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " B ", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "C", type: "Text" },
+	],
+	WHITESPACE_CONTROL_5: [
+		{ value: " comment ", type: "Comment" },
+		{ value: "X", type: "Text" },
+	],
+	WHITESPACE_CONTROL_6: [
+		{ value: "X", type: "Text" },
+		{ value: " comment ", type: "Comment" },
+	],
+	WHITESPACE_CONTROL_7: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	WHITESPACE_CONTROL_8: [
+		{ value: " \n A", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: " \n ", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: " \nB \n", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "y", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "C", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "D", type: "Text" },
+		{ value: "Comment - goes - here-", type: "Comment" },
+		{ value: "E \n ", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -4722,6 +4843,16 @@ const TEST_CONTEXT = {
 
 	// Unpacking
 	UNPACKING: {},
+
+	// Whitespace control
+	WHITESPACE_CONTROL_1: {},
+	WHITESPACE_CONTROL_2: {},
+	WHITESPACE_CONTROL_3: {},
+	WHITESPACE_CONTROL_4: {},
+	WHITESPACE_CONTROL_5: {},
+	WHITESPACE_CONTROL_6: {},
+	WHITESPACE_CONTROL_7: {},
+	WHITESPACE_CONTROL_8: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -4937,6 +5068,16 @@ const EXPECTED_OUTPUTS = {
 
 	// Unpacking
 	UNPACKING: `|6|6|`,
+
+	// Whitespace control
+	WHITESPACE_CONTROL_1: `{123}`,
+	WHITESPACE_CONTROL_2: `123`,
+	WHITESPACE_CONTROL_3: `A`,
+	WHITESPACE_CONTROL_4: `A B C`,
+	WHITESPACE_CONTROL_5: `X`,
+	WHITESPACE_CONTROL_6: `X`,
+	WHITESPACE_CONTROL_7: `1`,
+	WHITESPACE_CONTROL_8: ` \n A \n 1 \nB \nC2DE \n `,
 };
 
 describe("Templates", () => {
