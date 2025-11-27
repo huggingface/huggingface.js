@@ -231,6 +231,7 @@ const TEST_STRINGS = {
 	WHITESPACE_CONTROL_5: `{#- comment -#}X`,
 	WHITESPACE_CONTROL_6: `X{#- comment -#}`,
 	WHITESPACE_CONTROL_7: `  {%- set x = 1 -%}  {{ x }}`,
+	WHITESPACE_CONTROL_8: ` \n A \n {%- set x = 1 %} \n {{ x }} \nB \n{% set y = 2 -%} \n\n C {{- y -}}  D  {#-Comment - goes - here--#} \n E \n `,
 };
 
 const TEST_PARSED = {
@@ -4418,6 +4419,33 @@ const TEST_PARSED = {
 		{ value: "x", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	WHITESPACE_CONTROL_8: [
+		{ value: " \n A", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: " \n ", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: " \nB \n", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "y", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "C", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "D", type: "Text" },
+		{ value: "Comment - goes - here-", type: "Comment" },
+		{ value: "E \n ", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -4824,6 +4852,7 @@ const TEST_CONTEXT = {
 	WHITESPACE_CONTROL_5: {},
 	WHITESPACE_CONTROL_6: {},
 	WHITESPACE_CONTROL_7: {},
+	WHITESPACE_CONTROL_8: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -5048,6 +5077,7 @@ const EXPECTED_OUTPUTS = {
 	WHITESPACE_CONTROL_5: `X`,
 	WHITESPACE_CONTROL_6: `X`,
 	WHITESPACE_CONTROL_7: `1`,
+	WHITESPACE_CONTROL_8: ` \n A \n 1 \nB \nC2DE \n `,
 };
 
 describe("Templates", () => {
