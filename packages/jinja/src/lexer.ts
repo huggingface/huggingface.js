@@ -180,9 +180,8 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 	};
 
 	const stripTrailingWhitespace = () => {
-		if (tokens.length === 0) return;
-		const lastToken = tokens.at(-1)!;
-		if (lastToken.type === TOKEN_TYPES.Text) {
+		const lastToken = tokens.at(-1);
+		if (lastToken && lastToken.type === TOKEN_TYPES.Text) {
 			lastToken.value = lastToken.value.trimEnd();
 			if (lastToken.value === "") {
 				tokens.pop(); // Remove empty text token
