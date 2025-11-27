@@ -229,7 +229,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		// Possibly consume a comment
 		if (src[cursorPosition] === "{" && src[cursorPosition + 1] === "#") {
 			cursorPosition += 2; // Skip the opening {#
-			
+
 			// Check for leading hyphen for whitespace control {#-
 			let stripBefore = false;
 			if (src[cursorPosition] === "-") {
@@ -245,30 +245,30 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				}
 				comment += src[cursorPosition++];
 			}
-			
+
 			// Check for trailing hyphen for whitespace control -#}
 			let stripAfter = false;
 			if (comment.endsWith("-")) {
 				stripAfter = true;
 				comment = comment.slice(0, -1); // Remove the trailing hyphen
 			}
-			
+
 			// Apply whitespace stripping for leading hyphen
 			if (stripBefore) {
 				stripTrailingWhitespace();
 			}
-			
+
 			tokens.push(new Token(comment, TOKEN_TYPES.Comment));
 			cursorPosition += 2; // Skip the closing #}
-			
+
 			// Apply whitespace stripping for trailing hyphen
 			if (stripAfter) {
 				skipLeadingWhitespace();
 			}
-			
+
 			continue;
 		}
-		
+
 		// Check for opening statement with whitespace control {%-
 		if (src.slice(cursorPosition, cursorPosition + 3) === "{%-") {
 			stripTrailingWhitespace();
@@ -276,7 +276,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			cursorPosition += 3; // Skip {%-
 			continue;
 		}
-		
+
 		// Check for opening expression with whitespace control {{-
 		if (src.slice(cursorPosition, cursorPosition + 3) === "{{-") {
 			stripTrailingWhitespace();
@@ -288,7 +288,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 
 		// Consume (and ignore) all whitespace inside Jinja statements or expressions
 		consumeWhile(isWhitespace);
-		
+
 		// Check for closing statement with whitespace control -%}
 		if (src.slice(cursorPosition, cursorPosition + 3) === "-%}") {
 			tokens.push(new Token("%}", TOKEN_TYPES.CloseStatement));
@@ -296,7 +296,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			skipLeadingWhitespace();
 			continue;
 		}
-		
+
 		// Check for closing expression with whitespace control -}}
 		if (src.slice(cursorPosition, cursorPosition + 3) === "-}}") {
 			tokens.push(new Token("}}", TOKEN_TYPES.CloseExpression));
@@ -392,6 +392,6 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 
 		throw new SyntaxError(`Unexpected character: ${char}`);
 	}
-	
+
 	return tokens;
 }
