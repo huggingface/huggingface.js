@@ -231,9 +231,8 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			cursorPosition += 2; // Skip the opening {#
 
 			// Check for leading hyphen for whitespace control {#-
-			let stripBefore = false;
-			if (src[cursorPosition] === "-") {
-				stripBefore = true;
+			const stripBefore = src[cursorPosition] === "-";
+			if (stripBefore) {
 				++cursorPosition; // Skip the hyphen
 			}
 
@@ -247,9 +246,8 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			}
 
 			// Check for trailing hyphen for whitespace control -#}
-			let stripAfter = false;
-			if (comment.endsWith("-")) {
-				stripAfter = true;
+			const stripAfter = comment.endsWith("-");
+			if (stripAfter) {
 				comment = comment.slice(0, -1); // Remove the trailing hyphen
 			}
 
