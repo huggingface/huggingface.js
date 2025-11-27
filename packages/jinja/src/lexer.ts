@@ -56,6 +56,10 @@ function isInteger(char: string): boolean {
 	return /[0-9]/.test(char);
 }
 
+function isWhitespace(char: string): boolean {
+	return /\s/.test(char);
+}
+
 /**
  * A data structure which contains a list of rules to test
  */
@@ -174,22 +178,21 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 		return str;
 	};
-	
-	// Helper to strip trailing whitespace from the last text token
+
 	const stripTrailingWhitespace = () => {
-		if (tokens.length > 0 && tokens[tokens.length - 1].type === TOKEN_TYPES.Text) {
-			const lastToken = tokens[tokens.length - 1];
-			lastToken.value = lastToken.value.replace(/\s+$/, "");
+		if (tokens.length === 0) return;
+		const lastToken = tokens.at(-1)!;
+		if (lastToken.type === TOKEN_TYPES.Text) {
+			lastToken.value = lastToken.value.trimEnd();
 			if (lastToken.value === "") {
 				tokens.pop(); // Remove empty text token
 			}
 		}
 	};
-	
-	// Helper to skip leading whitespace in source
+
 	const skipLeadingWhitespace = () => {
-		while (cursorPosition < src.length && /\s/.test(src[cursorPosition])) {
-			cursorPosition++;
+		while (cursorPosition < src.length && isWhitespace(src[cursorPosition])) {
+			++cursorPosition;
 		}
 	};
 
@@ -231,7 +234,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			let stripBefore = false;
 			if (src[cursorPosition] === "-") {
 				stripBefore = true;
-				cursorPosition++; // Skip the hyphen
+				++cursorPosition; // Skip the hyphen
 			}
 
 			let comment = "";
@@ -284,7 +287,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Consume (and ignore) all whitespace inside Jinja statements or expressions
-		consumeWhile((char) => /\s/.test(char));
+		consumeWhile(isWhitespace);
 		
 		// Check for closing statement with whitespace control -%}
 		if (src.slice(cursorPosition, cursorPosition + 3) === "-%}") {
