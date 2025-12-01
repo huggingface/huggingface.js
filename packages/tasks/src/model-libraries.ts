@@ -413,6 +413,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"bin"`,
 	},
+	fixer: {
+		prettyLabel: "Fixer",
+		repoName: "Fixer",
+		repoUrl: "https://github.com/nv-tlabs/Fixer",
+		filter: false,
+		countDownloads: `path:"pretrained/pretrained_fixer.pkl"`,
+	},
 	flair: {
 		prettyLabel: "Flair",
 		repoName: "Flair",
