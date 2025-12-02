@@ -12,6 +12,7 @@ export function deleteFiles(
 		branch?: CommitParams["branch"];
 		isPullRequest?: CommitParams["isPullRequest"];
 		parentCommit?: CommitParams["parentCommit"];
+		mode?: CommitParams["mode"];
 		fetch?: CommitParams["fetch"];
 	} & CredentialsParams
 ): Promise<CommitOutput> {
@@ -29,5 +30,6 @@ export function deleteFiles(
 		isPullRequest: params.isPullRequest,
 		parentCommit: params.parentCommit,
 		fetch: params.fetch,
+		mode: params.mode,
 	});
 }
