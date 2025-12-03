@@ -1,0 +1,64 @@
+## Use Cases
+
+### Image Animation
+
+Image-text-to-video models can be used to animate still images based on text descriptions. For example, you can provide a landscape photo and the instruction "A camera pan from left to right" to create a video with camera movement.
+
+### Dynamic Content Creation
+
+Transform static images into dynamic video content by adding motion, transformations, or effects described in text prompts. This is useful for creating engaging social media content, presentations, or marketing materials.
+
+### Guided Video Generation
+
+Use a reference image along with text prompts to guide the video generation process. This provides more control over the visual style and composition compared to text-to-video models alone.
+
+### Story Visualization
+
+Create video sequences from storyboards or concept art by providing scene descriptions. This can help filmmakers and animators visualize scenes before production.
+
+### Motion Control
+
+Generate videos with specific camera movements, object motions, or scene transitions by combining reference images with detailed motion descriptions.
+
+## Task Variants
+
+### Image-to-Video with Motion Control
+
+Models that generate videos from images while following specific motion instructions, such as camera movements, object animations, or scene dynamics.
+
+### Reference-guided Video Generation
+
+Models that use a reference image to guide the visual style and composition of the generated video while incorporating text prompts for motion and transformation control.
+
+### Conditional Video Synthesis
+
+Models that perform specific video transformations based on text conditions, such as adding weather effects, time-of-day changes, or environmental animations.
+
+## Inference
+
+You can use the Diffusers library to interact with image-text-to-video models.
+
+```python
+from diffusers import LTXImageToVideoPipeline
+from PIL import Image
+import torch
+
+# Load the model
+pipe = LTXImageToVideoPipeline.from_pretrained(
+    "Lightricks/LTX-Video",
+    torch_dtype=torch.bfloat16
+).to("cuda")
+
+# Load input image
+image = Image.open("input.jpg").convert("RGB")
+
+# Generate video with a text prompt
+prompt = "A camera pan showing the scene in motion"
+video = pipe(prompt=prompt, image=image).frames
+```
+
+## Useful Resources
+
+- [LTX-Video Model Card](https://huggingface.co/Lightricks/LTX-Video)
+- [Text-to-Video: The Task, Challenges and the Current State](https://huggingface.co/blog/text-to-video)
+- [Diffusers documentation on Video Generation](https://huggingface.co/docs/diffusers/using-diffusers/text-img2vid)
