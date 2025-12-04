@@ -331,6 +331,19 @@ output = model.generate(text)
 sf.write("simple.mp3", output, 44100)`,
 ];
 
+export const dia2 = (model: ModelData): string[] => [
+	`from dia2 import Dia2, GenerationConfig, SamplingConfig
+
+dia = Dia2.from_repo("${model.id}", device="cuda", dtype="bfloat16")
+config = GenerationConfig(
+    cfg_scale=2.0,
+    audio=SamplingConfig(temperature=0.8, top_k=50),
+    use_cuda_graph=True,
+)
+result = dia.generate("[S1] Hello Dia2!", config=config, output_wav="hello.wav", verbose=True)
+`,
+];
+
 export const describe_anything = (model: ModelData): string[] => [
 	`# pip install git+https://github.com/NVlabs/describe-anything
 from huggingface_hub import snapshot_download
