@@ -39,23 +39,31 @@ Models that perform specific transformations based on text conditions, such as c
 You can use the Diffusers library to interact with image-text-to-image models.
 
 ```python
-from diffusers import FluxControlPipeline
-from PIL import Image
 import torch
+from diffusers import Flux2Pipeline
+from diffusers.utils import load_image
 
-# Load the model
-pipe = FluxControlPipeline.from_pretrained(
-    "black-forest-labs/FLUX.2-dev",
-    torch_dtype=torch.bfloat16
-).to("cuda")
+repo_id = "black-forest-labs/FLUX.2-dev"
+device = "cuda:0"
+torch_dtype = torch.bfloat16
 
-# Load input image
-image = Image.open("input.jpg").convert("RGB")
+pipe = Flux2Pipeline.from_pretrained(
+    repo_id, torch_dtype=torch_dtype
+)
+pipe.enable_model_cpu_offload() #no need to do cpu offload for >80G VRAM carts like H200, B200, etc. and do a `pipe.to(device)` instead
 
-# Edit the image with a text prompt
-prompt = "Make it a snowy winter scene"
-edited_image = pipe(prompt=prompt, image=image).images[0]
-edited_image.save("edited_image.png")
+prompt = "Realistic macro photograph of a hermit crab using a soda can as its shell, partially emerging from the can, captured with sharp detail and natural colors, on a sunlit beach with soft shadows and a shallow depth of field, with blurred ocean waves in the background. The can has the text `BFL Diffusers` on it and it has a color gradient that start with #FF5733 at the top and transitions to #33FF57 at the bottom."
+
+#cat_image = load_image("https://huggingface.co/spaces/zerogpu-aoti/FLUX.1-Kontext-Dev-fp8-dynamic/resolve/main/cat.png")
+image = pipe(
+    prompt=prompt,
+    #image=[cat_image] #multi-image input
+    generator=torch.Generator(device=device).manual_seed(42),
+    num_inference_steps=50,
+    guidance_scale=4,
+).images[0]
+
+image.save("flux2_output.png")
 ```
 
 ## Useful Resources

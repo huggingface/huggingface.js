@@ -5,18 +5,18 @@ const taskData: TaskDataCustom = {
 	demo: {
 		inputs: [
 			{
-				filename: "image-text-to-video-input.png",
+				filename: "image-to-video-input.jpg",
 				type: "img",
 			},
 			{
-				label: "Text Prompt",
-				content: "A camera pan showing the scene in motion",
+				label: "Input",
+				content: "Darth Vader is surfing on the waves.",
 				type: "text",
 			},
 		],
 		outputs: [
 			{
-				filename: "image-text-to-video-output.gif",
+				filename: "text-to-video-output.gif",
 				type: "img",
 			},
 		],

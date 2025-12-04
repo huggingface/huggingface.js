@@ -5,18 +5,18 @@ const taskData: TaskDataCustom = {
 	demo: {
 		inputs: [
 			{
-				filename: "image-text-to-image-input.png",
+				filename: "image-to-image-input.jpeg",
 				type: "img",
 			},
 			{
-				label: "Text Prompt",
-				content: "Make it winter, add snow",
+				label: "Input",
+				content: "A city above clouds, pastel colors, Victorian style",
 				type: "text",
 			},
 		],
 		outputs: [
 			{
-				filename: "image-text-to-image-output.png",
+				filename: "image-to-image-output.png",
 				type: "img",
 			},
 		],

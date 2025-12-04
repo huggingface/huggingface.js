@@ -39,22 +39,29 @@ Models that perform specific video transformations based on text conditions, suc
 You can use the Diffusers library to interact with image-text-to-video models.
 
 ```python
-from diffusers import LTXImageToVideoPipeline
-from PIL import Image
 import torch
+from diffusers import LTXImageToVideoPipeline
+from diffusers.utils import export_to_video, load_image
 
-# Load the model
-pipe = LTXImageToVideoPipeline.from_pretrained(
-    "Lightricks/LTX-Video",
-    torch_dtype=torch.bfloat16
-).to("cuda")
+pipe = LTXImageToVideoPipeline.from_pretrained("Lightricks/LTX-Video", torch_dtype=torch.bfloat16)
+pipe.to("cuda")
 
-# Load input image
-image = Image.open("input.jpg").convert("RGB")
+image = load_image(
+    "https://huggingface.co/datasets/a-r-r-o-w/tiny-meme-dataset-captioned/resolve/main/images/8.png"
+)
+prompt = "A young girl stands calmly in the foreground, looking directly at the camera, as a house fire rages in the background. Flames engulf the structure, with smoke billowing into the air. Firefighters in protective gear rush to the scene, a fire truck labeled '38' visible behind them. The girl's neutral expression contrasts sharply with the chaos of the fire, creating a poignant and emotionally charged scene."
+negative_prompt = "worst quality, inconsistent motion, blurry, jittery, distorted"
 
-# Generate video with a text prompt
-prompt = "A camera pan showing the scene in motion"
-video = pipe(prompt=prompt, image=image).frames
+video = pipe(
+    image=image,
+    prompt=prompt,
+    negative_prompt=negative_prompt,
+    width=704,
+    height=480,
+    num_frames=161,
+    num_inference_steps=50,
+).frames[0]
+export_to_video(video, "output.mp4", fps=24)
 ```
 
 ## Useful Resources
