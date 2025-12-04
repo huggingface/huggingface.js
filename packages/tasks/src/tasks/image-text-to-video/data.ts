@@ -46,7 +46,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Image-text-to-video models take an image and a text prompt as input and generate a video based on the reference image and text instructions. These models are useful for animating still images, creating dynamic content from static references, and generating videos with specific motion or transformation guidance.",
+		"Image-text-to-video models take an reference image and a text instructions as and generate a video based on them. These models are useful for animating still images, creating dynamic content from static references, and generating videos with specific motion or transformation guidance.",
 	widgetModels: ["Lightricks/LTX-Video"],
 	youtubeId: undefined,
 };
