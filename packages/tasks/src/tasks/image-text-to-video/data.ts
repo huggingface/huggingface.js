@@ -5,7 +5,7 @@ const taskData: TaskDataCustom = {
 	demo: {
 		inputs: [
 			{
-				filename: "image-to-video-input.jpg",
+				filename: "image-text-to-video-input.jpg",
 				type: "img",
 			},
 			{
@@ -16,7 +16,7 @@ const taskData: TaskDataCustom = {
 		],
 		outputs: [
 			{
-				filename: "text-to-video-output.gif",
+				filename: "image-text-to-video-output.gif",
 				type: "img",
 			},
 		],
