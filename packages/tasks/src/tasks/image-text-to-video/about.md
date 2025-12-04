@@ -10,7 +10,7 @@ Transform static images into dynamic video content by adding motion, transformat
 
 ### Guided Video Generation
 
-Use a reference image along with text prompts to guide the video generation process. This provides more control over the visual style and composition compared to text-to-video models alone.
+Use a reference image with text prompts to guide the video generation process. This provides more control over the visual style and composition compared to text-to-video models alone.
 
 ### Story Visualization
 
