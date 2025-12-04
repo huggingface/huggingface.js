@@ -36,7 +36,7 @@ Models that perform specific video transformations based on text conditions, suc
 
 ## Inference
 
-You can use the Diffusers library to interact with image-text-to-video models.
+You can use the Diffusers library to interact with image-text-to-video models. Here's example snippet to use `LTXImageToVideoPipeline`.
 
 ```python
 from diffusers import LTXImageToVideoPipeline
