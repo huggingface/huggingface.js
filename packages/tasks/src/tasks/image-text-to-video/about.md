@@ -6,7 +6,7 @@ Image-text-to-video models can be used to animate still images based on text des
 
 ### Dynamic Content Creation
 
-Transform static images into dynamic video content by adding motion, transformations, or effects described in text prompts. This is useful for creating engaging social media content, presentations, or marketing materials.
+Transform images into video by adding motion, transformations, or effects described in text prompts. This is useful for creating engaging social media content, presentations, or marketing materials.
 
 ### Guided Video Generation
 
