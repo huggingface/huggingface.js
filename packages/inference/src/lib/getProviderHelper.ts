@@ -28,6 +28,8 @@ import type {
 	ImageToImageTaskHelper,
 	ImageToTextTaskHelper,
 	ImageToVideoTaskHelper,
+	ImageTextToImageTaskHelper,
+	ImageTextToVideoTaskHelper,
 	ObjectDetectionTaskHelper,
 	QuestionAnsweringTaskHelper,
 	SentenceSimilarityTaskHelper,
@@ -276,6 +278,14 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "image-to-video"
 ): ImageToVideoTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
+	task: "image-text-to-image"
+): ImageTextToImageTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
+	task: "image-text-to-video"
+): ImageTextToVideoTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "sentence-similarity"
