@@ -517,13 +517,6 @@ export const LOCAL_APPS = {
 			model.tags.includes("coreml") && model.tags.includes("joyfusion") && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://joyfusion.app/import_from_hf?repo_id=${model.id}`),
 	},
-	invoke: {
-		prettyLabel: "Invoke",
-		docsUrl: "https://github.com/invoke-ai/InvokeAI",
-		mainTask: "text-to-image",
-		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
-		deeplink: (model) => new URL(`https://models.invoke.ai/huggingface/${model.id}`),
-	},
 	ollama: {
 		prettyLabel: "Ollama",
 		docsUrl: "https://ollama.com",
