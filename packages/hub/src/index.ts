@@ -1,4 +1,7 @@
 export * from "./lib";
+export * from "./utils";
+export { USER_AGENT, VERSION } from "./consts";
+
 // Typescript 5 will add 'export type *'
 export type {
 	AccessToken,
