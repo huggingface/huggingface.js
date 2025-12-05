@@ -84,7 +84,7 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/hub/datasets-duckdb",
 	},
 	datadesigner: {
-		prettyLabel: "Data Designer",
+		prettyLabel: "NeMo Data Designer",
 		repoName: "datadesigner",
 		repoUrl: "https://github.com/NVIDIA-NeMo/DataDesigner",
 		docsUrl: "https://nvidia-nemo.github.io/DataDesigner/",
