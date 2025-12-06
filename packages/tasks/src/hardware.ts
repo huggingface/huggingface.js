@@ -66,6 +66,10 @@ export const SKUS = {
 				tflops: 30.29,
 				memory: [24],
 			},
+			GB10: {
+				tflops: 29.71,
+				memory: [128],
+			},
 			"RTX PRO 6000 WS": {
 				tflops: 126,
 				memory: [96],
