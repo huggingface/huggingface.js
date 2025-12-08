@@ -5,31 +5,40 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/gpt-oss:20b
- * - library/llama3.1:8b
- * - library/llama3.2:latest
+ * - library/llama3.2:1b
+ * - library/llava:latest
+ * - library/qwen2.5:0.5b
+ * - library/qwen2.5-coder:latest
+ * - library/llama3:latest
+ * - library/gemma2:latest
  * - library/gemma3:latest
- * - library/qwen2:0.5b
- * - library/tinyllama:1.1b
- * - library/qwq:latest
- * - library/codegemma:2b
- * - library/cogito:latest
- * - library/cogito:3b
- * - library/smollm:latest
- * - library/devstral:24b
- * - library/dolphin-llama3:8b
- * - library/opencoder:latest
- * - library/codegeex4:9b
- * - library/starcoder:latest
- * - library/command-r-plus:latest
- * - library/command-r-plus:104b
- * - library/llama3-chatqa:8b
- * - library/tulu3:latest
- * - library/llama3-groq-tool-use:latest
- * - library/yarn-llama2:latest
- * - library/command-r7b:7b
- * - library/phi4-mini-reasoning:latest
- * - library/reader-lm:latest
+ * - library/gemma2:latest
+ * - library/gemma3:latest
+ * - library/gemma:2b
+ * - library/qwen2:latest
+ * - library/dolphin3:latest
+ * - library/llama3.2-vision:latest
+ * - library/deepseek-v3:latest
+ * - library/deepseek-v3:671b
+ * - library/falcon3:latest
+ * - library/phi4-reasoning:14b
+ * - library/phi:latest
+ * - library/llama4:16x17b
+ * - library/magistral:latest
+ * - library/magistral:24b
+ * - library/openthinker:7b
+ * - library/dolphin-llama3:latest
+ * - library/smollm:135m
+ * - library/dolphin-llama3:latest
+ * - library/mistral-small3.1:latest
+ * - library/devstral:latest
+ * - library/deepcoder:latest
+ * - library/reflection:latest
+ * - library/r1-1776:latest
+ * - library/meditron:latest
+ * - library/wizard-math:7b
+ * - library/smallthinker:latest
+ * - library/aya-expanse:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
