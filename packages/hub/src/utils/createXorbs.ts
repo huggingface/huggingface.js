@@ -148,7 +148,17 @@ export async function* createXorbs(
 	const remoteXorbHashes: string[] = [""]; // starts at index 1 (to simplify implem a bit)
 
 	for await (const fileSource of fileSources) {
+		params.yieldCallback?.({
+			event: "fileProgress",
+			path: fileSource.path,
+			progress: 0,
+		});
 		if (alreadyDoneFileSha256s.has(fileSource.sha256)) {
+			params.yieldCallback?.({
+				event: "fileProgress",
+				path: fileSource.path,
+				progress: 1,
+			});
 			continue;
 		}
 		alreadyDoneFileSha256s.add(fileSource.sha256);
@@ -204,7 +214,7 @@ export async function* createXorbs(
 
 					let cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
 					if (cacheData === undefined && chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
-						const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
+						const token = await xetWriteToken(params);
 						bytesSinceRemoteDedup = 0;
 
 						const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {
@@ -691,7 +701,7 @@ async function loadDedupInfoToCache(
 
 				// Try remote dedup lookup if conditions are met
 				if (chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
-					const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
+					const token = await xetWriteToken(params);
 					bytesSinceRemoteDedup = 0;
 
 					const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {

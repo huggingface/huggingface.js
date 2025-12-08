@@ -293,6 +293,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.dia,
 		filter: false,
 	},
+	dia2: {
+		prettyLabel: "Dia2",
+		repoName: "Dia2",
+		repoUrl: "https://github.com/nari-labs/dia2",
+		snippets: snippets.dia2,
+		filter: false,
+	},
 	"diff-interpretation-tuning": {
 		prettyLabel: "Diff Interpretation Tuning",
 		repoName: "Diff Interpretation Tuning",
@@ -413,6 +420,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"bin"`,
 	},
+	fixer: {
+		prettyLabel: "Fixer",
+		repoName: "Fixer",
+		repoUrl: "https://github.com/nv-tlabs/Fixer",
+		filter: false,
+		countDownloads: `path:"pretrained/pretrained_fixer.pkl"`,
+	},
 	flair: {
 		prettyLabel: "Flair",
 		repoName: "Flair",
@@ -450,6 +464,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.gliner,
 		filter: false,
 		countDownloads: `path:"gliner_config.json"`,
+	},
+	gliner2: {
+		prettyLabel: "GLiNER2",
+		repoName: "GLiNER2",
+		repoUrl: "https://github.com/fastino-ai/GLiNER2",
+		snippets: snippets.gliner2,
+		filter: false,
 	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
@@ -508,6 +529,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "HunyuanWorld-voyager",
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
+	},
+	"image-matching-models": {
+		prettyLabel: "Image Matching Models",
+		repoName: "Image Matching Models",
+		repoUrl: "https://github.com/alexstoken/image-matching-models",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
@@ -622,6 +650,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/lerobot",
 		filter: false,
 		snippets: snippets.lerobot,
+	},
+	lightglue: {
+		prettyLabel: "LightGlue",
+		repoName: "LightGlue",
+		repoUrl: "https://github.com/cvg/LightGlue",
+		filter: false,
+		countDownloads: `path_extension:"pth" OR path:"config.json"`,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
