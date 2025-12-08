@@ -3,6 +3,9 @@
  *
  * Using src/scripts/inference-codegen
  */
+
+import type { ChatCompletionInputGrammarType } from "../chat-completion/inference.js";
+
 /**
  * Inputs for Automatic Speech Recognition inference
  */
@@ -116,6 +119,7 @@ export interface GenerationParameters {
 	 * Whether the model should use the past last key/values attentions to speed up decoding
 	 */
 	use_cache?: boolean;
+	response_format?: Omit<ChatCompletionInputGrammarType, "value">;
 	[property: string]: unknown;
 }
 /**
