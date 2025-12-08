@@ -346,6 +346,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
 		snippets: snippets.cartesia_mlx,
 	},
+	clara: {
+		prettyLabel: "Clara",
+		repoName: "Clara",
+		filter: false,
+		repoUrl: "https://github.com/nvidia/clara",
+		countDownloads: `path_extension:"ckpt"`,
+	},
 	clipscope: {
 		prettyLabel: "clipscope",
 		repoName: "clipscope",
