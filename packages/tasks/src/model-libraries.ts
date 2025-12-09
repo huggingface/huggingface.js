@@ -971,14 +971,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sam2,
 		countDownloads: `path_extension:"pt"`,
 	},
-	"sam-3d-object": {
-		prettyLabel: "SAM 3D Object",
-		repoName: "SAM 3D Object",
-		repoUrl: "https://github.com/facebookresearch/sam-3d-objects",
-		filter: false,
-		snippets: snippets.sam_3d_object,
-		countDownloads: `path:"checkpoints/pipeline.yaml"`,
-	},
 	"sam-3d-body": {
 		prettyLabel: "SAM 3D Body",
 		repoName: "SAM 3D Body",
@@ -986,6 +978,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.sam_3d_body,
 		countDownloads: `path:"model_config.yaml"`,
+	},
+	"sam-3d-object": {
+		prettyLabel: "SAM 3D Object",
+		repoName: "SAM 3D Object",
+		repoUrl: "https://github.com/facebookresearch/sam-3d-objects",
+		filter: false,
+		snippets: snippets.sam_3d_object,
+		countDownloads: `path:"checkpoints/pipeline.yaml"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
