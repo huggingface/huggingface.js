@@ -102,7 +102,6 @@ describe("collectionInfo", () => {
 					lastModified: expect.any(String),
 					likes: 1,
 					pinned: false,
-					featured: false,
 					position: 2,
 					private: false,
 					repoType: "space",
