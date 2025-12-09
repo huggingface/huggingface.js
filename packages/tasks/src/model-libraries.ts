@@ -193,7 +193,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://huggingface.co/OpenPeerAI/CancerAtHomeV2",
 		filter: false,
 		countDownloads: `path:"run.py"`,
-	},	
+	},
 	cartesia_pytorch: {
 		prettyLabel: "Cartesia Pytorch",
 		repoName: "Cartesia Pytorch",
@@ -219,7 +219,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.chatterbox,
 		countDownloads: `path:"tokenizer.json"`,
 		filter: false,
-	},	
+	},
 	chaossim: {
 		prettyLabel: "ChaosSIM",
 		repoName: "ChaosSIM",
@@ -247,14 +247,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Lewington-pitsos/clipscope",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
-	},	
+	},
 	"cloud-agents": {
 		prettyLabel: "Cloud Agents",
 		repoName: "Cloud Agents",
 		repoUrl: "https://huggingface.co/OpenPeerAI/Cloud-Agents",
 		filter: false,
 		countDownloads: `path:"setup.py"`,
-	},	
+	},
 	cosyvoice: {
 		prettyLabel: "CosyVoice",
 		repoName: "CosyVoice",
@@ -268,7 +268,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/co-tracker",
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
-	},	
+	},
 	colpali: {
 		prettyLabel: "ColPali",
 		repoName: "ColPali",
@@ -375,7 +375,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://huggingface.co/OpenPeerAI/DockingAtHOME",
 		filter: false,
 		countDownloads: `path:"setup.py"`,		
-	},	
+	},
 	doctr: {
 		prettyLabel: "docTR",
 		repoName: "doctr",
