@@ -246,7 +246,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Clara",
 		filter: false,
 		repoUrl: "https://github.com/nvidia/clara",
-		countDownloads: `path_extension:"ckpt"`,
+		countDownloads: `path_extension:"ckpt" OR path:"config.json"`,
 	},
 	clipscope: {
 		prettyLabel: "clipscope",
