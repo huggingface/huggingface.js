@@ -374,7 +374,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Docking@Home",
 		repoUrl: "https://huggingface.co/OpenPeerAI/DockingAtHOME",
 		filter: false,
-		countDownloads: `path:"setup.py"`,		
+		countDownloads: `path:"setup.py"`,
 	},
 	doctr: {
 		prettyLabel: "docTR",
