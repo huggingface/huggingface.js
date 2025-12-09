@@ -241,6 +241,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/amazon-science/chronos-forecasting",
 		snippets: snippets.chronos_forecasting,
 	},
+	clara: {
+		prettyLabel: "Clara",
+		repoName: "Clara",
+		filter: false,
+		repoUrl: "https://github.com/nvidia/clara",
+		countDownloads: `path_extension:"ckpt" OR path:"config.json"`,
+	},
 	clipscope: {
 		prettyLabel: "clipscope",
 		repoName: "clipscope",
