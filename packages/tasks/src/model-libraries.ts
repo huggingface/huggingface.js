@@ -189,10 +189,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	cancertathomev2: {
 		prettyLabel: "Cancer@HomeV2",
-		repoName: "CancerAtHomeV2",
+		repoName: "Cancer@HomeV2",
 		repoUrl: "https://huggingface.co/OpenPeerAI/CancerAtHomeV2",
 		filter: false,
-		countDownloads: `path:"setup.py"`,			
+		countDownloads: `path:"run.py"`,
 	},	
 	cartesia_pytorch: {
 		prettyLabel: "Cartesia Pytorch",
@@ -234,7 +234,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.chattts,
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
-	},	
+	},
 	"chronos-forecasting": {
 		prettyLabel: "Chronos",
 		repoName: "Chronos",
@@ -369,9 +369,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/argmaxinc/DiffusionKit",
 		snippets: snippets.diffusionkit,
 	},
-	dockingathome: {
+	"docking-at-home": {
 		prettyLabel: "Docking@Home",
-		repoName: "docking-at-home",
+		repoName: "Docking@Home",
 		repoUrl: "https://huggingface.co/OpenPeerAI/DockingAtHOME",
 		filter: false,
 		countDownloads: `path:"setup.py"`,		
