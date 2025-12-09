@@ -39,7 +39,7 @@
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
-		"test": "vitest run ./src/lib/*collection*.spec.ts",
+		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
 		"check": "tsc",
 		"build:xet-wasm": "./scripts/build-xet-wasm.sh -t bundler --clean",
