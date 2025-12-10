@@ -1169,6 +1169,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
 	},
+	starflow: {
+		prettyLabel: "STARFlow",
+		repoName: "STARFlow",
+		repoUrl: "https://github.com/apple/ml-starflow",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	swarmformer: {
 		prettyLabel: "SwarmFormer",
 		repoName: "SwarmFormer",
