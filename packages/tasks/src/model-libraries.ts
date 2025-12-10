@@ -1171,7 +1171,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	supertonic: {
 		prettyLabel: "Supertonic",
-		repoName: "supertonic",
+		repoName: "Supertonic",
 		repoUrl: "https://github.com/supertone-inc/supertonic",
 		snippets: snippets.supertonic,
 		filter: false,
