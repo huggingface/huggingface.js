@@ -1961,6 +1961,19 @@ from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
+export const supertonic = (model: ModelData): string[] => [
+	`from supertonic import TTS
+
+tts = TTS(auto_download=True)
+
+style = tts.get_voice_style(voice_name="M1")
+
+text = "The train delay was announced at 4:45 PM on Wed, Apr 3, 2024 due to track maintenance."
+wav, duration = tts.synthesize(text, voice_style=style)
+
+tts.save_audio(wav, "output.wav")`,
+];
+
 export const swarmformer = (model: ModelData): string[] => [
 	`from swarmformer import SwarmFormerModel
 

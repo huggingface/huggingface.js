@@ -1169,6 +1169,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
 	},
+	supertonic: {
+		prettyLabel: "Supertonic",
+		repoName: "supertonic",
+		repoUrl: "https://github.com/supertone-inc/supertonic",
+		snippets: snippets.supertonic,
+		filter: false,
+	},
 	swarmformer: {
 		prettyLabel: "SwarmFormer",
 		repoName: "SwarmFormer",
