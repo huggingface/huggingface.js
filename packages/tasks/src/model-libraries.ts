@@ -1370,7 +1370,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.vibevoice,
 		filter: false,
 	},
-	"videox_fun": {
+	videox_fun: {
 		prettyLabel: "VideoX Fun",
 		repoName: "VideoX Fun",
 		repoUrl: "https://github.com/aigc-apps/VideoX-Fun",
