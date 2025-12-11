@@ -1021,9 +1021,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sam_3d_body,
 		countDownloads: `path:"model_config.yaml"`,
 	},
-	"sam-3d-object": {
-		prettyLabel: "SAM 3D Object",
-		repoName: "SAM 3D Object",
+	"sam-3d-objects": {
+		prettyLabel: "SAM 3D Objects",
+		repoName: "SAM 3D Objects",
 		repoUrl: "https://github.com/facebookresearch/sam-3d-objects",
 		filter: false,
 		snippets: snippets.sam_3d_object,
