@@ -66,6 +66,10 @@ export const SKUS = {
 				tflops: 30.29,
 				memory: [24],
 			},
+			GB10: {
+				tflops: 29.71,
+				memory: [128],
+			},
 			"RTX PRO 6000 WS": {
 				tflops: 126,
 				memory: [96],
@@ -308,7 +312,7 @@ export const SKUS = {
 			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
-				memory: [6],
+				memory: [4, 6],
 			},
 			"RTX 2060": {
 				tflops: 12.9,

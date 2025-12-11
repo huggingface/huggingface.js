@@ -557,6 +557,14 @@ export const PIPELINE_DATA = {
 		name: "Image-Text-to-Text",
 		modality: "multimodal",
 	},
+	"image-text-to-image": {
+		name: "Image-Text-to-Image",
+		modality: "multimodal",
+	},
+	"image-text-to-video": {
+		name: "Image-Text-to-Video",
+		modality: "multimodal",
+	},
 	"visual-question-answering": {
 		name: "Visual Question Answering",
 		subtasks: [

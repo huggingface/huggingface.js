@@ -331,6 +331,19 @@ output = model.generate(text)
 sf.write("simple.mp3", output, 44100)`,
 ];
 
+export const dia2 = (model: ModelData): string[] => [
+	`from dia2 import Dia2, GenerationConfig, SamplingConfig
+
+dia = Dia2.from_repo("${model.id}", device="cuda", dtype="bfloat16")
+config = GenerationConfig(
+    cfg_scale=2.0,
+    audio=SamplingConfig(temperature=0.8, top_k=50),
+    use_cuda_graph=True,
+)
+result = dia.generate("[S1] Hello Dia2!", config=config, output_wav="hello.wav", verbose=True)
+`,
+];
+
 export const describe_anything = (model: ModelData): string[] => [
 	`# pip install git+https://github.com/NVlabs/describe-anything
 from huggingface_hub import snapshot_download
@@ -1967,6 +1980,19 @@ birefnet = AutoModelForImageSegmentation.from_pretrained("${model.id}", trust_re
 
 from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
+];
+
+export const supertonic = (model: ModelData): string[] => [
+	`from supertonic import TTS
+
+tts = TTS(auto_download=True)
+
+style = tts.get_voice_style(voice_name="M1")
+
+text = "The train delay was announced at 4:45 PM on Wed, Apr 3, 2024 due to track maintenance."
+wav, duration = tts.synthesize(text, voice_style=style)
+
+tts.save_audio(wav, "output.wav")`,
 ];
 
 export const swarmformer = (model: ModelData): string[] => [
