@@ -1026,7 +1026,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "SAM 3D Objects",
 		repoUrl: "https://github.com/facebookresearch/sam-3d-objects",
 		filter: false,
-		snippets: snippets.sam_3d_object,
+		snippets: snippets.sam_3d_objects,
 		countDownloads: `path:"checkpoints/pipeline.yaml"`,
 	},
 	"sample-factory": {
