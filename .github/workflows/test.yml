@@ -17,8 +17,11 @@ jobs:
           fetch-depth: 0
       - name: "Extracting the merge base into 'SINCE'"
         id: since
+        env: 
+          PR_REF: ${{  github.event.pull_request.head.ref }}
+          
         run: |
-          if [ -z "${{  github.event.pull_request.head.ref }}" ]
+          if [ -z $PR_REF ]
           then
             echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
           else
@@ -53,8 +56,10 @@ jobs:
           fetch-depth: 0
       - name: "Extracting the merge base into 'SINCE'"
         id: since
+        env: 
+          PR_REF: ${{  github.event.pull_request.head.ref }}
         run: |
-          if [ -z "${{  github.event.pull_request.head.ref }}" ]
+          if [ -z $PR_REF ]
           then
             echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
           else
