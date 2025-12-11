@@ -1445,7 +1445,7 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
 	return [image_predictor, video_predictor];
 };
 
-export const sam_3d_object = (model: ModelData): string[] => [
+export const sam_3d_objects = (model: ModelData): string[] => [
 	`from inference import Inference, load_image, load_single_mask
 from huggingface_hub import hf_hub_download
 
