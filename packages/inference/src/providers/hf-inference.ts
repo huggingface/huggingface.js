@@ -361,13 +361,14 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 }
 
 export class HFInferenceImageToTextTask extends HFInferenceTask implements ImageToTextTaskHelper {
-	override async getResponse(response: ImageToTextOutput): Promise<ImageToTextOutput> {
-		if (typeof response?.generated_text !== "string") {
+	override async getResponse(response: ImageToTextOutput[]): Promise<ImageToTextOutput> {
+		const [first] = response
+		if (typeof first?.generated_text !== "string") {
 			throw new InferenceClientProviderOutputError(
 				"Received malformed response from HF-Inference image-to-text API: expected {generated_text: string}"
 			);
 		}
-		return response;
+		return first;
 	}
 }
 
