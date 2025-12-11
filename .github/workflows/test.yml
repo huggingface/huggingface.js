@@ -18,8 +18,7 @@ jobs:
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         env: 
-          PR_REF: ${{  github.event.pull_request.head.ref }}
-          
+          PR_REF: ${{  github.event.pull_request.head.ref }} 
         run: |
           if [ -z $PR_REF ]
           then
