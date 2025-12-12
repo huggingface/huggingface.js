@@ -21,7 +21,11 @@ import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, InferenceTask, ModelId, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import type { ImageSegmentationTaskHelper, ImageToImageTaskHelper } from "./providerHelper.js";
+import type {
+	ImageSegmentationTaskHelper,
+	ImageToImageTaskHelper,
+	ImageTextToImageTaskHelper,
+} from "./providerHelper.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
@@ -37,6 +41,7 @@ import {
 	InferenceClientProviderOutputError,
 } from "../errors.js";
 import type { ImageToImageArgs, ImageToVideoArgs } from "../tasks/index.js";
+import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 
 export interface FalAiQueueOutput {
@@ -281,6 +286,38 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 				)}`
 			);
 		}
+	}
+}
+
+export class FalAIImageTextToImageTask extends FalAIImageToImageTask implements ImageTextToImageTaskHelper {
+	private useTextOnlyEndpoint = false;
+
+	constructor() {
+		super();
+		this.task = "image-text-to-image";
+	}
+
+	override makeRoute(params: UrlParams): string {
+		let model = params.model;
+		if (this.useTextOnlyEndpoint) {
+			// Strip last path segment: fal-ai/flux-2/edit => fal-ai/flux-2
+			model = model.split("/").slice(0, -1).join("/");
+			this.useTextOnlyEndpoint = false;
+		}
+		return super.makeRoute({ ...params, model });
+	}
+
+	override async preparePayloadAsync(args: ImageTextToImageArgs): Promise<RequestArgs> {
+		if (args.inputs) {
+			return super.preparePayloadAsync(args as ImageToImageArgs);
+		}
+		// No image provided: strip endpoint suffix and use `text-to-image` endpoint
+		this.useTextOnlyEndpoint = true;
+		return {
+			...omit(args, ["inputs", "parameters"]),
+			...(args.parameters as Record<string, unknown>),
+			prompt: args.parameters?.prompt,
+		} as RequestArgs;
 	}
 }
 
