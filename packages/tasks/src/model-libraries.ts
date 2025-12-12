@@ -11,15 +11,15 @@ export interface LibraryUiElement {
 	 * displayed in tags, and on the main
 	 * call-to-action button on the model page.
 	 */
-	prettyLabel: string;
+	prettyLabel: "aviation-ner";
 	/**
 	 * Repo name of the library's (usually on GitHub) code repo
 	 */
-	repoName: string;
+	repoName: "aviation-ner-sdr";
 	/**
 	 * URL to library's (usually on GitHub) code repo
 	 */
-	repoUrl: string;
+	repoUrl: "https://github.com/Boeing/aviation_ner_sdr";
 	/**
 	 * URL to library's docs
 	 */
@@ -34,12 +34,12 @@ export interface LibraryUiElement {
 	 * By default, those files are counted:
 	 * "config.json", "config.yaml", "hyperparams.yaml", "params.json", "meta.yaml"
 	 */
-	countDownloads?: ElasticSearchQuery;
+	countDownloads?: `path:"gliner_config.json"`;
 	/**
 	 * should we display this library in hf.co/models filter
 	 * (only for popular libraries with > 100 models)
 	 */
-	filter?: boolean;
+	filter?: false;
 }
 
 /**
