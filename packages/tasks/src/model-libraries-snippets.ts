@@ -1445,6 +1445,27 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
 	return [image_predictor, video_predictor];
 };
 
+export const sam_3d_objects = (model: ModelData): string[] => [
+	`from inference import Inference, load_image, load_single_mask
+from huggingface_hub import hf_hub_download
+
+path = hf_hub_download("${model.id}", "pipeline.yaml")
+inference = Inference(path, compile=False)
+
+image = load_image("path_to_image.png")
+mask = load_single_mask("path_to_mask.png", index=14)
+
+output = inference(image, mask)`,
+];
+
+export const sam_3d_body = (model: ModelData): string[] => [
+	`from notebook.utils import setup_sam_3d_body
+
+estimator = setup_sam_3d_body(${model.id})
+outputs = estimator.process_one_image(image)
+rend_img = visualize_sample_together(image, outputs, estimator.faces)`,
+];
+
 export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];
@@ -1959,6 +1980,19 @@ birefnet = AutoModelForImageSegmentation.from_pretrained("${model.id}", trust_re
 
 from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
+];
+
+export const supertonic = (model: ModelData): string[] => [
+	`from supertonic import TTS
+
+tts = TTS(auto_download=True)
+
+style = tts.get_voice_style(voice_name="M1")
+
+text = "The train delay was announced at 4:45 PM on Wed, Apr 3, 2024 due to track maintenance."
+wav, duration = tts.synthesize(text, voice_style=style)
+
+tts.save_audio(wav, "output.wav")`,
 ];
 
 export const swarmformer = (model: ModelData): string[] => [

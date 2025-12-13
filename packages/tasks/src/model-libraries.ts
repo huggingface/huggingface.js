@@ -1013,6 +1013,22 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sam2,
 		countDownloads: `path_extension:"pt"`,
 	},
+	"sam-3d-body": {
+		prettyLabel: "SAM 3D Body",
+		repoName: "SAM 3D Body",
+		repoUrl: "https://github.com/facebookresearch/sam-3d-body",
+		filter: false,
+		snippets: snippets.sam_3d_body,
+		countDownloads: `path:"model_config.yaml"`,
+	},
+	"sam-3d-objects": {
+		prettyLabel: "SAM 3D Objects",
+		repoName: "SAM 3D Objects",
+		repoUrl: "https://github.com/facebookresearch/sam-3d-objects",
+		filter: false,
+		snippets: snippets.sam_3d_objects,
+		countDownloads: `path:"checkpoints/pipeline.yaml"`,
+	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
 		repoName: "sample-factory",
@@ -1168,6 +1184,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.stanza,
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
+	},
+	supertonic: {
+		prettyLabel: "Supertonic",
+		repoName: "Supertonic",
+		repoUrl: "https://github.com/supertone-inc/supertonic",
+		snippets: snippets.supertonic,
+		filter: false,
 	},
 	swarmformer: {
 		prettyLabel: "SwarmFormer",
