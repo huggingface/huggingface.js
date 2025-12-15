@@ -78,6 +78,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	"fal-ai": {
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
 		"image-text-to-image": new FalAI.FalAIImageTextToImageTask(),
+		"image-text-to-video": new FalAI.FalAIImageTextToVideoTask(),
 		"image-to-image": new FalAI.FalAIImageToImageTask(),
 		"image-segmentation": new FalAI.FalAIImageSegmentationTask(),
 		"image-to-video": new FalAI.FalAIImageToVideoTask(),
