@@ -1982,7 +1982,7 @@ from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
-export const supertonic = (model: ModelData): string[] => [
+export const supertonic = (): string[] => [
 	`from supertonic import TTS
 
 tts = TTS(auto_download=True)
