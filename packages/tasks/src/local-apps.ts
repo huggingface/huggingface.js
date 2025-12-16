@@ -251,6 +251,46 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 		},
 	];
 };
+const snippetSglang = (model: ModelData): LocalAppSnippet[] => {
+	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+
+	let setup;
+	let serverCommand;
+	let dockerCommand;
+	let runCommand;
+
+	setup = ["# Install SGLang from pip:", "pip install sglang"].join("\n");
+	serverCommand = `# Start the SGLang serve:\npython3 -m sglang.launch_server --model-path ${model.id} \\
+ --host 0.0.0.0 --log-level warning"`;
+	dockerCommand = `docker run --gpus all \\
+    --shm-size 32g \\
+    -p 30000:30000 \\
+    -v ~/.cache/huggingface:/root/.cache/huggingface \\
+    --env "HF_TOKEN=<secret>" \\
+    --ipc=host \\
+    lmsysorg/sglang:latest \\
+    python3 -m sglang.launch_server --model-path ${model.id} --host 0.0.0.0 --port 30000`
+	runCommand = `curl -s http://localhost:{port}/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -d '{{"model": "${model.id}", "messages": ${stringifyMessages(messages, {
+		indent: "\t\t",
+		attributeKeyQuotes: true,
+		customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+	})}'`
+
+	return [
+		{
+			title: "Install from pip and serve model",
+			setup: setup,
+			content: [serverCommand, runCommand]
+		},
+		{
+			title: "Use Docker images",
+			setup: dockerCommand,
+			content: [runCommand]
+		},
+	];
+};
 const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 	const runCommand = [
 		"# Call the server using curl:",
@@ -400,6 +440,20 @@ export const LOCAL_APPS = {
 				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetVllm,
+	},
+	sglang: {
+		prettyLabel: "SGLang",
+		docsUrl: "https://docs.sglang.io",
+		mainTask: "text-generation",
+		displayOnModelPage: (model: ModelData) =>
+			(isAwqModel(model) ||
+				isGptqModel(model) ||
+				isAqlmModel(model) ||
+				isMarlinModel(model) ||
+				isLlamaCppGgufModel(model) ||
+				isTransformersModel(model)) &&
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
+		snippet: snippetSglang,
 	},
 	"mlx-lm": {
 		prettyLabel: "MLX LM",
