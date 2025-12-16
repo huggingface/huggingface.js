@@ -264,25 +264,25 @@ const snippetSglang = (model: ModelData): LocalAppSnippet[] => {
     --env "HF_TOKEN=<secret>" \\
     --ipc=host \\
     lmsysorg/sglang:latest \\
-    python3 -m sglang.launch_server --model-path ${model.id} --host 0.0.0.0 --port 30000`
+    python3 -m sglang.launch_server --model-path ${model.id} --host 0.0.0.0 --port 30000`;
 	const runCommand = `curl -s http://localhost:{port}/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -d '{{"model": "${model.id}", "messages": ${stringifyMessages(messages, {
 		indent: "\t\t",
 		attributeKeyQuotes: true,
 		customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
-	})}'`
+	})}'`;
 
 	return [
 		{
 			title: "Install from pip and serve model",
 			setup: setup,
-			content: [serverCommand, runCommand]
+			content: [serverCommand, runCommand],
 		},
 		{
 			title: "Use Docker images",
 			setup: dockerCommand,
-			content: [runCommand]
+			content: [runCommand],
 		},
 	];
 };
