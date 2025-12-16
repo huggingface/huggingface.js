@@ -354,6 +354,7 @@ const prepareConversationalInput = (
 		temperature?: GenerationParameters["temperature"];
 		max_tokens?: GenerationParameters["max_new_tokens"];
 		top_p?: GenerationParameters["top_p"];
+		response_format?: Record<string, unknown>;
 	}
 ): object => {
 	return {
@@ -361,7 +362,34 @@ const prepareConversationalInput = (
 		...(opts?.temperature ? { temperature: opts?.temperature } : undefined),
 		...(opts?.max_tokens ? { max_tokens: opts?.max_tokens } : undefined),
 		...(opts?.top_p ? { top_p: opts?.top_p } : undefined),
+		...(opts?.response_format ? { response_format: opts?.response_format } : undefined),
 	};
+};
+
+const prepareTextGenerationInput = (
+	model: ModelDataMinimal,
+	opts?: {
+		streaming?: boolean;
+		temperature?: GenerationParameters["temperature"];
+		max_tokens?: GenerationParameters["max_new_tokens"];
+		top_p?: GenerationParameters["top_p"];
+		response_format?: Record<string, unknown>;
+	}
+): object => {
+	const base = { inputs: getModelInputSnippet(model) };
+	const parameters: Record<string, unknown> = {};
+	
+	if (opts?.temperature !== undefined) parameters.temperature = opts.temperature;
+	if (opts?.max_tokens !== undefined) parameters.max_new_tokens = opts.max_tokens;
+	if (opts?.top_p !== undefined) parameters.top_p = opts.top_p;
+	if (opts?.response_format !== undefined) parameters.response_format = opts.response_format;
+	
+	// Only add parameters if there are any
+	if (Object.keys(parameters).length > 0) {
+		return { ...base, parameters };
+	}
+	
+	return base;
 };
 
 const prepareQuestionAnsweringInput = (model: ModelDataMinimal): object => {
@@ -407,7 +435,7 @@ const snippets: Partial<
 	"tabular-regression": snippetGenerator("tabular"),
 	"table-question-answering": snippetGenerator("tableQuestionAnswering", prepareTableQuestionAnsweringInput),
 	"text-classification": snippetGenerator("basic"),
-	"text-generation": snippetGenerator("basic"),
+	"text-generation": snippetGenerator("basic", prepareTextGenerationInput),
 	"text-to-audio": snippetGenerator("textToAudio"),
 	"text-to-image": snippetGenerator("textToImage"),
 	"text-to-speech": snippetGenerator("textToSpeech"),
@@ -444,7 +472,7 @@ function formatBody(obj: object, format: "curl" | "json" | "python" | "ts"): str
 			return indentString(
 				Object.entries(obj)
 					.map(([key, value]) => {
-						const formattedValue = JSON.stringify(value, null, 4).replace(/"/g, '"');
+						const formattedValue = formatPythonValue(value, 1);
 						return `${key}=${formattedValue},`;
 					})
 					.join("\n")
@@ -457,6 +485,46 @@ function formatBody(obj: object, format: "curl" | "json" | "python" | "ts"): str
 		default:
 			throw new Error(`Unsupported format: ${format}`);
 	}
+}
+
+function formatPythonValue(obj: unknown, depth?: number): string {
+	depth = depth ?? 0;
+
+	/// Case boolean - convert to Python format
+	if (typeof obj === "boolean") {
+		return obj ? "True" : "False";
+	}
+
+	/// Case null - convert to Python format
+	if (obj === null) {
+		return "None";
+	}
+
+	/// Case number or string
+	if (typeof obj !== "object") {
+		return JSON.stringify(obj);
+	}
+
+	/// Case array
+	if (Array.isArray(obj)) {
+		const items = obj
+			.map((item) => {
+				const formatted = formatPythonValue(item, depth + 1);
+				return `${" ".repeat(4 * (depth + 1))}${formatted},`;
+			})
+			.join("\n");
+		return `[\n${items}\n${" ".repeat(4 * depth)}]`;
+	}
+
+	/// Case mapping (object)
+	const entries = Object.entries(obj);
+	const lines = entries
+		.map(([key, value]) => {
+			const formattedValue = formatPythonValue(value, depth + 1);
+			return `${" ".repeat(4 * (depth + 1))}"${key}": ${formattedValue},`;
+		})
+		.join("\n");
+	return `{\n${lines}\n${" ".repeat(4 * depth)}}`;
 }
 
 function formatTsObject(obj: unknown, depth?: number): string {
