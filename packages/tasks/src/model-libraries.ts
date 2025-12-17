@@ -1029,7 +1029,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sam_3d_objects,
 		countDownloads: `path:"checkpoints/pipeline.yaml"`,
 	},
-	"same": {
+	same: {
 		prettyLabel: "SAME",
 		repoName: "SAME",
 		repoUrl: "https://github.com/GengzeZhou/SAME",
