@@ -82,6 +82,7 @@ function isMarlinModel(model: ModelData): boolean {
 function isTransformersModel(model: ModelData): boolean {
 	return model.tags.includes("transformers");
 }
+
 function isTgiModel(model: ModelData): boolean {
 	return model.tags.includes("text-generation-inference");
 }
@@ -441,12 +442,7 @@ export const LOCAL_APPS = {
 		docsUrl: "https://docs.sglang.io",
 		mainTask: "text-generation",
 		displayOnModelPage: (model: ModelData) =>
-			(isAwqModel(model) ||
-				isGptqModel(model) ||
-				isAqlmModel(model) ||
-				isMarlinModel(model) ||
-				isLlamaCppGgufModel(model) ||
-				isTransformersModel(model)) &&
+			isTransformersModel(model) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetSglang,
 	},
