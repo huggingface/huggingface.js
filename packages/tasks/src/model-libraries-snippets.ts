@@ -1466,6 +1466,17 @@ outputs = estimator.process_one_image(image)
 rend_img = visualize_sample_together(image, outputs, estimator.faces)`,
 ];
 
+export const same = (model: ModelData): string[] => [
+	`# Download pretrained weights
+python download.py --checkpoints
+
+# Or load checkpoint directly with PyTorch
+import torch
+from huggingface_hub import hf_hub_download
+
+checkpoint = torch.load(hf_hub_download("${model.id}", "ckpt/SAME.pt"))`,
+];
+
 export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];
