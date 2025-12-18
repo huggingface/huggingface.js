@@ -558,6 +558,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
 	},
+	"hy-worldplay": {
+		prettyLabel: "HY-WorldPlay",
+		repoName: "HY-WorldPlay",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HY-WorldPlay",
+		filter: false,
+		countDownloads: `path_extension:"json"`,
+	},
 	"image-matching-models": {
 		prettyLabel: "Image Matching Models",
 		repoName: "Image Matching Models",
