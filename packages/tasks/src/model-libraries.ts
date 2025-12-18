@@ -1043,6 +1043,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sam_3d_objects,
 		countDownloads: `path:"checkpoints/pipeline.yaml"`,
 	},
+	same: {
+		prettyLabel: "SAME",
+		repoName: "SAME",
+		repoUrl: "https://github.com/GengzeZhou/SAME",
+		filter: false,
+		countDownloads: `path:"ckpt/SAME.pt" OR path:"pretrain/Attnq_pretrained_ckpt.pt"`,
+	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
 		repoName: "sample-factory",
