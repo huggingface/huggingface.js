@@ -788,6 +788,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
 	},
+	"ml-sharp": {
+		prettyLabel: "Sharp",
+		repoName: "Sharp",
+		repoUrl: "https://github.com/apple/ml-sharp",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	mlx: {
 		prettyLabel: "MLX",
 		repoName: "MLX",
@@ -1088,13 +1095,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/hub/setfit",
 		snippets: snippets.setfit,
 		filter: true,
-	},
-	"ml-sharp": {
-		prettyLabel: "Sharp",
-		repoName: "Sharp",
-		repoUrl: "https://github.com/apple/ml-sharp",
-		filter: false,
-		countDownloads: `path_extension:"pt"`,
 	},
 	sklearn: {
 		prettyLabel: "Scikit-learn",
