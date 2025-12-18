@@ -1034,8 +1034,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "SAME",
 		repoUrl: "https://github.com/GengzeZhou/SAME",
 		filter: false,
-		snippets: snippets.same,
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path:"ckpt/SAME.pt" OR path:"pretrain/Attnq_pretrained_ckpt.pt"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
