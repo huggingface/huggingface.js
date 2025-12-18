@@ -1089,7 +1089,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.setfit,
 		filter: true,
 	},
-	sharp: {
+	"ml-sharp": {
 		prettyLabel: "Sharp",
 		repoName: "Sharp",
 		repoUrl: "https://github.com/apple/ml-sharp",
