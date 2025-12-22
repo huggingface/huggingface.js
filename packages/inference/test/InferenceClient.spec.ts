@@ -2297,6 +2297,13 @@ describe.skip("InferenceClient", () => {
 			const client = new InferenceClient(env.HF_WAVESPEED_KEY ?? "dummy");
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["wavespeed"] = {
+				"Qwen/Qwen-Image-Layered": {
+					provider: "wavespeed",
+					hfModelId: "Qwen/Qwen-Image-Layered",
+					providerId: "wavespeed-ai/qwen-image/layered",
+					status: "live",
+					task: "image-text-to-image",
+				},
 				"Qwen/Qwen-Image-Edit-2509": {
 					provider: "wavespeed",
 					hfModelId: "Qwen/Qwen-Image-Edit-2509",
@@ -2459,6 +2466,20 @@ describe.skip("InferenceClient", () => {
 							new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 							new Blob([readTestFile("bird_canny.png")], { type: "image/png" }),
 						],
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+			it(`imageTextToImage - Qwen/Qwen-Image-Layered`, async () => {
+				const res = await client.imageToImage({
+					model: "Qwen/Qwen-Image-Layered",
+					provider: "wavespeed",
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "The leopard chases its prey",
+						guidance_scale: 5,
+						num_inference_steps: 30,
+						seed: -1,
 					},
 				});
 				expect(res).toBeInstanceOf(Blob);
