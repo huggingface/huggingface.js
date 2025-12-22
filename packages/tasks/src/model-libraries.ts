@@ -11,15 +11,15 @@ export interface LibraryUiElement {
 	 * displayed in tags, and on the main
 	 * call-to-action button on the model page.
 	 */
-	prettyLabel: "aviation-ner";
+	prettyLabel: string;
 	/**
 	 * Repo name of the library's (usually on GitHub) code repo
 	 */
-	repoName: "aviation-ner-sdr";
+	repoName: string;
 	/**
 	 * URL to library's (usually on GitHub) code repo
 	 */
-	repoUrl: "https://github.com/Boeing/aviation_ner_sdr";
+	repoUrl: string;
 	/**
 	 * URL to library's docs
 	 */
@@ -34,12 +34,12 @@ export interface LibraryUiElement {
 	 * By default, those files are counted:
 	 * "config.json", "config.yaml", "hyperparams.yaml", "params.json", "meta.yaml"
 	 */
-	countDownloads?: `path:"gliner_config.json"`;
+	countDownloads?: ElasticSearchQuery;
 	/**
 	 * should we display this library in hf.co/models filter
 	 * (only for popular libraries with > 100 models)
 	 */
-	filter?: false;
+	filter?: boolean;
 }
 
 /**
@@ -1438,6 +1438,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
+	},
+	"aviation-ner": {
+		prettyLabel: "aviation-ner",
+		repoName: "aviation-ner-sdr",
+		repoUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		docsUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		snippets: snippets.aviation-ner,
+		countDownloads: `path:"gliner_config.json"`,
+		filter: false,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
