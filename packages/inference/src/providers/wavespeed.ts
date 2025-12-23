@@ -1,7 +1,9 @@
 import type { TextToImageArgs } from "../tasks/cv/textToImage.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
+import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
@@ -11,6 +13,8 @@ import type {
 	TextToVideoTaskHelper,
 	ImageToImageTaskHelper,
 	ImageToVideoTaskHelper,
+	ImageTextToImageTaskHelper,
+	ImageTextToVideoTaskHelper,
 } from "./providerHelper.js";
 import { TaskProviderHelper } from "./providerHelper.js";
 import {
@@ -93,7 +97,14 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 	}
 
 	preparePayload(
-		params: BodyParams<ImageToImageArgs | TextToImageArgs | TextToVideoArgs | ImageToVideoArgs>
+		params: BodyParams<
+			| ImageToImageArgs
+			| ImageTextToImageArgs
+			| ImageTextToVideoArgs
+			| TextToImageArgs
+			| TextToVideoArgs
+			| ImageToVideoArgs
+		>
 	): Record<string, unknown> {
 		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
@@ -219,5 +230,36 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
 		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
+	}
+}
+
+// 1x1 fully transparent PNG for use when no input image is provided
+const TRANSPARENT_1PX_PNG_BASE64 =
+	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
+function getTransparentPngBlob(): Blob {
+	const bytes = Uint8Array.from(Buffer.from(TRANSPARENT_1PX_PNG_BASE64, "base64"));
+	return new Blob([bytes], { type: "image/png" });
+}
+
+export class WavespeedAIImageTextToImageTask extends WavespeedAIImageToImageTask implements ImageTextToImageTaskHelper {
+	constructor() {
+		super();
+	}
+
+	override async preparePayloadAsync(args: ImageTextToImageArgs): Promise<RequestArgs> {
+		const inputs = args.inputs ?? getTransparentPngBlob();
+		return super.preparePayloadAsync({ ...args, inputs } as ImageToImageArgs);
+	}
+}
+
+export class WavespeedAIImageTextToVideoTask extends WavespeedAIImageToVideoTask implements ImageTextToVideoTaskHelper {
+	constructor() {
+		super();
+	}
+
+	override async preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs> {
+		const inputs = args.inputs ?? getTransparentPngBlob();
+		return super.preparePayloadAsync({ ...args, inputs } as ImageToVideoArgs);
 	}
 }
