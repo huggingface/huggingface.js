@@ -446,7 +446,7 @@ export const SKUS = {
 			},
 			"R9700 PRO": {
 				tflops: 95.7,
-				memory: [32]
+				memory: [32],
 			},
 			"RX 9070 XT": {
 				tflops: 97.32,
