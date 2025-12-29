@@ -5,42 +5,64 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/deepseek-r1:1.5b
- * - library/llama3.2:1b
+ * - library/llama3:latest
+ * - library/qwen3:0.6b
+ * - library/functiongemma:latest
+ * - library/qwen3:latest
+ * - library/qwen3:latest
+ * - library/ministral-3:3b
+ * - library/ministral-3:latest
+ * - library/qwen2.5-coder:latest
+ * - library/devstral-2:123b
+ * - library/devstral-small-2:latest
+ * - library/phi4:latest
+ * - library/qwen3-coder:latest
+ * - library/qwen3-coder:30b
  * - library/llama3.2:latest
- * - library/phi4:14b
  * - library/gemma:latest
- * - library/qwen2.5:0.5b
- * - library/olmo2:latest
- * - library/mistral-small:22b
- * - library/qwen:latest
  * - library/gemma3:latest
- * - library/llava-llama3:8b
+ * - library/qwen:latest
+ * - library/qwen:latest
+ * - library/minicpm-v:8b
+ * - library/deepseek-v3:671b
+ * - library/qwen:0.5b
+ * - library/codellama:latest
+ * - library/codellama:latest
+ * - library/llama3.3:latest
+ * - library/deepseek-coder:1.3b
+ * - library/llama3.3:70b
+ * - library/mistral-small:22b
+ * - library/phi3:latest
  * - library/granite3.1-moe:latest
- * - library/all-minilm:22m
- * - library/falcon3:latest
+ * - library/deepseek-coder-v2:16b
+ * - library/phi4-reasoning:latest
  * - library/gemma3n:latest
- * - library/qwen2:latest
- * - library/qwen2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:24b
- * - library/cogito:latest
- * - library/phi4-mini:3.8b
- * - library/openthinker:latest
- * - library/openthinker:latest
- * - library/qwq:latest
- * - library/granite-code:3b
- * - library/neural-chat:latest
- * - library/paraphrase-multilingual:latest
- * - library/llama3-groq-tool-use:latest
- * - library/aya-expanse:latest
- * - library/reader-lm:latest
- * - library/shieldgemma:latest
- * - library/command-a:latest
- * - library/sailor2:latest
- * - library/yarn-mistral:7b
- * - library/qwen3-next:latest
+ * - library/gemma3n:e2b
+ * - library/gemma3n:latest
+ * - library/smollm:135m
+ * - library/smollm:latest
+ * - library/moondream:latest
+ * - library/embeddinggemma:latest
+ * - library/mistral-large:123b
+ * - library/embeddinggemma:latest
+ * - library/embeddinggemma:300m
+ * - library/deepseek-v2:16b
+ * - library/exaone-deep:latest
+ * - library/starcoder:1b
+ * - library/codegeex4:latest
+ * - library/snowflake-arctic-embed2:568m
+ * - library/command-r-plus:latest
+ * - library/snowflake-arctic-embed2:latest
+ * - library/llama2-chinese:latest
+ * - library/granite-embedding:30m
+ * - library/nemotron:latest
+ * - library/tulu3:latest
+ * - library/tulu3:8b
+ * - library/deepseek-v2.5:latest
+ * - library/llama-pro:instruct
+ * - library/yarn-mistral:latest
+ * - library/deepseek-v2.5:236b
+ * - library/notux:8x7b
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
