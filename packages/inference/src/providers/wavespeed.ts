@@ -2,6 +2,8 @@ import type { TextToImageArgs } from "../tasks/cv/textToImage.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
+import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
+import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
@@ -11,6 +13,8 @@ import type {
 	TextToVideoTaskHelper,
 	ImageToImageTaskHelper,
 	ImageToVideoTaskHelper,
+	ImageTextToImageTaskHelper,
+	ImageTextToVideoTaskHelper,
 } from "./providerHelper.js";
 import { TaskProviderHelper } from "./providerHelper.js";
 import {
@@ -93,7 +97,14 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 	}
 
 	preparePayload(
-		params: BodyParams<ImageToImageArgs | TextToImageArgs | TextToVideoArgs | ImageToVideoArgs>
+		params: BodyParams<
+			| ImageToImageArgs
+			| TextToImageArgs
+			| TextToVideoArgs
+			| ImageToVideoArgs
+			| ImageTextToImageArgs
+			| ImageTextToVideoArgs
+		>
 	): Record<string, unknown> {
 		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
@@ -215,6 +226,32 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 	}
 
 	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
+		const hasImages =
+			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
+		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
+		return { ...args, inputs: args.parameters?.prompt, image: base, images };
+	}
+}
+
+export class WavespeedAIImageTextToImageTask extends WavespeedAITask implements ImageTextToImageTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+
+	async preparePayloadAsync(args: ImageTextToImageArgs): Promise<RequestArgs> {
+		const hasImages =
+			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
+		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
+		return { ...args, inputs: args.parameters?.prompt, image: base, images };
+	}
+}
+
+export class WavespeedAIImageTextToVideoTask extends WavespeedAITask implements ImageTextToVideoTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+
+	async preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs> {
 		const hasImages =
 			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
 		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
