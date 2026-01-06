@@ -256,7 +256,7 @@ const snippetSglang = (model: ModelData): LocalAppSnippet[] => {
 	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 
 	const setup = ["# Install SGLang from pip:", "pip install sglang"].join("\n");
-	const serverCommand = `# Start the SGLang serve:\npython3 -m sglang.launch_server --model-path ${model.id} \\
+	const serverCommand = `# Start the SGLang server:\npython3 -m sglang.launch_server --model-path ${model.id} \\
  --host 0.0.0.0 --log-level warning"`;
 	const dockerCommand = `docker run --gpus all \\
     --shm-size 32g \\
