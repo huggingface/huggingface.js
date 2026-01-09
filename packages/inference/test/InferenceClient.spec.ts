@@ -1654,6 +1654,13 @@ if (!env.HF_TOKEN) {
 					status: "live",
 					task: "conversational",
 				},
+				"Qwen/Qwen3-8B": {
+					provider: "alphaneural",
+					hfModelId: "Qwen/Qwen3-8B",
+					providerId: "qwen3",
+					status: "live",
+					task: "text-generation",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1689,6 +1696,22 @@ if (!env.HF_TOKEN) {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+
+			it("textGeneration", async () => {
+				const res = await textGeneration({
+					accessToken: env.HF_ALPHANEURAL_KEY ?? "dummy",
+					model: "Qwen/Qwen3-8B",
+					provider: "alphaneural",
+					inputs: "The capital of France is",
+					parameters: {
+						temperature: 0,
+						max_tokens: 10,
+					},
+				});
+				expect(res).toBeDefined();
+				expect(res.generated_text).toBeDefined();
+				expect(typeof res.generated_text).toBe("string");
 			});
 		},
 		TIMEOUT

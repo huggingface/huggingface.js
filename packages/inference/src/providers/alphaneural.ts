@@ -14,9 +14,10 @@
  *
  * Thanks!
  */
-import type { TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
+import type { TextGenerationInput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
+import { omit } from "../utils/omit.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
 
 const ALPHANEURAL_API_BASE_URL = "https://proxy.alfnrl.io";
@@ -41,10 +42,16 @@ export class AlphaneuralTextGenerationTask extends BaseTextGenerationTask {
 		super("alphaneural", ALPHANEURAL_API_BASE_URL);
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams<TextGenerationInput>): Record<string, unknown> {
 		return {
 			model: params.model,
-			...params.args,
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters
+				? {
+						max_tokens: params.args.parameters.max_new_tokens,
+						...omit(params.args.parameters, "max_new_tokens"),
+				  }
+				: undefined),
 			prompt: params.args.inputs,
 		};
 	}
