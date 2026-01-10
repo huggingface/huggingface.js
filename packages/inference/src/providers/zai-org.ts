@@ -56,7 +56,7 @@ interface ZaiAsyncResultResponse {
 }
 
 const MAX_POLL_ATTEMPTS = 60;
-const POLL_INTERVAL_MS = 2000;
+const POLL_INTERVAL_MS = 5000;
 
 export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
