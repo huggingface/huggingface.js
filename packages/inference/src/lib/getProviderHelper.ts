@@ -184,6 +184,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	"zai-org": {
 		conversational: new Zai.ZaiConversationalTask(),
+		"text-to-image": new Zai.ZaiTextToImageTask(),
 	},
 };
 
