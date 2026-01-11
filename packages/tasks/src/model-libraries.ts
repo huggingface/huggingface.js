@@ -500,6 +500,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.gliner2,
 		filter: false,
 	},
+	"glm-tts": {
+		prettyLabel: "glm-tts",
+		repoName: "glm-tts",
+		repoUrl: "https://github.com/zai-org/GLM-TTS",
+		filter: false,
+		countDownloads: `path:"flow/flow.pt"`,
+	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
 		repoName: "Glyph-ByT5",
