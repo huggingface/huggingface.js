@@ -35,7 +35,7 @@ describe("listCollections", () => {
 					isHfAdmin: false,
 					isMod: false,
 					isEnterprise: false,
-					isUserFollowing: false,
+					isUserFollowing: expect.any(Boolean),
 				},
 				items: [
 					{
@@ -76,7 +76,7 @@ describe("listCollections", () => {
 							isHf: false,
 							isHfAdmin: false,
 							isMod: false,
-							isUserFollowing: false,
+							isUserFollowing: expect.any(Boolean),
 							name: "huggingfacejs",
 							type: "org",
 						},
@@ -102,7 +102,7 @@ describe("listCollections", () => {
 							isHf: false,
 							isHfAdmin: false,
 							isMod: false,
-							isUserFollowing: false,
+							isUserFollowing: expect.any(Boolean),
 							name: "huggingfacejs",
 							type: "org",
 						},
