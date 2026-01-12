@@ -25,6 +25,7 @@ describe("collectionInfo", () => {
 				isHfAdmin: false,
 				isMod: false,
 				isEnterprise: false,
+				isUserFollowing: false,
 			},
 			items: [
 				{
@@ -64,6 +65,7 @@ describe("collectionInfo", () => {
 						isHf: false,
 						isHfAdmin: false,
 						isMod: false,
+						isUserFollowing: false,
 						name: "huggingfacejs",
 						type: "org",
 					},
@@ -89,6 +91,7 @@ describe("collectionInfo", () => {
 						isHf: false,
 						isHfAdmin: false,
 						isMod: false,
+						isUserFollowing: false,
 						name: "huggingfacejs",
 						type: "org",
 					},
@@ -146,6 +149,7 @@ describe("collectionInfo", () => {
 						isHf: false,
 						isHfAdmin: false,
 						isMod: false,
+						isUserFollowing: false,
 						name: "huggingfacejs",
 						type: "org",
 					},
