@@ -35,6 +35,7 @@ describe("listCollections", () => {
 					isHfAdmin: false,
 					isMod: false,
 					isEnterprise: false,
+					isUserFollowing: false,
 				},
 				items: [
 					{
@@ -50,6 +51,7 @@ describe("listCollections", () => {
 						downloads: expect.any(Number),
 						gated: false,
 						id: "huggingfacejs/tasks",
+						isBenchmark: false,
 						isLikedByUser: false,
 						lastModified: expect.any(String),
 						likes: expect.any(Number),
@@ -74,6 +76,7 @@ describe("listCollections", () => {
 							isHf: false,
 							isHfAdmin: false,
 							isMod: false,
+							isUserFollowing: false,
 							name: "huggingfacejs",
 							type: "org",
 						},
@@ -99,6 +102,7 @@ describe("listCollections", () => {
 							isHf: false,
 							isHfAdmin: false,
 							isMod: false,
+							isUserFollowing: false,
 							name: "huggingfacejs",
 							type: "org",
 						},
