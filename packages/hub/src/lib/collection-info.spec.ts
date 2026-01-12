@@ -41,6 +41,7 @@ describe("collectionInfo", () => {
 					downloads: expect.any(Number),
 					gated: false,
 					id: "huggingfacejs/tasks",
+					isBenchmark: false,
 					isLikedByUser: false,
 					lastModified: expect.any(String),
 					likes: expect.any(Number),
