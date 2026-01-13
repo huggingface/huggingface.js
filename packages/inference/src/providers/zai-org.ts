@@ -14,7 +14,11 @@
  *
  * Thanks!
  */
-import { InferenceClientProviderApiError, InferenceClientProviderOutputError } from "../errors.js";
+import {
+	InferenceClientInputError,
+	InferenceClientProviderApiError,
+	InferenceClientProviderOutputError,
+} from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams } from "../types.js";
 import { delay } from "../utils/delay.js";
@@ -94,7 +98,9 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		headers?: Record<string, string>,
 		outputType?: "url" | "blob" | "json"
 	): Promise<string | Blob | Record<string, unknown>> {
-		void url;
+		if (!url || !headers) {
+			throw new InferenceClientInputError(`URL and headers are required for 'text-to-image' task`);
+		}
 		if (
 			typeof response !== "object" ||
 			!response ||
@@ -114,7 +120,11 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		}
 
 		const taskId = response.id;
-		const pollUrl = `${ZAI_API_BASE_URL}/api/paas/v4/async-result/${taskId}`;
+		const parsedUrl = new URL(url);
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
+			parsedUrl.host === "router.huggingface.co" ? "/zai-org" : ""
+		}`;
+		const pollUrl = `${baseUrl}/api/paas/v4/async-result/${taskId}`;
 
 		const pollHeaders: Record<string, string> = {
 			"x-source-channel": "hugging_face",
