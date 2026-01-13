@@ -24,6 +24,7 @@ import type { BodyParams, HeaderParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
+
 const ZAI_API_BASE_URL = "https://api.z.ai";
 
 export class ZaiConversationalTask extends BaseConversationalTask {
