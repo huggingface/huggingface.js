@@ -15,8 +15,8 @@
  * Thanks!
  */
 import { InferenceClientProviderApiError, InferenceClientProviderOutputError } from "../errors.js";
-import { getLogger } from "../lib/logger.js";
-import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
+import { isUrl } from "../lib/isUrl.js";
+import type { BodyParams, HeaderParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
@@ -75,8 +75,7 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		return headers;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	makeRoute(_params: UrlParams): string {
+	makeRoute(): string {
 		return "/api/paas/v4/async/images/generations";
 	}
 
@@ -92,10 +91,23 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 	async getResponse(
 		response: ZaiTextToImageResponse,
 		url?: string,
-		headers?: HeadersInit,
+		headers?: Record<string, string>,
 		outputType?: "url" | "blob" | "json"
 	): Promise<string | Blob | Record<string, unknown>> {
-		const logger = getLogger();
+		void url;
+		if (
+			typeof response !== "object" ||
+			!response ||
+			!("task_status" in response) ||
+			!("id" in response) ||
+			typeof response.id !== "string"
+		) {
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from ZAI text-to-image API: expected { id: string, task_status: string }, got: ${JSON.stringify(
+					response
+				)}`
+			);
+		}
 
 		if (response.task_status === "FAIL") {
 			throw new InferenceClientProviderOutputError("ZAI API returned task status: FAIL");
@@ -105,18 +117,15 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		const pollUrl = `${ZAI_API_BASE_URL}/api/paas/v4/async-result/${taskId}`;
 
 		const pollHeaders: Record<string, string> = {
-			"Accept-Language": "en-US,en",
+			"x-source-channel": "hugging_face",
+			"accept-language": "en-US,en",
 		};
-		if (headers && typeof headers === "object") {
-			const h = headers as Record<string, string>;
-			if (h["Authorization"]) {
-				pollHeaders["Authorization"] = h["Authorization"];
-			}
+		if (headers && headers["Authorization"]) {
+			pollHeaders["Authorization"] = headers["Authorization"];
 		}
 
 		for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
 			await delay(POLL_INTERVAL_MS);
-			logger.debug(`Polling ZAI API for the result... ${attempt + 1}/${MAX_POLL_ATTEMPTS}`);
 
 			const resp = await fetch(pollUrl, {
 				method: "GET",
@@ -125,21 +134,31 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 
 			if (!resp.ok) {
 				throw new InferenceClientProviderApiError(
-					`Failed to fetch result from ZAI API: ${resp.status}`,
-					{ url: pollUrl, method: "GET", headers: pollHeaders },
-					{ requestId: resp.headers.get("X-LOG-ID") ?? "", status: resp.status, body: await resp.text() }
+					`Failed to fetch result from ZAI text-to-image API: ${resp.status}`,
+					{ url: pollUrl, method: "GET" },
+					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
 				);
 			}
 
 			const result: ZaiAsyncResultResponse = await resp.json();
 
 			if (result.task_status === "FAIL") {
-				throw new InferenceClientProviderOutputError("ZAI API task failed");
+				throw new InferenceClientProviderOutputError("ZAI text-to-image API task failed");
 			}
 
 			if (result.task_status === "SUCCESS") {
-				if (!result.image_result || result.image_result.length === 0) {
-					throw new InferenceClientProviderOutputError("ZAI API returned no image results");
+				if (
+					!result.image_result ||
+					!Array.isArray(result.image_result) ||
+					result.image_result.length === 0 ||
+					typeof result.image_result[0]?.url !== "string" ||
+					!isUrl(result.image_result[0].url)
+				) {
+					throw new InferenceClientProviderOutputError(
+						`Received malformed response from ZAI text-to-image API: expected { image_result: Array<{ url: string }> }, got: ${JSON.stringify(
+							result
+						)}`
+					);
 				}
 
 				const imageUrl = result.image_result[0].url;
