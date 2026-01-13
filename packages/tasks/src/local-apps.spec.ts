@@ -133,4 +133,16 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 	});
+
+	it("ramalama", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["ramalama"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet).toEqual(`ramalama run hf://bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
+	});
 });
