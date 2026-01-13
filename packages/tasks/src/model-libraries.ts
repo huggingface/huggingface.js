@@ -98,6 +98,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.araclip,
 	},
+	"aviation-ner": {
+		prettyLabel: "Aviation NER",
+		repoName: "Aviation NER",
+		repoUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		docsUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		snippets: snippets.aviation_ner,
+		countDownloads: `path:"gliner_config.json"`,
+		filter: false,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -1439,15 +1448,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
-	"aviation-ner": {
-		prettyLabel: "aviation-ner",
-		repoName: "aviation-ner-sdr",
-		repoUrl: "https://github.com/Boeing/aviation_ner_sdr",
-		docsUrl: "https://github.com/Boeing/aviation_ner_sdr",
-		snippets: snippets.aviation-ner,
-		countDownloads: `path:"gliner_config.json"`,
-		filter: false,
-	},
+
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
