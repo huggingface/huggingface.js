@@ -14,13 +14,16 @@
  *
  * Thanks!
  */
-import { InferenceClientProviderApiError, InferenceClientProviderOutputError } from "../errors.js";
+import {
+	InferenceClientInputError,
+	InferenceClientProviderApiError,
+	InferenceClientProviderOutputError,
+} from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
-
 const ZAI_API_BASE_URL = "https://api.z.ai";
 
 export class ZaiConversationalTask extends BaseConversationalTask {
@@ -94,7 +97,9 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		headers?: Record<string, string>,
 		outputType?: "url" | "blob" | "json"
 	): Promise<string | Blob | Record<string, unknown>> {
-		void url;
+		if (!url || !headers) {
+			throw new InferenceClientInputError(`URL and headers are required for 'text-to-image' task`);
+		}
 		if (
 			typeof response !== "object" ||
 			!response ||
@@ -114,7 +119,11 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		}
 
 		const taskId = response.id;
-		const pollUrl = `${ZAI_API_BASE_URL}/api/paas/v4/async-result/${taskId}`;
+		const parsedUrl = new URL(url);
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
+			parsedUrl.host === "router.huggingface.co" ? "/zai-org" : ""
+		}`;
+		const pollUrl = `${baseUrl}/api/paas/v4/async-result/${taskId}`;
 
 		const pollHeaders: Record<string, string> = {
 			"x-source-channel": "hugging_face",
@@ -123,7 +132,8 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		if (headers && headers["Authorization"]) {
 			pollHeaders["Authorization"] = headers["Authorization"];
 		}
-
+		console.log("pollUrl", pollUrl);
+		console.log("pollHeaders", pollHeaders);
 		for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
 			await delay(POLL_INTERVAL_MS);
 
