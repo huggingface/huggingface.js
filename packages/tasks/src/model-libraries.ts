@@ -501,8 +501,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 	},
 	"glm-tts": {
-		prettyLabel: "glm-tts",
-		repoName: "glm-tts",
+		prettyLabel: "GLM-TTS",
+		repoName: "GLM-TTS",
 		repoUrl: "https://github.com/zai-org/GLM-TTS",
 		filter: false,
 		countDownloads: `path:"flow/flow.pt"`,
