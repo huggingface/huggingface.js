@@ -133,8 +133,7 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		if (headers && headers["Authorization"]) {
 			pollHeaders["Authorization"] = headers["Authorization"];
 		}
-		console.log("pollUrl", pollUrl);
-		console.log("pollHeaders", pollHeaders);
+
 		for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
 			await delay(POLL_INTERVAL_MS);
 
