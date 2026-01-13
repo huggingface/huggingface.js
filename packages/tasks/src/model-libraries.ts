@@ -103,7 +103,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Aviation NER",
 		repoUrl: "https://github.com/Boeing/aviation_ner_sdr",
 		docsUrl: "https://github.com/Boeing/aviation_ner_sdr",
-		snippets: snippets.aviation_ner,
 		countDownloads: `path:"gliner_config.json"`,
 		filter: false,
 	},
