@@ -1209,7 +1209,7 @@ export const pocket_tts = (model: ModelData): string[] => [
 	`from pocket_tts import TTSModel
 import scipy.io.wavfile
 
-tts_model = TTSModel.load_model()
+tts_model = TTSModel.load_model("${model.id}")
 voice_state = tts_model.get_state_for_audio_prompt(
     "hf://kyutai/tts-voices/alba-mackenna/casual.wav"
 )
