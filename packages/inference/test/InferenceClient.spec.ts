@@ -2147,6 +2147,13 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "conversational",
 				},
+				"zai-org/glm-image": {
+					provider: "zai-org",
+					hfModelId: "zai-org/glm-image",
+					providerId: "glm-image",
+					status: "live",
+					task: "text-to-image",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -2182,6 +2189,16 @@ describe.skip("InferenceClient", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "zai-org/glm-image",
+					provider: "zai-org",
+					inputs:
+						"A cute little kitten sitting on a sunny windowsill, with the background of blue sky and white clouds.",
+				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT

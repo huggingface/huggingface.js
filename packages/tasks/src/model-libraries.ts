@@ -508,6 +508,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.gliner2,
 		filter: false,
 	},
+	"glm-tts": {
+		prettyLabel: "GLM-TTS",
+		repoName: "GLM-TTS",
+		repoUrl: "https://github.com/zai-org/GLM-TTS",
+		filter: false,
+		countDownloads: `path:"flow/flow.pt"`,
+	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
 		repoName: "Glyph-ByT5",
@@ -565,6 +572,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "HunyuanWorld-voyager",
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
+	},
+	"hy-worldplay": {
+		prettyLabel: "HY-WorldPlay",
+		repoName: "HY-WorldPlay",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HY-WorldPlay",
+		filter: false,
+		countDownloads: `path_extension:"json"`,
 	},
 	"image-matching-models": {
 		prettyLabel: "Image Matching Models",
@@ -788,6 +802,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mlAgents,
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
+	},
+	"ml-sharp": {
+		prettyLabel: "Sharp",
+		repoName: "Sharp",
+		repoUrl: "https://github.com/apple/ml-sharp",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	mlx: {
 		prettyLabel: "MLX",
@@ -1036,6 +1057,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.sam_3d_objects,
 		countDownloads: `path:"checkpoints/pipeline.yaml"`,
+	},
+	same: {
+		prettyLabel: "SAME",
+		repoName: "SAME",
+		repoUrl: "https://github.com/GengzeZhou/SAME",
+		filter: false,
+		countDownloads: `path:"ckpt/SAME.pt" OR path:"pretrain/Attnq_pretrained_ckpt.pt"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
@@ -1400,6 +1428,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/microsoft/VibeVoice",
 		snippets: snippets.vibevoice,
 		filter: false,
+	},
+	videox_fun: {
+		prettyLabel: "VideoX Fun",
+		repoName: "VideoX Fun",
+		repoUrl: "https://github.com/aigc-apps/VideoX-Fun",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"wan2.2": {
 		prettyLabel: "Wan2.2",

@@ -110,20 +110,27 @@ function getQuantTag(filepath?: string): string {
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const command = (binary: string) => {
-		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
+	const serverCommand = (binary: string) => {
+		const snippet = [
+			"# Start a local OpenAI-compatible server with a web UI:",
+			`${binary} -hf ${model.id}${getQuantTag(filepath)}`,
+		];
+		return snippet.join("\n");
+	};
+	const cliCommand = (binary: string) => {
+		const snippet = ["# Run inference directly in the terminal:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
 		return snippet.join("\n");
 	};
 	return [
 		{
 			title: "Install from brew",
 			setup: "brew install llama.cpp",
-			content: command("llama-server"),
+			content: [serverCommand("llama-server"), cliCommand("llama-cli")],
 		},
 		{
 			title: "Install from WinGet (Windows)",
 			setup: "winget install llama.cpp",
-			content: command("llama-server"),
+			content: [serverCommand("llama-server"), cliCommand("llama-cli")],
 		},
 		{
 			title: "Use pre-built binary",
@@ -132,7 +139,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"# Download pre-built binary from:",
 				"# https://github.com/ggerganov/llama.cpp/releases",
 			].join("\n"),
-			content: command("./llama-server"),
+			content: [serverCommand("./llama-server"), cliCommand("./llama-cli")],
 		},
 		{
 			title: "Build from source code",
@@ -140,9 +147,9 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
 				"cmake -B build",
-				"cmake --build build -j --target llama-server",
+				"cmake --build build -j --target llama-server llama-cli",
 			].join("\n"),
-			content: command("./build/bin/llama-server"),
+			content: [serverCommand("./build/bin/llama-server"), cliCommand("./build/bin/llama-cli")],
 		},
 	];
 };
