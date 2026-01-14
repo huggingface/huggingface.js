@@ -98,6 +98,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.araclip,
 	},
+	"aviation-ner": {
+		prettyLabel: "Aviation NER",
+		repoName: "Aviation NER",
+		repoUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		docsUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		countDownloads: `path:"gliner_config.json"`,
+		filter: false,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
