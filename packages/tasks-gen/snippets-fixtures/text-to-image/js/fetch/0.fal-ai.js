@@ -14,6 +14,7 @@ async function query(data) {
 	return result;
 }
 
-query({ prompt: '"Astronaut riding a horse"' }).then((response) => {
-	// Use image
+
+query({     prompt: "\"Astronaut riding a horse\"", }).then((response) => {
+    // Use image
 });

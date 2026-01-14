@@ -14,14 +14,13 @@ async function query(data) {
 	return result;
 }
 
-query({
-	prompt: '"Astronaut riding a horse"',
-	loras: [
-		{
-			path: "https://huggingface.co/openfree/flux-chatgpt-ghibli-lora/resolve/main/<path to LoRA weights in .safetensors format>",
-			scale: 1,
-		},
-	],
-}).then((response) => {
-	// Use image
+
+query({     prompt: "\"Astronaut riding a horse\"",
+    loras: [
+        {
+            path: "https://huggingface.co/openfree/flux-chatgpt-ghibli-lora/resolve/main/<path to LoRA weights in .safetensors format>",
+            scale: 1,
+        },
+    ], }).then((response) => {
+    // Use image
 });
