@@ -127,12 +127,10 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		const pollUrl = `${baseUrl}/api/paas/v4/async-result/${taskId}`;
 
 		const pollHeaders: Record<string, string> = {
+			...headers,
 			"x-source-channel": "hugging_face",
 			"accept-language": "en-US,en",
 		};
-		if (headers && headers["Authorization"]) {
-			pollHeaders["Authorization"] = headers["Authorization"];
-		}
 
 		for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
 			await delay(POLL_INTERVAL_MS);
