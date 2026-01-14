@@ -130,7 +130,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-generation": new Hyperbolic.HyperbolicTextGenerationTask(),
 	},
 	mokzu: {
-		"text-to-video": new Mokzu.MokzuTextToVideoTask(),
 		"image-to-video": new Mokzu.MokzuImageToVideoTask(),
 	},
 	nebius: {
