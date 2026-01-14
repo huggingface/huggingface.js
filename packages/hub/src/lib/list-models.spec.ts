@@ -134,4 +134,98 @@ describe("listModels", () => {
 
 		expect(count).to.equal(1);
 	});
+
+	it("should search models by apps", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { apps: ["vllm"] },
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.name).to.be.a("string").and.is.not.empty;
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should search models by multiple apps", async () => {
+		let count = 0;
+		const apps = ["vllm", "tgi"];
+		for await (const entry of listModels({
+			search: { apps },
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.name).to.be.a("string").and.is.not.empty;
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should search models by library", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { library: ["pytorch"] },
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.name).to.be.a("string").and.is.not.empty;
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should search models by multiple libraries", async () => {
+		let count = 0;
+		const library = ["pytorch", "transformers"];
+		for await (const entry of listModels({
+			search: { library },
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.name).to.be.a("string").and.is.not.empty;
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should search models by license", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { license: ["mit"] },
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.name).to.be.a("string").and.is.not.empty;
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should search models by multiple licenses", async () => {
+		let count = 0;
+		const license = ["mit", "apache-2.0"];
+		for await (const entry of listModels({
+			search: { license },
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.name).to.be.a("string").and.is.not.empty;
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should search models with multiple filters", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { apps: ["vllm"], library: ["pytorch"], license: ["mit"] },
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.name).to.be.a("string").and.is.not.empty;
+		}
+
+		expect(count).to.equal(10);
+	});
 });

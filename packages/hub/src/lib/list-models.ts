@@ -68,6 +68,9 @@ export async function* listModels<
 			 * Will search for models that have one of the inference providers in the list.
 			 */
 			inferenceProviders?: string[];
+			apps?: string[];
+			library?: string[];
+			license?: string[];
 		};
 		hubUrl?: string;
 		additionalFields?: T[];
@@ -92,6 +95,9 @@ export async function* listModels<
 			...(params?.search?.inferenceProviders
 				? { inference_provider: params.search.inferenceProviders.join(",") }
 				: undefined),
+			...(params?.search?.apps ? { apps: params.search.apps.join(",") } : undefined),
+			...(params?.search?.library ? { library: params.search.library.join(",") } : undefined),
+			...(params?.search?.license ? { license: params.search.license.join(",") } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
