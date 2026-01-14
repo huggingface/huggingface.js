@@ -734,6 +734,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"pocket-tts": {
+		prettyLabel: "Pocket-TTS",
+		repoName: "PocketTTS",
+		repoUrl: "https://github.com/kyutai-labs/pocket-tts",
+		snippets: snippets.pocket_tts,
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	pxia: {
 		prettyLabel: "pxia",
 		repoName: "pxia",
