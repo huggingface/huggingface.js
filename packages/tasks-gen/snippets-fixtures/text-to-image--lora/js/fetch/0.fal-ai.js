@@ -1,6 +1,6 @@
 async function query(data) {
 	const response = await fetch(
-		"https://router.huggingface.co/fal-ai/<fal-ai alias for openfree/flux-chatgpt-ghibli-lora>",
+		"https://router.huggingface.co/fal-ai/<fal-ai alias for openfree/flux-chatgpt-ghibli-lora>?_subdomain=queue",
 		{
 			headers: {
 				Authorization: `Bearer ${process.env.HF_TOKEN}`,
@@ -14,14 +14,14 @@ async function query(data) {
 	return result;
 }
 
-
-query({     sync_mode: true,
-    prompt: "\"Astronaut riding a horse\"",
-    loras: [
-        {
-            path: "https://huggingface.co/openfree/flux-chatgpt-ghibli-lora/resolve/main/<path to LoRA weights in .safetensors format>",
-            scale: 1,
-        },
-    ], }).then((response) => {
-    // Use image
+query({
+	prompt: '"Astronaut riding a horse"',
+	loras: [
+		{
+			path: "https://huggingface.co/openfree/flux-chatgpt-ghibli-lora/resolve/main/<path to LoRA weights in .safetensors format>",
+			scale: 1,
+		},
+	],
+}).then((response) => {
+	// Use image
 });

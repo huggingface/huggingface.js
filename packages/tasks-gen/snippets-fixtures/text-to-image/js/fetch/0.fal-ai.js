@@ -1,6 +1,6 @@
 async function query(data) {
 	const response = await fetch(
-		"https://router.huggingface.co/fal-ai/<fal-ai alias for black-forest-labs/FLUX.1-schnell>",
+		"https://router.huggingface.co/fal-ai/<fal-ai alias for black-forest-labs/FLUX.1-schnell>?_subdomain=queue",
 		{
 			headers: {
 				Authorization: `Bearer ${process.env.HF_TOKEN}`,
@@ -14,8 +14,6 @@ async function query(data) {
 	return result;
 }
 
-
-query({     sync_mode: true,
-    prompt: "\"Astronaut riding a horse\"", }).then((response) => {
-    // Use image
+query({ prompt: '"Astronaut riding a horse"' }).then((response) => {
+	// Use image
 });
