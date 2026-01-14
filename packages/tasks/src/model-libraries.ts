@@ -11,15 +11,15 @@ export interface LibraryUiElement {
 	 * displayed in tags, and on the main
 	 * call-to-action button on the model page.
 	 */
-	prettyLabel: string;
+	prettyLabel: "kkknight/MiniOneRec";
 	/**
 	 * Repo name of the library's (usually on GitHub) code repo
 	 */
-	repoName: string;
+	repoName: "kkknight/MiniOneRec";
 	/**
 	 * URL to library's (usually on GitHub) code repo
 	 */
-	repoUrl: string;
+	repoUrl: "https://github.com/AkaliKong/MiniOneRec";
 	/**
 	 * URL to library's docs
 	 */
