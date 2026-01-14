@@ -14,7 +14,7 @@ export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
 export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
 export const RE_SAFETENSORS_SHARD_FILE =
-	/^(?<prefix>(?<basePrefix>.*?)[_-])(?<shard>\d{5})-of-(?<total>\d{5})\.safetensors$/;
+	/^(?<prefix>(?<basePrefix>.*?)[_-])(?<shard>\d{5,6})-of-(?<total>\d{5,6})\.safetensors$/;
 export interface SafetensorsShardFileInfo {
 	prefix: string;
 	basePrefix: string;
@@ -36,6 +36,7 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 
 const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000;
+const GPTQ_QWEIGHT_SUFFIX = "qweight";
 
 class SafetensorParseError extends Error {}
 
@@ -48,6 +49,11 @@ export type Dtype =
 	| "F16"
 	| "F8_E4M3"
 	| "F8_E5M2"
+	| "E8M0"
+	| "F6_E3M2"
+	| "F6_E2M3"
+	| "F4"
+	| "FP4"
 	| "BF16"
 	| "I64"
 	| "I32"
@@ -55,6 +61,7 @@ export type Dtype =
 	| "I8"
 	| "U16"
 	| "U8"
+	| "UE8"
 	| "BOOL";
 
 export interface TensorInfo {
@@ -91,6 +98,35 @@ export type SafetensorsParseFromRepo =
 			parameterCount?: Partial<Record<Dtype, number>>;
 			parameterTotal?: number;
 	  };
+
+/**
+ * Fetches and parses model config.json
+ */
+async function fetchModelConfig(
+	params: {
+		repo: RepoDesignation;
+		revision?: string;
+		hubUrl?: string;
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<ModelConfig | null> {
+	try {
+		const configBlob = await downloadFile({
+			...params,
+			path: "config.json",
+		});
+
+		if (!configBlob) {
+			return null;
+		}
+
+		const config = JSON.parse(await configBlob.text());
+		return config as ModelConfig;
+	} catch (error) {
+		// Config file might not exist or be inaccessible
+		return null;
+	}
+}
 
 async function parseSingleFile(
 	path: string,
@@ -154,7 +190,7 @@ async function parseShardedIndex(
 
 	try {
 		// no validation for now, we assume it's a valid IndexJson.
-		const index = JSON.parse(await indexBlob.slice(0, 10_000_000).text());
+		const index = JSON.parse(await indexBlob.slice(0, 20_000_000).text());
 		return index;
 	} catch (error) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
@@ -252,6 +288,10 @@ export async function parseSafetensorsMetadata(
 		throw new TypeError("Only model repos should contain safetensors files.");
 	}
 
+	// Fetch model config for quantization information
+	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
+	const quantConfig = modelConfig?.quantization_config;
+
 	if (
 		(params.path && RE_SAFETENSORS_FILE.test(params.path)) ||
 		(await fileExists({ ...params, path: SAFETENSORS_FILE }))
@@ -262,7 +302,7 @@ export async function parseSafetensorsMetadata(
 			header,
 			...(params.computeParametersCount
 				? {
-						parameterCount: computeNumOfParamsByDtypeSingleFile(header),
+						parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
 						parameterTotal:
 							/// shortcut: get param count directly from metadata
 							header.__metadata__.total_parameters
@@ -289,7 +329,7 @@ export async function parseSafetensorsMetadata(
 			headers: shardedMap,
 			...(params.computeParametersCount
 				? {
-						parameterCount: computeNumOfParamsByDtypeSharded(shardedMap),
+						parameterCount: computeNumOfParamsByDtypeSharded(shardedMap, quantConfig),
 						parameterTotal:
 							/// shortcut: get param count directly from metadata
 							index.metadata?.total_parameters
@@ -307,25 +347,155 @@ export async function parseSafetensorsMetadata(
 	}
 }
 
-function computeNumOfParamsByDtypeSingleFile(header: SafetensorsFileHeader): Partial<Record<Dtype, number>> {
+export interface QuantizationConfig {
+	quant_method?: string;
+	modules_to_not_convert?: string[];
+	bits?: number;
+	load_in_4bit?: boolean;
+	load_in_8bit?: boolean;
+}
+
+export interface ModelConfig {
+	quantization_config?: QuantizationConfig;
+}
+
+/**
+ * Determines if a tensor is quantized based on quantization config and tensor name
+ */
+function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
+	if (!quantConfig) {
+		return false;
+	}
+
+	if (!quantConfig.modules_to_not_convert || quantConfig.modules_to_not_convert.length === 0) {
+		return true;
+	}
+
+	for (const pattern of quantConfig.modules_to_not_convert) {
+		const regexPattern = pattern.replace(/\*/g, ".*");
+		const regex = new RegExp(regexPattern);
+		if (regex.test(tensorName)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Gets the parameter multiplier for a quantized tensor based on quantization method
+ */
+function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig?: QuantizationConfig): number {
+	if (!quantConfig || !isQuantizedTensor(tensorName, quantConfig)) {
+		return 1;
+	}
+
+	const quantMethod = quantConfig.quant_method?.toLowerCase();
+
+	switch (quantMethod) {
+		case "mxfp4":
+			if (dtype === "U8" && tensorName.includes("_blocks")) {
+				return 2;
+			}
+			return 1;
+
+		case "gptq":
+		case "awq":
+			if (getTensorSuffix(tensorName) === GPTQ_QWEIGHT_SUFFIX) {
+				const bits = quantConfig.bits && quantConfig.bits > 0 ? quantConfig.bits : 4;
+				return Math.max(1, Math.floor(32 / bits));
+			}
+			if (quantConfig.bits === 4 && dtype === "U8") {
+				return 2;
+			}
+			if (quantConfig.bits === 2 && dtype === "U8") {
+				return 4;
+			}
+			return 1;
+
+		case "bitsandbytes":
+			if (quantConfig.load_in_4bit && dtype === "U8") {
+				return 2;
+			}
+			if (quantConfig.load_in_8bit) {
+				return 1;
+			}
+			return 1;
+
+		default:
+			if (quantConfig.load_in_4bit && dtype === "U8") {
+				return 2;
+			}
+			if (quantConfig.bits === 4 && dtype === "U8") {
+				return 2;
+			}
+			return 1;
+	}
+}
+
+function computeNumOfParamsByDtypeSingleFile(
+	header: SafetensorsFileHeader,
+	quantConfig?: QuantizationConfig
+): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
 
-	for (const [, v] of typedEntries(tensors)) {
+	for (const [tensorName, v] of typedEntries(tensors)) {
+		if (shouldSkipTensor(tensorName, quantConfig)) {
+			continue;
+		}
 		if (v.shape.length === 0) {
 			continue;
 		}
-		counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a, b) => a * b);
+
+		const elements = v.shape.reduce((a, b) => a * b);
+		const multiplier = quantConfig ? getQuantizationMultiplier(tensorName, v.dtype, quantConfig) : 1;
+		if (multiplier === 0) {
+			continue;
+		}
+		counter[v.dtype] = (counter[v.dtype] ?? 0) + elements * multiplier;
 	}
 	return counter;
 }
 
-function computeNumOfParamsByDtypeSharded(shardedMap: SafetensorsShardedHeaders): Partial<Record<Dtype, number>> {
+function computeNumOfParamsByDtypeSharded(
+	shardedMap: SafetensorsShardedHeaders,
+	quantConfig?: QuantizationConfig
+): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	for (const header of Object.values(shardedMap)) {
-		for (const [k, v] of typedEntries(computeNumOfParamsByDtypeSingleFile(header))) {
+		for (const [k, v] of typedEntries(computeNumOfParamsByDtypeSingleFile(header, quantConfig))) {
 			counter[k] = (counter[k] ?? 0) + (v ?? 0);
 		}
 	}
 	return counter;
+}
+
+function getTensorSuffix(tensorName: string): string {
+	const lastDotIndex = tensorName.lastIndexOf(".");
+	return lastDotIndex === -1 ? tensorName : tensorName.slice(lastDotIndex + 1);
+}
+
+function shouldSkipTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
+	const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
+
+	if (!quantConfig) {
+		return false;
+	}
+
+	const quantMethod = quantConfig.quant_method?.toLowerCase();
+	if (!quantMethod || (quantMethod !== "gptq" && quantMethod !== "awq")) {
+		return false;
+	}
+
+	if (!isQuantizedTensor(tensorName, quantConfig)) {
+		return false;
+	}
+
+	const suffix = getTensorSuffix(tensorName);
+	if (suffix === GPTQ_QWEIGHT_SUFFIX) {
+		return false;
+	}
+
+	return GPTQ_AWQ_AUXILIARY_SUFFIXES.includes(suffix);
 }

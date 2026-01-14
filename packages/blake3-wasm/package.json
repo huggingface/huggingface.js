@@ -1,0 +1,49 @@
+{
+	"name": "@huggingface/blake3-wasm",
+	"version": "0.0.3",
+	"scripts": {
+		"build:debug": "asc assembly/index.ts --target debug",
+		"build:release": "asc assembly/index.ts --target release",
+		"build": "pnpm run build:debug && npm run build:release",
+		"test": "vitest run",
+		"bench": "node tests/bench.js",
+		"prepare": "pnpm run build"
+	},
+	"keywords": [
+		"blake3",
+		"assemblyscript",
+		"assembly",
+		"wasm"
+	],
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./build/release.js",
+			"types": "./build/release.d.ts"
+		},
+		"./assembly": {
+			"import": "./assembly/index.ts"
+		},
+		"./wasm": {
+			"import": "./build/release.wasm"
+		}
+	},
+	"main": "./build/release.js",
+	"types": "./build/release.d.ts",
+	"files": [
+		"build/release.js",
+		"build/release.d.ts",
+		"build/release.wasm",
+		"build/release.wat",
+		"build/release.wasm.map",
+		"LICENSE_A2",
+		"LICENSE_A2LLVM",
+		"LICENSE_C0",
+		"README.md",
+		"asconfig.json",
+		"assembly"
+	],
+	"devDependencies": {
+		"assemblyscript": "0.27.36"
+	}
+}

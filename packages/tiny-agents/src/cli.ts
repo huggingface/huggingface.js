@@ -4,6 +4,7 @@ import * as readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { z } from "zod";
 import { PROVIDERS_OR_POLICIES } from "@huggingface/inference";
+import type { ServerConfig } from "@huggingface/mcp-client";
 import { Agent } from "@huggingface/mcp-client";
 import { version as packageVersion } from "../package.json";
 import { InputConfigSchema, ServerConfigSchema } from "./lib/types";
@@ -107,86 +108,79 @@ async function main() {
 			// Check env variables that will use this input
 			const inputVars = new Set<string>();
 			for (const server of config.servers) {
-				if (server.type === "stdio" && server.config.env) {
-					for (const [key, value] of Object.entries(server.config.env)) {
-						if (value === envSpecialValue) {
-							inputVars.add(key);
-						}
-					}
-				}
-				if ((server.type === "http" || server.type === "sse") && server.config.options?.requestInit?.headers) {
-					for (const [key, value] of Object.entries(server.config.options.requestInit.headers)) {
+				if (server.type === "stdio" && server.env) {
+					for (const [key, value] of Object.entries(server.env)) {
 						if (value.includes(envSpecialValue)) {
 							inputVars.add(key);
 						}
 					}
 				}
+				if ((server.type === "http" || server.type === "sse") && server.headers) {
+					for (const [key, value] of Object.entries(server.headers)) {
+						if (value.includes(envSpecialValue)) {
+							inputVars.add(key);
+						}
+					}
+				}
+			}
+
+			if (config.apiKey?.includes(envSpecialValue)) {
+				inputVars.add("apiKey");
 			}
 
 			if (inputVars.size === 0) {
 				stdout.write(ANSI.YELLOW);
-				stdout.write(`Input ${inputId} defined in config but not used by any server.`);
+				stdout.write(`Input ${inputId} defined in config but not used by any server or as an API key. Skipping.`);
 				stdout.write(ANSI.RESET);
 				stdout.write("\n");
 				continue;
 			}
-
+			const envVariableKey = inputId.replaceAll("-", "_").toUpperCase();
 			// Prompt user for input
 			stdout.write(ANSI.BLUE);
 			stdout.write(` • ${inputId}`);
 			stdout.write(ANSI.RESET);
-			stdout.write(`: ${description}. (default: load from ${Array.from(inputVars).join(", ")}) `);
+			stdout.write(`: ${description}. (default: load from ${envVariableKey}) `);
+			stdout.write("\n");
 
 			const userInput = (await rl.question("")).trim();
+			const valueFromEnv = process.env[envVariableKey] || "";
+			const finalValue = userInput || valueFromEnv;
+
+			if (!userInput) {
+				if (valueFromEnv) {
+					stdout.write(ANSI.GREEN);
+					stdout.write(`Value successfully loaded from '${envVariableKey}'`);
+					stdout.write(ANSI.RESET);
+					stdout.write("\n");
+				} else {
+					stdout.write(ANSI.YELLOW);
+					stdout.write(`No value found for '${envVariableKey}' in environment variables. Continuing.`);
+					stdout.write(ANSI.RESET);
+					stdout.write("\n");
+				}
+			}
 
 			// Inject user input (or env variable) into servers' env
 			for (const server of config.servers) {
-				if (server.type === "stdio" && server.config.env) {
-					for (const [key, value] of Object.entries(server.config.env)) {
-						if (value === envSpecialValue) {
-							if (userInput) {
-								server.config.env[key] = userInput;
-							} else {
-								const valueFromEnv = process.env[key] || "";
-								server.config.env[key] = valueFromEnv;
-								if (valueFromEnv) {
-									stdout.write(ANSI.GREEN);
-									stdout.write(`Value successfully loaded from '${key}'`);
-									stdout.write(ANSI.RESET);
-									stdout.write("\n");
-								} else {
-									stdout.write(ANSI.YELLOW);
-									stdout.write(`No value found for '${key}' in environment variables. Continuing.`);
-									stdout.write(ANSI.RESET);
-									stdout.write("\n");
-								}
-							}
-						}
-					}
-				}
-				if ((server.type === "http" || server.type === "sse") && server.config.options?.requestInit?.headers) {
-					for (const [key, value] of Object.entries(server.config.options.requestInit.headers)) {
+				if (server.type === "stdio" && server.env) {
+					for (const [key, value] of Object.entries(server.env)) {
 						if (value.includes(envSpecialValue)) {
-							if (userInput) {
-								server.config.options.requestInit.headers[key] = value.replace(envSpecialValue, userInput);
-							} else {
-								const valueFromEnv = process.env[key] || "";
-								server.config.options.requestInit.headers[key] = value.replace(envSpecialValue, valueFromEnv);
-								if (valueFromEnv) {
-									stdout.write(ANSI.GREEN);
-									stdout.write(`Value successfully loaded from '${key}'`);
-									stdout.write(ANSI.RESET);
-									stdout.write("\n");
-								} else {
-									stdout.write(ANSI.YELLOW);
-									stdout.write(`No value found for '${key}' in environment variables. Continuing.`);
-									stdout.write(ANSI.RESET);
-									stdout.write("\n");
-								}
-							}
+							server.env[key] = value.replace(envSpecialValue, finalValue);
 						}
 					}
 				}
+				if ((server.type === "http" || server.type === "sse") && server.headers) {
+					for (const [key, value] of Object.entries(server.headers)) {
+						if (value.includes(envSpecialValue)) {
+							server.headers[key] = value.replace(envSpecialValue, finalValue);
+						}
+					}
+				}
+			}
+
+			if (config.apiKey?.includes(envSpecialValue)) {
+				config.apiKey = config.apiKey.replace(envSpecialValue, finalValue);
 			}
 		}
 
@@ -194,13 +188,52 @@ async function main() {
 		rl.close();
 	}
 
+	// Debug: Log the processed servers config
+	debug("Processed servers configuration:");
+	for (const server of config.servers) {
+		if ((server.type === "http" || server.type === "sse") && server.headers) {
+			debug(`${server.type} server headers:`, server.headers);
+		}
+	}
+
+	const formattedServers: ServerConfig[] = config.servers.map((server) => {
+		switch (server.type) {
+			case "stdio":
+				return {
+					type: "stdio",
+					config: {
+						command: server.command,
+						args: server.args ?? [],
+						env: server.env ?? {},
+						cwd: server.cwd ?? process.cwd(),
+					},
+				};
+			case "http":
+			case "sse": {
+				const formatted = {
+					type: server.type,
+					config: {
+						url: server.url,
+						options: {
+							requestInit: {
+								headers: server.headers,
+							},
+						},
+					},
+				};
+				debug(`Formatted ${server.type} server:`, formatted);
+				return formatted;
+			}
+		}
+	});
+
 	const agent = new Agent(
 		config.endpointUrl
 			? {
 					endpointUrl: config.endpointUrl,
 					model: config.model,
 					apiKey: config.apiKey ?? process.env.API_KEY ?? process.env.HF_TOKEN,
-					servers: config.servers,
+					servers: formattedServers,
 					prompt,
 			  }
 			: {
@@ -208,7 +241,7 @@ async function main() {
 					provider: config.provider!,
 					model: config.model,
 					apiKey: config.apiKey ?? process.env.API_KEY ?? process.env.HF_TOKEN,
-					servers: config.servers,
+					servers: formattedServers,
 					prompt,
 			  }
 	);

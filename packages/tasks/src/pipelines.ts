@@ -237,12 +237,6 @@ export const PIPELINE_DATA = {
 				type: "language-modeling",
 				name: "Language Modeling",
 			},
-		],
-		modality: "nlp",
-	},
-	"text2text-generation": {
-		name: "Text2Text Generation",
-		subtasks: [
 			{
 				type: "text-simplification",
 				name: "Text simplification",
@@ -270,6 +264,10 @@ export const PIPELINE_DATA = {
 			{
 				type: "closed-book-qa",
 				name: "Closed Book QA",
+			},
+			{
+				type: "text2text-generation",
+				name: "Text2Text Generation",
 			},
 		],
 		modality: "nlp",
@@ -557,6 +555,14 @@ export const PIPELINE_DATA = {
 	},
 	"image-text-to-text": {
 		name: "Image-Text-to-Text",
+		modality: "multimodal",
+	},
+	"image-text-to-image": {
+		name: "Image-Text-to-Image",
+		modality: "multimodal",
+	},
+	"image-text-to-video": {
+		name: "Image-Text-to-Video",
 		modality: "multimodal",
 	},
 	"visual-question-answering": {

@@ -90,6 +90,10 @@ function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
+function isAmdRyzenModel(model: ModelData) {
+	return model.tags.includes("ryzenai-hybrid") || model.tags.includes("ryzenai-npu");
+}
+
 function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
@@ -106,20 +110,27 @@ function getQuantTag(filepath?: string): string {
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const command = (binary: string) => {
-		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
+	const serverCommand = (binary: string) => {
+		const snippet = [
+			"# Start a local OpenAI-compatible server with a web UI:",
+			`${binary} -hf ${model.id}${getQuantTag(filepath)}`,
+		];
+		return snippet.join("\n");
+	};
+	const cliCommand = (binary: string) => {
+		const snippet = ["# Run inference directly in the terminal:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
 		return snippet.join("\n");
 	};
 	return [
 		{
 			title: "Install from brew",
 			setup: "brew install llama.cpp",
-			content: command("llama-server"),
+			content: [serverCommand("llama-server"), cliCommand("llama-cli")],
 		},
 		{
 			title: "Install from WinGet (Windows)",
 			setup: "winget install llama.cpp",
-			content: command("llama-server"),
+			content: [serverCommand("llama-server"), cliCommand("llama-cli")],
 		},
 		{
 			title: "Use pre-built binary",
@@ -128,7 +139,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"# Download pre-built binary from:",
 				"# https://github.com/ggerganov/llama.cpp/releases",
 			].join("\n"),
-			content: command("./llama-server"),
+			content: [serverCommand("./llama-server"), cliCommand("./llama-cli")],
 		},
 		{
 			title: "Build from source code",
@@ -136,9 +147,9 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
 				"cmake -B build",
-				"cmake --build build -j --target llama-server",
+				"cmake --build build -j --target llama-server llama-cli",
 			].join("\n"),
-			content: command("./build/bin/llama-server"),
+			content: [serverCommand("./build/bin/llama-server"), cliCommand("./build/bin/llama-cli")],
 		},
 	];
 };
@@ -207,10 +218,27 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 		"temperature": 0.5
 	}'`;
 	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
+
+	let setup;
+	let dockerCommand;
+
+	if (model.tags.includes("mistral-common")) {
+		setup = [
+			"# Install vLLM from pip:",
+			"pip install vllm",
+			"# Make sure you have the latest version of mistral-common installed:",
+			"pip install --upgrade mistral-common",
+		].join("\n");
+		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"`;
+	} else {
+		setup = ["# Install vLLM from pip:", "pip install vllm"].join("\n");
+		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`;
+	}
+
 	return [
 		{
 			title: "Install from pip",
-			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
+			setup: setup,
 			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand],
 		},
 		{
@@ -226,10 +254,7 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 				`	vllm/vllm-openai:latest \\`,
 				`	--model ${model.id}`,
 			].join("\n"),
-			content: [
-				`# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
-				runCommand,
-			],
+			content: [dockerCommand, runCommand],
 		},
 	];
 };
@@ -294,6 +319,52 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 					},
 			  ]
 			: []),
+	];
+};
+
+const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
+	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
+};
+
+const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const tagName = getQuantTag(filepath);
+	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
+
+	// Get recipe according to model type
+	let simplifiedModelName: string;
+	let recipe: string;
+	let checkpoint: string;
+	let requirements: string;
+	if (model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag))) {
+		recipe = model.tags.includes("ryzenai-npu") ? "oga-npu" : "oga-hybrid";
+		checkpoint = model.id;
+		requirements = " (requires RyzenAI 300 series)";
+		simplifiedModelName = modelName.split("-awq-")[0];
+		simplifiedModelName += recipe === "oga-npu" ? "-NPU" : "-Hybrid";
+	} else {
+		recipe = "llamacpp";
+		checkpoint = `${model.id}${tagName}`;
+		requirements = "";
+		simplifiedModelName = modelName;
+	}
+
+	return [
+		{
+			title: "Pull the model",
+			setup: "# Download Lemonade from https://lemonade-server.ai/",
+			content: [
+				`lemonade-server pull user.${simplifiedModelName} --checkpoint ${checkpoint} --recipe ${recipe}`,
+				"# Note: If you installed from source, use the lemonade-server-dev command instead.",
+			].join("\n"),
+		},
+		{
+			title: `Run and chat with the model${requirements}`,
+			content: `lemonade-server run user.${simplifiedModelName}`,
+		},
+		{
+			title: "List all available models",
+			content: "lemonade-server list",
+		},
 	];
 };
 
@@ -453,19 +524,26 @@ export const LOCAL_APPS = {
 			model.tags.includes("coreml") && model.tags.includes("joyfusion") && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://joyfusion.app/import_from_hf?repo_id=${model.id}`),
 	},
-	invoke: {
-		prettyLabel: "Invoke",
-		docsUrl: "https://github.com/invoke-ai/InvokeAI",
-		mainTask: "text-to-image",
-		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
-		deeplink: (model) => new URL(`https://models.invoke.ai/huggingface/${model.id}`),
-	},
 	ollama: {
 		prettyLabel: "Ollama",
 		docsUrl: "https://ollama.com",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
+	},
+	"docker-model-runner": {
+		prettyLabel: "Docker Model Runner",
+		docsUrl: "https://docs.docker.com/ai/model-runner/",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetDockerModelRunner,
+	},
+	lemonade: {
+		prettyLabel: "Lemonade",
+		docsUrl: "https://lemonade-server.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
+		snippet: snippetLemonade,
 	},
 } satisfies Record<string, LocalApp>;
 

@@ -66,8 +66,6 @@ const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionI
 	return `"Can you please let us know more details about your "`;
 };
 
-const inputsText2TextGeneration = () => `"The answer to the universe is"`;
-
 const inputsFillMask = (model: ModelDataMinimal) => `"The answer to the universe is ${model.mask_token}."`;
 
 const inputsSentenceSimilarity = () =>
@@ -92,6 +90,16 @@ const inputsImageToImage = () => `{
 }`;
 
 const inputsImageToVideo = () => `{
+    "image": "cat.png",
+    "prompt": "The cat starts to dance"
+}`;
+
+const inputsImageTextToImage = () => `{
+    "image": "cat.png",
+    "prompt": "Turn the cat into a tiger."
+}`;
+
+const inputsImageTextToVideo = () => `{
     "image": "cat.png",
     "prompt": "The cat starts to dance"
 }`;
@@ -132,6 +140,8 @@ const modelInputSnippets: {
 	"image-to-text": inputsImageToText,
 	"image-to-image": inputsImageToImage,
 	"image-to-video": inputsImageToVideo,
+	"image-text-to-image": inputsImageTextToImage,
+	"image-text-to-video": inputsImageTextToVideo,
 	"image-segmentation": inputsImageSegmentation,
 	"object-detection": inputsObjectDetection,
 	"question-answering": inputsQuestionAnswering,
@@ -147,7 +157,6 @@ const modelInputSnippets: {
 	"text-to-video": inputsTextToVideo,
 	"text-to-speech": inputsTextToSpeech,
 	"text-to-audio": inputsTextToAudio,
-	"text2text-generation": inputsText2TextGeneration,
 	"token-classification": inputsTokenClassification,
 	translation: inputsTranslation,
 	"zero-shot-classification": inputsZeroShotClassification,

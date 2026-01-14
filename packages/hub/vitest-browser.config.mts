@@ -14,6 +14,8 @@ export default defineConfig({
 			"src/lib/upload-files.fs.spec.ts",
 			// Because we use redirect: "manual" in the test
 			"src/lib/oauth-handle-redirect.spec.ts",
+			// Because we use a local file
+			"src/utils/shardParser.spec.ts",
 		],
 	},
 });

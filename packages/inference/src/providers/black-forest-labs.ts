@@ -19,6 +19,7 @@ import {
 	InferenceClientProviderApiError,
 	InferenceClientProviderOutputError,
 } from "../errors.js";
+import { getLogger } from "../lib/logger.js";
 import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
@@ -65,12 +66,13 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 		response: BlackForestLabsResponse,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob> {
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
+		const logger = getLogger();
 		const urlObj = new URL(response.polling_url);
 		for (let step = 0; step < 5; step++) {
 			await delay(1000);
-			console.debug(`Polling Black Forest Labs API for the result... ${step + 1}/5`);
+			logger.debug(`Polling Black Forest Labs API for the result... ${step + 1}/5`);
 			urlObj.searchParams.set("attempt", step.toString(10));
 			const resp = await fetch(urlObj, { headers: { "Content-Type": "application/json" } });
 			if (!resp.ok) {
@@ -93,6 +95,9 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 				"sample" in payload.result &&
 				typeof payload.result.sample === "string"
 			) {
+				if (outputType === "json") {
+					return payload.result;
+				}
 				if (outputType === "url") {
 					return payload.result.sample;
 				}

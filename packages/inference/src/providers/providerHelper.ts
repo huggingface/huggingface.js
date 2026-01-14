@@ -18,6 +18,9 @@ import type {
 	ImageToImageInput,
 	ImageToTextInput,
 	ImageToTextOutput,
+	ImageToVideoInput,
+	ImageTextToImageInput,
+	ImageTextToVideoInput,
 	ObjectDetectionInput,
 	ObjectDetectionOutput,
 	QuestionAnsweringInput,
@@ -46,12 +49,16 @@ import type {
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
-import { InferenceClientProviderOutputError } from "../errors.js";
+import { InferenceClientProviderOutputError, InferenceClientRoutingError } from "../errors.js";
 import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, RequestArgs, UrlParams } from "../types.js";
 import { toArray } from "../utils/toArray.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
+import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
+import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
+import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 
 /**
  * Base class for task-specific provider helpers
@@ -59,7 +66,7 @@ import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpe
 export abstract class TaskProviderHelper {
 	constructor(
 		readonly provider: InferenceProvider,
-		private baseUrl: string,
+		protected baseUrl: string,
 		readonly clientSideRoutingOnly: boolean = false
 	) {}
 
@@ -134,8 +141,8 @@ export interface TextToImageTaskHelper {
 		response: unknown,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob>;
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>>;
 	preparePayload(params: BodyParams<TextToImageInput & BaseArgs>): Record<string, unknown>;
 }
 
@@ -150,9 +157,28 @@ export interface ImageToImageTaskHelper {
 	preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs>;
 }
 
+export interface ImageToVideoTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	preparePayload(params: BodyParams<ImageToVideoInput & BaseArgs>): Record<string, unknown>;
+	preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs>;
+}
+
+export interface ImageTextToImageTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	preparePayload(params: BodyParams<ImageTextToImageInput & BaseArgs>): Record<string, unknown>;
+	preparePayloadAsync(args: ImageTextToImageArgs): Promise<RequestArgs>;
+}
+
+export interface ImageTextToVideoTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	preparePayload(params: BodyParams<ImageTextToVideoInput & BaseArgs>): Record<string, unknown>;
+	preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs>;
+}
+
 export interface ImageSegmentationTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageSegmentationOutput>;
 	preparePayload(params: BodyParams<ImageSegmentationInput & BaseArgs>): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs>;
 }
 
 export interface ImageClassificationTaskHelper {
@@ -357,5 +383,18 @@ export class BaseTextGenerationTask extends TaskProviderHelper implements TextGe
 		}
 
 		throw new InferenceClientProviderOutputError("Expected Array<{generated_text: string}>");
+	}
+}
+
+export class AutoRouterConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("auto" as InferenceProvider, "https://router.huggingface.co");
+	}
+
+	override makeBaseUrl(params: UrlParams): string {
+		if (params.authMethod !== "hf-token") {
+			throw new InferenceClientRoutingError("Cannot select auto-router when using non-Hugging Face API key.");
+		}
+		return this.baseUrl;
 	}
 }

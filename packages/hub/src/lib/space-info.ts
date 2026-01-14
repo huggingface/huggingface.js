@@ -38,7 +38,6 @@ export async function spaceInfo<
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-				Accepts: "application/json",
 			},
 		}
 	);

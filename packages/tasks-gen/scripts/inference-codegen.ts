@@ -270,7 +270,7 @@ const allTasks = await Promise.all(
 	(await fs.readdir(tasksDir, { withFileTypes: true }))
 		.filter((entry) => entry.isDirectory())
 		.filter((entry) => entry.name !== "placeholder")
-		.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.path, entry.name) }))
+		.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.parentPath, entry.name) }))
 );
 const allSpecFiles = [
 	path.join(tasksDir, "common-definitions.json"),
@@ -286,6 +286,11 @@ for (const { task, dirPath } of allTasks) {
 		continue;
 	}
 	console.debug(`✨ Generating types for task`, task);
+
+	if (task === "chat-completion") {
+		console.debug("   🙈 Skipping chat-completion (maintained manually)");
+		continue;
+	}
 
 	console.debug("   📦 Building input data");
 	const inputData = await buildInputData(task, taskSpecDir, allSpecFiles);

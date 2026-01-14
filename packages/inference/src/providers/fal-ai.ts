@@ -16,17 +16,18 @@
  */
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 
-import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
+import type { AutomaticSpeechRecognitionOutput, ImageSegmentationOutput } from "@huggingface/tasks";
 import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, InferenceTask, ModelId, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import type { ImageToImageTaskHelper } from "./providerHelper.js";
+import type { ImageSegmentationTaskHelper, ImageToImageTaskHelper } from "./providerHelper.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
+	type ImageToVideoTaskHelper,
 } from "./providerHelper.js";
 import { HF_HUB_URL } from "../config.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
@@ -35,7 +36,8 @@ import {
 	InferenceClientProviderApiError,
 	InferenceClientProviderOutputError,
 } from "../errors.js";
-import type { ImageToImageArgs } from "../tasks/index.js";
+import type { ImageToImageArgs, ImageToVideoArgs } from "../tasks/index.js";
+import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -181,7 +183,12 @@ export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHe
 		return payload;
 	}
 
-	override async getResponse(response: FalAITextToImageOutput, outputType?: "url" | "blob"): Promise<string | Blob> {
+	override async getResponse(
+		response: FalAITextToImageOutput,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
 			"images" in response &&
@@ -190,6 +197,9 @@ export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHe
 			"url" in response.images[0] &&
 			typeof response.images[0].url === "string"
 		) {
+			if (outputType === "json") {
+				return { ...response };
+			}
 			if (outputType === "url") {
 				return response.images[0].url;
 			}
@@ -215,15 +225,31 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 		return `/${params.model}`;
 	}
 
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const payload = params.args;
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			payload.loras = [
+				{
+					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
+					scale: 1,
+				},
+			];
+		}
+		return payload;
+	}
+
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
 		const mimeType = args.inputs instanceof Blob ? args.inputs.type : "image/png";
+		const imageDataUrl = `data:${mimeType};base64,${base64FromBytes(
+			new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+		)}`;
 		return {
 			...omit(args, ["inputs", "parameters"]),
-			image_url: `data:${mimeType};base64,${base64FromBytes(
-				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
-			)}`,
+			image_url: imageDataUrl,
 			...args.parameters,
 			...args,
+			// Some fal endpoints (e.g. FLUX.2-dev) expect `image_urls` (array) instead of `image_url`
+			image_urls: [imageDataUrl],
 		};
 	}
 
@@ -304,6 +330,73 @@ export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoT
 				)}`
 			);
 		}
+	}
+}
+
+export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVideoTaskHelper {
+	task: InferenceTask;
+
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "image-to-video";
+	}
+
+	/** Same queue routing rule as the other Fal queue tasks */
+	override makeRoute(params: UrlParams): string {
+		return params.authMethod !== "provider-key" ? `/${params.model}?_subdomain=queue` : `/${params.model}`;
+	}
+
+	/** Synchronous case – caller already gave us base64 or a URL */
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			// args.inputs is expected to be a base64 data URI or an URL
+			image_url: params.args.image_url,
+		};
+	}
+
+	/** Asynchronous helper – caller gave us a Blob */
+	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
+		const mimeType = args.inputs instanceof Blob ? args.inputs.type : "image/png";
+		return {
+			...omit(args, ["inputs", "parameters"]),
+			image_url: `data:${mimeType};base64,${base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			)}`,
+			...args.parameters,
+			...args,
+		};
+	}
+
+	/** Queue polling + final download – mirrors Text‑to‑Video */
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<Blob> {
+		const result = await this.getResponseFromQueueApi(response, url, headers);
+
+		if (
+			typeof result === "object" &&
+			result !== null &&
+			"video" in result &&
+			typeof result.video === "object" &&
+			result.video !== null &&
+			"url" in result.video &&
+			typeof result.video.url === "string" &&
+			"url" in result.video &&
+			isUrl(result.video.url)
+		) {
+			const urlResponse = await fetch(result.video.url);
+			return await urlResponse.blob();
+		}
+
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from Fal.ai image‑to‑video API: expected { video: { url: string } }, got: ${JSON.stringify(
+				result
+			)}`
+		);
 	}
 }
 
@@ -391,5 +484,89 @@ export class FalAITextToSpeechTask extends FalAITask {
 				}
 			);
 		}
+	}
+}
+export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageSegmentationTaskHelper {
+	task: InferenceTask;
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "image-segmentation";
+	}
+
+	override makeRoute(params: UrlParams): string {
+		if (params.authMethod !== "provider-key") {
+			return `/${params.model}?_subdomain=queue`;
+		}
+		return `/${params.model}`;
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			sync_mode: true,
+		};
+	}
+
+	async preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs> {
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+		const mimeType = blob instanceof Blob ? blob.type : "image/png";
+		const base64Image = base64FromBytes(
+			new Uint8Array(blob instanceof ArrayBuffer ? blob : await (blob as Blob).arrayBuffer())
+		);
+		return {
+			...omit(args, ["inputs", "parameters", "data"]),
+			...args.parameters,
+			...args,
+			image_url: `data:${mimeType};base64,${base64Image}`,
+			sync_mode: true,
+		};
+	}
+
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<ImageSegmentationOutput> {
+		const result = await this.getResponseFromQueueApi(response, url, headers);
+		if (
+			typeof result === "object" &&
+			result !== null &&
+			"image" in result &&
+			typeof result.image === "object" &&
+			result.image !== null &&
+			"url" in result.image &&
+			typeof result.image.url === "string"
+		) {
+			const maskResponse = await fetch(result.image.url);
+			if (!maskResponse.ok) {
+				throw new InferenceClientProviderApiError(
+					`Failed to fetch segmentation mask from ${result.image.url}`,
+					{ url: result.image.url, method: "GET" },
+					{
+						requestId: maskResponse.headers.get("x-request-id") ?? "",
+						status: maskResponse.status,
+						body: await maskResponse.text(),
+					}
+				);
+			}
+			const maskBlob = await maskResponse.blob();
+			const maskArrayBuffer = await maskBlob.arrayBuffer();
+			const maskBase64 = base64FromBytes(new Uint8Array(maskArrayBuffer));
+
+			return [
+				{
+					label: "mask", // placeholder label, as Fal does not provide labels in the response(?)
+					score: 1.0, // placeholder score, as Fal does not provide scores in the response(?)
+					mask: maskBase64,
+				},
+			];
+		}
+
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from Fal.ai image-segmentation API: expected { image: { url: string } } format, got instead: ${JSON.stringify(
+				response
+			)}`
+		);
 	}
 }

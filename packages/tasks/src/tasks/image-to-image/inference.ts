@@ -41,13 +41,15 @@ export interface ImageToImageParameters {
 	 */
 	prompt?: string;
 	/**
-	 * The size in pixel of the output image.
+	 * The size in pixels of the output image. This parameter is only supported by some
+	 * providers and for specific models. It will be ignored when unsupported.
 	 */
 	target_size?: TargetSize;
 	[property: string]: unknown;
 }
 /**
- * The size in pixel of the output image.
+ * The size in pixels of the output image. This parameter is only supported by some
+ * providers and for specific models. It will be ignored when unsupported.
  */
 export interface TargetSize {
 	height: number;

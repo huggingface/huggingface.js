@@ -20,11 +20,14 @@ import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types.
 import { omit } from "../utils/omit.js";
 import {
 	TaskProviderHelper,
+	type AutomaticSpeechRecognitionTaskHelper,
 	type ImageToImageTaskHelper,
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
 } from "./providerHelper.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 export interface ReplicateOutput {
 	output?: string | string[];
@@ -88,10 +91,24 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 		res: ReplicateOutput | Blob,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob> {
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		void url;
 		void headers;
+
+		// Handle string output
+		if (typeof res === "object" && "output" in res && typeof res.output === "string" && isUrl(res.output)) {
+			if (outputType === "json") {
+				return { ...res };
+			}
+			if (outputType === "url") {
+				return res.output;
+			}
+			const urlResponse = await fetch(res.output);
+			return await urlResponse.blob();
+		}
+
+		// Handle array output
 		if (
 			typeof res === "object" &&
 			"output" in res &&
@@ -99,6 +116,9 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			res.output.length > 0 &&
 			typeof res.output[0] === "string"
 		) {
+			if (outputType === "json") {
+				return { ...res };
+			}
 			if (outputType === "url") {
 				return res.output[0];
 			}
@@ -160,6 +180,64 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 	}
 }
 
+export class ReplicateAutomaticSpeechRecognitionTask
+	extends ReplicateTask
+	implements AutomaticSpeechRecognitionTaskHelper
+{
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			input: {
+				...omit(params.args, ["inputs", "parameters"]),
+				...(params.args.parameters as Record<string, unknown>),
+				audio: params.args.inputs, // This will be processed in preparePayloadAsync
+			},
+			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		};
+	}
+
+	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+
+		if (!blob || !(blob instanceof Blob)) {
+			throw new Error("Audio input must be a Blob");
+		}
+
+		// Convert Blob to base64 data URL
+		const bytes = new Uint8Array(await blob.arrayBuffer());
+		const base64 = base64FromBytes(bytes);
+		const audioInput = `data:${blob.type || "audio/wav"};base64,${base64}`;
+
+		return {
+			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
+			inputs: audioInput,
+		};
+	}
+
+	override async getResponse(response: ReplicateOutput): Promise<AutomaticSpeechRecognitionOutput> {
+		if (typeof response?.output === "string") return { text: response.output };
+		if (Array.isArray(response?.output) && typeof response.output[0] === "string") return { text: response.output[0] };
+
+		const out = response?.output as
+			| undefined
+			| {
+					transcription?: string;
+					translation?: string;
+					txt_file?: string;
+			  };
+		if (out && typeof out === "object") {
+			if (typeof out.transcription === "string") return { text: out.transcription };
+			if (typeof out.translation === "string") return { text: out.translation };
+			if (typeof out.txt_file === "string") {
+				const r = await fetch(out.txt_file);
+				return { text: await r.text() };
+			}
+		}
+		throw new InferenceClientProviderOutputError(
+			"Received malformed response from Replicate automatic-speech-recognition API"
+		);
+	}
+}
+
 export class ReplicateImageToImageTask extends ReplicateTask implements ImageToImageTaskHelper {
 	override preparePayload(params: BodyParams<ImageToImageArgs>): Record<string, unknown> {
 		return {
@@ -167,6 +245,10 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 				...omit(params.args, ["inputs", "parameters"]),
 				...params.args.parameters,
 				input_image: params.args.inputs, // This will be processed in preparePayloadAsync
+				lora_weights:
+					params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath
+						? `https://huggingface.co/${params.mapping.hfModelId}`
+						: undefined,
 			},
 			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
 		};

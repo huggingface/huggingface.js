@@ -82,6 +82,25 @@ for await (const progressEvent of await hub.uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
+// Edit a file by adding prefix & suffix
+await commit({
+  repo,
+  accessToken: "hf_...",
+  operations: [{
+    type: "edit",
+    originalContent: originalFile,
+    edits: [{
+      start: 0,
+      end: 0,
+      content: new Blob(["prefix"])
+    }, {
+      start: originalFile.length,
+      end: originalFile.length,
+      content: new Blob(["suffix"])
+    }]
+  }]
+})
+
 await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
 await (await hub.downloadFile({ repo, path: "README.md" })).text();
@@ -205,4 +224,3 @@ Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the f
 ## Dependencies
 
 - `@huggingface/tasks` : Typings only
-- `@huggingface/lz4` : URL join utility
