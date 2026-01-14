@@ -951,6 +951,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pruna,
 		docsUrl: "https://docs.pruna.ai",
 	},
+	"pocket-tts": {
+		prettyLabel: "Pocket TTS",
+		repoName: "pocket-tts",
+		repoUrl: "https://github.com/kyutai-labs/pocket-tts",
+		snippets: snippets.pocket_tts,
+		filter: false,
+	},
 	pxia: {
 		prettyLabel: "pxia",
 		repoName: "pxia",
