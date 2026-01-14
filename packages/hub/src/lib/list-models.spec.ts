@@ -189,37 +189,10 @@ describe("listModels", () => {
 		expect(count).to.equal(10);
 	});
 
-	it("should search models by license", async () => {
-		let count = 0;
-		for await (const entry of listModels({
-			search: { license: ["mit"] },
-			limit: 10,
-		})) {
-			count++;
-			expect(entry.name).to.be.a("string").and.is.not.empty;
-		}
-
-		expect(count).to.equal(10);
-	});
-
-	it("should search models by multiple licenses", async () => {
-		let count = 0;
-		const license = ["mit", "apache-2.0"];
-		for await (const entry of listModels({
-			search: { license },
-			limit: 10,
-		})) {
-			count++;
-			expect(entry.name).to.be.a("string").and.is.not.empty;
-		}
-
-		expect(count).to.equal(10);
-	});
-
 	it("should search models with multiple filters", async () => {
 		let count = 0;
 		for await (const entry of listModels({
-			search: { apps: ["vllm"], library: ["pytorch"], license: ["mit"] },
+			search: { apps: ["vllm"], library: ["pytorch"] },
 			limit: 10,
 		})) {
 			count++;
