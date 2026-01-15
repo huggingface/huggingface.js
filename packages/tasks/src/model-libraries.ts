@@ -944,6 +944,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"pocket-tts": {
+		prettyLabel: "Pocket-TTS",
+		repoName: "PocketTTS",
+		repoUrl: "https://github.com/kyutai-labs/pocket-tts",
+		snippets: snippets.pocket_tts,
+		filter: false,
+		countDownloads: `path:"tts_b6369a24.safetensors"`,
+	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
 		repoName: "Pruna AI",
@@ -1465,6 +1473,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/THU-MIG/yolov10",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
+	},
+	yolov26: {
+		prettyLabel: "YOLOv26",
+		repoName: "YOLOv26",
+		repoUrl: "https://github.com/ultralytics/ultralytics",
+		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 	},
 	zonos: {
 		prettyLabel: "Zonos",
