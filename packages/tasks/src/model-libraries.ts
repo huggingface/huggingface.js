@@ -950,7 +950,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/kyutai-labs/pocket-tts",
 		snippets: snippets.pocket_tts,
 		filter: false,
-		countDownloads: `path_extension:"safetensors"`,
+		countDownloads: `path:"tts_b6369a24.safetensors"`,
 	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
