@@ -1466,6 +1466,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
 	},
+	yolov26: {
+		prettyLabel: "YOLOv26",
+		repoName: "YOLOv26",
+		repoUrl: "https://github.com/ultralytics/ultralytics",
+		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
+	},
 	zonos: {
 		prettyLabel: "Zonos",
 		repoName: "Zonos",
