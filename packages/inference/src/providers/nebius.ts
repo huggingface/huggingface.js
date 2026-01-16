@@ -129,12 +129,10 @@ export class NebiusTextToImageTask extends TaskProviderHelper implements TextToI
 				return { ...response };
 			}
 
-			// Handle URL response format
 			if ("url" in response.data[0] && typeof response.data[0].url === "string") {
 				return response.data[0].url;
 			}
 
-			// Handle base64 response format
 			if ("b64_json" in response.data[0] && typeof response.data[0].b64_json === "string") {
 				const base64Data = response.data[0].b64_json;
 				return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
