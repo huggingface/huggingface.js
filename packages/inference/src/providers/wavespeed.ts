@@ -115,8 +115,9 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 	override async getResponse(
 		response: WaveSpeedAISubmitTaskResponse,
 		url?: string,
-		headers?: Record<string, string>
-	): Promise<Blob> {
+		headers?: Record<string, string>,
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError("Headers are required for WaveSpeed AI API calls");
 		}
@@ -156,11 +157,21 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 							"Received malformed response from WaveSpeed AI API: No output URL in completed response"
 						);
 					}
-					const mediaResponse = await fetch(taskResult.outputs[0]);
+					const mediaUrl = taskResult.outputs[0];
+
+					if (outputType === "url") {
+						return mediaUrl;
+					}
+					if (outputType === "json") {
+						return result as unknown as Record<string, unknown>;
+					}
+
+					// Default: fetch and return blob
+					const mediaResponse = await fetch(mediaUrl);
 					if (!mediaResponse.ok) {
 						throw new InferenceClientProviderApiError(
 							"Failed to fetch generation output from WaveSpeed AI API",
-							{ url: taskResult.outputs[0], method: "GET" },
+							{ url: mediaUrl, method: "GET" },
 							{
 								requestId: mediaResponse.headers.get("x-request-id") ?? "",
 								status: mediaResponse.status,
@@ -194,6 +205,14 @@ export class WavespeedAITextToVideoTask extends WavespeedAITask implements TextT
 	constructor() {
 		super(WAVESPEEDAI_API_BASE_URL);
 	}
+
+	override async getResponse(
+		response: WaveSpeedAISubmitTaskResponse,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<Blob> {
+		return super.getResponse(response, url, headers) as Promise<Blob>;
+	}
 }
 
 export class WavespeedAIImageToImageTask extends WavespeedAITask implements ImageToImageTaskHelper {
@@ -207,6 +226,14 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
 	}
+
+	override async getResponse(
+		response: WaveSpeedAISubmitTaskResponse,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<Blob> {
+		return super.getResponse(response, url, headers) as Promise<Blob>;
+	}
 }
 
 export class WavespeedAIImageToVideoTask extends WavespeedAITask implements ImageToVideoTaskHelper {
@@ -219,5 +246,13 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
 		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
+	}
+
+	override async getResponse(
+		response: WaveSpeedAISubmitTaskResponse,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<Blob> {
+		return super.getResponse(response, url, headers) as Promise<Blob>;
 	}
 }

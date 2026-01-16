@@ -331,6 +331,19 @@ output = model.generate(text)
 sf.write("simple.mp3", output, 44100)`,
 ];
 
+export const dia2 = (model: ModelData): string[] => [
+	`from dia2 import Dia2, GenerationConfig, SamplingConfig
+
+dia = Dia2.from_repo("${model.id}", device="cuda", dtype="bfloat16")
+config = GenerationConfig(
+    cfg_scale=2.0,
+    audio=SamplingConfig(temperature=0.8, top_k=50),
+    use_cuda_graph=True,
+)
+result = dia.generate("[S1] Hello Dia2!", config=config, output_wav="hello.wav", verbose=True)
+`,
+];
+
 export const describe_anything = (model: ModelData): string[] => [
 	`# pip install git+https://github.com/NVlabs/describe-anything
 from huggingface_hub import snapshot_download
@@ -705,6 +718,18 @@ export const gliner = (model: ModelData): string[] => [
 	`from gliner import GLiNER
 
 model = GLiNER.from_pretrained("${model.id}")`,
+];
+
+export const gliner2 = (model: ModelData): string[] => [
+	`from gliner2 import GLiNER2
+
+model = GLiNER2.from_pretrained("${model.id}")
+
+# Extract entities
+text = "Apple CEO Tim Cook announced iPhone 15 in Cupertino yesterday."
+result = extractor.extract_entities(text, ["company", "person", "product", "location"])
+
+print(result)`,
 ];
 
 export const indextts = (model: ModelData): string[] => [
@@ -1180,6 +1205,19 @@ wan_i2v = WanI2V(
  video = wan_i2v.generate(text_prompt, image_prompt)`,
 ];
 
+export const pocket_tts = (model: ModelData): string[] => [
+	`from pocket_tts import TTSModel
+import scipy.io.wavfile
+
+tts_model = TTSModel.load_model("${model.id}")
+voice_state = tts_model.get_state_for_audio_prompt(
+    "hf://kyutai/tts-voices/alba-mackenna/casual.wav"
+)
+audio = tts_model.generate_audio(voice_state, "Hello world, this is a test.")
+# Audio is a 1D torch tensor containing PCM data.
+scipy.io.wavfile.write("output.wav", tts_model.sample_rate, audio.numpy())`,
+];
+
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
 	`from pyannote.audio import Pipeline
   
@@ -1419,6 +1457,27 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
         ...`;
 	return [image_predictor, video_predictor];
 };
+
+export const sam_3d_objects = (model: ModelData): string[] => [
+	`from inference import Inference, load_image, load_single_mask
+from huggingface_hub import hf_hub_download
+
+path = hf_hub_download("${model.id}", "pipeline.yaml")
+inference = Inference(path, compile=False)
+
+image = load_image("path_to_image.png")
+mask = load_single_mask("path_to_mask.png", index=14)
+
+output = inference(image, mask)`,
+];
+
+export const sam_3d_body = (model: ModelData): string[] => [
+	`from notebook.utils import setup_sam_3d_body
+
+estimator = setup_sam_3d_body(${model.id})
+outputs = estimator.process_one_image(image)
+rend_img = visualize_sample_together(image, outputs, estimator.faces)`,
+];
 
 export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
@@ -1934,6 +1993,19 @@ birefnet = AutoModelForImageSegmentation.from_pretrained("${model.id}", trust_re
 
 from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
+];
+
+export const supertonic = (): string[] => [
+	`from supertonic import TTS
+
+tts = TTS(auto_download=True)
+
+style = tts.get_voice_style(voice_name="M1")
+
+text = "The train delay was announced at 4:45 PM on Wed, Apr 3, 2024 due to track maintenance."
+wav, duration = tts.synthesize(text, voice_style=style)
+
+tts.save_audio(wav, "output.wav")`,
 ];
 
 export const swarmformer = (model: ModelData): string[] => [

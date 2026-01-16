@@ -66,6 +66,10 @@ export const SKUS = {
 				tflops: 30.29,
 				memory: [24],
 			},
+			GB10: {
+				tflops: 29.71,
+				memory: [128],
+			},
 			"RTX PRO 6000 WS": {
 				tflops: 126,
 				memory: [96],
@@ -308,7 +312,7 @@ export const SKUS = {
 			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
-				memory: [6],
+				memory: [4, 6],
 			},
 			"RTX 2060": {
 				tflops: 12.9,
@@ -439,6 +443,10 @@ export const SKUS = {
 			MI50: {
 				tflops: 26.5,
 				memory: [16, 32],
+			},
+			"R9700 PRO": {
+				tflops: 95.7,
+				memory: [32],
 			},
 			"RX 9070 XT": {
 				tflops: 97.32,
@@ -757,6 +765,10 @@ export const SKUS = {
 			"Apple M4 Max": {
 				tflops: 18.4,
 				memory: [36, 48, 64, 96, 128, 256, 512],
+			},
+			"Apple M5": {
+				tflops: 5.7,
+				memory: [16, 24, 32],
 			},
 		},
 	},

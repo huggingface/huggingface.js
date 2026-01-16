@@ -89,6 +89,12 @@ abstract class FalAITask extends TaskProviderHelper {
 abstract class FalAiQueueTask extends FalAITask {
 	abstract task: InferenceTask;
 
+	override makeRoute(params: UrlParams): string {
+		if (params.authMethod !== "provider-key") {
+			return `/${params.model}?_subdomain=queue`;
+		}
+		return `/${params.model}`;
+	}
 	async getResponseFromQueueApi(
 		response: FalAiQueueOutput,
 		url?: string,
@@ -159,12 +165,18 @@ function buildLoraPath(modelId: ModelId, adapterWeightsPath: string): string {
 	return `${HF_HUB_URL}/${modelId}/resolve/main/${adapterWeightsPath}`;
 }
 
-export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHelper {
+export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageTaskHelper {
+	task: InferenceTask;
+
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "text-to-image";
+	}
+
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
-			sync_mode: true,
 			prompt: params.args.inputs,
 		};
 
@@ -184,30 +196,36 @@ export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHe
 	}
 
 	override async getResponse(
-		response: FalAITextToImageOutput,
+		response: FalAiQueueOutput,
 		url?: string,
-		headers?: HeadersInit,
+		headers?: Record<string, string>,
 		outputType?: "url" | "blob" | "json"
 	): Promise<string | Blob | Record<string, unknown>> {
+		const result = (await this.getResponseFromQueueApi(response, url, headers)) as FalAITextToImageOutput;
 		if (
-			typeof response === "object" &&
-			"images" in response &&
-			Array.isArray(response.images) &&
-			response.images.length > 0 &&
-			"url" in response.images[0] &&
-			typeof response.images[0].url === "string"
+			typeof result === "object" &&
+			"images" in result &&
+			Array.isArray(result.images) &&
+			result.images.length > 0 &&
+			"url" in result.images[0] &&
+			typeof result.images[0].url === "string" &&
+			isUrl(result.images[0].url)
 		) {
 			if (outputType === "json") {
-				return { ...response };
+				return { ...result };
 			}
 			if (outputType === "url") {
-				return response.images[0].url;
+				return result.images[0].url;
 			}
-			const urlResponse = await fetch(response.images[0].url);
+			const urlResponse = await fetch(result.images[0].url);
 			return await urlResponse.blob();
 		}
 
-		throw new InferenceClientProviderOutputError("Received malformed response from Fal.ai text-to-image API");
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from Fal.ai text-to-image API: expected { images: Array<{ url: string }> } result format, got instead: ${JSON.stringify(
+				result
+			)}`
+		);
 	}
 }
 
@@ -216,13 +234,6 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 	constructor() {
 		super("https://queue.fal.run");
 		this.task = "image-to-image";
-	}
-
-	override makeRoute(params: UrlParams): string {
-		if (params.authMethod !== "provider-key") {
-			return `/${params.model}?_subdomain=queue`;
-		}
-		return `/${params.model}`;
 	}
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {
@@ -240,13 +251,16 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
 		const mimeType = args.inputs instanceof Blob ? args.inputs.type : "image/png";
+		const imageDataUrl = `data:${mimeType};base64,${base64FromBytes(
+			new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+		)}`;
 		return {
 			...omit(args, ["inputs", "parameters"]),
-			image_url: `data:${mimeType};base64,${base64FromBytes(
-				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
-			)}`,
+			image_url: imageDataUrl,
 			...args.parameters,
 			...args,
+			// Some fal endpoints (e.g. FLUX.2-dev) expect `image_urls` (array) instead of `image_url`
+			image_urls: [imageDataUrl],
 		};
 	}
 
@@ -287,12 +301,7 @@ export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoT
 		super("https://queue.fal.run");
 		this.task = "text-to-video";
 	}
-	override makeRoute(params: UrlParams): string {
-		if (params.authMethod !== "provider-key") {
-			return `/${params.model}?_subdomain=queue`;
-		}
-		return `/${params.model}`;
-	}
+
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
@@ -336,11 +345,6 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 	constructor() {
 		super("https://queue.fal.run");
 		this.task = "image-to-video";
-	}
-
-	/** Same queue routing rule as the other Fal queue tasks */
-	override makeRoute(params: UrlParams): string {
-		return params.authMethod !== "provider-key" ? `/${params.model}?_subdomain=queue` : `/${params.model}`;
 	}
 
 	/** Synchronous case – caller already gave us base64 or a URL */
@@ -488,13 +492,6 @@ export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageS
 	constructor() {
 		super("https://queue.fal.run");
 		this.task = "image-segmentation";
-	}
-
-	override makeRoute(params: UrlParams): string {
-		if (params.authMethod !== "provider-key") {
-			return `/${params.model}?_subdomain=queue`;
-		}
-		return `/${params.model}`;
 	}
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {
