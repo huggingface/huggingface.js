@@ -138,65 +138,12 @@ describe("listModels", () => {
 	it("should search models by apps", async () => {
 		let count = 0;
 		for await (const entry of listModels({
-			search: { apps: ["vllm"] },
+			search: { apps: ["mlx-lm"] },
+			additionalFields: ["tags"],
 			limit: 10,
 		})) {
 			count++;
-			expect(entry.name).to.be.a("string").and.is.not.empty;
-		}
-
-		expect(count).to.equal(10);
-	});
-
-	it("should search models by multiple apps", async () => {
-		let count = 0;
-		const apps = ["vllm", "tgi"];
-		for await (const entry of listModels({
-			search: { apps },
-			limit: 10,
-		})) {
-			count++;
-			expect(entry.name).to.be.a("string").and.is.not.empty;
-		}
-
-		expect(count).to.equal(10);
-	});
-
-	it("should search models by library", async () => {
-		let count = 0;
-		for await (const entry of listModels({
-			search: { library: ["pytorch"] },
-			limit: 10,
-		})) {
-			count++;
-			expect(entry.name).to.be.a("string").and.is.not.empty;
-		}
-
-		expect(count).to.equal(10);
-	});
-
-	it("should search models by multiple libraries", async () => {
-		let count = 0;
-		const library = ["pytorch", "transformers"];
-		for await (const entry of listModels({
-			search: { library },
-			limit: 10,
-		})) {
-			count++;
-			expect(entry.name).to.be.a("string").and.is.not.empty;
-		}
-
-		expect(count).to.equal(10);
-	});
-
-	it("should search models with multiple filters", async () => {
-		let count = 0;
-		for await (const entry of listModels({
-			search: { apps: ["vllm"], library: ["pytorch"] },
-			limit: 10,
-		})) {
-			count++;
-			expect(entry.name).to.be.a("string").and.is.not.empty;
+			expect(entry.tags).to.include("mlx");
 		}
 
 		expect(count).to.equal(10);

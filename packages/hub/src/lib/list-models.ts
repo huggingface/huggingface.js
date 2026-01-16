@@ -95,7 +95,6 @@ export async function* listModels<
 				? { inference_provider: params.search.inferenceProviders.join(",") }
 				: undefined),
 			...(params?.search?.apps ? { apps: params.search.apps.join(",") } : undefined),
-			...(params?.search?.library ? { library: params.search.library.join(",") } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
