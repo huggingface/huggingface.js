@@ -178,10 +178,12 @@ export interface UrlParams {
 	task?: InferenceTask;
 }
 
+export type OutputType = "url" | "dataUrl" | "blob" | "json";
+
 export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
 	args: T;
 	model: string;
 	mapping?: InferenceProviderMappingEntry | undefined;
 	task?: InferenceTask;
-	outputType?: "url" | "blob" | "json";
+	outputType?: OutputType;
 }

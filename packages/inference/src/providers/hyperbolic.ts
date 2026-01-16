@@ -15,7 +15,7 @@
  * Thanks!
  */
 import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/tasks";
-import type { BodyParams, UrlParams } from "../types.js";
+import type { BodyParams, OutputType, UrlParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
 	BaseConversationalTask,
@@ -93,6 +93,11 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
+		if (params.outputType === "url") {
+			throw new InferenceClientInputError(
+				"hyperbolic provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead."
+			);
+		}
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
@@ -105,7 +110,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 		response: HyperbolicTextToImageOutput,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
@@ -117,10 +122,8 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 			if (outputType === "json") {
 				return { ...response };
 			}
-			if (outputType === "url") {
-				throw new InferenceClientInputError(
-					"hyperbolic provider does not support URL output. Use outputType 'blob' or 'json' instead."
-				);
+			if (outputType === "dataUrl") {
+				return `data:image/jpeg;base64,${response.images[0].image}`;
 			}
 			return fetch(`data:image/jpeg;base64,${response.images[0].image}`).then((res) => res.blob());
 		}

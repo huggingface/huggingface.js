@@ -18,7 +18,7 @@ import { base64FromBytes } from "../utils/base64FromBytes.js";
 
 import type { AutomaticSpeechRecognitionOutput, ImageSegmentationOutput } from "@huggingface/tasks";
 import { isUrl } from "../lib/isUrl.js";
-import type { BodyParams, HeaderParams, InferenceTask, ModelId, RequestArgs, UrlParams } from "../types.js";
+import type { BodyParams, HeaderParams, InferenceTask, ModelId, OutputType, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import type { ImageSegmentationTaskHelper, ImageToImageTaskHelper } from "./providerHelper.js";
@@ -199,7 +199,7 @@ export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageT
 		response: FalAiQueueOutput,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType
 	): Promise<string | Blob | Record<string, unknown>> {
 		const result = (await this.getResponseFromQueueApi(response, url, headers)) as FalAITextToImageOutput;
 		if (
@@ -218,7 +218,12 @@ export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageT
 				return result.images[0].url;
 			}
 			const urlResponse = await fetch(result.images[0].url);
-			return await urlResponse.blob();
+			const blob = await urlResponse.blob();
+			if (outputType === "dataUrl") {
+				const b64 = await blob.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
+				return `data:image/jpeg;base64,${b64}`;
+			}
+			return blob;
 		}
 
 		throw new InferenceClientProviderOutputError(

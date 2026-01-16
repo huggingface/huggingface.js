@@ -1,6 +1,6 @@
 import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
 import { PACKAGE_NAME, PACKAGE_VERSION } from "../package.js";
-import type { InferenceTask, InferenceProviderMappingEntry, Options, RequestArgs } from "../types.js";
+import type { InferenceTask, InferenceProviderMappingEntry, Options, OutputType, RequestArgs } from "../types.js";
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
 import type { getProviderHelper } from "./getProviderHelper.js";
 import { isUrl } from "./isUrl.js";
@@ -112,7 +112,7 @@ export function makeRequestOptionsFromResolvedModel(
 	mapping: InferenceProviderMappingEntry | undefined,
 	options?: Options & {
 		task?: InferenceTask;
-		outputType?: "url" | "blob" | "json";
+		outputType?: OutputType;
 	}
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
