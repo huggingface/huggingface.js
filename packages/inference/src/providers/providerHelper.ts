@@ -51,7 +51,15 @@ import type {
 import { HF_ROUTER_URL } from "../config.js";
 import { InferenceClientProviderOutputError, InferenceClientRoutingError } from "../errors.js";
 import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
-import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, OutputType, RequestArgs, UrlParams } from "../types.js";
+import type {
+	BaseArgs,
+	BodyParams,
+	HeaderParams,
+	InferenceProvider,
+	OutputType,
+	RequestArgs,
+	UrlParams,
+} from "../types.js";
 import { toArray } from "../utils/toArray.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
