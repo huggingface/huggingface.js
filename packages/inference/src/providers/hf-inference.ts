@@ -141,6 +141,9 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 			if ("data" in response && Array.isArray(response.data) && response.data[0].b64_json) {
 				const base64Data = response.data[0].b64_json;
 				if (outputType === "url") {
+					console.warn(
+						"hf-inference provider does not support URL output for this model, returning base64 data URL instead"
+					);
 					return `data:image/jpeg;base64,${base64Data}`;
 				}
 				const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
@@ -157,6 +160,9 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 		}
 		if (response instanceof Blob) {
 			if (outputType === "url" || outputType === "json") {
+				console.warn(
+					"hf-inference provider does not support URL output for this model, returning base64 data URL instead"
+				);
 				const b64 = await response.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
 				return outputType === "url" ? `data:image/jpeg;base64,${b64}` : { output: `data:image/jpeg;base64,${b64}` };
 			}

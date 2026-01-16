@@ -72,6 +72,7 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 			}
 			const base64Data = response.data[0].b64_json;
 			if (outputType === "url") {
+				console.warn("nscale provider does not support URL output, returning base64 data URL instead");
 				return `data:image/jpeg;base64,${base64Data}`;
 			}
 			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());

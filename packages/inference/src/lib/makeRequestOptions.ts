@@ -112,6 +112,7 @@ export function makeRequestOptionsFromResolvedModel(
 	mapping: InferenceProviderMappingEntry | undefined,
 	options?: Options & {
 		task?: InferenceTask;
+		outputType?: "url" | "blob" | "json";
 	}
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
@@ -120,7 +121,7 @@ export function makeRequestOptionsFromResolvedModel(
 
 	const provider = providerHelper.provider;
 
-	const { includeCredentials, task, signal, billTo } = options ?? {};
+	const { includeCredentials, task, signal, billTo, outputType } = options ?? {};
 	const authMethod = (() => {
 		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
@@ -172,6 +173,7 @@ export function makeRequestOptionsFromResolvedModel(
 		model: resolvedModel,
 		task,
 		mapping,
+		outputType,
 	});
 	/**
 	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error

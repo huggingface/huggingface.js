@@ -118,6 +118,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 				return { ...response };
 			}
 			if (outputType === "url") {
+				console.warn("hyperbolic provider does not support URL output, returning base64 data URL instead");
 				return `data:image/jpeg;base64,${response.images[0].image}`;
 			}
 			return fetch(`data:image/jpeg;base64,${response.images[0].image}`).then((res) => res.blob());

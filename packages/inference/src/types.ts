@@ -183,4 +183,5 @@ export interface BodyParams<T extends Record<string, unknown> = Record<string, u
 	model: string;
 	mapping?: InferenceProviderMappingEntry | undefined;
 	task?: InferenceTask;
+	outputType?: "url" | "blob" | "json";
 }
