@@ -23,7 +23,7 @@ import {
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
-import { InferenceClientProviderOutputError } from "../errors.js";
+import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
 export interface HyperbolicTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
@@ -118,8 +118,9 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 				return { ...response };
 			}
 			if (outputType === "url") {
-				console.warn("hyperbolic provider does not support URL output, returning base64 data URL instead");
-				return `data:image/jpeg;base64,${response.images[0].image}`;
+				throw new InferenceClientInputError(
+					"hyperbolic provider does not support URL output. Use outputType 'blob' or 'json' instead."
+				);
 			}
 			return fetch(`data:image/jpeg;base64,${response.images[0].image}`).then((res) => res.blob());
 		}

@@ -36,7 +36,7 @@ import type {
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
-import { InferenceClientProviderOutputError } from "../errors.js";
+import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 import type { TabularClassificationOutput } from "../tasks/tabular/tabularClassification.js";
 import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
 import { toArray } from "../utils/toArray.js";
@@ -141,10 +141,9 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 			if ("data" in response && Array.isArray(response.data) && response.data[0].b64_json) {
 				const base64Data = response.data[0].b64_json;
 				if (outputType === "url") {
-					console.warn(
-						"hf-inference provider does not support URL output for this model, returning base64 data URL instead"
+					throw new InferenceClientInputError(
+						"hf-inference provider does not support URL output for this model. Use outputType 'blob' or 'json' instead."
 					);
-					return `data:image/jpeg;base64,${base64Data}`;
 				}
 				const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
 				return await base64Response.blob();
@@ -159,12 +158,14 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 			}
 		}
 		if (response instanceof Blob) {
-			if (outputType === "url" || outputType === "json") {
-				console.warn(
-					"hf-inference provider does not support URL output for this model, returning base64 data URL instead"
+			if (outputType === "url") {
+				throw new InferenceClientInputError(
+					"hf-inference provider does not support URL output for this model. Use outputType 'blob' or 'json' instead."
 				);
+			}
+			if (outputType === "json") {
 				const b64 = await response.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return outputType === "url" ? `data:image/jpeg;base64,${b64}` : { output: `data:image/jpeg;base64,${b64}` };
+				return { output: `data:image/jpeg;base64,${b64}` };
 			}
 			return response;
 		}

@@ -18,7 +18,7 @@ import type { TextToImageInput } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
-import { InferenceClientProviderOutputError } from "../errors.js";
+import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 
 const NSCALE_API_BASE_URL = "https://inference.api.nscale.com";
 
@@ -72,8 +72,9 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 			}
 			const base64Data = response.data[0].b64_json;
 			if (outputType === "url") {
-				console.warn("nscale provider does not support URL output, returning base64 data URL instead");
-				return `data:image/jpeg;base64,${base64Data}`;
+				throw new InferenceClientInputError(
+					"nscale provider does not support URL output. Use outputType 'blob' or 'json' instead."
+				);
 			}
 			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
 		}
