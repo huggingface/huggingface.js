@@ -69,7 +69,6 @@ export async function* listModels<
 			 */
 			inferenceProviders?: string[];
 			apps?: string[];
-			library?: string[];
 		};
 		hubUrl?: string;
 		additionalFields?: T[];
