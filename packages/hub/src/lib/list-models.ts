@@ -68,6 +68,9 @@ export async function* listModels<
 			 * Will search for models that have one of the inference providers in the list.
 			 */
 			inferenceProviders?: string[];
+			/**
+			 * Will search for models that support at least one of those local apps (eg "lmstudio", "mlx-lm", ...)
+			 */
 			apps?: string[];
 		};
 		hubUrl?: string;
