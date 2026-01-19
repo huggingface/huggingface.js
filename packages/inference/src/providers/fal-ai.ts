@@ -292,33 +292,26 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 }
 
 export class FalAIImageTextToImageTask extends FalAIImageToImageTask implements ImageTextToImageTaskHelper {
-	private useTextOnlyEndpoint = false;
 
 	constructor() {
 		super();
 		this.task = "image-text-to-image";
 	}
 
-	override makeRoute(params: UrlParams): string {
-		let model = params.model;
-		if (this.useTextOnlyEndpoint) {
-			// Strip last path segment: fal-ai/flux-2/edit => fal-ai/flux-2
-			model = model.split("/").slice(0, -1).join("/");
-			this.useTextOnlyEndpoint = false;
-		}
-		return super.makeRoute({ ...params, model });
-	}
-
 	override async preparePayloadAsync(args: ImageTextToImageArgs): Promise<RequestArgs> {
 		if (args.inputs) {
 			return super.preparePayloadAsync(args as ImageToImageArgs);
 		}
-		// No image provided: strip endpoint suffix and use `text-to-image` endpoint
-		this.useTextOnlyEndpoint = true;
 		return {
 			...omit(args, ["inputs", "parameters"]),
 			...(args.parameters as Record<string, unknown>),
 			prompt: args.parameters?.prompt,
+			urlTransform: (url) => {
+				const urlObj = new URL(url);
+				// Strip last path segment: fal-ai/flux-2/edit => fal-ai/flux-2
+				urlObj.pathname = urlObj.pathname.split("/").slice(0, -1).join("/");
+				return urlObj.toString();
+			},
 		} as RequestArgs;
 	}
 }
@@ -440,33 +433,25 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 }
 
 export class FalAIImageTextToVideoTask extends FalAIImageToVideoTask implements ImageTextToVideoTaskHelper {
-	private useTextOnlyEndpoint = false;
 
 	constructor() {
 		super();
 		this.task = "image-text-to-video";
 	}
-
-	override makeRoute(params: UrlParams): string {
-		let model = params.model;
-		if (this.useTextOnlyEndpoint) {
-			// Strip last path segment: fal-ai/ltxv-13b-098-distilled/image-to-video => fal-ai/ltxv-13b-098-distilled
-			model = model.split("/").slice(0, -1).join("/");
-			this.useTextOnlyEndpoint = false;
-		}
-		return super.makeRoute({ ...params, model });
-	}
-
+	
 	override async preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs> {
 		if (args.inputs) {
 			return super.preparePayloadAsync(args as ImageToVideoArgs);
 		}
-		// No image provided: strip endpoint suffix and use `text-to-video` endpoint
-		this.useTextOnlyEndpoint = true;
 		return {
 			...omit(args, ["inputs", "parameters"]),
 			...(args.parameters as Record<string, unknown>),
 			prompt: args.parameters?.prompt,
+			urlTransform: (url) => {
+				const urlObj = new URL(url);
+				urlObj.pathname = urlObj.pathname.split("/").slice(0, -1).join("/");
+				return urlObj.toString();
+			},
 		} as RequestArgs;
 	}
 }
