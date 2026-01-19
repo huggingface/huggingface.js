@@ -98,6 +98,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.araclip,
 	},
+	"aviation-ner": {
+		prettyLabel: "Aviation NER",
+		repoName: "Aviation NER",
+		repoUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		docsUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		countDownloads: `path:"gliner_config.json"`,
+		filter: false,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -500,6 +508,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.gliner2,
 		filter: false,
 	},
+	"glm-tts": {
+		prettyLabel: "GLM-TTS",
+		repoName: "GLM-TTS",
+		repoUrl: "https://github.com/zai-org/GLM-TTS",
+		filter: false,
+		countDownloads: `path:"flow/flow.pt"`,
+	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
 		repoName: "Glyph-ByT5",
@@ -557,6 +572,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "HunyuanWorld-voyager",
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
+	},
+	"hy-worldplay": {
+		prettyLabel: "HY-WorldPlay",
+		repoName: "HY-WorldPlay",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HY-WorldPlay",
+		filter: false,
+		countDownloads: `path_extension:"json"`,
 	},
 	"image-matching-models": {
 		prettyLabel: "Image Matching Models",
@@ -781,6 +803,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
 	},
+	"ml-sharp": {
+		prettyLabel: "Sharp",
+		repoName: "Sharp",
+		repoUrl: "https://github.com/apple/ml-sharp",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	mlx: {
 		prettyLabel: "MLX",
 		repoName: "MLX",
@@ -915,6 +944,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"pocket-tts": {
+		prettyLabel: "Pocket-TTS",
+		repoName: "PocketTTS",
+		repoUrl: "https://github.com/kyutai-labs/pocket-tts",
+		snippets: snippets.pocket_tts,
+		filter: false,
+		countDownloads: `path:"tts_b6369a24.safetensors"`,
+	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
 		repoName: "Pruna AI",
@@ -1028,6 +1065,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.sam_3d_objects,
 		countDownloads: `path:"checkpoints/pipeline.yaml"`,
+	},
+	same: {
+		prettyLabel: "SAME",
+		repoName: "SAME",
+		repoUrl: "https://github.com/GengzeZhou/SAME",
+		filter: false,
+		countDownloads: `path:"ckpt/SAME.pt" OR path:"pretrain/Attnq_pretrained_ckpt.pt"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
@@ -1393,6 +1437,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.vibevoice,
 		filter: false,
 	},
+	videox_fun: {
+		prettyLabel: "VideoX Fun",
+		repoName: "VideoX Fun",
+		repoUrl: "https://github.com/aigc-apps/VideoX-Fun",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"wan2.2": {
 		prettyLabel: "Wan2.2",
 		repoName: "Wan2.2",
@@ -1422,6 +1473,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/THU-MIG/yolov10",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
+	},
+	yolov26: {
+		prettyLabel: "YOLOv26",
+		repoName: "YOLOv26",
+		repoUrl: "https://github.com/ultralytics/ultralytics",
+		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 	},
 	zonos: {
 		prettyLabel: "Zonos",

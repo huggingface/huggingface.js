@@ -134,4 +134,18 @@ describe("listModels", () => {
 
 		expect(count).to.equal(1);
 	});
+
+	it("should search models by apps", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { apps: ["mlx-lm"] },
+			additionalFields: ["tags"],
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.tags).to.include("mlx");
+		}
+
+		expect(count).to.equal(10);
+	});
 });
