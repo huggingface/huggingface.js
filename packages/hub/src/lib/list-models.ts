@@ -68,6 +68,10 @@ export async function* listModels<
 			 * Will search for models that have one of the inference providers in the list.
 			 */
 			inferenceProviders?: string[];
+			/**
+			 * Will search for models that support at least one of those local apps (eg "lmstudio", "mlx-lm", ...)
+			 */
+			apps?: string[];
 		};
 		hubUrl?: string;
 		additionalFields?: T[];
@@ -92,6 +96,7 @@ export async function* listModels<
 			...(params?.search?.inferenceProviders
 				? { inference_provider: params.search.inferenceProviders.join(",") }
 				: undefined),
+			...(params?.search?.apps ? { apps: params.search.apps.join(",") } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),

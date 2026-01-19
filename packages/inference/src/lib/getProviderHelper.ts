@@ -183,9 +183,12 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-video": new Wavespeed.WavespeedAITextToVideoTask(),
 		"image-to-image": new Wavespeed.WavespeedAIImageToImageTask(),
 		"image-to-video": new Wavespeed.WavespeedAIImageToVideoTask(),
+		"image-text-to-image": new Wavespeed.WavespeedAIImageTextToImageTask(),
+		"image-text-to-video": new Wavespeed.WavespeedAIImageTextToVideoTask(),
 	},
 	"zai-org": {
 		conversational: new Zai.ZaiConversationalTask(),
+		"text-to-image": new Zai.ZaiTextToImageTask(),
 	},
 };
 
