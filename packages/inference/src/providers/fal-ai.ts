@@ -21,7 +21,12 @@ import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, InferenceTask, ModelId, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import type { ImageSegmentationTaskHelper, ImageToImageTaskHelper } from "./providerHelper.js";
+import type {
+	ImageSegmentationTaskHelper,
+	ImageToImageTaskHelper,
+	ImageTextToImageTaskHelper,
+	ImageTextToVideoTaskHelper,
+} from "./providerHelper.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
@@ -37,6 +42,8 @@ import {
 	InferenceClientProviderOutputError,
 } from "../errors.js";
 import type { ImageToImageArgs, ImageToVideoArgs } from "../tasks/index.js";
+import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
+import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 
 export interface FalAiQueueOutput {
@@ -295,6 +302,30 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 	}
 }
 
+export class FalAIImageTextToImageTask extends FalAIImageToImageTask implements ImageTextToImageTaskHelper {
+	constructor() {
+		super();
+		this.task = "image-text-to-image";
+	}
+
+	override async preparePayloadAsync(args: ImageTextToImageArgs): Promise<RequestArgs> {
+		if (args.inputs) {
+			return super.preparePayloadAsync(args as ImageToImageArgs);
+		}
+		return {
+			...omit(args, ["inputs", "parameters"]),
+			...(args.parameters as Record<string, unknown>),
+			prompt: args.parameters?.prompt,
+			urlTransform: (url) => {
+				const urlObj = new URL(url);
+				// Strip last path segment: fal-ai/flux-2/edit => fal-ai/flux-2
+				urlObj.pathname = urlObj.pathname.split("/").slice(0, -1).join("/");
+				return urlObj.toString();
+			},
+		} as RequestArgs;
+	}
+}
+
 export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoTaskHelper {
 	task: InferenceTask;
 	constructor() {
@@ -398,6 +429,29 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 				result
 			)}`
 		);
+	}
+}
+
+export class FalAIImageTextToVideoTask extends FalAIImageToVideoTask implements ImageTextToVideoTaskHelper {
+	constructor() {
+		super();
+		this.task = "image-text-to-video";
+	}
+
+	override async preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs> {
+		if (args.inputs) {
+			return super.preparePayloadAsync(args as ImageToVideoArgs);
+		}
+		return {
+			...omit(args, ["inputs", "parameters"]),
+			...(args.parameters as Record<string, unknown>),
+			prompt: args.parameters?.prompt,
+			urlTransform: (url) => {
+				const urlObj = new URL(url);
+				urlObj.pathname = urlObj.pathname.split("/").slice(0, -1).join("/");
+				return urlObj.toString();
+			},
+		} as RequestArgs;
 	}
 }
 
