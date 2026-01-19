@@ -292,7 +292,6 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 }
 
 export class FalAIImageTextToImageTask extends FalAIImageToImageTask implements ImageTextToImageTaskHelper {
-
 	constructor() {
 		super();
 		this.task = "image-text-to-image";
@@ -433,12 +432,11 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 }
 
 export class FalAIImageTextToVideoTask extends FalAIImageToVideoTask implements ImageTextToVideoTaskHelper {
-
 	constructor() {
 		super();
 		this.task = "image-text-to-video";
 	}
-	
+
 	override async preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs> {
 		if (args.inputs) {
 			return super.preparePayloadAsync(args as ImageToVideoArgs);

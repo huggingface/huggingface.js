@@ -145,7 +145,7 @@ export function makeRequestOptionsFromResolvedModel(
 		authMethod,
 		model: modelId,
 		task,
-		urlTransform
+		urlTransform,
 	});
 	// Make headers
 	const headers = providerHelper.prepareHeaders(
