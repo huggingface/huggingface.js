@@ -1,21 +1,21 @@
 {
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.defaultFormatter": "oxc.oxc-vscode",
 	"editor.formatOnSave": true,
+	"editor.formatOnSaveMode": "file", // tell oxfmt to format the whole file, not only the modified lines
 	"editor.codeActionsOnSave": {
 		"source.fixAll": "explicit"
 	},
-	"[svelte]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"prettier.configPath": ".prettierrc",
 	"json.format.enable": false,
-	"[json]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
 	"cSpell.words": ["huggingface"],
 	"deno.enablePaths": ["./e2e/deno"],
 	"search.exclude": {
 		"**/dist": true
 	},
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"[typescript]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	}
 }

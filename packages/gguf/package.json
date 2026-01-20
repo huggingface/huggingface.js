@@ -33,8 +33,8 @@
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup src/index.ts src/cli.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"build:llm": "tsx scripts/generate-llm.ts && pnpm run format",

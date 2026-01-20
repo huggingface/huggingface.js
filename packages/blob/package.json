@@ -34,8 +34,8 @@
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup && tsc --emitDeclarationOnly --declaration && cp dist/index.d.ts dist/index.m.d.ts && cp dist/src/utils/FileBlob.d.ts dist/src/utils/FileBlob.m.d.ts && cp dist/src/utils/WebBlob.d.ts dist/src/utils/WebBlob.m.d.ts",
 		"prepare": "pnpm run build",

@@ -8,13 +8,13 @@
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"check": "tsc",
 		"generate-snippets-fixtures": "tsx scripts/generate-snippets-fixtures.ts",
-		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write ../tasks/src/tasks/*/inference.ts",
-		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && prettier --write ../tasks/src/tasks/text-generation/spec/*.json && prettier --write ../tasks/src/tasks/chat-completion/spec/*.json",
-		"inference-tei-import": "tsx scripts/inference-tei-import.ts && prettier --write ../tasks/src/tasks/feature-extraction/spec/*.json",
+		"inference-codegen": "tsx scripts/inference-codegen.ts && oxfmt ../tasks/src/tasks/*/inference.ts",
+		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && oxfmt ../tasks/src/tasks/text-generation/spec/*.json && oxfmt ../tasks/src/tasks/chat-completion/spec/*.json",
+		"inference-tei-import": "tsx scripts/inference-tei-import.ts && oxfmt ../tasks/src/tasks/feature-extraction/spec/*.json",
 		"test": "vitest run"
 	},
 	"type": "module",
