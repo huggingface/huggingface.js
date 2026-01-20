@@ -1,4 +1,4 @@
-[js,json,jsonc,ts,tsx]
+[*.{js,json,jsonc,ts,tsx}]
 max_line_length = 120
 indent_style = tab
 indent_size = 2
