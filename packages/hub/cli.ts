@@ -366,6 +366,13 @@ const commands = {
 						description: "Environment variable in the format KEY=VALUE (can be specified multiple times)",
 					},
 					{
+						name: "secret" as const,
+						short: "s",
+						multiple: true,
+						description:
+							"Secret in the format KEY=VALUE (will be encrypted server-side, can be specified multiple times)",
+					},
+					{
 						name: "flavor" as const,
 						description: "Hardware flavor to use (defaults to cpu-basic)",
 						default: "cpu-basic",
@@ -768,6 +775,7 @@ async function run() {
 						dockerImageOrSpace: firstArg,
 						command: commandArray,
 						env,
+						secret,
 						flavor,
 						name,
 						attempts: attemptsStr,
@@ -776,6 +784,7 @@ async function run() {
 						detach,
 					} = parsedArgs;
 					const envVars = env;
+					const secretVars = secret;
 					let attempts: number | undefined;
 					if (attemptsStr) {
 						const parsed = parseInt(attemptsStr, 10);
@@ -832,6 +841,20 @@ async function run() {
 						environment[key] = value;
 					}
 
+					// Parse secrets
+					const secrets: Record<string, string> = {};
+					if (secretVars) {
+						for (const secretVar of secretVars) {
+							const equalIndex = secretVar.indexOf("=");
+							if (equalIndex === -1) {
+								throw new Error(`Invalid secret format: ${secretVar}. Expected KEY=VALUE`);
+							}
+							const key = secretVar.slice(0, equalIndex);
+							const value = secretVar.slice(equalIndex + 1);
+							secrets[key] = value;
+						}
+					}
+
 					const jobParams = {
 						namespace: finalNamespace,
 						...(name ? { name } : {}),
@@ -839,7 +862,8 @@ async function run() {
 						...(spaceId ? { spaceId } : {}),
 						flavor: flavor as SpaceHardwareFlavor,
 						command: commandArray.length > 0 ? commandArray : undefined,
-						environment: Object.keys(environment).length > 0 ? environment : {},
+						environment,
+						secrets,
 						...(attempts !== undefined ? { attempts } : {}),
 						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
 						...(token ? { accessToken: token } : {}),

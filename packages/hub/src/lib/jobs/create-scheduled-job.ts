@@ -51,9 +51,7 @@ export async function createScheduledJob(
 	if (rest.jobSpec.command) {
 		(body.jobSpec as Record<string, unknown>).command = rest.jobSpec.command;
 	}
-	if (rest.jobSpec.environment) {
-		(body.jobSpec as Record<string, unknown>).environment = rest.jobSpec.environment;
-	}
+	(body.jobSpec as Record<string, unknown>).environment = rest.jobSpec.environment || {};
 	if (rest.jobSpec.secrets) {
 		(body.jobSpec as Record<string, unknown>).secrets = rest.jobSpec.secrets;
 	}
