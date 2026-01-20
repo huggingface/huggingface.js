@@ -354,7 +354,7 @@ const commands = {
 					{
 						name: "command" as const,
 						description:
-							'The command to run (should be quoted if it contains flags like -c, e.g., \'python -c "print(\\"hello\\")"\' or "python -c \'print(\\"hello\\")\'")',
+							"The command to run (can be multiple arguments, e.g., python -c 'import os; print(os.environ[\"FOO\"])')",
 						positional: true,
 					},
 					{
@@ -789,21 +789,33 @@ async function run() {
 						process.env.HF_TOKEN;
 
 					// Get positional arguments - first is docker image or space ID, rest is command
-					const positionals = tokens.filter((t) => t.kind === "positional").map((t) => t.value);
-					if (positionals.length === 0) {
+					// Find the first positional token (docker image)
+					const positionalTokens = tokens.filter((t) => t.kind === "positional");
+					if (positionalTokens.length === 0) {
 						throw new Error("Missing required argument: docker-image or space-id");
 					}
-					const firstArg = positionals[0];
-					// If there's only one command argument, it might be a quoted string that needs parsing
-					// Otherwise, use all arguments as-is
-					let commandArray: string[] = [];
-					if (positionals.length > 1) {
-						if (positionals.length === 2 && positionals[1].includes(" ") && !positionals[1].startsWith("-")) {
-							// Likely a quoted command string, parse it
-							commandArray = parseShellCommand(positionals[1]);
-						} else {
-							// Multiple arguments, use as-is
-							commandArray = positionals.slice(1);
+					const firstArg = positionalTokens[0].value;
+
+					// Find the index of the first positional token in the full tokens array
+					const firstPositionalIndex = tokens.findIndex((t) => t.kind === "positional");
+
+					// Everything after the first positional should be part of the command
+					// Convert any option-like tokens (starting with -) to positional args if they come after the docker image
+					const commandArray: string[] = [];
+					for (let i = firstPositionalIndex + 1; i < tokens.length; i++) {
+						const token = tokens[i];
+						if (token.kind === "positional") {
+							// Regular positional arg - use as-is, don't split
+							commandArray.push(token.value);
+						} else if (token.kind === "option") {
+							// Option token that came after docker image - treat as part of command
+							// Include both the option name and its value if it has one
+							if (token.rawName) {
+								commandArray.push(token.rawName);
+							}
+							if (token.value !== undefined) {
+								commandArray.push(token.value);
+							}
 						}
 					}
 
@@ -1164,7 +1176,7 @@ function listSubcommands(commandName: TopLevelCommandName, commandGroup: Command
 		.join("\n");
 	if (commandName === "jobs") {
 		ret +=
-			'\n\nExample:\n  hfjs jobs run -e FOO=foo -e BAR=bar python:3.12 "python -c \'import os; print(os.environ[\\"FOO\\"], os.environ[\\"BAR\\"])\'"';
+			'\n\nExample:\n  hfjs jobs run -e FOO=foo -e BAR=bar python:3.12 python -c \'import os; print(os.environ["FOO"], os.environ["BAR"])\'';
 	}
 	ret += `\n\nRun \`hfjs help ${commandName} <subcommand>\` for more information on a specific subcommand.`;
 	return ret;
@@ -1285,52 +1297,4 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 
 function kebabToCamelCase(str: string) {
 	return str.replace(/-./g, (match) => match[1].toUpperCase());
-}
-
-/**
- * Parse a shell command string into an array of arguments, respecting quotes.
- * Handles both single and double quotes, and escaped quotes.
- */
-function parseShellCommand(cmd: string): string[] {
-	const args: string[] = [];
-	let current = "";
-	let inSingleQuote = false;
-	let inDoubleQuote = false;
-	let i = 0;
-
-	while (i < cmd.length) {
-		const char = cmd[i];
-		const nextChar = cmd[i + 1];
-
-		if (char === "\\" && (nextChar === '"' || nextChar === "'" || nextChar === "\\")) {
-			// Escaped quote or backslash
-			current += nextChar;
-			i += 2;
-		} else if (char === "'" && !inDoubleQuote) {
-			// Toggle single quote
-			inSingleQuote = !inSingleQuote;
-			i++;
-		} else if (char === '"' && !inSingleQuote) {
-			// Toggle double quote
-			inDoubleQuote = !inDoubleQuote;
-			i++;
-		} else if ((char === " " || char === "\t") && !inSingleQuote && !inDoubleQuote) {
-			// Whitespace outside quotes - end of argument
-			if (current.length > 0) {
-				args.push(current);
-				current = "";
-			}
-			i++;
-		} else {
-			current += char;
-			i++;
-		}
-	}
-
-	// Add the last argument if any
-	if (current.length > 0) {
-		args.push(current);
-	}
-
-	return args;
 }
