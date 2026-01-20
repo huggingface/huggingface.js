@@ -798,16 +798,10 @@ async function run() {
 					let dockerImage: string | undefined;
 					let spaceId: string | undefined;
 
-					// Check for hf.co/ prefix to identify Space IDs
-					if (firstArg.startsWith("hf.co/")) {
-						// hf.co/spaces/namespace/space-name or hf.co/namespace/space-name
-						const hfCoSpacesMatch = firstArg.match(/^hf\.co\/spaces\/(.+)$/);
-						if (hfCoSpacesMatch) {
-							spaceId = hfCoSpacesMatch[1];
-						} else {
-							// hf.co/namespace/space-name format
-							spaceId = firstArg.slice("hf.co/".length);
-						}
+					// Check for hf.co/spaces/* format to identify Space IDs
+					const hfCoSpacesMatch = firstArg.match(/^hf\.co\/spaces\/(.+)$/);
+					if (hfCoSpacesMatch) {
+						spaceId = hfCoSpacesMatch[1];
 					} else {
 						// Everything else is treated as a docker image
 						dockerImage = firstArg;
