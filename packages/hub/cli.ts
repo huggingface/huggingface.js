@@ -798,16 +798,18 @@ async function run() {
 					let dockerImage: string | undefined;
 					let spaceId: string | undefined;
 
-					// Check for hf.co/spaces/... format
-					const hfCoSpacesMatch = firstArg.match(/^hf\.co\/spaces\/(.+)$/);
-					if (hfCoSpacesMatch) {
-						spaceId = hfCoSpacesMatch[1];
-					} else if (firstArg.includes("/") && !firstArg.includes(":")) {
-						// If it contains a slash but no colon, assume it's a space ID (namespace/space-name)
-						// Docker images typically have colons (e.g., python:3.12)
-						spaceId = firstArg;
+					// Check for hf.co/ prefix to identify Space IDs
+					if (firstArg.startsWith("hf.co/")) {
+						// hf.co/spaces/namespace/space-name or hf.co/namespace/space-name
+						const hfCoSpacesMatch = firstArg.match(/^hf\.co\/spaces\/(.+)$/);
+						if (hfCoSpacesMatch) {
+							spaceId = hfCoSpacesMatch[1];
+						} else {
+							// hf.co/namespace/space-name format
+							spaceId = firstArg.slice("hf.co/".length);
+						}
 					} else {
-						// Otherwise, treat it as a docker image
+						// Everything else is treated as a docker image
 						dockerImage = firstArg;
 					}
 
@@ -1177,7 +1179,7 @@ type ParsedArgsResult<TArgsDef extends readonly ArgDef[]> = {
 				: string
 			: K["default"] extends undefined
 				? K["multiple"] extends true
-					? string[] // Multiple optional strings are arrays
+					? string[] | undefined // Multiple optional strings are arrays or undefined if not provided
 					: string | undefined // Optional strings without default can be undefined
 				: K["multiple"] extends true
 					? string[] // Multiple strings with default are arrays
