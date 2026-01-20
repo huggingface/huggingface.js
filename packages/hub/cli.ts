@@ -7,10 +7,12 @@ import {
 	createRepo,
 	deleteBranch,
 	deleteRepo,
+	getJob,
 	listJobHardware,
 	listJobs,
 	repoExists,
 	runJob,
+	streamJobLogs,
 	uploadFilesWithProgress,
 	whoAmI,
 	type SpaceHardwareFlavor,
@@ -351,7 +353,8 @@ const commands = {
 					},
 					{
 						name: "command" as const,
-						description: "The command to run (can be multiple words, everything after docker-image-or-space)",
+						description:
+							'The command to run (should be quoted if it contains flags like -c, e.g., \'python -c "print(\\"hello\\")"\' or "python -c \'print(\\"hello\\")\'")',
 						positional: true,
 					},
 					{
@@ -408,6 +411,27 @@ const commands = {
 			hardware: {
 				description: "List available hardware options for jobs",
 				args: [
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+			logs: {
+				description: "Show logs for a job",
+				args: [
+					{
+						name: "job-id" as const,
+						description: "The job ID",
+						positional: true,
+						required: true,
+					},
+					{
+						name: "namespace" as const,
+						description: "The namespace (username or organization name). Defaults to the current user's username.",
+					},
 					{
 						name: "token" as const,
 						description:
@@ -770,7 +794,18 @@ async function run() {
 						throw new Error("Missing required argument: docker-image or space-id");
 					}
 					const firstArg = positionals[0];
-					const commandArray = positionals.slice(1);
+					// If there's only one command argument, it might be a quoted string that needs parsing
+					// Otherwise, use all arguments as-is
+					let commandArray: string[] = [];
+					if (positionals.length > 1) {
+						if (positionals.length === 2 && positionals[1].includes(" ") && !positionals[1].startsWith("-")) {
+							// Likely a quoted command string, parse it
+							commandArray = parseShellCommand(positionals[1]);
+						} else {
+							// Multiple arguments, use as-is
+							commandArray = positionals.slice(1);
+						}
+					}
 
 					// Detect if first argument is a space ID (format: hf.co/spaces/namespace/space-name or namespace/space-name)
 					let dockerImage: string | undefined;
@@ -826,7 +861,7 @@ async function run() {
 						...(spaceId ? { spaceId } : {}),
 						flavor: flavor as SpaceHardwareFlavor,
 						command: commandArray.length > 0 ? commandArray : undefined,
-						environment: Object.keys(environment).length > 0 ? environment : undefined,
+						environment: Object.keys(environment).length > 0 ? environment : {},
 						...(attempts !== undefined ? { attempts } : {}),
 						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
 						...(token ? { accessToken: token } : {}),
@@ -927,6 +962,74 @@ async function run() {
 						console.log(
 							`${hw.name.padEnd(15)} ${hw.prettyName.padEnd(22)} ${hw.cpu.padEnd(8)} ${hw.ram.padEnd(7)} ${accelerator.padEnd(16)} $${costPerMin.padStart(8)} $${costPerHour.padStart(9)}`,
 						);
+					}
+					break;
+				}
+				case "logs": {
+					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "jobs logs");
+					const { jobId, namespace, token } = parsedArgs;
+
+					// Get namespace from whoAmI if not provided
+					let finalNamespace = namespace;
+					if (!finalNamespace) {
+						if (!token) {
+							throw new Error(
+								"Cannot determine namespace without authentication. Please provide --namespace or --token.",
+							);
+						}
+						const userInfo = await whoAmI({
+							accessToken: token as string,
+							hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+						});
+						if (userInfo.type !== "user") {
+							throw new Error("Cannot determine namespace. Please provide --namespace explicitly.");
+						}
+						finalNamespace = userInfo.name;
+					}
+
+					const logsParams = {
+						namespace: finalNamespace,
+						jobId,
+						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+						...(token ? { accessToken: token } : {}),
+					} as Parameters<typeof streamJobLogs>[0];
+
+					// Get job info to check for error messages
+					const jobInfoParams = {
+						namespace: finalNamespace,
+						jobId,
+						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+						...(token ? { accessToken: token } : {}),
+					} as Parameters<typeof getJob>[0];
+					const jobInfo = await getJob(jobInfoParams);
+
+					// Show error message if job failed (check both FAILED stage and message field)
+					if (jobInfo.status.stage === "ERROR" && jobInfo.status.message) {
+						console.error(`\n❌ Job failed: ${jobInfo.status.message}\n`);
+					}
+
+					// Display logs with proper line breaks
+					// The stream itself may include the header, so we'll let it handle that
+					for await (const logChunk of streamJobLogs(logsParams)) {
+						try {
+							// Try to parse as JSON (SSE format)
+							const parsed = JSON.parse(logChunk);
+							if (parsed.data) {
+								// Ensure the data ends with a newline if it doesn't already
+								const data = parsed.data;
+								process.stdout.write(data.endsWith("\n") ? data : data + "\n");
+							}
+						} catch {
+							// If not JSON, write as-is with newline if needed
+							const chunk = logChunk;
+							// Check if it's already the header line (which includes newline)
+							if (chunk.includes("===== Job started")) {
+								process.stdout.write(chunk.endsWith("\n") ? chunk : chunk + "\n");
+							} else {
+								// For other chunks, ensure newline
+								process.stdout.write(chunk.endsWith("\n") ? chunk : chunk + "\n");
+							}
+						}
 					}
 					break;
 				}
@@ -1060,7 +1163,8 @@ function listSubcommands(commandName: TopLevelCommandName, commandGroup: Command
 		.map(([subName, subDef]) => `  ${subName}\t${subDef.description}`)
 		.join("\n");
 	if (commandName === "jobs") {
-		ret += `\n\nExample:\n  hfjs jobs run -e FOO=foo -e BAR=bar python:3.12 python -c 'import os; print(os.environ["FOO"], os.environ["BAR"])'`;
+		ret +=
+			'\n\nExample:\n  hfjs jobs run -e FOO=foo -e BAR=bar python:3.12 "python -c \'import os; print(os.environ[\\"FOO\\"], os.environ[\\"BAR\\"])\'"';
 	}
 	ret += `\n\nRun \`hfjs help ${commandName} <subcommand>\` for more information on a specific subcommand.`;
 	return ret;
@@ -1181,4 +1285,52 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 
 function kebabToCamelCase(str: string) {
 	return str.replace(/-./g, (match) => match[1].toUpperCase());
+}
+
+/**
+ * Parse a shell command string into an array of arguments, respecting quotes.
+ * Handles both single and double quotes, and escaped quotes.
+ */
+function parseShellCommand(cmd: string): string[] {
+	const args: string[] = [];
+	let current = "";
+	let inSingleQuote = false;
+	let inDoubleQuote = false;
+	let i = 0;
+
+	while (i < cmd.length) {
+		const char = cmd[i];
+		const nextChar = cmd[i + 1];
+
+		if (char === "\\" && (nextChar === '"' || nextChar === "'" || nextChar === "\\")) {
+			// Escaped quote or backslash
+			current += nextChar;
+			i += 2;
+		} else if (char === "'" && !inDoubleQuote) {
+			// Toggle single quote
+			inSingleQuote = !inSingleQuote;
+			i++;
+		} else if (char === '"' && !inSingleQuote) {
+			// Toggle double quote
+			inDoubleQuote = !inDoubleQuote;
+			i++;
+		} else if ((char === " " || char === "\t") && !inSingleQuote && !inDoubleQuote) {
+			// Whitespace outside quotes - end of argument
+			if (current.length > 0) {
+				args.push(current);
+				current = "";
+			}
+			i++;
+		} else {
+			current += char;
+			i++;
+		}
+	}
+
+	// Add the last argument if any
+	if (current.length > 0) {
+		args.push(current);
+	}
+
+	return args;
 }

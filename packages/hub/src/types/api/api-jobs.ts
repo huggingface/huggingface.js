@@ -17,7 +17,7 @@ export interface ApiJobHardware {
 	unitLabel: string;
 }
 
-export type JobStatusStage = "PENDING" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED" | "CANCELLING" | "QUEUED";
+export type JobStatusStage = "DELETING" | "RUNNING" | "PAUSED" | "STOPPED" | "UPDATING" | "ERROR";
 
 export interface ApiJobStatus {
 	stage: JobStatusStage;

@@ -33,6 +33,7 @@ export async function runJob(
 
 	const body: Record<string, unknown> = {
 		flavor: params.flavor,
+		environment: params.environment || {},
 	};
 
 	if (params.name) {
@@ -49,9 +50,6 @@ export async function runJob(
 	}
 	if (params.arguments) {
 		body.arguments = params.arguments;
-	}
-	if (params.environment) {
-		body.environment = params.environment;
 	}
 	if (params.secrets) {
 		body.secrets = params.secrets;
