@@ -365,6 +365,14 @@ const commands = {
 						default: "cpu-basic",
 					},
 					{
+						name: "name" as const,
+						description: "Optional name for the job",
+					},
+					{
+						name: "attempts" as const,
+						description: "Maximum number of attempts (defaults to 1)",
+					},
+					{
 						name: "namespace" as const,
 						description: "The namespace (username or organization name). Defaults to the current user's username.",
 					},
@@ -723,6 +731,8 @@ async function run() {
 					const { tokens } = parseArgs({
 						options: {
 							flavor: { type: "string", default: "cpu-basic" },
+							name: { type: "string" },
+							attempts: { type: "string" },
 							namespace: { type: "string" },
 							token: { type: "string", default: process.env.HF_TOKEN },
 						},
@@ -735,6 +745,18 @@ async function run() {
 					const flavor =
 						(tokens.find((t) => t.kind === "option" && t.name === "flavor") as OptionToken | undefined)?.value ||
 						"cpu-basic";
+					const name = (tokens.find((t) => t.kind === "option" && t.name === "name") as OptionToken | undefined)?.value;
+					const attemptsStr = (
+						tokens.find((t) => t.kind === "option" && t.name === "attempts") as OptionToken | undefined
+					)?.value;
+					let attempts: number | undefined;
+					if (attemptsStr) {
+						const parsed = parseInt(attemptsStr, 10);
+						if (isNaN(parsed) || parsed < 1) {
+							throw new Error("Attempts must be a positive integer");
+						}
+						attempts = parsed;
+					}
 					const namespace = (
 						tokens.find((t) => t.kind === "option" && t.name === "namespace") as OptionToken | undefined
 					)?.value;
@@ -799,11 +821,13 @@ async function run() {
 
 					const jobParams = {
 						namespace: finalNamespace,
+						...(name ? { name } : {}),
 						...(dockerImage ? { dockerImage } : {}),
 						...(spaceId ? { spaceId } : {}),
 						flavor: flavor as SpaceHardwareFlavor,
 						command: commandArray.length > 0 ? commandArray : undefined,
 						environment: Object.keys(environment).length > 0 ? environment : undefined,
+						...(attempts !== undefined ? { attempts } : {}),
 						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
 						...(token ? { accessToken: token } : {}),
 					} as Parameters<typeof runJob>[0];
@@ -851,12 +875,17 @@ async function run() {
 					}
 
 					// Display jobs in a table-like format
-					console.log(`${"ID".padEnd(40)} ${"STATUS".padEnd(12)} ${"CREATED".padEnd(20)} ${"DOCKER IMAGE"}`);
-					console.log("-".repeat(100));
+					console.log(
+						`${"ID".padEnd(40)} ${"NAME".padEnd(20)} ${"STATUS".padEnd(12)} ${"CREATED".padEnd(20)} ${"DOCKER IMAGE"}`,
+					);
+					console.log("-".repeat(120));
 					for (const job of filteredJobs) {
 						const createdAt = new Date(job.createdAt).toLocaleString();
 						const dockerImage = job.dockerImage || job.spaceId || "N/A";
-						console.log(`${job.id.padEnd(40)} ${job.status.padEnd(12)} ${createdAt.padEnd(20)} ${dockerImage}`);
+						const jobName = job.name || "N/A";
+						console.log(
+							`${job.id.padEnd(40)} ${jobName.padEnd(20)} ${job.status.padEnd(12)} ${createdAt.padEnd(20)} ${dockerImage}`,
+						);
 					}
 					break;
 				}

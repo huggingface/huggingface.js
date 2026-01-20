@@ -35,6 +35,9 @@ export async function runJob(
 		flavor: params.flavor,
 	};
 
+	if (params.name) {
+		body.name = params.name;
+	}
 	if (params.dockerImage) {
 		body.dockerImage = params.dockerImage;
 	}
