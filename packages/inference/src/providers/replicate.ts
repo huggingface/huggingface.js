@@ -92,7 +92,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 		res: ReplicateOutput | Blob,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: OutputType
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		void url;
 		void headers;
@@ -236,7 +236,7 @@ export class ReplicateAutomaticSpeechRecognitionTask
 			}
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from Replicate automatic-speech-recognition API"
+			"Received malformed response from Replicate automatic-speech-recognition API",
 		);
 	}
 }

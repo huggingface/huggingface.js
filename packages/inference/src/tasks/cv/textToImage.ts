@@ -17,23 +17,23 @@ interface TextToImageOptions extends Options {
  */
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType: "url" }
+	options?: TextToImageOptions & { outputType: "url" },
 ): Promise<string>;
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType: "dataUrl" }
+	options?: TextToImageOptions & { outputType: "dataUrl" },
 ): Promise<string>;
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType?: undefined | "blob" }
+	options?: TextToImageOptions & { outputType?: undefined | "blob" },
 ): Promise<Blob>;
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType?: undefined | "json" }
+	options?: TextToImageOptions & { outputType?: undefined | "json" },
 ): Promise<Record<string, unknown>>;
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions
+	options?: TextToImageOptions,
 ): Promise<Blob | string | Record<string, unknown>> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-to-image");

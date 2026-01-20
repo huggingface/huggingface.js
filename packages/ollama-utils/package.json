@@ -1,14 +1,28 @@
 {
 	"name": "@huggingface/ollama-utils",
-	"packageManager": "pnpm@10.10.0",
 	"version": "0.0.17",
 	"description": "Various utilities for maintaining Ollama compatibility with models on Hugging Face hub",
+	"keywords": [
+		"gguf",
+		"hub",
+		"huggingface"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
-	"publishConfig": {
-		"access": "public"
-	},
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"src",
+		"tsconfig.json"
+	],
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
+	"browser": {
+		"./src/utils/FileBlob.ts": false,
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
@@ -17,15 +31,9 @@
 			"import": "./dist/index.mjs"
 		}
 	},
-	"browser": {
-		"./src/utils/FileBlob.ts": false,
-		"./dist/index.js": "./dist/browser/index.js",
-		"./dist/index.mjs": "./dist/browser/index.mjs"
+	"publishConfig": {
+		"access": "public"
 	},
-	"engines": {
-		"node": ">=20"
-	},
-	"source": "index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
@@ -37,22 +45,14 @@
 		"test": "vitest run",
 		"check": "tsc"
 	},
-	"files": [
-		"dist",
-		"src",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"hub",
-		"gguf"
-	],
-	"author": "Hugging Face",
-	"license": "MIT",
 	"dependencies": {
 		"@huggingface/jinja": "workspace:^"
 	},
 	"devDependencies": {
 		"@types/node": "^20.12.8"
-	}
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"packageManager": "pnpm@10.10.0"
 }

@@ -42,7 +42,7 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 	preparePayload(params: BodyParams<TextToImageInput>): Record<string, unknown> {
 		if (params.outputType === "url") {
 			throw new InferenceClientInputError(
-				"nscale provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead."
+				"nscale provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead.",
 			);
 		}
 		return {
@@ -62,7 +62,7 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 		response: NscaleCloudBase64ImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: OutputType
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&

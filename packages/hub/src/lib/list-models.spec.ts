@@ -108,7 +108,7 @@ describe("listModels", () => {
 			count++;
 			if (Array.isArray(entry.inferenceProviderMapping)) {
 				expect(
-					entry.inferenceProviderMapping.filter(({ provider }) => inferenceProviders.includes(provider)).length
+					entry.inferenceProviderMapping.filter(({ provider }) => inferenceProviders.includes(provider)).length,
 				).toBeGreaterThan(0);
 			}
 		}

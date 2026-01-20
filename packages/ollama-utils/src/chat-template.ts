@@ -10,21 +10,21 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 		ggufTmpl.match(/<用户>/) && ggufTmpl.match(/<AI>/)
 			? {
 					ollamaTmpl: "<用户>{{ .Prompt }}<AI>",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/### Instruction:/)
 			? {
 					ollamaTmpl: "{{ .System }}\n### Instruction:\n{{ .Prompt }}\n### Response:\n",
 					stop: "### Instruction:",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/Human:/)
 			? {
 					ollamaTmpl: "{{ .System }}\nHuman: {{ .Prompt }}\n\nAssistant:",
 					stop: "Human:",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/<start_of_turn>/)
@@ -33,7 +33,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					ollamaTmpl:
 						"<start_of_turn>user\n{{ if .System }}{{ .System }} {{ end }}{{ .Prompt }}<end_of_turn>\n<start_of_turn>model\n{{ .Response }}<end_of_turn>\n",
 					stop: "<end_of_turn>",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/(bos_token|'<s>') \+ message\['role'\]/)
@@ -42,7 +42,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					ollamaTmpl:
 						"{{ if .System }}<s>system\n{{ .System }}</s>{{ end }}{{ if .Prompt }}<s>user\n{{ .Prompt }}</s>{{ end }}<s>assistant\n{{ .Response }}</s>",
 					stop: "</s>",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/<\|start_header_id\|>/) && ggufTmpl.match(/eos_token|<\/s>/)
@@ -51,7 +51,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					ollamaTmpl:
 						"{{ if .System }}<|start_header_id|>system<|end_header_id|>\n\n{{ .System }}</s>{{ end }}{{ if .Prompt }}<|start_header_id|>user<|end_header_id|>\n\n{{ .Prompt }}</s>{{ end }}<|start_header_id|>assistant<|end_header_id|>\n\n{{ .Response }}</s>",
 					stop: "</s>",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/<\|assistant\|>/) && ggufTmpl.match(/<\|end\|>/)
@@ -60,7 +60,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					ollamaTmpl:
 						"{{ if .System }}<|system|>\n{{ .System }}<|end|>\n{{ end }}{{ if .Prompt }}<|user|>\n{{ .Prompt }}<|end|>\n{{ end }}<|assistant|>\n{{ .Response }}<|end|>",
 					stop: "<|end|>",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/<\|{{ item\['role'\] }}\|>/) && ggufTmpl.match(/<\|begin_of_image\|>/)
@@ -70,7 +70,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					ollamaTmpl:
 						"{{ if .System }}<|system|>\n{{ .System }}{{ end }}{{ if .Prompt }}<|user|>\n{{ .Prompt }}{{ end }}<|assistant|>\n{{ .Response }}",
 					stop: "<|user|>",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/<\|START_OF_TURN_TOKEN\|>/) && ggufTmpl.match(/<\|USER_TOKEN\|>/)
@@ -79,7 +79,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					ollamaTmpl:
 						"{{ if .System }}<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>{{ .System }}<|END_OF_TURN_TOKEN|>{{ end }}{{ if .Prompt }}<|START_OF_TURN_TOKEN|><|USER_TOKEN|>{{ .Prompt }}<|END_OF_TURN_TOKEN|>{{ end }}<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|><|START_RESPONSE|>{{ .Response }}<|END_RESPONSE|><|END_OF_TURN_TOKEN|>",
 					stop: "<|END_OF_TURN_TOKEN|>",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/Mistral Small 3/) && ggufTmpl.match(/2023-10-01/)
@@ -89,7 +89,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					ollamaTmpl:
 						'{{- range $index, $_ := .Messages }}\n{{- if eq .Role "system" }}[SYSTEM_PROMPT]{{ .Content }}[/SYSTEM_PROMPT]\n{{- else if eq .Role "user" }}\n{{- if and (le (len (slice $.Messages $index)) 2) $.Tools }}[AVAILABLE_TOOLS]{{ $.Tools }}[/AVAILABLE_TOOLS]\n{{- end }}[INST]{{ .Content }}[/INST]\n{{- else if eq .Role "assistant" }}\n{{- if .Content }}{{ .Content }}\n{{- if not (eq (len (slice $.Messages $index)) 1) }}</s>\n{{- end }}\n{{- else if .ToolCalls }}[TOOL_CALLS][\n{{- range .ToolCalls }}{"name": "{{ .Function.Name }}", "arguments": {{ .Function.Arguments }}}\n{{- end }}]</s>\n{{- end }}\n{{- else if eq .Role "tool" }}[TOOL_RESULTS]{"content": {{ .Content }}}[/TOOL_RESULTS]\n{{- end }}\n{{- end }}',
 					stop: "[INST]",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		ggufTmpl.match(/rwkv-world/)
@@ -97,7 +97,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					// ref: https://huggingface.co/BlinkDL/rwkv-5-world
 					ollamaTmpl: "{{ .System }}\nUser: {{ .Prompt }}\n\nAssistant:",
 					stop: "### Instruction:",
-			  }
+				}
 			: undefined,
 	(ggufTmpl: string) =>
 		(ggufTmpl.match(/\[gMASK\]<sop>/) && ggufTmpl.match(/<\|user\|>/)) || ggufTmpl.match(/chatglm4/)
@@ -106,7 +106,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					ollamaTmpl:
 						"[gMASK]<sop>{{ if .System }}<|system|>\n{{ .System }}{{ end }}{{ if .Prompt }}<|user|>\n{{ .Prompt }}{{ end }}<|assistant|>\n{{ .Response }}",
 					stop: "<|user|>",
-			  }
+				}
 			: undefined,
 ];
 
@@ -116,7 +116,7 @@ export function convertGGUFTemplateToOllama(
 		// for error tracking purpose
 		debugModelId?: string;
 		logDebug?: (typeof console)["debug"];
-	}
+	},
 ): OllamaChatTemplateMapEntry | undefined {
 	if (!gguf.chat_template) {
 		return undefined;
@@ -148,7 +148,7 @@ export function convertGGUFTemplateToOllama(
 		if (matched) {
 			// @ngxson wants to track this
 			options?.logDebug?.(
-				`🔍 Custom map Jinja to Go:\n\n\`\`\`${matched.ollamaTmpl}\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`
+				`🔍 Custom map Jinja to Go:\n\n\`\`\`${matched.ollamaTmpl}\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`,
 			);
 			return {
 				model: "custom-matching",
@@ -159,7 +159,7 @@ export function convertGGUFTemplateToOllama(
 					params: matched.stop
 						? {
 								stop: [matched.stop],
-						  }
+							}
 						: {},
 				},
 			};
@@ -176,7 +176,7 @@ export function convertGGUFTemplateToOllama(
 		}
 		// @ngxson wants to track this
 		options?.logDebug?.(
-			`🙏 Converted Jinja to Go:\n\n\`\`\`${convertedToGo.tmpl}\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`
+			`🙏 Converted Jinja to Go:\n\n\`\`\`${convertedToGo.tmpl}\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`,
 		);
 		return {
 			model: "auto-conversion",
@@ -192,8 +192,8 @@ export function convertGGUFTemplateToOllama(
 	options?.logDebug?.(
 		`❌ Cannot map jinja template:\n\n\`\`\`${gguf.chat_template.substring(
 			0,
-			200
-		)}...\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`
+			200,
+		)}...\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`,
 	);
 }
 

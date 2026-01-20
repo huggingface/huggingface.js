@@ -97,7 +97,7 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		response: ZaiTextToImageResponse,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: OutputType
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError(`URL and headers are required for 'text-to-image' task`);
@@ -111,8 +111,8 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		) {
 			throw new InferenceClientProviderOutputError(
 				`Received malformed response from ZAI text-to-image API: expected { id: string, task_status: string }, got: ${JSON.stringify(
-					response
-				)}`
+					response,
+				)}`,
 			);
 		}
 
@@ -145,7 +145,7 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 				throw new InferenceClientProviderApiError(
 					`Failed to fetch result from ZAI text-to-image API: ${resp.status}`,
 					{ url: pollUrl, method: "GET" },
-					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
+					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() },
 				);
 			}
 
@@ -165,8 +165,8 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 				) {
 					throw new InferenceClientProviderOutputError(
 						`Received malformed response from ZAI text-to-image API: expected { image_result: Array<{ url: string }> }, got: ${JSON.stringify(
-							result
-						)}`
+							result,
+						)}`,
 					);
 				}
 
@@ -186,7 +186,7 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		}
 
 		throw new InferenceClientProviderOutputError(
-			`Timed out while waiting for the result from ZAI API - aborting after ${MAX_POLL_ATTEMPTS} attempts`
+			`Timed out while waiting for the result from ZAI API - aborting after ${MAX_POLL_ATTEMPTS} attempts`,
 		);
 	}
 }

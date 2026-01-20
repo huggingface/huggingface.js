@@ -1,10 +1,12 @@
 {
 	"name": "@huggingface/tasks-gen",
-	"packageManager": "pnpm@10.10.0",
 	"version": "0.13.1",
-	"description": "Utilities to generate files for @huggingface/tasks, and avoid unnecessary deps in the published package",
-	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"private": true,
+	"description": "Utilities to generate files for @huggingface/tasks, and avoid unnecessary deps in the published package",
+	"license": "MIT",
+	"author": "Hugging Face",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"type": "module",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
@@ -17,16 +19,14 @@
 		"inference-tei-import": "tsx scripts/inference-tei-import.ts && oxfmt ../tasks/src/tasks/feature-extraction/spec/*.json",
 		"test": "vitest run"
 	},
-	"type": "module",
-	"author": "Hugging Face",
-	"license": "MIT",
+	"dependencies": {
+		"@huggingface/inference": "workspace:^",
+		"@huggingface/tasks": "workspace:^"
+	},
 	"devDependencies": {
 		"@types/node": "^20.11.5",
 		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
 		"type-fest": "^3.13.1"
 	},
-	"dependencies": {
-		"@huggingface/tasks": "workspace:^",
-		"@huggingface/inference": "workspace:^"
-	}
+	"packageManager": "pnpm@10.10.0"
 }

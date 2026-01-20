@@ -149,7 +149,7 @@ export async function oauthHandleRedirect(opts?: {
 	}
 	if (typeof localStorage === "undefined" && (!opts?.nonce || !opts?.codeVerifier)) {
 		throw new Error(
-			"oauthHandleRedirect requires localStorage to be available, unless you provide nonce and codeVerifier"
+			"oauthHandleRedirect requires localStorage to be available, unless you provide nonce and codeVerifier",
 		);
 	}
 
@@ -319,7 +319,7 @@ export async function oauthHandleRedirectIfPresent(opts?: {
 	}
 	if (typeof localStorage === "undefined" && (!opts?.nonce || !opts?.codeVerifier)) {
 		throw new Error(
-			"oauthHandleRedirect requires localStorage to be available, unless you provide nonce and codeVerifier"
+			"oauthHandleRedirect requires localStorage to be available, unless you provide nonce and codeVerifier",
 		);
 	}
 	const searchParams = new URLSearchParams(opts?.redirectedUrl ?? window.location.search);
@@ -331,7 +331,7 @@ export async function oauthHandleRedirectIfPresent(opts?: {
 	if (searchParams.has("code")) {
 		if (!localStorage.getItem("huggingface.co:oauth:nonce")) {
 			console.warn(
-				"Missing oauth nonce from localStorage. This can happen when the user refreshes the page after logging in, without changing the URL."
+				"Missing oauth nonce from localStorage. This can happen when the user refreshes the page after logging in, without changing the URL.",
 			);
 			return false;
 		}

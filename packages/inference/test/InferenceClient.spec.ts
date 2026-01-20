@@ -247,7 +247,7 @@ describe.skip("InferenceClient", () => {
 					hf.fillMask({
 						model: "this-model/does-not-exist-123",
 						inputs: "[MASK] world!",
-					})
+					}),
 				).rejects.toThrowError("Model this-model/does-not-exist-123 does not exist");
 			});
 
@@ -256,7 +256,7 @@ describe.skip("InferenceClient", () => {
 					await hf.fillMask({
 						model: "google-bert/bert-base-uncased",
 						inputs: "[MASK] world!",
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
@@ -265,7 +265,7 @@ describe.skip("InferenceClient", () => {
 							token_str: expect.any(String),
 							sequence: expect.any(String),
 						}),
-					])
+					]),
 				);
 			});
 
@@ -273,7 +273,7 @@ describe.skip("InferenceClient", () => {
 				expect(
 					await hf.fillMask({
 						inputs: "[MASK] world!",
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
@@ -282,7 +282,7 @@ describe.skip("InferenceClient", () => {
 							token_str: expect.any(String),
 							sequence: expect.any(String),
 						}),
-					])
+					]),
 				);
 			});
 
@@ -295,7 +295,7 @@ describe.skip("InferenceClient", () => {
 						parameters: {
 							max_length: 100,
 						},
-					})
+					}),
 				).toEqual({
 					summary_text: "The Eiffel Tower is one of the most famous buildings in the world.",
 				});
@@ -309,7 +309,7 @@ describe.skip("InferenceClient", () => {
 							question: "What is the capital of France?",
 							context: "The capital of France is Paris.",
 						},
-					})
+					}),
 				).toMatchObject({
 					answer: "Paris",
 					score: expect.any(Number),
@@ -331,7 +331,7 @@ describe.skip("InferenceClient", () => {
 								"Programming language": ["Python", "Python", "Rust, Python and NodeJS"],
 							},
 						},
-					})
+					}),
 				).toMatchObject({
 					answer: "AVERAGE > 36542",
 					coordinates: [[0, 1]],
@@ -348,7 +348,7 @@ describe.skip("InferenceClient", () => {
 							question: "Invoice number?",
 							image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
 						},
-					})
+					}),
 				).toMatchObject({
 					answer: "us-001",
 					score: expect.any(Number),
@@ -367,7 +367,7 @@ describe.skip("InferenceClient", () => {
 							question: "Invoice number?",
 							image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
 						},
-					})
+					}),
 				).toMatchObject({
 					answer: "us-001",
 				});
@@ -381,7 +381,7 @@ describe.skip("InferenceClient", () => {
 							question: "How many cats are lying down?",
 							image: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						},
-					})
+					}),
 				).toMatchObject({
 					answer: "2",
 					score: expect.any(Number),
@@ -393,14 +393,14 @@ describe.skip("InferenceClient", () => {
 					await hf.textClassification({
 						model: "distilbert-base-uncased-finetuned-sst-2-english",
 						inputs: "I like you. I love you.",
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
 							label: expect.any(String),
 							score: expect.any(Number),
 						}),
-					])
+					]),
 				);
 			});
 
@@ -409,7 +409,7 @@ describe.skip("InferenceClient", () => {
 					await hf.textGeneration({
 						model: "gpt2",
 						inputs: "The answer to the universe is",
-					})
+					}),
 				).toMatchObject({
 					generated_text: expect.any(String),
 				});
@@ -420,7 +420,7 @@ describe.skip("InferenceClient", () => {
 					await hf.textGeneration({
 						model: "openai-community/gpt2",
 						inputs: "The answer to the universe is",
-					})
+					}),
 				).toMatchObject({
 					generated_text: expect.any(String),
 				});
@@ -463,7 +463,7 @@ describe.skip("InferenceClient", () => {
 				});
 
 				await expect(response.next()).rejects.toThrow(
-					"Error forwarded from backend: Input validation error: `inputs` tokens + `max_new_tokens` must be <= 4096. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
+					"Error forwarded from backend: Input validation error: `inputs` tokens + `max_new_tokens` must be <= 4096. Given: 17 `inputs` tokens and 10000 `max_new_tokens`",
 				);
 			});
 
@@ -477,7 +477,7 @@ describe.skip("InferenceClient", () => {
 							max_new_tokens: 100,
 						},
 					},
-					{ signal: controller.signal }
+					{ signal: controller.signal },
 				);
 				await expect(response.next()).resolves.toBeDefined();
 				await expect(response.next()).resolves.toBeDefined();
@@ -490,7 +490,7 @@ describe.skip("InferenceClient", () => {
 					await hf.tokenClassification({
 						model: "dbmdz/bert-large-cased-finetuned-conll03-english",
 						inputs: "My name is Sarah Jessica Parker but you can call me Jessica",
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
@@ -500,7 +500,7 @@ describe.skip("InferenceClient", () => {
 							start: expect.any(Number),
 							end: expect.any(Number),
 						}),
-					])
+					]),
 				);
 			});
 
@@ -509,7 +509,7 @@ describe.skip("InferenceClient", () => {
 					await hf.translation({
 						model: "t5-base",
 						inputs: "My name is Wolfgang and I live in Berlin",
-					})
+					}),
 				).toMatchObject({
 					translation_text: "Mein Name ist Wolfgang und ich lebe in Berlin",
 				});
@@ -519,7 +519,7 @@ describe.skip("InferenceClient", () => {
 						model: "t5-base",
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						inputs: ["My name is Wolfgang and I live in Berlin", "I work as programmer"] as any,
-					})
+					}),
 				).toMatchObject([
 					{
 						translation_text: "Mein Name ist Wolfgang und ich lebe in Berlin",
@@ -538,7 +538,7 @@ describe.skip("InferenceClient", () => {
 							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						] as any,
 						parameters: { candidate_labels: ["refund", "legal", "faq"] },
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
@@ -551,7 +551,7 @@ describe.skip("InferenceClient", () => {
 								expect.closeTo(0.01698593981564045, 5),
 							],
 						}),
-					])
+					]),
 				);
 			});
 			it("sentenceSimilarity", async () => {
@@ -562,7 +562,7 @@ describe.skip("InferenceClient", () => {
 							source_sentence: "That is a happy person",
 							sentences: ["That is a happy dog", "That is a very happy person", "Today is a sunny day"],
 						},
-					})
+					}),
 				).toEqual([expect.any(Number), expect.any(Number), expect.any(Number)]);
 			});
 			it("FeatureExtraction", async () => {
@@ -631,7 +631,7 @@ describe.skip("InferenceClient", () => {
 					await hf.automaticSpeechRecognition({
 						model: "facebook/wav2vec2-large-960h-lv60-self",
 						data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
-					})
+					}),
 				).toMatchObject({
 					text: "GOING ALONG SLUSHY COUNTRY ROADS AND SPEAKING TO DAMP AUDIENCES IN DRAUGHTY SCHOOLROOMS DAY AFTER DAY FOR A FORTNIGHT HE'LL HAVE TO PUT IN AN APPEARANCE AT SOME PLACE OF WORSHIP ON SUNDAY MORNING AND HE CAN COME TO US IMMEDIATELY AFTERWARDS",
 				});
@@ -641,14 +641,14 @@ describe.skip("InferenceClient", () => {
 					await hf.audioClassification({
 						model: "superb/hubert-large-superb-er",
 						data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
 							score: expect.any(Number),
 							label: expect.any(String),
 						}),
-					])
+					]),
 				);
 			});
 
@@ -657,7 +657,7 @@ describe.skip("InferenceClient", () => {
 					await hf.audioToAudio({
 						model: "speechbrain/sepformer-wham",
 						data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
@@ -665,7 +665,7 @@ describe.skip("InferenceClient", () => {
 							blob: expect.any(String),
 							"content-type": expect.any(String),
 						}),
-					])
+					]),
 				);
 			});
 
@@ -674,7 +674,7 @@ describe.skip("InferenceClient", () => {
 					await hf.textToSpeech({
 						model: "espnet/kan-bayashi_ljspeech_vits",
 						inputs: "hello there!",
-					})
+					}),
 				).toBeInstanceOf(Blob);
 			});
 
@@ -683,14 +683,14 @@ describe.skip("InferenceClient", () => {
 					await hf.imageClassification({
 						data: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 						model: "google/vit-base-patch16-224",
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
 							score: expect.any(Number),
 							label: expect.any(String),
 						}),
-					])
+					]),
 				);
 			});
 
@@ -702,7 +702,7 @@ describe.skip("InferenceClient", () => {
 						parameters: {
 							candidate_labels: ["animal", "toy", "car"],
 						},
-					})
+					}),
 				).toEqual([
 					{
 						label: "animal",
@@ -724,7 +724,7 @@ describe.skip("InferenceClient", () => {
 					await hf.objectDetection({
 						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50",
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
@@ -737,7 +737,7 @@ describe.skip("InferenceClient", () => {
 								ymax: expect.any(Number),
 							}),
 						}),
-					])
+					]),
 				);
 			});
 			it("imageSegmentation", async () => {
@@ -745,7 +745,7 @@ describe.skip("InferenceClient", () => {
 					await hf.imageSegmentation({
 						inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50-panoptic",
-					})
+					}),
 				).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
@@ -753,7 +753,7 @@ describe.skip("InferenceClient", () => {
 							label: expect.any(String),
 							mask: expect.any(String),
 						}),
-					])
+					]),
 				);
 			});
 			it("imageToImage", async () => {
@@ -818,7 +818,7 @@ describe.skip("InferenceClient", () => {
 					await hf.imageToText({
 						data: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 						model: "nlpconnect/vit-gpt2-image-captioning",
-					})
+					}),
 				).toEqual({
 					generated_text: "a large brown and white giraffe standing in a field ",
 				});
@@ -830,7 +830,7 @@ describe.skip("InferenceClient", () => {
 					await hf.request({
 						model: "openai-community/gpt2",
 						inputs: "one plus two equals",
-					})
+					}),
 				).toMatchObject([
 					{
 						generated_text: expect.any(String),
@@ -853,7 +853,7 @@ describe.skip("InferenceClient", () => {
 								Width: ["4.02", "4.3056", "4.6961"],
 							},
 						},
-					})
+					}),
 				).toMatchObject([270.5473526976245, 313.6843425638086, 328.3727133404402]);
 			});
 
@@ -877,7 +877,7 @@ describe.skip("InferenceClient", () => {
 								alcohol: ["9.4", "9.8", "12.6"],
 							},
 						},
-					})
+					}),
 				).toMatchObject([5, 5, 7]);
 			});
 
@@ -946,9 +946,9 @@ describe.skip("InferenceClient", () => {
 							temperature: 0.1,
 							seed: 0,
 						})
-						.next()
+						.next(),
 				).rejects.toThrowError(
-					"Server google/gemma-2b does not seem to support chat completion. Error: Template error: template not found"
+					"Server google/gemma-2b does not seem to support chat completion. Error: Template error: template not found",
 				);
 			});
 
@@ -1021,11 +1021,11 @@ describe.skip("InferenceClient", () => {
 						model: "gpt-3.5-turbo", // must be "openai/gpt-3.5-turbo"
 						provider: "openai",
 						messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					})
+					}),
 				).rejects.toThrowError(`Models from openai must be prefixed by "openai/". Got "gpt-3.5-turbo".`);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	/**
@@ -1112,7 +1112,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -1187,7 +1187,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toMatchObject({ generated_text: "2.2 million people, and it is the" });
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -1311,7 +1311,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 	describe.concurrent(
 		"SambaNova",
@@ -1353,7 +1353,7 @@ describe.skip("InferenceClient", () => {
 				expect(res[0]).toBeInstanceOf(Array);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -1408,7 +1408,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toMatchObject({ generated_text: " a city of love, and it’s also" });
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -1513,7 +1513,7 @@ describe.skip("InferenceClient", () => {
 				});
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -1623,7 +1623,7 @@ describe.skip("InferenceClient", () => {
 				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent("3rd party providers", () => {
@@ -1634,9 +1634,9 @@ describe.skip("InferenceClient", () => {
 					provider: "together",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
 					accessToken: env.HF_TOGETHER_KEY ?? "dummy",
-				})
+				}),
 			).rejects.toThrowError(
-				"Model black-forest-labs/Flux.1-dev is not supported for task conversational and provider together"
+				"Model black-forest-labs/Flux.1-dev is not supported for task conversational and provider together",
 			);
 		});
 	});
@@ -1691,7 +1691,7 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse.length).toBeGreaterThan(0);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -1794,7 +1794,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toMatchObject({ generated_text: "...the capital and most populous city of France," });
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -1854,7 +1854,7 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse.length).toBeGreaterThan(0);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 	describe.concurrent(
 		"Black Forest Labs",
@@ -1900,13 +1900,13 @@ describe.skip("InferenceClient", () => {
 							seed: 8817,
 						},
 					},
-					{ outputType: "url" }
+					{ outputType: "url" },
 				);
 				expect(res).toBeTypeOf("string");
 				expect(isUrl(res)).toBeTruthy();
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 	describe.concurrent(
 		"Cohere",
@@ -1965,7 +1965,7 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse.length).toBeGreaterThan(0);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 	describe.concurrent(
 		"Cerebras",
@@ -2017,7 +2017,7 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse.length).toBeGreaterThan(0);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 	describe.concurrent(
 		"Nscale",
@@ -2080,7 +2080,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 	describe.concurrent(
 		"Groq",
@@ -2132,7 +2132,7 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse.length).toBeGreaterThan(0);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 	describe.concurrent(
 		"ZAI",
@@ -2201,7 +2201,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 	describe.concurrent(
 		"OVHcloud",
@@ -2305,7 +2305,7 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse).toContain("D");
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -2481,7 +2481,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -2534,7 +2534,7 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse.length).toBeGreaterThan(0);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -2592,7 +2592,7 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse).toMatch(/1.*2.*3/);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 
 	describe.concurrent(
@@ -2650,6 +2650,6 @@ describe.skip("InferenceClient", () => {
 				expect(fullResponse).toMatch(/1.*2.*3/);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 });

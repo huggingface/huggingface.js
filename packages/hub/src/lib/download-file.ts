@@ -43,7 +43,7 @@ export async function downloadFile(
 		 * Can save an http request if provided
 		 */
 		downloadInfo?: FileDownloadInfoOutput;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<Blob | null> {
 	const accessToken = checkCredentials(params);
 

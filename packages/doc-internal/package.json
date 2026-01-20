@@ -1,9 +1,10 @@
 {
 	"name": "@huggingface/doc-internal",
-	"packageManager": "pnpm@10.10.0",
 	"version": "1.0.0",
-	"description": "Package to generate doc for other @huggingface packages",
 	"private": true,
+	"description": "Package to generate doc for other @huggingface packages",
+	"license": "MIT",
+	"type": "module",
 	"scripts": {
 		"start": "pnpm run fix-cdn-versions && pnpm run doc-hub && pnpm run doc-inference && pnpm run doc-space-header && pnpm run doc-gguf && pnpm run doc-mcp-client && pnpm run doc-tiny-agents && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links && pnpm run fix-md-headinghashlinks",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
@@ -21,15 +22,14 @@
 		"fix-md-links": "tsx fix-md-links.ts",
 		"fix-md-headinghashlinks": "tsx fix-md-headinghashlinks.ts"
 	},
-	"type": "module",
-	"license": "MIT",
+	"dependencies": {
+		"glob": "^9.2.1",
+		"yaml": "^2.2.2"
+	},
 	"devDependencies": {
 		"@types/node": "^18.14.5",
 		"typedoc": "^0.25.12",
 		"typedoc-plugin-markdown": "^3.17.1"
 	},
-	"dependencies": {
-		"glob": "^9.2.1",
-		"yaml": "^2.2.2"
-	}
+	"packageManager": "pnpm@10.10.0"
 }

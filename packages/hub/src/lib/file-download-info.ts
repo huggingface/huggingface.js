@@ -44,7 +44,7 @@ export async function fileDownloadInfo(
 		 * So that on browsers you can use the URL in an iframe for example
 		 */
 		noContentDisposition?: boolean;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<FileDownloadInfoOutput | null> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);

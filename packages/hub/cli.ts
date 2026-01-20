@@ -36,7 +36,7 @@ class UploadProgressManager {
 					barCompleteChar: "\u2588",
 					barIncompleteChar: "\u2591",
 				},
-				cliProgress.Presets.shades_grey
+				cliProgress.Presets.shades_grey,
 			);
 		} catch (error) {
 			// cli-progress is not available, fall back to simple logging
@@ -388,11 +388,11 @@ async function run() {
 					`Hugging Face CLI Tools (hfjs)\n\nAvailable commands:\n\n` +
 						typedEntries(commands)
 							.map(([name, def]) => `  ${usage(name)}: ${def.description}`)
-							.join("\n")
+							.join("\n"),
 				);
 				console.log("\nTo get help on a specific command, run `hfjs help <command>` or `hfjs <command> --help`");
 				console.log(
-					"For commands with subcommands (like 'branch'), run `hfjs help <command> <subcommand>` or `hfjs <command> <subcommand> --help`"
+					"For commands with subcommands (like 'branch'), run `hfjs help <command> <subcommand>` or `hfjs <command> <subcommand> --help`",
 				);
 				if (mainCommandName === undefined) {
 					process.exitCode = 1;
@@ -443,7 +443,7 @@ async function run() {
 							content: pathToFileURL(localFolder),
 							path: join(pathInRepo, `${basename(localFolder)}`).replace(/^[.]?\//, ""),
 						},
-				  ]
+					]
 				: [{ content: pathToFileURL(localFolder), path: pathInRepo.replace(/^[.]?\//, "") }];
 
 			const progressManager = new UploadProgressManager(!!quiet);
@@ -598,7 +598,7 @@ async function run() {
 				`\nAvailable commands:\n\n` +
 					typedEntries(commands)
 						.map(([name, def]) => `  ${usage(name)}: ${def.description}`)
-						.join("\n")
+						.join("\n"),
 			);
 			console.log("\nTo get help on a specific command, run `hfjs help <command>` or `hfjs <command> --help`");
 			process.exitCode = 1;
@@ -667,8 +667,8 @@ function _detailedUsage(args: readonly ArgDef[], usageLine: string, commandDescr
 			const valueHint = arg.enum
 				? `{${arg.enum.join("|")}}`
 				: arg.boolean
-				  ? ""
-				  : `<${arg.name.toUpperCase().replace(/-/g, "_")}>`;
+					? ""
+					: `<${arg.name.toUpperCase().replace(/-/g, "_")}>`;
 			ret += `  ${nameAndAlias}${valueHint ? " " + valueHint : ""}\t${arg.description}${
 				arg.default !== undefined
 					? ` (default: ${typeof arg.default === "function" ? arg.default() : arg.default})`
@@ -690,7 +690,7 @@ function detailedUsageForCommand(commandName: TopLevelCommandName): string {
 
 function detailedUsageForSubcommand(
 	commandName: TopLevelCommandName,
-	subCommandName: keyof CommandGroup["subcommands"]
+	subCommandName: keyof CommandGroup["subcommands"],
 ): string {
 	const commandGroup = commands[commandName];
 	if (!("subcommands" in commandGroup) || !(subCommandName in commandGroup.subcommands)) {
@@ -715,16 +715,16 @@ type ParsedArgsResult<TArgsDef extends readonly ArgDef[]> = {
 	[K in TArgsDef[number] as Camelize<K["name"]>]: K["boolean"] extends true
 		? boolean
 		: K["required"] extends true
-		  ? string
-		  : K["default"] extends undefined
-		    ? string | undefined // Optional strings without default can be undefined
-		    : string; // Strings with default or required are strings
+			? string
+			: K["default"] extends undefined
+				? string | undefined // Optional strings without default can be undefined
+				: string; // Strings with default or required are strings
 };
 
 function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 	args: string[],
 	argDefs: TArgsDef,
-	commandNameForError: string
+	commandNameForError: string,
 ): ParsedArgsResult<TArgsDef> {
 	const { tokens } = parseArgs({
 		options: Object.fromEntries(
@@ -739,7 +739,7 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 						}),
 					};
 					return [arg.name, optionConfig];
-				})
+				}),
 		),
 		args,
 		allowPositionals: true,
@@ -754,8 +754,8 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 		throw new Error(
 			`Command '${commandNameForError}': Missing required positional arguments. Usage: hfjs ${usage(
 				commandNameForError.split(" ")[0] as TopLevelCommandName,
-				commandNameForError.split(" ")[1]
-			)}`
+				commandNameForError.split(" ")[1],
+			)}`,
 		);
 	}
 
@@ -763,8 +763,8 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 		throw new Error(
 			`Command '${commandNameForError}': Too many positional arguments. Usage: hfjs ${usage(
 				commandNameForError.split(" ")[0] as TopLevelCommandName,
-				commandNameForError.split(" ")[1]
-			)}`
+				commandNameForError.split(" ")[1],
+			)}`,
 		);
 	}
 
@@ -805,7 +805,7 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 					throw new Error(
 						`Command '${commandNameForError}': Invalid value '${token.value}' for option ${
 							token.rawName
-						}. Expected one of: ${argDef.enum.join(", ")}`
+						}. Expected one of: ${argDef.enum.join(", ")}`,
 					);
 				}
 				result[argDef.name] = token.value;
@@ -820,7 +820,7 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 	}
 
 	return Object.fromEntries(
-		Object.entries(result).map(([name, val]) => [kebabToCamelCase(name), val])
+		Object.entries(result).map(([name, val]) => [kebabToCamelCase(name), val]),
 	) as ParsedArgsResult<TArgsDef>;
 }
 

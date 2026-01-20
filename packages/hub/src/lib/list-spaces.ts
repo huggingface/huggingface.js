@@ -62,7 +62,7 @@ export async function* listSpaces<
 		 * Additional fields to fetch from huggingface.co.
 		 */
 		additionalFields?: T[];
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): AsyncGenerator<SpaceEntry & Pick<ApiSpaceInfo, T>> {
 	const accessToken = params && checkCredentials(params);
 	const search = new URLSearchParams([
@@ -73,7 +73,7 @@ export async function* listSpaces<
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...[...SPACE_EXPAND_KEYS, ...(params?.additionalFields ?? [])].map(
-			(val) => ["expand", val] satisfies [string, string]
+			(val) => ["expand", val] satisfies [string, string],
 		),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/spaces?${search}`;

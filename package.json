@@ -1,8 +1,7 @@
 {
-	"private": true,
 	"name": "@huggingface/root",
+	"private": true,
 	"license": "MIT",
-	"packageManager": "pnpm@10.10.0",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs",
 		"lint:check": "eslint --ext .cjs,.ts .eslintrc.cjs",
@@ -29,5 +28,6 @@
 		"vite": "^5.0.2",
 		"vitest": "^0.34.6",
 		"webdriverio": "^8.6.7"
-	}
+	},
+	"packageManager": "pnpm@10.10.0"
 }
