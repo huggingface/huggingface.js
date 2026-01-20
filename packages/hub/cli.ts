@@ -831,14 +831,16 @@ async function run() {
 
 					// Parse environment variables
 					const environment: Record<string, string> = {};
-					for (const envVar of envVars) {
-						const equalIndex = envVar.indexOf("=");
-						if (equalIndex === -1) {
-							throw new Error(`Invalid environment variable format: ${envVar}. Expected KEY=VALUE`);
+					if (envVars) {
+						for (const envVar of envVars) {
+							const equalIndex = envVar.indexOf("=");
+							if (equalIndex === -1) {
+								throw new Error(`Invalid environment variable format: ${envVar}. Expected KEY=VALUE`);
+							}
+							const key = envVar.slice(0, equalIndex);
+							const value = envVar.slice(equalIndex + 1);
+							environment[key] = value;
 						}
-						const key = envVar.slice(0, equalIndex);
-						const value = envVar.slice(equalIndex + 1);
-						environment[key] = value;
 					}
 
 					// Parse secrets
@@ -1246,7 +1248,7 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 	expectedPositionals.forEach((argDef, i) => {
 		if (argDef.multiple) {
 			result[argDef.name] = providedPositionalTokens.slice(i).map((token) => token.value);
-		} else {
+		} else if (providedPositionalTokens[i]) {
 			result[argDef.name] = providedPositionalTokens[i].value;
 		}
 	});
