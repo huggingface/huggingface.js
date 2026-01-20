@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/blake3-wasm",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"deprecated": "This package is deprecated in favor of blake3-jit. Please migrate to blake3-jit for better performance and maintenance.",
 	"scripts": {
 		"build:debug": "asc assembly/index.ts --target debug",
