@@ -82,7 +82,7 @@ describe("uploadFiles", () => {
   },
   "vocab_size": 50257
 }
-      `.trim()
+      `.trim(),
 			);
 		} finally {
 			await deleteRepo({

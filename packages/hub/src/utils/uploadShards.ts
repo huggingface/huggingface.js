@@ -75,7 +75,7 @@ interface UploadShardsParams {
  */
 export async function* uploadShards(
 	source: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
-	params: UploadShardsParams
+	params: UploadShardsParams,
 ): AsyncGenerator<
 	| { event: "file"; path: string; sha256: string; dedupRatio: number }
 	| { event: "fileProgress"; path: string; progress: number }
@@ -189,7 +189,7 @@ export async function* uploadShards(
 					writeHashToArray(
 						typeof repItem.xorbId === "number" ? xorbHashes[repItem.xorbId] : repItem.xorbId,
 						fileInfoSection,
-						fileViewOffset
+						fileViewOffset,
 					);
 					fileViewOffset += HASH_LENGTH;
 					fileInfoView.setUint32(fileViewOffset, 0, true); // Xorb flags
@@ -230,7 +230,7 @@ export async function* uploadShards(
 
 	function createShard(): Uint8Array {
 		const shard = new Uint8Array(
-			SHARD_HEADER_SIZE + SHARD_FOOTER_SIZE + xorbViewOffset + XORB_FOOTER_LENGTH + fileViewOffset + FILE_FOOTER_LENGTH
+			SHARD_HEADER_SIZE + SHARD_FOOTER_SIZE + xorbViewOffset + XORB_FOOTER_LENGTH + fileViewOffset + FILE_FOOTER_LENGTH,
 		);
 
 		const shardView = new DataView(shard.buffer);
@@ -365,7 +365,7 @@ function writeHashToArray(hash: string, array: Uint8Array, offset: number) {
 
 async function uploadXorb(
 	xorb: { hash: string; xorb: Uint8Array; files: Array<{ path: string; progress: number; lastSentProgress: number }> },
-	params: UploadShardsParams
+	params: UploadShardsParams,
 ) {
 	const token = await xetWriteToken(params);
 

@@ -8,6 +8,6 @@ export function pick<T, K extends keyof T>(o: T, props: K[] | ReadonlyArray<K>):
 			if (o[prop] !== undefined) {
 				return { [prop]: o[prop] };
 			}
-		})
+		}),
 	);
 }

@@ -32,7 +32,7 @@ for (const dir of dirs) {
 
 	for (const subdir of subdirs) {
 		const files = readdirSync(join("../../docs", dir.name, subdir.name), { withFileTypes: true }).filter((dir) =>
-			dir.isFile()
+			dir.isFile(),
 		);
 
 		const newSection: Section = {

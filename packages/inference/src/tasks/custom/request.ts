@@ -13,11 +13,11 @@ export async function request<T>(
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
-	}
+	},
 ): Promise<T> {
 	const logger = getLogger();
 	logger.warn(
-		"The request method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead."
+		"The request method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead.",
 	);
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, options?.task);

@@ -64,7 +64,7 @@ export async function downloadFileToCacheDir(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<string> {
 	// get revision provided or default to main
 	const revision = params.revision ?? "main";

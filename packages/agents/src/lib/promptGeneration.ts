@@ -35,7 +35,7 @@ user: ${example.prompt}
 function: 
 \`\`\`js
 ${example.code}
-\`\`\``
+\`\`\``,
 		)
 		.join("\n-------\n");
 

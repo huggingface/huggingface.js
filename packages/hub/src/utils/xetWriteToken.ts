@@ -52,7 +52,7 @@ export async function xetWriteToken(params: XetWriteTokenParams): Promise<{ acce
 				...(params.accessToken
 					? {
 							Authorization: `Bearer ${params.accessToken}`,
-					  }
+						}
 					: {}),
 				...(params.xetParams.sessionId ? { "X-Xet-Session-Id": params.xetParams.sessionId } : {}),
 			},

@@ -21,7 +21,7 @@ export async function datasetInfo<
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<DatasetEntry & Pick<ApiDatasetInfo, T>> {
 	const accessToken = params && checkCredentials(params);
 
@@ -32,13 +32,13 @@ export async function datasetInfo<
 
 	const response = await (params.fetch || fetch)(
 		`${params?.hubUrl || HUB_URL}/api/datasets/${params.name}/revision/${encodeURIComponent(
-			params.revision ?? "HEAD"
+			params.revision ?? "HEAD",
 		)}?${search.toString()}`,
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {

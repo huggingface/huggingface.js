@@ -283,7 +283,7 @@ function toJSON(
 	input: AnyRuntimeValue,
 	indent?: number | null,
 	depth?: number,
-	convertUndefinedToNull: boolean = true
+	convertUndefinedToNull: boolean = true,
 ): string {
 	const currentDepth = depth ?? 0;
 	switch (input.type) {
@@ -304,7 +304,7 @@ function toJSON(
 
 			if (input.type === "ArrayValue") {
 				const core = (input as ArrayValue).value.map((x) =>
-					toJSON(x, indent, currentDepth + 1, convertUndefinedToNull)
+					toJSON(x, indent, currentDepth + 1, convertUndefinedToNull),
 				);
 				return indent
 					? `[${childrenPadding}${core.join(`,${childrenPadding}`)}${basePadding}]`
@@ -412,7 +412,7 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 
 	items(): ArrayValue {
 		return new ArrayValue(
-			Array.from(this.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+			Array.from(this.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value])),
 		);
 	}
 	keys(): ArrayValue {
@@ -863,7 +863,7 @@ export class Interpreter {
 
 	private evaluateArguments(
 		args: Expression[],
-		environment: Environment
+		environment: Environment,
 	): [AnyRuntimeValue[], Map<string, AnyRuntimeValue>] {
 		// Accumulate args and kwargs
 		const positionalArguments: AnyRuntimeValue[] = [];
@@ -972,9 +972,9 @@ export class Interpreter {
 								.split("\n")
 								.map((x, i) =>
 									// By default, don't indent the first line or empty lines
-									i === 0 || x.length === 0 ? x : "    " + x
+									i === 0 || x.length === 0 ? x : "    " + x,
 								)
-								.join("\n")
+								.join("\n"),
 						);
 					case "join":
 					case "string":
@@ -1007,7 +1007,7 @@ export class Interpreter {
 				switch (filter.value) {
 					case "items":
 						return new ArrayValue(
-							Array.from(operand.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+							Array.from(operand.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value])),
 						);
 					case "length":
 						return new IntegerValue(operand.value.size);
@@ -1143,7 +1143,7 @@ export class Interpreter {
 								const bVal = getSortValue(b);
 								const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
 								return reverse.value ? -result : result;
-							})
+							}),
 						);
 					}
 					case "selectattr":
@@ -1198,7 +1198,7 @@ export class Interpreter {
 								}
 
 								const value = getAttributeValue(item, attr.value);
-								return value instanceof UndefinedValue ? defaultValue ?? new UndefinedValue() : value;
+								return value instanceof UndefinedValue ? (defaultValue ?? new UndefinedValue()) : value;
 							});
 							return new ArrayValue(mapped);
 						} else {
@@ -1229,7 +1229,7 @@ export class Interpreter {
 						const lines = operand.value.split("\n");
 						const indent = " ".repeat(width.value);
 						const indented = lines.map((x, i) =>
-							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x
+							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x,
 						);
 						return new StringValue(indented.join("\n"));
 					}
@@ -1363,7 +1363,7 @@ export class Interpreter {
 	private evaluateSliceExpression(
 		object: AnyRuntimeValue,
 		expr: SliceExpression,
-		environment: Environment
+		environment: Environment,
 	): ArrayValue | StringValue {
 		if (!(object instanceof ArrayValue || object instanceof StringValue)) {
 			throw new Error("Slice object must be an array or string");
@@ -1633,7 +1633,7 @@ export class Interpreter {
 					}
 				}
 				return this.evaluateBlock(node.body, macroScope);
-			})
+			}),
 		);
 
 		// Macros are not evaluated immediately, so we return null
@@ -1767,7 +1767,7 @@ function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 				return new ArrayValue(input.map(convertToRuntimeValues));
 			} else {
 				return new ObjectValue(
-					new Map(Object.entries(input).map(([key, value]) => [key, convertToRuntimeValues(value)]))
+					new Map(Object.entries(input).map(([key, value]) => [key, convertToRuntimeValues(value)])),
 				);
 			}
 		case "function":

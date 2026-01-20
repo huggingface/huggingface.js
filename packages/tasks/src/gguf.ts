@@ -128,7 +128,7 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 // It returns undefined if no such quantization type is found.
 export function findNearestQuantType(
 	quant: GGMLFileQuantizationType,
-	availableQuants: GGMLFileQuantizationType[]
+	availableQuants: GGMLFileQuantizationType[],
 ): GGMLFileQuantizationType | undefined {
 	// Create a map for quick index lookup from the defined order
 	const orderMap = new Map<GGMLFileQuantizationType, number>();

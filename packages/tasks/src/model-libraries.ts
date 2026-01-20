@@ -98,6 +98,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.araclip,
 	},
+	"aviation-ner": {
+		prettyLabel: "Aviation NER",
+		repoName: "Aviation NER",
+		repoUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		docsUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		countDownloads: `path:"gliner_config.json"`,
+		filter: false,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -499,6 +507,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fastino-ai/GLiNER2",
 		snippets: snippets.gliner2,
 		filter: false,
+	},
+	"glm-tts": {
+		prettyLabel: "GLM-TTS",
+		repoName: "GLM-TTS",
+		repoUrl: "https://github.com/zai-org/GLM-TTS",
+		filter: false,
+		countDownloads: `path:"flow/flow.pt"`,
 	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
@@ -928,6 +943,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.phantom_wan,
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	"pocket-tts": {
+		prettyLabel: "Pocket-TTS",
+		repoName: "PocketTTS",
+		repoUrl: "https://github.com/kyutai-labs/pocket-tts",
+		snippets: snippets.pocket_tts,
+		filter: false,
+		countDownloads: `path:"tts_b6369a24.safetensors"`,
 	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
@@ -1450,6 +1473,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/THU-MIG/yolov10",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
+	},
+	yolov26: {
+		prettyLabel: "YOLOv26",
+		repoName: "YOLOv26",
+		repoUrl: "https://github.com/ultralytics/ultralytics",
+		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 	},
 	zonos: {
 		prettyLabel: "Zonos",

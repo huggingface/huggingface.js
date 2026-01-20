@@ -189,7 +189,7 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 				"docker pull localai/localai:latest-cpu",
 			].join("\n"),
 			content: command(
-				"docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu"
+				"docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu",
 			),
 		},
 	];
@@ -317,7 +317,7 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 						setup: ["# Install MLX LM", "uv tool install mlx-lm"].join("\n"),
 						content: ["# Start the server", `mlx_lm.server --model "${model.id}"`, ...openaiCurl].join("\n"),
 					},
-			  ]
+				]
 			: []),
 	];
 };

@@ -199,7 +199,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						// Convert EditFile operation to a file operation with SplicedBlob
 						const splicedBlob = SplicedBlob.create(
 							operation.originalContent,
-							operation.edits.map((splice) => ({ insert: splice.content, start: splice.start, end: splice.end }))
+							operation.edits.map((splice) => ({ insert: splice.content, start: splice.start, end: splice.end })),
 						);
 						return {
 							operation: "addOrUpdate" as const,
@@ -229,7 +229,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						content: blob.blob,
 						path: blob.path,
 					}));
-				})
+				}),
 			)
 		).flat(1);
 
@@ -243,7 +243,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						path: operation.path,
 						size: operation.content.size,
 						sample: base64FromBytes(new Uint8Array(await operation.content.slice(0, 512).arrayBuffer())),
-					}))
+					})),
 				),
 			};
 
@@ -251,7 +251,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const res = await (params.fetch ?? fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/preupload/${encodeURIComponent(
-					params.branch ?? "main"
+					params.branch ?? "main",
 				)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 				{
 					method: "POST",
@@ -261,7 +261,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					},
 					body: JSON.stringify(payload),
 					signal: abortSignal,
-				}
+				},
 			);
 
 			if (!res.ok) {
@@ -281,7 +281,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 		for (const operations of chunk(
 			allOperations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
-			100
+			100,
 		)) {
 			const shas = yield* eventToGenerator<
 				{ event: "fileProgress"; state: "hashing"; path: string; progress: number },
@@ -301,7 +301,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						lfsShas.set(op.path, res.value);
 						return sha;
 					}),
-					CONCURRENT_SHAS
+					CONCURRENT_SHAS,
 				).then(returnCallback, rejectCallack);
 			});
 
@@ -336,7 +336,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					},
 					body: JSON.stringify(payload),
 					signal: abortSignal,
-				}
+				},
 			);
 
 			if (!res.ok) {
@@ -434,8 +434,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 										});
 									}
 								}
-							})
-						).then(() => returnCallback(undefined), rejectCallback)
+							}),
+						).then(() => returnCallback(undefined), rejectCallback),
 					);
 				} else {
 					// No LFS file to upload
@@ -542,7 +542,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 										completeReq.parts[Number(part) - 1].etag = eTag;
 									}),
-									MULTIPART_PARALLEL_UPLOAD
+									MULTIPART_PARALLEL_UPLOAD,
 								);
 
 								abortSignal?.throwIfAborted();
@@ -611,7 +611,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								});
 							}
 						}),
-						CONCURRENT_LFS_UPLOADS
+						CONCURRENT_LFS_UPLOADS,
 					).then(returnCallback, rejectCallback);
 				});
 			}
@@ -625,7 +625,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			async (yieldCallback, returnCallback, rejectCallback) =>
 				(params.fetch ?? fetch)(
 					`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
-						params.branch ?? "main"
+						params.branch ?? "main",
 					)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 					{
 						method: "POST",
@@ -660,7 +660,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									}
 
 									return convertOperationToNdJson(operation);
-								})
+								}),
 							)) satisfies ApiCommitOperation[]),
 						]
 							.map((x) => JSON.stringify(x))
@@ -685,7 +685,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							},
 							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						} as any),
-					}
+					},
 				)
 					.then(async (res) => {
 						if (!res.ok) {
@@ -703,7 +703,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							hookOutput: json.hookOutput,
 						});
 					})
-					.catch(rejectCallback)
+					.catch(rejectCallback),
 		);
 	} catch (err) {
 		// For parallel requests, cancel them all if one fails
@@ -757,7 +757,7 @@ async function convertOperationToNdJson(operation: CommitBlobOperation): Promise
 			// Note: By the time we get here, splice operations should have been converted to addOrUpdate operations with SplicedBlob
 			// But we handle this case for completeness
 			throw new Error(
-				"Edit operations should be converted to addOrUpdate operations before reaching convertOperationToNdJson"
+				"Edit operations should be converted to addOrUpdate operations before reaching convertOperationToNdJson",
 			);
 		}
 		default:
