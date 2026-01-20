@@ -14,9 +14,9 @@
 		"format:check": "oxfmt --check .",
 		"check": "tsc",
 		"generate-snippets-fixtures": "tsx scripts/generate-snippets-fixtures.ts",
-		"inference-codegen": "tsx scripts/inference-codegen.ts && oxfmt ../tasks/src/tasks/*/inference.ts",
-		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && oxfmt ../tasks/src/tasks/text-generation/spec/*.json && oxfmt ../tasks/src/tasks/chat-completion/spec/*.json",
-		"inference-tei-import": "tsx scripts/inference-tei-import.ts && oxfmt ../tasks/src/tasks/feature-extraction/spec/*.json",
+		"inference-codegen": "tsx scripts/inference-codegen.ts && pnpm --filter tasks format",
+		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && pnpm --filter tasks format",
+		"inference-tei-import": "tsx scripts/inference-tei-import.ts && pnpm --filter tasks format",
 		"test": "vitest run"
 	},
 	"dependencies": {
