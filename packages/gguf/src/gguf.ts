@@ -158,7 +158,7 @@ class RangeViewLocalFile extends RangeView {
 	override async fetchChunk(): Promise<void> {
 		const { FileBlob } = await import("./utils/FileBlob");
 		const blob = await FileBlob.create(this.uri);
-		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
+		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE];
 		const buffer = await blob.slice(range[0], range[1]).arrayBuffer();
 		this.appendBuffer(new Uint8Array(buffer));
 		this.chunk += 1;
