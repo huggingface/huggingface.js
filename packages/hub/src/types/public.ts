@@ -23,23 +23,42 @@ export interface Credentials {
 
 export type CredentialsParams =
 	| {
-		accessToken?: undefined;
-		/**
-		 * @deprecated Use `accessToken` instead
-		 */
-		credentials: Credentials;
-	}
+			accessToken?: undefined;
+			/**
+			 * @deprecated Use `accessToken` instead
+			 */
+			credentials: Credentials;
+	  }
 	| {
-		accessToken: AccessToken;
-		/**
-		 * @deprecated Use `accessToken` instead
-		 */
-		credentials?: undefined;
-	};
+			accessToken: AccessToken;
+			/**
+			 * @deprecated Use `accessToken` instead
+			 */
+			credentials?: undefined;
+	  };
 
 export type SpaceHardwareFlavor =
-	"cpu-basic" | "cpu-upgrade" | "cpu-performance" | "cpu-xl" | "sprx8" | "zero-a10g" | "inf2x6" | "t4-small" |
-	"t4-medium" | "l4x1" | "l4x4" | "l40sx1" | "l40sx4" | "l40sx8" | "a10g-small" | "a10g-large" | "a10g-largex2" | "a10g-largex4" | "a100-large" | "a100x4" | "a100x8";
+	| "cpu-basic"
+	| "cpu-upgrade"
+	| "cpu-performance"
+	| "cpu-xl"
+	| "sprx8"
+	| "zero-a10g"
+	| "inf2x6"
+	| "t4-small"
+	| "t4-medium"
+	| "l4x1"
+	| "l4x4"
+	| "l40sx1"
+	| "l40sx4"
+	| "l40sx8"
+	| "a10g-small"
+	| "a10g-large"
+	| "a10g-largex2"
+	| "a10g-largex4"
+	| "a100-large"
+	| "a100x4"
+	| "a100x8";
 
 export type SpaceSdk = "streamlit" | "gradio" | "docker" | "static";
 

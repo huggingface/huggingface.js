@@ -17,14 +17,7 @@ export interface ApiJobHardware {
 	unitLabel: string;
 }
 
-export type JobStatus =
-	| "pending"
-	| "running"
-	| "succeeded"
-	| "failed"
-	| "cancelled"
-	| "cancelling"
-	| "queued";
+export type JobStatus = "pending" | "running" | "succeeded" | "failed" | "cancelled" | "cancelling" | "queued";
 
 export interface ApiJob {
 	id: string;

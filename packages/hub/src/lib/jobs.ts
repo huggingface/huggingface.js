@@ -48,7 +48,7 @@ export async function listJobs(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<ApiJob[]> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -87,7 +87,7 @@ export async function getJob(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<ApiJob> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -101,7 +101,7 @@ export async function getJob(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -126,7 +126,7 @@ export async function runJob(
 		 */
 		fetch?: typeof fetch;
 	} & CreateJobOptions &
-		CredentialsParams
+		CredentialsParams,
 ): Promise<ApiJob> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -207,7 +207,7 @@ export async function cancelJob(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<ApiJob> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -222,7 +222,7 @@ export async function cancelJob(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -250,7 +250,7 @@ export async function duplicateJob(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<ApiJob> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -265,7 +265,7 @@ export async function duplicateJob(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -294,7 +294,7 @@ export async function* streamJobLogs(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): AsyncGenerator<string, void, unknown> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -308,7 +308,7 @@ export async function* streamJobLogs(
 				Accept: "text/event-stream",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -372,7 +372,7 @@ export async function* streamJobMetrics(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): AsyncGenerator<string, void, unknown> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -386,7 +386,7 @@ export async function* streamJobMetrics(
 				Accept: "text/event-stream",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -450,7 +450,7 @@ export async function* streamJobEvents(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): AsyncGenerator<string, void, unknown> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -464,7 +464,7 @@ export async function* streamJobEvents(
 				Accept: "text/event-stream",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -525,22 +525,19 @@ export async function listScheduledJobs(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<ApiScheduledJob[]> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
 		throw new Error("Authentication required. Please provide an access token.");
 	}
 
-	const response = await (params.fetch || fetch)(
-		`${params.hubUrl || HUB_URL}/api/scheduled-jobs/${params.namespace}`,
-		{
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${accessToken}`,
-			},
-		}
-	);
+	const response = await (params.fetch || fetch)(`${params.hubUrl || HUB_URL}/api/scheduled-jobs/${params.namespace}`, {
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
 
 	if (!response.ok) {
 		throw await createApiError(response);
@@ -567,7 +564,7 @@ export async function getScheduledJob(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<ApiScheduledJob> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -581,7 +578,7 @@ export async function getScheduledJob(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -606,7 +603,7 @@ export async function createScheduledJob(
 		 */
 		fetch?: typeof fetch;
 	} & CreateScheduledJobOptions &
-		CredentialsParams
+		CredentialsParams,
 ): Promise<ApiScheduledJob> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -691,7 +688,7 @@ export async function deleteScheduledJob(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<void> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -706,7 +703,7 @@ export async function deleteScheduledJob(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -732,7 +729,7 @@ export async function suspendScheduledJob(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<void> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -747,7 +744,7 @@ export async function suspendScheduledJob(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -773,7 +770,7 @@ export async function resumeScheduledJob(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<void> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -788,7 +785,7 @@ export async function resumeScheduledJob(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
@@ -815,7 +812,7 @@ export async function runScheduledJob(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<ApiJob | null> {
 	const accessToken = checkCredentials(params);
 	if (!accessToken) {
@@ -830,7 +827,7 @@ export async function runScheduledJob(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${accessToken}`,
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {

@@ -351,8 +351,7 @@ const commands = {
 				args: [
 					{
 						name: "docker-image-or-space" as const,
-						description:
-							"The Docker image (e.g., 'python:3.12') or Space ID (e.g., 'username/space-name') to run",
+						description: "The Docker image (e.g., 'python:3.12') or Space ID (e.g., 'username/space-name') to run",
 						positional: true,
 						required: true,
 					},
@@ -363,8 +362,7 @@ const commands = {
 					},
 					{
 						name: "namespace" as const,
-						description:
-							"The namespace (username or organization name). Defaults to the current user if not provided.",
+						description: "The namespace (username or organization name). Defaults to the current user if not provided.",
 					},
 					{
 						name: "flavor" as const,
@@ -432,8 +430,7 @@ const commands = {
 				args: [
 					{
 						name: "namespace" as const,
-						description:
-							"The namespace (username or organization name). Defaults to the current user if not provided.",
+						description: "The namespace (username or organization name). Defaults to the current user if not provided.",
 					},
 					{
 						name: "all" as const,
@@ -460,8 +457,7 @@ const commands = {
 					},
 					{
 						name: "namespace" as const,
-						description:
-							"The namespace (username or organization name). Defaults to the current user if not provided.",
+						description: "The namespace (username or organization name). Defaults to the current user if not provided.",
 					},
 					{
 						name: "token" as const,
@@ -482,8 +478,7 @@ const commands = {
 					},
 					{
 						name: "namespace" as const,
-						description:
-							"The namespace (username or organization name). Defaults to the current user if not provided.",
+						description: "The namespace (username or organization name). Defaults to the current user if not provided.",
 					},
 					{
 						name: "token" as const,
@@ -504,8 +499,7 @@ const commands = {
 					},
 					{
 						name: "namespace" as const,
-						description:
-							"The namespace (username or organization name). Defaults to the current user if not provided.",
+						description: "The namespace (username or organization name). Defaults to the current user if not provided.",
 					},
 					{
 						name: "token" as const,
@@ -526,8 +520,7 @@ const commands = {
 					},
 					{
 						name: "namespace" as const,
-						description:
-							"The namespace (username or organization name). Defaults to the current user if not provided.",
+						description: "The namespace (username or organization name). Defaults to the current user if not provided.",
 					},
 					{
 						name: "token" as const,
@@ -556,8 +549,7 @@ const commands = {
 							},
 							{
 								name: "docker-image-or-space" as const,
-								description:
-									"The Docker image (e.g., 'python:3.12') or Space ID (e.g., 'username/space-name') to run",
+								description: "The Docker image (e.g., 'python:3.12') or Space ID (e.g., 'username/space-name') to run",
 								positional: true,
 								required: true,
 							},
@@ -618,7 +610,8 @@ const commands = {
 							{
 								name: "secret" as const,
 								short: "s",
-								description: "Secret in the format KEY=VALUE (will be encrypted server-side, can be used multiple times)",
+								description:
+									"Secret in the format KEY=VALUE (will be encrypted server-side, can be used multiple times)",
 							},
 							{
 								name: "secrets-file" as const,
@@ -742,7 +735,7 @@ const commands = {
 								name: "token" as const,
 								description:
 									"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
-									default: process.env.HF_TOKEN,
+								default: process.env.HF_TOKEN,
 							},
 						] as const,
 					},
@@ -764,7 +757,7 @@ const commands = {
 								name: "token" as const,
 								description:
 									"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
-									default: process.env.HF_TOKEN,
+								default: process.env.HF_TOKEN,
 							},
 						] as const,
 					},
@@ -820,13 +813,11 @@ async function run() {
 									if (helpArgs.length > 2) {
 										const nestedSubCmdName = helpArgs[2];
 										if (nestedSubCmdName in subCmdDef.subcommands) {
-											console.log(
-												detailedUsageForNestedSubcommand(cmdName, subCmdName, nestedSubCmdName)
-											);
+											console.log(detailedUsageForNestedSubcommand(cmdName, subCmdName, nestedSubCmdName));
 											break;
 										} else {
 											console.error(
-												`Error: Unknown subcommand '${nestedSubCmdName}' for command '${cmdName} ${subCmdName}'.`
+												`Error: Unknown subcommand '${nestedSubCmdName}' for command '${cmdName} ${subCmdName}'.`,
 											);
 											console.log(listNestedSubcommands(cmdName, subCmdName, subCmdDef));
 											process.exitCode = 1;
@@ -1070,9 +1061,7 @@ async function run() {
 						// This is a nested command group (scheduled)
 						const nestedSubCmdName = cliArgs[1];
 						if (nestedSubCmdName && nestedSubCmdName in subCmd.subcommands) {
-							console.log(
-								detailedUsageForNestedSubcommand("jobs", currentSubCommandName, nestedSubCmdName as string)
-							);
+							console.log(detailedUsageForNestedSubcommand("jobs", currentSubCommandName, nestedSubCmdName as string));
 						} else {
 							console.log(listNestedSubcommands("jobs", currentSubCommandName, subCmd));
 						}
@@ -1096,7 +1085,6 @@ async function run() {
 			const hubUrl = process.env.HF_ENDPOINT ?? HUB_URL;
 			const token = process.env.HF_TOKEN;
 
-			
 			switch (currentSubCommandName) {
 				case "run": {
 					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "jobs run");
@@ -1161,7 +1149,9 @@ async function run() {
 					}
 
 					// Filter by status if not --all
-					const filteredJobs = parsedArgs.all ? jobs : jobs.filter((j) => j.status === "running" || j.status === "pending");
+					const filteredJobs = parsedArgs.all
+						? jobs
+						: jobs.filter((j) => j.status === "running" || j.status === "pending");
 
 					console.log(`\n${filteredJobs.length} job(s):\n`);
 					for (const job of filteredJobs) {
@@ -1247,7 +1237,7 @@ async function run() {
 							"RAM".padEnd(8) +
 							"ACCELERATOR".padEnd(17) +
 							"COST/MIN".padEnd(9) +
-							"COST/HOUR"
+							"COST/HOUR",
 					);
 					console.log(
 						"-".repeat(15) +
@@ -1262,7 +1252,7 @@ async function run() {
 							" " +
 							"-".repeat(8) +
 							" " +
-							"-".repeat(9)
+							"-".repeat(9),
 					);
 
 					for (const hw of hardware) {
@@ -1279,7 +1269,7 @@ async function run() {
 								hw.ram.padEnd(8) +
 								acceleratorStr.padEnd(17) +
 								costPerMin.padEnd(9) +
-								costPerHour
+								costPerHour,
 						);
 					}
 					break;
@@ -1308,7 +1298,11 @@ async function run() {
 						break;
 					}
 
-					const nestedParsedArgs = advParseArgs(cliArgs.slice(1), nestedSubCmdDef.args, `jobs scheduled ${scheduledSubCmdName}`);
+					const nestedParsedArgs = advParseArgs(
+						cliArgs.slice(1),
+						nestedSubCmdDef.args,
+						`jobs scheduled ${scheduledSubCmdName}`,
+					);
 					const namespace = await getNamespace(nestedParsedArgs.namespace);
 
 					switch (scheduledSubCmdName) {
@@ -1442,7 +1436,7 @@ async function run() {
 								console.log(`Status: ${job.status}`);
 							} else {
 								console.log(
-									`Scheduled job ${nestedParsedArgs.scheduledJobId} could not be triggered: another instance is already running.`
+									`Scheduled job ${nestedParsedArgs.scheduledJobId} could not be triggered: another instance is already running.`,
 								);
 								console.log(`Set 'concurrency' to allow multiple instances to run concurrently.`);
 							}
@@ -1536,7 +1530,9 @@ function parseTimeout(timeoutStr?: string): number | null | undefined {
 	if (!timeoutStr) return undefined;
 	const match = timeoutStr.match(/^(\d+(?:\.\d+)?)\s*([smhd])?$/i);
 	if (!match) {
-		throw new Error(`Invalid timeout format: ${timeoutStr}. Use format like '2h', '90m', '1.5h', or a number in seconds.`);
+		throw new Error(
+			`Invalid timeout format: ${timeoutStr}. Use format like '2h', '90m', '1.5h', or a number in seconds.`,
+		);
 	}
 	const value = parseFloat(match[1]);
 	const unit = (match[2] || "s").toLowerCase();
@@ -1556,7 +1552,7 @@ function parseKeyValuePairs(values?: string | string[]): Record<string, string> 
 		}
 		result[key] = valueParts.join("=");
 	}
-	return  result;
+	return result;
 }
 
 // Helper to load env file
@@ -1578,7 +1574,6 @@ function loadEnvFile(filePath: string): Record<string, string> {
 		throw new Error(`Failed to read env file ${filePath}: ${error}`);
 	}
 }
-
 
 function _detailedUsage(args: readonly ArgDef[], usageLine: string, commandDescription?: string): string {
 	let ret = `usage: hfjs ${usageLine}\n`;
@@ -1652,7 +1647,7 @@ function listSubcommands(commandName: TopLevelCommandName, commandGroup: Command
 function listNestedSubcommands(
 	commandName: TopLevelCommandName,
 	subCommandName: string,
-	commandGroup: CommandGroup
+	commandGroup: CommandGroup,
 ): string {
 	let ret = `usage: hfjs ${commandName} ${subCommandName} <subcommand> [options]\n\n`;
 	ret += `${commandGroup.description}\n\n`;
@@ -1667,7 +1662,7 @@ function listNestedSubcommands(
 function detailedUsageForNestedSubcommand(
 	commandName: TopLevelCommandName,
 	subCommandName: string,
-	nestedSubCommandName: string
+	nestedSubCommandName: string,
 ): string {
 	const commandGroup = commands[commandName];
 	if (!("subcommands" in commandGroup)) {
@@ -1684,7 +1679,7 @@ function detailedUsageForNestedSubcommand(
 	return _detailedUsage(
 		nestedSubCommandDef.args,
 		usage(commandName, `${subCommandName} ${nestedSubCommandName}`),
-		nestedSubCommandDef.description
+		nestedSubCommandDef.description,
 	);
 }
 
