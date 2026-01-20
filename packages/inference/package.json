@@ -28,7 +28,6 @@
 	"module": "./dist/esm/index.js",
 	"types": "./dist/commonjs/index.d.ts",
 	"exports": {
-		"./package.json": "./package.json",
 		".": {
 			"import": {
 				"types": "./dist/esm/index.d.ts",
@@ -38,7 +37,8 @@
 				"types": "./dist/commonjs/index.d.ts",
 				"default": "./dist/commonjs/index.js"
 			}
-		}
+		},
+		"./package.json": "./package.json"
 	},
 	"publishConfig": {
 		"access": "public"
