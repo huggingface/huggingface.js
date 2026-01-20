@@ -605,6 +605,13 @@ async function run() {
 			const branchCommandGroup = commands.branch;
 			const currentSubCommandName = subCommandName as keyof typeof branchCommandGroup.subcommands | undefined;
 
+			// Check if --help is in subcommand position (e.g., "hfjs branch --help")
+			if (subCommandName === "--help" || subCommandName === "-h") {
+				console.log(listSubcommands("branch", branchCommandGroup));
+				break;
+			}
+
+			// Check if --help is in args position (e.g., "hfjs branch create --help")
 			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
 				if (currentSubCommandName && branchCommandGroup.subcommands[currentSubCommandName]) {
 					console.log(detailedUsageForSubcommand("branch", currentSubCommandName));
@@ -666,6 +673,13 @@ async function run() {
 			const repoCommandGroup = commands.repo;
 			const currentSubCommandName = subCommandName as keyof typeof repoCommandGroup.subcommands | undefined;
 
+			// Check if --help is in subcommand position (e.g., "hfjs repo --help")
+			if (subCommandName === "--help" || subCommandName === "-h") {
+				console.log(listSubcommands("repo", repoCommandGroup));
+				break;
+			}
+
+			// Check if --help is in args position (e.g., "hfjs repo delete --help")
 			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
 				if (currentSubCommandName && repoCommandGroup.subcommands[currentSubCommandName]) {
 					console.log(detailedUsageForSubcommand("repo", currentSubCommandName));
@@ -722,6 +736,13 @@ async function run() {
 			const jobsCommandGroup = commands.jobs;
 			const currentSubCommandName = subCommandName as keyof typeof jobsCommandGroup.subcommands | undefined;
 
+			// Check if --help is in subcommand position (e.g., "hfjs jobs --help")
+			if (subCommandName === "--help" || subCommandName === "-h") {
+				console.log(listSubcommands("jobs", jobsCommandGroup));
+				break;
+			}
+
+			// Check if --help is in args position (e.g., "hfjs jobs run --help")
 			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
 				if (currentSubCommandName && jobsCommandGroup.subcommands[currentSubCommandName]) {
 					console.log(detailedUsageForSubcommand("jobs", currentSubCommandName));
