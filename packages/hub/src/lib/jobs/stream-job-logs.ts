@@ -23,7 +23,7 @@ export async function* streamJobLogs(
 		 */
 		fetch?: typeof fetch;
 	} & CredentialsParams,
-): AsyncGenerator<string, void, unknown> {
+): AsyncGenerator<{ message: string; timestamp: Date }, void, unknown> {
 	const accessToken = checkCredentials(params);
 
 	const response = await (params.fetch || fetch)(
@@ -59,7 +59,12 @@ export async function* streamJobLogs(
 
 			for (const line of lines) {
 				if (line.startsWith("data: ")) {
-					yield line.slice(6);
+					try {
+						const data = JSON.parse(line.slice(6));
+						yield { message: data.data, timestamp: new Date(data.timestamp) };
+					} catch {
+						yield { message: line.slice(6), timestamp: new Date() };
+					}
 				}
 			}
 		}
@@ -69,7 +74,12 @@ export async function* streamJobLogs(
 			const lines = buffer.split("\n");
 			for (const line of lines) {
 				if (line.startsWith("data: ")) {
-					yield line.slice(6);
+					try {
+						const data = JSON.parse(line.slice(6));
+						yield { message: data.data, timestamp: new Date(data.timestamp) };
+					} catch {
+						yield { message: line.slice(6), timestamp: new Date() };
+					}
 				}
 			}
 		}

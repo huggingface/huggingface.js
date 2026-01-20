@@ -388,6 +388,12 @@ const commands = {
 							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
 						default: process.env.HF_TOKEN,
 					},
+					{
+						name: "follow" as const,
+						short: "f",
+						description: "Stream logs after creating the job",
+						boolean: true,
+					},
 				] as const,
 			},
 			ps: {
@@ -746,6 +752,7 @@ async function run() {
 						attempts: attemptsStr,
 						namespace,
 						token,
+						follow,
 					} = parsedArgs;
 					const envVars = env;
 					let attempts: number | undefined;
@@ -821,6 +828,20 @@ async function run() {
 
 					console.log(`Job created: ${job.id}`);
 					console.log(`Status: ${job.status.stage}`);
+
+					if (follow) {
+						const logsParams = {
+							namespace: finalNamespace,
+							jobId: job.id,
+							hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+							...(token ? { accessToken: token } : {}),
+						} as Parameters<typeof streamJobLogs>[0];
+
+						// Display logs with proper line breaks
+						for await (const logChunk of streamJobLogs(logsParams)) {
+							console.log(logChunk.message);
+						}
+					}
 					break;
 				}
 				case "ps": {
@@ -958,28 +979,8 @@ async function run() {
 						console.error(`\n❌ Job failed: ${jobInfo.status.message}\n`);
 					}
 
-					// Display logs with proper line breaks
-					// The stream itself may include the header, so we'll let it handle that
 					for await (const logChunk of streamJobLogs(logsParams)) {
-						try {
-							// Try to parse as JSON (SSE format)
-							const parsed = JSON.parse(logChunk);
-							if (parsed.data) {
-								// Ensure the data ends with a newline if it doesn't already
-								const data = parsed.data;
-								process.stdout.write(data.endsWith("\n") ? data : data + "\n");
-							}
-						} catch {
-							// If not JSON, write as-is with newline if needed
-							const chunk = logChunk;
-							// Check if it's already the header line (which includes newline)
-							if (chunk.includes("===== Job started")) {
-								process.stdout.write(chunk.endsWith("\n") ? chunk : chunk + "\n");
-							} else {
-								// For other chunks, ensure newline
-								process.stdout.write(chunk.endsWith("\n") ? chunk : chunk + "\n");
-							}
-						}
+						console.log(logChunk.message);
 					}
 					break;
 				}
