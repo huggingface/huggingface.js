@@ -3,5 +3,6 @@
 	"ignorePatterns": [],
 	"useTabs": true,
 	"printWidth": 120,
+	// Because tshy modifies the package.json file, the "exports" subprop
 	"experimentalSortPackageJson": false
 }
