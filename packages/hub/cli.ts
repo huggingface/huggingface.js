@@ -2,7 +2,19 @@
 
 import { parseArgs } from "node:util";
 import { typedEntries } from "./src/utils/typedEntries";
-import { createBranch, createRepo, deleteBranch, deleteRepo, repoExists, uploadFilesWithProgress } from "./src";
+import {
+	createBranch,
+	createRepo,
+	deleteBranch,
+	deleteRepo,
+	listJobHardware,
+	listJobs,
+	repoExists,
+	runJob,
+	uploadFilesWithProgress,
+	whoAmI,
+	type SpaceHardwareFlavor,
+} from "./src";
 import { pathToFileURL } from "node:url";
 import { stat } from "node:fs/promises";
 import { basename, join } from "node:path";
@@ -324,6 +336,80 @@ const commands = {
 		description: "Print the version of the CLI",
 		args: [] as const,
 	} satisfies SingleCommand,
+	jobs: {
+		description: "Manage jobs on the Hub",
+		subcommands: {
+			run: {
+				description: "Run a new job",
+				args: [
+					{
+						name: "docker-image-or-space" as const,
+						description:
+							"The Docker image to run (e.g., python:3.12) or Space ID (e.g., hf.co/spaces/username/space-name or username/space-name)",
+						positional: true,
+						required: true,
+					},
+					{
+						name: "command" as const,
+						description: "The command to run (can be multiple words, everything after docker-image-or-space)",
+						positional: true,
+					},
+					{
+						name: "env" as const,
+						short: "e",
+						description: "Environment variable in the format KEY=VALUE (can be specified multiple times)",
+					},
+					{
+						name: "flavor" as const,
+						description: "Hardware flavor to use (defaults to cpu-basic)",
+						default: "cpu-basic",
+					},
+					{
+						name: "namespace" as const,
+						description: "The namespace (username or organization name). Defaults to the current user's username.",
+					},
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+			ps: {
+				description: "List jobs",
+				args: [
+					{
+						name: "all" as const,
+						short: "a",
+						description: "List all jobs (not just running ones)",
+						boolean: true,
+					},
+					{
+						name: "namespace" as const,
+						description: "The namespace (username or organization name). Defaults to the current user's username.",
+					},
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+			hardware: {
+				description: "List available hardware options for jobs",
+				args: [
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+		},
+	} satisfies CommandGroup,
 } satisfies Record<string, SingleCommand | CommandGroup>;
 
 type TopLevelCommandName = keyof typeof commands;
@@ -591,6 +677,238 @@ async function run() {
 			console.log(`hfjs version: ${version}`);
 			break;
 		}
+		case "jobs": {
+			const jobsCommandGroup = commands.jobs;
+			const currentSubCommandName = subCommandName as keyof typeof jobsCommandGroup.subcommands | undefined;
+
+			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
+				if (currentSubCommandName && jobsCommandGroup.subcommands[currentSubCommandName]) {
+					console.log(detailedUsageForSubcommand("jobs", currentSubCommandName));
+				} else {
+					console.log(listSubcommands("jobs", jobsCommandGroup));
+				}
+				break;
+			}
+
+			if (!currentSubCommandName || !jobsCommandGroup.subcommands[currentSubCommandName]) {
+				console.error(`Error: Missing or invalid subcommand for 'jobs'.`);
+				console.log(listSubcommands("jobs", jobsCommandGroup));
+				process.exitCode = 1;
+				break;
+			}
+
+			const subCmdDef = jobsCommandGroup.subcommands[currentSubCommandName];
+
+			switch (currentSubCommandName) {
+				case "run": {
+					// Handle multiple -e flags manually since parseArgs doesn't support multiple values for the same option
+					const envVars: string[] = [];
+					const filteredArgs: string[] = [];
+					let i = 0;
+					while (i < cliArgs.length) {
+						if (cliArgs[i] === "-e" || cliArgs[i] === "--env") {
+							if (i + 1 < cliArgs.length) {
+								envVars.push(cliArgs[i + 1]);
+								i += 2;
+							} else {
+								throw new Error("Missing value for -e/--env option");
+							}
+						} else {
+							filteredArgs.push(cliArgs[i]);
+							i++;
+						}
+					}
+
+					// Parse non-positional arguments first
+					const { tokens } = parseArgs({
+						options: {
+							flavor: { type: "string", default: "cpu-basic" },
+							namespace: { type: "string" },
+							token: { type: "string", default: process.env.HF_TOKEN },
+						},
+						args: filteredArgs,
+						allowPositionals: true,
+						strict: false,
+						tokens: true,
+					});
+
+					const flavor =
+						(tokens.find((t) => t.kind === "option" && t.name === "flavor") as OptionToken | undefined)?.value ||
+						"cpu-basic";
+					const namespace = (
+						tokens.find((t) => t.kind === "option" && t.name === "namespace") as OptionToken | undefined
+					)?.value;
+					const token =
+						(tokens.find((t) => t.kind === "option" && t.name === "token") as OptionToken | undefined)?.value ||
+						process.env.HF_TOKEN;
+
+					// Get positional arguments - first is docker image or space ID, rest is command
+					const positionals = tokens.filter((t) => t.kind === "positional").map((t) => t.value);
+					if (positionals.length === 0) {
+						throw new Error("Missing required argument: docker-image or space-id");
+					}
+					const firstArg = positionals[0];
+					const commandArray = positionals.slice(1);
+
+					// Detect if first argument is a space ID (format: hf.co/spaces/namespace/space-name or namespace/space-name)
+					let dockerImage: string | undefined;
+					let spaceId: string | undefined;
+
+					// Check for hf.co/spaces/... format
+					const hfCoSpacesMatch = firstArg.match(/^hf\.co\/spaces\/(.+)$/);
+					if (hfCoSpacesMatch) {
+						spaceId = hfCoSpacesMatch[1];
+					} else if (firstArg.includes("/") && !firstArg.includes(":")) {
+						// If it contains a slash but no colon, assume it's a space ID (namespace/space-name)
+						// Docker images typically have colons (e.g., python:3.12)
+						spaceId = firstArg;
+					} else {
+						// Otherwise, treat it as a docker image
+						dockerImage = firstArg;
+					}
+
+					// Get namespace from whoAmI if not provided
+					let finalNamespace = namespace;
+					if (!finalNamespace) {
+						if (!token) {
+							throw new Error(
+								"Cannot determine namespace without authentication. Please provide --namespace or --token.",
+							);
+						}
+						const userInfo = await whoAmI({
+							accessToken: token as string,
+							hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+						});
+						if (userInfo.type !== "user") {
+							throw new Error("Cannot determine namespace. Please provide --namespace explicitly.");
+						}
+						finalNamespace = userInfo.name;
+					}
+
+					// Parse environment variables
+					const environment: Record<string, string> = {};
+					for (const envVar of envVars) {
+						const equalIndex = envVar.indexOf("=");
+						if (equalIndex === -1) {
+							throw new Error(`Invalid environment variable format: ${envVar}. Expected KEY=VALUE`);
+						}
+						const key = envVar.slice(0, equalIndex);
+						const value = envVar.slice(equalIndex + 1);
+						environment[key] = value;
+					}
+
+					const jobParams = {
+						namespace: finalNamespace,
+						...(dockerImage ? { dockerImage } : {}),
+						...(spaceId ? { spaceId } : {}),
+						flavor: flavor as SpaceHardwareFlavor,
+						command: commandArray.length > 0 ? commandArray : undefined,
+						environment: Object.keys(environment).length > 0 ? environment : undefined,
+						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+						...(token ? { accessToken: token } : {}),
+					} as Parameters<typeof runJob>[0];
+
+					const job = await runJob(jobParams);
+
+					console.log(`Job created: ${job.id}`);
+					console.log(`Status: ${job.status}`);
+					break;
+				}
+				case "ps": {
+					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "jobs ps");
+					const { all, namespace, token } = parsedArgs;
+
+					// Get namespace from whoAmI if not provided
+					let finalNamespace = namespace;
+					if (!finalNamespace) {
+						if (!token) {
+							throw new Error(
+								"Cannot determine namespace without authentication. Please provide --namespace or --token.",
+							);
+						}
+						const userInfo = await whoAmI({
+							accessToken: token as string,
+							hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+						});
+						if (userInfo.type !== "user") {
+							throw new Error("Cannot determine namespace. Please provide --namespace explicitly.");
+						}
+						finalNamespace = userInfo.name;
+					}
+
+					const jobs = await listJobs({
+						namespace: finalNamespace,
+						accessToken: token,
+						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+					});
+
+					// Filter by status if not showing all
+					const filteredJobs = all ? jobs : jobs.filter((job) => job.status === "running");
+
+					if (filteredJobs.length === 0) {
+						console.log(all ? "No jobs found." : "No running jobs found.");
+						break;
+					}
+
+					// Display jobs in a table-like format
+					console.log(`${"ID".padEnd(40)} ${"STATUS".padEnd(12)} ${"CREATED".padEnd(20)} ${"DOCKER IMAGE"}`);
+					console.log("-".repeat(100));
+					for (const job of filteredJobs) {
+						const createdAt = new Date(job.createdAt).toLocaleString();
+						const dockerImage = job.dockerImage || job.spaceId || "N/A";
+						console.log(`${job.id.padEnd(40)} ${job.status.padEnd(12)} ${createdAt.padEnd(20)} ${dockerImage}`);
+					}
+					break;
+				}
+				case "hardware": {
+					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "jobs hardware");
+					const { token } = parsedArgs;
+
+					const hardwareParams: {
+						hubUrl?: string;
+						accessToken?: string;
+					} = {
+						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+					};
+					if (token) {
+						hardwareParams.accessToken = token;
+					}
+
+					const hardware = await listJobHardware(hardwareParams);
+
+					// Format and display the hardware list
+					console.log(
+						`${"NAME".padEnd(15)} ${"PRETTY NAME".padEnd(22)} ${"CPU".padEnd(8)} ${"RAM".padEnd(7)} ${"ACCELERATOR".padEnd(16)} ${"COST/MIN".padEnd(9)} ${"COST/HOUR"}`,
+					);
+					console.log("-".repeat(100));
+
+					for (const hw of hardware) {
+						// Format accelerator
+						let accelerator = "N/A";
+						if (hw.accelerator) {
+							accelerator = `${hw.accelerator.quantity}x ${hw.accelerator.model} (${hw.accelerator.vram})`;
+						}
+
+						// Format costs - unitCostMicroUSD is in microUSD (divide by 1,000,000 to get USD)
+						// unitCostUSD appears to be per minute based on the example
+						const costPerMin = (hw.unitCostMicroUSD / 1_000_000).toFixed(4);
+						const costPerHour = ((hw.unitCostMicroUSD / 1_000_000) * 60).toFixed(2);
+
+						console.log(
+							`${hw.name.padEnd(15)} ${hw.prettyName.padEnd(22)} ${hw.cpu.padEnd(8)} ${hw.ram.padEnd(7)} ${accelerator.padEnd(16)} $${costPerMin.padStart(8)} $${costPerHour.padStart(9)}`,
+						);
+					}
+					break;
+				}
+				default:
+					// Should be caught by the check above
+					console.error(`Error: Unknown subcommand '${currentSubCommandName}' for 'jobs'.`);
+					console.log(listSubcommands("jobs", jobsCommandGroup));
+					process.exitCode = 1;
+					break;
+			}
+			break;
+		}
 		default:
 			console.error("Command not found: " + mainCommandName);
 			// Print general help
@@ -621,7 +939,8 @@ function usage(commandName: TopLevelCommandName, subCommandName?: string): strin
 
 	if ("subcommands" in commandEntry) {
 		if (subCommandName && subCommandName in commandEntry.subcommands) {
-			cmdArgs = commandEntry.subcommands[subCommandName as keyof typeof commandEntry.subcommands].args;
+			const subCmd = commandEntry.subcommands[subCommandName as keyof typeof commandEntry.subcommands] as SingleCommand;
+			cmdArgs = subCmd.args;
 			fullCommandName = `${commandName} ${subCommandName}`;
 		} else {
 			return `${commandName} <subcommand>`;
@@ -693,10 +1012,13 @@ function detailedUsageForSubcommand(
 	subCommandName: keyof CommandGroup["subcommands"],
 ): string {
 	const commandGroup = commands[commandName];
-	if (!("subcommands" in commandGroup) || !(subCommandName in commandGroup.subcommands)) {
+	if (!("subcommands" in commandGroup)) {
+		throw new Error(`Command ${commandName} does not have subcommands`);
+	}
+	if (!(subCommandName in commandGroup.subcommands)) {
 		throw new Error(`Subcommand ${subCommandName as string} not found for ${commandName}`);
 	}
-	const subCommandDef = commandGroup.subcommands[subCommandName as keyof typeof commandGroup.subcommands];
+	const subCommandDef = (commandGroup.subcommands as Record<string, SingleCommand>)[subCommandName];
 	return _detailedUsage(subCommandDef.args, usage(commandName, subCommandName as string), subCommandDef.description);
 }
 
