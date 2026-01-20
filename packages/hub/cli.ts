@@ -151,6 +151,7 @@ interface ArgDef {
 	name: string;
 	short?: string;
 	positional?: boolean;
+	multiple?: boolean;
 	description?: string;
 	required?: boolean;
 	boolean?: boolean;
@@ -354,12 +355,14 @@ const commands = {
 					{
 						name: "command" as const,
 						description:
-							"The command to run (can be multiple arguments, e.g., python -c 'import os; print(os.environ[\"FOO\"])')",
+							"The command to run (can be multiple arguments preceded by --, e.g., -- python -c 'import os; print(os.environ[\"FOO\"])')",
 						positional: true,
+						multiple: true,
 					},
 					{
 						name: "env" as const,
 						short: "e",
+						multiple: true,
 						description: "Environment variable in the format KEY=VALUE (can be specified multiple times)",
 					},
 					{
@@ -733,46 +736,18 @@ async function run() {
 
 			switch (currentSubCommandName) {
 				case "run": {
-					// Handle multiple -e flags manually since parseArgs doesn't support multiple values for the same option
-					const envVars: string[] = [];
-					const filteredArgs: string[] = [];
-					let i = 0;
-					while (i < cliArgs.length) {
-						if (cliArgs[i] === "-e" || cliArgs[i] === "--env") {
-							if (i + 1 < cliArgs.length) {
-								envVars.push(cliArgs[i + 1]);
-								i += 2;
-							} else {
-								throw new Error("Missing value for -e/--env option");
-							}
-						} else {
-							filteredArgs.push(cliArgs[i]);
-							i++;
-						}
-					}
-
-					// Parse non-positional arguments first
-					const { tokens } = parseArgs({
-						options: {
-							flavor: { type: "string", default: "cpu-basic" },
-							name: { type: "string" },
-							attempts: { type: "string" },
-							namespace: { type: "string" },
-							token: { type: "string", default: process.env.HF_TOKEN },
-						},
-						args: filteredArgs,
-						allowPositionals: true,
-						strict: false,
-						tokens: true,
-					});
-
-					const flavor =
-						(tokens.find((t) => t.kind === "option" && t.name === "flavor") as OptionToken | undefined)?.value ||
-						"cpu-basic";
-					const name = (tokens.find((t) => t.kind === "option" && t.name === "name") as OptionToken | undefined)?.value;
-					const attemptsStr = (
-						tokens.find((t) => t.kind === "option" && t.name === "attempts") as OptionToken | undefined
-					)?.value;
+					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "jobs run");
+					const {
+						dockerImageOrSpace: firstArg,
+						command: commandArray,
+						env,
+						flavor,
+						name,
+						attempts: attemptsStr,
+						namespace,
+						token,
+					} = parsedArgs;
+					const envVars = env;
 					let attempts: number | undefined;
 					if (attemptsStr) {
 						const parsed = parseInt(attemptsStr, 10);
@@ -780,43 +755,6 @@ async function run() {
 							throw new Error("Attempts must be a positive integer");
 						}
 						attempts = parsed;
-					}
-					const namespace = (
-						tokens.find((t) => t.kind === "option" && t.name === "namespace") as OptionToken | undefined
-					)?.value;
-					const token =
-						(tokens.find((t) => t.kind === "option" && t.name === "token") as OptionToken | undefined)?.value ||
-						process.env.HF_TOKEN;
-
-					// Get positional arguments - first is docker image or space ID, rest is command
-					// Find the first positional token (docker image)
-					const positionalTokens = tokens.filter((t) => t.kind === "positional");
-					if (positionalTokens.length === 0) {
-						throw new Error("Missing required argument: docker-image or space-id");
-					}
-					const firstArg = positionalTokens[0].value;
-
-					// Find the index of the first positional token in the full tokens array
-					const firstPositionalIndex = tokens.findIndex((t) => t.kind === "positional");
-
-					// Everything after the first positional should be part of the command
-					// Convert any option-like tokens (starting with -) to positional args if they come after the docker image
-					const commandArray: string[] = [];
-					for (let i = firstPositionalIndex + 1; i < tokens.length; i++) {
-						const token = tokens[i];
-						if (token.kind === "positional") {
-							// Regular positional arg - use as-is, don't split
-							commandArray.push(token.value);
-						} else if (token.kind === "option") {
-							// Option token that came after docker image - treat as part of command
-							// Include both the option name and its value if it has one
-							if (token.rawName) {
-								commandArray.push(token.rawName);
-							}
-							if (token.value !== undefined) {
-								commandArray.push(token.value);
-							}
-						}
 					}
 
 					// Detect if first argument is a space ID (format: hf.co/spaces/namespace/space-name or namespace/space-name)
@@ -1176,7 +1114,7 @@ function listSubcommands(commandName: TopLevelCommandName, commandGroup: Command
 		.join("\n");
 	if (commandName === "jobs") {
 		ret +=
-			'\n\nExample:\n  hfjs jobs run -e FOO=foo -e BAR=bar python:3.12 python -c \'import os; print(os.environ["FOO"], os.environ["BAR"])\'';
+			'\n\nExample:\n  hfjs jobs run -e FOO=foo -e BAR=bar python:3.12 -- python -c \'import os; print(os.environ["FOO"], os.environ["BAR"])\'';
 	}
 	ret += `\n\nRun \`hfjs help ${commandName} <subcommand>\` for more information on a specific subcommand.`;
 	return ret;
@@ -1186,10 +1124,16 @@ type ParsedArgsResult<TArgsDef extends readonly ArgDef[]> = {
 	[K in TArgsDef[number] as Camelize<K["name"]>]: K["boolean"] extends true
 		? boolean
 		: K["required"] extends true
-			? string
+			? K["multiple"] extends true
+				? string[] // Multiple strings are arrays
+				: string
 			: K["default"] extends undefined
-				? string | undefined // Optional strings without default can be undefined
-				: string; // Strings with default or required are strings
+				? K["multiple"] extends true
+					? string[] // Multiple optional strings are arrays
+					: string | undefined // Optional strings without default can be undefined
+				: K["multiple"] extends true
+					? string[] // Multiple strings with default are arrays
+					: string; // Strings with default or required are strings
 };
 
 function advParseArgs<TArgsDef extends readonly ArgDef[]>(
@@ -1197,6 +1141,7 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 	argDefs: TArgsDef,
 	commandNameForError: string,
 ): ParsedArgsResult<TArgsDef> {
+	const hasMultiplePositional = argDefs.some((arg) => arg.multiple && arg.positional);
 	const { tokens } = parseArgs({
 		options: Object.fromEntries(
 			argDefs
@@ -1205,6 +1150,7 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 					const optionConfig = {
 						type: arg.boolean ? ("boolean" as const) : ("string" as const),
 						...(arg.short && { short: arg.short }),
+						...(arg.multiple && { multiple: true }),
 						...(arg.default !== undefined && {
 							default: typeof arg.default === "function" ? arg.default() : arg.default,
 						}),
@@ -1230,7 +1176,7 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 		);
 	}
 
-	if (providedPositionalTokens.length > expectedPositionals.length) {
+	if (providedPositionalTokens.length > expectedPositionals.length && !hasMultiplePositional) {
 		throw new Error(
 			`Command '${commandNameForError}': Too many positional arguments. Usage: hfjs ${usage(
 				commandNameForError.split(" ")[0] as TopLevelCommandName,
@@ -1239,7 +1185,7 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 		);
 	}
 
-	const result: Record<string, string | boolean> = {};
+	const result: Record<string, string | boolean | string[]> = {};
 
 	// Populate from defaults first
 	for (const argDef of argDefs) {
@@ -1251,9 +1197,11 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 	}
 
 	// Populate positionals
-	providedPositionalTokens.forEach((token, i) => {
-		if (expectedPositionals[i]) {
-			result[expectedPositionals[i].name] = token.value;
+	expectedPositionals.forEach((argDef, i) => {
+		if (argDef.multiple) {
+			result[argDef.name] = providedPositionalTokens.slice(i).map((token) => token.value);
+		} else {
+			result[argDef.name] = providedPositionalTokens[i].value;
 		}
 	});
 
@@ -1279,7 +1227,13 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 						}. Expected one of: ${argDef.enum.join(", ")}`,
 					);
 				}
-				result[argDef.name] = token.value;
+				if (argDef.multiple) {
+					const existing = (result[argDef.name] as string[]) || [];
+					existing.push(token.value);
+					result[argDef.name] = existing;
+				} else {
+					result[argDef.name] = token.value;
+				}
 			}
 		});
 
