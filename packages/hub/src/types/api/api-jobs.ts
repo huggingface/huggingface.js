@@ -17,28 +17,46 @@ export interface ApiJobHardware {
 	unitLabel: string;
 }
 
-export type JobStatus = "pending" | "running" | "succeeded" | "failed" | "cancelled" | "cancelling" | "queued";
+export type JobStatusStage = "PENDING" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED" | "CANCELLING" | "QUEUED";
+
+export interface ApiJobStatus {
+	stage: JobStatusStage;
+	message?: string | null;
+	failureCount: number;
+}
+
+export interface ApiJobUser {
+	id: string;
+	name: string;
+	type?: "user" | "org";
+	avatarUrl?: string;
+}
 
 export interface ApiJob {
+	type: "job";
 	id: string;
-	status: JobStatus;
+	status: ApiJobStatus;
 	createdAt: string;
-	updatedAt: string;
+	updatedAt?: string;
 	startedAt?: string | null;
 	finishedAt?: string | null;
+	createdBy?: {
+		id: string;
+		name: string;
+	};
 	name?: string | null;
 	dockerImage?: string | null;
 	spaceId?: string | null;
 	command?: string[] | null;
 	arguments?: string[] | null;
+	environment?: Record<string, string> | null;
 	flavor: SpaceHardwareFlavor;
 	arch?: "amd64" | "arm64" | null;
 	timeoutSeconds?: number | null;
 	attempts?: number;
-	initiator?: {
-		type: "user" | "scheduled-job" | "duplicated-job";
-		id?: string;
-	} | null;
+	owner?: ApiJobUser;
+	initiator?: ApiJobUser;
+	secrets?: string[];
 }
 
 export interface ApiScheduledJob {

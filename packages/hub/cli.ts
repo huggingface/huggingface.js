@@ -835,7 +835,7 @@ async function run() {
 					const job = await runJob(jobParams);
 
 					console.log(`Job created: ${job.id}`);
-					console.log(`Status: ${job.status}`);
+					console.log(`Status: ${job.status.stage}`);
 					break;
 				}
 				case "ps": {
@@ -867,7 +867,7 @@ async function run() {
 					});
 
 					// Filter by status if not showing all
-					const filteredJobs = all ? jobs : jobs.filter((job) => job.status === "running");
+					const filteredJobs = all ? jobs : jobs.filter((job) => job.status.stage === "RUNNING");
 
 					if (filteredJobs.length === 0) {
 						console.log(all ? "No jobs found." : "No running jobs found.");
@@ -883,8 +883,9 @@ async function run() {
 						const createdAt = new Date(job.createdAt).toLocaleString();
 						const dockerImage = job.dockerImage || job.spaceId || "N/A";
 						const jobName = job.name || "N/A";
+						const status = job.status.stage;
 						console.log(
-							`${job.id.padEnd(40)} ${jobName.padEnd(20)} ${job.status.padEnd(12)} ${createdAt.padEnd(20)} ${dockerImage}`,
+							`${job.id.padEnd(40)} ${jobName.padEnd(20)} ${status.padEnd(12)} ${createdAt.padEnd(20)} ${dockerImage}`,
 						);
 					}
 					break;
@@ -1058,6 +1059,9 @@ function listSubcommands(commandName: TopLevelCommandName, commandGroup: Command
 	ret += typedEntries(commandGroup.subcommands)
 		.map(([subName, subDef]) => `  ${subName}\t${subDef.description}`)
 		.join("\n");
+	if (commandName === "jobs") {
+		ret += `\n\nExample:\n  hfjs jobs run -e FOO=foo -e BAR=bar python:3.12 python -c 'import os; print(os.environ["FOO"], os.environ["BAR"])'`;
+	}
 	ret += `\n\nRun \`hfjs help ${commandName} <subcommand>\` for more information on a specific subcommand.`;
 	return ret;
 }
