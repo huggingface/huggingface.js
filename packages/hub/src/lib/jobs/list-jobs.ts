@@ -21,14 +21,10 @@ export async function listJobs(
 	} & CredentialsParams,
 ): Promise<ApiJob[]> {
 	const accessToken = checkCredentials(params);
-	if (!accessToken) {
-		throw new Error("Authentication required. Please provide an access token.");
-	}
 
 	const response = await (params.fetch || fetch)(`${params.hubUrl || HUB_URL}/api/jobs/${params.namespace}`, {
 		headers: {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${accessToken}`,
+			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 		},
 	});
 

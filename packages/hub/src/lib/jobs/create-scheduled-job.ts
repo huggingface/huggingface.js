@@ -22,9 +22,6 @@ export async function createScheduledJob(
 		CredentialsParams,
 ): Promise<ApiScheduledJob> {
 	const accessToken = checkCredentials(params);
-	if (!accessToken) {
-		throw new Error("Authentication required. Please provide an access token.");
-	}
 
 	const { namespace, hubUrl, fetch: customFetch, ...rest } = params;
 
@@ -74,7 +71,7 @@ export async function createScheduledJob(
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
-			Authorization: `Bearer ${accessToken}`,
+			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 		},
 		body: JSON.stringify(body),
 	});

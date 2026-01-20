@@ -25,16 +25,13 @@ export async function* streamJobEvents(
 	} & CredentialsParams,
 ): AsyncGenerator<string, void, unknown> {
 	const accessToken = checkCredentials(params);
-	if (!accessToken) {
-		throw new Error("Authentication required. Please provide an access token.");
-	}
 
 	const response = await (params.fetch || fetch)(
 		`${params.hubUrl || HUB_URL}/api/jobs/${params.namespace}/${params.jobId}/events`,
 		{
 			headers: {
 				Accept: "text/event-stream",
-				Authorization: `Bearer ${accessToken}`,
+				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 			},
 		},
 	);

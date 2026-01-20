@@ -24,9 +24,6 @@ export async function deleteScheduledJob(
 	} & CredentialsParams,
 ): Promise<void> {
 	const accessToken = checkCredentials(params);
-	if (!accessToken) {
-		throw new Error("Authentication required. Please provide an access token.");
-	}
 
 	const response = await (params.fetch || fetch)(
 		`${params.hubUrl || HUB_URL}/api/scheduled-jobs/${params.namespace}/${params.jobId}`,
@@ -34,7 +31,7 @@ export async function deleteScheduledJob(
 			method: "DELETE",
 			headers: {
 				"Content-Type": "application/json",
-				Authorization: `Bearer ${accessToken}`,
+				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 			},
 		},
 	);

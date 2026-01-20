@@ -22,9 +22,6 @@ export async function runJob(
 		CredentialsParams,
 ): Promise<ApiJob> {
 	const accessToken = checkCredentials(params);
-	if (!accessToken) {
-		throw new Error("Authentication required. Please provide an access token.");
-	}
 
 	if (!params.dockerImage && !params.spaceId) {
 		throw new Error("Either dockerImage or spaceId must be provided");
@@ -70,7 +67,7 @@ export async function runJob(
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
-			Authorization: `Bearer ${accessToken}`,
+			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 		},
 		body: JSON.stringify(body),
 	});

@@ -19,9 +19,7 @@ export async function listJobHardware(
 ): Promise<ApiJobHardware[]> {
 	const accessToken = checkCredentials(params ?? {});
 
-	const headers: Record<string, string> = {
-		"Content-Type": "application/json",
-	};
+	const headers: Record<string, string> = {};
 
 	if (accessToken) {
 		headers.Authorization = `Bearer ${accessToken}`;
