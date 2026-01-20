@@ -3,8 +3,9 @@ import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
+import type { BodyParams, OutputType, RequestArgs, UrlParams } from "../types.js";
 import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
-import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
@@ -127,7 +128,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		response: WaveSpeedAISubmitTaskResponse,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError("Headers are required for WaveSpeed AI API calls");
@@ -190,7 +191,8 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 							}
 						);
 					}
-					return await mediaResponse.blob();
+					const blob = await mediaResponse.blob();
+					return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 				}
 				case "failed": {
 					throw new InferenceClientProviderOutputError(taskResult.error || "Task failed");

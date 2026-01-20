@@ -51,7 +51,15 @@ import type {
 import { HF_ROUTER_URL } from "../config.js";
 import { InferenceClientProviderOutputError, InferenceClientRoutingError } from "../errors.js";
 import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
-import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, RequestArgs, UrlParams } from "../types.js";
+import type {
+	BaseArgs,
+	BodyParams,
+	HeaderParams,
+	InferenceProvider,
+	OutputType,
+	RequestArgs,
+	UrlParams,
+} from "../types.js";
 import { toArray } from "../utils/toArray.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
@@ -78,7 +86,7 @@ export abstract class TaskProviderHelper {
 		response: unknown,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
+		outputType?: OutputType
 	): Promise<unknown>;
 
 	/**
@@ -144,7 +152,7 @@ export interface TextToImageTaskHelper {
 		response: unknown,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType
 	): Promise<string | Blob | Record<string, unknown>>;
 	preparePayload(params: BodyParams<TextToImageInput & BaseArgs>): Record<string, unknown>;
 }

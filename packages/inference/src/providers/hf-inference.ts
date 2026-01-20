@@ -36,9 +36,9 @@ import type {
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
-import { InferenceClientProviderOutputError } from "../errors.js";
+import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 import type { TabularClassificationOutput } from "../tasks/tabular/tabularClassification.js";
-import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
+import type { BodyParams, OutputType, RequestArgs, UrlParams } from "../types.js";
 import { toArray } from "../utils/toArray.js";
 import type {
 	AudioClassificationTaskHelper,
@@ -73,6 +73,7 @@ import type {
 
 import { TaskProviderHelper } from "./providerHelper.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import { omit } from "../utils/omit.js";
@@ -123,11 +124,20 @@ export class HFInferenceTask extends TaskProviderHelper {
 }
 
 export class HFInferenceTextToImageTask extends HFInferenceTask implements TextToImageTaskHelper {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		if (params.outputType === "url") {
+			throw new InferenceClientInputError(
+				"hf-inference provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead."
+			);
+		}
+		return params.args;
+	}
+
 	override async getResponse(
 		response: Base64ImageGeneration | OutputUrlImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (!response) {
 			throw new InferenceClientProviderOutputError(
@@ -140,25 +150,24 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 			}
 			if ("data" in response && Array.isArray(response.data) && response.data[0].b64_json) {
 				const base64Data = response.data[0].b64_json;
-				if (outputType === "url") {
+				if (outputType === "dataUrl") {
 					return `data:image/jpeg;base64,${base64Data}`;
 				}
 				const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
 				return await base64Response.blob();
 			}
 			if ("output" in response && Array.isArray(response.output)) {
-				if (outputType === "url") {
-					return response.output[0];
-				}
 				const urlResponse = await fetch(response.output[0]);
 				const blob = await urlResponse.blob();
-				return blob;
+				return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 			}
 		}
 		if (response instanceof Blob) {
-			if (outputType === "url" || outputType === "json") {
-				const b64 = await response.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return outputType === "url" ? `data:image/jpeg;base64,${b64}` : { output: `data:image/jpeg;base64,${b64}` };
+			if (outputType === "dataUrl") {
+				return dataUrlFromBlob(response);
+			}
+			if (outputType === "json") {
+				return { output: await dataUrlFromBlob(response) };
 			}
 			return response;
 		}

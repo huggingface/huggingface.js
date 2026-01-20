@@ -20,7 +20,8 @@ import {
 	InferenceClientProviderOutputError,
 } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
-import type { BodyParams, HeaderParams } from "../types.js";
+import type { BodyParams, HeaderParams, OutputType } from "../types.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
@@ -96,7 +97,7 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		response: ZaiTextToImageResponse,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError(`URL and headers are required for 'text-to-image' task`);
@@ -179,7 +180,8 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 				}
 
 				const imageResponse = await fetch(imageUrl);
-				return await imageResponse.blob();
+				const blob = await imageResponse.blob();
+				return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 			}
 		}
 

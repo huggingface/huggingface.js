@@ -1,6 +1,6 @@
 import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
 import { PACKAGE_NAME, PACKAGE_VERSION } from "../package.js";
-import type { InferenceTask, InferenceProviderMappingEntry, Options, RequestArgs } from "../types.js";
+import type { InferenceTask, InferenceProviderMappingEntry, Options, OutputType, RequestArgs } from "../types.js";
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
 import type { getProviderHelper } from "./getProviderHelper.js";
 import { isUrl } from "./isUrl.js";
@@ -112,6 +112,7 @@ export function makeRequestOptionsFromResolvedModel(
 	mapping: InferenceProviderMappingEntry | undefined,
 	options?: Options & {
 		task?: InferenceTask;
+		outputType?: OutputType;
 	}
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, urlTransform, ...remainingArgs } = args;
@@ -120,7 +121,7 @@ export function makeRequestOptionsFromResolvedModel(
 
 	const provider = providerHelper.provider;
 
-	const { includeCredentials, task, signal, billTo } = options ?? {};
+	const { includeCredentials, task, signal, billTo, outputType } = options ?? {};
 	const authMethod = (() => {
 		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
@@ -173,6 +174,7 @@ export function makeRequestOptionsFromResolvedModel(
 		model: resolvedModel,
 		task,
 		mapping,
+		outputType,
 	});
 	/**
 	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error

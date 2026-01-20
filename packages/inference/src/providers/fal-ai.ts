@@ -15,10 +15,11 @@
  * Thanks!
  */
 import { base64FromBytes } from "../utils/base64FromBytes.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 
 import type { AutomaticSpeechRecognitionOutput, ImageSegmentationOutput } from "@huggingface/tasks";
 import { isUrl } from "../lib/isUrl.js";
-import type { BodyParams, HeaderParams, InferenceTask, ModelId, RequestArgs, UrlParams } from "../types.js";
+import type { BodyParams, HeaderParams, InferenceTask, ModelId, OutputType, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import type {
@@ -206,7 +207,7 @@ export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageT
 		response: FalAiQueueOutput,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType
 	): Promise<string | Blob | Record<string, unknown>> {
 		const result = (await this.getResponseFromQueueApi(response, url, headers)) as FalAITextToImageOutput;
 		if (
@@ -225,7 +226,8 @@ export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageT
 				return result.images[0].url;
 			}
 			const urlResponse = await fetch(result.images[0].url);
-			return await urlResponse.blob();
+			const blob = await urlResponse.blob();
+			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
 
 		throw new InferenceClientProviderOutputError(
