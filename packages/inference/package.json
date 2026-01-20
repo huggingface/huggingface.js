@@ -1,51 +1,54 @@
 {
 	"name": "@huggingface/inference",
 	"version": "4.13.10",
-	"packageManager": "pnpm@10.10.0",
-	"license": "MIT",
-	"author": "Hugging Face and Tim Mikeladze <tim.mikeladze@gmail.com>",
 	"description": "Typescript client for the Hugging Face Inference Providers and Inference Endpoints",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/huggingface/huggingface.js.git"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
 	"keywords": [
+		"ai",
 		"hugging face",
 		"hugging face typescript",
 		"huggingface",
 		"huggingface-inference-api",
 		"huggingface-inference-api-typescript",
-		"inference",
-		"ai"
+		"inference"
 	],
-	"engines": {
-		"node": ">=18"
+	"license": "MIT",
+	"author": "Hugging Face and Tim Mikeladze <tim.mikeladze@gmail.com>",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/huggingface/huggingface.js.git"
 	},
+	"source": "src/index.ts",
 	"files": [
 		"dist",
 		"src",
 		"!src/snippets/templates/**/*.jinja"
 	],
-	"source": "src/index.ts",
-	"types": "./dist/commonjs/index.d.ts",
+	"type": "module",
 	"main": "./dist/commonjs/index.js",
 	"module": "./dist/esm/index.js",
-	"tshy": {
-		"exports": {
-			"./package.json": "./package.json",
-			".": "./src/index.ts"
-		}
+	"types": "./dist/commonjs/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		},
+		"./package.json": "./package.json"
 	},
-	"type": "module",
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"build": "pnpm run export-templates && pnpm run package-to-ts && tshy",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepare": "pnpm run build",
 		"prepublishOnly": "pnpm run build",
 		"test": "vitest run --config vitest.config.mts",
@@ -56,24 +59,21 @@
 		"package-to-ts": "tsx scripts/package-json-to-ts.ts"
 	},
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^",
-		"@huggingface/jinja": "workspace:^"
+		"@huggingface/jinja": "workspace:^",
+		"@huggingface/tasks": "workspace:^"
 	},
 	"devDependencies": {
 		"@types/node": "18.13.0"
 	},
 	"resolutions": {},
-	"exports": {
-		"./package.json": "./package.json",
-		".": {
-			"import": {
-				"types": "./dist/esm/index.d.ts",
-				"default": "./dist/esm/index.js"
-			},
-			"require": {
-				"types": "./dist/commonjs/index.d.ts",
-				"default": "./dist/commonjs/index.js"
-			}
+	"tshy": {
+		"exports": {
+			".": "./src/index.ts",
+			"./package.json": "./package.json"
 		}
-	}
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"packageManager": "pnpm@10.10.0"
 }

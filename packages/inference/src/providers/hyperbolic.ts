@@ -58,7 +58,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 				? {
 						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
 						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				  }
+					}
 				: undefined),
 			...omit(params.args, ["inputs", "parameters"]),
 			model: params.model,
@@ -95,7 +95,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 	preparePayload(params: BodyParams): Record<string, unknown> {
 		if (params.outputType === "url") {
 			throw new InferenceClientInputError(
-				"hyperbolic provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead."
+				"hyperbolic provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead.",
 			);
 		}
 		return {
@@ -110,7 +110,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 		response: HyperbolicTextToImageOutput,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: OutputType
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&

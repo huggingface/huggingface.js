@@ -119,7 +119,7 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 		response: TogetherImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: OutputType
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&

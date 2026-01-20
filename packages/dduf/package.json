@@ -1,14 +1,29 @@
 {
 	"name": "@huggingface/dduf",
-	"packageManager": "pnpm@10.10.0",
 	"version": "0.0.2",
 	"description": "Very alpha lib to check DDUF compliance",
+	"keywords": [
+		"dduf",
+		"face",
+		"hugging",
+		"huggingface"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
-	"publishConfig": {
-		"access": "public"
-	},
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"index.ts",
+		"src",
+		"tsconfig.json"
+	],
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
+	"browser": {
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
@@ -18,16 +33,14 @@
 		},
 		"./package.json": "./package.json"
 	},
-	"browser": {
-		"./dist/index.js": "./dist/browser/index.js",
-		"./dist/index.mjs": "./dist/browser/index.mjs"
+	"publishConfig": {
+		"access": "public"
 	},
-	"source": "index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
@@ -35,24 +48,11 @@
 		"test:browser": "vitest run --browser.name=chrome --browser.headless",
 		"check": "tsc"
 	},
-	"files": [
-		"src",
-		"dist",
-		"index.ts",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"hugging",
-		"face",
-		"dduf"
-	],
-	"author": "Hugging Face",
-	"license": "MIT",
+	"dependencies": {
+		"@huggingface/blob": "workspace:^"
+	},
 	"devDependencies": {
 		"@types/node": "^20.11.28"
 	},
-	"dependencies": {
-		"@huggingface/blob": "workspace:^"
-	}
+	"packageManager": "pnpm@10.10.0"
 }

@@ -69,7 +69,7 @@ export class WebBlob extends Blob {
 			Math.min(this.start + end, this.end),
 			this.contentType,
 			start === 0 && end === this.size ? this.full : false,
-			this.fetch
+			this.fetch,
 		);
 
 		return slice;

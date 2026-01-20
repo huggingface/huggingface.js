@@ -26,11 +26,11 @@ const ChatCompletionInputSchema = z.object({
 								image_url: z.object({
 									url: z.string(),
 								}),
-							})
-						)
-				)
+							}),
+						),
+				),
 			),
-		})
+		}),
 	),
 	/// Only allow stream: true
 	stream: z.literal(true),
@@ -81,7 +81,7 @@ export function startServer(agent: Agent): void {
 					"Content-Type": "text/event-stream",
 					"Cache-Control": "no-cache",
 					Connection: "keep-alive",
-				})
+				}),
 			);
 
 			/// Prepend the agent's prompt

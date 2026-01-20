@@ -1024,7 +1024,7 @@ python -m lerobot.record \\
   --dataset.repo_id=HF_USER/dataset_name \\  # <- This will be the dataset name on HF Hub
   --dataset.episode_time_s=50 \\
   --dataset.num_episodes=10 \\
-  --policy.path=${model.id}`
+  --policy.path=${model.id}`,
 			);
 		}
 		return smolvlaSnippets;
@@ -1644,14 +1644,14 @@ export const transformers = (model: ModelData): string[] => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
+					? "extractor"
+					: "processor";
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
 			"",
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")"
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
 		);
 		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
@@ -1666,7 +1666,7 @@ export const transformers = (model: ModelData): string[] => {
 						"        ]",
 						"    },",
 					].join("\n"),
-					"]"
+					"]",
 				);
 			} else {
 				autoSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
@@ -1681,14 +1681,14 @@ export const transformers = (model: ModelData): string[] => {
 				").to(model.device)",
 				"",
 				"outputs = model.generate(**inputs, max_new_tokens=40)",
-				`print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))`
+				`print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))`,
 			);
 		}
 	} else {
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', dtype="auto")'
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', dtype="auto")',
 		);
 	}
 
@@ -1713,7 +1713,7 @@ export const transformers = (model: ModelData): string[] => {
 						"        ]",
 						"    },",
 					].join("\n"),
-					"]"
+					"]",
 				);
 				pipelineSnippet.push("pipe(text=messages)");
 			} else {
@@ -1725,11 +1725,11 @@ export const transformers = (model: ModelData): string[] => {
 				"pipe(",
 				'    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png",',
 				'    candidate_labels=["animals", "humans", "landscape"],',
-				")"
+				")",
 			);
 		} else if (model.pipeline_tag === "image-classification") {
 			pipelineSnippet.push(
-				'pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png")'
+				'pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png")',
 			);
 		}
 
@@ -2140,7 +2140,7 @@ export const pruna = (model: ModelData): string[] => {
 
 	if (model.tags.includes("pruna_pro-ai")) {
 		return snippets.map((snippet) =>
-			snippet.replace(/\bpruna\b/g, "pruna_pro").replace(/\bPrunaModel\b/g, "PrunaProModel")
+			snippet.replace(/\bpruna\b/g, "pruna_pro").replace(/\bPrunaModel\b/g, "PrunaProModel"),
 		);
 	}
 
@@ -2164,7 +2164,7 @@ const pruna_diffusers = (model: ModelData): string[] => {
 			.replace(/from diffusers import PrunaModel, ([^,\n]+)/g, "from diffusers import $1")
 			// Clean up whitespace
 			.replace(/\n\n+/g, "\n")
-			.trim()
+			.trim(),
 	);
 };
 
@@ -2176,7 +2176,7 @@ const pruna_transformers = (model: ModelData): string[] => {
 	let processedSnippets = transformersSnippets.map((snippet) =>
 		snippet
 			.replace(/from transformers import pipeline/g, "from pruna import PrunaModel")
-			.replace(/pipeline\([^)]*\)/g, `PrunaModel.from_pretrained("${model.id}")`)
+			.replace(/pipeline\([^)]*\)/g, `PrunaModel.from_pretrained("${model.id}")`),
 	);
 
 	// Additional cleanup if auto_model info is available
@@ -2186,8 +2186,8 @@ const pruna_transformers = (model: ModelData): string[] => {
 				.replace(new RegExp(`from transformers import ${info.auto_model}\n?`, "g"), "")
 				.replace(new RegExp(`${info.auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
 				.replace(new RegExp(`^.*from.*import.*(, *${info.auto_model})+.*$`, "gm"), (line) =>
-					line.replace(new RegExp(`, *${info.auto_model}`, "g"), "")
-				)
+					line.replace(new RegExp(`, *${info.auto_model}`, "g"), ""),
+				),
 		);
 	}
 

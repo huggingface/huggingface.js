@@ -208,7 +208,7 @@ export class XetBlob extends Blob {
 			reconstructionInfo: ReconstructionInfo,
 			customFetch: typeof fetch,
 			maxBytes: number,
-			reloadReconstructionInfo: () => Promise<ReconstructionInfo>
+			reloadReconstructionInfo: () => Promise<ReconstructionInfo>,
 		) {
 			let totalBytesRead = 0;
 			let readBytesToSkip = reconstructionInfo.offset_into_first_range;
@@ -259,12 +259,12 @@ export class XetBlob extends Blob {
 				}
 
 				const fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
-					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end
+					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
 				);
 
 				if (!fetchInfo) {
 					throw new Error(
-						`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`
+						`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
 					);
 				}
 
@@ -297,7 +297,7 @@ export class XetBlob extends Blob {
 					resp.headers.get("content-length"),
 					"range",
 					fetchInfo.url_range,
-					resp.headers.get("content-range")
+					resp.headers.get("content-range"),
 				);
 
 				const reader = resp.body?.getReader();
@@ -361,7 +361,7 @@ export class XetBlob extends Blob {
 							throw new Error(
 								`Unsupported compression scheme ${
 									compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
-								}`
+								}`,
 							);
 						}
 
@@ -377,13 +377,13 @@ export class XetBlob extends Blob {
 							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
 								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
 								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
-								  ? bg4_regroup_bytes(
+									? bg4_regroup_bytes(
 											lz4_decompress(
 												result.value.slice(0, chunkHeader.compressed_length),
-												chunkHeader.uncompressed_length
-											)
-								    )
-								  : result.value.slice(0, chunkHeader.compressed_length);
+												chunkHeader.uncompressed_length,
+											),
+										)
+									: result.value.slice(0, chunkHeader.compressed_length);
 
 						const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
 						const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
@@ -416,7 +416,7 @@ export class XetBlob extends Blob {
 									result.value.byteLength,
 									"total read",
 									totalBytesRead,
-									stored
+									stored,
 								);
 								totalBytesRead += uncompressed.byteLength;
 								yield stored ? uncompressed.slice() : uncompressed;
@@ -439,7 +439,7 @@ export class XetBlob extends Blob {
 					throw new Error(
 						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
 							fetchInfo.url_range.end - fetchInfo.url_range.start + 1
-						}`
+						}`,
 					);
 				}
 
@@ -455,7 +455,7 @@ export class XetBlob extends Blob {
 			this.reconstructionInfo,
 			this.fetch,
 			this.end - this.start,
-			this.#loadReconstructionInfo.bind(this)
+			this.#loadReconstructionInfo.bind(this),
 		);
 
 		// todo: when Chrome/Safari support it, use ReadableStream.from(readData)
@@ -479,7 +479,7 @@ export class XetBlob extends Blob {
 			// todo : use ByteLengthQueuingStrategy when there's good support for it, currently in Node.js it fails due to size being a function
 			{
 				highWaterMark: 1_000, // 1_000 chunks for ~1MB of RAM
-			}
+			},
 		);
 	}
 
@@ -628,7 +628,7 @@ export function bg4_split_bytes(bytes: Uint8Array): Uint8Array {
 async function getAccessToken(
 	initialAccessToken: string | undefined,
 	customFetch: typeof fetch,
-	refreshUrl: string
+	refreshUrl: string,
 ): Promise<{ accessToken: string; casUrl: string }> {
 	const key = cacheKey({ refreshUrl, initialAccessToken });
 
@@ -650,7 +650,7 @@ async function getAccessToken(
 				...(initialAccessToken
 					? {
 							Authorization: `Bearer ${initialAccessToken}`,
-					  }
+						}
 					: {}),
 			},
 		});

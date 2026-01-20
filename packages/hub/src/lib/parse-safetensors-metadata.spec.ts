@@ -236,7 +236,7 @@ describe("parseSafetensorsMetadata", () => {
 			sum(
 				Object.entries(parameterCount)
 					.filter(([, value]) => typeof value === "number")
-					.map(([, value]) => value as number)
+					.map(([, value]) => value as number),
 			);
 
 		assert.strictEqual(parameterCountTotal, 8_031_637_504);

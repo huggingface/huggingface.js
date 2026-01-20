@@ -28,7 +28,7 @@ function normalizeInferenceProviderMapping(
 					adapter?: string;
 					adapterWeightsPath?: string;
 				}
-		  >
+		  >,
 ): InferenceProviderMappingEntry[] {
 	if (!inferenceProviderMapping) {
 		return [];
@@ -56,7 +56,7 @@ export async function fetchInferenceProviderMappingForModel(
 	accessToken?: string,
 	options?: {
 		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
-	}
+	},
 ): Promise<InferenceProviderMappingEntry[]> {
 	let inferenceProviderMapping: InferenceProviderMappingEntry[] | null;
 	if (inferenceProviderMappingCache.has(modelId)) {
@@ -74,14 +74,14 @@ export async function fetchInferenceProviderMappingForModel(
 					throw new InferenceClientHubApiError(
 						`Failed to fetch inference provider mapping for model ${modelId}: ${error.error}`,
 						{ url, method: "GET" },
-						{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: error }
+						{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: error },
 					);
 				}
 			} else {
 				throw new InferenceClientHubApiError(
 					`Failed to fetch inference provider mapping for model ${modelId}`,
 					{ url, method: "GET" },
-					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
+					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() },
 				);
 			}
 		}
@@ -96,14 +96,14 @@ export async function fetchInferenceProviderMappingForModel(
 			throw new InferenceClientHubApiError(
 				`Failed to fetch inference provider mapping for model ${modelId}: malformed API response, invalid JSON`,
 				{ url, method: "GET" },
-				{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
+				{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() },
 			);
 		}
 		if (!payload?.inferenceProviderMapping) {
 			throw new InferenceClientHubApiError(
 				`We have not been able to find inference provider information for model ${modelId}.`,
 				{ url, method: "GET" },
-				{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
+				{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() },
 			);
 		}
 		inferenceProviderMapping = normalizeInferenceProviderMapping(modelId, payload.inferenceProviderMapping);
@@ -121,7 +121,7 @@ export async function getInferenceProviderMapping(
 	},
 	options: {
 		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
-	}
+	},
 ): Promise<InferenceProviderMappingEntry | null> {
 	const logger = getLogger();
 	if (params.provider === ("auto" as InferenceProvider) && params.task === "conversational") {
@@ -147,12 +147,12 @@ export async function getInferenceProviderMapping(
 				: [params.task];
 		if (!typedInclude(equivalentTasks, providerMapping.task)) {
 			throw new InferenceClientInputError(
-				`Model ${params.modelId} is not supported for task ${params.task} and provider ${params.provider}. Supported task: ${providerMapping.task}.`
+				`Model ${params.modelId} is not supported for task ${params.task} and provider ${params.provider}. Supported task: ${providerMapping.task}.`,
 			);
 		}
 		if (providerMapping.status === "staging") {
 			logger.warn(
-				`Model ${params.modelId} is in staging mode for provider ${params.provider}. Meant for test purposes only.`
+				`Model ${params.modelId} is in staging mode for provider ${params.provider}. Meant for test purposes only.`,
 			);
 		}
 		return providerMapping;
@@ -163,7 +163,7 @@ export async function getInferenceProviderMapping(
 export async function resolveProvider(
 	provider?: InferenceProviderOrPolicy,
 	modelId?: string,
-	endpointUrl?: string
+	endpointUrl?: string,
 ): Promise<InferenceProvider> {
 	const logger = getLogger();
 	if (endpointUrl) {
@@ -175,7 +175,7 @@ export async function resolveProvider(
 	}
 	if (!provider) {
 		logger.log(
-			"Defaulting to 'auto' which will select the first provider available for the model, sorted by the user's order in https://hf.co/settings/inference-providers."
+			"Defaulting to 'auto' which will select the first provider available for the model, sorted by the user's order in https://hf.co/settings/inference-providers.",
 		);
 		provider = "auto";
 	}

@@ -83,7 +83,7 @@ export async function* listModels<
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): AsyncGenerator<ModelEntry & Pick<ApiModelInfo, T>> {
 	const accessToken = params && checkCredentials(params);
 	let totalToFetch = params?.limit ?? Infinity;
@@ -127,7 +127,7 @@ export async function* listModels<
 			) {
 				normalizedItem.inferenceProviderMapping = normalizeInferenceProviderMapping(
 					item.id,
-					item.inferenceProviderMapping
+					item.inferenceProviderMapping,
 				);
 			}
 

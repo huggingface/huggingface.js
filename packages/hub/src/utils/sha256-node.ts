@@ -6,7 +6,7 @@ export async function* sha256Node(
 	buffer: ArrayBuffer | Blob,
 	opts?: {
 		abortSignal?: AbortSignal;
-	}
+	},
 ): AsyncGenerator<number, string> {
 	const sha256Stream = createHash("sha256");
 	const size = buffer instanceof Blob ? buffer.size : buffer.byteLength;

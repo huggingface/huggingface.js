@@ -117,7 +117,7 @@ export class NebiusTextToImageTask extends TaskProviderHelper implements TextToI
 		response: NebiusImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: OutputType
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&

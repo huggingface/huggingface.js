@@ -45,7 +45,7 @@ export function pathsInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<(PathInfo & { lastCommit: CommitInfo; securityFileStatus: SecurityFileStatus })[]>;
 export function pathsInfo(
 	params: {
@@ -58,7 +58,7 @@ export function pathsInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<PathInfo[]>;
 
 export async function pathsInfo(
@@ -72,7 +72,7 @@ export async function pathsInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<PathInfo[]> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
@@ -80,7 +80,7 @@ export async function pathsInfo(
 	const hubUrl = params.hubUrl ?? HUB_URL;
 
 	const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/paths-info/${encodeURIComponent(
-		params.revision ?? "main"
+		params.revision ?? "main",
 	)}`;
 
 	const resp = await (params.fetch ?? fetch)(url, {
@@ -118,7 +118,7 @@ export async function pathsInfo(
 					date: new Date(item.lastCommit.date),
 					title: item.lastCommit.title,
 					id: item.lastCommit.id,
-			  }
+				}
 			: undefined,
 	}));
 }

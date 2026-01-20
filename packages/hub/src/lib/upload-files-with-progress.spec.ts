@@ -72,7 +72,7 @@ describe("uploadFilesWithProgress", () => {
 					progressEvents = progressEvents.filter(
 						(e, i) =>
 							(e.event !== "fileProgress" || e.progress === 0 || e.progress === 1) &&
-							(i === 0 || JSON.stringify(e) !== JSON.stringify(progressEvents[i - 1]))
+							(i === 0 || JSON.stringify(e) !== JSON.stringify(progressEvents[i - 1])),
 					);
 
 					assert.deepStrictEqual(progressEvents, [
@@ -162,7 +162,7 @@ describe("uploadFilesWithProgress", () => {
   },
   "vocab_size": 50257
 }
-      `.trim()
+      `.trim(),
 					);
 				} finally {
 					await deleteRepo({

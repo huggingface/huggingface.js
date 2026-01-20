@@ -106,7 +106,7 @@ abstract class FalAiQueueTask extends FalAITask {
 	async getResponseFromQueueApi(
 		response: FalAiQueueOutput,
 		url?: string,
-		headers?: Record<string, string>
+		headers?: Record<string, string>,
 	): Promise<unknown> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError(`URL and headers are required for ${this.task} task`);
@@ -114,7 +114,7 @@ abstract class FalAiQueueTask extends FalAITask {
 		const requestId = response.request_id;
 		if (!requestId) {
 			throw new InferenceClientProviderOutputError(
-				`Received malformed response from Fal.ai ${this.task} API: no request ID found in the response`
+				`Received malformed response from Fal.ai ${this.task} API: no request ID found in the response`,
 			);
 		}
 		let status = response.status;
@@ -144,14 +144,14 @@ abstract class FalAiQueueTask extends FalAITask {
 						requestId: statusResponse.headers.get("x-request-id") ?? "",
 						status: statusResponse.status,
 						body: await statusResponse.text(),
-					}
+					},
 				);
 			}
 			try {
 				status = (await statusResponse.json()).status;
 			} catch (error) {
 				throw new InferenceClientProviderOutputError(
-					"Failed to parse status response from fal-ai API: received malformed response"
+					"Failed to parse status response from fal-ai API: received malformed response",
 				);
 			}
 		}
@@ -162,7 +162,7 @@ abstract class FalAiQueueTask extends FalAITask {
 			result = await resultResponse.json();
 		} catch (error) {
 			throw new InferenceClientProviderOutputError(
-				"Failed to parse result response from fal-ai API: received malformed response"
+				"Failed to parse result response from fal-ai API: received malformed response",
 			);
 		}
 		return result;
@@ -207,7 +207,7 @@ export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageT
 		response: FalAiQueueOutput,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: OutputType
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		const result = (await this.getResponseFromQueueApi(response, url, headers)) as FalAITextToImageOutput;
 		if (
@@ -232,8 +232,8 @@ export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageT
 
 		throw new InferenceClientProviderOutputError(
 			`Received malformed response from Fal.ai text-to-image API: expected { images: Array<{ url: string }> } result format, got instead: ${JSON.stringify(
-				result
-			)}`
+				result,
+			)}`,
 		);
 	}
 }
@@ -261,7 +261,7 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
 		const mimeType = args.inputs instanceof Blob ? args.inputs.type : "image/png";
 		const imageDataUrl = `data:${mimeType};base64,${base64FromBytes(
-			new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer()),
 		)}`;
 		return {
 			...omit(args, ["inputs", "parameters"]),
@@ -276,7 +276,7 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 	override async getResponse(
 		response: FalAiQueueOutput,
 		url?: string,
-		headers?: Record<string, string>
+		headers?: Record<string, string>,
 	): Promise<Blob> {
 		const result = await this.getResponseFromQueueApi(response, url, headers);
 
@@ -297,8 +297,8 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 		} else {
 			throw new InferenceClientProviderOutputError(
 				`Received malformed response from Fal.ai image-to-image API: expected { images: Array<{ url: string }> } result format, got instead: ${JSON.stringify(
-					result
-				)}`
+					result,
+				)}`,
 			);
 		}
 	}
@@ -346,7 +346,7 @@ export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoT
 	override async getResponse(
 		response: FalAiQueueOutput,
 		url?: string,
-		headers?: Record<string, string>
+		headers?: Record<string, string>,
 	): Promise<Blob> {
 		const result = await this.getResponseFromQueueApi(response, url, headers);
 
@@ -365,8 +365,8 @@ export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoT
 		} else {
 			throw new InferenceClientProviderOutputError(
 				`Received malformed response from Fal.ai text-to-video API: expected { video: { url: string } } result format, got instead: ${JSON.stringify(
-					result
-				)}`
+					result,
+				)}`,
 			);
 		}
 	}
@@ -396,7 +396,7 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 		return {
 			...omit(args, ["inputs", "parameters"]),
 			image_url: `data:${mimeType};base64,${base64FromBytes(
-				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer()),
 			)}`,
 			...args.parameters,
 			...args,
@@ -407,7 +407,7 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 	override async getResponse(
 		response: FalAiQueueOutput,
 		url?: string,
-		headers?: Record<string, string>
+		headers?: Record<string, string>,
 	): Promise<Blob> {
 		const result = await this.getResponseFromQueueApi(response, url, headers);
 
@@ -428,8 +428,8 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 
 		throw new InferenceClientProviderOutputError(
 			`Received malformed response from Fal.ai image‑to‑video API: expected { video: { url: string } }, got: ${JSON.stringify(
-				result
-			)}`
+				result,
+			)}`,
 		);
 	}
 }
@@ -468,8 +468,8 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 		if (typeof res?.text !== "string") {
 			throw new InferenceClientProviderOutputError(
 				`Received malformed response from Fal.ai Automatic Speech Recognition API: expected { text: string } format, got instead: ${JSON.stringify(
-					response
-				)}`
+					response,
+				)}`,
 			);
 		}
 		return { text: res.text };
@@ -480,14 +480,14 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 		const contentType = blob?.type;
 		if (!contentType) {
 			throw new InferenceClientInputError(
-				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`
+				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`,
 			);
 		}
 		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
 			throw new InferenceClientInputError(
 				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
-					", "
-				)}`
+					", ",
+				)}`,
 			);
 		}
 		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
@@ -512,8 +512,8 @@ export class FalAITextToSpeechTask extends FalAITask {
 		if (typeof res?.audio?.url !== "string") {
 			throw new InferenceClientProviderOutputError(
 				`Received malformed response from Fal.ai Text-to-Speech API: expected { audio: { url: string } } format, got instead: ${JSON.stringify(
-					response
-				)}`
+					response,
+				)}`,
 			);
 		}
 		const urlResponse = await fetch(res.audio.url);
@@ -525,7 +525,7 @@ export class FalAITextToSpeechTask extends FalAITask {
 					requestId: urlResponse.headers.get("x-request-id") ?? "",
 					status: urlResponse.status,
 					body: await urlResponse.text(),
-				}
+				},
 			);
 		}
 		try {
@@ -538,7 +538,7 @@ export class FalAITextToSpeechTask extends FalAITask {
 					requestId: urlResponse.headers.get("x-request-id") ?? "",
 					status: urlResponse.status,
 					body: await urlResponse.text(),
-				}
+				},
 			);
 		}
 	}
@@ -562,7 +562,7 @@ export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageS
 		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
 		const mimeType = blob instanceof Blob ? blob.type : "image/png";
 		const base64Image = base64FromBytes(
-			new Uint8Array(blob instanceof ArrayBuffer ? blob : await (blob as Blob).arrayBuffer())
+			new Uint8Array(blob instanceof ArrayBuffer ? blob : await (blob as Blob).arrayBuffer()),
 		);
 		return {
 			...omit(args, ["inputs", "parameters", "data"]),
@@ -576,7 +576,7 @@ export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageS
 	override async getResponse(
 		response: FalAiQueueOutput,
 		url?: string,
-		headers?: Record<string, string>
+		headers?: Record<string, string>,
 	): Promise<ImageSegmentationOutput> {
 		const result = await this.getResponseFromQueueApi(response, url, headers);
 		if (
@@ -597,7 +597,7 @@ export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageS
 						requestId: maskResponse.headers.get("x-request-id") ?? "",
 						status: maskResponse.status,
 						body: await maskResponse.text(),
-					}
+					},
 				);
 			}
 			const maskBlob = await maskResponse.blob();
@@ -615,8 +615,8 @@ export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageS
 
 		throw new InferenceClientProviderOutputError(
 			`Received malformed response from Fal.ai image-segmentation API: expected { image: { url: string } } format, got instead: ${JSON.stringify(
-				response
-			)}`
+				response,
+			)}`,
 		);
 	}
 }
