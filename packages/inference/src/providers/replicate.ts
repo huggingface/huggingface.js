@@ -17,6 +17,7 @@
 import { InferenceClientProviderOutputError } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, OutputType, RequestArgs, UrlParams } from "../types.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { omit } from "../utils/omit.js";
 import {
 	TaskProviderHelper,
@@ -106,11 +107,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			}
 			const urlResponse = await fetch(res.output);
 			const blob = await urlResponse.blob();
-			if (outputType === "dataUrl") {
-				const b64 = await blob.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return `data:image/jpeg;base64,${b64}`;
-			}
-			return blob;
+			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
 
 		// Handle array output
@@ -129,11 +126,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			}
 			const urlResponse = await fetch(res.output[0]);
 			const blob = await urlResponse.blob();
-			if (outputType === "dataUrl") {
-				const b64 = await blob.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return `data:image/jpeg;base64,${b64}`;
-			}
-			return blob;
+			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-image API");

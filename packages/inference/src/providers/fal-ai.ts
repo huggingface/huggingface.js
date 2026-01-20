@@ -15,6 +15,7 @@
  * Thanks!
  */
 import { base64FromBytes } from "../utils/base64FromBytes.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 
 import type { AutomaticSpeechRecognitionOutput, ImageSegmentationOutput } from "@huggingface/tasks";
 import { isUrl } from "../lib/isUrl.js";
@@ -226,11 +227,7 @@ export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageT
 			}
 			const urlResponse = await fetch(result.images[0].url);
 			const blob = await urlResponse.blob();
-			if (outputType === "dataUrl") {
-				const b64 = await blob.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return `data:image/jpeg;base64,${b64}`;
-			}
-			return blob;
+			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
 
 		throw new InferenceClientProviderOutputError(

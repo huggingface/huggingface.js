@@ -73,6 +73,7 @@ import type {
 
 import { TaskProviderHelper } from "./providerHelper.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import { omit } from "../utils/omit.js";
@@ -156,26 +157,17 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 				return await base64Response.blob();
 			}
 			if ("output" in response && Array.isArray(response.output)) {
-				if (outputType === "dataUrl") {
-					// Fetch the URL and convert to dataUrl
-					const urlResponse = await fetch(response.output[0]);
-					const blob = await urlResponse.blob();
-					const b64 = await blob.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-					return `data:image/jpeg;base64,${b64}`;
-				}
 				const urlResponse = await fetch(response.output[0]);
 				const blob = await urlResponse.blob();
-				return blob;
+				return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 			}
 		}
 		if (response instanceof Blob) {
 			if (outputType === "dataUrl") {
-				const b64 = await response.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return `data:image/jpeg;base64,${b64}`;
+				return dataUrlFromBlob(response);
 			}
 			if (outputType === "json") {
-				const b64 = await response.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return { output: `data:image/jpeg;base64,${b64}` };
+				return { output: await dataUrlFromBlob(response) };
 			}
 			return response;
 		}

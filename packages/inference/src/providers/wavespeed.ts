@@ -5,6 +5,7 @@ import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
 import type { BodyParams, OutputType, RequestArgs, UrlParams } from "../types.js";
 import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
@@ -191,11 +192,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 						);
 					}
 					const blob = await mediaResponse.blob();
-					if (outputType === "dataUrl") {
-						const b64 = await blob.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-						return `data:image/jpeg;base64,${b64}`;
-					}
-					return blob;
+					return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 				}
 				case "failed": {
 					throw new InferenceClientProviderOutputError(taskResult.error || "Task failed");

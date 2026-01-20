@@ -21,6 +21,7 @@ import {
 } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, OutputType } from "../types.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
@@ -180,11 +181,7 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 
 				const imageResponse = await fetch(imageUrl);
 				const blob = await imageResponse.blob();
-				if (outputType === "dataUrl") {
-					const b64 = await blob.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-					return `data:image/jpeg;base64,${b64}`;
-				}
-				return blob;
+				return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 			}
 		}
 
