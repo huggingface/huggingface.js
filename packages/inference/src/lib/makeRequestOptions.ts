@@ -115,7 +115,7 @@ export function makeRequestOptionsFromResolvedModel(
 		outputType?: OutputType;
 	}
 ): { url: string; info: RequestInit } {
-	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
+	const { accessToken, endpointUrl, provider: maybeProvider, model, urlTransform, ...remainingArgs } = args;
 	void model;
 	void maybeProvider;
 
@@ -146,6 +146,7 @@ export function makeRequestOptionsFromResolvedModel(
 		authMethod,
 		model: modelId,
 		task,
+		urlTransform,
 	});
 	// Make headers
 	const headers = providerHelper.prepareHeaders(

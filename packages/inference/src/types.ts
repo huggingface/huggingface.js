@@ -163,6 +163,7 @@ export type RequestArgs = BaseArgs &
 		| ChatCompletionInput
 	) & {
 		parameters?: Record<string, unknown>;
+		urlTransform?: (url: string) => string;
 	};
 
 export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
@@ -176,6 +177,7 @@ export interface UrlParams {
 	authMethod: AuthMethod;
 	model: string;
 	task?: InferenceTask;
+	urlTransform?: (url: string) => string;
 }
 
 export type OutputType = "url" | "dataUrl" | "blob" | "json";

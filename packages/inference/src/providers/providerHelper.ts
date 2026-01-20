@@ -123,6 +123,9 @@ export abstract class TaskProviderHelper {
 	makeUrl(params: UrlParams): string {
 		const baseUrl = this.makeBaseUrl(params);
 		const route = this.makeRoute(params).replace(/^\/+/, "");
+		if (params.urlTransform) {
+			return params.urlTransform(`${baseUrl}/${route}`);
+		}
 		return `${baseUrl}/${route}`;
 	}
 
