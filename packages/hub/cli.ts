@@ -389,9 +389,9 @@ const commands = {
 						default: process.env.HF_TOKEN,
 					},
 					{
-						name: "follow" as const,
-						short: "f",
-						description: "Stream logs after creating the job",
+						name: "detach" as const,
+						short: "d",
+						description: "Don't stream logs after creating the job",
 						boolean: true,
 					},
 				] as const,
@@ -773,7 +773,7 @@ async function run() {
 						attempts: attemptsStr,
 						namespace,
 						token,
-						follow,
+						detach,
 					} = parsedArgs;
 					const envVars = env;
 					let attempts: number | undefined;
@@ -850,7 +850,7 @@ async function run() {
 					console.log(`Job created: ${job.id}`);
 					console.log(`Status: ${job.status.stage}`);
 
-					if (follow) {
+					if (!detach) {
 						const logsParams = {
 							namespace: finalNamespace,
 							jobId: job.id,
