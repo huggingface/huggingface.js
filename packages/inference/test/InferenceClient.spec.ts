@@ -1626,6 +1626,84 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 
+	describe.concurrent(
+		"CometAPI",
+		() => {
+			const client = new InferenceClient(env.COMETAPI_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING.cometapi = {
+				"openai/gpt-4o-mini": {
+					provider: "cometapi",
+					hfModelId: "openai/gpt-4o-mini",
+					providerId: "gpt-4o-mini",
+					status: "live",
+					task: "conversational",
+				},
+				"openai/text-embedding-3-small": {
+					provider: "cometapi",
+					hfModelId: "openai/text-embedding-3-small",
+					providerId: "text-embedding-3-small",
+					task: "feature-extraction",
+					status: "live",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "openai/gpt-4o-mini",
+					provider: "cometapi",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					tool_choice: "none",
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toMatch(/(to )?(two|2)/i);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "openai/gpt-4o-mini",
+					provider: "cometapi",
+					messages: [{ role: "system", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toMatch(/(two|2)/i);
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "openai/gpt-4o-mini",
+					provider: "cometapi",
+					inputs: "Once upon a time,",
+					temperature: 0,
+					max_tokens: 20,
+				});
+
+				expect(res).toHaveProperty("generated_text");
+				expect(typeof res.generated_text).toBe("string");
+				expect(res.generated_text.length).toBeGreaterThan(0);
+			});
+
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "openai/text-embedding-3-small",
+					provider: "cometapi",
+					inputs: "That is a happy person",
+				});
+
+				expect(res).toBeInstanceOf(Array);
+				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
+			});
+		},
+		TIMEOUT
+	);
+
 	describe.concurrent("3rd party providers", () => {
 		it("chatCompletion - fails with unsupported model", async () => {
 			expect(
