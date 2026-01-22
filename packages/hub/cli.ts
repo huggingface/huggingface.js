@@ -918,17 +918,13 @@ async function run() {
 					}
 
 					// Display jobs in a table-like format
-					console.log(
-						`${"ID".padEnd(40)} ${"STATUS".padEnd(12)} ${"CREATED".padEnd(20)} ${"DOCKER IMAGE"}`,
-					);
+					console.log(`${"ID".padEnd(40)} ${"STATUS".padEnd(12)} ${"CREATED".padEnd(20)} ${"DOCKER IMAGE"}`);
 					console.log("-".repeat(100));
 					for (const job of filteredJobs) {
 						const createdAt = new Date(job.createdAt).toLocaleString();
 						const dockerImage = job.dockerImage || job.spaceId || "N/A";
 						const status = job.status.stage;
-						console.log(
-							`${job.id.padEnd(40)} ${status.padEnd(12)} ${createdAt.padEnd(20)} ${dockerImage}`,
-						);
+						console.log(`${job.id.padEnd(40)} ${status.padEnd(12)} ${createdAt.padEnd(20)} ${dockerImage}`);
 					}
 					break;
 				}
