@@ -84,7 +84,7 @@ class RangeView {
 			 */
 			fetch?: typeof fetch;
 			additionalFetchHeaders?: Record<string, string>;
-		}
+		},
 	) {
 		this.chunk = 0;
 		/// TODO(fix typing)
@@ -106,7 +106,7 @@ class RangeView {
 						Range: `bytes=${range[0]}-${range[1]}`,
 					},
 				})
-			).arrayBuffer()
+			).arrayBuffer(),
 		);
 		this.appendBuffer(buf);
 		this.chunk += 1;
@@ -158,7 +158,7 @@ class RangeViewLocalFile extends RangeView {
 	override async fetchChunk(): Promise<void> {
 		const { FileBlob } = await import("./utils/FileBlob");
 		const blob = await FileBlob.create(this.uri);
-		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
+		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE];
 		const buffer = await blob.slice(range[0], range[1]).arrayBuffer();
 		this.appendBuffer(new Uint8Array(buffer));
 		this.chunk += 1;
@@ -199,7 +199,7 @@ function readMetadataValue(
 	type: GGUFValueType,
 	offset: number,
 	version: Version,
-	littleEndian: boolean
+	littleEndian: boolean,
 ): Slice<MetadataValue> {
 	switch (type) {
 		case GGUFValueType.UINT8:
@@ -248,7 +248,7 @@ export async function gguf(
 		additionalFetchHeaders?: Record<string, string>;
 		typedMetadata: true;
 		allowLocalFile?: boolean;
-	}
+	},
 ): Promise<GGUFParseOutput & { typedMetadata: GGUFTypedMetadata }>;
 export async function gguf(
 	uri: string,
@@ -258,7 +258,7 @@ export async function gguf(
 		typedMetadata: true;
 		computeParametersCount: true;
 		allowLocalFile?: boolean;
-	}
+	},
 ): Promise<GGUFParseOutput & { parameterCount: number; typedMetadata: GGUFTypedMetadata }>;
 export async function gguf(
 	uri: string,
@@ -267,7 +267,7 @@ export async function gguf(
 		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount: true;
 		allowLocalFile?: boolean;
-	}
+	},
 ): Promise<GGUFParseOutput & { parameterCount: number }>;
 export async function gguf(
 	uri: string,
@@ -275,7 +275,7 @@ export async function gguf(
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		allowLocalFile?: boolean;
-	}
+	},
 ): Promise<GGUFParseOutput>;
 export async function gguf(
 	uri: string,
@@ -288,7 +288,7 @@ export async function gguf(
 		typedMetadata?: boolean;
 		computeParametersCount?: boolean;
 		allowLocalFile?: boolean;
-	}
+	},
 ): Promise<GGUFParseOutput & { parameterCount?: number; typedMetadata?: GGUFTypedMetadata }> {
 	let r: RangeView;
 	if (isBackend) {
@@ -542,7 +542,7 @@ function writeMetadataValue(
 	type: GGUFValueType,
 	version: Version,
 	littleEndian: boolean,
-	subType?: GGUFValueType
+	subType?: GGUFValueType,
 ): Uint8Array {
 	switch (type) {
 		case GGUFValueType.UINT8: {
@@ -678,7 +678,7 @@ export function serializeGgufMetadata(
 		 * @default GGUF_DEFAULT_ALIGNMENT (32)
 		 */
 		alignment?: number;
-	} = {}
+	} = {},
 ): Uint8Array {
 	const littleEndian = options.littleEndian ?? true;
 	const alignment = options.alignment ?? GGUF_DEFAULT_ALIGNMENT;
@@ -697,7 +697,7 @@ export function serializeGgufMetadata(
 
 	// Count key-value pairs (excluding the built-in fields: version, tensor_count, kv_count)
 	const kvEntries = Object.entries(typedMetadata).filter(
-		([key]) => !["version", "tensor_count", "kv_count"].includes(key)
+		([key]) => !["version", "tensor_count", "kv_count"].includes(key),
 	);
 	const kvCount = BigInt(kvEntries.length);
 
@@ -728,7 +728,7 @@ export function serializeGgufMetadata(
 			entry.type,
 			version,
 			littleEndian,
-			"subType" in entry ? entry.subType : undefined
+			"subType" in entry ? entry.subType : undefined,
 		);
 		kvBytes.push(valueBytes);
 	}
@@ -795,7 +795,7 @@ export async function buildGgufHeader(
 		tensorInfoByteRange: [number, number];
 		/** Alignment for tensor data (default: GGUF_DEFAULT_ALIGNMENT (32)) */
 		alignment?: number;
-	}
+	},
 ): Promise<Blob> {
 	const alignment = options.alignment ?? GGUF_DEFAULT_ALIGNMENT;
 	const version = updatedMetadata.version.value;
@@ -854,7 +854,7 @@ export async function ggufAllShards(
 		additionalFetchHeaders?: Record<string, string>;
 		parallelDownloads?: number;
 		allowLocalFile?: boolean;
-	}
+	},
 ): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
 	const parallelDownloads = params?.parallelDownloads ?? PARALLEL_DOWNLOADS;
 	if (parallelDownloads < 1) {
@@ -872,7 +872,7 @@ export async function ggufAllShards(
 
 		const shards = await promisesQueue(
 			urls.map((shardUrl) => () => gguf(shardUrl, { ...params, computeParametersCount: true })),
-			parallelDownloads
+			parallelDownloads,
 		);
 		return {
 			shards,
@@ -884,7 +884,7 @@ export async function ggufAllShards(
 			{
 				...params,
 				computeParametersCount: true,
-			}
+			},
 		);
 		return { shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }], parameterCount };
 	}

@@ -18,7 +18,7 @@ export type DocumentQuestionAnsweringArgs = BaseArgs &
  */
 export async function documentQuestionAnswering(
 	args: DocumentQuestionAnsweringArgs,
-	options?: Options
+	options?: Options,
 ): Promise<DocumentQuestionAnsweringOutput[number]> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "document-question-answering");
@@ -36,7 +36,7 @@ export async function documentQuestionAnswering(
 		{
 			...options,
 			task: "document-question-answering",
-		}
+		},
 	);
 	return providerHelper.getResponse(res);
 }

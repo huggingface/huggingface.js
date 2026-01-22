@@ -24,7 +24,7 @@ export type TabularRegressionOutput = number[];
  */
 export async function tabularRegression(
 	args: TabularRegressionArgs,
-	options?: Options
+	options?: Options,
 ): Promise<TabularRegressionOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "tabular-regression");

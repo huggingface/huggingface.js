@@ -28,7 +28,7 @@ license: mit
 
 # GPT-2
 
-Test the whole generation capabilities here: https://transformer.huggingface.co/doc/gpt2-large`)
+Test the whole generation capabilities here: https://transformer.huggingface.co/doc/gpt2-large`),
 		);
 	});
 	test("should downoad xet file", async () => {

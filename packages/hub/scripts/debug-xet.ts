@@ -98,7 +98,7 @@ function createDebugFetch(args: { debugDir: string; replay?: boolean }): {
 
 					// Compare all bytes except footer bytes 104-112 (9 bytes from positions 104-112 inclusive)
 					const footerStart = Number(
-						new DataView(localData.buffer).getBigUint64(localData.buffer.byteLength - 8, true)
+						new DataView(localData.buffer).getBigUint64(localData.buffer.byteLength - 8, true),
 					);
 					// This is the shard timestamp
 					const toIgnoreStart = footerStart + 104;
@@ -303,7 +303,7 @@ async function main() {
 	};
 
 	console.log(
-		`\n=== Starting debug upload for ${filePaths.length > 1 ? `${filePaths.length} files` : basename(filePaths[0])} ===`
+		`\n=== Starting debug upload for ${filePaths.length > 1 ? `${filePaths.length} files` : basename(filePaths[0])} ===`,
 	);
 	if (args.replay) {
 		console.log("🔄 Replay mode: Using local dedup info when available");

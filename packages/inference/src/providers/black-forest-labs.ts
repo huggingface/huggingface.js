@@ -66,7 +66,7 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 		response: BlackForestLabsResponse,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob" | "json"
+		outputType?: "url" | "blob" | "json",
 	): Promise<string | Blob | Record<string, unknown>> {
 		const logger = getLogger();
 		const urlObj = new URL(response.polling_url);
@@ -79,7 +79,7 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 				throw new InferenceClientProviderApiError(
 					"Failed to fetch result from black forest labs API",
 					{ url: urlObj.toString(), method: "GET", headers: { "Content-Type": "application/json" } },
-					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
+					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() },
 				);
 			}
 			const payload = await resp.json();
@@ -106,7 +106,7 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 			}
 		}
 		throw new InferenceClientProviderOutputError(
-			`Timed out while waiting for the result from black forest labs API - aborting after 5 attempts`
+			`Timed out while waiting for the result from black forest labs API - aborting after 5 attempts`,
 		);
 	}
 }

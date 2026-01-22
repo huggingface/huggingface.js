@@ -17,14 +17,14 @@ export function uploadFiles(
 		maxFolderDepth?: CommitParams["maxFolderDepth"];
 		abortSignal?: CommitParams["abortSignal"];
 		useXet?: CommitParams["useXet"];
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<CommitOutput> {
 	return commit({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
 		operations: params.files.map((file) => ({
 			operation: "addOrUpdate",
-			path: file instanceof URL ? file.pathname.split("/").at(-1) ?? "file" : "path" in file ? file.path : file.name,
+			path: file instanceof URL ? (file.pathname.split("/").at(-1) ?? "file") : "path" in file ? file.path : file.name,
 			content: "content" in file ? file.content : file,
 		})),
 		title: params.commitTitle ?? `Add ${params.files.length} files`,

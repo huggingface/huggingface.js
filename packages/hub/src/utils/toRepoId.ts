@@ -7,7 +7,7 @@ export function toRepoId(repo: RepoDesignation): RepoId {
 
 	if (repo.startsWith("model/") || repo.startsWith("models/")) {
 		throw new TypeError(
-			"A repo designation for a model should not start with 'models/', directly specify the model namespace / name"
+			"A repo designation for a model should not start with 'models/', directly specify the model namespace / name",
 		);
 	}
 

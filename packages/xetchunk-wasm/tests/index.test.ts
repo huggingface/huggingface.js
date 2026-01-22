@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createChunker, finalize, nextBlock, getChunks, hashToHex } from "../build/debug.js";
+import { createChunker, finalize, nextBlock, getChunks, hashToHex } from "../dist/index.js";
 import { createRandomArray } from "@huggingface/splitmix64-wasm";
 
 // Helper function to get chunk boundaries from chunks
@@ -15,7 +15,7 @@ describe("xetchunk-wasm", () => {
 	describe("Basic functionality with 1MB random data", () => {
 		it("should pass 1MB random data test", async () => {
 			// Create 1MB of random data with seed 0
-			const dataBuffer = createRandomArray(1000000, 0);
+			const dataBuffer = createRandomArray(1000000, 0n);
 			const data = new Uint8Array(dataBuffer);
 
 			// Verify specific byte values (from Rust reference)

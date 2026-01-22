@@ -1,22 +1,30 @@
 {
 	"name": "@huggingface/hub",
-	"packageManager": "pnpm@10.10.0",
-	"version": "2.7.1",
+	"version": "2.7.2",
 	"description": "Utilities to interact with the Hugging Face hub",
+	"keywords": [
+		"api",
+		"client",
+		"face",
+		"hub",
+		"hugging",
+		"huggingface"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
-	"publishConfig": {
-		"access": "public"
+	"bin": {
+		"hfjs": "./dist/cli.js"
 	},
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"index.ts",
+		"src",
+		"tsconfig.json"
+	],
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs"
-		}
-	},
 	"browser": {
 		"./src/utils/sha256-node.ts": false,
 		"./src/utils/sub-paths.ts": false,
@@ -27,15 +35,22 @@
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
-	"engines": {
-		"node": ">=18"
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs"
+		}
 	},
-	"source": "index.ts",
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
@@ -46,32 +61,17 @@
 		"bench": "tsx scripts/bench.ts",
 		"debug-xet": "tsx scripts/debug-xet.ts"
 	},
-	"files": [
-		"src",
-		"dist",
-		"index.ts",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"hub",
-		"api",
-		"client",
-		"hugging",
-		"face"
-	],
-	"bin": {
-		"hfjs": "./dist/cli.js"
-	},
-	"author": "Hugging Face",
-	"license": "MIT",
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^"
+	},
+	"devDependencies": {
+		"@types/cli-progress": "^3.11.6"
 	},
 	"optionalDependencies": {
 		"cli-progress": "^3.12.0"
 	},
-	"devDependencies": {
-		"@types/cli-progress": "^3.11.6"
-	}
+	"engines": {
+		"node": ">=18"
+	},
+	"packageManager": "pnpm@10.10.0"
 }
