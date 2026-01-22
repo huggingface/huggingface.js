@@ -29,6 +29,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	groq: {},
 	"hf-inference": {},
 	hyperbolic: {},
+	"latitude-sh": {},
 	nebius: {},
 	novita: {},
 	nscale: {},
