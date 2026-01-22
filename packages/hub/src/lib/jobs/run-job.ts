@@ -36,9 +36,6 @@ export async function runJob(
 		environment: params.environment || {},
 	};
 
-	if (params.name) {
-		body.name = params.name;
-	}
 	if (params.dockerImage) {
 		body.dockerImage = params.dockerImage;
 	}

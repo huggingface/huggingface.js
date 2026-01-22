@@ -44,7 +44,6 @@ export interface ApiJob {
 		id: string;
 		name: string;
 	};
-	name?: string | null;
 	dockerImage?: string | null;
 	spaceId?: string | null;
 	command?: string[] | null;
@@ -79,10 +78,6 @@ export interface ApiScheduledJob {
 }
 
 export interface CreateJobOptions {
-	/**
-	 * Optional name for the job
-	 */
-	name?: string;
 	/**
 	 * The Docker image to run (e.g., "python:3.12" or "pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel")
 	 */
