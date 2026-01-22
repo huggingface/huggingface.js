@@ -373,6 +373,12 @@ const commands = {
 							"Secret in the format KEY=VALUE (will be encrypted server-side, can be specified multiple times)",
 					},
 					{
+						name: "label" as const,
+						short: "l",
+						multiple: true,
+						description: "Label in the format KEY=VALUE (can be specified multiple times)",
+					},
+					{
 						name: "flavor" as const,
 						description: "Hardware flavor to use (defaults to cpu-basic)",
 						default: "cpu-basic",
@@ -772,6 +778,7 @@ async function run() {
 						command: commandArray,
 						env,
 						secret,
+						label,
 						flavor,
 						attempts: attemptsStr,
 						namespace,
@@ -780,6 +787,7 @@ async function run() {
 					} = parsedArgs;
 					const envVars = env;
 					const secretVars = secret;
+					const labelVars = label;
 					let attempts: number | undefined;
 					if (attemptsStr) {
 						const parsed = parseInt(attemptsStr, 10);
@@ -848,6 +856,20 @@ async function run() {
 						}
 					}
 
+					// Parse labels
+					const labels: Record<string, string> = {};
+					if (labelVars) {
+						for (const labelVar of labelVars) {
+							const equalIndex = labelVar.indexOf("=");
+							if (equalIndex === -1) {
+								throw new Error(`Invalid label format: ${labelVar}. Expected KEY=VALUE`);
+							}
+							const key = labelVar.slice(0, equalIndex);
+							const value = labelVar.slice(equalIndex + 1);
+							labels[key] = value;
+						}
+					}
+
 					const jobParams = {
 						namespace: finalNamespace,
 						...(dockerImage ? { dockerImage } : {}),
@@ -857,6 +879,7 @@ async function run() {
 						environment,
 						secrets,
 						...(attempts !== undefined ? { attempts } : {}),
+						...(Object.keys(labels).length > 0 ? { labels } : {}),
 						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
 						...(token ? { accessToken: token } : {}),
 					} as Parameters<typeof runJob>[0];
