@@ -443,7 +443,8 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model: ModelData) =>
 			isTransformersModel(model) &&
-			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text") &&
+			model.tags.includes("conversational"),
 		snippet: snippetSglang,
 	},
 	"mlx-lm": {
