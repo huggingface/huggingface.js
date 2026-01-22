@@ -82,6 +82,7 @@ function isMarlinModel(model: ModelData): boolean {
 function isTransformersModel(model: ModelData): boolean {
 	return model.tags.includes("transformers");
 }
+
 function isTgiModel(model: ModelData): boolean {
 	return model.tags.includes("text-generation-inference");
 }
@@ -258,6 +259,41 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 		},
 	];
 };
+const snippetSglang = (model: ModelData): LocalAppSnippet[] => {
+	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+
+	const setup = ["# Install SGLang from pip:", "pip install sglang"].join("\n");
+	const serverCommand = `# Start the SGLang server:\npython3 -m sglang.launch_server --model-path ${model.id} \\
+ --host 0.0.0.0 --log-level warning"`;
+	const dockerCommand = `docker run --gpus all \\
+    --shm-size 32g \\
+    -p 30000:30000 \\
+    -v ~/.cache/huggingface:/root/.cache/huggingface \\
+    --env "HF_TOKEN=<secret>" \\
+    --ipc=host \\
+    lmsysorg/sglang:latest \\
+    python3 -m sglang.launch_server --model-path ${model.id} --host 0.0.0.0 --port 30000`;
+	const runCommand = `curl -s http://localhost:{port}/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -d '{{"model": "${model.id}", "messages": ${stringifyMessages(messages, {
+		indent: "\t\t",
+		attributeKeyQuotes: true,
+		customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+	})}'`;
+
+	return [
+		{
+			title: "Install from pip and serve model",
+			setup: setup,
+			content: [serverCommand, runCommand],
+		},
+		{
+			title: "Use Docker images",
+			setup: dockerCommand,
+			content: [runCommand],
+		},
+	];
+};
 const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 	const runCommand = [
 		"# Call the server using curl:",
@@ -407,6 +443,16 @@ export const LOCAL_APPS = {
 				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetVllm,
+	},
+	sglang: {
+		prettyLabel: "SGLang",
+		docsUrl: "https://docs.sglang.io",
+		mainTask: "text-generation",
+		displayOnModelPage: (model: ModelData) =>
+			isTransformersModel(model) &&
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text") &&
+			model.tags.includes("conversational"),
+		snippet: snippetSglang,
 	},
 	"mlx-lm": {
 		prettyLabel: "MLX LM",
