@@ -376,7 +376,8 @@ const commands = {
 						name: "label" as const,
 						short: "l",
 						multiple: true,
-						description: "Label in the format KEY=VALUE or KEY alone (in this case VALUE defaults to empty string). Can be specified multiple times.",
+						description:
+							"Label in the format KEY=VALUE or KEY alone (in this case VALUE defaults to empty string). Can be specified multiple times.",
 					},
 					{
 						name: "flavor" as const,
@@ -860,7 +861,9 @@ async function run() {
 					const labels: Record<string, string> = {};
 					if (labelVars) {
 						for (const labelVar of labelVars) {
-							const [key, value] = labelVar.indexOf("=") > -1 ? labelVar.split("=", 2) : [labelVar, ""]
+							const equalIndex = labelVar.indexOf("=");
+							const [key, value] =
+								equalIndex > -1 ? [labelVar.slice(0, equalIndex), labelVar.slice(equalIndex + 1)] : [labelVar, ""];
 							labels[key] = value;
 						}
 					}
