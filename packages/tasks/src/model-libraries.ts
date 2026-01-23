@@ -529,6 +529,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"ckpt/tensor00000_000" OR path:"ckpt-0/tensor00000_000"`,
 	},
+	"habibi-tts": {
+		prettyLabel: "Habibi-TTS",
+		repoName: "Habibi-TTS",
+		repoUrl: "https://github.com/SWivid/Habibi-TTS",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	hallo: {
 		prettyLabel: "Hallo",
 		repoName: "Hallo",
