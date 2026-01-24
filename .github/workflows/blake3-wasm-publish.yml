@@ -28,7 +28,7 @@ jobs:
   version_and_release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           # Needed to push the tag and the commit on the main branch, otherwise we get:
           # > Run git push --follow-tags
@@ -36,7 +36,7 @@ jobs:
           # remote: error: Changes must be made through a pull request. Required status check "lint" is expected.
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
       - run: npm install -g corepack@latest && corepack enable
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "24"
           cache: "pnpm"
@@ -56,8 +56,8 @@ jobs:
       - run: (git pull --rebase && git push --follow-tags) || (git pull --rebase && git push --follow-tags)
 
       - run: pnpm publish --no-git-checks .
-      # hack - reuse actions/setup-node@v4 just to set a new registry
-      - uses: actions/setup-node@v4
+      # hack - reuse actions/setup-node@v6 just to set a new registry
+      - uses: actions/setup-node@v6
         with:
           node-version: "24"
           registry-url: "https://npm.pkg.github.com"
