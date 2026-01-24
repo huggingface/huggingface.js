@@ -138,7 +138,7 @@ jobs:
           pnpm build
           pnpm run test:browser
 
-      - uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@v2.0.3
         with:
           deno-version: vx.x.x
       - name: E2E test - deno import from npm
