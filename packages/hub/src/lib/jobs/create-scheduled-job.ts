@@ -64,6 +64,9 @@ export async function createScheduledJob(
 	if (rest.jobSpec.attempts !== undefined) {
 		(body.jobSpec as Record<string, unknown>).attempts = rest.jobSpec.attempts;
 	}
+	if (rest.jobSpec.labels) {
+		(body.jobSpec as Record<string, unknown>).labels = rest.jobSpec.labels;
+	}
 
 	const response = await (customFetch || fetch)(`${hubUrl || HUB_URL}/api/scheduled-jobs/${namespace}`, {
 		method: "POST",

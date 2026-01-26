@@ -60,6 +60,9 @@ export async function runJob(
 	if (params.attempts !== undefined) {
 		body.attempts = params.attempts;
 	}
+	if (params.labels) {
+		body.labels = params.labels;
+	}
 
 	const response = await (params.fetch || fetch)(`${params.hubUrl || HUB_URL}/api/jobs/${params.namespace}`, {
 		method: "POST",
