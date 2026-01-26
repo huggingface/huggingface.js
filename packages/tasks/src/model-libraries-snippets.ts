@@ -156,6 +156,26 @@ pred_df = pipeline.predict_df(
 	return [installSnippet, exampleSnippet];
 };
 
+export const colipri = (model: ModelData): string[] => {
+	const installSnippet = `pip install colipri`;
+
+	const exampleSnippet = `from colipri import get_model
+from colipri import get_processor
+from colipri import load_sample_ct
+from colipri import ZeroShotImageClassificationPipeline
+
+model = get_model().cuda()
+processor = get_processor()
+pipeline = ZeroShotImageClassificationPipeline(model, processor)
+
+image = load_sample_ct()
+
+pipeline(image, ["No lung nodules", "Lung nodules"])
+`;
+
+	return [installSnippet, exampleSnippet];
+};
+
 export const sap_rpt_one_oss = (): string[] => {
 	const installSnippet = `pip install git+https://github.com/SAP-samples/sap-rpt-1-oss`;
 
