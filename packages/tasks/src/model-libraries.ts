@@ -270,6 +270,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"setup.py"`,
 	},
+	colipri: {
+		prettyLabel: "COLIPRI",
+		repoName: "COLIPRI",
+		repoUrl: "https://huggingface.co/microsoft/colipri",
+		snippets: snippets.colipri,
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	cosyvoice: {
 		prettyLabel: "CosyVoice",
 		repoName: "CosyVoice",
