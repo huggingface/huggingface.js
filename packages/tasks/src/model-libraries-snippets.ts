@@ -2360,4 +2360,13 @@ torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 `,
 ];
 
+export const pickle = (model: ModelData): string[] => [
+  `from huggingface_hub import hf_hub_download
+import pickle
+
+model_path = hf_hub_download(repo_id="${model.id}", filename="trained_model.pkl")
+with open(model_path, 'rb') as f:
+    model = pickle.load(f)`
+];
+
 //#endregion
