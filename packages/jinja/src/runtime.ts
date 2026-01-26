@@ -280,10 +280,21 @@ interface ToJSONOptions {
 	indent?: number | null;
 	/** If true, escape non-ASCII characters. Default is false. */
 	ensureAscii?: boolean;
-	/** Custom separators: [itemSeparator, keySeparator]. Default is [", ", ": "] or [",", ":"] when indent is set. */
+	/** Custom separators: [itemSeparator, keySeparator]. Default is [", ", ": "] or [",", ": "] when indent is set. */
 	separators?: [string, string] | null;
 	/** If true, sort object keys alphabetically. Default is false. */
 	sortKeys?: boolean;
+}
+
+/**
+ * Escapes non-ASCII characters in a string to \uXXXX format.
+ * Handles surrogate pairs for characters outside the BMP (like emoji).
+ */
+function escapeNonAscii(str: string): string {
+	return str.replace(/[\u0080-\uffff]/g, (char) => {
+		const code = char.charCodeAt(0);
+		return "\\u" + code.toString(16).padStart(4, "0");
+	});
 }
 
 /**
@@ -307,7 +318,8 @@ function toJSON(
 	if (separators) {
 		[itemSeparator, keySeparator] = separators;
 	} else if (indent) {
-		// When indent is set and no custom separators, use compact separators
+		// When indent is set and no custom separators, use compact item separator
+		// but keep the standard key separator (matches Python json.dumps behavior)
 		itemSeparator = ",";
 		keySeparator = ": ";
 	} else {
@@ -328,10 +340,7 @@ function toJSON(
 		case "StringValue": {
 			let result = JSON.stringify(input.value);
 			if (ensureAscii) {
-				// Escape non-ASCII characters to \uXXXX format
-				result = result.replace(/[\u0080-\uffff]/g, (char) => {
-					return "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0");
-				});
+				result = escapeNonAscii(result);
 			}
 			return result;
 		}
@@ -357,9 +366,7 @@ function toJSON(
 				const core = entries.map(([key, value]) => {
 					let keyStr = JSON.stringify(key);
 					if (ensureAscii) {
-						keyStr = keyStr.replace(/[\u0080-\uffff]/g, (char) => {
-							return "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0");
-						});
+						keyStr = escapeNonAscii(keyStr);
 					}
 					const v = `${keyStr}${keySeparator}${toJSON(value, options, depth + 1, convertUndefinedToNull)}`;
 					return indent ? `${childrenPadding}${v}` : v;
