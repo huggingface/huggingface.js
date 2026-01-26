@@ -1512,6 +1512,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
+	pickle: {
+	  prettyLabel: "Pickle",
+	  repoName: "pickle",
+	  countDownloads: `path_extension:"pkl"`,
+	  snippets: snippets.pickle,
+},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
