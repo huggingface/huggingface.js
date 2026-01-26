@@ -298,10 +298,7 @@ const NON_ASCII_CHARS = /[\x7f-\uffff]/g;
  * @returns The ASCII-safe string
  */
 function makeAsciiSafe(str: string): string {
-	return str.replace(
-		NON_ASCII_CHARS,
-		(char: string) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0"),
-	);
+	return str.replace(NON_ASCII_CHARS, (char: string) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0"));
 }
 
 /**
