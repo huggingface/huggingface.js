@@ -273,19 +273,65 @@ export class BooleanValue extends RuntimeValue<boolean> {
 }
 
 /**
+ * Options for JSON serialization.
+ */
+interface ToJSONOptions {
+	/** Optional indentation for pretty-printing */
+	indent?: number | null;
+	/** If true, escape non-ASCII characters. Default is false. */
+	ensureAscii?: boolean;
+	/** Custom separators: [itemSeparator, keySeparator]. Default is [", ", ": "] or [",", ": "] when indent is set. */
+	separators?: [string, string] | null;
+	/** If true, sort object keys alphabetically. Default is false. */
+	sortKeys?: boolean;
+}
+
+/**
+ * Regular expression to match non-ASCII characters (code points >= 0x7F).
+ * Used when ensure_ascii is true to escape these characters to \uXXXX format in JSON output.
+ */
+const NON_ASCII_CHARS = /[\x7f-\uffff]/g;
+
+/**
+ * Converts a string to an ASCII-safe representation by escaping non-ASCII characters.
+ * @param str The input string
+ * @returns The ASCII-safe string
+ */
+function makeAsciiSafe(str: string): string {
+	return str.replace(NON_ASCII_CHARS, (char: string) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0"));
+}
+
+/**
  * Converts a runtime value to its JSON string representation.
  * @param input The runtime value to convert
- * @param indent Optional indentation for pretty-printing
+ * @param options JSON serialization options
  * @param depth Current recursion depth (used for indentation)
  * @param convertUndefinedToNull If true, undefined becomes "null" (JSON-safe). If false, undefined becomes "undefined".
  */
 function toJSON(
 	input: AnyRuntimeValue,
-	indent?: number | null,
-	depth?: number,
+	options: ToJSONOptions = {},
+	depth: number = 0,
 	convertUndefinedToNull: boolean = true,
 ): string {
-	const currentDepth = depth ?? 0;
+	const { indent = null, ensureAscii = false, separators = null, sortKeys = false } = options;
+
+	// Determine the separators to use
+	let itemSeparator: string;
+	let keySeparator: string;
+	if (separators) {
+		[itemSeparator, keySeparator] = separators;
+	} else if (indent) {
+		// When indent is set and no custom separators, use compact item separator
+		// but keep the standard key separator (matches Python json.dumps behavior)
+		itemSeparator = ",";
+		keySeparator = ": ";
+	} else {
+		// Default separators (matches Python json.dumps default)
+		itemSeparator = ", ";
+		keySeparator = ": ";
+	}
+
 	switch (input.type) {
 		case "NullValue":
 			return "null";
@@ -293,29 +339,41 @@ function toJSON(
 			return convertUndefinedToNull ? "null" : "undefined";
 		case "IntegerValue":
 		case "FloatValue":
-		case "StringValue":
 		case "BooleanValue":
 			return JSON.stringify(input.value);
+		case "StringValue": {
+			let result = JSON.stringify(input.value);
+			if (ensureAscii) {
+				result = makeAsciiSafe(result);
+			}
+			return result;
+		}
 		case "ArrayValue":
 		case "ObjectValue": {
 			const indentValue = indent ? " ".repeat(indent) : "";
-			const basePadding = "\n" + indentValue.repeat(currentDepth);
+			const basePadding = "\n" + indentValue.repeat(depth);
 			const childrenPadding = basePadding + indentValue; // Depth + 1
 
 			if (input.type === "ArrayValue") {
-				const core = (input as ArrayValue).value.map((x) =>
-					toJSON(x, indent, currentDepth + 1, convertUndefinedToNull),
-				);
+				const core = (input as ArrayValue).value.map((x) => toJSON(x, options, depth + 1, convertUndefinedToNull));
 				return indent
-					? `[${childrenPadding}${core.join(`,${childrenPadding}`)}${basePadding}]`
-					: `[${core.join(", ")}]`;
+					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
+					: `[${core.join(itemSeparator)}]`;
 			} else {
 				// ObjectValue
-				const core = Array.from((input as ObjectValue).value.entries()).map(([key, value]) => {
-					const v = `"${key}": ${toJSON(value, indent, currentDepth + 1, convertUndefinedToNull)}`;
+				let entries = Array.from((input as ObjectValue).value.entries());
+				if (sortKeys) {
+					entries = entries.sort(([a], [b]) => a.localeCompare(b));
+				}
+				const core = entries.map(([key, value]) => {
+					let keyStr = JSON.stringify(key);
+					if (ensureAscii) {
+						keyStr = makeAsciiSafe(keyStr);
+					}
+					const v = `${keyStr}${keySeparator}${toJSON(value, options, depth + 1, convertUndefinedToNull)}`;
 					return indent ? `${childrenPadding}${v}` : v;
 				});
-				return indent ? `{${core.join(",")}${basePadding}}` : `{${core.join(", ")}}`;
+				return indent ? `{${core.join(itemSeparator)}${basePadding}}` : `{${core.join(itemSeparator)}}`;
 			}
 		}
 		default:
@@ -422,7 +480,7 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 		return new ArrayValue(Array.from(this.value.values()));
 	}
 	override toString(): string {
-		return toJSON(this, null, 0, false);
+		return toJSON(this, {}, 0, false);
 	}
 }
 
@@ -452,7 +510,7 @@ export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 		return new BooleanValue(this.value.length > 0);
 	}
 	override toString(): string {
-		return toJSON(this, null, 0, false);
+		return toJSON(this, {}, 0, false);
 	}
 }
 
@@ -910,7 +968,7 @@ export class Interpreter {
 			const filter = filterNode as Identifier;
 
 			if (filter.value === "tojson") {
-				return new StringValue(toJSON(operand));
+				return new StringValue(toJSON(operand, {}));
 			}
 
 			if (operand instanceof ArrayValue) {
@@ -932,7 +990,7 @@ export class Interpreter {
 					case "join":
 						return new StringValue(operand.value.map((x) => x.value).join(""));
 					case "string":
-						return new StringValue(toJSON(operand, null, 0, false));
+						return new StringValue(toJSON(operand, {}, 0, false));
 					case "unique": {
 						const seen = new Set();
 						const output: AnyRuntimeValue[] = [];
@@ -1048,11 +1106,49 @@ export class Interpreter {
 
 			if (filterName === "tojson") {
 				const [, kwargs] = this.evaluateArguments(filter.args, environment);
+
+				// Handle indent parameter
 				const indent = kwargs.get("indent") ?? new NullValue();
 				if (!(indent instanceof IntegerValue || indent instanceof NullValue)) {
 					throw new Error("If set, indent must be a number");
 				}
-				return new StringValue(toJSON(operand, indent.value));
+
+				// Handle ensure_ascii parameter
+				const ensureAscii = kwargs.get("ensure_ascii") ?? new BooleanValue(false);
+				if (!(ensureAscii instanceof BooleanValue)) {
+					throw new Error("If set, ensure_ascii must be a boolean");
+				}
+
+				// Handle sort_keys parameter
+				const sortKeys = kwargs.get("sort_keys") ?? new BooleanValue(false);
+				if (!(sortKeys instanceof BooleanValue)) {
+					throw new Error("If set, sort_keys must be a boolean");
+				}
+
+				// Handle separators parameter - expects a tuple/array of two strings: (item_separator, key_separator)
+				const separatorsArg = kwargs.get("separators") ?? new NullValue();
+				let separators: [string, string] | null = null;
+				if (separatorsArg instanceof ArrayValue || separatorsArg instanceof TupleValue) {
+					if (separatorsArg.value.length !== 2) {
+						throw new Error("separators must be a tuple of two strings");
+					}
+					const [itemSep, keySep] = separatorsArg.value;
+					if (!(itemSep instanceof StringValue) || !(keySep instanceof StringValue)) {
+						throw new Error("separators must be a tuple of two strings");
+					}
+					separators = [itemSep.value, keySep.value];
+				} else if (!(separatorsArg instanceof NullValue)) {
+					throw new Error("If set, separators must be a tuple of two strings");
+				}
+
+				return new StringValue(
+					toJSON(operand, {
+						indent: indent.value,
+						ensureAscii: ensureAscii.value,
+						sortKeys: sortKeys.value,
+						separators,
+					}),
+				);
 			} else if (filterName === "join") {
 				let value;
 				if (operand instanceof StringValue) {
