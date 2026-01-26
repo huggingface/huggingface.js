@@ -4800,10 +4800,10 @@ const TEST_CONTEXT = {
 		obj: { a: 1, b: 2 },
 	},
 	TOJSON_ENSURE_ASCII: {
-		obj: { "🤗": "🤗", "안녕": "안녕", "ascii": "ascii", "\u0000\t\n\"'\\": "\u0000\t\n\"'\\" },
+		obj: { "🤗": "🤗", 안녕: "안녕", ascii: "ascii", "\u0000\t\n\"'\\": "\u0000\t\n\"'\\" },
 	},
 	TOJSON_ENSURE_ASCII_FALSE: {
-		obj: { "🤗": "🤗", "안녕": "안녕", "ascii": "ascii", "\u0000\t\n\"'\\": "\u0000\t\n\"'\\" },
+		obj: { "🤗": "🤗", 안녕: "안녕", ascii: "ascii", "\u0000\t\n\"'\\": "\u0000\t\n\"'\\" },
 	},
 	TOJSON_SORT_KEYS: {
 		obj: { c: 3, a: 1, b: 2 },
