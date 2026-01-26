@@ -1190,6 +1190,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model.safetensors"`,
 		snippets: snippets.stable_audio_tools,
 	},
+	stormscope: {
+		prettyLabel: "StormScope",
+		repoName: "StormScope",
+		repoUrl: "https://github.com/NVIDIA/earth2studio.git",
+		docsUrl: "https://huggingface.co/nvidia/stormscope-goes-mrms",
+		filter: false,
+		countDownloads: `path:"registry.json"`,
+	},
 	monkeyocr: {
 		prettyLabel: "MonkeyOCR",
 		repoName: "monkeyocr",
