@@ -287,14 +287,21 @@ interface ToJSONOptions {
 }
 
 /**
- * Escapes non-ASCII characters in a string to \uXXXX format.
- * Handles surrogate pairs for characters outside the BMP (like emoji).
+ * Regular expression to match non-ASCII characters (code points >= 0x7F).
+ * Used when ensure_ascii is true to escape these characters to \uXXXX format in JSON output.
  */
-function escapeNonAscii(str: string): string {
-	return str.replace(/[\u0080-\uffff]/g, (char) => {
-		const code = char.charCodeAt(0);
-		return "\\u" + code.toString(16).padStart(4, "0");
-	});
+const NON_ASCII_CHARS = /[\x7f-\uffff]/g;
+
+/**
+ * Converts a string to an ASCII-safe representation by escaping non-ASCII characters.
+ * @param str The input string
+ * @returns The ASCII-safe string
+ */
+function makeAsciiSafe(str: string): string {
+	return str.replace(
+		NON_ASCII_CHARS,
+		(char: string) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0"),
+	);
 }
 
 /**
@@ -340,7 +347,7 @@ function toJSON(
 		case "StringValue": {
 			let result = JSON.stringify(input.value);
 			if (ensureAscii) {
-				result = escapeNonAscii(result);
+				result = makeAsciiSafe(result);
 			}
 			return result;
 		}
@@ -364,7 +371,7 @@ function toJSON(
 				const core = entries.map(([key, value]) => {
 					let keyStr = JSON.stringify(key);
 					if (ensureAscii) {
-						keyStr = escapeNonAscii(keyStr);
+						keyStr = makeAsciiSafe(keyStr);
 					}
 					const v = `${keyStr}${keySeparator}${toJSON(value, options, depth + 1, convertUndefinedToNull)}`;
 					return indent ? `${childrenPadding}${v}` : v;
