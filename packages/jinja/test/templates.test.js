@@ -4787,7 +4787,7 @@ const TEST_CONTEXT = {
 		obj: { a: 1, b: 2 },
 	},
 	TOJSON_ENSURE_ASCII: {
-		obj: { 안녕: "🤗", ascii: "hello" },
+		obj: { 안녕: "🤗", ascii: "hello", "\u0000": "null char", "\t": "tab" },
 	},
 	TOJSON_SORT_KEYS: {
 		obj: { c: 3, a: 1, b: 2 },
@@ -5111,7 +5111,7 @@ const EXPECTED_OUTPUTS = {
 	TOJSON_SEPARATORS_1: `{"type":"function","name":"get_weather"}`,
 	TOJSON_SEPARATORS_2: `[1,2,3]`,
 	TOJSON_SEPARATORS_3: `{"a"=1;"b"=2}`,
-	TOJSON_ENSURE_ASCII: `{"\\uc548\\ub155": "\\ud83e\\udd17", "ascii": "hello"}`,
+	TOJSON_ENSURE_ASCII: `{"\\uc548\\ub155": "\\ud83e\\udd17", "ascii": "hello", "\\u0000": "null char", "\\t": "tab"}`,
 	TOJSON_SORT_KEYS: `{"a": 1, "b": 2, "c": 3}`,
 	TOJSON_COMBINED: `{"a":1,"b":2,"c":3}`,
 	TOJSON_INDENT_WITH_SEPARATORS: `{\n  "a": 1,\n  "b": [\n    1,\n    2\n  ]\n}`,
