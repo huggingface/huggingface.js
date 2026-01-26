@@ -351,9 +351,7 @@ function toJSON(
 			const childrenPadding = basePadding + indentValue; // Depth + 1
 
 			if (input.type === "ArrayValue") {
-				const core = (input as ArrayValue).value.map((x) =>
-					toJSON(x, options, depth + 1, convertUndefinedToNull),
-				);
+				const core = (input as ArrayValue).value.map((x) => toJSON(x, options, depth + 1, convertUndefinedToNull));
 				return indent
 					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
 					: `[${core.join(itemSeparator)}]`;

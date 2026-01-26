@@ -4787,7 +4787,7 @@ const TEST_CONTEXT = {
 		obj: { a: 1, b: 2 },
 	},
 	TOJSON_ENSURE_ASCII: {
-		obj: { "안녕": "🤗", ascii: "hello" },
+		obj: { 안녕: "🤗", ascii: "hello" },
 	},
 	TOJSON_SORT_KEYS: {
 		obj: { c: 3, a: 1, b: 2 },
