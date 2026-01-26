@@ -119,6 +119,7 @@ const TEST_STRINGS = {
 	TOJSON_SEPARATORS_2: `{{ arr | tojson(separators=(',', ':')) }}`,
 	TOJSON_SEPARATORS_3: `{{ obj | tojson(separators=(';', '=')) }}`,
 	TOJSON_ENSURE_ASCII: `{{ obj | tojson(ensure_ascii=true) }}`,
+	TOJSON_ENSURE_ASCII_FALSE: `{{ obj | tojson(ensure_ascii=false) }}`,
 	TOJSON_SORT_KEYS: `{{ obj | tojson(sort_keys=true) }}`,
 	TOJSON_COMBINED: `{{ obj | tojson(separators=(',', ':'), sort_keys=true) }}`,
 	TOJSON_INDENT_WITH_SEPARATORS: `{{ obj | tojson(indent=2, separators=(',', ': ')) }}`,
@@ -2499,6 +2500,18 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	TOJSON_ENSURE_ASCII_FALSE: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "ensure_ascii", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "false", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 	TOJSON_SORT_KEYS: [
 		{ value: "{{", type: "OpenExpression" },
 		{ value: "obj", type: "Identifier" },
@@ -4789,6 +4802,9 @@ const TEST_CONTEXT = {
 	TOJSON_ENSURE_ASCII: {
 		obj: { "🤗": "🤗", "안녕": "안녕", "ascii": "ascii", "\u0000\t\n\"'\\": "\u0000\t\n\"'\\" },
 	},
+	TOJSON_ENSURE_ASCII_FALSE: {
+		obj: { "🤗": "🤗", "안녕": "안녕", "ascii": "ascii", "\u0000\t\n\"'\\": "\u0000\t\n\"'\\" },
+	},
 	TOJSON_SORT_KEYS: {
 		obj: { c: 3, a: 1, b: 2 },
 	},
@@ -5112,6 +5128,7 @@ const EXPECTED_OUTPUTS = {
 	TOJSON_SEPARATORS_2: `[1,2,3]`,
 	TOJSON_SEPARATORS_3: `{"a"=1;"b"=2}`,
 	TOJSON_ENSURE_ASCII: `{"\\ud83e\\udd17": "\\ud83e\\udd17", "\\uc548\\ub155": "\\uc548\\ub155", "ascii": "ascii", "\\u0000\\t\\n\\"\'\\\\": "\\u0000\\t\\n\\"\'\\\\"}`,
+	TOJSON_ENSURE_ASCII_FALSE: `{"🤗": "🤗", "안녕": "안녕", "ascii": "ascii", "\\u0000\\t\\n\\"\'\\\\": "\\u0000\\t\\n\\"\'\\\\"}`,
 	TOJSON_SORT_KEYS: `{"a": 1, "b": 2, "c": 3}`,
 	TOJSON_COMBINED: `{"a":1,"b":2,"c":3}`,
 	TOJSON_INDENT_WITH_SEPARATORS: `{\n  "a": 1,\n  "b": [\n    1,\n    2\n  ]\n}`,
