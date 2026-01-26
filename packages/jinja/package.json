@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/jinja",
-	"version": "0.5.3",
+	"version": "0.5.4",
 	"description": "A minimalistic JavaScript implementation of the Jinja templating engine, specifically designed for parsing and rendering ML chat templates.",
 	"keywords": [
 		"face",
