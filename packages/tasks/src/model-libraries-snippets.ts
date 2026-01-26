@@ -166,7 +166,7 @@ from colipri import ZeroShotImageClassificationPipeline
 
 model = get_model().cuda()
 processor = get_processor()
-pipeline = ZeroShotImageClassificationPipeline(model, processor)
+pipeline = ZeroShotImageClassificationPipeline("${model.id}", processor)
 
 image = load_sample_ct()
 
