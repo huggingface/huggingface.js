@@ -56,6 +56,7 @@ export interface ApiJob {
 	owner?: ApiJobUser;
 	initiator?: ApiJobUser;
 	secrets?: string[];
+	labels?: Record<string, string> | null;
 }
 
 export interface ApiScheduledJob {
@@ -74,6 +75,7 @@ export interface ApiScheduledJob {
 		arch?: "amd64" | "arm64" | null;
 		timeoutSeconds?: number | null;
 		attempts?: number;
+		labels?: Record<string, string> | null;
 	};
 }
 
@@ -118,6 +120,10 @@ export interface CreateJobOptions {
 	 * Maximum number of attempts (defaults to 1)
 	 */
 	attempts?: number;
+	/**
+	 * Labels to attach to the job (key-value pairs)
+	 */
+	labels?: Record<string, string>;
 }
 
 export interface CreateScheduledJobOptions {
