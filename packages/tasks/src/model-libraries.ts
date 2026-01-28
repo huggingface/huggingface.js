@@ -1190,14 +1190,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model.safetensors"`,
 		snippets: snippets.stable_audio_tools,
 	},
-	stormscope: {
-		prettyLabel: "StormScope",
-		repoName: "StormScope",
-		repoUrl: "https://github.com/NVIDIA/earth2studio",
-		docsUrl: "https://huggingface.co/nvidia/stormscope-goes-mrms",
-		filter: false,
-		countDownloads: `path:"registry.json"`,
-	},
 	monkeyocr: {
 		prettyLabel: "MonkeyOCR",
 		repoName: "monkeyocr",
@@ -1251,6 +1243,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.stanza,
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
+	},
+	stormscope: {
+		prettyLabel: "StormScope",
+		repoName: "StormScope",
+		repoUrl: "https://github.com/NVIDIA/earth2studio",
+		docsUrl: "https://huggingface.co/nvidia/stormscope-goes-mrms",
+		filter: false,
+		countDownloads: `path:"registry.json"`,
 	},
 	supertonic: {
 		prettyLabel: "Supertonic",
