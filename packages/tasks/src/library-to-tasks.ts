@@ -49,7 +49,7 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"image-feature-extraction",
 		"image-segmentation",
 		"image-to-image",
-		"image-to-text",
+		// "image-to-text", dropped in transformers v5.0.0
 		"image-text-to-text",
 		"mask-generation",
 		"object-detection",
