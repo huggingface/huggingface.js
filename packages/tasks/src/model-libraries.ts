@@ -1193,7 +1193,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	stormscope: {
 		prettyLabel: "StormScope",
 		repoName: "StormScope",
-		repoUrl: "https://github.com/NVIDIA/earth2studio.git",
+		repoUrl: "https://github.com/NVIDIA/earth2studio",
 		docsUrl: "https://huggingface.co/nvidia/stormscope-goes-mrms",
 		filter: false,
 		countDownloads: `path:"registry.json"`,
