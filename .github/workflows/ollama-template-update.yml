@@ -14,7 +14,7 @@ jobs:
   update-ollama-templates:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         if: github.repository == 'huggingface/huggingface.js'
 
       - name: Prepare
@@ -76,7 +76,7 @@ jobs:
 
       - name: Create PR
         if: steps.changes.outputs.HAS_CHANGES == 'true' && github.repository == 'huggingface/huggingface.js'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         env:
           CURRENT_DATE: ${{ steps.prepare.outputs.CURRENT_DATE }}
           NEW_BRANCH: ${{ steps.changes.outputs.NEW_BRANCH }}
