@@ -243,11 +243,16 @@ export class ReplicateAutomaticSpeechRecognitionTask
 
 export class ReplicateImageToImageTask extends ReplicateTask implements ImageToImageTaskHelper {
 	override preparePayload(params: BodyParams<ImageToImageArgs>): Record<string, unknown> {
+		const imageInput = params.args.inputs; // This will be processed in preparePayloadAsync
 		return {
 			input: {
 				...omit(params.args, ["inputs", "parameters"]),
 				...params.args.parameters,
-				input_image: params.args.inputs, // This will be processed in preparePayloadAsync
+				// Different Replicate models expect the image in different keys
+				image: imageInput,
+				images: [imageInput],
+				input_image: imageInput,
+				input_images: [imageInput],
 				lora_weights:
 					params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath
 						? `https://huggingface.co/${params.mapping.hfModelId}`
