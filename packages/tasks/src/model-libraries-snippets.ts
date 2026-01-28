@@ -1713,7 +1713,7 @@ export const transformers = (model: ModelData): string[] => {
 	}
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
-		const pipelineSnippet = ["# Use a pipeline as a high-level helper"]
+		const pipelineSnippet = ["# Use a pipeline as a high-level helper"];
 		if (REMOVED_IN_V5_TRANSFORMERS_PIPELINES.includes(model.pipeline_tag)) {
 			pipelineSnippet.push(
 				`# Warning: Pipeline type "${model.pipeline_tag}" is no longer supported in transformers v5.`,
