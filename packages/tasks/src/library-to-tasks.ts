@@ -54,14 +54,14 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"mask-generation",
 		"object-detection",
 		"question-answering",
-		"summarization",
+		// "summarization", dropped in transformers v5.0.0
 		"table-question-answering",
 		"text-classification",
 		"text-generation",
 		"text-to-audio",
 		"text-to-speech",
 		"token-classification",
-		"translation",
+		// "translation", dropped in transformers v5.0.0
 		"video-classification",
 		"visual-question-answering",
 		"zero-shot-classification",
