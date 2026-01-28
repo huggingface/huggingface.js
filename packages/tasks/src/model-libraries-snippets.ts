@@ -1,6 +1,6 @@
 import type { ModelData } from "./model-data.js";
 import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
-import { LIBRARY_TASK_MAPPING, LEGACY_TRANSFORMERS_TASKS } from "./library-to-tasks.js";
+import { LIBRARY_TASK_MAPPING, REMOVED_IN_V5_TRANSFORMERS_PIPELINES } from "./library-to-tasks.js";
 import { getModelInputSnippet } from "./snippets/inputs.js";
 import type { ChatCompletionInputMessage } from "./tasks/index.js";
 import { stringifyMessages } from "./snippets/common.js";
@@ -1716,7 +1716,7 @@ export const transformers = (model: ModelData): string[] => {
 		const pipelineSnippet = [
 			"# Use a pipeline as a high-level helper",
 		]
-		if (LEGACY_TRANSFORMERS_TASKS.includes(model.pipeline_tag)) {
+		if (REMOVED_IN_V5_TRANSFORMERS_PIPELINES.includes(model.pipeline_tag)) {
 			pipelineSnippet.push(
 				`# Note: The "${model.pipeline_tag}" pipeline has been removed in transformers v5.`,
 				`#       The recommended approach is to load the model directly as shown below.`,

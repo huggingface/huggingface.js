@@ -73,7 +73,7 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 
 
 // Pipeline types that were supported in legacy transformers versions (<5.0.0)
-export const LEGACY_TRANSFORMERS_TASKS: PipelineType[] = [
+export const REMOVED_IN_V5_TRANSFORMERS_PIPELINES: PipelineType[] = [
 	"summarization",
 	"translation",
 	"image-to-text",
