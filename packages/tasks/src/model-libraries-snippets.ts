@@ -1,6 +1,6 @@
 import type { ModelData } from "./model-data.js";
 import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
-import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
+import { LIBRARY_TASK_MAPPING, LEGACY_TRANSFORMERS_TASKS } from "./library-to-tasks.js";
 import { getModelInputSnippet } from "./snippets/inputs.js";
 import type { ChatCompletionInputMessage } from "./tasks/index.js";
 import { stringifyMessages } from "./snippets/common.js";
@@ -1715,10 +1715,20 @@ export const transformers = (model: ModelData): string[] => {
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
 		const pipelineSnippet = [
 			"# Use a pipeline as a high-level helper",
+		]
+		if (LEGACY_TRANSFORMERS_TASKS.includes(model.pipeline_tag)) {
+			pipelineSnippet.push(
+				`# Note: The "${model.pipeline_tag}" pipeline has been removed in transformers v5.`,
+				`#       The recommended approach is to load the model directly as shown below.`,
+				`#       Otherwise, you must install transformers v4.x to use this pipeline ('pip install transformers<5.0.0').`,
+			);
+		}
+
+		pipelineSnippet.push(
 			"from transformers import pipeline",
 			"",
 			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
-		];
+		);
 
 		if (model.tags.includes("conversational")) {
 			if (model.tags.includes("image-text-to-text")) {

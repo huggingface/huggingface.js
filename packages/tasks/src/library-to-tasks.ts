@@ -49,19 +49,19 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"image-feature-extraction",
 		"image-segmentation",
 		"image-to-image",
-		// "image-to-text", dropped in transformers v5.0.0
+		"image-to-text",
 		"image-text-to-text",
 		"mask-generation",
 		"object-detection",
 		"question-answering",
-		// "summarization", dropped in transformers v5.0.0
+		"summarization",
 		"table-question-answering",
 		"text-classification",
 		"text-generation",
 		"text-to-audio",
 		"text-to-speech",
 		"token-classification",
-		// "translation", dropped in transformers v5.0.0
+		"translation",
 		"video-classification",
 		"visual-question-answering",
 		"zero-shot-classification",
@@ -70,3 +70,11 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 	],
 	mindspore: ["image-classification"],
 };
+
+
+// Pipeline types that were supported in legacy transformers versions (<5.0.0)
+export const LEGACY_TRANSFORMERS_TASKS: PipelineType[] = [
+	"summarization",
+	"translation",
+	"image-to-text",
+];
