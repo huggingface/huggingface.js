@@ -17,7 +17,14 @@ def query(payload):
 image_bytes = query({
     "input": {
         "prompt": "Turn the cat into a tiger.",
-        "input_image": "cat.png"
+        "image": "cat.png",
+        "images": [
+            "cat.png"
+        ],
+        "input_image": "cat.png",
+        "input_images": [
+            "cat.png"
+        ]
     }
 })
 
