@@ -1718,9 +1718,9 @@ export const transformers = (model: ModelData): string[] => {
 		]
 		if (REMOVED_IN_V5_TRANSFORMERS_PIPELINES.includes(model.pipeline_tag)) {
 			pipelineSnippet.push(
-				`# Note: The "${model.pipeline_tag}" pipeline has been removed in transformers v5.`,
-				`#       The recommended approach is to load the model directly as shown below.`,
-				`#       Otherwise, you must install transformers v4.x to use this pipeline ('pip install transformers<5.0.0').`,
+				`# Warning: Pipeline type "${model.pipeline_tag}" is no longer supported in transformers v5.`,
+				`# You must load the model directly (see below) or downgrade to v4.x with:`,
+				`# 'pip install "transformers<5.0.0'`,
 			);
 		}
 
