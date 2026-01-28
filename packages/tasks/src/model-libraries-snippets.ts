@@ -1,6 +1,6 @@
 import type { ModelData } from "./model-data.js";
 import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
-import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
+import { LIBRARY_TASK_MAPPING, REMOVED_IN_V5_TRANSFORMERS_PIPELINES } from "./library-to-tasks.js";
 import { getModelInputSnippet } from "./snippets/inputs.js";
 import type { ChatCompletionInputMessage } from "./tasks/index.js";
 import { stringifyMessages } from "./snippets/common.js";
@@ -1713,12 +1713,20 @@ export const transformers = (model: ModelData): string[] => {
 	}
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
-		const pipelineSnippet = [
-			"# Use a pipeline as a high-level helper",
+		const pipelineSnippet = ["# Use a pipeline as a high-level helper"];
+		if (REMOVED_IN_V5_TRANSFORMERS_PIPELINES.includes(model.pipeline_tag)) {
+			pipelineSnippet.push(
+				`# Warning: Pipeline type "${model.pipeline_tag}" is no longer supported in transformers v5.`,
+				`# You must load the model directly (see below) or downgrade to v4.x with:`,
+				`# 'pip install "transformers<5.0.0'`,
+			);
+		}
+
+		pipelineSnippet.push(
 			"from transformers import pipeline",
 			"",
 			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
-		];
+		);
 
 		if (model.tags.includes("conversational")) {
 			if (model.tags.includes("image-text-to-text")) {
