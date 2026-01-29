@@ -356,6 +356,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.describe_anything,
 		filter: false,
 	},
+	"depthanything-ac": {
+		prettyLabel: "DepthAnything-AC",
+		repoName: "DepthAnythingAC",
+		repoUrl: "https://github.com/HVision-NKU/DepthAnythingAC",
+		snippets: snippets.DepthAnythingAC,
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	"dia-tts": {
 		prettyLabel: "Dia",
 		repoName: "Dia",
