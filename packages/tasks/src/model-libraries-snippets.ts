@@ -2368,4 +2368,54 @@ torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 `,
 ];
 
+export const moshi = (model: ModelData): string[] => {
+	// Detect backend from model name (no distinguishing tags available)
+	if (model.id.includes("-mlx")) {
+		// MLX backend (macOS Apple Silicon)
+		// -q flag only accepts 4 or 8, bf16 models don't use it
+		const quantFlag = model.id.includes("-q4") ? " -q 4" : model.id.includes("-q8") ? " -q 8" : "";
+		return [
+			`# pip install moshi_mlx
+# Run local inference (macOS Apple Silicon)
+python -m moshi_mlx.local${quantFlag} --hf-repo "${model.id}"
+
+# Or run with web UI
+python -m moshi_mlx.local_web${quantFlag} --hf-repo "${model.id}"`,
+		];
+	}
+
+	if (model.id.includes("-candle")) {
+		// Rust/Candle backend
+		return [
+			`# pip install rustymimi
+# Candle backend - see https://github.com/kyutai-labs/moshi
+# for Rust installation instructions`,
+		];
+	}
+
+	// PyTorch backend (default)
+	return [
+		`# pip install moshi
+# Run the interactive web server
+python -m moshi.server --hf-repo "${model.id}"
+# Then open https://localhost:8998 in your browser`,
+		`# pip install moshi
+import torch
+from moshi.models import loaders
+
+# Load checkpoint info from HuggingFace
+checkpoint = loaders.CheckpointInfo.from_hf_repo("${model.id}")
+
+# Load the Mimi audio codec
+mimi = checkpoint.get_mimi(device="cuda")
+mimi.set_num_codebooks(8)
+
+# Encode audio (24kHz, mono)
+wav = torch.randn(1, 1, 24000 * 10)  # [batch, channels, samples]
+with torch.no_grad():
+    codes = mimi.encode(wav.cuda())
+    decoded = mimi.decode(codes)`,
+	];
+};
+
 //#endregion
