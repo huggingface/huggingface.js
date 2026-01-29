@@ -860,6 +860,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Moshi",
 		repoName: "Moshi",
 		repoUrl: "https://github.com/kyutai-labs/moshi",
+		snippets: snippets.moshi,
 		filter: false,
 		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
 	},
