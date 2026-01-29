@@ -75,7 +75,8 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoName: "lance",
 		repoUrl: "https://github.com/lance-format/lance",
 		docsUrl: "https://huggingface.co/docs/hub/datasets-lance",
-		logoUrl: "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/library-logos/lance.png",
+		logoUrl:
+			"https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/library-logos/lance.png",
 	},
 	argilla: {
 		prettyLabel: "Argilla",
