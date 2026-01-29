@@ -163,11 +163,12 @@ interface ApiCollectionItemDataset extends ApiCollectionItemBase {
 			| "dask"
 			| "distilabel"
 			| "fiftyone"
+			| "lance"
 			| "argilla"
 			| "polars"
 			| "duckdb"
 		)[];
-		formats: ("json" | "csv" | "parquet" | "imagefolder" | "audiofolder" | "webdataset" | "text" | "arrow")[];
+		formats: ("json" | "csv" | "parquet" | "lance" | "imagefolder" | "audiofolder" | "webdataset" | "text" | "arrow")[];
 		modalities: ("3d" | "audio" | "document" | "geospatial" | "image" | "tabular" | "text" | "timeseries" | "video")[];
 	};
 	private: boolean;

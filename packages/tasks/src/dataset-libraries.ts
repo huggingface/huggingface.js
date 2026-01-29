@@ -20,6 +20,11 @@ export interface DatasetLibraryUiElement {
 	 * URL to library's docs
 	 */
 	docsUrl?: string;
+	/**
+	 * URL to the library's logo image
+	 * displayed in the "Use this dataset" dropdown
+	 */
+	logoUrl?: string;
 }
 
 export const DATASET_LIBRARIES_UI_ELEMENTS = {
@@ -70,6 +75,7 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoName: "lance",
 		repoUrl: "https://github.com/lance-format/lance",
 		docsUrl: "https://huggingface.co/docs/hub/datasets-lance",
+		logoUrl: "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/library-logos/lance.png",
 	},
 	argilla: {
 		prettyLabel: "Argilla",
