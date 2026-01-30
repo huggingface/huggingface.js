@@ -265,7 +265,7 @@ const snippetSglang = (model: ModelData): LocalAppSnippet[] => {
 	const setup = ["# Install SGLang from pip:", "pip install sglang"].join("\n");
 	const serverCommand = `# Start the SGLang server:
 python3 -m sglang.launch_server \\
-    --model-path ${model.id} \\
+    --model-path "${model.id}" \\
     --host 0.0.0.0 \\
     --port 30000`;
 	const dockerCommand = `docker run --gpus all \\
@@ -276,7 +276,7 @@ python3 -m sglang.launch_server \\
     --ipc=host \\
     lmsysorg/sglang:latest \\
     python3 -m sglang.launch_server \\
-        --model-path ${model.id} \\
+        --model-path "${model.id}" \\
         --host 0.0.0.0 \\
         --port 30000`;
 	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
