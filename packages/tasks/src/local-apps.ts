@@ -275,7 +275,10 @@ python3 -m sglang.launch_server \\
     --env "HF_TOKEN=<secret>" \\
     --ipc=host \\
     lmsysorg/sglang:latest \\
-    python3 -m sglang.launch_server --model-path ${model.id} --host 0.0.0.0 --port 30000`;
+    python3 -m sglang.launch_server \\
+        --model-path ${model.id} \\
+        --host 0.0.0.0 \\
+        --port 30000`;
 	const runCommand = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:30000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
