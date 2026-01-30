@@ -198,7 +198,30 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
-	const runCommandInstruct = `# Call the server using curl:
+
+	const isMistral = model.tags.includes("mistral-common");
+	const mistralFlags = isMistral
+		? " --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"
+		: "";
+
+	const setup = isMistral
+		? ["# Install vLLM from pip:", "pip install vllm", "# Install mistral-common:", "pip install --upgrade mistral-common"].join(
+				"\n"
+			)
+		: ["# Install vLLM from pip:", "pip install vllm"].join("\n");
+
+	const serverCommand = `# Start the vLLM server:
+vllm serve "${model.id}"${mistralFlags}`;
+
+	const dockerCommand = `docker run --gpus all \\
+    -v ~/.cache/huggingface:/root/.cache/huggingface \\
+    --env "HF_TOKEN=<secret>" \\
+    -p 8000:8000 \\
+    --ipc=host \\
+    vllm/vllm-openai:latest \\
+    --model "${model.id}"${mistralFlags}`;
+
+	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
@@ -209,7 +232,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
 		})}
 	}'`;
-	const runCommandNonInstruct = `# Call the server using curl:
+	const runCommandNonInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
@@ -220,42 +243,16 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 	}'`;
 	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 
-	let setup;
-	let dockerCommand;
-
-	if (model.tags.includes("mistral-common")) {
-		setup = [
-			"# Install vLLM from pip:",
-			"pip install vllm",
-			"# Make sure you have the latest version of mistral-common installed:",
-			"pip install --upgrade mistral-common",
-		].join("\n");
-		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"`;
-	} else {
-		setup = ["# Install vLLM from pip:", "pip install vllm"].join("\n");
-		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`;
-	}
-
 	return [
 		{
-			title: "Install from pip",
+			title: "Install from pip and serve model",
 			setup: setup,
-			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand],
+			content: [serverCommand, runCommand],
 		},
 		{
 			title: "Use Docker images",
-			setup: [
-				"# Deploy with docker on Linux:",
-				`docker run --runtime nvidia --gpus all \\`,
-				`	--name my_vllm_container \\`,
-				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
-				` 	--env "HUGGING_FACE_HUB_TOKEN=<secret>" \\`,
-				`	-p 8000:8000 \\`,
-				`	--ipc=host \\`,
-				`	vllm/vllm-openai:latest \\`,
-				`	--model ${model.id}`,
-			].join("\n"),
-			content: [dockerCommand, runCommand],
+			setup: dockerCommand,
+			content: [runCommand],
 		},
 	];
 };
