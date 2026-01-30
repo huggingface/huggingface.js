@@ -205,9 +205,12 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 		: "";
 
 	const setup = isMistral
-		? ["# Install vLLM from pip:", "pip install vllm", "# Install mistral-common:", "pip install --upgrade mistral-common"].join(
-				"\n"
-			)
+		? [
+				"# Install vLLM from pip:",
+				"pip install vllm",
+				"# Install mistral-common:",
+				"pip install --upgrade mistral-common",
+			].join("\n")
 		: ["# Install vLLM from pip:", "pip install vllm"].join("\n");
 
 	const serverCommand = `# Start the vLLM server:
