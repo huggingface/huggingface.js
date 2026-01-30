@@ -382,6 +382,79 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
+const snippetLlamaFarm = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const modelId = model.id;
+	const isGguf = isLlamaCppGgufModel(model);
+	const tagName = isGguf ? getQuantTag(filepath) : "";
+
+	// Determine model type hint for better UX
+	const getModelTypeHint = (): string => {
+		if (model.pipeline_tag === "automatic-speech-recognition") {
+			return "# Transcribe audio:";
+		}
+		if (model.pipeline_tag === "feature-extraction" || model.pipeline_tag === "sentence-similarity") {
+			return "# Generate embeddings:";
+		}
+		return "# Chat with this model:";
+	};
+
+	return [
+		{
+			title: "Install LlamaFarm CLI (config-based ML workflows)",
+			setup: [
+				"# macOS / Linux:",
+				"curl -fsSL https://raw.githubusercontent.com/llama-farm/llamafarm/main/install.sh | bash",
+				"",
+				"# Windows (PowerShell):",
+				"# irm https://raw.githubusercontent.com/llama-farm/llamafarm/main/install.ps1 | iex",
+			].join("\n"),
+			content: [
+				"# Initialize a project:",
+				"lf init my-project",
+				"lf start",
+				"",
+				getModelTypeHint(),
+				`lf chat --model ${modelId}${tagName} "Hello!"`,
+				"",
+				"# Or open the visual designer:",
+				"# http://localhost:8000",
+			].join("\n"),
+		},
+		{
+			title: "Or download the Desktop App (no CLI required)",
+			setup: "# Download from GitHub releases:",
+			content: [
+				"# macOS (Universal):",
+				"# https://github.com/llama-farm/llamafarm/releases/latest/download/LlamaFarm-desktop-app-mac-universal.dmg",
+				"#",
+				"# Windows:",
+				"# https://github.com/llama-farm/llamafarm/releases/latest/download/LlamaFarm-desktop-app-windows.exe",
+				"#",
+				"# Linux (x86_64):",
+				"# https://github.com/llama-farm/llamafarm/releases/latest/download/LlamaFarm-desktop-app-linux-x86_64.AppImage",
+				"#",
+				"# Linux (ARM64):",
+				"# https://github.com/llama-farm/llamafarm/releases/latest/download/LlamaFarm-desktop-app-linux-arm64.AppImage",
+			].join("\n"),
+		},
+		{
+			title: "Built-in ML capabilities (beyond model inference)",
+			content: [
+				"# In addition to inference, LlamaFarm includes specialized ML features:",
+				"#",
+				"# • Text Classification — Train classifiers with 8-16 examples (SetFit)",
+				"# • Anomaly Detection — Isolation Forest, One-Class SVM, LOF, Autoencoders",
+				"# • Named Entity Recognition — Extract people, orgs, locations",
+				"# • OCR & Document Extraction — Surya, EasyOCR, PaddleOCR",
+				"# • Reranking — Cross-encoders for better RAG retrieval",
+				"# • Full RAG Pipeline — Ingest PDFs/docs, chunk, embed, query",
+				"#",
+				"# See: https://docs.llamafarm.dev/docs/models",
+			].join("\n"),
+		},
+	];
+};
+
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const tagName = getQuantTag(filepath);
 	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
@@ -613,6 +686,28 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	llamafarm: {
+		prettyLabel: "LlamaFarm",
+		docsUrl: "https://llamafarm.dev",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			// Text generation (GGUF, Transformers, TGI)
+			isLlamaCppGgufModel(model) ||
+			isTransformersModel(model) ||
+			model.pipeline_tag === "text-generation" ||
+			// Embeddings
+			model.pipeline_tag === "feature-extraction" ||
+			model.pipeline_tag === "sentence-similarity" ||
+			// Audio models
+			model.pipeline_tag === "automatic-speech-recognition" ||
+			model.pipeline_tag === "audio-classification" ||
+			// NLP tasks (NER, classification)
+			model.pipeline_tag === "token-classification" ||
+			model.pipeline_tag === "text-classification" ||
+			// Document understanding
+			model.pipeline_tag === "document-question-answering",
+		snippet: snippetLlamaFarm,
 	},
 } satisfies Record<string, LocalApp>;
 
