@@ -614,6 +614,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
 	},
+	inferencer: {
+		prettyLabel: "Inferencer",
+		docsUrl: "https://inferencer.com",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
+		deeplink: (model) => new URL(`inferencer://open_from_hf?model=${model.id}`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
