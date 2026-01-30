@@ -65,9 +65,9 @@ export interface UserInfo {
 		picture: string;
 
 		/**
-		 * Hugging Face field. Whether the org is an enterprise org.
+		 * Hugging Face field. The org's plan (e.g., "enterprise", "team").
 		 */
-		isEnterprise: boolean;
+		plan?: string;
 		/**
 		 * Hugging Face field. Whether the org has a payment method set up. Needs "read-billing" scope, and the user needs to approve access to the org in the OAuth page.
 		 */
