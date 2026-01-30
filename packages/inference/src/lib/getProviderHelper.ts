@@ -9,6 +9,7 @@ import * as Fireworks from "../providers/fireworks-ai.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
 import * as Hyperbolic from "../providers/hyperbolic.js";
+import * as Latitude from "../providers/latitude.js";
 import * as Nebius from "../providers/nebius.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
@@ -131,6 +132,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Hyperbolic.HyperbolicTextToImageTask(),
 		conversational: new Hyperbolic.HyperbolicConversationalTask(),
 		"text-generation": new Hyperbolic.HyperbolicTextGenerationTask(),
+	},
+	"latitude-sh": {
+		conversational: new Latitude.LatitudeConversationalTask(),
+		"text-generation": new Latitude.LatitudeTextGenerationTask(),
 	},
 	nebius: {
 		"text-to-image": new Nebius.NebiusTextToImageTask(),
