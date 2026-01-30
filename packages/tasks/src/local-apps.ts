@@ -279,7 +279,7 @@ python3 -m sglang.launch_server \\
         --model-path ${model.id} \\
         --host 0.0.0.0 \\
         --port 30000`;
-	const runCommand = `# Call the server using curl (OpenAI-compatible API):
+	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:30000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
@@ -290,6 +290,16 @@ curl -X POST "http://localhost:30000/v1/chat/completions" \\
 			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
 		})}
 	}'`;
+	const runCommandNonInstruct = `# Call the server using curl (OpenAI-compatible API):
+curl -X POST "http://localhost:30000/v1/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"prompt": "Once upon a time,",
+		"max_tokens": 512,
+		"temperature": 0.5
+	}'`;
+	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 
 	return [
 		{
@@ -459,9 +469,8 @@ export const LOCAL_APPS = {
 		docsUrl: "https://docs.sglang.io",
 		mainTask: "text-generation",
 		displayOnModelPage: (model: ModelData) =>
-			isTransformersModel(model) &&
-			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text") &&
-			model.tags.includes("conversational"),
+			(isAwqModel(model) || isGptqModel(model) || isTransformersModel(model)) &&
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetSglang,
 	},
 	"mlx-lm": {
