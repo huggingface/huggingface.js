@@ -263,8 +263,11 @@ const snippetSglang = (model: ModelData): LocalAppSnippet[] => {
 	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 
 	const setup = ["# Install SGLang from pip:", "pip install sglang"].join("\n");
-	const serverCommand = `# Start the SGLang server:\npython3 -m sglang.launch_server --model-path ${model.id} \\
- --host 0.0.0.0 --log-level warning"`;
+	const serverCommand = `# Start the SGLang server:
+python3 -m sglang.launch_server \\
+    --model-path "${model.id}" \\
+    --host 0.0.0.0 \\
+    --port 30000`;
 	const dockerCommand = `docker run --gpus all \\
     --shm-size 32g \\
     -p 30000:30000 \\
@@ -272,14 +275,31 @@ const snippetSglang = (model: ModelData): LocalAppSnippet[] => {
     --env "HF_TOKEN=<secret>" \\
     --ipc=host \\
     lmsysorg/sglang:latest \\
-    python3 -m sglang.launch_server --model-path ${model.id} --host 0.0.0.0 --port 30000`;
-	const runCommand = `curl -s http://localhost:{port}/v1/chat/completions \\
-  -H "Content-Type: application/json" \\
-  -d '{{"model": "${model.id}", "messages": ${stringifyMessages(messages, {
-		indent: "\t\t",
-		attributeKeyQuotes: true,
-		customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
-	})}'`;
+    python3 -m sglang.launch_server \\
+        --model-path "${model.id}" \\
+        --host 0.0.0.0 \\
+        --port 30000`;
+	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
+curl -X POST "http://localhost:30000/v1/chat/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"messages": ${stringifyMessages(messages, {
+			indent: "\t\t",
+			attributeKeyQuotes: true,
+			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+		})}
+	}'`;
+	const runCommandNonInstruct = `# Call the server using curl (OpenAI-compatible API):
+curl -X POST "http://localhost:30000/v1/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"prompt": "Once upon a time,",
+		"max_tokens": 512,
+		"temperature": 0.5
+	}'`;
+	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 
 	return [
 		{
@@ -449,9 +469,12 @@ export const LOCAL_APPS = {
 		docsUrl: "https://docs.sglang.io",
 		mainTask: "text-generation",
 		displayOnModelPage: (model: ModelData) =>
-			isTransformersModel(model) &&
-			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text") &&
-			model.tags.includes("conversational"),
+			(isAwqModel(model) ||
+				isGptqModel(model) ||
+				isAqlmModel(model) ||
+				isMarlinModel(model) ||
+				isTransformersModel(model)) &&
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetSglang,
 	},
 	"mlx-lm": {
