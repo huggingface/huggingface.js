@@ -65,7 +65,7 @@ from audioseal import AudioSeal
 model = AudioSeal.load_generator("${model.id}")
 # pass a tensor (tensor_wav) of shape (batch, channels, samples) and a sample rate
 wav, sr = tensor_wav, 16000
-	
+
 watermark = model.get_watermark(wav, sr)
 watermarked_audio = wav + watermark`;
 
@@ -73,7 +73,7 @@ watermarked_audio = wav + watermark`;
 from audioseal import AudioSeal
 
 detector = AudioSeal.load_detector("${model.id}")
-	
+
 result, message = detector.detect_watermark(watermarked_audio, sr)`;
 	return [watermarkSnippet, detectorSnippet];
 };
@@ -656,7 +656,7 @@ export const cartesia_mlx = (model: ModelData): string[] => [
 import cartesia_mlx as cmx
 
 model = cmx.from_pretrained("${model.id}")
-model.set_dtype(mx.float32)   
+model.set_dtype(mx.float32)
 
 prompt = "Rene Descartes was"
 
@@ -791,7 +791,7 @@ export const keras = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
 os.environ["KERAS_BACKEND"] = "jax"
-	
+
 import keras
 
 model = keras.saving.load_model("hf://${model.id}")
@@ -974,7 +974,7 @@ model.score("query", ["doc1", "doc2", "doc3"])`,
 from lightning_ir import BiEncoderModule, CrossEncoderModule
 
 # depending on the model type, use either BiEncoderModule or CrossEncoderModule
-model = BiEncoderModule("${model.id}") 
+model = BiEncoderModule("${model.id}")
 # model = CrossEncoderModule("${model.id}")
 
 model.score("query", ["doc1", "doc2", "doc3"])`,
@@ -1023,7 +1023,7 @@ pip install -e .[smolvla]`,
 			`# Launch finetuning on your dataset
 python lerobot/scripts/train.py \\
 --policy.path=${model.id} \\
---dataset.repo_id=lerobot/svla_so101_pickplace \\ 
+--dataset.repo_id=lerobot/svla_so101_pickplace \\
 --batch_size=64 \\
 --steps=20000 \\
 --output_dir=outputs/train/my_smolvla \\
@@ -1034,7 +1034,7 @@ python lerobot/scripts/train.py \\
 		if (model.id !== "lerobot/smolvla_base") {
 			// Inference snippet (only if not base model)
 			smolvlaSnippets.push(
-				`# Run the policy using the record function	
+				`# Run the policy using the record function
 python -m lerobot.record \\
   --robot.type=so101_follower \\
   --robot.port=/dev/ttyACM0 \\ # <- Use your port
@@ -1159,11 +1159,13 @@ for res in output:
 	}
 
 	if (model.tags.includes("document-parse")) {
+		const rawVersion = model.id.replace("PaddleOCR-VL-", "v");
+		const version = rawVersion === "PaddleOCR-VL" ? "v1" : rawVersion;
 		return [
 			`# See https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html to installation
 
 from paddleocr import PaddleOCRVL
-pipeline = PaddleOCRVL()
+pipeline = PaddleOCRVL(pipeline_version="${version}")
 output = pipeline.predict("path/to/document_image.png")
 for res in output:
 	res.print()
@@ -1191,7 +1193,7 @@ for res in output:
 	}
 
 	return [
-		`# Please refer to the document for information on how to use the model. 
+		`# Please refer to the document for information on how to use the model.
 # https://paddlepaddle.github.io/PaddleOCR/latest/en/version3.x/module_usage/module_overview.html`,
 	];
 };
@@ -1240,7 +1242,7 @@ scipy.io.wavfile.write("output.wav", tts_model.sample_rate, audio.numpy())`,
 
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
 	`from pyannote.audio import Pipeline
-  
+
 pipeline = Pipeline.from_pretrained("${model.id}")
 
 # inference on the whole file
@@ -1279,7 +1281,7 @@ export const pyannote_audio = (model: ModelData): string[] => {
 
 export const relik = (model: ModelData): string[] => [
 	`from relik import Relik
- 
+
 relik = Relik.from_pretrained("${model.id}")`,
 ];
 
@@ -1463,7 +1465,7 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
 	const video_predictor = `# Use SAM2 with videos
 import torch
 from sam2.sam2_video_predictor import SAM2VideoPredictor
-	
+
 predictor = SAM2VideoPredictor.from_pretrained(${model.id})
 
 with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
@@ -2247,11 +2249,11 @@ export const outetts = (model: ModelData): string[] => {
 	return [
 		`
   import outetts
-  
+
   enum = outetts.Models("${model.id}".split("/", 1)[1])       # VERSION_1_0_SIZE_1B
   cfg  = outetts.ModelConfig.auto_config(enum, outetts.Backend.HF)
   tts  = outetts.Interface(cfg)
-  
+
   speaker = tts.load_default_speaker("EN-FEMALE-1-NEUTRAL")
   tts.generate(
 	  outetts.GenerationConfig(
@@ -2286,7 +2288,7 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 
 const magnet = (model: ModelData): string[] => [
 	`from audiocraft.models import MAGNeT
-	
+
 model = MAGNeT.get_pretrained("${model.id}")
 
 descriptions = ['disco beat', 'energetic EDM', 'funky groove']
@@ -2295,7 +2297,7 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 
 const audiogen = (model: ModelData): string[] => [
 	`from audiocraft.models import AudioGen
-	
+
 model = AudioGen.get_pretrained("${model.id}")
 model.set_generation_params(duration=5)  # generate 5 seconds.
 descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a corridor']
@@ -2328,7 +2330,7 @@ brew install whisperkit-cli
 
 # View all available inference options
 whisperkit-cli transcribe --help
-	
+
 # Download and run inference using whisper base model
 whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 
