@@ -469,7 +469,11 @@ export const LOCAL_APPS = {
 		docsUrl: "https://docs.sglang.io",
 		mainTask: "text-generation",
 		displayOnModelPage: (model: ModelData) =>
-			(isAwqModel(model) || isGptqModel(model) || isTransformersModel(model)) &&
+			(isAwqModel(model) ||
+				isGptqModel(model) ||
+				isAqlmModel(model) ||
+				isMarlinModel(model) ||
+				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetSglang,
 	},
