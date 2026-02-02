@@ -994,6 +994,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"setup.py"`,
 	},
+	qwen3_tts: {
+		prettyLabel: "Qwen3-TTS",
+		repoName: "Qwen3-TTS",
+		repoUrl: "https://github.com/QwenLM/Qwen3-TTS",
+		snippets: snippets.qwen3_tts,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
 		repoName: "recurrentgemma",
