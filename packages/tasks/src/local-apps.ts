@@ -417,7 +417,7 @@ const snippetLlamaFarm = (model: ModelData, filepath?: string): LocalAppSnippet[
 				`lf chat --model ${modelId}${tagName} "Hello!"`,
 				"",
 				"# Or open the visual designer:",
-				"# http://localhost:8000",
+				"# http://localhost:14345",
 			].join("\n"),
 		},
 		{
@@ -443,7 +443,7 @@ const snippetLlamaFarm = (model: ModelData, filepath?: string): LocalAppSnippet[
 				"# In addition to inference, LlamaFarm includes specialized ML features:",
 				"#",
 				"# • Text Classification — Train classifiers with 8-16 examples (SetFit)",
-				"# • Anomaly Detection — Isolation Forest, One-Class SVM, LOF, Autoencoders",
+				"# • Anomaly Detection — Isofor tlation Forest, One-Class SVM, LOF, Autoencoders",
 				"# • Named Entity Recognition — Extract people, orgs, locations",
 				"# • OCR & Document Extraction — Surya, EasyOCR, PaddleOCR",
 				"# • Reranking — Cross-encoders for better RAG retrieval",
