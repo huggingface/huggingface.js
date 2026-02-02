@@ -47,9 +47,9 @@ llama-cli -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`,
 		};
 		const snippet = snippetFunc(model);
 
-		expect((snippet[0].content as string[]).join("\n")).toEqual(`# Load and run the model:
+		expect((snippet[0].content as string[]).join("\n")).toEqual(`# Start the vLLM server:
 vllm serve "meta-llama/Llama-3.2-3B-Instruct"
-# Call the server using curl:
+# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
@@ -72,9 +72,9 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 		const snippet = snippetFunc(model);
 
-		expect((snippet[0].content as string[]).join("\n")).toEqual(`# Load and run the model:
+		expect((snippet[0].content as string[]).join("\n")).toEqual(`# Start the vLLM server:
 vllm serve "meta-llama/Llama-3.2-3B"
-# Call the server using curl:
+# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
@@ -95,9 +95,9 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 		};
 		const snippet = snippetFunc(model);
 
-		expect((snippet[0].content as string[]).join("\n")).toEqual(`# Load and run the model:
+		expect((snippet[0].content as string[]).join("\n")).toEqual(`# Start the vLLM server:
 vllm serve "meta-llama/Llama-3.2-11B-Vision-Instruct"
-# Call the server using curl:
+# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
