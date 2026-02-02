@@ -5,42 +5,48 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/deepseek-r1:1.5b
- * - library/llama3.2:1b
- * - library/llama3.2:latest
- * - library/phi4:14b
- * - library/gemma:latest
- * - library/qwen2.5:0.5b
- * - library/olmo2:latest
- * - library/mistral-small:22b
- * - library/qwen:latest
- * - library/gemma3:latest
- * - library/llava-llama3:8b
- * - library/granite3.1-moe:latest
- * - library/all-minilm:22m
- * - library/falcon3:latest
+ * - library/minicpm-v:latest
+ * - library/tinyllama:1.1b
+ * - library/deepseek-coder:latest
+ * - library/granite3.1-moe:1b
+ * - library/mistral-nemo:latest
+ * - library/qwen3-coder:30b
+ * - library/qwen3-coder:latest
+ * - library/llava:latest
+ * - library/llama3:8b
+ * - library/starcoder2:latest
+ * - library/snowflake-arctic-embed:latest
+ * - library/snowflake-arctic-embed:22m
+ * - library/cogito:3b
+ * - library/qwen3-vl:latest
+ * - library/mistral-small3.2:latest
+ * - library/llama2-uncensored:latest
+ * - library/gpt-oss:20b
+ * - library/gpt-oss:latest
+ * - library/llama4:latest
  * - library/gemma3n:latest
- * - library/qwen2:latest
- * - library/qwen2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:24b
- * - library/cogito:latest
- * - library/phi4-mini:3.8b
- * - library/openthinker:latest
- * - library/openthinker:latest
- * - library/qwq:latest
- * - library/granite-code:3b
- * - library/neural-chat:latest
- * - library/paraphrase-multilingual:latest
- * - library/llama3-groq-tool-use:latest
- * - library/aya-expanse:latest
+ * - library/phi:latest
+ * - library/phi4-reasoning:latest
+ * - library/magistral:24b
+ * - library/command-r:latest
+ * - library/mistral-large:latest
+ * - library/mistral-large:latest
+ * - library/deepcoder:latest
+ * - library/embeddinggemma:latest
+ * - library/command-r-plus:104b
+ * - library/phind-codellama:latest
+ * - library/llama-pro:instruct
  * - library/reader-lm:latest
- * - library/shieldgemma:latest
- * - library/command-a:latest
- * - library/sailor2:latest
- * - library/yarn-mistral:7b
- * - library/qwen3-next:latest
+ * - library/wizardlm:7b-q2_K
+ * - library/dbrx:latest
+ * - library/marco-o1:latest
+ * - library/translategemma:latest
+ * - library/command-r7b-arabic:latest
+ * - library/deepseek-ocr:latest
+ * - library/deepseek-ocr:3b
+ * - library/olmo-3:latest
+ * - library/glm-4.7-flash:q4_K_M
+ * - library/glm-4.7-flash:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
