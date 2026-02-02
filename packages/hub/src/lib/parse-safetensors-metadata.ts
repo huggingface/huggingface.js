@@ -35,7 +35,7 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 }
 
 const PARALLEL_DOWNLOADS = 20;
-const MAX_HEADER_LENGTH = 25_000_000;
+const MAX_HEADER_LENGTH = 25_000_000; // 25MB
 const GPTQ_QWEIGHT_SUFFIX = "qweight";
 
 class SafetensorParseError extends Error {}
@@ -190,7 +190,7 @@ async function parseShardedIndex(
 
 	try {
 		// no validation for now, we assume it's a valid IndexJson.
-		const index = JSON.parse(await indexBlob.slice(0, 20_000_000).text());
+		const index = JSON.parse(await indexBlob.slice(0, MAX_HEADER_LENGTH).text());
 		return index;
 	} catch (error) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);

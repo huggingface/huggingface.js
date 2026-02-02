@@ -37,6 +37,7 @@ const TEST_STRINGS = {
 	FOR_LOOP_SELECT_2: `{% for x in arr | selectattr('value', 'equalto', 'a') %}{{ x['value'] }}{% endfor %}`,
 	FOR_LOOP_BREAK: `{% for x in [1, 2, 3, 4] %}{% if x == 3 %}{% break %}{% endif %}{{ x }}{% endfor %}`,
 	FOR_LOOP_CONTINUE: `{% for x in [1, 2, 3, 4] %}{% if x == 3 %}{% continue %}{% endif %}{{ x }}{% endfor %}`,
+	FOR_LOOP_RANGE_NEGATIVE_STEP: `|{% for i in range(5, 0, -2) %}{{ i }}|{% endfor %}`,
 	FOR_LOOP_OBJECTS: `{% for x in obj %}{{ x + ':' + obj[x] + ';' }}{% endfor %}`,
 
 	// Set variables
@@ -832,6 +833,29 @@ const TEST_PARSED = {
 		{ value: "{{", type: "OpenExpression" },
 		{ value: "x", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+	],
+	FOR_LOOP_RANGE_NEGATIVE_STEP: [
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "Identifier" },
+		{ value: "i", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "range", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "5", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "-2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "i", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
 		{ value: "{%", type: "OpenStatement" },
 		{ value: "endfor", type: "Identifier" },
 		{ value: "%}", type: "CloseStatement" },
@@ -4622,6 +4646,7 @@ const TEST_CONTEXT = {
 	},
 	FOR_LOOP_BREAK: {},
 	FOR_LOOP_CONTINUE: {},
+	FOR_LOOP_RANGE_NEGATIVE_STEP: {},
 	FOR_LOOP_OBJECTS: {
 		obj: {
 			a: 1,
@@ -5046,6 +5071,7 @@ const EXPECTED_OUTPUTS = {
 	FOR_LOOP_SELECT_2: "aa",
 	FOR_LOOP_BREAK: "12",
 	FOR_LOOP_CONTINUE: "124",
+	FOR_LOOP_RANGE_NEGATIVE_STEP: "|5|3|1|",
 	FOR_LOOP_OBJECTS: "a:1;b:2;c:3;",
 
 	// Set variables
