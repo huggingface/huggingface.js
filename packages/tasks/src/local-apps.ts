@@ -95,6 +95,10 @@ function isAmdRyzenModel(model: ModelData) {
 	return model.tags.includes("ryzenai-hybrid") || model.tags.includes("ryzenai-npu");
 }
 
+function isCactusModel(model: ModelData) {
+	return model.tags.includes("cactus");
+}
+
 function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
@@ -424,6 +428,21 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetCactus = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	return [
+		{
+			title: "Install Cactus for Flutter",
+			setup: "flutter pub get cactus",
+			content: "Follow the documentation",
+		},
+		{
+			title: "Install Cactus for React Native",
+			setup: "npm install cactus-react-native",
+			content: "Follow the documentation",
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -613,6 +632,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	cactus: {
+		prettyLabel: "Cactus",
+		docsUrl: "https://cactuscompute.com/docs",
+		mainTask: "text-generation",
+		displayOnModelPage: isCactusModel,
+		snippet: snippetCactus
 	},
 } satisfies Record<string, LocalApp>;
 
