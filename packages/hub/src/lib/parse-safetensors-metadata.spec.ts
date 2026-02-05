@@ -236,7 +236,7 @@ describe("parseSafetensorsMetadata", () => {
 			sum(
 				Object.entries(parameterCount)
 					.filter(([, value]) => typeof value === "number")
-					.map(([, value]) => value as number)
+					.map(([, value]) => value as number),
 			);
 
 		assert.strictEqual(parameterCountTotal, 8_031_637_504);
@@ -322,5 +322,16 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert(parse.sharded);
 		assert.strictEqual(Object.keys(parse.headers).length, 62);
+	});
+
+	it("fetch info for moonshotai/Kimi-K2.5 (large index file >20MB)", async () => {
+		// This model has a ~23.5MB index file due to having many experts
+		const parse = await parseSafetensorsMetadata({
+			repo: "moonshotai/Kimi-K2.5",
+			revision: "2426b45b6af0da48d0dcce71bbce6225e5c73adc",
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 64);
 	});
 });

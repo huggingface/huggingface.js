@@ -24,7 +24,7 @@ export type TabularClassificationOutput = number[];
  */
 export async function tabularClassification(
 	args: TabularClassificationArgs,
-	options?: Options
+	options?: Options,
 ): Promise<TabularClassificationOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "tabular-classification");

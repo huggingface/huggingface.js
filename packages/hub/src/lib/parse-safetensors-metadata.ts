@@ -35,7 +35,7 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 }
 
 const PARALLEL_DOWNLOADS = 20;
-const MAX_HEADER_LENGTH = 25_000_000;
+const MAX_HEADER_LENGTH = 25_000_000; // 25MB
 const GPTQ_QWEIGHT_SUFFIX = "qweight";
 
 class SafetensorParseError extends Error {}
@@ -108,7 +108,7 @@ async function fetchModelConfig(
 		revision?: string;
 		hubUrl?: string;
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<ModelConfig | null> {
 	try {
 		const configBlob = await downloadFile({
@@ -138,7 +138,7 @@ async function parseSingleFile(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsFileHeader> {
 	const blob = await downloadFile({ ...params, path });
 
@@ -154,7 +154,7 @@ async function parseSingleFile(
 	}
 	if (lengthOfHeader > MAX_HEADER_LENGTH) {
 		throw new SafetensorParseError(
-			`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`
+			`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`,
 		);
 	}
 
@@ -177,7 +177,7 @@ async function parseShardedIndex(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsIndexJson> {
 	const indexBlob = await downloadFile({
 		...params,
@@ -190,7 +190,7 @@ async function parseShardedIndex(
 
 	try {
 		// no validation for now, we assume it's a valid IndexJson.
-		const index = JSON.parse(await indexBlob.slice(0, 20_000_000).text());
+		const index = JSON.parse(await indexBlob.slice(0, MAX_HEADER_LENGTH).text());
 		return index;
 	} catch (error) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
@@ -208,7 +208,7 @@ async function fetchAllHeaders(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsShardedHeaders> {
 	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
@@ -216,10 +216,10 @@ async function fetchAllHeaders(
 		await promisesQueue(
 			filenames.map(
 				(filename) => async () =>
-					[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader]
+					[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader],
 			),
-			PARALLEL_DOWNLOADS
-		)
+			PARALLEL_DOWNLOADS,
+		),
 	);
 	return shardedMap;
 }
@@ -248,7 +248,7 @@ export async function parseSafetensorsMetadata(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SetRequired<SafetensorsParseFromRepo, "parameterCount">>;
 export async function parseSafetensorsMetadata(
 	params: {
@@ -267,7 +267,7 @@ export async function parseSafetensorsMetadata(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsParseFromRepo>;
 export async function parseSafetensorsMetadata(
 	params: {
@@ -280,7 +280,7 @@ export async function parseSafetensorsMetadata(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsParseFromRepo> {
 	const repoId = toRepoId(params.repo);
 
@@ -309,10 +309,10 @@ export async function parseSafetensorsMetadata(
 								? typeof header.__metadata__.total_parameters === "number"
 									? header.__metadata__.total_parameters
 									: typeof header.__metadata__.total_parameters === "string"
-									  ? parseInt(header.__metadata__.total_parameters)
-									  : undefined
+										? parseInt(header.__metadata__.total_parameters)
+										: undefined
 								: undefined,
-				  }
+					}
 				: undefined),
 		};
 	} else if (
@@ -336,10 +336,10 @@ export async function parseSafetensorsMetadata(
 								? typeof index.metadata.total_parameters === "number"
 									? index.metadata.total_parameters
 									: typeof index.metadata.total_parameters === "string"
-									  ? parseInt(index.metadata.total_parameters)
-									  : undefined
+										? parseInt(index.metadata.total_parameters)
+										: undefined
 								: undefined,
-				  }
+					}
 				: undefined),
 		};
 	} else {
@@ -435,7 +435,7 @@ function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig
 
 function computeNumOfParamsByDtypeSingleFile(
 	header: SafetensorsFileHeader,
-	quantConfig?: QuantizationConfig
+	quantConfig?: QuantizationConfig,
 ): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
@@ -460,7 +460,7 @@ function computeNumOfParamsByDtypeSingleFile(
 
 function computeNumOfParamsByDtypeSharded(
 	shardedMap: SafetensorsShardedHeaders,
-	quantConfig?: QuantizationConfig
+	quantConfig?: QuantizationConfig,
 ): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	for (const header of Object.values(shardedMap)) {

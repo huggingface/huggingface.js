@@ -34,14 +34,14 @@ export async function* uploadFilesWithProgress(
 		 * Set this to true in order to have progress events for hashing
 		 */
 		useWebWorkers?: CommitParams["useWebWorkers"];
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): AsyncGenerator<CommitProgressEvent, CommitOutput> {
 	return yield* commitIter({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
 		operations: params.files.map((file) => ({
 			operation: "addOrUpdate",
-			path: file instanceof URL ? file.pathname.split("/").at(-1) ?? "file" : "path" in file ? file.path : file.name,
+			path: file instanceof URL ? (file.pathname.split("/").at(-1) ?? "file") : "path" in file ? file.path : file.name,
 			content: "content" in file ? file.content : file,
 		})),
 		title: params.commitTitle ?? `Add ${params.files.length} files`,
@@ -130,9 +130,12 @@ export async function* uploadFilesWithProgress(
 									.getAllResponseHeaders()
 									.trim()
 									.split("\n")
-									.map((header) => [header.slice(0, header.indexOf(":")), header.slice(header.indexOf(":") + 1).trim()])
+									.map((header) => [
+										header.slice(0, header.indexOf(":")),
+										header.slice(header.indexOf(":") + 1).trim(),
+									]),
 							),
-						})
+						}),
 					);
 				});
 				xhr.addEventListener("error", () => {

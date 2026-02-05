@@ -241,7 +241,7 @@ export function compressBlock(
 	dst: Uint8Array,
 	sIndex: number,
 	sLength: number,
-	hashTable: Uint32Array | number[]
+	hashTable: Uint32Array | number[],
 ) {
 	let mIndex, mAnchor, mLength, mOffset, mStep;
 	let literalCount, dIndex, sEnd, n;

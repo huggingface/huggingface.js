@@ -25,7 +25,7 @@ export async function createRepo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<{ repoUrl: string }> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
@@ -33,7 +33,7 @@ export async function createRepo(
 
 	if (!namespace || !repoName) {
 		throw new TypeError(
-			`"${repoId.name}" is not a fully qualified repo name. It should be of the form "{namespace}/{repoName}".`
+			`"${repoId.name}" is not a fully qualified repo name. It should be of the form "{namespace}/{repoName}".`,
 		);
 	}
 
@@ -48,20 +48,20 @@ export async function createRepo(
 				? {
 						type: "space",
 						sdk: params.sdk ?? "static",
-				  }
+					}
 				: {
 						type: repoId.type,
-				  }),
+					}),
 			files: params.files
 				? await Promise.all(
 						params.files.map(async (file) => ({
 							encoding: "base64",
 							path: file.path,
 							content: base64FromBytes(
-								new Uint8Array(file.content instanceof Blob ? await file.content.arrayBuffer() : file.content)
+								new Uint8Array(file.content instanceof Blob ? await file.content.arrayBuffer() : file.content),
 							),
-						}))
-				  )
+						})),
+					)
 				: undefined,
 		} satisfies ApiCreateRepoPayload),
 		headers: {

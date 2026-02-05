@@ -15,7 +15,7 @@
  * Thanks!
  */
 import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
-import type { BodyParams } from "../types.js";
+import type { BodyParams, OutputType } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
 	BaseConversationalTask,
@@ -38,9 +38,10 @@ interface TogetherTextCompletionOutput extends Omit<ChatCompletionOutput, "choic
 	}>;
 }
 
-interface TogetherBase64ImageGeneration {
+interface TogetherImageGeneration {
 	data: Array<{
-		b64_json: string;
+		b64_json?: string;
+		url?: string;
 	}>;
 }
 
@@ -109,33 +110,38 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			prompt: params.args.inputs,
-			response_format: "base64",
+			response_format: params.outputType === "url" ? "url" : "base64",
 			model: params.model,
 		};
 	}
 
 	async getResponse(
-		response: TogetherBase64ImageGeneration,
+		response: TogetherImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
 			"data" in response &&
 			Array.isArray(response.data) &&
-			response.data.length > 0 &&
-			"b64_json" in response.data[0] &&
-			typeof response.data[0].b64_json === "string"
+			response.data.length > 0
 		) {
 			if (outputType === "json") {
 				return { ...response };
 			}
-			const base64Data = response.data[0].b64_json;
-			if (outputType === "url") {
-				return `data:image/jpeg;base64,${base64Data}`;
+
+			if ("url" in response.data[0] && typeof response.data[0].url === "string") {
+				return response.data[0].url;
 			}
-			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
+
+			if ("b64_json" in response.data[0] && typeof response.data[0].b64_json === "string") {
+				const base64Data = response.data[0].b64_json;
+				if (outputType === "dataUrl") {
+					return `data:image/jpeg;base64,${base64Data}`;
+				}
+				return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
+			}
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Together text-to-image API");

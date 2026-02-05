@@ -12,7 +12,7 @@ export async function deleteRepo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<void> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);

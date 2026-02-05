@@ -82,6 +82,7 @@ function isMarlinModel(model: ModelData): boolean {
 function isTransformersModel(model: ModelData): boolean {
 	return model.tags.includes("transformers");
 }
+
 function isTgiModel(model: ModelData): boolean {
 	return model.tags.includes("text-generation-inference");
 }
@@ -110,20 +111,27 @@ function getQuantTag(filepath?: string): string {
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const command = (binary: string) => {
-		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
+	const serverCommand = (binary: string) => {
+		const snippet = [
+			"# Start a local OpenAI-compatible server with a web UI:",
+			`${binary} -hf ${model.id}${getQuantTag(filepath)}`,
+		];
+		return snippet.join("\n");
+	};
+	const cliCommand = (binary: string) => {
+		const snippet = ["# Run inference directly in the terminal:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
 		return snippet.join("\n");
 	};
 	return [
 		{
 			title: "Install from brew",
 			setup: "brew install llama.cpp",
-			content: command("llama-server"),
+			content: [serverCommand("llama-server"), cliCommand("llama-cli")],
 		},
 		{
 			title: "Install from WinGet (Windows)",
 			setup: "winget install llama.cpp",
-			content: command("llama-server"),
+			content: [serverCommand("llama-server"), cliCommand("llama-cli")],
 		},
 		{
 			title: "Use pre-built binary",
@@ -132,7 +140,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"# Download pre-built binary from:",
 				"# https://github.com/ggerganov/llama.cpp/releases",
 			].join("\n"),
-			content: command("./llama-server"),
+			content: [serverCommand("./llama-server"), cliCommand("./llama-cli")],
 		},
 		{
 			title: "Build from source code",
@@ -140,9 +148,9 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
 				"cmake -B build",
-				"cmake --build build -j --target llama-server",
+				"cmake --build build -j --target llama-server llama-cli",
 			].join("\n"),
-			content: command("./build/bin/llama-server"),
+			content: [serverCommand("./build/bin/llama-server"), cliCommand("./build/bin/llama-cli")],
 		},
 	];
 };
@@ -182,7 +190,7 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 				"docker pull localai/localai:latest-cpu",
 			].join("\n"),
 			content: command(
-				"docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu"
+				"docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu",
 			),
 		},
 	];
@@ -190,7 +198,33 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
-	const runCommandInstruct = `# Call the server using curl:
+
+	const isMistral = model.tags.includes("mistral-common");
+	const mistralFlags = isMistral
+		? " --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"
+		: "";
+
+	const setup = isMistral
+		? [
+				"# Install vLLM from pip:",
+				"pip install vllm",
+				"# Install mistral-common:",
+				"pip install --upgrade mistral-common",
+			].join("\n")
+		: ["# Install vLLM from pip:", "pip install vllm"].join("\n");
+
+	const serverCommand = `# Start the vLLM server:
+vllm serve "${model.id}"${mistralFlags}`;
+
+	const dockerCommand = `docker run --gpus all \\
+    -v ~/.cache/huggingface:/root/.cache/huggingface \\
+    --env "HF_TOKEN=<secret>" \\
+    -p 8000:8000 \\
+    --ipc=host \\
+    vllm/vllm-openai:latest \\
+    --model "${model.id}"${mistralFlags}`;
+
+	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
@@ -201,7 +235,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
 		})}
 	}'`;
-	const runCommandNonInstruct = `# Call the server using curl:
+	const runCommandNonInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
@@ -212,42 +246,71 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 	}'`;
 	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 
-	let setup;
-	let dockerCommand;
-
-	if (model.tags.includes("mistral-common")) {
-		setup = [
-			"# Install vLLM from pip:",
-			"pip install vllm",
-			"# Make sure you have the latest version of mistral-common installed:",
-			"pip install --upgrade mistral-common",
-		].join("\n");
-		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"`;
-	} else {
-		setup = ["# Install vLLM from pip:", "pip install vllm"].join("\n");
-		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`;
-	}
-
 	return [
 		{
-			title: "Install from pip",
+			title: "Install from pip and serve model",
 			setup: setup,
-			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand],
+			content: [serverCommand, runCommand],
 		},
 		{
 			title: "Use Docker images",
-			setup: [
-				"# Deploy with docker on Linux:",
-				`docker run --runtime nvidia --gpus all \\`,
-				`	--name my_vllm_container \\`,
-				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
-				` 	--env "HUGGING_FACE_HUB_TOKEN=<secret>" \\`,
-				`	-p 8000:8000 \\`,
-				`	--ipc=host \\`,
-				`	vllm/vllm-openai:latest \\`,
-				`	--model ${model.id}`,
-			].join("\n"),
-			content: [dockerCommand, runCommand],
+			setup: dockerCommand,
+			content: [runCommand],
+		},
+	];
+};
+const snippetSglang = (model: ModelData): LocalAppSnippet[] => {
+	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+
+	const setup = ["# Install SGLang from pip:", "pip install sglang"].join("\n");
+	const serverCommand = `# Start the SGLang server:
+python3 -m sglang.launch_server \\
+    --model-path "${model.id}" \\
+    --host 0.0.0.0 \\
+    --port 30000`;
+	const dockerCommand = `docker run --gpus all \\
+    --shm-size 32g \\
+    -p 30000:30000 \\
+    -v ~/.cache/huggingface:/root/.cache/huggingface \\
+    --env "HF_TOKEN=<secret>" \\
+    --ipc=host \\
+    lmsysorg/sglang:latest \\
+    python3 -m sglang.launch_server \\
+        --model-path "${model.id}" \\
+        --host 0.0.0.0 \\
+        --port 30000`;
+	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
+curl -X POST "http://localhost:30000/v1/chat/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"messages": ${stringifyMessages(messages, {
+			indent: "\t\t",
+			attributeKeyQuotes: true,
+			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+		})}
+	}'`;
+	const runCommandNonInstruct = `# Call the server using curl (OpenAI-compatible API):
+curl -X POST "http://localhost:30000/v1/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"prompt": "Once upon a time,",
+		"max_tokens": 512,
+		"temperature": 0.5
+	}'`;
+	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
+
+	return [
+		{
+			title: "Install from pip and serve model",
+			setup: setup,
+			content: [serverCommand, runCommand],
+		},
+		{
+			title: "Use Docker images",
+			setup: dockerCommand,
+			content: [runCommand],
 		},
 	];
 };
@@ -310,7 +373,7 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 						setup: ["# Install MLX LM", "uv tool install mlx-lm"].join("\n"),
 						content: ["# Start the server", `mlx_lm.server --model "${model.id}"`, ...openaiCurl].join("\n"),
 					},
-			  ]
+				]
 			: []),
 	];
 };
@@ -400,6 +463,19 @@ export const LOCAL_APPS = {
 				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetVllm,
+	},
+	sglang: {
+		prettyLabel: "SGLang",
+		docsUrl: "https://docs.sglang.io",
+		mainTask: "text-generation",
+		displayOnModelPage: (model: ModelData) =>
+			(isAwqModel(model) ||
+				isGptqModel(model) ||
+				isAqlmModel(model) ||
+				isMarlinModel(model) ||
+				isTransformersModel(model)) &&
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
+		snippet: snippetSglang,
 	},
 	"mlx-lm": {
 		prettyLabel: "MLX LM",

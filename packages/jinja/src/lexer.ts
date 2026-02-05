@@ -44,7 +44,7 @@ export class Token {
 	 */
 	constructor(
 		public value: string,
-		public type: TokenType
+		public type: TokenType,
 	) {}
 }
 
@@ -330,7 +330,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 					// Check for numbers following the unary operator
 					const num = consumeWhile(isInteger);
 					tokens.push(
-						new Token(`${char}${num}`, num.length > 0 ? TOKEN_TYPES.NumericLiteral : TOKEN_TYPES.UnaryOperator)
+						new Token(`${char}${num}`, num.length > 0 ? TOKEN_TYPES.NumericLiteral : TOKEN_TYPES.UnaryOperator),
 					);
 					continue;
 				}

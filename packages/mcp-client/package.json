@@ -1,18 +1,31 @@
 {
 	"name": "@huggingface/mcp-client",
-	"packageManager": "pnpm@10.10.0",
 	"version": "0.2.3",
 	"description": "Client for the Model Context Protocol",
+	"keywords": [
+		"agent",
+		"client",
+		"huggingface",
+		"mcp",
+		"model context protocol",
+		"tiny-agent"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
-	"publishConfig": {
-		"access": "public"
-	},
-	"main": "./dist/src/index.js",
-	"module": "./dist/src/index.mjs",
-	"types": "./dist/src/index.d.ts",
 	"bin": {
 		"tiny-agent": "./dist/cli.js"
 	},
+	"source": "index.ts",
+	"files": [
+		"cli.ts",
+		"dist",
+		"src",
+		"tsconfig.json"
+	],
+	"main": "./dist/src/index.js",
+	"module": "./dist/src/index.mjs",
+	"types": "./dist/src/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/src/index.d.ts",
@@ -20,15 +33,14 @@
 			"import": "./dist/src/index.mjs"
 		}
 	},
-	"engines": {
-		"node": ">=18"
+	"publishConfig": {
+		"access": "public"
 	},
-	"source": "index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup src/index.ts cli.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
@@ -36,25 +48,13 @@
 		"check": "tsc",
 		"cli": "tsx cli.ts"
 	},
-	"files": [
-		"src",
-		"dist",
-		"cli.ts",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"mcp",
-		"model context protocol",
-		"client",
-		"agent",
-		"tiny-agent"
-	],
-	"author": "Hugging Face",
-	"license": "MIT",
 	"dependencies": {
 		"@huggingface/inference": "workspace:^",
 		"@huggingface/tasks": "workspace:^",
 		"@modelcontextprotocol/sdk": "^1.11.2"
-	}
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"packageManager": "pnpm@10.10.0"
 }

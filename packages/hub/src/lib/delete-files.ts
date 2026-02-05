@@ -13,7 +13,7 @@ export function deleteFiles(
 		isPullRequest?: CommitParams["isPullRequest"];
 		parentCommit?: CommitParams["parentCommit"];
 		fetch?: CommitParams["fetch"];
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<CommitOutput> {
 	return commit({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),

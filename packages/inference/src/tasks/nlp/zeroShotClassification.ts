@@ -11,7 +11,7 @@ export type ZeroShotClassificationArgs = BaseArgs & ZeroShotClassificationInput;
  */
 export async function zeroShotClassification(
 	args: ZeroShotClassificationArgs,
-	options?: Options
+	options?: Options,
 ): Promise<ZeroShotClassificationOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "zero-shot-classification");
@@ -21,7 +21,7 @@ export async function zeroShotClassification(
 		{
 			...options,
 			task: "zero-shot-classification",
-		}
+		},
 	);
 	return providerHelper.getResponse(res);
 }

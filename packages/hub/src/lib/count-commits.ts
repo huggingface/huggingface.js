@@ -13,7 +13,7 @@ export async function countCommits(
 		revision?: string;
 		hubUrl?: string;
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<number> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
