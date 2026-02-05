@@ -32,11 +32,7 @@ export async function downloadFile(
 		/**
 		 * Whether to use the xet protocol to download the file (if applicable).
 		 *
-		 * Currently there's experimental support for it, so it's not enabled by default.
-		 *
-		 * It will be enabled automatically in a future minor version.
-		 *
-		 * @default false
+		 * @default true
 		 */
 		xet?: boolean;
 		/**
@@ -63,7 +59,7 @@ export async function downloadFile(
 		return null;
 	}
 
-	if (info.xet && params.xet) {
+	if (info.xet && params.xet !== false) {
 		return new XetBlob({
 			refreshUrl: info.xet.refreshUrl.href,
 			reconstructionUrl: info.xet.reconstructionUrl.href,
