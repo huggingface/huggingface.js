@@ -91,6 +91,22 @@ function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
+function isVllmModel(model: ModelData): boolean {
+	return (
+		(isAwqModel(model) ||
+			isGptqModel(model) ||
+			isAqlmModel(model) ||
+			isMarlinModel(model) ||
+			isLlamaCppGgufModel(model) ||
+			isTransformersModel(model)) &&
+		(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text")
+	);
+}
+
+function isDockerModelRunnerModel(model: ModelData): boolean {
+	return isLlamaCppGgufModel(model) || isVllmModel(model);
+}
+
 function isAmdRyzenModel(model: ModelData) {
 	return model.tags.includes("ryzenai-hybrid") || model.tags.includes("ryzenai-npu");
 }
@@ -151,6 +167,10 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"cmake --build build -j --target llama-server llama-cli",
 			].join("\n"),
 			content: [serverCommand("./build/bin/llama-server"), cliCommand("./build/bin/llama-cli")],
+		},
+		{
+			title: "Use Docker",
+			content: snippetDockerModelRunner(model, filepath),
 		},
 	];
 };
@@ -216,14 +236,6 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	const serverCommand = `# Start the vLLM server:
 vllm serve "${model.id}"${mistralFlags}`;
 
-	const dockerCommand = `docker run --gpus all \\
-    -v ~/.cache/huggingface:/root/.cache/huggingface \\
-    --env "HF_TOKEN=<secret>" \\
-    -p 8000:8000 \\
-    --ipc=host \\
-    vllm/vllm-openai:latest \\
-    --model "${model.id}"${mistralFlags}`;
-
 	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
@@ -253,9 +265,8 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 			content: [serverCommand, runCommand],
 		},
 		{
-			title: "Use Docker images",
-			setup: dockerCommand,
-			content: [runCommand],
+			title: "Use Docker",
+			content: snippetDockerModelRunner(model),
 		},
 	];
 };
@@ -379,7 +390,9 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 };
 
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
-	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
+	// Only add quant tag for GGUF models, not safetensors
+	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
+	return `docker model run hf.co/${model.id}${quantTag}`;
 };
 
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -454,14 +467,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "vLLM",
 		docsUrl: "https://docs.vllm.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: (model: ModelData) =>
-			(isAwqModel(model) ||
-				isGptqModel(model) ||
-				isAqlmModel(model) ||
-				isMarlinModel(model) ||
-				isLlamaCppGgufModel(model) ||
-				isTransformersModel(model)) &&
-			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
+		displayOnModelPage: isVllmModel,
 		snippet: snippetVllm,
 	},
 	sglang: {
@@ -604,7 +610,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Docker Model Runner",
 		docsUrl: "https://docs.docker.com/ai/model-runner/",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: isDockerModelRunnerModel,
 		snippet: snippetDockerModelRunner,
 	},
 	lemonade: {

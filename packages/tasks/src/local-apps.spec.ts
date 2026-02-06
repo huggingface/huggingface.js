@@ -127,6 +127,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
 			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
 			inference: "",
 		};
 		const snippet = snippetFunc(model);
