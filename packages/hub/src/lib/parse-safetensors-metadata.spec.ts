@@ -313,17 +313,6 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(parameterCount.UE8, 5000);
 	});
 
-	it("fetch info for large index file (>10MB) with many experts (moonshotai/Kimi-K2-Instruct-0905)", async () => {
-		// This model has a 13.5MB index file due to having 384 experts per layer
-		const parse = await parseSafetensorsMetadata({
-			repo: "moonshotai/Kimi-K2-Instruct-0905",
-			revision: "7152993552508c9f22042b3bb93b5e6acd06ce73",
-		});
-
-		assert(parse.sharded);
-		assert.strictEqual(Object.keys(parse.headers).length, 62);
-	});
-
 	it("fetch info for moonshotai/Kimi-K2.5 (large index file >20MB)", async () => {
 		// This model has a ~23.5MB index file due to having many experts
 		const parse = await parseSafetensorsMetadata({
