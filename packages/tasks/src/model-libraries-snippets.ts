@@ -1159,8 +1159,8 @@ for res in output:
 	}
 
 	if (model.tags.includes("document-parse")) {
-		const rawVersion = model.id.replace("PaddleOCR-VL-", "v");
-		const version = rawVersion === "PaddleOCR-VL" ? "v1" : rawVersion;
+		const rawVersion = model.id.replace("PaddlePaddle/PaddleOCR-VL-", "v");
+		const version = rawVersion === "PaddlePaddle/PaddleOCR-VL" ? "v1" : rawVersion;
 		return [
 			`# See https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html to installation
 
