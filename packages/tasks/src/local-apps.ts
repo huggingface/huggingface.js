@@ -104,10 +104,7 @@ function isVllmModel(model: ModelData): boolean {
 }
 
 function isDockerModelRunnerModel(model: ModelData): boolean {
-	return (
-		isLlamaCppGgufModel(model) ||
-		isVllmModel(model)
-	);
+	return isLlamaCppGgufModel(model) || isVllmModel(model);
 }
 
 function isAmdRyzenModel(model: ModelData) {
