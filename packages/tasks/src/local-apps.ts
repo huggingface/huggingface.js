@@ -239,14 +239,6 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	const serverCommand = `# Start the vLLM server:
 vllm serve "${model.id}"${mistralFlags}`;
 
-	const dockerCommand = `docker run --gpus all \\
-    -v ~/.cache/huggingface:/root/.cache/huggingface \\
-    --env "HF_TOKEN=<secret>" \\
-    -p 8000:8000 \\
-    --ipc=host \\
-    vllm/vllm-openai:latest \\
-    --model "${model.id}"${mistralFlags}`;
-
 	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
