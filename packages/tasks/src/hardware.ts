@@ -151,20 +151,12 @@ export const SKUS = {
 				memory: [4],
 			},
 			"RTX A2000 Max-Q": {
-				tflops: 6.180,
-				memory: [4],
-			},
-			"RTX A2000 Max-Q 8GB": {
-				tflops: 6.026,
-				memory: [8],
+				tflops: 6.1,
+				memory: [4,8],
 			},
 			"RTX A2000 Mobile": {
-				tflops: 8.637,
-				memory: [4],
-			},
-			"RTX A2000 Mobile 8GB": {
-				tflops: 8.253,
-				memory: [8],
+				tflops: 8.4,
+				memory: [4, 8],
 			},
 			A100: {
 				tflops: 77.97,
