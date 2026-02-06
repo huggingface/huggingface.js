@@ -1,4 +1,4 @@
-/**
+X/**
  * Biden AI Executive Order (since revoked by President Trump):
  * https://web.archive.org/web/20250105222429/https://www.whitehouse.gov/briefing-room/presidential-actions/2023/10/30/executive-order-on-the-safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence/
  */
@@ -111,12 +111,16 @@ export const SKUS = {
 				memory: [48],
 			},
 			"RTX A5000": {
-				tflops: 34.1,
+				tflops: 27.8,
 				memory: [24],
 			},
 			"RTX A4000": {
 				tflops: 19.2,
 				memory: [16],
+			},
+			"RTX A3000": {
+				tflops: 10.08,
+				memory: [6],
 			},
 			"RTX A2000": {
 				tflops: 7.987,
