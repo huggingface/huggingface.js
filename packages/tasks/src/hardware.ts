@@ -134,13 +134,9 @@ export const SKUS = {
 				tflops: 17.2,
 				memory: [8],
 			},
-			"RTX A3000 Mobile 12GB": {
-				tflops: 11.80,
-				memory: [12],
-			},
-			"RTX A3000 Mobile 6GB": {
-				tflops: 10.08,
-				memory: [6],
+			"RTX A3000 Mobile": {
+				tflops: 10.90,
+				memory: [6, 12],
 			},
 			"RTX A2000": {
 				tflops: 7.987,
