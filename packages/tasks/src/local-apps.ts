@@ -437,6 +437,10 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetRamalama = (model: ModelData, filepath?: string): string => {
+	return `ramalama run hf://${model.id}${getQuantTag(filepath)}`;
+};
+
 /**
  * Add your new local app here.
  *
@@ -619,6 +623,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	ramalama: {
+		prettyLabel: "RamaLama",
+		docsUrl: "https://ramalama.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetRamalama,
 	},
 } satisfies Record<string, LocalApp>;
 
