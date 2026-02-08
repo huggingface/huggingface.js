@@ -437,6 +437,20 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetPaddler = (): LocalAppSnippet[] => {
+	return [
+		{
+			title: "Run Paddler cluster",
+			setup: "# Install Paddler: https://paddler.intentee.com/docs/introduction/installation/",
+			content: [
+				"# Run the management server\npaddler balancer --management-addr 127.0.0.1:8060 --web-admin-panel-addr 127.0.0.1:8062",
+				"# Run Paddler agents to scale your setup\npaddler agent --management-addr 127.0.0.1:8060 --name agent-1",
+				"# Use `Model` tab in the Paddler admin panel to paste the link to this model\n# More info: https://paddler.intentee.com/docs/starting-out/model-swapping/",
+		  ],
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -619,6 +633,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	paddler: {
+		prettyLabel: "Paddler (self-hosted cluster)",
+		docsUrl: "https://paddler.intentee.com",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetPaddler,
 	},
 } satisfies Record<string, LocalApp>;
 
