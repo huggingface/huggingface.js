@@ -1425,6 +1425,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pkl"`,
 		snippets: snippets.vfimamba,
 	},
+	vismatch: {
+		prettyLabel: "VisMatch",
+		repoName: "VisMatch",
+		repoUrl: "https://github.com/gmberton/vismatch",
+		filter: false,
+		countDownloads: `path:"vismatch.yaml"`,
+	},
 	lvface: {
 		prettyLabel: "LVFace",
 		repoName: "LVFace",
