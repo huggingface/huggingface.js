@@ -629,6 +629,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"infu_flux_v1.0/sim_stage1/image_proj_model.bin" OR path:"infu_flux_v1.0/aes_stage2/image_proj_model.bin"`,
 	},
+	intellifold: {
+		prettyLabel: "IntelliFold",
+		repoName: "IntelliFold",
+		repoUrl: "https://github.com/IntelliGen-AI/IntelliFold",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
