@@ -12,6 +12,7 @@ import * as Hyperbolic from "../providers/hyperbolic.js";
 import * as Nebius from "../providers/nebius.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
+import * as Nvidia from "../providers/nvidia.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
@@ -146,6 +147,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	nscale: {
 		"text-to-image": new Nscale.NscaleTextToImageTask(),
 		conversational: new Nscale.NscaleConversationalTask(),
+	},
+	nvidia: {
+		conversational: new Nvidia.NvidiaConversationalTask(),
 	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
