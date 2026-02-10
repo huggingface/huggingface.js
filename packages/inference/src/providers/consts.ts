@@ -42,4 +42,5 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	together: {},
 	wavespeed: {},
 	"zai-org": {},
+	zenmux: {},
 };
