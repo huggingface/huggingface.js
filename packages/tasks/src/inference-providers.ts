@@ -7,7 +7,6 @@ const INFERENCE_PROVIDERS = [
 	"fireworks-ai",
 	"hf-inference",
 	"hyperbolic",
-	"nvidia",
 	"ovhcloud",
 	"replicate",
 	"sambanova",
