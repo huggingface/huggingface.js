@@ -22,6 +22,7 @@ describe("createRepo", () => {
 
 		assert.deepStrictEqual(result, {
 			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
 		});
 
 		const content = await downloadFile({
@@ -68,6 +69,7 @@ describe("createRepo", () => {
 
 		assert.deepStrictEqual(result, {
 			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
 		});
 
 		await deleteRepo({
@@ -92,6 +94,7 @@ describe("createRepo", () => {
 
 		assert.deepStrictEqual(result, {
 			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
 		});
 
 		await deleteRepo({

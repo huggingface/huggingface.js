@@ -1,4 +1,4 @@
-import { assert, it, describe } from "vitest";
+import { assert, it, describe, expect } from "vitest";
 
 import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../test/consts";
 import type { RepoId } from "../types/public";
@@ -22,6 +22,7 @@ describe("uploadFiles", () => {
 
 			assert.deepStrictEqual(result, {
 				repoUrl: `${TEST_HUB_URL}/${repoName}`,
+				id: expect.any(String),
 			});
 
 			await uploadFiles({
