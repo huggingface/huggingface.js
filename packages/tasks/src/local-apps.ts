@@ -437,6 +437,10 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetNexaSdk = (model: ModelData): string => {
+	return `nexa infer ${model.id}`;
+};
+
 /**
  * Add your new local app here.
  *
@@ -619,6 +623,31 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	"nexa-sdk": {
+		prettyLabel: "Nexa SDK",
+		docsUrl: "https://docs.nexa.ai/",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => {
+			const supportedPipelineTags = new Set([
+				"text-generation",
+				"text-to-speech",
+				"automatic-speech-recognition",
+				"image-text-to-text",
+				"audio-text-to-text",
+				"text-ranking",
+				"text-to-image",
+				"image-classification",
+				"object-detection",
+			]);
+			return (
+				model.id.startsWith("NexaAI/") ||
+				((isLlamaCppGgufModel(model) || isMlxModel(model) || isAmdRyzenModel(model)) &&
+					model.pipeline_tag !== undefined &&
+					supportedPipelineTags.has(model.pipeline_tag))
+			);
+		},
+		snippet: snippetNexaSdk,
 	},
 } satisfies Record<string, LocalApp>;
 
