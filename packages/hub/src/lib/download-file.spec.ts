@@ -55,8 +55,9 @@ Test the whole generation capabilities here: https://transformer.huggingface.co/
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
-		assert.deepStrictEqual(result, {
+		expect(result).toEqual({
 			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
 		});
 
 		try {

@@ -83,7 +83,7 @@ export class CurrentXorbInfo {
 }
 
 export async function* createXorbs(
-	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
+	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256?: string }>,
 	params: XetWriteTokenParams & {
 		yieldCallback?: (event: { event: "fileProgress"; path: string; progress: number }) => void;
 	},
@@ -93,7 +93,7 @@ export async function* createXorbs(
 			event: "file";
 			path: string;
 			hash: string;
-			sha256: string;
+			sha256?: string;
 			/** Percentage of file bytes that were deduplicated (0-1) */
 			dedupRatio: number;
 			representation: Array<{
@@ -135,7 +135,7 @@ export async function* createXorbs(
 		path: string;
 		hash: string;
 		dedupRatio: number;
-		sha256: string;
+		sha256?: string;
 		representation: Array<{
 			xorbId: number | string;
 			indexStart: number;
@@ -153,7 +153,7 @@ export async function* createXorbs(
 			path: fileSource.path,
 			progress: 0,
 		});
-		if (alreadyDoneFileSha256s.has(fileSource.sha256)) {
+		if (fileSource.sha256 && alreadyDoneFileSha256s.has(fileSource.sha256)) {
 			params.yieldCallback?.({
 				event: "fileProgress",
 				path: fileSource.path,
@@ -161,7 +161,9 @@ export async function* createXorbs(
 			});
 			continue;
 		}
-		alreadyDoneFileSha256s.add(fileSource.sha256);
+		if (fileSource.sha256) {
+			alreadyDoneFileSha256s.add(fileSource.sha256);
+		}
 
 		const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 		try {

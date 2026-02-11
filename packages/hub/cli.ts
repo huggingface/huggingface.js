@@ -95,7 +95,9 @@ class UploadProgressManager {
 				this.fileBars.set(path, bar);
 			}
 
-			if (progress >= 1) {
+			if (state === "error") {
+				bar.update(0, { state: "✗ error" });
+			} else if (progress >= 1) {
 				// If complete, mark it as done
 				bar.update(100, { state: state === "hashing" ? "✓ hashed" : "✓ uploaded" });
 			} else {
@@ -108,7 +110,9 @@ class UploadProgressManager {
 			const percentage = Math.round(progress * 100);
 			const truncatedPath = this.truncateFilename(path, 100);
 
-			if (progress >= 1) {
+			if (state === "error") {
+				console.error(`✗ error: ${truncatedPath}`);
+			} else if (progress >= 1) {
 				const statusIcon = state === "hashing" ? "✓ hashed" : "✓ uploaded";
 				console.log(`${statusIcon}: ${truncatedPath}`);
 			} else if (percentage % 25 === 0) {
@@ -199,9 +203,9 @@ const commands = {
 			},
 			{
 				name: "repo-type" as const,
-				enum: ["dataset", "model", "space"],
+				enum: ["dataset", "model", "space", "bucket"],
 				description:
-					"The type of repo to upload to. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+					"The type of repo to upload to. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name or buckets/username/repo-name",
 			},
 			{
 				name: "revision" as const,
@@ -557,7 +561,9 @@ async function run() {
 				private: isPrivate,
 			} = parsedArgs;
 
-			const repoId = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
+			const repoId = repoType
+				? { type: repoType as "model" | "dataset" | "space" | "bucket", name: repoName }
+				: repoName;
 
 			if (
 				!(await repoExists({ repo: repoId, revision, accessToken: token, hubUrl: process.env.HF_ENDPOINT ?? HUB_URL }))

@@ -17,7 +17,7 @@ export function uploadFile(
 		abortSignal?: CommitParams["abortSignal"];
 		useXet?: CommitParams["useXet"];
 	} & Partial<CredentialsParams>,
-): Promise<CommitOutput> {
+): Promise<CommitOutput | undefined> {
 	const path =
 		params.file instanceof URL
 			? (params.file.pathname.split("/").at(-1) ?? "file")

@@ -300,6 +300,10 @@ async function main() {
 		fetch: debugFetchObj.fetch,
 		repo,
 		rev: "main",
+		xetParams: {
+			sessionId: crypto.randomUUID(),
+			refreshWriteTokenUrl: `https://huggingface.co/api/${repo.type}s/${repo.name}/xet-write-token/main`,
+		},
 	};
 
 	console.log(
@@ -323,7 +327,8 @@ async function main() {
 
 	const processedFiles: Array<{
 		path: string;
-		sha256: string;
+		xetHash: string;
+		sha256: string | undefined;
 		dedupRatio: number;
 	}> = [];
 
@@ -331,11 +336,13 @@ async function main() {
 		switch (event.event) {
 			case "file": {
 				console.log(`\n✅ Upload completed for: ${event.path}`);
-				console.log(`   SHA256: ${event.sha256}`);
+				console.log(`   Xet hash: ${event.xetHash}`);
+				console.log(`   SHA256: ${event.sha256 ?? "N/A"}`);
 				console.log(`   Dedup ratio: ${(event.dedupRatio * 100).toFixed(2)}%`);
 
 				processedFiles.push({
 					path: event.path,
+					xetHash: event.xetHash,
 					sha256: event.sha256,
 					dedupRatio: event.dedupRatio,
 				});
@@ -360,7 +367,8 @@ async function main() {
 	// Show details for each file
 	for (const file of processedFiles) {
 		console.log(`\n🔒 ${file.path}:`);
-		console.log(`   SHA256: ${file.sha256}`);
+		console.log(`   Xet hash: ${file.xetHash}`);
+		console.log(`   SHA256: ${file.sha256 ?? "N/A"}`);
 		console.log(`   Deduplication: ${(file.dedupRatio * 100).toFixed(2)}%`);
 	}
 

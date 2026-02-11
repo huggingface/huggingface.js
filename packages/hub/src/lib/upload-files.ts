@@ -18,7 +18,7 @@ export function uploadFiles(
 		abortSignal?: CommitParams["abortSignal"];
 		useXet?: CommitParams["useXet"];
 	} & Partial<CredentialsParams>,
-): Promise<CommitOutput> {
+): Promise<CommitOutput | undefined> {
 	return commit({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
