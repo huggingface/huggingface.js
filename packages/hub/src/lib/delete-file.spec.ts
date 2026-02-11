@@ -24,10 +24,10 @@ describe("deleteFile", () => {
 				],
 			});
 
-		expect(result).toEqual({
-			repoUrl: `${TEST_HUB_URL}/${repoName}`,
-			id: expect.any(String),
-		});
+			expect(result).toEqual({
+				repoUrl: `${TEST_HUB_URL}/${repoName}`,
+				id: expect.any(String),
+			});
 
 			let content = await downloadFile({
 				hubUrl: TEST_HUB_URL,

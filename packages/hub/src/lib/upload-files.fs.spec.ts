@@ -34,10 +34,10 @@ describe("uploadFiles", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-		expect(result).toEqual({
-			repoUrl: `${TEST_HUB_URL}/${repoName}`,
-			id: expect.any(String),
-		});
+			expect(result).toEqual({
+				repoUrl: `${TEST_HUB_URL}/${repoName}`,
+				id: expect.any(String),
+			});
 
 			await uploadFiles({
 				accessToken: TEST_ACCESS_TOKEN,

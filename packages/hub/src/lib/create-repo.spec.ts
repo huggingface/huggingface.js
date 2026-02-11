@@ -20,12 +20,12 @@ describe("createRepo", () => {
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
-	expect(result).toEqual({
-		repoUrl: `${TEST_HUB_URL}/${repoName}`,
-		id: expect.any(String),
-	});
+		expect(result).toEqual({
+			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
+		});
 
-	const content = await downloadFile({
+		const content = await downloadFile({
 			repo: {
 				name: repoName,
 				type: "model",
@@ -67,17 +67,17 @@ describe("createRepo", () => {
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
-	expect(result).toEqual({
-		repoUrl: `${TEST_HUB_URL}/${repoName}`,
-		id: expect.any(String),
-	});
+		expect(result).toEqual({
+			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
+		});
 
-	await deleteRepo({
-		repo: {
-			name: repoName,
-			type: "model",
-		},
-		hubUrl: TEST_HUB_URL,
+		await deleteRepo({
+			repo: {
+				name: repoName,
+				type: "model",
+			},
+			hubUrl: TEST_HUB_URL,
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
 		});
 	});
@@ -92,13 +92,13 @@ describe("createRepo", () => {
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
-	expect(result).toEqual({
-		repoUrl: `${TEST_HUB_URL}/${repoName}`,
-		id: expect.any(String),
-	});
+		expect(result).toEqual({
+			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
+		});
 
-	await deleteRepo({
-		repo: repoName,
+		await deleteRepo({
+			repo: repoName,
 			hubUrl: TEST_HUB_URL,
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
 		});
