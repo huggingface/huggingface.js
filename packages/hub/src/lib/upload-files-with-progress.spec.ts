@@ -47,7 +47,7 @@ describe("uploadFilesWithProgress", () => {
 						useXet,
 					});
 
-					let res: IteratorResult<CommitProgressEvent, CommitOutput>;
+					let res: IteratorResult<CommitProgressEvent, CommitOutput | undefined>;
 					let progressEvents: CommitProgressEvent[] = [];
 
 					do {
