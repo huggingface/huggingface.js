@@ -839,25 +839,26 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 				).then(() => returnCallback(undefined), rejectCallback),
 			);
 
-			const resp = await (params.fetch ?? fetch)(
-				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
-				{
-					method: "POST",
-					headers: {
-						...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-						"Content-Type": "application/x-ndjson",
-					},
-					body: [...xetHashes.entries()]
-						.map(([path, sha256]) =>
-							JSON.stringify({
-								type: "addFile",
-								path,
-								xetHash: sha256,
-							}),
-						)
-						.join("\n"),
+		const resp = await (params.fetch ?? fetch)(
+			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
+			{
+				method: "POST",
+				headers: {
+					...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+					"Content-Type": "application/x-ndjson",
 				},
-			);
+				body: [...xetHashes.entries()]
+					.map(([path, sha256]) =>
+						JSON.stringify({
+							type: "addFile",
+							path,
+							xetHash: sha256,
+						}),
+					)
+					.join("\n"),
+				signal: abortSignal,
+			},
+		);
 
 			if (!resp.ok && resp.status !== 422) {
 				throw await createApiError(resp);
@@ -880,37 +881,39 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 		const deletedOperations = allOperations.filter((operation) => operation.operation === "delete");
 
 		if (deletedOperations.length > 0) {
-			const resp = await (params.fetch ?? fetch)(
-				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
-				{
-					method: "POST",
-					headers: {
-						...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-						"Content-Type": "application/x-ndjson",
-					},
-					body: deletedOperations
-						.map((operation) =>
-							JSON.stringify({
-								type: "deleteFile",
-								path: operation.path,
-							}),
-						)
-						.join("\n"),
+		const resp = await (params.fetch ?? fetch)(
+			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
+			{
+				method: "POST",
+				headers: {
+					...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+					"Content-Type": "application/x-ndjson",
 				},
-			);
+				body: deletedOperations
+					.map((operation) =>
+						JSON.stringify({
+							type: "deleteFile",
+							path: operation.path,
+						}),
+					)
+					.join("\n"),
+				signal: abortSignal,
+			},
+		);
 
-			if (!resp.ok) {
-				throw await createApiError(resp);
-			}
-
-			const json = await resp.json();
-
-			for (const failed of json.failed) {
-				throw new Error(
-					`Failed to delete ${json.failed.length} file(s), including ${failed.path}: ${failed.error}, request ID: ${resp.headers.get("X-Request-Id")}, url: ${resp.url}`,
-				);
-			}
+		if (!resp.ok) {
+			throw await createApiError(resp);
 		}
+
+		const json = await resp.json();
+
+		if (json.failed.length > 0) {
+			const failed = json.failed[0];
+			throw new Error(
+				`Failed to delete ${json.failed.length} file(s), including ${failed.path}: ${failed.error}, request ID: ${resp.headers.get("X-Request-Id")}, url: ${resp.url}`,
+			);
+		}
+	}
 
 		abortSignal?.throwIfAborted();
 	} catch (err) {

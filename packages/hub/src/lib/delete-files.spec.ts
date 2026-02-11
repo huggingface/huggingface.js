@@ -25,10 +25,10 @@ describe("deleteFiles", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-			assert.deepStrictEqual(result, {
-				repoUrl: `${TEST_HUB_URL}/${repoName}`,
-				id: expect.any(String),
-			});
+		expect(result).toEqual({
+			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
+		});
 
 			let content = await downloadFile({
 				repo,
