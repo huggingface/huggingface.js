@@ -122,6 +122,22 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	}'`);
 	});
 
+	it("pi", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["pi"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096, chat_template: "{% if tools %}" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toContain(`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}} --jinja`);
+		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
+		expect(snippet[1].content).toContain(`"id": "Llama-3.2-3B-Instruct-GGUF"`);
+		expect(snippet[2].content).toContain("pi");
+	});
+
 	it("docker model runner", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
 		const model: ModelData = {

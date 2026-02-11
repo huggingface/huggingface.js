@@ -389,6 +389,43 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const quantTag = getQuantTag(filepath);
+	const modelName = model.id.split("/").pop() ?? model.id;
+
+	const modelsJson = JSON.stringify(
+		{
+			providers: {
+				"llama-cpp": {
+					baseUrl: "http://localhost:8080/v1",
+					api: "openai-completions",
+					apiKey: "none",
+					models: [{ id: modelName }],
+				},
+			},
+		},
+		null,
+		2,
+	);
+
+	return [
+		{
+			title: "Start the llama.cpp server",
+			setup: "# Install llama.cpp:\nbrew install llama.cpp",
+			content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${quantTag} --jinja`,
+		},
+		{
+			title: "Configure the model in Pi",
+			setup: "# Install Pi:\nnpm install -g @mariozechner/pi-coding-agent",
+			content: `# Add to ~/.pi/agent/models.json:\n${modelsJson}`,
+		},
+		{
+			title: "Run Pi",
+			content: `# Start Pi in your project directory:\npi`,
+		},
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	// Only add quant tag for GGUF models, not safetensors
 	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
@@ -619,6 +656,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	pi: {
+		prettyLabel: "Pi",
+		docsUrl: "https://github.com/badlogic/pi-mono",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) && !!model.gguf?.chat_template?.includes("tools"),
+		snippet: snippetPi,
 	},
 } satisfies Record<string, LocalApp>;
 
