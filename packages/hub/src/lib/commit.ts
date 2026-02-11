@@ -907,12 +907,12 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 
 			const json = await resp.json();
 
-			if (json.failed.length > 0) {
-				const failed = json.failed[0];
-				throw new Error(
-					`Failed to delete ${json.failed.length} file(s), including ${failed.path}: ${failed.error}, request ID: ${resp.headers.get("X-Request-Id")}, url: ${resp.url}`,
-				);
-			}
+		if (json.failed.length > 0) {
+			const failedPaths = json.failed.slice(0, 5).map((f: { path: string }) => f.path);
+			throw new Error(
+				`Failed to delete ${json.failed.length} file(s): ${failedPaths.join(", ")}${json.failed.length > 5 ? "..." : ""}, request ID: ${resp.headers.get("X-Request-Id")}`,
+			);
+		}
 		}
 
 		abortSignal?.throwIfAborted();
@@ -929,16 +929,20 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 export async function commit(params: CommitParams): Promise<CommitOutput | undefined> {
 	const iterator = commitIter(params);
 	const failedPaths: string[] = [];
+	let failedCount = 0;
 	let res = await iterator.next();
 	while (!res.done) {
 		if (res.value.event === "fileProgress" && res.value.state === "error") {
-			failedPaths.push(res.value.path);
+			failedCount++;
+			if (failedPaths.length < 5) {
+				failedPaths.push(res.value.path);
+			}
 		}
 		res = await iterator.next();
 	}
-	if (failedPaths.length > 0) {
+	if (failedCount > 0) {
 		throw new Error(
-			`Failed to upload ${failedPaths.length} file(s): ${failedPaths.slice(0, 5).join(", ")}${failedPaths.length > 5 ? "..." : ""}`,
+			`Failed to upload ${failedCount} file(s): ${failedPaths.join(", ")}${failedCount > 5 ? "..." : ""}`,
 		);
 	}
 	return res.value;
