@@ -191,10 +191,23 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 		params.abortSignal.addEventListener("abort", () => abortController.abort());
 	}
 
+	let hasAddDelete = false;
+
 	try {
 		const allOperations = (
 			await Promise.all(
 				params.operations.map(async (operation) => {
+					switch (operation.operation) {
+						case "delete":
+							hasAddDelete = true;
+							break;
+						case "addOrUpdate":
+						default:
+							if (hasAddDelete && repoId.type === "bucket") {
+								throw new Error("Cannot have add or update operations after a delete operation for a bucket");
+							}
+					}
+
 					if (operation.operation === "edit") {
 						// Convert EditFile operation to a file operation with SplicedBlob
 						const splicedBlob = SplicedBlob.create(
