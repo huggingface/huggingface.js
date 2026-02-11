@@ -907,12 +907,12 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 
 			const json = await resp.json();
 
-		if (json.failed.length > 0) {
-			const failedPaths = json.failed.slice(0, 5).map((f: { path: string }) => f.path);
-			throw new Error(
-				`Failed to delete ${json.failed.length} file(s): ${failedPaths.join(", ")}${json.failed.length > 5 ? "..." : ""}, request ID: ${resp.headers.get("X-Request-Id")}`,
-			);
-		}
+			if (json.failed.length > 0) {
+				const failedPaths = json.failed.slice(0, 5).map((f: { path: string }) => f.path);
+				throw new Error(
+					`Failed to delete ${json.failed.length} file(s): ${failedPaths.join(", ")}${json.failed.length > 5 ? "..." : ""}, request ID: ${resp.headers.get("X-Request-Id")}`,
+				);
+			}
 		}
 
 		abortSignal?.throwIfAborted();
