@@ -391,7 +391,7 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 
 const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const quantTag = getQuantTag(filepath);
-	const modelName = model.id.includes("/") ? model.id.split("/").pop()! : model.id;
+	const modelName = model.id.split("/").pop() ?? model.id;
 
 	const modelsJson = JSON.stringify(
 		{
@@ -405,7 +405,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 			},
 		},
 		null,
-		2
+		2,
 	);
 
 	return [

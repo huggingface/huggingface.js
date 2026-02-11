@@ -132,9 +132,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 		const snippet = snippetFunc(model);
 
-		expect(snippet[0].content).toContain(
-			`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}} --jinja`
-		);
+		expect(snippet[0].content).toContain(`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}} --jinja`);
 		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
 		expect(snippet[1].content).toContain(`"id": "Llama-3.2-3B-Instruct-GGUF"`);
 		expect(snippet[2].content).toContain("pi");
