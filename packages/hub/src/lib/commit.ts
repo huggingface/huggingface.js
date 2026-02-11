@@ -928,9 +928,18 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
  */
 export async function commit(params: CommitParams): Promise<CommitOutput | undefined> {
 	const iterator = commitIter(params);
+	const failedPaths: string[] = [];
 	let res = await iterator.next();
 	while (!res.done) {
+		if (res.value.event === "fileProgress" && res.value.state === "error") {
+			failedPaths.push(res.value.path);
+		}
 		res = await iterator.next();
+	}
+	if (failedPaths.length > 0) {
+		throw new Error(
+			`Failed to upload ${failedPaths.length} file(s): ${failedPaths.slice(0, 5).join(", ")}${failedPaths.length > 5 ? "..." : ""}`,
+		);
 	}
 	return res.value;
 }
