@@ -848,11 +848,11 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 						"Content-Type": "application/x-ndjson",
 					},
 					body: [...xetHashes.entries()]
-						.map(([path, sha256]) =>
+						.map(([path, xetHash]) =>
 							JSON.stringify({
 								type: "addFile",
 								path,
-								xetHash: sha256,
+								xetHash,
 							}),
 						)
 						.join("\n"),
