@@ -16,6 +16,8 @@ export const SHARD_FOOTER_VERSION = 1n;
 const MDB_FILE_FLAG_WITH_VERIFICATION = 0x80000000; // Cannot define as 1 << 31 because it becomes a negative number
 const MDB_FILE_FLAG_WITH_METADATA_EXT = 0x40000000;
 
+const EMPTY_HASH = "0".repeat(HASH_LENGTH);
+
 export const SHARD_MAGIC_TAG = new Uint8Array([
 	"H".charCodeAt(0),
 	"F".charCodeAt(0),
@@ -74,10 +76,18 @@ interface UploadShardsParams {
  * Outputs the file sha256 after their xorbs/shards have been uploaded.
  */
 export async function* uploadShards(
-	source: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
+	source: AsyncGenerator<{ content: Blob; path: string; sha256?: string }>,
 	params: UploadShardsParams,
 ): AsyncGenerator<
-	| { event: "file"; path: string; sha256: string; dedupRatio: number }
+	| {
+			event: "file";
+			path: string;
+			/**
+			 * Todo: rename to hash, as it can be the sha256 or the xet hash of the file
+			 */
+			sha256: string;
+			dedupRatio: number;
+	  }
 	| { event: "fileProgress"; path: string; progress: number }
 > {
 	const xorbHashes: Array<string> = [];
@@ -158,7 +168,7 @@ export async function* uploadShards(
 				break;
 			}
 			case "file": {
-				yield { event: "file", path: output.path, sha256: output.sha256, dedupRatio: output.dedupRatio }; // Maybe wait until shard is uploaded before yielding.
+				yield { event: "file", path: output.path, sha256: output.sha256 ?? output.hash, dedupRatio: output.dedupRatio }; // Maybe wait until shard is uploaded before yielding.
 
 				// Calculate space needed for this file entry
 				const fileHeaderSize = HASH_LENGTH + 4 + 4 + 8; // hash + flags + rep length + reserved
@@ -214,7 +224,7 @@ export async function* uploadShards(
 				}
 
 				// File metadata ext
-				writeHashToArray(output.sha256, fileInfoSection, fileViewOffset);
+				writeHashToArray(output.sha256 ?? EMPTY_HASH, fileInfoSection, fileViewOffset);
 				fileViewOffset += HASH_LENGTH;
 
 				// reserved in file metadata ext

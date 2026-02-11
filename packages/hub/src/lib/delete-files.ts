@@ -14,7 +14,7 @@ export function deleteFiles(
 		parentCommit?: CommitParams["parentCommit"];
 		fetch?: CommitParams["fetch"];
 	} & CredentialsParams,
-): Promise<CommitOutput> {
+): Promise<CommitOutput | undefined> {
 	return commit({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
