@@ -82,10 +82,8 @@ export async function* uploadShards(
 	| {
 			event: "file";
 			path: string;
-			/**
-			 * Todo: rename to hash, as it can be the sha256 or the xet hash of the file
-			 */
-			sha256: string;
+			xetHash: string;
+			sha256: string | undefined;
 			dedupRatio: number;
 	  }
 	| { event: "fileProgress"; path: string; progress: number }
@@ -168,7 +166,13 @@ export async function* uploadShards(
 				break;
 			}
 			case "file": {
-				yield { event: "file", path: output.path, sha256: output.sha256 ?? output.hash, dedupRatio: output.dedupRatio }; // Maybe wait until shard is uploaded before yielding.
+				yield {
+					event: "file",
+					path: output.path,
+					xetHash: output.hash,
+					sha256: output.sha256,
+					dedupRatio: output.dedupRatio,
+				}; // Maybe wait until shard is uploaded before yielding.
 
 				// Calculate space needed for this file entry
 				const fileHeaderSize = HASH_LENGTH + 4 + 4 + 8; // hash + flags + rep length + reserved

@@ -825,7 +825,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 									progress: 1,
 									state: "uploading" as const,
 								});
-								xetHashes.set(event.path, event.sha256);
+								xetHashes.set(event.path, event.xetHash);
 							} else if (event.event === "fileProgress") {
 								yieldCallback({
 									event: "fileProgress" as const,
