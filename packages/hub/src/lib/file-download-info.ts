@@ -51,10 +51,12 @@ export async function fileDownloadInfo(
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
 	const url =
-		`${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/${
-			params.raw ? "raw" : "resolve"
-		}/${encodeURIComponent(params.revision ?? "main")}/${params.path}` +
-		(params.noContentDisposition ? "?noContentDisposition=1" : "");
+		repoId.type === "bucket"
+			? `${hubUrl}/api/buckets/${repoId.name}/resolve/${params.path}`
+			: `${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/${
+					params.raw ? "raw" : "resolve"
+				}/${encodeURIComponent(params.revision ?? "main")}/${params.path}` +
+				(params.noContentDisposition ? "?noContentDisposition=1" : "");
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "GET",
