@@ -162,6 +162,10 @@ export const SKUS = {
 				tflops: 37.42,
 				memory: [48],
 			},
+			A30: {
+				tflops: 10.32,
+				memory: [24],
+			},
 			A10: {
 				tflops: 31.24,
 				memory: [24],
