@@ -57,6 +57,7 @@ Test the whole generation capabilities here: https://transformer.huggingface.co/
 
 		assert.deepStrictEqual(result, {
 			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
 		});
 
 		try {
