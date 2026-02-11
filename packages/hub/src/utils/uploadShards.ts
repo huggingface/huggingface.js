@@ -16,7 +16,7 @@ export const SHARD_FOOTER_VERSION = 1n;
 const MDB_FILE_FLAG_WITH_VERIFICATION = 0x80000000; // Cannot define as 1 << 31 because it becomes a negative number
 const MDB_FILE_FLAG_WITH_METADATA_EXT = 0x40000000;
 
-const EMPTY_HASH = "0".repeat(HASH_LENGTH);
+const EMPTY_HEX_HASH = "0".repeat(HASH_LENGTH * 2);
 
 export const SHARD_MAGIC_TAG = new Uint8Array([
 	"H".charCodeAt(0),
@@ -224,7 +224,7 @@ export async function* uploadShards(
 				}
 
 				// File metadata ext
-				writeHashToArray(output.sha256 ?? EMPTY_HASH, fileInfoSection, fileViewOffset);
+				writeHashToArray(output.sha256 ?? EMPTY_HEX_HASH, fileInfoSection, fileViewOffset);
 				fileViewOffset += HASH_LENGTH;
 
 				// reserved in file metadata ext

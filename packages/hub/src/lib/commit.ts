@@ -907,7 +907,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 
 			for (const failed of json.failed) {
 				throw new Error(
-					`Failed to delete ${failed.length} file(s), including ${failed.path}: ${failed.error}, request ID: ${resp.headers.get("X-Request-Id")}, url: ${resp.url}`,
+					`Failed to delete ${json.failed.length} file(s), including ${failed.path}: ${failed.error}, request ID: ${resp.headers.get("X-Request-Id")}, url: ${resp.url}`,
 				);
 			}
 		}
