@@ -16,11 +16,11 @@ export function toRepoId(repo: RepoDesignation): RepoId {
 	}
 
 	if (repo.startsWith("dataset/")) {
-		throw new TypeError("Datasets should start with 'dataset/', plural, not 'dataset/'");
+		throw new TypeError("Datasets should start with 'datasets/', plural, not 'dataset/'");
 	}
 
 	if (repo.startsWith("bucket/")) {
-		throw new TypeError("Buckets should start with 'bucket/', plural, not 'bucket/'");
+		throw new TypeError("Buckets should start with 'buckets/', plural, not 'bucket/'");
 	}
 
 	const slashes = repo.split("/").length - 1;

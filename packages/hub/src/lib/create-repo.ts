@@ -13,9 +13,13 @@ export async function createRepo(
 		 * If unset, will follow the organization's default setting. (typically public, except for some Enterprise organizations)
 		 */
 		private?: boolean;
+		resourceGroupId?: string;
+		/**
+		 * Does not work for buckets
+		 */
 		license?: string;
 		/**
-		 * Only a few lightweight files are supported at repo creation
+		 * Only a few lightweight files are supported at repo creation - and not for buckets
 		 */
 		files?: Array<{ content: ArrayBuffer | Blob; path: string }>;
 		/** @required for when {@link repo.type} === "space" */
@@ -26,7 +30,7 @@ export async function createRepo(
 		 */
 		fetch?: typeof fetch;
 	} & CredentialsParams,
-): Promise<{ repoUrl: string }> {
+): Promise<{ repoUrl: string; id: string }> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 	const [namespace, repoName] = repoId.name.split("/");
@@ -37,42 +41,56 @@ export async function createRepo(
 		);
 	}
 
-	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
-		method: "POST",
-		body: JSON.stringify({
-			name: repoName,
-			private: params.private,
-			organization: namespace,
-			license: params.license,
-			...(repoId.type === "space"
-				? {
-						type: "space",
-						sdk: params.sdk ?? "static",
-					}
-				: {
-						type: repoId.type,
+	const res =
+		repoId.type === "bucket"
+			? await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/buckets/${namespace}/${repoName}`, {
+					method: "POST",
+					body: JSON.stringify({
+						private: params.private,
+						resourceGroupId: params.resourceGroupId,
 					}),
-			files: params.files
-				? await Promise.all(
-						params.files.map(async (file) => ({
-							encoding: "base64",
-							path: file.path,
-							content: base64FromBytes(
-								new Uint8Array(file.content instanceof Blob ? await file.content.arrayBuffer() : file.content),
-							),
-						})),
-					)
-				: undefined,
-		} satisfies ApiCreateRepoPayload),
-		headers: {
-			Authorization: `Bearer ${accessToken}`,
-			"Content-Type": "application/json",
-		},
-	});
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+					},
+				})
+			: await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
+					method: "POST",
+					body: JSON.stringify({
+						name: repoName,
+						private: params.private,
+						organization: namespace,
+						resourceGroupId: params.resourceGroupId,
+						license: params.license,
+						...(repoId.type === "space"
+							? {
+									type: "space",
+									sdk: params.sdk ?? "static",
+								}
+							: {
+									type: repoId.type,
+								}),
+						files: params.files
+							? await Promise.all(
+									params.files.map(async (file) => ({
+										encoding: "base64",
+										path: file.path,
+										content: base64FromBytes(
+											new Uint8Array(file.content instanceof Blob ? await file.content.arrayBuffer() : file.content),
+										),
+									})),
+								)
+							: undefined,
+					} satisfies ApiCreateRepoPayload),
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+					},
+				});
 
 	if (!res.ok) {
 		throw await createApiError(res);
 	}
 	const output = await res.json();
-	return { repoUrl: output.url };
+	return { repoUrl: output.url, id: output.id };
 }
