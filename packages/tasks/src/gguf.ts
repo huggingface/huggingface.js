@@ -53,7 +53,9 @@ export enum GGMLFileQuantizationType {
 }
 
 const ggufQuants = Object.values(GGMLFileQuantizationType).filter((v): v is string => typeof v === "string");
-export const GGUF_QUANT_RE = new RegExp(`(?<quant>${ggufQuants.join("|")})` + "(_(?<sizeVariation>[A-Z]+))?");
+export const GGUF_QUANT_RE = new RegExp(
+	"(?<prefix>UD-)?" + `(?<quant>${ggufQuants.join("|")})` + "(_(?<sizeVariation>[A-Z]+))?",
+);
 export const GGUF_QUANT_RE_GLOBAL = new RegExp(GGUF_QUANT_RE, "g");
 
 export function parseGGUFQuantLabel(fname: string): string | undefined {
