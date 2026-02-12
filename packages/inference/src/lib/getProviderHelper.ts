@@ -2,6 +2,7 @@ import * as Baseten from "../providers/baseten.js";
 import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
+import * as CharityEngine from "../providers/charity-engine.js";
 import * as Cohere from "../providers/cohere.js";
 import * as FalAI from "../providers/fal-ai.js";
 import * as FeatherlessAI from "../providers/featherless-ai.js";
@@ -69,6 +70,11 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
+	},
+	"charity-engine": {
+		conversational: new CharityEngine.CharityEngineConversationalTask(),
+		"text-generation": new CharityEngine.CharityEngineTextGenerationTask(),
+		"feature-extraction": new CharityEngine.CharityEngineFeatureExtractionTask(),
 	},
 	clarifai: {
 		conversational: new Clarifai.ClarifaiConversationalTask(),
