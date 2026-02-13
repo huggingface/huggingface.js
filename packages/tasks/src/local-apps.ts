@@ -620,6 +620,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
 	},
+	localchat: {
+		prettyLabel: "LocalChat.app",
+		docsUrl: "https://www.localchat.app",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) => new URL(`localchat://models/hf/llm/${model.id}`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
