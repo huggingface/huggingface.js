@@ -80,6 +80,19 @@ export async function* listModels<
 		 */
 		limit?: number;
 		/**
+		 * Sort models by a specific field.
+		 */
+		sort?:
+			| "createdAt"
+			| "downloads"
+			| "likes"
+			| "lastModified"
+			| "likes30d"
+			| "trendingScore"
+			| "num_parameters"
+			| "mainSize"
+			| "id";
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -97,6 +110,7 @@ export async function* listModels<
 				? { inference_provider: params.search.inferenceProviders.join(",") }
 				: undefined),
 			...(params?.search?.apps ? { apps: params.search.apps.join(",") } : undefined),
+			...(params?.sort ? { sort: params.sort } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
