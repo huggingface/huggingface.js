@@ -98,7 +98,7 @@ function createDebugFetch(args: { debugDir: string; replay?: boolean }): {
 
 					// Compare all bytes except footer bytes 104-112 (9 bytes from positions 104-112 inclusive)
 					const footerStart = Number(
-						new DataView(localData.buffer).getBigUint64(localData.buffer.byteLength - 8, true)
+						new DataView(localData.buffer).getBigUint64(localData.buffer.byteLength - 8, true),
 					);
 					// This is the shard timestamp
 					const toIgnoreStart = footerStart + 104;
@@ -300,10 +300,14 @@ async function main() {
 		fetch: debugFetchObj.fetch,
 		repo,
 		rev: "main",
+		xetParams: {
+			sessionId: crypto.randomUUID(),
+			refreshWriteTokenUrl: `https://huggingface.co/api/${repo.type}s/${repo.name}/xet-write-token/main`,
+		},
 	};
 
 	console.log(
-		`\n=== Starting debug upload for ${filePaths.length > 1 ? `${filePaths.length} files` : basename(filePaths[0])} ===`
+		`\n=== Starting debug upload for ${filePaths.length > 1 ? `${filePaths.length} files` : basename(filePaths[0])} ===`,
 	);
 	if (args.replay) {
 		console.log("🔄 Replay mode: Using local dedup info when available");
@@ -323,7 +327,8 @@ async function main() {
 
 	const processedFiles: Array<{
 		path: string;
-		sha256: string;
+		xetHash: string;
+		sha256: string | undefined;
 		dedupRatio: number;
 	}> = [];
 
@@ -331,11 +336,13 @@ async function main() {
 		switch (event.event) {
 			case "file": {
 				console.log(`\n✅ Upload completed for: ${event.path}`);
-				console.log(`   SHA256: ${event.sha256}`);
+				console.log(`   Xet hash: ${event.xetHash}`);
+				console.log(`   SHA256: ${event.sha256 ?? "N/A"}`);
 				console.log(`   Dedup ratio: ${(event.dedupRatio * 100).toFixed(2)}%`);
 
 				processedFiles.push({
 					path: event.path,
+					xetHash: event.xetHash,
 					sha256: event.sha256,
 					dedupRatio: event.dedupRatio,
 				});
@@ -360,7 +367,8 @@ async function main() {
 	// Show details for each file
 	for (const file of processedFiles) {
 		console.log(`\n🔒 ${file.path}:`);
-		console.log(`   SHA256: ${file.sha256}`);
+		console.log(`   Xet hash: ${file.xetHash}`);
+		console.log(`   SHA256: ${file.sha256 ?? "N/A"}`);
 		console.log(`   Deduplication: ${(file.dedupRatio * 100).toFixed(2)}%`);
 	}
 

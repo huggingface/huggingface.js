@@ -34,7 +34,6 @@ describe("listCollections", () => {
 					isHf: false,
 					isHfAdmin: false,
 					isMod: false,
-					isEnterprise: false,
 					isUserFollowing: expect.any(Boolean),
 				},
 				items: [
@@ -72,7 +71,6 @@ describe("listCollections", () => {
 							avatarUrl: expect.any(String),
 							followerCount: expect.any(Number),
 							fullname: "Huggingface.js",
-							isEnterprise: false,
 							isHf: false,
 							isHfAdmin: false,
 							isMod: false,
@@ -98,7 +96,6 @@ describe("listCollections", () => {
 							avatarUrl: expect.any(String),
 							followerCount: expect.any(Number),
 							fullname: "Huggingface.js",
-							isEnterprise: false,
 							isHf: false,
 							isHfAdmin: false,
 							isMod: false,

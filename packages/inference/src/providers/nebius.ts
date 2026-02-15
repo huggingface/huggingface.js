@@ -15,7 +15,7 @@
  * Thanks!
  */
 import type { FeatureExtractionOutput, TextGenerationOutput } from "@huggingface/tasks";
-import type { BodyParams } from "../types.js";
+import type { BodyParams, OutputType } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
 	BaseConversationalTask,
@@ -29,9 +29,10 @@ import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js"
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
-interface NebiusBase64ImageGeneration {
+interface NebiusImageGeneration {
 	data: Array<{
-		b64_json: string;
+		b64_json?: string;
+		url?: string;
 	}>;
 }
 
@@ -102,7 +103,7 @@ export class NebiusTextToImageTask extends TaskProviderHelper implements TextToI
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
-			response_format: "b64_json",
+			response_format: params.outputType === "url" ? "url" : "b64_json",
 			prompt: params.args.inputs,
 			model: params.model,
 		};
@@ -113,27 +114,32 @@ export class NebiusTextToImageTask extends TaskProviderHelper implements TextToI
 	}
 
 	async getResponse(
-		response: NebiusBase64ImageGeneration,
+		response: NebiusImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
 			"data" in response &&
 			Array.isArray(response.data) &&
-			response.data.length > 0 &&
-			"b64_json" in response.data[0] &&
-			typeof response.data[0].b64_json === "string"
+			response.data.length > 0
 		) {
 			if (outputType === "json") {
 				return { ...response };
 			}
-			const base64Data = response.data[0].b64_json;
-			if (outputType === "url") {
-				return `data:image/jpeg;base64,${base64Data}`;
+
+			if ("url" in response.data[0] && typeof response.data[0].url === "string") {
+				return response.data[0].url;
 			}
-			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
+
+			if ("b64_json" in response.data[0] && typeof response.data[0].b64_json === "string") {
+				const base64Data = response.data[0].b64_json;
+				if (outputType === "dataUrl") {
+					return `data:image/jpeg;base64,${base64Data}`;
+				}
+				return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
+			}
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Nebius text-to-image API");

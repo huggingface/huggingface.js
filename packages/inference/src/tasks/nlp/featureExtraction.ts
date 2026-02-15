@@ -21,7 +21,7 @@ export type FeatureExtractionOutput = (number | number[] | number[][])[];
  */
 export async function featureExtraction(
 	args: FeatureExtractionArgs,
-	options?: Options
+	options?: Options,
 ): Promise<FeatureExtractionOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "feature-extraction");

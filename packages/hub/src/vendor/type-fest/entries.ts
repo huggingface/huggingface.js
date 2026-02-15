@@ -54,12 +54,13 @@ const setEntries: Entries<typeof setExample> = [['a', 'a'], [1, 1]];
 @category Set
 @category Array
 */
-export type Entries<BaseType> = BaseType extends Map<unknown, unknown>
-	? MapEntries<BaseType>
-	: BaseType extends Set<unknown>
-	  ? SetEntries<BaseType>
-	  : BaseType extends readonly unknown[]
-	    ? ArrayEntries<BaseType>
-	    : BaseType extends object
-	      ? ObjectEntries<BaseType>
-	      : never;
+export type Entries<BaseType> =
+	BaseType extends Map<unknown, unknown>
+		? MapEntries<BaseType>
+		: BaseType extends Set<unknown>
+			? SetEntries<BaseType>
+			: BaseType extends readonly unknown[]
+				? ArrayEntries<BaseType>
+				: BaseType extends object
+					? ObjectEntries<BaseType>
+					: never;

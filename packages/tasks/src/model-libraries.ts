@@ -270,6 +270,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"setup.py"`,
 	},
+	colipri: {
+		prettyLabel: "COLIPRI",
+		repoName: "COLIPRI",
+		repoUrl: "https://huggingface.co/microsoft/colipri",
+		snippets: snippets.colipri,
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	cosyvoice: {
 		prettyLabel: "CosyVoice",
 		repoName: "CosyVoice",
@@ -529,6 +537,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"ckpt/tensor00000_000" OR path:"ckpt-0/tensor00000_000"`,
 	},
+	"habibi-tts": {
+		prettyLabel: "Habibi-TTS",
+		repoName: "Habibi-TTS",
+		repoUrl: "https://github.com/SWivid/Habibi-TTS",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	hallo: {
 		prettyLabel: "Hallo",
 		repoName: "Hallo",
@@ -613,6 +628,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/bytedance/InfiniteYou",
 		filter: false,
 		countDownloads: `path:"infu_flux_v1.0/sim_stage1/image_proj_model.bin" OR path:"infu_flux_v1.0/aes_stage2/image_proj_model.bin"`,
+	},
+	intellifold: {
+		prettyLabel: "IntelliFold",
+		repoName: "IntelliFold",
+		repoUrl: "https://github.com/IntelliGen-AI/IntelliFold",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -845,6 +867,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Moshi",
 		repoName: "Moshi",
 		repoUrl: "https://github.com/kyutai-labs/moshi",
+		snippets: snippets.moshi,
 		filter: false,
 		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
 	},
@@ -993,6 +1016,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/OpenPeer-AI/QuantumPeer",
 		filter: false,
 		countDownloads: `path_extension:"setup.py"`,
+	},
+	qwen3_tts: {
+		prettyLabel: "Qwen3-TTS",
+		repoName: "Qwen3-TTS",
+		repoUrl: "https://github.com/QwenLM/Qwen3-TTS",
+		snippets: snippets.qwen3_tts,
+		filter: false,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
@@ -1401,6 +1431,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/MCG-NJU/VFIMamba",
 		countDownloads: `path_extension:"pkl"`,
 		snippets: snippets.vfimamba,
+	},
+	vismatch: {
+		prettyLabel: "VisMatch",
+		repoName: "VisMatch",
+		repoUrl: "https://github.com/gmberton/vismatch",
+		filter: false,
+		countDownloads: `path:"vismatch.yaml"`,
 	},
 	lvface: {
 		prettyLabel: "LVFace",

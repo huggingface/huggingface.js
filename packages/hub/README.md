@@ -139,6 +139,8 @@ hfjs upload --repo-type dataset coyotte508/test-dataset . --revision release
 
 hfjs --help
 hfjs  upload --help
+
+hfjs help jobs
 ```
 
 ## OAuth Login

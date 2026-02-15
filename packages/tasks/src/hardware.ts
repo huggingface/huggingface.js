@@ -111,16 +111,48 @@ export const SKUS = {
 				memory: [48],
 			},
 			"RTX A5000": {
-				tflops: 34.1,
-				memory: [24],
+				tflops: 27.77,
+				memory: [8, 12, 24],
+			},
+			"RTX A5000 Max-Q": {
+				tflops: 16.59,
+				memory: [16],
+			},
+			"RTX A5000 Mobile": {
+				tflops: 19.35,
+				memory: [16],
 			},
 			"RTX A4000": {
-				tflops: 19.2,
+				tflops: 19.17,
 				memory: [16],
+			},
+			"RTX A4000 Max-Q": {
+				tflops: 14.28,
+				memory: [8],
+			},
+			"RTX A4000 Mobile": {
+				tflops: 17.2,
+				memory: [8],
+			},
+			"RTX A3000 Mobile": {
+				tflops: 10.9,
+				memory: [6, 12],
 			},
 			"RTX A2000": {
 				tflops: 7.987,
-				memory: [8, 12],
+				memory: [6, 12],
+			},
+			"RTX A2000 Embedded": {
+				tflops: 6.026,
+				memory: [4],
+			},
+			"RTX A2000 Max-Q": {
+				tflops: 6.1,
+				memory: [4, 8],
+			},
+			"RTX A2000 Mobile": {
+				tflops: 8.4,
+				memory: [4, 8],
 			},
 			A100: {
 				tflops: 77.97,
@@ -129,6 +161,10 @@ export const SKUS = {
 			A40: {
 				tflops: 37.42,
 				memory: [48],
+			},
+			A30: {
+				tflops: 10.32,
+				memory: [24],
 			},
 			A10: {
 				tflops: 31.24,

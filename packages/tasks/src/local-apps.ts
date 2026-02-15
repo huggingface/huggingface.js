@@ -82,12 +82,29 @@ function isMarlinModel(model: ModelData): boolean {
 function isTransformersModel(model: ModelData): boolean {
 	return model.tags.includes("transformers");
 }
+
 function isTgiModel(model: ModelData): boolean {
 	return model.tags.includes("text-generation-inference");
 }
 
 function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
+}
+
+function isVllmModel(model: ModelData): boolean {
+	return (
+		(isAwqModel(model) ||
+			isGptqModel(model) ||
+			isAqlmModel(model) ||
+			isMarlinModel(model) ||
+			isLlamaCppGgufModel(model) ||
+			isTransformersModel(model)) &&
+		(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text")
+	);
+}
+
+function isDockerModelRunnerModel(model: ModelData): boolean {
+	return isLlamaCppGgufModel(model) || isVllmModel(model);
 }
 
 function isAmdRyzenModel(model: ModelData) {
@@ -151,6 +168,10 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			].join("\n"),
 			content: [serverCommand("./build/bin/llama-server"), cliCommand("./build/bin/llama-cli")],
 		},
+		{
+			title: "Use Docker",
+			content: snippetDockerModelRunner(model, filepath),
+		},
 	];
 };
 
@@ -189,7 +210,7 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 				"docker pull localai/localai:latest-cpu",
 			].join("\n"),
 			content: command(
-				"docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu"
+				"docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu",
 			),
 		},
 	];
@@ -197,7 +218,25 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
-	const runCommandInstruct = `# Call the server using curl:
+
+	const isMistral = model.tags.includes("mistral-common");
+	const mistralFlags = isMistral
+		? " --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"
+		: "";
+
+	const setup = isMistral
+		? [
+				"# Install vLLM from pip:",
+				"pip install vllm",
+				"# Install mistral-common:",
+				"pip install --upgrade mistral-common",
+			].join("\n")
+		: ["# Install vLLM from pip:", "pip install vllm"].join("\n");
+
+	const serverCommand = `# Start the vLLM server:
+vllm serve "${model.id}"${mistralFlags}`;
+
+	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
@@ -208,7 +247,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
 		})}
 	}'`;
-	const runCommandNonInstruct = `# Call the server using curl:
+	const runCommandNonInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
@@ -219,42 +258,70 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 	}'`;
 	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 
-	let setup;
-	let dockerCommand;
+	return [
+		{
+			title: "Install from pip and serve model",
+			setup: setup,
+			content: [serverCommand, runCommand],
+		},
+		{
+			title: "Use Docker",
+			content: snippetDockerModelRunner(model),
+		},
+	];
+};
+const snippetSglang = (model: ModelData): LocalAppSnippet[] => {
+	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 
-	if (model.tags.includes("mistral-common")) {
-		setup = [
-			"# Install vLLM from pip:",
-			"pip install vllm",
-			"# Make sure you have the latest version of mistral-common installed:",
-			"pip install --upgrade mistral-common",
-		].join("\n");
-		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"`;
-	} else {
-		setup = ["# Install vLLM from pip:", "pip install vllm"].join("\n");
-		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`;
-	}
+	const setup = ["# Install SGLang from pip:", "pip install sglang"].join("\n");
+	const serverCommand = `# Start the SGLang server:
+python3 -m sglang.launch_server \\
+    --model-path "${model.id}" \\
+    --host 0.0.0.0 \\
+    --port 30000`;
+	const dockerCommand = `docker run --gpus all \\
+    --shm-size 32g \\
+    -p 30000:30000 \\
+    -v ~/.cache/huggingface:/root/.cache/huggingface \\
+    --env "HF_TOKEN=<secret>" \\
+    --ipc=host \\
+    lmsysorg/sglang:latest \\
+    python3 -m sglang.launch_server \\
+        --model-path "${model.id}" \\
+        --host 0.0.0.0 \\
+        --port 30000`;
+	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
+curl -X POST "http://localhost:30000/v1/chat/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"messages": ${stringifyMessages(messages, {
+			indent: "\t\t",
+			attributeKeyQuotes: true,
+			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+		})}
+	}'`;
+	const runCommandNonInstruct = `# Call the server using curl (OpenAI-compatible API):
+curl -X POST "http://localhost:30000/v1/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"prompt": "Once upon a time,",
+		"max_tokens": 512,
+		"temperature": 0.5
+	}'`;
+	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 
 	return [
 		{
-			title: "Install from pip",
+			title: "Install from pip and serve model",
 			setup: setup,
-			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand],
+			content: [serverCommand, runCommand],
 		},
 		{
 			title: "Use Docker images",
-			setup: [
-				"# Deploy with docker on Linux:",
-				`docker run --runtime nvidia --gpus all \\`,
-				`	--name my_vllm_container \\`,
-				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
-				` 	--env "HUGGING_FACE_HUB_TOKEN=<secret>" \\`,
-				`	-p 8000:8000 \\`,
-				`	--ipc=host \\`,
-				`	vllm/vllm-openai:latest \\`,
-				`	--model ${model.id}`,
-			].join("\n"),
-			content: [dockerCommand, runCommand],
+			setup: dockerCommand,
+			content: [runCommand],
 		},
 	];
 };
@@ -317,13 +384,15 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 						setup: ["# Install MLX LM", "uv tool install mlx-lm"].join("\n"),
 						content: ["# Start the server", `mlx_lm.server --model "${model.id}"`, ...openaiCurl].join("\n"),
 					},
-			  ]
+				]
 			: []),
 	];
 };
 
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
-	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
+	// Only add quant tag for GGUF models, not safetensors
+	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
+	return `docker model run hf.co/${model.id}${quantTag}`;
 };
 
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -398,15 +467,21 @@ export const LOCAL_APPS = {
 		prettyLabel: "vLLM",
 		docsUrl: "https://docs.vllm.ai",
 		mainTask: "text-generation",
+		displayOnModelPage: isVllmModel,
+		snippet: snippetVllm,
+	},
+	sglang: {
+		prettyLabel: "SGLang",
+		docsUrl: "https://docs.sglang.io",
+		mainTask: "text-generation",
 		displayOnModelPage: (model: ModelData) =>
 			(isAwqModel(model) ||
 				isGptqModel(model) ||
 				isAqlmModel(model) ||
 				isMarlinModel(model) ||
-				isLlamaCppGgufModel(model) ||
 				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
-		snippet: snippetVllm,
+		snippet: snippetSglang,
 	},
 	"mlx-lm": {
 		prettyLabel: "MLX LM",
@@ -535,7 +610,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Docker Model Runner",
 		docsUrl: "https://docs.docker.com/ai/model-runner/",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: isDockerModelRunnerModel,
 		snippet: snippetDockerModelRunner,
 	},
 	lemonade: {

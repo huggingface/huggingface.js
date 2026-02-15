@@ -1,18 +1,29 @@
 {
 	"name": "@huggingface/tiny-agents",
-	"packageManager": "pnpm@10.10.0",
 	"version": "0.3.4",
 	"description": "Lightweight, composable agents for AI applications",
+	"keywords": [
+		"agent",
+		"ai",
+		"huggingface",
+		"llm",
+		"tiny-agent"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
-	"publishConfig": {
-		"access": "public"
-	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
 	"bin": {
 		"tiny-agents": "./dist/cli.js"
 	},
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"src",
+		"tsconfig.json"
+	],
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -20,15 +31,14 @@
 			"import": "./dist/index.mjs"
 		}
 	},
-	"engines": {
-		"node": ">=18"
+	"publishConfig": {
+		"access": "public"
 	},
-	"source": "index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup src/*.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
@@ -37,26 +47,16 @@
 		"cli": "tsx src/cli.ts",
 		"cli:watch": "tsx watch src/cli.ts"
 	},
-	"files": [
-		"src",
-		"dist",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"agent",
-		"ai",
-		"llm",
-		"tiny-agent"
-	],
-	"author": "Hugging Face",
-	"license": "MIT",
 	"dependencies": {
+		"@huggingface/hub": "workspace:^",
 		"@huggingface/inference": "workspace:^",
 		"@huggingface/mcp-client": "workspace:^",
 		"@huggingface/tasks": "workspace:^",
-		"@huggingface/hub": "workspace:^",
 		"@modelcontextprotocol/sdk": "^1.11.4",
 		"zod": "^3.25.7"
-	}
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"packageManager": "pnpm@10.10.0"
 }

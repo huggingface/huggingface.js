@@ -61,7 +61,7 @@ const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionI
 							},
 						],
 					},
-			  ];
+				];
 	}
 	return `"Can you please let us know more details about your "`;
 };
@@ -168,7 +168,7 @@ const modelInputSnippets: {
 export function getModelInputSnippet(
 	model: ModelDataMinimal,
 	noWrap = false,
-	noQuotes = false
+	noQuotes = false,
 ): string | ChatCompletionInputMessage[] {
 	if (model.pipeline_tag) {
 		const inputs = modelInputSnippets[model.pipeline_tag];

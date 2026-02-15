@@ -83,17 +83,17 @@ export class CurrentXorbInfo {
 }
 
 export async function* createXorbs(
-	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
+	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256?: string }>,
 	params: XetWriteTokenParams & {
 		yieldCallback?: (event: { event: "fileProgress"; path: string; progress: number }) => void;
-	}
+	},
 ): AsyncGenerator<
 	| XorbEvent
 	| {
 			event: "file";
 			path: string;
 			hash: string;
-			sha256: string;
+			sha256?: string;
 			/** Percentage of file bytes that were deduplicated (0-1) */
 			dedupRatio: number;
 			representation: Array<{
@@ -135,7 +135,7 @@ export async function* createXorbs(
 		path: string;
 		hash: string;
 		dedupRatio: number;
-		sha256: string;
+		sha256?: string;
 		representation: Array<{
 			xorbId: number | string;
 			indexStart: number;
@@ -153,7 +153,7 @@ export async function* createXorbs(
 			path: fileSource.path,
 			progress: 0,
 		});
-		if (alreadyDoneFileSha256s.has(fileSource.sha256)) {
+		if (fileSource.sha256 && alreadyDoneFileSha256s.has(fileSource.sha256)) {
 			params.yieldCallback?.({
 				event: "fileProgress",
 				path: fileSource.path,
@@ -161,7 +161,9 @@ export async function* createXorbs(
 			});
 			continue;
 		}
-		alreadyDoneFileSha256s.add(fileSource.sha256);
+		if (fileSource.sha256) {
+			alreadyDoneFileSha256s.add(fileSource.sha256);
+		}
 
 		const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 		try {
@@ -178,7 +180,7 @@ export async function* createXorbs(
 					{
 						maxChunks: 1,
 						isAtBeginning: true,
-					}
+					},
 				);
 			}
 			let bytesSinceRemoteDedup = Infinity;
@@ -246,7 +248,7 @@ export async function* createXorbs(
 								shardData,
 								chunkCache,
 								chunkMetadata,
-								dedupedBytes
+								dedupedBytes,
 							);
 
 							if (dedupedBytes > oldDedupedBytes) {
@@ -342,7 +344,7 @@ export async function* createXorbs(
 			const fileRepresentation = buildFileRepresentation(
 				chunkMetadata,
 				fileChunks,
-				chunkModule.compute_verification_hash.bind(chunkModule)
+				chunkModule.compute_verification_hash.bind(chunkModule),
 			);
 			xorb.immutableData = {
 				chunkIndex: xorb.chunks.length,
@@ -383,7 +385,7 @@ export function backtrackDedup(
 	shardData: ShardData,
 	chunkCache: ChunkCache,
 	chunkMetadata: { xorbId: number | string; chunkIndex: number; length: number }[],
-	dedupedBytes: number
+	dedupedBytes: number,
 ): number {
 	const chunkIndexesToBacktrackFor = new Map<number, { xorbId: number; chunkIndex: number }>();
 	for (
@@ -562,7 +564,7 @@ function writeChunk(xorb: CurrentXorbInfo, chunk: Uint8Array, hash: string): boo
 const buildFileRepresentation = (
 	metadata: Array<{ xorbId: number | string; chunkIndex: number; length: number }>,
 	chunks: Array<{ hash: string; length: number }>,
-	computeVerificationHash: (hashes: string[]) => string
+	computeVerificationHash: (hashes: string[]) => string,
 ): Array<{
 	xorbId: number | string;
 	indexStart: number;
@@ -664,7 +666,7 @@ async function loadDedupInfoToCache(
 		 * Will process content up to the end of the chunk after this position
 		 */
 		maxChunks?: number;
-	}
+	},
 ): Promise<void> {
 	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 	const cache = chunkCache;

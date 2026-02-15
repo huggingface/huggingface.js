@@ -13,6 +13,7 @@ import * as Mokzu from "../providers/mokzu.js";
 import * as Nebius from "../providers/nebius.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
+import * as Nvidia from "../providers/nvidia.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
@@ -77,13 +78,15 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Cohere.CohereConversationalTask(),
 	},
 	"fal-ai": {
+		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
+		"image-text-to-image": new FalAI.FalAIImageTextToImageTask(),
+		"image-text-to-video": new FalAI.FalAIImageTextToVideoTask(),
+		"image-to-image": new FalAI.FalAIImageToImageTask(),
+		"image-segmentation": new FalAI.FalAIImageSegmentationTask(),
+		"image-to-video": new FalAI.FalAIImageToVideoTask(),
 		"text-to-image": new FalAI.FalAITextToImageTask(),
 		"text-to-speech": new FalAI.FalAITextToSpeechTask(),
 		"text-to-video": new FalAI.FalAITextToVideoTask(),
-		"image-to-image": new FalAI.FalAIImageToImageTask(),
-		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
-		"image-segmentation": new FalAI.FalAIImageSegmentationTask(),
-		"image-to-video": new FalAI.FalAIImageToVideoTask(),
 	},
 	"featherless-ai": {
 		conversational: new FeatherlessAI.FeatherlessAIConversationalTask(),
@@ -149,6 +152,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Nscale.NscaleTextToImageTask(),
 		conversational: new Nscale.NscaleConversationalTask(),
 	},
+	nvidia: {
+		conversational: new Nvidia.NvidiaConversationalTask(),
+	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
 	},
@@ -185,6 +191,8 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-video": new Wavespeed.WavespeedAITextToVideoTask(),
 		"image-to-image": new Wavespeed.WavespeedAIImageToImageTask(),
 		"image-to-video": new Wavespeed.WavespeedAIImageToVideoTask(),
+		"image-text-to-image": new Wavespeed.WavespeedAIImageTextToImageTask(),
+		"image-text-to-video": new Wavespeed.WavespeedAIImageTextToVideoTask(),
 	},
 	"zai-org": {
 		conversational: new Zai.ZaiConversationalTask(),
@@ -197,157 +205,157 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
  */
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "text-to-image"
+	task: "text-to-image",
 ): TextToImageTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "conversational"
+	task: "conversational",
 ): ConversationalTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "text-generation"
+	task: "text-generation",
 ): TextGenerationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "text-to-speech"
+	task: "text-to-speech",
 ): TextToSpeechTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "text-to-audio"
+	task: "text-to-audio",
 ): TextToAudioTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "automatic-speech-recognition"
+	task: "automatic-speech-recognition",
 ): AutomaticSpeechRecognitionTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "text-to-video"
+	task: "text-to-video",
 ): TextToVideoTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "text-classification"
+	task: "text-classification",
 ): TextClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "question-answering"
+	task: "question-answering",
 ): QuestionAnsweringTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "audio-classification"
+	task: "audio-classification",
 ): AudioClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "audio-to-audio"
+	task: "audio-to-audio",
 ): AudioToAudioTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "fill-mask"
+	task: "fill-mask",
 ): FillMaskTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "feature-extraction"
+	task: "feature-extraction",
 ): FeatureExtractionTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "image-classification"
+	task: "image-classification",
 ): ImageClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "image-segmentation"
+	task: "image-segmentation",
 ): ImageSegmentationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "document-question-answering"
+	task: "document-question-answering",
 ): DocumentQuestionAnsweringTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "image-to-text"
+	task: "image-to-text",
 ): ImageToTextTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "object-detection"
+	task: "object-detection",
 ): ObjectDetectionTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "zero-shot-image-classification"
+	task: "zero-shot-image-classification",
 ): ZeroShotImageClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "zero-shot-classification"
+	task: "zero-shot-classification",
 ): ZeroShotClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "image-to-image"
+	task: "image-to-image",
 ): ImageToImageTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "image-to-video"
+	task: "image-to-video",
 ): ImageToVideoTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "image-text-to-image"
+	task: "image-text-to-image",
 ): ImageTextToImageTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "image-text-to-video"
+	task: "image-text-to-video",
 ): ImageTextToVideoTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "sentence-similarity"
+	task: "sentence-similarity",
 ): SentenceSimilarityTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "table-question-answering"
+	task: "table-question-answering",
 ): TableQuestionAnsweringTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "tabular-classification"
+	task: "tabular-classification",
 ): TabularClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "tabular-regression"
+	task: "tabular-regression",
 ): TabularRegressionTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "token-classification"
+	task: "token-classification",
 ): TokenClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "translation"
+	task: "translation",
 ): TranslationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "summarization"
+	task: "summarization",
 ): SummarizationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: "visual-question-answering"
+	task: "visual-question-answering",
 ): VisualQuestionAnsweringTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: InferenceTask | undefined
+	task: InferenceTask | undefined,
 ): TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
-	task: InferenceTask | undefined
+	task: InferenceTask | undefined,
 ): TaskProviderHelper {
 	if ((provider === "hf-inference" && !task) || provider === "auto") {
 		return new HFInference.HFInferenceTask();
 	}
 	if (!task) {
 		throw new InferenceClientInputError(
-			"you need to provide a task name when using an external provider, e.g. 'text-to-image'"
+			"you need to provide a task name when using an external provider, e.g. 'text-to-image'",
 		);
 	}
 	if (!(provider in PROVIDERS)) {
 		throw new InferenceClientInputError(
-			`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`
+			`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`,
 		);
 	}
 	const providerTasks = PROVIDERS[provider];
 	if (!providerTasks || !(task in providerTasks)) {
 		throw new InferenceClientInputError(
-			`Task '${task}' not supported for provider '${provider}'. Available tasks: ${Object.keys(providerTasks ?? {})}`
+			`Task '${task}' not supported for provider '${provider}'. Available tasks: ${Object.keys(providerTasks ?? {})}`,
 		);
 	}
 	return providerTasks[task] as TaskProviderHelper;

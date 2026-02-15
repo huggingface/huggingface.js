@@ -1,8 +1,11 @@
 import type { TextToImageArgs } from "../tasks/cv/textToImage.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
-import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
+import type { BodyParams, OutputType, RequestArgs, UrlParams } from "../types.js";
+import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
@@ -11,6 +14,8 @@ import type {
 	TextToVideoTaskHelper,
 	ImageToImageTaskHelper,
 	ImageToVideoTaskHelper,
+	ImageTextToImageTaskHelper,
+	ImageTextToVideoTaskHelper,
 } from "./providerHelper.js";
 import { TaskProviderHelper } from "./providerHelper.js";
 import {
@@ -71,10 +76,10 @@ interface WaveSpeedAISubmitTaskResponse {
 
 async function buildImagesField(
 	inputs: Blob | ArrayBuffer,
-	hasImages: unknown
+	hasImages: unknown,
 ): Promise<{ base: string; images: string[] }> {
 	const base = base64FromBytes(
-		new Uint8Array(inputs instanceof ArrayBuffer ? inputs : await (inputs as Blob).arrayBuffer())
+		new Uint8Array(inputs instanceof ArrayBuffer ? inputs : await (inputs as Blob).arrayBuffer()),
 	);
 	const images =
 		Array.isArray(hasImages) && hasImages.every((value): value is string => typeof value === "string")
@@ -93,7 +98,14 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 	}
 
 	preparePayload(
-		params: BodyParams<ImageToImageArgs | TextToImageArgs | TextToVideoArgs | ImageToVideoArgs>
+		params: BodyParams<
+			| ImageToImageArgs
+			| ImageTextToImageArgs
+			| ImageTextToVideoArgs
+			| TextToImageArgs
+			| TextToVideoArgs
+			| ImageToVideoArgs
+		>,
 	): Record<string, unknown> {
 		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
@@ -116,7 +128,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		response: WaveSpeedAISubmitTaskResponse,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError("Headers are required for WaveSpeed AI API calls");
@@ -142,7 +154,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 						requestId: resultResponse.headers.get("x-request-id") ?? "",
 						status: resultResponse.status,
 						body: await resultResponse.text(),
-					}
+					},
 				);
 			}
 
@@ -154,7 +166,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 					// Get the media data from the first output URL
 					if (!taskResult.outputs?.[0]) {
 						throw new InferenceClientProviderOutputError(
-							"Received malformed response from WaveSpeed AI API: No output URL in completed response"
+							"Received malformed response from WaveSpeed AI API: No output URL in completed response",
 						);
 					}
 					const mediaUrl = taskResult.outputs[0];
@@ -176,10 +188,11 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 								requestId: mediaResponse.headers.get("x-request-id") ?? "",
 								status: mediaResponse.status,
 								body: await mediaResponse.text(),
-							}
+							},
 						);
 					}
-					return await mediaResponse.blob();
+					const blob = await mediaResponse.blob();
+					return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 				}
 				case "failed": {
 					throw new InferenceClientProviderOutputError(taskResult.error || "Task failed");
@@ -209,7 +222,7 @@ export class WavespeedAITextToVideoTask extends WavespeedAITask implements TextT
 	override async getResponse(
 		response: WaveSpeedAISubmitTaskResponse,
 		url?: string,
-		headers?: Record<string, string>
+		headers?: Record<string, string>,
 	): Promise<Blob> {
 		return super.getResponse(response, url, headers) as Promise<Blob>;
 	}
@@ -230,7 +243,7 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 	override async getResponse(
 		response: WaveSpeedAISubmitTaskResponse,
 		url?: string,
-		headers?: Record<string, string>
+		headers?: Record<string, string>,
 	): Promise<Blob> {
 		return super.getResponse(response, url, headers) as Promise<Blob>;
 	}
@@ -251,8 +264,39 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 	override async getResponse(
 		response: WaveSpeedAISubmitTaskResponse,
 		url?: string,
-		headers?: Record<string, string>
+		headers?: Record<string, string>,
 	): Promise<Blob> {
 		return super.getResponse(response, url, headers) as Promise<Blob>;
+	}
+}
+
+// 1x1 fully transparent PNG for use when no input image is provided
+const TRANSPARENT_1PX_PNG_BASE64 =
+	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
+function getTransparentPngBlob(): Blob {
+	const bytes = Uint8Array.from(Buffer.from(TRANSPARENT_1PX_PNG_BASE64, "base64"));
+	return new Blob([bytes], { type: "image/png" });
+}
+
+export class WavespeedAIImageTextToImageTask extends WavespeedAIImageToImageTask implements ImageTextToImageTaskHelper {
+	constructor() {
+		super();
+	}
+
+	override async preparePayloadAsync(args: ImageTextToImageArgs): Promise<RequestArgs> {
+		const inputs = args.inputs ?? getTransparentPngBlob();
+		return super.preparePayloadAsync({ ...args, inputs } as ImageToImageArgs);
+	}
+}
+
+export class WavespeedAIImageTextToVideoTask extends WavespeedAIImageToVideoTask implements ImageTextToVideoTaskHelper {
+	constructor() {
+		super();
+	}
+
+	override async preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs> {
+		const inputs = args.inputs ?? getTransparentPngBlob();
+		return super.preparePayloadAsync({ ...args, inputs } as ImageToVideoArgs);
 	}
 }

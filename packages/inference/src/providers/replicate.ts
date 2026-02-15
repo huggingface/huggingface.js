@@ -16,7 +16,8 @@
  */
 import { InferenceClientProviderOutputError } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
-import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types.js";
+import type { BodyParams, HeaderParams, OutputType, RequestArgs, UrlParams } from "../types.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { omit } from "../utils/omit.js";
 import {
 	TaskProviderHelper,
@@ -91,7 +92,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 		res: ReplicateOutput | Blob,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		void url;
 		void headers;
@@ -105,7 +106,8 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 				return res.output;
 			}
 			const urlResponse = await fetch(res.output);
-			return await urlResponse.blob();
+			const blob = await urlResponse.blob();
+			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
 
 		// Handle array output
@@ -123,7 +125,8 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 				return res.output[0];
 			}
 			const urlResponse = await fetch(res.output[0]);
-			return await urlResponse.blob();
+			const blob = await urlResponse.blob();
+			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-image API");
@@ -233,18 +236,23 @@ export class ReplicateAutomaticSpeechRecognitionTask
 			}
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from Replicate automatic-speech-recognition API"
+			"Received malformed response from Replicate automatic-speech-recognition API",
 		);
 	}
 }
 
 export class ReplicateImageToImageTask extends ReplicateTask implements ImageToImageTaskHelper {
 	override preparePayload(params: BodyParams<ImageToImageArgs>): Record<string, unknown> {
+		const imageInput = params.args.inputs; // This will be processed in preparePayloadAsync
 		return {
 			input: {
 				...omit(params.args, ["inputs", "parameters"]),
 				...params.args.parameters,
-				input_image: params.args.inputs, // This will be processed in preparePayloadAsync
+				// Different Replicate models expect the image in different keys
+				image: imageInput,
+				images: [imageInput],
+				input_image: imageInput,
+				input_images: [imageInput],
 				lora_weights:
 					params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath
 						? `https://huggingface.co/${params.mapping.hfModelId}`

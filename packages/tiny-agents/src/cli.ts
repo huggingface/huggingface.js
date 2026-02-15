@@ -235,7 +235,7 @@ async function main() {
 					apiKey: config.apiKey ?? process.env.API_KEY ?? process.env.HF_TOKEN,
 					servers: formattedServers,
 					prompt,
-			  }
+				}
 			: {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					provider: config.provider!,
@@ -243,7 +243,7 @@ async function main() {
 					apiKey: config.apiKey ?? process.env.API_KEY ?? process.env.HF_TOKEN,
 					servers: formattedServers,
 					prompt,
-			  }
+				},
 	);
 
 	debug(agent);
