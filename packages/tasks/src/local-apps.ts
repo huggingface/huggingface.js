@@ -620,6 +620,40 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
 	},
+	gpt4all: {
+		prettyLabel: "GPT4All",
+		docsUrl: "https://gpt4all.io",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+			const quantTag = getQuantTag(filepath);
+			return [
+				{
+					title: "Install via Flatpak (Linux, Discover)",
+					setup: [
+						"flatpak install flathub io.gpt4all.GPT4All",
+					].join("\n"),
+					content: [
+						"# Run GPT4All after install:",
+						"flatpak run io.gpt4all.GPT4All",
+						"",
+						"# Place GGUF files into ~/.local/share/nomic.ai/GPT4All/",
+						`# Then select in app: hf:${model.id}${quantTag}`
+					].join("\n"),
+				},
+				{
+					title: "Use GPT4All CLI (optional)",
+					setup: [
+						"# Download CLI from https://gpt4all.io",
+					].join("\n"),
+					content: [
+						"# Example run:",
+						`gpt4all --model hf:${model.id}${quantTag}`
+					].join("\n"),
+				},
+			];
+		},
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
