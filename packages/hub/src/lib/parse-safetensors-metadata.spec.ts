@@ -323,4 +323,39 @@ describe("parseSafetensorsMetadata", () => {
 		assert(parse.sharded);
 		assert.strictEqual(Object.keys(parse.headers).length, 64);
 	});
+
+	it("fetch info for deepseek-ai/DeepSeek-Math-V2 (163 shards)", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "deepseek-ai/DeepSeek-Math-V2",
+			computeParametersCount: true,
+		});
+
+		assert(parse);
+		assert(parse.sharded, "Model should be sharded");
+		assert.strictEqual(Object.keys(parse.headers).length, 163, "Should have 163 shards");
+		assert.ok(parse.parameterCount, "Should have parameter count");
+		assert.ok(parse.index, "Should have index");
+
+		// Verify parameter count is computed
+		const totalParams = parse.parameterTotal || sum(Object.values(parse.parameterCount));
+		assert.ok(totalParams > 0, "Total parameters should be greater than 0");
+
+		console.log("Total parameters:", totalParams);
+		console.log("Parameter count by dtype:", parse.parameterCount);
+	});
+
+	it("fetch info for Qwen/Qwen3.5-397B-A17B (94 shards)", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "Qwen/Qwen3.5-397B-A17B",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 94);
+		assert.ok(parse.parameterCount);
+
+		const totalParams = parse.parameterTotal || sum(Object.values(parse.parameterCount));
+		console.log("Qwen3.5-397B total parameters:", totalParams);
+		console.log("Qwen3.5-397B parameter count by dtype:", parse.parameterCount);
+	});
 });
