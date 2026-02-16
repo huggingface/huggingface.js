@@ -1526,6 +1526,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.zonos,
 		filter: false,
 	},
+	"causal-forcing": {
+		prettyLabel: "CausalForcing",
+		repoName: "CausalForcing",
+		repoUrl: "https://github.com/thu-ml/Causal-Forcing",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	}
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",
 		repoName: "3DTopia-XL",
