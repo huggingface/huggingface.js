@@ -340,7 +340,7 @@ const commands = {
 			},
 		},
 	} satisfies CommandGroup,
-	model: {
+	models: {
 		description: "Manage models on the Hub",
 		subcommands: {
 			list: {
@@ -777,29 +777,29 @@ async function run() {
 			}
 			break;
 		}
-		case "model": {
-			const modelCommandGroup = commands.model;
+		case "models": {
+			const modelCommandGroup = commands.models;
 			const currentSubCommandName = subCommandName as keyof typeof modelCommandGroup.subcommands | undefined;
 
-			// Check if --help is in subcommand position (e.g., "hfjs model --help")
+			// Check if --help is in subcommand position (e.g., "hfjs models --help")
 			if (subCommandName === "--help" || subCommandName === "-h") {
-				console.log(listSubcommands("model", modelCommandGroup));
+				console.log(listSubcommands("models", modelCommandGroup));
 				break;
 			}
 
-			// Check if --help is in args position (e.g., "hfjs model list --help")
+			// Check if --help is in args position (e.g., "hfjs models list --help")
 			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
 				if (currentSubCommandName && modelCommandGroup.subcommands[currentSubCommandName]) {
-					console.log(detailedUsageForSubcommand("model", currentSubCommandName));
+					console.log(detailedUsageForSubcommand("models", currentSubCommandName));
 				} else {
-					console.log(listSubcommands("model", modelCommandGroup));
+					console.log(listSubcommands("models", modelCommandGroup));
 				}
 				break;
 			}
 
 			if (!currentSubCommandName || !modelCommandGroup.subcommands[currentSubCommandName]) {
-				console.error(`Error: Missing or invalid subcommand for 'model'.`);
-				console.log(listSubcommands("model", modelCommandGroup));
+				console.error(`Error: Missing or invalid subcommand for 'models'.`);
+				console.log(listSubcommands("models", modelCommandGroup));
 				process.exitCode = 1;
 				break;
 			}
@@ -808,7 +808,7 @@ async function run() {
 
 			switch (currentSubCommandName) {
 				case "list": {
-					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "model list");
+					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "models list");
 					const { search, sort, token } = parsedArgs;
 
 					const models: Array<{ name: string; task?: string; downloads: number; likes: number; updatedAt: Date }> = [];
@@ -842,8 +842,8 @@ async function run() {
 					break;
 				}
 				default:
-					console.error(`Error: Unknown subcommand '${currentSubCommandName}' for 'model'.`);
-					console.log(listSubcommands("model", modelCommandGroup));
+					console.error(`Error: Unknown subcommand '${currentSubCommandName}' for 'models'.`);
+					console.log(listSubcommands("models", modelCommandGroup));
 					process.exitCode = 1;
 					break;
 			}
