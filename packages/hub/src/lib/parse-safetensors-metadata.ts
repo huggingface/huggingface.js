@@ -216,8 +216,17 @@ async function fetchHeaderDirect(
 		headers: { Range: "bytes=0-7", ...headers },
 	});
 
-	if (!resp.ok && resp.status !== 206) {
+	if (resp.status !== 206 && resp.status !== 200) {
 		throw await createApiError(resp);
+	}
+
+	// If the server ignored the Range header (200 instead of 206), abort to avoid
+	// downloading the entire multi-GB shard file into memory.
+	if (resp.status !== 206) {
+		resp.body?.cancel();
+		throw new SafetensorParseError(
+			`Server does not support range requests (status ${resp.status}). Cannot efficiently parse safetensors header.`,
+		);
 	}
 
 	const lengthBuf = await resp.arrayBuffer();
@@ -242,8 +251,14 @@ async function fetchHeaderDirect(
 		headers: { Range: `bytes=8-${8 + Number(lengthOfHeader) - 1}`, ...headers },
 	});
 
-	if (!resp2.ok && resp2.status !== 206) {
-		throw await createApiError(resp2);
+	if (resp2.status !== 206) {
+		if (!resp2.ok) {
+			throw await createApiError(resp2);
+		}
+		resp2.body?.cancel();
+		throw new SafetensorParseError(
+			`Server does not support range requests (status ${resp2.status}). Cannot efficiently parse safetensors header.`,
+		);
 	}
 
 	try {
