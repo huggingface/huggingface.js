@@ -17,7 +17,7 @@
 
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
 
-const SYSTALYZE_API_BASE_URL = "https://api.hf.systalyze.com";
+const SYSTALYZE_API_BASE_URL = "https://api.systalyze.com";
 
 export class SystalyzeConversationalTask extends BaseConversationalTask {
 	constructor() {
