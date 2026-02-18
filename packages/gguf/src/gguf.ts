@@ -458,21 +458,34 @@ export async function gguf(
 	const tensorInfoEndBeforePadOffset = offset;
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
-	const parameterCount = params?.computeParametersCount
-		? tensorInfos
-				.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
-				.reduce((acc, val) => acc + val, 0)
-		: undefined;
-
-	return {
+	const baseResult = {
 		metadata,
 		tensorInfos,
 		tensorDataOffset,
 		littleEndian,
-		tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset],
-		...(parameterCount !== undefined && { parameterCount }),
-		...(typedMetadata && { typedMetadata }),
-	} as GGUFParseOutput & { parameterCount?: number; typedMetadata?: GGUFTypedMetadata };
+		tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset] as [number, number],
+	};
+
+	if (params?.computeParametersCount && params?.typedMetadata) {
+		const parameterCount = tensorInfos
+			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
+			.reduce((acc, val) => acc + val, 0);
+		return { ...baseResult, parameterCount, typedMetadata: typedMetadata as GGUFTypedMetadata } as GGUFParseOutput & {
+			parameterCount: number;
+			typedMetadata: GGUFTypedMetadata;
+		};
+	} else if (params?.computeParametersCount) {
+		const parameterCount = tensorInfos
+			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
+			.reduce((acc, val) => acc + val, 0);
+		return { ...baseResult, parameterCount } as GGUFParseOutput & { parameterCount: number };
+	} else if (params?.typedMetadata) {
+		return { ...baseResult, typedMetadata: typedMetadata as GGUFTypedMetadata } as GGUFParseOutput & {
+			typedMetadata: GGUFTypedMetadata;
+		};
+	} else {
+		return baseResult as GGUFParseOutput;
+	}
 }
 
 /**
