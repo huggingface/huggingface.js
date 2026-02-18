@@ -459,7 +459,9 @@ export async function gguf(
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
 	const parameterCount = params?.computeParametersCount
-		? tensorInfos.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1)).reduce((acc, val) => acc + val, 0)
+		? tensorInfos
+				.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
+				.reduce((acc, val) => acc + val, 0)
 		: undefined;
 
 	return {
