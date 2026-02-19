@@ -1,3 +1,5 @@
+> ⚠️ **DEPRECATED**: This package is deprecated in favor of [`blake3-jit`](https://www.npmjs.com/package/blake3-jit). Please migrate to `blake3-jit` for better performance and maintenance. This package will continue to work but will not receive updates.
+
 JS and WASM implementations of https://github.com/BLAKE3-team/BLAKE3
 
 Using [AssemblyScript](https://www.assemblyscript.org/) to generate a lean WASM.

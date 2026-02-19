@@ -66,3 +66,5 @@ export { DATASET_LIBRARIES_UI_ELEMENTS } from "./dataset-libraries.js";
 export type { DatasetLibraryUiElement, DatasetLibraryKey } from "./dataset-libraries.js";
 
 export * from "./inference-providers.js";
+
+export { EVALUATION_FRAMEWORKS } from "./eval.js";

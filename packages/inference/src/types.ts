@@ -45,6 +45,7 @@ export interface Options {
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
+	"avian",
 	"baseten",
 	"black-forest-labs",
 	"cerebras",
@@ -59,6 +60,7 @@ export const INFERENCE_PROVIDERS = [
 	"nebius",
 	"novita",
 	"nscale",
+	"nvidia",
 	"openai",
 	"ovhcloud",
 	"publicai",
@@ -82,6 +84,7 @@ export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
  * Whenever possible, InferenceProvider should == org namespace
  */
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
+	avian: "avian",
 	baseten: "baseten",
 	"black-forest-labs": "black-forest-labs",
 	cerebras: "cerebras",
@@ -96,6 +99,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	nebius: "nebius",
 	novita: "novita",
 	nscale: "nscale",
+	nvidia: "nvidia",
 	openai: "openai",
 	ovhcloud: "ovhcloud",
 	publicai: "publicai",
@@ -163,6 +167,7 @@ export type RequestArgs = BaseArgs &
 		| ChatCompletionInput
 	) & {
 		parameters?: Record<string, unknown>;
+		urlTransform?: (url: string) => string;
 	};
 
 export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
@@ -176,11 +181,15 @@ export interface UrlParams {
 	authMethod: AuthMethod;
 	model: string;
 	task?: InferenceTask;
+	urlTransform?: (url: string) => string;
 }
+
+export type OutputType = "url" | "dataUrl" | "blob" | "json";
 
 export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
 	args: T;
 	model: string;
 	mapping?: InferenceProviderMappingEntry | undefined;
 	task?: InferenceTask;
+	outputType?: OutputType;
 }

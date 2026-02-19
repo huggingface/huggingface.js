@@ -102,7 +102,7 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 		description:
 			prettyName +
 			".\n\nAuto-generated from TEI specs." +
-			"\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tei-import.ts.",
+			"\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks-gen/scripts/inference-tei-import.ts.",
 		title: camelFullName,
 		type: mainComponent["type"],
 		required: mainComponent["required"],

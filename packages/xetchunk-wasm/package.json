@@ -2,9 +2,7 @@
 	"name": "@huggingface/xetchunk-wasm",
 	"version": "0.0.2",
 	"scripts": {
-		"build:debug": "asc assembly/index.ts --target debug",
-		"build:release": "asc assembly/index.ts --target release",
-		"build": "pnpm run build:debug && npm run build:release",
+		"build": "tsup src/index.ts --format esm --dts",
 		"test": "vitest run",
 		"bench": "node tests/bench.js",
 		"prepare": "pnpm run build"
@@ -12,42 +10,30 @@
 	"keywords": [
 		"xet",
 		"chunk",
-		"chunking",
-		"assemblyscript",
-		"assembly",
-		"wasm"
+		"chunking"
 	],
 	"dependencies": {
-		"@huggingface/blake3-wasm": "workspace:*",
-		"@huggingface/gearhash-wasm": "workspace:*"
+		"@huggingface/gearhash-wasm": "workspace:*",
+		"blake3-jit": "^1.0.0"
 	},
 	"type": "module",
 	"exports": {
 		".": {
-			"import": "./build/release.js",
-			"types": "./build/release.d.ts"
-		},
-		"./assembly": {
-			"import": "./assembly/index.ts"
-		},
-		"./wasm": {
-			"import": "./build/release.wasm"
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
 		}
 	},
-	"main": "./build/release.js",
-	"types": "./build/release.d.ts",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"devDependencies": {
 		"@huggingface/splitmix64-wasm": "workspace:*",
-		"assemblyscript": "0.27.36"
+		"tsup": "^8.0.0",
+		"typescript": "^5.0.0"
 	},
 	"files": [
-		"build/release.js",
-		"build/release.d.ts",
-		"build/release.wasm",
-		"build/release.wat",
-		"build/release.wasm.map",
+		"dist",
+		"src",
 		"README.md",
-		"asconfig.json",
-		"assembly"
+		"tsconfig.json"
 	]
 }

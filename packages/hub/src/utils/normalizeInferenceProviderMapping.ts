@@ -11,7 +11,7 @@ export function normalizeInferenceProviderMapping(
 	hfModelId: string,
 	inferenceProviderMapping?:
 		| ApiModelInferenceProviderMappingEntry[]
-		| Record<string, { providerId: string; status: "live" | "staging"; task: WidgetType }>
+		| Record<string, { providerId: string; status: "live" | "staging"; task: WidgetType }>,
 ): ApiModelInferenceProviderMappingEntry[] {
 	if (!inferenceProviderMapping) {
 		return [];

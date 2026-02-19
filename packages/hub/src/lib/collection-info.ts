@@ -15,7 +15,7 @@ export async function collectionInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<ApiCollectionInfo & { position: number; shareUrl: string }> {
 	const accessToken = checkCredentials(params);
 

@@ -11,7 +11,7 @@ import { AutoRouterConversationalTask } from "../../providers/providerHelper.js"
  */
 export async function chatCompletion(
 	args: BaseArgs & ChatCompletionInput,
-	options?: Options
+	options?: Options,
 ): Promise<ChatCompletionOutput> {
 	let providerHelper: ConversationalTaskHelper & TaskProviderHelper;
 	if (!args.provider || args.provider === "auto") {

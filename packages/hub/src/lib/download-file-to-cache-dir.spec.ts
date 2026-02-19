@@ -57,7 +57,7 @@ function _getSnapshotFile(params: {
 		getRepoFolderName(toRepoId(params.repo)),
 		"snapshots",
 		params.revision,
-		params.path
+		params.path,
 	);
 }
 
@@ -73,7 +73,7 @@ describe("downloadFileToCacheDir", () => {
 					etag: DUMMY_ETAG,
 					"Content-Range": "bytes 0-54/55",
 				},
-			})
+			}),
 		);
 
 		// prevent to use caching
@@ -95,7 +95,7 @@ describe("downloadFileToCacheDir", () => {
 				repo: DUMMY_REPO,
 				paths: ["/README.md"],
 				fetch: fetchMock,
-			})
+			}),
 		);
 	});
 

@@ -88,7 +88,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 	await Promise.all(
 		Array(N_WORKERS)
 			.fill(null)
-			.map(() => workerGetTags())
+			.map(() => workerGetTags()),
 	);
 	console.log({ modelsWithTag });
 
@@ -198,7 +198,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 	await Promise.all(
 		Array(N_WORKERS)
 			.fill(null)
-			.map(() => workerGetTemplate())
+			.map(() => workerGetTemplate()),
 	);
 
 	console.log("====================================");
@@ -224,6 +224,6 @@ ${skippedModelsDueToErr.map((m) => ` * - ${m}`).join("\n")}
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = ${JSON.stringify(output, null, "\t")};
-  `.trim()
+  `.trim(),
 	);
 })();

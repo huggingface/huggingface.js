@@ -80,7 +80,7 @@ export async function oauthLoginUrl(opts?: {
 	}
 	if (typeof localStorage === "undefined" && !opts?.localStorage) {
 		throw new Error(
-			"oauthLogin requires localStorage to be available in the context, unless you provide a localStorage empty object as argument"
+			"oauthLogin requires localStorage to be available in the context, unless you provide a localStorage empty object as argument",
 		);
 	}
 
@@ -109,12 +109,12 @@ export async function oauthLoginUrl(opts?: {
 	if (opts?.localStorage) {
 		if (opts.localStorage.codeVerifier !== undefined && opts.localStorage.codeVerifier !== null) {
 			throw new Error(
-				"localStorage.codeVerifier must be initially set to null or undefined, and will be filled by oauthLoginUrl"
+				"localStorage.codeVerifier must be initially set to null or undefined, and will be filled by oauthLoginUrl",
 			);
 		}
 		if (opts.localStorage.nonce !== undefined && opts.localStorage.nonce !== null) {
 			throw new Error(
-				"localStorage.nonce must be initially set to null or undefined, and will be filled by oauthLoginUrl"
+				"localStorage.nonce must be initially set to null or undefined, and will be filled by oauthLoginUrl",
 			);
 		}
 		opts.localStorage.codeVerifier = newCodeVerifier;
@@ -136,7 +136,7 @@ export async function oauthLoginUrl(opts?: {
 
 	const variables: Record<string, string> | null =
 		// @ts-expect-error window.huggingface is defined inside static Spaces.
-		typeof window !== "undefined" ? window.huggingface?.variables ?? null : null;
+		typeof window !== "undefined" ? (window.huggingface?.variables ?? null) : null;
 
 	const clientId = opts?.clientId || variables?.OAUTH_CLIENT_ID;
 
@@ -148,7 +148,7 @@ export async function oauthLoginUrl(opts?: {
 	}
 
 	const challenge = base64FromBytes(
-		new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(newCodeVerifier)))
+		new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(newCodeVerifier))),
 	)
 		.replace(/[+]/g, "-")
 		.replace(/[/]/g, "_")

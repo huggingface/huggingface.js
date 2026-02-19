@@ -65,9 +65,9 @@ export interface UserInfo {
 		picture: string;
 
 		/**
-		 * Hugging Face field. Whether the org is an enterprise org.
+		 * Hugging Face field. The org's plan (e.g., "enterprise", "team").
 		 */
-		isEnterprise: boolean;
+		plan?: string;
 		/**
 		 * Hugging Face field. Whether the org has a payment method set up. Needs "read-billing" scope, and the user needs to approve access to the org in the OAuth page.
 		 */
@@ -149,7 +149,7 @@ export async function oauthHandleRedirect(opts?: {
 	}
 	if (typeof localStorage === "undefined" && (!opts?.nonce || !opts?.codeVerifier)) {
 		throw new Error(
-			"oauthHandleRedirect requires localStorage to be available, unless you provide nonce and codeVerifier"
+			"oauthHandleRedirect requires localStorage to be available, unless you provide nonce and codeVerifier",
 		);
 	}
 
@@ -319,7 +319,7 @@ export async function oauthHandleRedirectIfPresent(opts?: {
 	}
 	if (typeof localStorage === "undefined" && (!opts?.nonce || !opts?.codeVerifier)) {
 		throw new Error(
-			"oauthHandleRedirect requires localStorage to be available, unless you provide nonce and codeVerifier"
+			"oauthHandleRedirect requires localStorage to be available, unless you provide nonce and codeVerifier",
 		);
 	}
 	const searchParams = new URLSearchParams(opts?.redirectedUrl ?? window.location.search);
@@ -331,7 +331,7 @@ export async function oauthHandleRedirectIfPresent(opts?: {
 	if (searchParams.has("code")) {
 		if (!localStorage.getItem("huggingface.co:oauth:nonce")) {
 			console.warn(
-				"Missing oauth nonce from localStorage. This can happen when the user refreshes the page after logging in, without changing the URL."
+				"Missing oauth nonce from localStorage. This can happen when the user refreshes the page after logging in, without changing the URL.",
 			);
 			return false;
 		}

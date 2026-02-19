@@ -2,13 +2,13 @@ import type { TextToImageInput } from "@huggingface/tasks";
 import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../../lib/getProviderHelper.js";
 import { makeRequestOptions } from "../../lib/makeRequestOptions.js";
-import type { BaseArgs, Options } from "../../types.js";
+import type { BaseArgs, Options, OutputType } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
 
 export type TextToImageArgs = BaseArgs & TextToImageInput;
 
 interface TextToImageOptions extends Options {
-	outputType?: "url" | "blob" | "json";
+	outputType?: OutputType;
 }
 
 /**
@@ -17,19 +17,23 @@ interface TextToImageOptions extends Options {
  */
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType: "url" }
+	options?: TextToImageOptions & { outputType: "url" },
 ): Promise<string>;
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType?: undefined | "blob" }
+	options?: TextToImageOptions & { outputType: "dataUrl" },
+): Promise<string>;
+export async function textToImage(
+	args: TextToImageArgs,
+	options?: TextToImageOptions & { outputType?: undefined | "blob" },
 ): Promise<Blob>;
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType?: undefined | "json" }
+	options?: TextToImageOptions & { outputType?: undefined | "json" },
 ): Promise<Record<string, unknown>>;
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions
+	options?: TextToImageOptions,
 ): Promise<Blob | string | Record<string, unknown>> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-to-image");

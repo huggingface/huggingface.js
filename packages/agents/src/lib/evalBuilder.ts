@@ -7,7 +7,7 @@ export async function evalBuilder(
 	tools: Tool[],
 	files: FileList | undefined,
 	updateCallback: (message: string, data: undefined | string | Blob) => void,
-	accessToken?: string
+	accessToken?: string,
 ): Promise<() => Promise<void>> {
 	async function wrapperEval() {
 		if (files && files.length > 0) {

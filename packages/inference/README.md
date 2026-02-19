@@ -56,6 +56,7 @@ Currently, we support the following providers:
 - [Nebius](https://studio.nebius.ai)
 - [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
+- [NVIDIA](https://build.nvidia.com/)
 - [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
 - [Public AI](https://publicai.co)
 - [Replicate](https://replicate.com)
@@ -97,6 +98,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Hyperbolic supported models](https://huggingface.co/api/partners/hyperbolic/models)
 - [Nebius supported models](https://huggingface.co/api/partners/nebius/models)
 - [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
+- [NVIDIA supported models](https://huggingface.co/api/partners/nvidia/models)
 - [OVHcloud supported models](https://huggingface.co/api/partners/ovhcloud/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Sambanova supported models](https://huggingface.co/api/partners/sambanova/models)
@@ -126,13 +128,6 @@ This is not an issue for LLMs as everyone converged on the OpenAI API anyways, b
 import { InferenceClient } from "@huggingface/inference";
 
 const hf = new InferenceClient("your_access_token");
-
-// Text generation
-const result = await hf.textGeneration({
-  provider: "avian",
-  model: "zai-org/GLM-4.6",
-  inputs: "What is machine learning?",
-});
 
 // Chat completion
 const chatResult = await hf.chatCompletion({

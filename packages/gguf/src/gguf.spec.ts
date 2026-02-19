@@ -289,6 +289,7 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-F32-Q2_K.gguf")).toEqual("Q2_K"); // gguf name with two quant labels [F32, Q2_K]
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-IQ3_XS.gguf")).toEqual("IQ3_XS");
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual("Q4_0"); // TODO: investigate Q4_0_4_4
+		expect(parseGGUFQuantLabel("Qwen3-4B-UD-Q2_K_XL.gguf")).toEqual("UD-Q2_K_XL"); // unsloth UD (Unsloth Dynamic) prefix
 	});
 
 	it("calculate tensor data offset", async () => {
@@ -625,7 +626,7 @@ describe("gguf", () => {
 
 				// Verify the kv_count matches the actual number of KV pairs (excluding built-in fields)
 				const kvPairs = Object.keys(deserializedMetadata).filter(
-					(key) => !["version", "tensor_count", "kv_count"].includes(key)
+					(key) => !["version", "tensor_count", "kv_count"].includes(key),
 				);
 				expect(BigInt(kvPairs.length)).toBe(originalTypedMetadata.kv_count.value);
 			} finally {
@@ -677,7 +678,7 @@ describe("gguf", () => {
 				expect(deserializedMetadata["test.float32"].type).toBe(originalTypedMetadata["test.float32"].type);
 				expect(deserializedMetadata["test.float32"].value as number).toBeCloseTo(
 					originalTypedMetadata["test.float32"].value as number,
-					5
+					5,
 				);
 				expect(deserializedMetadata["test.uint64"]).toEqual(originalTypedMetadata["test.uint64"]);
 				expect(deserializedMetadata["test.int64"]).toEqual(originalTypedMetadata["test.int64"]);
@@ -873,7 +874,7 @@ describe("gguf", () => {
 
 				console.log(`✅ Complete header parses successfully!`);
 				console.log(
-					`📋 Tensor count matches: ${deserializedTensorInfos.length} === ${originalMetadata.tensor_count.value}`
+					`📋 Tensor count matches: ${deserializedTensorInfos.length} === ${originalMetadata.tensor_count.value}`,
 				);
 				console.log(`📊 Tensor data offset: ${deserializedOffset}`);
 
@@ -1242,7 +1243,7 @@ describe("gguf", () => {
 				expect(parsedTensorInfos.length).toBe(originalTensorInfos.length);
 				expect(parsedTensorInfos[0]).toEqual(originalTensorInfos[0]);
 				expect(parsedTensorInfos[parsedTensorInfos.length - 1]).toEqual(
-					originalTensorInfos[originalTensorInfos.length - 1]
+					originalTensorInfos[originalTensorInfos.length - 1],
 				);
 
 				// Verify our custom metadata was added

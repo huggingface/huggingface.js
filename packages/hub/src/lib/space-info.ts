@@ -22,7 +22,7 @@ export async function spaceInfo<
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SpaceEntry & Pick<ApiSpaceInfo, T>> {
 	const accessToken = params && checkCredentials(params);
 
@@ -33,13 +33,13 @@ export async function spaceInfo<
 
 	const response = await (params.fetch || fetch)(
 		`${params?.hubUrl || HUB_URL}/api/spaces/${params.name}/revision/${encodeURIComponent(
-			params.revision ?? "HEAD"
+			params.revision ?? "HEAD",
 		)}?${search.toString()}`,
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {

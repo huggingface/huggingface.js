@@ -1361,7 +1361,7 @@ ZW4HMC4yLjEwMABJD3RhcmdldF9mZWF0dXJlcwQrD211dGFibGUtZ2xvYmFscysIc2lnbi1leHQrD3Jl
 bXVsdGl2YWx1ZQ==
 `
 		.trim()
-		.replaceAll("\n", "")
+		.replaceAll("\n", ""),
 );
 const wasmBinary = new Uint8Array(wasmBase64.length);
 for (let i = 0; i < wasmBase64.length; i++) {

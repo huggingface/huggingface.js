@@ -12,7 +12,7 @@ export type QuestionAnsweringArgs = BaseArgs & QuestionAnsweringInput;
  */
 export async function questionAnswering(
 	args: QuestionAnsweringArgs,
-	options?: Options
+	options?: Options,
 ): Promise<QuestionAnsweringOutput[number]> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "question-answering");
@@ -22,7 +22,7 @@ export async function questionAnswering(
 		{
 			...options,
 			task: "question-answering",
-		}
+		},
 	);
 	return providerHelper.getResponse(res);
 }

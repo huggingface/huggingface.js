@@ -57,7 +57,7 @@ export class WebBlob extends Blob {
 		contentType: string,
 		full: boolean,
 		customFetch: typeof fetch,
-		accessToken: string | undefined
+		accessToken: string | undefined,
 	) {
 		super([]);
 
@@ -90,7 +90,7 @@ export class WebBlob extends Blob {
 			this.contentType,
 			start === 0 && end === this.size ? this.full : false,
 			this.fetch,
-			this.accessToken
+			this.accessToken,
 		);
 
 		return slice;

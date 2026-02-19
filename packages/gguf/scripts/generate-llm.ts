@@ -128,7 +128,7 @@ async function main() {
 		SOURCE_CPP_URLS.map(async (url) => {
 			const res = await fetch(url);
 			return await res.text();
-		})
+		}),
 	);
 	const cppSource = cppSources.join("\n");
 

@@ -7,7 +7,7 @@ export function toRepoId(repo: RepoDesignation): RepoId {
 
 	if (repo.startsWith("model/") || repo.startsWith("models/")) {
 		throw new TypeError(
-			"A repo designation for a model should not start with 'models/', directly specify the model namespace / name"
+			"A repo designation for a model should not start with 'models/', directly specify the model namespace / name",
 		);
 	}
 
@@ -16,7 +16,11 @@ export function toRepoId(repo: RepoDesignation): RepoId {
 	}
 
 	if (repo.startsWith("dataset/")) {
-		throw new TypeError("Datasets should start with 'dataset/', plural, not 'dataset/'");
+		throw new TypeError("Datasets should start with 'datasets/', plural, not 'dataset/'");
+	}
+
+	if (repo.startsWith("bucket/")) {
+		throw new TypeError("Buckets should start with 'buckets/', plural, not 'bucket/'");
 	}
 
 	const slashes = repo.split("/").length - 1;
@@ -40,6 +44,17 @@ export function toRepoId(repo: RepoDesignation): RepoId {
 		return {
 			type: "dataset",
 			name: repo.slice("datasets/".length),
+		};
+	}
+
+	if (repo.startsWith("buckets/")) {
+		if (slashes !== 2) {
+			throw new TypeError("Bucket Id must include namespace and name of the bucket");
+		}
+
+		return {
+			type: "bucket",
+			name: repo.slice("buckets/".length),
 		};
 	}
 

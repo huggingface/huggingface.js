@@ -8,7 +8,7 @@ export type ApiAuthor =
 			isMod: boolean;
 			followerCount?: number;
 			type: "org";
-			isEnterprise: boolean;
+			plan?: string;
 			isUserFollowing?: boolean;
 	  }
 	| {

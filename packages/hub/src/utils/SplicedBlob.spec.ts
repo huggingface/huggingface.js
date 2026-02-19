@@ -23,31 +23,31 @@ describe("SplicedBlob", () => {
 
 		it("should throw error for negative start", () => {
 			expect(() => SplicedBlob.create(originalBlob, [{ insert: insertBlob, start: -1, end: 5 }])).toThrow(
-				"Invalid start/end positions for SplicedBlob"
+				"Invalid start/end positions for SplicedBlob",
 			);
 		});
 
 		it("should throw error for negative end", () => {
 			expect(() => SplicedBlob.create(originalBlob, [{ insert: insertBlob, start: 5, end: -1 }])).toThrow(
-				"Invalid start/end positions for SplicedBlob"
+				"Invalid start/end positions for SplicedBlob",
 			);
 		});
 
 		it("should throw error for start > original.size", () => {
 			expect(() => SplicedBlob.create(originalBlob, [{ insert: insertBlob, start: 15, end: 5 }])).toThrow(
-				"Invalid start/end positions for SplicedBlob"
+				"Invalid start/end positions for SplicedBlob",
 			);
 		});
 
 		it("should throw error for end > original.size", () => {
 			expect(() => SplicedBlob.create(originalBlob, [{ insert: insertBlob, start: 5, end: 15 }])).toThrow(
-				"Invalid start/end positions for SplicedBlob"
+				"Invalid start/end positions for SplicedBlob",
 			);
 		});
 
 		it("should throw error for start > end", () => {
 			expect(() => SplicedBlob.create(originalBlob, [{ insert: insertBlob, start: 7, end: 5 }])).toThrow(
-				"Invalid start/end positions for SplicedBlob"
+				"Invalid start/end positions for SplicedBlob",
 			);
 		});
 	});

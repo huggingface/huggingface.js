@@ -36,9 +36,9 @@ import type {
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
-import { InferenceClientProviderOutputError } from "../errors.js";
+import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 import type { TabularClassificationOutput } from "../tasks/tabular/tabularClassification.js";
-import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
+import type { BodyParams, OutputType, RequestArgs, UrlParams } from "../types.js";
 import { toArray } from "../utils/toArray.js";
 import type {
 	AudioClassificationTaskHelper,
@@ -73,6 +73,7 @@ import type {
 
 import { TaskProviderHelper } from "./providerHelper.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import { omit } from "../utils/omit.js";
@@ -123,15 +124,24 @@ export class HFInferenceTask extends TaskProviderHelper {
 }
 
 export class HFInferenceTextToImageTask extends HFInferenceTask implements TextToImageTaskHelper {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		if (params.outputType === "url") {
+			throw new InferenceClientInputError(
+				"hf-inference provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead.",
+			);
+		}
+		return params.args;
+	}
+
 	override async getResponse(
 		response: Base64ImageGeneration | OutputUrlImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (!response) {
 			throw new InferenceClientProviderOutputError(
-				"Received malformed response from HF-Inference text-to-image API: response is undefined"
+				"Received malformed response from HF-Inference text-to-image API: response is undefined",
 			);
 		}
 		if (typeof response == "object") {
@@ -140,30 +150,29 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 			}
 			if ("data" in response && Array.isArray(response.data) && response.data[0].b64_json) {
 				const base64Data = response.data[0].b64_json;
-				if (outputType === "url") {
+				if (outputType === "dataUrl") {
 					return `data:image/jpeg;base64,${base64Data}`;
 				}
 				const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
 				return await base64Response.blob();
 			}
 			if ("output" in response && Array.isArray(response.output)) {
-				if (outputType === "url") {
-					return response.output[0];
-				}
 				const urlResponse = await fetch(response.output[0]);
 				const blob = await urlResponse.blob();
-				return blob;
+				return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 			}
 		}
 		if (response instanceof Blob) {
-			if (outputType === "url" || outputType === "json") {
-				const b64 = await response.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return outputType === "url" ? `data:image/jpeg;base64,${b64}` : { output: `data:image/jpeg;base64,${b64}` };
+			if (outputType === "dataUrl") {
+				return dataUrlFromBlob(response);
+			}
+			if (outputType === "json") {
+				return { output: await dataUrlFromBlob(response) };
 			}
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference text-to-image API: expected a Blob"
+			"Received malformed response from HF-Inference text-to-image API: expected a Blob",
 		);
 	}
 }
@@ -206,7 +215,7 @@ export class HFInferenceTextGenerationTask extends HFInferenceTask implements Te
 			return (res as TextGenerationOutput[])?.[0];
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference text generation API: expected Array<{generated_text: string}>"
+			"Received malformed response from HF-Inference text generation API: expected Array<{generated_text: string}>",
 		);
 	}
 }
@@ -217,13 +226,13 @@ export class HFInferenceAudioClassificationTask extends HFInferenceTask implemen
 			Array.isArray(response) &&
 			response.every(
 				(x): x is { label: string; score: number } =>
-					typeof x === "object" && x !== null && typeof x.label === "string" && typeof x.score === "number"
+					typeof x === "object" && x !== null && typeof x.label === "string" && typeof x.score === "number",
 			)
 		) {
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference audio-classification API: expected Array<{label: string, score: number}> but received different format"
+			"Received malformed response from HF-Inference audio-classification API: expected Array<{label: string, score: number}> but received different format",
 		);
 	}
 }
@@ -242,7 +251,7 @@ export class HFInferenceAutomaticSpeechRecognitionTask
 			: {
 					...omit(args, "inputs"),
 					data: args.inputs,
-			  };
+				};
 	}
 }
 
@@ -250,7 +259,7 @@ export class HFInferenceAudioToAudioTask extends HFInferenceTask implements Audi
 	override async getResponse(response: AudioToAudioOutput[]): Promise<AudioToAudioOutput[]> {
 		if (!Array.isArray(response)) {
 			throw new InferenceClientProviderOutputError(
-				"Received malformed response from HF-Inference audio-to-audio API: expected Array"
+				"Received malformed response from HF-Inference audio-to-audio API: expected Array",
 			);
 		}
 		if (
@@ -268,7 +277,7 @@ export class HFInferenceAudioToAudioTask extends HFInferenceTask implements Audi
 			})
 		) {
 			throw new InferenceClientProviderOutputError(
-				"Received malformed response from HF-Inference audio-to-audio API: expected Array<{label: string, audio: Blob}>"
+				"Received malformed response from HF-Inference audio-to-audio API: expected Array<{label: string, audio: Blob}>",
 			);
 		}
 		return response;
@@ -280,7 +289,7 @@ export class HFInferenceDocumentQuestionAnsweringTask
 	implements DocumentQuestionAnsweringTaskHelper
 {
 	override async getResponse(
-		response: DocumentQuestionAnsweringOutput
+		response: DocumentQuestionAnsweringOutput,
 	): Promise<DocumentQuestionAnsweringOutput[number]> {
 		if (
 			Array.isArray(response) &&
@@ -291,13 +300,13 @@ export class HFInferenceDocumentQuestionAnsweringTask
 					typeof elem?.answer === "string" &&
 					(typeof elem.end === "number" || typeof elem.end === "undefined") &&
 					(typeof elem.score === "number" || typeof elem.score === "undefined") &&
-					(typeof elem.start === "number" || typeof elem.start === "undefined")
+					(typeof elem.start === "number" || typeof elem.start === "undefined"),
 			)
 		) {
 			return response[0];
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference document-question-answering API: expected Array<{answer: string, end: number, score: number, start: number}>"
+			"Received malformed response from HF-Inference document-question-answering API: expected Array<{answer: string, end: number, score: number, start: number}>",
 		);
 	}
 }
@@ -316,7 +325,7 @@ export class HFInferenceFeatureExtractionTask extends HFInferenceTask implements
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference feature-extraction API: expected Array<number[][][] | number[][] | number[] | number>"
+			"Received malformed response from HF-Inference feature-extraction API: expected Array<number[][][] | number[][] | number[] | number>",
 		);
 	}
 }
@@ -327,7 +336,7 @@ export class HFInferenceImageClassificationTask extends HFInferenceTask implemen
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference image-classification API: expected Array<{label: string, score: number}>"
+			"Received malformed response from HF-Inference image-classification API: expected Array<{label: string, score: number}>",
 		);
 	}
 }
@@ -340,13 +349,13 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 				(x) =>
 					typeof x.label === "string" &&
 					typeof x.mask === "string" &&
-					(x.score === undefined || typeof x.score === "number")
+					(x.score === undefined || typeof x.score === "number"),
 			)
 		) {
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference image-segmentation API: expected Array<{label: string, mask: string, score: number}>"
+			"Received malformed response from HF-Inference image-segmentation API: expected Array<{label: string, mask: string, score: number}>",
 		);
 	}
 
@@ -354,7 +363,7 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 		return {
 			...args,
 			inputs: base64FromBytes(
-				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer()),
 			),
 		};
 	}
@@ -364,7 +373,7 @@ export class HFInferenceImageToTextTask extends HFInferenceTask implements Image
 	override async getResponse(response: ImageToTextOutput): Promise<ImageToTextOutput> {
 		if (typeof response?.generated_text !== "string") {
 			throw new InferenceClientProviderOutputError(
-				"Received malformed response from HF-Inference image-to-text API: expected {generated_text: string}"
+				"Received malformed response from HF-Inference image-to-text API: expected {generated_text: string}",
 			);
 		}
 		return response;
@@ -383,7 +392,7 @@ export class HFInferenceImageToImageTask extends HFInferenceTask implements Imag
 			return {
 				...args,
 				inputs: base64FromBytes(
-					new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+					new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer()),
 				),
 			};
 		}
@@ -394,7 +403,7 @@ export class HFInferenceImageToImageTask extends HFInferenceTask implements Imag
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference image-to-image API: expected Blob"
+			"Received malformed response from HF-Inference image-to-image API: expected Blob",
 		);
 	}
 }
@@ -410,13 +419,13 @@ export class HFInferenceObjectDetectionTask extends HFInferenceTask implements O
 					typeof x.box.xmin === "number" &&
 					typeof x.box.ymin === "number" &&
 					typeof x.box.xmax === "number" &&
-					typeof x.box.ymax === "number"
+					typeof x.box.ymax === "number",
 			)
 		) {
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference object-detection API: expected Array<{label: string, score: number, box: {xmin: number, ymin: number, xmax: number, ymax: number}}>"
+			"Received malformed response from HF-Inference object-detection API: expected Array<{label: string, score: number, box: {xmin: number, ymin: number, xmax: number, ymax: number}}>",
 		);
 	}
 }
@@ -430,7 +439,7 @@ export class HFInferenceZeroShotImageClassificationTask
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference zero-shot-image-classification API: expected Array<{label: string, score: number}>"
+			"Received malformed response from HF-Inference zero-shot-image-classification API: expected Array<{label: string, score: number}>",
 		);
 	}
 }
@@ -442,14 +451,14 @@ export class HFInferenceTextClassificationTask extends HFInferenceTask implement
 			return output;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference text-classification API: expected Array<{label: string, score: number}>"
+			"Received malformed response from HF-Inference text-classification API: expected Array<{label: string, score: number}>",
 		);
 	}
 }
 
 export class HFInferenceQuestionAnsweringTask extends HFInferenceTask implements QuestionAnsweringTaskHelper {
 	override async getResponse(
-		response: QuestionAnsweringOutput | QuestionAnsweringOutput[number]
+		response: QuestionAnsweringOutput | QuestionAnsweringOutput[number],
 	): Promise<QuestionAnsweringOutputElement> {
 		if (
 			Array.isArray(response)
@@ -460,19 +469,19 @@ export class HFInferenceQuestionAnsweringTask extends HFInferenceTask implements
 							typeof elem.answer === "string" &&
 							typeof elem.end === "number" &&
 							typeof elem.score === "number" &&
-							typeof elem.start === "number"
-				  )
+							typeof elem.start === "number",
+					)
 				: typeof response === "object" &&
-				  !!response &&
-				  typeof response.answer === "string" &&
-				  typeof response.end === "number" &&
-				  typeof response.score === "number" &&
-				  typeof response.start === "number"
+					!!response &&
+					typeof response.answer === "string" &&
+					typeof response.end === "number" &&
+					typeof response.score === "number" &&
+					typeof response.start === "number"
 		) {
 			return Array.isArray(response) ? response[0] : response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference question-answering API: expected Array<{answer: string, end: number, score: number, start: number}>"
+			"Received malformed response from HF-Inference question-answering API: expected Array<{answer: string, end: number, score: number, start: number}>",
 		);
 	}
 }
@@ -486,13 +495,13 @@ export class HFInferenceFillMaskTask extends HFInferenceTask implements FillMask
 					typeof x.score === "number" &&
 					typeof x.sequence === "string" &&
 					typeof x.token === "number" &&
-					typeof x.token_str === "string"
+					typeof x.token_str === "string",
 			)
 		) {
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference fill-mask API: expected Array<{score: number, sequence: string, token: number, token_str: string}>"
+			"Received malformed response from HF-Inference fill-mask API: expected Array<{score: number, sequence: string, token: number, token_str: string}>",
 		);
 	}
 }
@@ -522,7 +531,7 @@ export class HFInferenceZeroShotClassificationTask extends HFInferenceTask imple
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference zero-shot-classification API: expected Array<{label: string, score: number}>"
+			"Received malformed response from HF-Inference zero-shot-classification API: expected Array<{label: string, score: number}>",
 		);
 	}
 
@@ -544,7 +553,7 @@ export class HFInferenceSentenceSimilarityTask extends HFInferenceTask implement
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference sentence-similarity API: expected Array<number>"
+			"Received malformed response from HF-Inference sentence-similarity API: expected Array<number>",
 		);
 	}
 }
@@ -564,7 +573,7 @@ export class HFInferenceTableQuestionAnsweringTask extends HFInferenceTask imple
 			"coordinates" in elem &&
 			Array.isArray(elem.coordinates) &&
 			elem.coordinates.every(
-				(coord: unknown): coord is number[] => Array.isArray(coord) && coord.every((x) => typeof x === "number")
+				(coord: unknown): coord is number[] => Array.isArray(coord) && coord.every((x) => typeof x === "number"),
 			)
 		);
 	}
@@ -577,7 +586,7 @@ export class HFInferenceTableQuestionAnsweringTask extends HFInferenceTask imple
 			return Array.isArray(response) ? response[0] : response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference table-question-answering API: expected {aggregator: string, answer: string, cells: string[], coordinates: number[][]}"
+			"Received malformed response from HF-Inference table-question-answering API: expected {aggregator: string, answer: string, cells: string[], coordinates: number[][]}",
 		);
 	}
 }
@@ -592,13 +601,13 @@ export class HFInferenceTokenClassificationTask extends HFInferenceTask implemen
 					typeof x.entity_group === "string" &&
 					typeof x.score === "number" &&
 					typeof x.start === "number" &&
-					typeof x.word === "string"
+					typeof x.word === "string",
 			)
 		) {
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference token-classification API: expected Array<{end: number, entity_group: string, score: number, start: number, word: string}>"
+			"Received malformed response from HF-Inference token-classification API: expected Array<{end: number, entity_group: string, score: number, start: number, word: string}>",
 		);
 	}
 }
@@ -609,7 +618,7 @@ export class HFInferenceTranslationTask extends HFInferenceTask implements Trans
 			return response?.length === 1 ? response?.[0] : response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference translation API: expected Array<{translation_text: string}>"
+			"Received malformed response from HF-Inference translation API: expected Array<{translation_text: string}>",
 		);
 	}
 }
@@ -620,7 +629,7 @@ export class HFInferenceSummarizationTask extends HFInferenceTask implements Sum
 			return response?.[0];
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference summarization API: expected Array<{summary_text: string}>"
+			"Received malformed response from HF-Inference summarization API: expected Array<{summary_text: string}>",
 		);
 	}
 }
@@ -637,7 +646,7 @@ export class HFInferenceTabularClassificationTask extends HFInferenceTask implem
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference tabular-classification API: expected Array<number>"
+			"Received malformed response from HF-Inference tabular-classification API: expected Array<number>",
 		);
 	}
 }
@@ -651,13 +660,13 @@ export class HFInferenceVisualQuestionAnsweringTask
 			Array.isArray(response) &&
 			response.every(
 				(elem) =>
-					typeof elem === "object" && !!elem && typeof elem?.answer === "string" && typeof elem.score === "number"
+					typeof elem === "object" && !!elem && typeof elem?.answer === "string" && typeof elem.score === "number",
 			)
 		) {
 			return response[0];
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference visual-question-answering API: expected Array<{answer: string, score: number}>"
+			"Received malformed response from HF-Inference visual-question-answering API: expected Array<{answer: string, score: number}>",
 		);
 	}
 }
@@ -668,7 +677,7 @@ export class HFInferenceTabularRegressionTask extends HFInferenceTask implements
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference tabular-regression API: expected Array<number>"
+			"Received malformed response from HF-Inference tabular-regression API: expected Array<number>",
 		);
 	}
 }

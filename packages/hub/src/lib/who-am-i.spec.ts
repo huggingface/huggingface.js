@@ -21,6 +21,7 @@ describe("whoAmI", () => {
 			isPro: false,
 			periodEnd: null,
 			avatarUrl: "/avatars/934b830e9fdaa879487852f79eef7165.svg",
+			billingMode: "postpaid",
 			orgs: [],
 			auth: {
 				type: "access_token",

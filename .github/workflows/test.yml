@@ -17,12 +17,15 @@ jobs:
           fetch-depth: 0
       - name: "Extracting the merge base into 'SINCE'"
         id: since
+        env:
+          PR_REF: ${{  github.event.pull_request.head.ref }}
+          BASE_REF: origin/${{ github.event.pull_request.base.ref }}
         run: |
-          if [ -z "${{  github.event.pull_request.head.ref }}" ]
+          if [ -z $PR_REF ]
           then
             echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
+            echo "SINCE=$(git merge-base $BASE_REF ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
       - run: npm install -g corepack@latest && corepack enable
@@ -53,8 +56,10 @@ jobs:
           fetch-depth: 0
       - name: "Extracting the merge base into 'SINCE'"
         id: since
+        env:
+          PR_REF: ${{  github.event.pull_request.head.ref }}
         run: |
-          if [ -z "${{  github.event.pull_request.head.ref }}" ]
+          if [ -z $PR_REF ]
           then
             echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
           else

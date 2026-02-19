@@ -108,7 +108,7 @@ describe("listModels", () => {
 			count++;
 			if (Array.isArray(entry.inferenceProviderMapping)) {
 				expect(
-					entry.inferenceProviderMapping.filter(({ provider }) => inferenceProviders.includes(provider)).length
+					entry.inferenceProviderMapping.filter(({ provider }) => inferenceProviders.includes(provider)).length,
 				).toBeGreaterThan(0);
 			}
 		}
@@ -116,10 +116,10 @@ describe("listModels", () => {
 		expect(count).to.equal(10);
 	});
 
-	it("should list deepseek-ai models with inference provider mapping", async () => {
+	it("should list meta-llama models with inference provider mapping", async () => {
 		let count = 0;
 		for await (const entry of listModels({
-			search: { owner: "deepseek-ai" },
+			search: { owner: "meta-llama" },
 			additionalFields: ["inferenceProviderMapping"],
 			limit: 1,
 		})) {
@@ -133,5 +133,19 @@ describe("listModels", () => {
 		}
 
 		expect(count).to.equal(1);
+	});
+
+	it("should search models by apps", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { apps: ["mlx-lm"] },
+			additionalFields: ["tags"],
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.tags).to.include("mlx");
+		}
+
+		expect(count).to.equal(10);
 	});
 });
