@@ -11,7 +11,6 @@ const DEEPINFRA_API_BASE_URL = "https://api.deepinfra.com";
 
 interface DeepInfraCompletionChoice {
 	text?: string;
-	message?: { content?: string };
 }
 
 interface DeepInfraCompletionResponse {
@@ -47,8 +46,7 @@ export class DeepInfraTextGenerationTask extends BaseTextGenerationTask {
 			...(parameters
 				? {
 						max_tokens: parameters.max_new_tokens,
-						stop: parameters.stop_strings,
-						...omit(parameters, ["max_new_tokens", "stop_strings"]),
+						...omit(parameters, ["max_new_tokens"]),
 				  }
 				: undefined),
 		};
@@ -62,10 +60,7 @@ export class DeepInfraTextGenerationTask extends BaseTextGenerationTask {
 			Array.isArray(response.choices) &&
 			response.choices.length > 0
 		) {
-			const choice = response.choices[0];
-			const completion =
-				choice.text ??
-				(typeof choice.message?.content === "string" ? choice.message.content : undefined);
+			const completion = response.choices[0].text;
 			if (typeof completion === "string") {
 				return { generated_text: completion };
 			}
