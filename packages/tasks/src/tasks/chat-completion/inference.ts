@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Chat Completion Input.
  *
