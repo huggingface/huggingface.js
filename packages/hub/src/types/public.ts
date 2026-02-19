@@ -1,13 +1,13 @@
 import type { PipelineType } from "@huggingface/tasks";
 
-export type RepoType = "space" | "dataset" | "model";
+export type RepoType = "space" | "dataset" | "model" | "bucket";
 
 export interface RepoId {
 	name: string;
 	type: RepoType;
 }
 
-export type RepoFullName = string | `spaces/${string}` | `datasets/${string}`;
+export type RepoFullName = string | `spaces/${string}` | `datasets/${string}` | `buckets/${string}`;
 
 export type RepoDesignation = RepoId | RepoFullName;
 
@@ -40,18 +40,25 @@ export type CredentialsParams =
 export type SpaceHardwareFlavor =
 	| "cpu-basic"
 	| "cpu-upgrade"
+	| "cpu-performance"
+	| "cpu-xl"
+	| "sprx8"
+	| "zero-a10g"
+	| "inf2x6"
 	| "t4-small"
 	| "t4-medium"
 	| "l4x1"
 	| "l4x4"
+	| "l40sx1"
+	| "l40sx4"
+	| "l40sx8"
 	| "a10g-small"
 	| "a10g-large"
 	| "a10g-largex2"
 	| "a10g-largex4"
 	| "a100-large"
-	| "v5e-1x1"
-	| "v5e-2x2"
-	| "v5e-2x4";
+	| "a100x4"
+	| "a100x8";
 
 export type SpaceSdk = "streamlit" | "gradio" | "docker" | "static";
 

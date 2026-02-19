@@ -14,6 +14,8 @@ import imageFeatureExtraction from "./image-feature-extraction/data.js";
 import imageToImage from "./image-to-image/data.js";
 import imageToText from "./image-to-text/data.js";
 import imageTextToText from "./image-text-to-text/data.js";
+import imageTextToImage from "./image-text-to-image/data.js";
+import imageTextToVideo from "./image-text-to-video/data.js";
 import imageSegmentation from "./image-segmentation/data.js";
 import imageToVideo from "./image-to-video/data.js";
 import maskGeneration from "./mask-generation/data.js";
@@ -74,6 +76,16 @@ export type * from "./image-to-image/inference.js";
 export type { ImageToTextInput, ImageToTextOutput, ImageToTextParameters } from "./image-to-text/inference.js";
 export type * from "./image-segmentation/inference.js";
 export type { ImageToVideoInput, ImageToVideoOutput, ImageToVideoParameters } from "./image-to-video/inference.js";
+export type {
+	ImageTextToImageInput,
+	ImageTextToImageOutput,
+	ImageTextToImageParameters,
+} from "./image-text-to-image/inference.js";
+export type {
+	ImageTextToVideoInput,
+	ImageTextToVideoOutput,
+	ImageTextToVideoParameters,
+} from "./image-text-to-video/inference.js";
 export type * from "./object-detection/inference.js";
 export type * from "./depth-estimation/inference.js";
 export type * from "./question-answering/inference.js";
@@ -133,6 +145,8 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"image-feature-extraction": ["timm", "transformers"],
 	"image-segmentation": ["transformers", "transformers.js"],
 	"image-text-to-text": ["transformers"],
+	"image-text-to-image": ["diffusers"],
+	"image-text-to-video": ["diffusers"],
 	"image-to-image": ["diffusers", "transformers", "transformers.js"],
 	"image-to-text": ["transformers", "transformers.js"],
 	"image-to-video": ["diffusers"],
@@ -220,6 +234,8 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"image-segmentation": getData("image-segmentation", imageSegmentation),
 	"image-to-image": getData("image-to-image", imageToImage),
 	"image-text-to-text": getData("image-text-to-text", imageTextToText),
+	"image-text-to-image": getData("image-text-to-image", imageTextToImage),
+	"image-text-to-video": getData("image-text-to-video", imageTextToVideo),
 	"image-to-text": getData("image-to-text", imageToText),
 	"image-to-video": getData("image-to-video", imageToVideo),
 	"keypoint-detection": getData("keypoint-detection", keypointDetection),

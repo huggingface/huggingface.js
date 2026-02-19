@@ -1,18 +1,33 @@
 {
 	"name": "@huggingface/gguf",
-	"packageManager": "pnpm@10.10.0",
-	"version": "0.3.2",
+	"version": "0.3.5",
 	"description": "a GGUF parser that works on remotely hosted files",
+	"keywords": [
+		"gguf",
+		"hub",
+		"huggingface"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
-	"publishConfig": {
-		"access": "public"
-	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
 	"bin": {
 		"gguf-view": "./dist/cli.js"
 	},
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"src",
+		"tsconfig.json"
+	],
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"browser": {
+		"./src/cli.ts": false,
+		"./src/utils/FileBlob.ts": false,
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -20,43 +35,28 @@
 			"import": "./dist/index.mjs"
 		}
 	},
-	"browser": {
-		"./src/cli.ts": false,
-		"./src/utils/FileBlob.ts": false,
-		"./dist/index.js": "./dist/browser/index.js",
-		"./dist/index.mjs": "./dist/browser/index.mjs"
+	"publishConfig": {
+		"access": "public"
 	},
-	"engines": {
-		"node": ">=20"
-	},
-	"source": "index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup src/index.ts src/cli.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"build:llm": "tsx scripts/generate-llm.ts && pnpm run format",
 		"test": "vitest run",
 		"check": "tsc"
 	},
-	"files": [
-		"dist",
-		"src",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"hub",
-		"gguf"
-	],
-	"author": "Hugging Face",
-	"license": "MIT",
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^"
 	},
 	"devDependencies": {
 		"@types/node": "^20.12.8"
-	}
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"packageManager": "pnpm@10.10.0"
 }

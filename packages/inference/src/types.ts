@@ -60,6 +60,7 @@ export const INFERENCE_PROVIDERS = [
 	"nebius",
 	"novita",
 	"nscale",
+	"nvidia",
 	"openai",
 	"ovhcloud",
 	"publicai",
@@ -97,6 +98,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	nebius: "nebius",
 	novita: "novita",
 	nscale: "nscale",
+	nvidia: "nvidia",
 	openai: "openai",
 	ovhcloud: "ovhcloud",
 	publicai: "publicai",
@@ -164,6 +166,7 @@ export type RequestArgs = BaseArgs &
 		| ChatCompletionInput
 	) & {
 		parameters?: Record<string, unknown>;
+		urlTransform?: (url: string) => string;
 	};
 
 export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
@@ -177,11 +180,15 @@ export interface UrlParams {
 	authMethod: AuthMethod;
 	model: string;
 	task?: InferenceTask;
+	urlTransform?: (url: string) => string;
 }
+
+export type OutputType = "url" | "dataUrl" | "blob" | "json";
 
 export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
 	args: T;
 	model: string;
 	mapping?: InferenceProviderMappingEntry | undefined;
 	task?: InferenceTask;
+	outputType?: OutputType;
 }

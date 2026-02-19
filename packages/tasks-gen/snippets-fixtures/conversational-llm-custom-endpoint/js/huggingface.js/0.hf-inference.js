@@ -4,7 +4,6 @@ const client = new InferenceClient(process.env.API_TOKEN);
 
 const chatCompletion = await client.chatCompletion({
     endpointUrl: "http://localhost:8080/v1",
-    provider: "hf-inference",
     model: "meta-llama/Llama-3.1-8B-Instruct",
     messages: [
         {

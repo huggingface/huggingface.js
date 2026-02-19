@@ -25,8 +25,12 @@ export async function addCollectionItem(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<void> {
+	if (!params.slug) {
+		throw new TypeError("slug is required");
+	}
+
 	const accessToken = checkCredentials(params);
 
 	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.slug}/items`, {

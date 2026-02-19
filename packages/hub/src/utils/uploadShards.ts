@@ -16,6 +16,8 @@ export const SHARD_FOOTER_VERSION = 1n;
 const MDB_FILE_FLAG_WITH_VERIFICATION = 0x80000000; // Cannot define as 1 << 31 because it becomes a negative number
 const MDB_FILE_FLAG_WITH_METADATA_EXT = 0x40000000;
 
+const EMPTY_HEX_HASH = "0".repeat(HASH_LENGTH * 2);
+
 export const SHARD_MAGIC_TAG = new Uint8Array([
 	"H".charCodeAt(0),
 	"F".charCodeAt(0),
@@ -51,9 +53,18 @@ export const SHARD_MAGIC_TAG = new Uint8Array([
 	169,
 ]);
 
+export interface XetTokenParams {
+	sessionId?: string;
+	casUrl?: string;
+	accessToken?: string;
+	expiresAt?: Date;
+	refreshWriteTokenUrl: string;
+}
+
 interface UploadShardsParams {
 	accessToken: string | undefined;
 	hubUrl: string;
+	xetParams: XetTokenParams;
 	fetch?: typeof fetch;
 	repo: RepoId;
 	rev: string;
@@ -65,10 +76,16 @@ interface UploadShardsParams {
  * Outputs the file sha256 after their xorbs/shards have been uploaded.
  */
 export async function* uploadShards(
-	source: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
-	params: UploadShardsParams
+	source: AsyncGenerator<{ content: Blob; path: string; sha256?: string }>,
+	params: UploadShardsParams,
 ): AsyncGenerator<
-	| { event: "file"; path: string; sha256: string; dedupRatio: number }
+	| {
+			event: "file";
+			path: string;
+			xetHash: string;
+			sha256: string | undefined;
+			dedupRatio: number;
+	  }
 	| { event: "fileProgress"; path: string; progress: number }
 > {
 	const xorbHashes: Array<string> = [];
@@ -149,7 +166,13 @@ export async function* uploadShards(
 				break;
 			}
 			case "file": {
-				yield { event: "file", path: output.path, sha256: output.sha256, dedupRatio: output.dedupRatio }; // Maybe wait until shard is uploaded before yielding.
+				yield {
+					event: "file",
+					path: output.path,
+					xetHash: output.hash,
+					sha256: output.sha256,
+					dedupRatio: output.dedupRatio,
+				}; // Maybe wait until shard is uploaded before yielding.
 
 				// Calculate space needed for this file entry
 				const fileHeaderSize = HASH_LENGTH + 4 + 4 + 8; // hash + flags + rep length + reserved
@@ -180,7 +203,7 @@ export async function* uploadShards(
 					writeHashToArray(
 						typeof repItem.xorbId === "number" ? xorbHashes[repItem.xorbId] : repItem.xorbId,
 						fileInfoSection,
-						fileViewOffset
+						fileViewOffset,
 					);
 					fileViewOffset += HASH_LENGTH;
 					fileInfoView.setUint32(fileViewOffset, 0, true); // Xorb flags
@@ -205,7 +228,7 @@ export async function* uploadShards(
 				}
 
 				// File metadata ext
-				writeHashToArray(output.sha256, fileInfoSection, fileViewOffset);
+				writeHashToArray(output.sha256 ?? EMPTY_HEX_HASH, fileInfoSection, fileViewOffset);
 				fileViewOffset += HASH_LENGTH;
 
 				// reserved in file metadata ext
@@ -221,7 +244,7 @@ export async function* uploadShards(
 
 	function createShard(): Uint8Array {
 		const shard = new Uint8Array(
-			SHARD_HEADER_SIZE + SHARD_FOOTER_SIZE + xorbViewOffset + XORB_FOOTER_LENGTH + fileViewOffset + FILE_FOOTER_LENGTH
+			SHARD_HEADER_SIZE + SHARD_FOOTER_SIZE + xorbViewOffset + XORB_FOOTER_LENGTH + fileViewOffset + FILE_FOOTER_LENGTH,
 		);
 
 		const shardView = new DataView(shard.buffer);
@@ -356,15 +379,16 @@ function writeHashToArray(hash: string, array: Uint8Array, offset: number) {
 
 async function uploadXorb(
 	xorb: { hash: string; xorb: Uint8Array; files: Array<{ path: string; progress: number; lastSentProgress: number }> },
-	params: UploadShardsParams
+	params: UploadShardsParams,
 ) {
-	const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
+	const token = await xetWriteToken(params);
 
 	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/xorbs/default/${xorb.hash}`, {
 		method: "POST",
 		body: xorb.xorb,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
+			...(params.xetParams.sessionId ? { "X-Xet-Session-Id": params.xetParams.sessionId } : {}),
 		},
 		...{
 			progressHint: {
@@ -387,13 +411,14 @@ async function uploadXorb(
 }
 
 async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
-	const token = await xetWriteToken({ ...params, isPullRequest: params.isPullRequest });
+	const token = await xetWriteToken(params);
 
 	const resp = await (params.fetch ?? fetch)(`${token.casUrl}/v1/shards`, {
 		method: "POST",
 		body: shard,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
+			...(params.xetParams.sessionId ? { "X-Xet-Session-Id": params.xetParams.sessionId } : {}),
 		},
 	});
 

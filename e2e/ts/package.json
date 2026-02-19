@@ -2,19 +2,19 @@
 	"name": "ts",
 	"version": "1.0.0",
 	"description": "",
+	"keywords": [],
+	"license": "ISC",
+	"author": "",
 	"main": "index.js",
 	"scripts": {
 		"start": "tsc && node ./dist/index.js"
 	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
+	"dependencies": {
+		"@huggingface/hub": "*",
+		"@huggingface/inference": "*"
+	},
 	"devDependencies": {
 		"@types/node": "^18.16.1",
 		"typescript": "^5.0.4"
-	},
-	"dependencies": {
-		"@huggingface/inference": "*",
-		"@huggingface/hub": "*"
 	}
 }

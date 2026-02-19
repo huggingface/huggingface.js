@@ -6,6 +6,7 @@ export type ApiCreateRepoPayload = {
 	name: string;
 	canonical?: boolean;
 	license?: string;
+	resourceGroupId?: string;
 	template?: string;
 	organization?: string;
 	/** @default false */

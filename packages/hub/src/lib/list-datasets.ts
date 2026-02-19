@@ -59,14 +59,27 @@ export async function* listDatasets<
 		hubUrl?: string;
 		additionalFields?: T[];
 		/**
-		 * Set to limit the number of models returned.
+		 * Set to limit the number of datasets returned.
 		 */
 		limit?: number;
+		/**
+		 * Sort datasets by a specific field.
+		 */
+		sort?:
+			| "createdAt"
+			| "downloads"
+			| "likes"
+			| "lastModified"
+			| "likes30d"
+			| "trendingScore"
+			| "datasetsServerInfo.numRows"
+			| "mainSize"
+			| "id";
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): AsyncGenerator<DatasetEntry & Pick<ApiDatasetInfo, T>> {
 	const accessToken = params && checkCredentials(params);
 	let totalToFetch = params?.limit ?? Infinity;
@@ -75,6 +88,7 @@ export async function* listDatasets<
 			limit: String(Math.min(totalToFetch, 500)),
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
 			...(params?.search?.query ? { search: params.search.query } : undefined),
+			...(params?.sort ? { sort: params.sort } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...DATASET_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),

@@ -164,7 +164,7 @@ describe("snapshotDownload", () => {
 						title: "feat: best commit",
 					},
 				},
-			])
+			]),
 		);
 
 		await snapshotDownload({
@@ -209,7 +209,7 @@ describe("snapshotDownload", () => {
 					},
 					path: entry.path,
 					revision: DUMMY_SHA,
-				})
+				}),
 			);
 		}
 	});
@@ -233,7 +233,7 @@ describe("snapshotDownload", () => {
 						title: "feat: best commit",
 					},
 				},
-			])
+			]),
 		);
 
 		await snapshotDownload({
@@ -251,7 +251,7 @@ describe("snapshotDownload", () => {
 				fetch: fetchMock,
 				hubUrl: hubMock,
 				accessToken: accessTokenMock,
-			})
+			}),
 		);
 
 		// list files should receive custom fetch
@@ -260,7 +260,7 @@ describe("snapshotDownload", () => {
 				fetch: fetchMock,
 				hubUrl: hubMock,
 				accessToken: accessTokenMock,
-			})
+			}),
 		);
 
 		// download file to cache should receive custom fetch
@@ -269,7 +269,7 @@ describe("snapshotDownload", () => {
 				fetch: fetchMock,
 				hubUrl: hubMock,
 				accessToken: accessTokenMock,
-			})
+			}),
 		);
 	});
 });

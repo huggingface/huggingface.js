@@ -66,6 +66,10 @@ export const SKUS = {
 				tflops: 30.29,
 				memory: [24],
 			},
+			GB10: {
+				tflops: 29.71,
+				memory: [128],
+			},
 			"RTX PRO 6000 WS": {
 				tflops: 126,
 				memory: [96],
@@ -107,16 +111,48 @@ export const SKUS = {
 				memory: [48],
 			},
 			"RTX A5000": {
-				tflops: 34.1,
-				memory: [24],
+				tflops: 27.77,
+				memory: [8, 12, 24],
+			},
+			"RTX A5000 Max-Q": {
+				tflops: 16.59,
+				memory: [16],
+			},
+			"RTX A5000 Mobile": {
+				tflops: 19.35,
+				memory: [16],
 			},
 			"RTX A4000": {
-				tflops: 19.2,
+				tflops: 19.17,
 				memory: [16],
+			},
+			"RTX A4000 Max-Q": {
+				tflops: 14.28,
+				memory: [8],
+			},
+			"RTX A4000 Mobile": {
+				tflops: 17.2,
+				memory: [8],
+			},
+			"RTX A3000 Mobile": {
+				tflops: 10.9,
+				memory: [6, 12],
 			},
 			"RTX A2000": {
 				tflops: 7.987,
-				memory: [8, 12],
+				memory: [6, 12],
+			},
+			"RTX A2000 Embedded": {
+				tflops: 6.026,
+				memory: [4],
+			},
+			"RTX A2000 Max-Q": {
+				tflops: 6.1,
+				memory: [4, 8],
+			},
+			"RTX A2000 Mobile": {
+				tflops: 8.4,
+				memory: [4, 8],
 			},
 			A100: {
 				tflops: 77.97,
@@ -125,6 +161,10 @@ export const SKUS = {
 			A40: {
 				tflops: 37.42,
 				memory: [48],
+			},
+			A30: {
+				tflops: 10.32,
+				memory: [24],
 			},
 			A10: {
 				tflops: 31.24,
@@ -308,7 +348,7 @@ export const SKUS = {
 			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
-				memory: [6],
+				memory: [4, 6],
 			},
 			"RTX 2060": {
 				tflops: 12.9,
@@ -439,6 +479,10 @@ export const SKUS = {
 			MI50: {
 				tflops: 26.5,
 				memory: [16, 32],
+			},
+			"R9700 PRO": {
+				tflops: 95.7,
+				memory: [32],
 			},
 			"RX 9070 XT": {
 				tflops: 97.32,
@@ -757,6 +801,10 @@ export const SKUS = {
 			"Apple M4 Max": {
 				tflops: 18.4,
 				memory: [36, 48, 64, 96, 128, 256, 512],
+			},
+			"Apple M5": {
+				tflops: 5.7,
+				memory: [16, 24, 32],
 			},
 		},
 	},

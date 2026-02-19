@@ -15,7 +15,7 @@ export async function checkRepoAccess(
 		repo: RepoDesignation;
 		hubUrl?: string;
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<void> {
 	const accessToken = params && checkCredentials(params);
 	const repoId = toRepoId(params.repo);

@@ -29,8 +29,8 @@ async function preparePayload(args: ZeroShotImageClassificationArgs): Promise<Re
 			inputs: {
 				image: base64FromBytes(
 					new Uint8Array(
-						args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer()
-					)
+						args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer(),
+					),
 				),
 			},
 		};
@@ -43,7 +43,7 @@ async function preparePayload(args: ZeroShotImageClassificationArgs): Promise<Re
  */
 export async function zeroShotImageClassification(
 	args: ZeroShotImageClassificationArgs,
-	options?: Options
+	options?: Options,
 ): Promise<ZeroShotImageClassificationOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "zero-shot-image-classification");

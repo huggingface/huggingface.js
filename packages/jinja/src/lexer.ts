@@ -44,7 +44,7 @@ export class Token {
 	 */
 	constructor(
 		public value: string,
-		public type: TokenType
+		public type: TokenType,
 	) {}
 }
 
@@ -54,6 +54,10 @@ function isWord(char: string): boolean {
 
 function isInteger(char: string): boolean {
 	return /[0-9]/.test(char);
+}
+
+function isWhitespace(char: string): boolean {
+	return /\s/.test(char);
 }
 
 /**
@@ -134,19 +138,9 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 		template = template.replace(/([#%-]})\n/g, "$1");
 	}
 
-	return (
-		template
-			.replace(/-%}\s*/g, "%}")
-			.replace(/\s*{%-/g, "{%")
-			.replace(/-}}\s*/g, "}}")
-			.replace(/\s*{{-/g, "{{")
-			.replace(/-#}\s*/g, "#}")
-			.replace(/\s*{#-/g, "{#")
-
-			// Handle the custom transformers-specific `generation` tag.
-			// See https://github.com/huggingface/transformers/pull/30650 for more information.
-			.replace(/{%\s*(end)?generation\s*%}/gs, "")
-	);
+	// Handle the custom transformers-specific `generation` tag.
+	// See https://github.com/huggingface/transformers/pull/30650 for more information.
+	return template.replace(/{%\s*(end)?generation\s*%}/gs, "");
 }
 
 /**
@@ -185,6 +179,22 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		return str;
 	};
 
+	const stripTrailingWhitespace = () => {
+		const lastToken = tokens.at(-1);
+		if (lastToken && lastToken.type === TOKEN_TYPES.Text) {
+			lastToken.value = lastToken.value.trimEnd();
+			if (lastToken.value === "") {
+				tokens.pop(); // Remove empty text token
+			}
+		}
+	};
+
+	const skipLeadingWhitespace = () => {
+		while (cursorPosition < src.length && isWhitespace(src[cursorPosition])) {
+			++cursorPosition;
+		}
+	};
+
 	// Build each token until end of input
 	main: while (cursorPosition < src.length) {
 		// First, consume all text that is outside of a Jinja statement or expression
@@ -219,6 +229,12 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		if (src[cursorPosition] === "{" && src[cursorPosition + 1] === "#") {
 			cursorPosition += 2; // Skip the opening {#
 
+			// Check for leading hyphen for whitespace control {#-
+			const stripBefore = src[cursorPosition] === "-";
+			if (stripBefore) {
+				++cursorPosition; // Skip the hyphen
+			}
+
 			let comment = "";
 			while (src[cursorPosition] !== "#" || src[cursorPosition + 1] !== "}") {
 				// Check for end of input
@@ -227,13 +243,64 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				}
 				comment += src[cursorPosition++];
 			}
+
+			// Check for trailing hyphen for whitespace control -#}
+			const stripAfter = comment.endsWith("-");
+			if (stripAfter) {
+				comment = comment.slice(0, -1); // Remove the trailing hyphen
+			}
+
+			// Apply whitespace stripping for leading hyphen
+			if (stripBefore) {
+				stripTrailingWhitespace();
+			}
+
 			tokens.push(new Token(comment, TOKEN_TYPES.Comment));
 			cursorPosition += 2; // Skip the closing #}
+
+			// Apply whitespace stripping for trailing hyphen
+			if (stripAfter) {
+				skipLeadingWhitespace();
+			}
+
+			continue;
+		}
+
+		// Check for opening statement with whitespace control {%-
+		if (src.slice(cursorPosition, cursorPosition + 3) === "{%-") {
+			stripTrailingWhitespace();
+			tokens.push(new Token("{%", TOKEN_TYPES.OpenStatement));
+			cursorPosition += 3; // Skip {%-
+			continue;
+		}
+
+		// Check for opening expression with whitespace control {{-
+		if (src.slice(cursorPosition, cursorPosition + 3) === "{{-") {
+			stripTrailingWhitespace();
+			tokens.push(new Token("{{", TOKEN_TYPES.OpenExpression));
+			curlyBracketDepth = 0;
+			cursorPosition += 3; // Skip {{-
 			continue;
 		}
 
 		// Consume (and ignore) all whitespace inside Jinja statements or expressions
-		consumeWhile((char) => /\s/.test(char));
+		consumeWhile(isWhitespace);
+
+		// Check for closing statement with whitespace control -%}
+		if (src.slice(cursorPosition, cursorPosition + 3) === "-%}") {
+			tokens.push(new Token("%}", TOKEN_TYPES.CloseStatement));
+			cursorPosition += 3; // Skip -%}
+			skipLeadingWhitespace();
+			continue;
+		}
+
+		// Check for closing expression with whitespace control -}}
+		if (src.slice(cursorPosition, cursorPosition + 3) === "-}}") {
+			tokens.push(new Token("}}", TOKEN_TYPES.CloseExpression));
+			cursorPosition += 3; // Skip -}}
+			skipLeadingWhitespace();
+			continue;
+		}
 
 		// Handle multi-character tokens
 		const char = src[cursorPosition];
@@ -263,7 +330,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 					// Check for numbers following the unary operator
 					const num = consumeWhile(isInteger);
 					tokens.push(
-						new Token(`${char}${num}`, num.length > 0 ? TOKEN_TYPES.NumericLiteral : TOKEN_TYPES.UnaryOperator)
+						new Token(`${char}${num}`, num.length > 0 ? TOKEN_TYPES.NumericLiteral : TOKEN_TYPES.UnaryOperator),
 					);
 					continue;
 				}
@@ -322,5 +389,6 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 
 		throw new SyntaxError(`Unexpected character: ${char}`);
 	}
+
 	return tokens;
 }

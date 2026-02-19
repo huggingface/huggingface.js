@@ -13,7 +13,7 @@ for (const mdFile of await glob("**/*.md", { cwd: "../../docs" })) {
 			// Fix links of main page
 			.replaceAll(/\(packages\/[^)]+\)/g, (val) => val.replace("packages/", ""))
 			// When on HF, remove links to HF
-			.replaceAll(/.*\[full documentation\].*\n\n/g, "")
+			.replaceAll(/.*\[full documentation\].*\n\n/g, ""),
 	);
 }
 

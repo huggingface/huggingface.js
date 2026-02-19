@@ -290,7 +290,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "ObjectLiteral": {
 			const entries = Array.from((node as ObjectLiteral).value.entries()).map(
-				([k, v]) => `${formatExpression(k)}: ${formatExpression(v)}`
+				([k, v]) => `${formatExpression(k)}: ${formatExpression(v)}`,
 			);
 			return `{${entries.join(", ")}}`;
 		}
@@ -308,7 +308,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		case "Ternary": {
 			const n = node as Ternary;
 			const expr = `${formatExpression(n.trueExpr)} if ${formatExpression(n.condition, 0)} else ${formatExpression(
-				n.falseExpr
+				n.falseExpr,
 			)}`;
 			return parentPrec > -1 ? `(${expr})` : expr;
 		}

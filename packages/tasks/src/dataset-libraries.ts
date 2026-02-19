@@ -65,6 +65,12 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/voxel51/fiftyone",
 		docsUrl: "https://huggingface.co/docs/hub/datasets-fiftyone",
 	},
+	lance: {
+		prettyLabel: "Lance",
+		repoName: "lance",
+		repoUrl: "https://github.com/lance-format/lance",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-lance",
+	},
 	argilla: {
 		prettyLabel: "Argilla",
 		repoName: "argilla",
@@ -82,6 +88,12 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoName: "duckdb",
 		repoUrl: "https://github.com/duckdb/duckdb",
 		docsUrl: "https://huggingface.co/docs/hub/datasets-duckdb",
+	},
+	datadesigner: {
+		prettyLabel: "NeMo Data Designer",
+		repoName: "datadesigner",
+		repoUrl: "https://github.com/NVIDIA-NeMo/DataDesigner",
+		docsUrl: "https://nvidia-nemo.github.io/DataDesigner/",
 	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 

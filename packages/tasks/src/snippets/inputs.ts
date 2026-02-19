@@ -61,7 +61,7 @@ const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionI
 							},
 						],
 					},
-			  ];
+				];
 	}
 	return `"Can you please let us know more details about your "`;
 };
@@ -90,6 +90,16 @@ const inputsImageToImage = () => `{
 }`;
 
 const inputsImageToVideo = () => `{
+    "image": "cat.png",
+    "prompt": "The cat starts to dance"
+}`;
+
+const inputsImageTextToImage = () => `{
+    "image": "cat.png",
+    "prompt": "Turn the cat into a tiger."
+}`;
+
+const inputsImageTextToVideo = () => `{
     "image": "cat.png",
     "prompt": "The cat starts to dance"
 }`;
@@ -130,6 +140,8 @@ const modelInputSnippets: {
 	"image-to-text": inputsImageToText,
 	"image-to-image": inputsImageToImage,
 	"image-to-video": inputsImageToVideo,
+	"image-text-to-image": inputsImageTextToImage,
+	"image-text-to-video": inputsImageTextToVideo,
 	"image-segmentation": inputsImageSegmentation,
 	"object-detection": inputsObjectDetection,
 	"question-answering": inputsQuestionAnswering,
@@ -156,7 +168,7 @@ const modelInputSnippets: {
 export function getModelInputSnippet(
 	model: ModelDataMinimal,
 	noWrap = false,
-	noQuotes = false
+	noQuotes = false,
 ): string | ChatCompletionInputMessage[] {
 	if (model.pipeline_tag) {
 		const inputs = modelInputSnippets[model.pipeline_tag];

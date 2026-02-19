@@ -5,7 +5,7 @@ describe("check-dduf", () => {
 	it("should work", async () => {
 		const files: DDUFFileEntry[] = [];
 		for await (const file of checkDDUF(
-			new URL("https://huggingface.co/spaces/DDUF/dduf-check/resolve/main/file-64.dduf")
+			new URL("https://huggingface.co/spaces/DDUF/dduf-check/resolve/main/file-64.dduf"),
 		)) {
 			files.push(file);
 		}

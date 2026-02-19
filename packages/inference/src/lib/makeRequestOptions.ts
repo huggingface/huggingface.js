@@ -1,6 +1,6 @@
 import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
 import { PACKAGE_NAME, PACKAGE_VERSION } from "../package.js";
-import type { InferenceTask, InferenceProviderMappingEntry, Options, RequestArgs } from "../types.js";
+import type { InferenceTask, InferenceProviderMappingEntry, Options, OutputType, RequestArgs } from "../types.js";
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
 import type { getProviderHelper } from "./getProviderHelper.js";
 import { isUrl } from "./isUrl.js";
@@ -25,7 +25,7 @@ export async function makeRequestOptions(
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
-	}
+	},
 ): Promise<{ url: string; info: RequestInit }> {
 	const { model: maybeModel } = args;
 	const provider = providerHelper.provider;
@@ -46,7 +46,7 @@ export async function makeRequestOptions(
 			providerHelper,
 			args,
 			undefined,
-			options
+			options,
 		);
 	}
 
@@ -71,7 +71,7 @@ export async function makeRequestOptions(
 				status: "live",
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				task: task!,
-		  } satisfies InferenceProviderMappingEntry)
+			} satisfies InferenceProviderMappingEntry)
 		: await getInferenceProviderMapping(
 				{
 					modelId: hfModel,
@@ -80,11 +80,11 @@ export async function makeRequestOptions(
 					provider,
 					accessToken: args.accessToken,
 				},
-				{ fetch: options?.fetch }
-		  );
+				{ fetch: options?.fetch },
+			);
 	if (!inferenceProviderMapping) {
 		throw new InferenceClientInputError(
-			`We have not been able to find inference provider information for model ${hfModel}.`
+			`We have not been able to find inference provider information for model ${hfModel}.`,
 		);
 	}
 
@@ -94,7 +94,7 @@ export async function makeRequestOptions(
 		providerHelper,
 		args,
 		inferenceProviderMapping,
-		options
+		options,
 	);
 }
 
@@ -112,15 +112,16 @@ export function makeRequestOptionsFromResolvedModel(
 	mapping: InferenceProviderMappingEntry | undefined,
 	options?: Options & {
 		task?: InferenceTask;
-	}
+		outputType?: OutputType;
+	},
 ): { url: string; info: RequestInit } {
-	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
+	const { accessToken, endpointUrl, provider: maybeProvider, model, urlTransform, ...remainingArgs } = args;
 	void model;
 	void maybeProvider;
 
 	const provider = providerHelper.provider;
 
-	const { includeCredentials, task, signal, billTo } = options ?? {};
+	const { includeCredentials, task, signal, billTo, outputType } = options ?? {};
 	const authMethod = (() => {
 		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
@@ -145,6 +146,7 @@ export function makeRequestOptionsFromResolvedModel(
 		authMethod,
 		model: modelId,
 		task,
+		urlTransform,
 	});
 	// Make headers
 	const headers = providerHelper.prepareHeaders(
@@ -152,7 +154,7 @@ export function makeRequestOptionsFromResolvedModel(
 			accessToken,
 			authMethod,
 		},
-		"data" in args && !!args.data
+		"data" in args && !!args.data,
 	);
 	if (billTo) {
 		headers[HF_HEADER_X_BILL_TO] = billTo;
@@ -172,6 +174,7 @@ export function makeRequestOptionsFromResolvedModel(
 		model: resolvedModel,
 		task,
 		mapping,
+		outputType,
 	});
 	/**
 	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error
@@ -200,7 +203,7 @@ async function loadDefaultModel(task: InferenceTask): Promise<string> {
 	const taskInfo = tasks[task];
 	if ((taskInfo?.models.length ?? 0) <= 0) {
 		throw new InferenceClientInputError(
-			`No default model defined for task ${task}, please define the model explicitly.`
+			`No default model defined for task ${task}, please define the model explicitly.`,
 		);
 	}
 	return taskInfo.models[0].id;
@@ -214,7 +217,7 @@ async function loadTaskInfo(): Promise<Record<string, { models: { id: string }[]
 		throw new InferenceClientHubApiError(
 			"Failed to load tasks definitions from Hugging Face Hub.",
 			{ url, method: "GET" },
-			{ requestId: res.headers.get("x-request-id") ?? "", status: res.status, body: await res.text() }
+			{ requestId: res.headers.get("x-request-id") ?? "", status: res.status, body: await res.text() },
 		);
 	}
 	return await res.json();

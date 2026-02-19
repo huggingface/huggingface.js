@@ -1,4 +1,4 @@
-import { assert, it, describe } from "vitest";
+import { assert, it, describe, expect } from "vitest";
 
 import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../test/consts";
 import type { RepoId } from "../types/public";
@@ -20,8 +20,9 @@ describe("uploadFile", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-			assert.deepStrictEqual(result, {
+			expect(result).toEqual({
 				repoUrl: `${TEST_HUB_URL}/${repoName}`,
+				id: expect.any(String),
 			});
 
 			await uploadFile({
@@ -85,7 +86,7 @@ describe("uploadFile", () => {
   },
   "vocab_size": 50257
 }
-      `.trim()
+      `.trim(),
 			);
 		} finally {
 			await deleteRepo({

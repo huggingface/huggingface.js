@@ -89,7 +89,7 @@ export interface TextGenerationStreamOutput {
  */
 export async function* textGenerationStream(
 	args: BaseArgs & TextGenerationInput,
-	options?: Options
+	options?: Options,
 ): AsyncGenerator<TextGenerationStreamOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-generation");

@@ -16,7 +16,7 @@ export class InferenceClient {
 		accessToken = "",
 		defaultOptions: Options & {
 			endpointUrl?: string;
-		} = {}
+		} = {},
 	) {
 		this.accessToken = accessToken;
 		this.defaultOptions = defaultOptions;
@@ -32,7 +32,7 @@ export class InferenceClient {
 						{
 							...omit(defaultOptions, ["endpointUrl"]),
 							...options,
-						}
+						},
 					),
 			});
 		}

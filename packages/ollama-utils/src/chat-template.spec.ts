@@ -17,7 +17,7 @@ describe("chat-template", () => {
 		});
 		expect(ollamaTmpl && ollamaTmpl.ollama);
 		expect(ollamaTmpl?.ollama.template).toEqual(
-			"<|im_start|>system\n{{ .System }}<|im_end|>\n<|im_start|>user\n{{ .Prompt }}<|im_end|>\n<|im_start|>assistant\n"
+			"<|im_start|>system\n{{ .System }}<|im_end|>\n<|im_start|>user\n{{ .Prompt }}<|im_end|>\n<|im_start|>assistant\n",
 		);
 		expect(ollamaTmpl?.ollama.tokens).toEqual(["<|im_start|>", "<|im_end|>"]);
 		expect(ollamaTmpl?.ollama.params?.stop).toEqual(["<|im_start|>", "<|im_end|>"]);
@@ -30,7 +30,7 @@ describe("chat-template", () => {
 		});
 		expect(ollamaTmpl && ollamaTmpl.ollama);
 		expect(ollamaTmpl?.ollama.template).toEqual(
-			"{{ if .System }}<|im_start|>system\n{{ .System }}<|im_end|>\n{{ end }}{{ if .Prompt }}<|im_start|>user\n{{ .Prompt }}<|im_end|>\n{{ end }}<|im_start|>assistant\n{{ .Response }}<|im_end|>\n"
+			"{{ if .System }}<|im_start|>system\n{{ .System }}<|im_end|>\n{{ end }}{{ if .Prompt }}<|im_start|>user\n{{ .Prompt }}<|im_end|>\n{{ end }}<|im_start|>assistant\n{{ .Response }}<|im_end|>\n",
 		);
 		expect(ollamaTmpl?.ollama.tokens).toEqual(["<|im_start|>", "<|im_end|>"]);
 	});
@@ -42,7 +42,7 @@ describe("chat-template", () => {
 		});
 		expect(ollamaTmpl && ollamaTmpl.ollama);
 		expect(ollamaTmpl?.ollama.template).toEqual(
-			"{{ if .System }}<|system|>\n{{ .System }}{{ end }}{{ if .Prompt }}<|user|>\n{{ .Prompt }}{{ end }}<|assistant|>\n{{ .Response }}"
+			"{{ if .System }}<|system|>\n{{ .System }}{{ end }}{{ if .Prompt }}<|user|>\n{{ .Prompt }}{{ end }}<|assistant|>\n{{ .Response }}",
 		);
 	});
 
@@ -55,7 +55,7 @@ describe("chat-template", () => {
 		});
 		expect(ollamaTmpl && ollamaTmpl.ollama);
 		expect(ollamaTmpl?.ollama.template).toEqual(
-			"{{ if .System }}<|MY_CUSTOM_TOKEN_START|>system\n{{ .System }}<|MY_CUSTOM_TOKEN_END|>\n{{ end }}{{ if .Prompt }}<|MY_CUSTOM_TOKEN_START|>user\n{{ .Prompt }}<|MY_CUSTOM_TOKEN_END|>\n{{ end }}<|MY_CUSTOM_TOKEN_START|>assistant\n{{ .Response }}<|MY_CUSTOM_TOKEN_END|>\n"
+			"{{ if .System }}<|MY_CUSTOM_TOKEN_START|>system\n{{ .System }}<|MY_CUSTOM_TOKEN_END|>\n{{ end }}{{ if .Prompt }}<|MY_CUSTOM_TOKEN_START|>user\n{{ .Prompt }}<|MY_CUSTOM_TOKEN_END|>\n{{ end }}<|MY_CUSTOM_TOKEN_START|>assistant\n{{ .Response }}<|MY_CUSTOM_TOKEN_END|>\n",
 		);
 		expect(ollamaTmpl?.ollama.params?.stop).toEqual([
 			"<|MY_CUSTOM_TOKEN_START|>",

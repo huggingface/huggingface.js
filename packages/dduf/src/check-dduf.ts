@@ -115,8 +115,8 @@ export async function* checkDDUF(url: Blob | URL, opts?: { log?: (x: string) => 
 		centralDirOffset > blob.size - last100kB.byteLength
 			? last100kB.slice(
 					centralDirOffset - (blob.size - last100kB.byteLength),
-					centralDirOffset - (blob.size - last100kB.byteLength) + centralDirSize
-			  )
+					centralDirOffset - (blob.size - last100kB.byteLength) + centralDirSize,
+				)
 			: await blob.slice(centralDirOffset, centralDirOffset + centralDirSize).arrayBuffer();
 
 	const centralDirView = new DataView(centralDir);
@@ -175,7 +175,7 @@ export async function* checkDDUF(url: Blob | URL, opts?: { log?: (x: string) => 
 				const zip64ExtraField = new DataView(
 					centralDir,
 					offset + 46 + filenameLength + extraFieldOffset + 4,
-					extraFieldSize
+					extraFieldSize,
 				);
 				let zip64ExtraFieldOffset = 0;
 
