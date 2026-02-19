@@ -15,17 +15,7 @@
  * Thanks!
  */
 
-import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
-
-export class AvianTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("avian", "https://api.avian.io/v1");
-	}
-
-	override makeRoute(): string {
-		return "/completions";
-	}
-}
+import { BaseConversationalTask } from "./providerHelper.js";
 
 export class AvianConversationalTask extends BaseConversationalTask {
 	constructor() {

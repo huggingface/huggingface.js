@@ -99,23 +99,6 @@ describe.skip.concurrent(
 			expect(out).toMatch(/(two|2)/i);
 		});
 
-		it("textGeneration", async () => {
-			const res = await textGeneration({
-				accessToken: env.HF_AVIAN_KEY ?? "dummy",
-				model: "zai-org/GLM-4.6",
-				provider: "avian",
-				inputs: "Paris is",
-				parameters: {
-					temperature: 0,
-					top_p: 0.01,
-					max_new_tokens: 10,
-				},
-			});
-			expect(res).toBeDefined();
-			expect(res.generated_text).toBeDefined();
-			expect(typeof res.generated_text).toBe("string");
-			expect(res.generated_text.length).toBeGreaterThan(0);
-		});
 	},
 	TIMEOUT
 );

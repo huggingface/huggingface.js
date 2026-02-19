@@ -84,7 +84,7 @@ export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
  * Whenever possible, InferenceProvider should == org namespace
  */
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
-	avian: "avian",
+	avian: "aviandata",
 	baseten: "baseten",
 	"black-forest-labs": "black-forest-labs",
 	cerebras: "cerebras",
