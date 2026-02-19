@@ -8,6 +8,12 @@ import { RangeList } from "./RangeList";
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
 
+export interface XetReadToken {
+	accessToken: string;
+	casUrl: string;
+	exp: number;
+}
+
 type XetBlobCreateOptions = {
 	/**
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -18,6 +24,10 @@ type XetBlobCreateOptions = {
 	size: number;
 	listener?: (arg: { event: "read" } | { event: "progress"; progress: { read: number; total: number } }) => void;
 	internalLogging?: boolean;
+	/**
+	 * Pre-fetched read token to avoid the refresh URL roundtrip.
+	 */
+	readToken?: XetReadToken;
 } & ({ hash: string; reconstructionUrl?: string } | { hash?: string; reconstructionUrl: string }) &
 	Partial<CredentialsParams>;
 
@@ -104,7 +114,15 @@ export class XetBlob extends Blob {
 		this.hash = params.hash;
 		this.listener = params.listener;
 		this.internalLogging = params.internalLogging ?? false;
-		this.refreshUrl;
+
+		if (params.readToken) {
+			const key = cacheKey({ refreshUrl: this.refreshUrl, initialAccessToken: this.accessToken });
+			jwts.set(key, {
+				accessToken: params.readToken.accessToken,
+				expiresAt: new Date(params.readToken.exp * 1000),
+				casUrl: params.readToken.casUrl,
+			});
+		}
 	}
 
 	override get size(): number {

@@ -10,6 +10,7 @@ import {
 	getJob,
 	listJobHardware,
 	listJobs,
+	listModels,
 	repoExists,
 	runJob,
 	streamJobLogs,
@@ -328,6 +329,42 @@ const commands = {
 						enum: ["dataset", "model", "space"],
 						description:
 							"The type of the repo to delete. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+					},
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+		},
+	} satisfies CommandGroup,
+	models: {
+		description: "Manage models on the Hub",
+		subcommands: {
+			list: {
+				description: "List models on the Hub (first page)",
+				args: [
+					{
+						name: "search" as const,
+						description: "Search query to filter models by name",
+						positional: true,
+					},
+					{
+						name: "sort" as const,
+						enum: [
+							"createdAt",
+							"downloads",
+							"likes",
+							"lastModified",
+							"likes30d",
+							"trendingScore",
+							"num_parameters",
+							// "mainSize",
+							// "id",
+						],
+						description: "Sort models by a specific field",
 					},
 					{
 						name: "token" as const,
@@ -735,6 +772,78 @@ async function run() {
 					// This case should ideally be caught by the check above
 					console.error(`Error: Unknown subcommand '${currentSubCommandName}' for 'repo'.`);
 					console.log(listSubcommands("repo", repoCommandGroup));
+					process.exitCode = 1;
+					break;
+			}
+			break;
+		}
+		case "models": {
+			const modelCommandGroup = commands.models;
+			const currentSubCommandName = subCommandName as keyof typeof modelCommandGroup.subcommands | undefined;
+
+			// Check if --help is in subcommand position (e.g., "hfjs models --help")
+			if (subCommandName === "--help" || subCommandName === "-h") {
+				console.log(listSubcommands("models", modelCommandGroup));
+				break;
+			}
+
+			// Check if --help is in args position (e.g., "hfjs models list --help")
+			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
+				if (currentSubCommandName && modelCommandGroup.subcommands[currentSubCommandName]) {
+					console.log(detailedUsageForSubcommand("models", currentSubCommandName));
+				} else {
+					console.log(listSubcommands("models", modelCommandGroup));
+				}
+				break;
+			}
+
+			if (!currentSubCommandName || !modelCommandGroup.subcommands[currentSubCommandName]) {
+				console.error(`Error: Missing or invalid subcommand for 'models'.`);
+				console.log(listSubcommands("models", modelCommandGroup));
+				process.exitCode = 1;
+				break;
+			}
+
+			const subCmdDef = modelCommandGroup.subcommands[currentSubCommandName];
+
+			switch (currentSubCommandName) {
+				case "list": {
+					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "models list");
+					const { search, sort, token } = parsedArgs;
+
+					const models: Array<{ name: string; task?: string; downloads: number; likes: number; updatedAt: Date }> = [];
+
+					for await (const model of listModels({
+						search: search ? { query: search } : undefined,
+						sort: sort as NonNullable<Parameters<typeof listModels>[0]>["sort"],
+						limit: 20,
+						accessToken: token,
+						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+					})) {
+						models.push(model);
+					}
+
+					if (models.length === 0) {
+						console.log("No models found.");
+						break;
+					}
+
+					console.log(
+						`${"MODEL".padEnd(45)} ${"TASK".padEnd(25)} ${"DOWNLOADS".padStart(10)} ${"LIKES".padStart(7)} ${"UPDATED"}`,
+					);
+					console.log("-".repeat(110));
+					for (const model of models) {
+						const task = model.task || "N/A";
+						const updatedAt = model.updatedAt.toLocaleDateString();
+						console.log(
+							`${model.name.padEnd(45)} ${task.padEnd(25)} ${String(model.downloads).padStart(10)} ${String(model.likes).padStart(7)} ${updatedAt}`,
+						);
+					}
+					break;
+				}
+				default:
+					console.error(`Error: Unknown subcommand '${currentSubCommandName}' for 'models'.`);
+					console.log(listSubcommands("models", modelCommandGroup));
 					process.exitCode = 1;
 					break;
 			}

@@ -130,6 +130,7 @@ export interface ModelData {
 		total: number;
 		architecture?: string;
 		context_length?: number;
+		chat_template?: string;
 	};
 }
 
