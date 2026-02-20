@@ -1190,6 +1190,207 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 
+describe.concurrent(
+    "Regolo AI",
+    () => {
+      const client = new InferenceClient(env.HF_REGOLOAI_KEY ?? "dummy");
+
+      HARDCODED_MODEL_INFERENCE_MAPPING["regoloai"] = {
+        "deepseek-ai/DeepSeek-R1-Distill-Llama-70B": {
+          provider: "regoloai",
+          hfModelId: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+          providerId: "deepseek-r1-70b",
+          status: "live",
+          task: "conversational",
+        },
+        "meta-llama/Llama-3.3-70B-Instruct": {
+          provider: "regoloai",
+          hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
+          providerId: "Llama-3.3-70B-Instruct",
+          status: "live",
+          task: "conversational",
+        },
+        "meta-llama/Llama-3.1-8B-Instruct": {
+          provider: "regoloai",
+          hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+          providerId: "Llama-3.1-8B-Instruct",
+          status: "live",
+          task: "conversational",
+        },
+        "openai/gpt-oss-120b": {
+          provider: "regoloai",
+          hfModelId: "openai/gpt-oss-120b",
+          providerId: "gpt-oss-120b",
+          status: "live",
+          task: "conversational",
+        },
+        "openai/gpt-oss-20b": {
+          provider: "regoloai",
+          hfModelId: "openai/gpt-oss-20b",
+          providerId: "gpt-oss-20b",
+          status: "live",
+          task: "conversational",
+        },
+        "Qwen/Qwen3-8B": {
+          provider: "regoloai",
+          hfModelId: "Qwen/Qwen3-8B",
+          providerId: "Qwen3-8B",
+          status: "live",
+          task: "conversational",
+        },
+        "Qwen/qwen3-coder-next": {
+          provider: "regoloai",
+          hfModelId: "Qwen/qwen3-coder-next",
+          providerId: "qwen3-coder-next",
+          status: "live",
+          task: "conversational",
+        },
+
+        "deepseek-ai/deepseek-ocr": {
+          provider: "regoloai",
+          hfModelId: "deepseek-ai/deepseek-ocr",
+          providerId: "deepseek-ocr",
+          status: "live",
+          task: "conversational",
+        },
+        "google/gemma-3-27b-it": {
+          provider: "regoloai",
+          hfModelId: "google/gemma-3-27b-it",
+          providerId: "gemma-3-27b-it",
+          status: "live",
+          task: "conversational",
+        },
+        "Qwen/qwen3-vl-32b": {
+          provider: "regoloai",
+          hfModelId: "Qwen/qwen3-vl-32b",
+          providerId: "qwen3-vl-32b",
+          status: "live",
+          task: "conversational",
+        },
+        "mistralai/mistral-small3.2": {
+          provider: "regoloai",
+          hfModelId: "mistralai/mistral-small3.2",
+          providerId: "mistral-small3.2",
+          status: "live",
+          task: "conversational",
+        },
+
+        "Qwen/Qwen-Image": {
+          provider: "regoloai",
+          hfModelId: "Qwen/Qwen-Image",
+          providerId: "Qwen-Image",
+          status: "live",
+          task: "text-to-image",
+        },
+
+        "Alibaba-NLP/gte-Qwen2-7B-it": {
+          provider: "regoloai",
+          hfModelId: "Alibaba-NLP/gte-Qwen2-7B-it",
+          providerId: "gte-Qwen2",
+          status: "live",
+          task: "feature-extraction",
+        },
+        "Qwen/Qwen3-Embedding-8B": {
+          provider: "regoloai",
+          hfModelId: "Qwen/Qwen3-Embedding-8B",
+          providerId: "Qwen3-Embedding-8B",
+          status: "live",
+          task: "feature-extraction",
+        },
+      };
+
+      it("chatCompletion", async () => {
+        const res = await client.chatCompletion({
+          model: "meta-llama/Llama-3.1-8B-Instruct",
+          provider: "regoloai",
+          messages: [{ role: "user", content: "What is 1+1? Answer only with the number." }],
+        });
+        expect(res.choices?.[0]?.message?.content?.trim()).toBe("2");
+      });
+
+      it("chatCompletion stream", async () => {
+        const stream = client.chatCompletionStream({
+          model: "openai/gpt-oss-120b",
+          provider: "regoloai",
+          messages: [{ role: "user", content: "Say 'Hello Regolo'" }],
+        });
+        let out = "";
+        for await (const chunk of stream) {
+          if (chunk.choices?.[0]?.delta?.content) {
+            out += chunk.choices[0].delta.content;
+          }
+        }
+        expect(out.toLowerCase()).toContain("hello");
+      });
+
+      it("chatCompletion multimodal (Vision)", async () => {
+        const res = await client.chatCompletion({
+          model: "Qwen/qwen3-vl-32b",
+          provider: "regoloai",
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: "What is in this image?" },
+                {
+                  type: "image_url",
+                  image_url: { url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg" }
+                },
+              ],
+            },
+          ],
+        });
+        expect(res.choices?.[0]?.message?.content?.toLowerCase()).toContain("statue of liberty");
+      });
+
+      it("chatCompletion OCR", async () => {
+        const res = await client.chatCompletion({
+          model: "deepseek-ai/deepseek-ocr",
+          provider: "regoloai",
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: "OCR this image." },
+                { type: "image_url", image_url: { url: "https://cdn.britannica.com/86/22386-050-51E63D13/Silicon-silicon-symbol-square-Si-properties-some.jpg" } }
+              ]
+            }
+          ]
+        });
+        expect(res.choices?.[0]?.message?.content).toBeDefined();
+      });
+
+      it("textToImage", async () => {
+        const res = await client.textToImage({
+          model: "Qwen/Qwen-Image",
+          provider: "regoloai",
+          inputs: "A futuristic city in the style of Ghibli",
+        });
+        expect(res).toBeInstanceOf(Blob);
+      });
+
+      it("featureExtraction", async () => {
+        const res = await client.featureExtraction({
+          model: "Alibaba-NLP/gte-Qwen2-7B-it",
+          provider: "regoloai",
+          inputs: "Test sentence for embeddings",
+        });
+        expect(Array.isArray(res)).toBe(true);
+        expect(typeof res[0]).toBe("number");
+      });
+
+      it("textGeneration", async () => {
+        const res = await client.textGeneration({
+          model: "meta-llama/Llama-3.1-8B-Instruct",
+          provider: "regoloai",
+          inputs: "Paris is the capital of ",
+        });
+        expect(res.generated_text.toLowerCase()).toContain("france");
+      });
+    },
+    TIMEOUT,
+  );
+
 	describe.concurrent(
 		"Replicate",
 		() => {
