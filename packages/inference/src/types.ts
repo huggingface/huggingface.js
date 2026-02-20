@@ -89,6 +89,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	cerebras: "cerebras",
 	clarifai: "clarifai",
 	cohere: "CohereLabs",
+	deepinfra: "DeepInfra",
 	"fal-ai": "fal",
 	"featherless-ai": "featherless-ai",
 	"fireworks-ai": "fireworks-ai",
