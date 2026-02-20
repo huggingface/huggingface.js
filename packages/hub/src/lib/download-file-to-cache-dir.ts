@@ -67,7 +67,8 @@ export async function downloadFileToCacheDir(
 	} & Partial<CredentialsParams>,
 ): Promise<string> {
 	const repoId = toRepoId(params.repo);
-	const revision = repoId.type === "bucket" ? undefined : (params.revision ?? "main");
+	const isBucket = repoId.type === "bucket";
+	const revision = isBucket ? undefined : (params.revision ?? "main");
 	const cacheDir = params.cacheDir ?? getHFHubCachePath();
 	const storageFolder = join(cacheDir, getRepoFolderName(repoId));
 
@@ -99,8 +100,7 @@ export async function downloadFileToCacheDir(
 		throw new Error(`cannot determine etag for ${params.path}`);
 	}
 
-	const snapshotId =
-		commitHash ?? info.lastCommit?.id ?? (repoId.type === "bucket" ? (params.revision ?? "latest") : etag);
+	const snapshotId = isBucket ? "latest" : (commitHash ?? info.lastCommit?.id ?? etag);
 	const pointerPath = getFilePointer(storageFolder, snapshotId, params.path);
 	const blobPath = join(storageFolder, "blobs", etag);
 
@@ -124,7 +124,7 @@ export async function downloadFileToCacheDir(
 
 	const blob: Blob | null = await downloadFile({
 		...params,
-		revision: commitHash,
+		revision,
 	});
 
 	if (!blob) {

@@ -95,13 +95,14 @@ export async function snapshotDownload(
 		}
 	}
 
+	const isBucket = repoId.type === "bucket";
 	const snapshotFolder = join(storageFolder, "snapshots", commitHash);
 
 	const cursor = listFiles({
 		...params,
 		repo: params.repo,
 		recursive: true,
-		...(repoId.type !== "bucket" && { revision: commitHash }),
+		...(!isBucket && { revision: commitHash }),
 	});
 
 	for await (const entry of cursor) {
@@ -110,7 +111,7 @@ export async function snapshotDownload(
 				await downloadFileToCacheDir({
 					...params,
 					path: entry.path,
-					revision: commitHash,
+					...(!isBucket && { revision: commitHash }),
 					cacheDir: cacheDir,
 				});
 				break;
