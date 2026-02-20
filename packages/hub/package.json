@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/hub",
-	"version": "2.10.1",
+	"version": "2.10.3",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"keywords": [
 		"api",
