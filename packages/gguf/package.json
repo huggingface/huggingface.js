@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/gguf",
-	"version": "0.3.4",
+	"version": "0.3.5",
 	"description": "a GGUF parser that works on remotely hosted files",
 	"keywords": [
 		"gguf",

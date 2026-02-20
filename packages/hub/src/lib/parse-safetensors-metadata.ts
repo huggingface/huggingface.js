@@ -37,6 +37,7 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000; // 25MB
 const GPTQ_QWEIGHT_SUFFIX = "qweight";
+const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
 
 class SafetensorParseError extends Error {}
 
@@ -224,6 +225,12 @@ async function fetchAllHeaders(
 	return shardedMap;
 }
 
+function parseTotalParameters(value: string | number | undefined): number | undefined {
+	if (!value) return undefined;
+	if (typeof value === "number") return value;
+	return parseInt(value);
+}
+
 /**
  * Analyze model.safetensors.index.json or model.safetensors from a model hosted
  * on Hugging Face using smart range requests to extract its metadata.
@@ -297,24 +304,14 @@ export async function parseSafetensorsMetadata(
 		(await fileExists({ ...params, path: SAFETENSORS_FILE }))
 	) {
 		const header = await parseSingleFile(params.path ?? SAFETENSORS_FILE, params);
-		return {
-			sharded: false,
-			header,
-			...(params.computeParametersCount
-				? {
-						parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
-						parameterTotal:
-							/// shortcut: get param count directly from metadata
-							header.__metadata__.total_parameters
-								? typeof header.__metadata__.total_parameters === "number"
-									? header.__metadata__.total_parameters
-									: typeof header.__metadata__.total_parameters === "string"
-										? parseInt(header.__metadata__.total_parameters)
-										: undefined
-								: undefined,
-					}
-				: undefined),
-		};
+		const paramStats = params.computeParametersCount
+			? {
+					parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
+					/// shortcut: get param count directly from metadata
+					parameterTotal: parseTotalParameters(header.__metadata__.total_parameters),
+				}
+			: undefined;
+		return { sharded: false, header, ...paramStats };
 	} else if (
 		(params.path && RE_SAFETENSORS_INDEX_FILE.test(params.path)) ||
 		(await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))
@@ -323,25 +320,14 @@ export async function parseSafetensorsMetadata(
 		const index = await parseShardedIndex(path, params);
 		const shardedMap = await fetchAllHeaders(path, index, params);
 
-		return {
-			sharded: true,
-			index,
-			headers: shardedMap,
-			...(params.computeParametersCount
-				? {
-						parameterCount: computeNumOfParamsByDtypeSharded(shardedMap, quantConfig),
-						parameterTotal:
-							/// shortcut: get param count directly from metadata
-							index.metadata?.total_parameters
-								? typeof index.metadata.total_parameters === "number"
-									? index.metadata.total_parameters
-									: typeof index.metadata.total_parameters === "string"
-										? parseInt(index.metadata.total_parameters)
-										: undefined
-								: undefined,
-					}
-				: undefined),
-		};
+		const paramStats = params.computeParametersCount
+			? {
+					parameterCount: computeNumOfParamsByDtypeSharded(shardedMap, quantConfig),
+					/// shortcut: get param count directly from metadata
+					parameterTotal: parseTotalParameters(index.metadata?.total_parameters),
+				}
+			: undefined;
+		return { sharded: true, index, headers: shardedMap, ...paramStats };
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
 	}
@@ -363,23 +349,10 @@ export interface ModelConfig {
  * Determines if a tensor is quantized based on quantization config and tensor name
  */
 function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
-	if (!quantConfig) {
-		return false;
-	}
-
-	if (!quantConfig.modules_to_not_convert || quantConfig.modules_to_not_convert.length === 0) {
-		return true;
-	}
-
-	for (const pattern of quantConfig.modules_to_not_convert) {
-		const regexPattern = pattern.replace(/\*/g, ".*");
-		const regex = new RegExp(regexPattern);
-		if (regex.test(tensorName)) {
-			return false;
-		}
-	}
-
-	return true;
+	if (!quantConfig) return false;
+	const patterns = quantConfig.modules_to_not_convert;
+	if (!patterns?.length) return true;
+	return !patterns.some((pattern) => new RegExp(pattern.replace(/\*/g, ".*")).test(tensorName));
 }
 
 /**
@@ -417,16 +390,10 @@ function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig
 			if (quantConfig.load_in_4bit && dtype === "U8") {
 				return 2;
 			}
-			if (quantConfig.load_in_8bit) {
-				return 1;
-			}
 			return 1;
 
 		default:
-			if (quantConfig.load_in_4bit && dtype === "U8") {
-				return 2;
-			}
-			if (quantConfig.bits === 4 && dtype === "U8") {
+			if (dtype === "U8" && (quantConfig.load_in_4bit || quantConfig.bits === 4)) {
 				return 2;
 			}
 			return 1;
@@ -477,25 +444,10 @@ function getTensorSuffix(tensorName: string): string {
 }
 
 function shouldSkipTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
-	const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
-
-	if (!quantConfig) {
-		return false;
-	}
-
+	if (!quantConfig) return false;
 	const quantMethod = quantConfig.quant_method?.toLowerCase();
-	if (!quantMethod || (quantMethod !== "gptq" && quantMethod !== "awq")) {
-		return false;
-	}
-
-	if (!isQuantizedTensor(tensorName, quantConfig)) {
-		return false;
-	}
-
+	if (quantMethod !== "gptq" && quantMethod !== "awq") return false;
+	if (!isQuantizedTensor(tensorName, quantConfig)) return false;
 	const suffix = getTensorSuffix(tensorName);
-	if (suffix === GPTQ_QWEIGHT_SUFFIX) {
-		return false;
-	}
-
-	return GPTQ_AWQ_AUXILIARY_SUFFIXES.includes(suffix);
+	return suffix !== GPTQ_QWEIGHT_SUFFIX && GPTQ_AWQ_AUXILIARY_SUFFIXES.includes(suffix);
 }
