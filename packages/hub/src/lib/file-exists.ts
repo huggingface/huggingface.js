@@ -21,7 +21,8 @@ export async function fileExists(
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
 	const revision = repoId.type === "bucket" ? undefined : (params.revision ?? "main");
-	const url = `${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/raw${
+	const endpoint = repoId.type === "bucket" ? "resolve" : "raw";
+	const url = `${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/${endpoint}${
 		revision ? `/${encodeURIComponent(revision)}` : ""
 	}/${params.path}`;
 
