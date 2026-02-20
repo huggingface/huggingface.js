@@ -20,9 +20,10 @@ export async function fileExists(
 	const repoId = toRepoId(params.repo);
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
-	const url = `${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/raw/${encodeURIComponent(
-		params.revision ?? "main",
-	)}/${params.path}`;
+	const revision = repoId.type === "bucket" ? undefined : (params.revision ?? "main");
+	const url = `${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/raw${
+		revision ? `/${encodeURIComponent(revision)}` : ""
+	}/${params.path}`;
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "HEAD",

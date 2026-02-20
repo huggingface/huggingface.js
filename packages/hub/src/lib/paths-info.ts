@@ -79,9 +79,10 @@ export async function pathsInfo(
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
 
-	const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/paths-info/${encodeURIComponent(
-		params.revision ?? "main",
-	)}`;
+	const revision = repoId.type === "bucket" ? undefined : (params.revision ?? "main");
+	const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/paths-info${
+		revision ? `/${encodeURIComponent(revision)}` : ""
+	}`;
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "POST",

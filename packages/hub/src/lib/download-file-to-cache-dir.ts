@@ -66,18 +66,14 @@ export async function downloadFileToCacheDir(
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
 ): Promise<string> {
-	// get revision provided or default to main
-	const revision = params.revision ?? "main";
-	const cacheDir = params.cacheDir ?? getHFHubCachePath();
-	// get repo id
 	const repoId = toRepoId(params.repo);
-	// get storage folder
+	const revision = repoId.type === "bucket" ? undefined : (params.revision ?? "main");
+	const cacheDir = params.cacheDir ?? getHFHubCachePath();
 	const storageFolder = join(cacheDir, getRepoFolderName(repoId));
 
 	let commitHash: string | undefined;
 
-	// if user provides a commitHash as revision, and they already have the file on disk, shortcut everything.
-	if (REGEX_COMMIT_HASH.test(revision)) {
+	if (revision && REGEX_COMMIT_HASH.test(revision)) {
 		commitHash = revision;
 		const pointerPath = getFilePointer(storageFolder, revision, params.path);
 		if (await exists(pointerPath, true)) return pointerPath;
@@ -86,7 +82,7 @@ export async function downloadFileToCacheDir(
 	const pathsInformation: (PathInfo & { lastCommit: CommitInfo })[] = await pathsInfo({
 		...params,
 		paths: [params.path],
-		revision: revision,
+		revision,
 		expand: true,
 	});
 	if (!pathsInformation || pathsInformation.length !== 1) throw new Error(`cannot get path info for ${params.path}`);
