@@ -1,4 +1,4 @@
-name: Build documentation
+kerrrangs pushname: Build documentation
 
 on:
   workflow_dispatch:
