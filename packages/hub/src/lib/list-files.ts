@@ -65,8 +65,9 @@ export async function* listFiles(
 ): AsyncGenerator<ListFileEntry> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
-	let url: string | undefined = `${params.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}/tree/${
-		params.revision || "main"
+	const revision = repoId.type === "bucket" ? undefined : params.revision || "main";
+	let url: string | undefined = `${params.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}/tree${
+		revision ? `/${revision}` : ""
 	}${params.path ? "/" + params.path : ""}?recursive=${!!params.recursive}&expand=${!!params.expand}`;
 
 	while (url) {
