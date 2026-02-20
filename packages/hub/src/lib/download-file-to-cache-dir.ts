@@ -99,7 +99,7 @@ export async function downloadFileToCacheDir(
 		throw new Error(`cannot determine etag for ${params.path}`);
 	}
 
-	const snapshotId = commitHash ?? info.lastCommit?.id ?? etag;
+	const snapshotId = commitHash ?? info.lastCommit?.id ?? (repoId.type === "bucket" ? (params.revision ?? "latest") : etag);
 	const pointerPath = getFilePointer(storageFolder, snapshotId, params.path);
 	const blobPath = join(storageFolder, "blobs", etag);
 

@@ -110,7 +110,7 @@ export async function snapshotDownload(
 				await downloadFileToCacheDir({
 					...params,
 					path: entry.path,
-					...(repoId.type !== "bucket" && { revision: commitHash }),
+					revision: commitHash,
 					cacheDir: cacheDir,
 				});
 				break;
