@@ -48,58 +48,61 @@ export async function snapshotDownload(
 	}
 
 	const repoId = toRepoId(params.repo);
-
-	// get repository revision value (sha)
-	let repoInfo: { sha: string };
-	switch (repoId.type) {
-		case "space":
-			repoInfo = await spaceInfo({
-				...params,
-				name: repoId.name,
-				additionalFields: ["sha"],
-				revision: revision,
-			});
-			break;
-		case "dataset":
-			repoInfo = await datasetInfo({
-				...params,
-				name: repoId.name,
-				additionalFields: ["sha"],
-				revision: revision,
-			});
-			break;
-		case "model":
-			repoInfo = await modelInfo({
-				...params,
-				name: repoId.name,
-				additionalFields: ["sha"],
-				revision: revision,
-			});
-			break;
-		default:
-			throw new Error(`invalid repository type ${repoId.type}`);
-	}
-
-	const commitHash: string = repoInfo.sha;
-
-	// get storage folder
 	const storageFolder = join(cacheDir, getRepoFolderName(repoId));
-	const snapshotFolder = join(storageFolder, "snapshots", commitHash);
 
-	// if passed revision is not identical to commit_hash
-	// then revision has to be a branch name or tag name.
-	// In that case store a ref.
-	if (revision !== commitHash) {
-		const refPath = join(storageFolder, "refs", revision);
-		await mkdir(dirname(refPath), { recursive: true });
-		await writeFile(refPath, commitHash);
+	let commitHash: string;
+
+	if (repoId.type === "bucket") {
+		// Buckets have no revisions/commits — use a fixed snapshot name
+		commitHash = "latest";
+	} else {
+		let repoInfo: { sha: string };
+		switch (repoId.type) {
+			case "space":
+				repoInfo = await spaceInfo({
+					...params,
+					name: repoId.name,
+					additionalFields: ["sha"],
+					revision: revision,
+				});
+				break;
+			case "dataset":
+				repoInfo = await datasetInfo({
+					...params,
+					name: repoId.name,
+					additionalFields: ["sha"],
+					revision: revision,
+				});
+				break;
+			case "model":
+				repoInfo = await modelInfo({
+					...params,
+					name: repoId.name,
+					additionalFields: ["sha"],
+					revision: revision,
+				});
+				break;
+			default:
+				throw new Error(`invalid repository type ${repoId.type}`);
+		}
+
+		commitHash = repoInfo.sha;
+
+		if (revision !== commitHash) {
+			const refPath = join(storageFolder, "refs", revision);
+			await mkdir(dirname(refPath), { recursive: true });
+			await writeFile(refPath, commitHash);
+		}
 	}
+
+	const isBucket = repoId.type === "bucket";
+	const snapshotFolder = join(storageFolder, "snapshots", commitHash);
 
 	const cursor = listFiles({
 		...params,
 		repo: params.repo,
 		recursive: true,
-		revision: repoInfo.sha,
+		...(!isBucket && { revision: commitHash }),
 	});
 
 	for await (const entry of cursor) {
@@ -108,7 +111,7 @@ export async function snapshotDownload(
 				await downloadFileToCacheDir({
 					...params,
 					path: entry.path,
-					revision: commitHash,
+					...(!isBucket && { revision: commitHash }),
 					cacheDir: cacheDir,
 				});
 				break;

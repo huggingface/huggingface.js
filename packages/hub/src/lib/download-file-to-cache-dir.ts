@@ -1,7 +1,7 @@
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { dirname, join } from "node:path";
 import { rename, lstat, mkdir, stat } from "node:fs/promises";
-import type { CommitInfo, PathInfo } from "./paths-info";
+import type { PathInfo } from "./paths-info";
 import { pathsInfo } from "./paths-info";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { toRepoId } from "../utils/toRepoId";
@@ -66,43 +66,49 @@ export async function downloadFileToCacheDir(
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
 ): Promise<string> {
-	// get revision provided or default to main
-	const revision = params.revision ?? "main";
-	const cacheDir = params.cacheDir ?? getHFHubCachePath();
-	// get repo id
 	const repoId = toRepoId(params.repo);
-	// get storage folder
+	const isBucket = repoId.type === "bucket";
+	const revision = isBucket ? undefined : (params.revision ?? "main");
+	const cacheDir = params.cacheDir ?? getHFHubCachePath();
 	const storageFolder = join(cacheDir, getRepoFolderName(repoId));
 
 	let commitHash: string | undefined;
 
-	// if user provides a commitHash as revision, and they already have the file on disk, shortcut everything.
-	if (REGEX_COMMIT_HASH.test(revision)) {
+	if (revision && REGEX_COMMIT_HASH.test(revision)) {
 		commitHash = revision;
 		const pointerPath = getFilePointer(storageFolder, revision, params.path);
 		if (await exists(pointerPath, true)) return pointerPath;
 	}
 
-	const pathsInformation: (PathInfo & { lastCommit: CommitInfo })[] = await pathsInfo({
+	const pathsInformation: PathInfo[] = await pathsInfo({
 		...params,
 		paths: [params.path],
-		revision: revision,
+		revision,
 		expand: true,
 	});
 	if (!pathsInformation || pathsInformation.length !== 1) throw new Error(`cannot get path info for ${params.path}`);
 
+	const info = pathsInformation[0];
 	let etag: string;
-	if (pathsInformation[0].lfs) {
-		etag = pathsInformation[0].lfs.oid; // get the LFS pointed file oid
+	if (info.lfs) {
+		etag = info.lfs.oid;
+	} else if (info.xetHash) {
+		etag = info.xetHash;
+	} else if (info.oid) {
+		etag = info.oid;
 	} else {
-		etag = pathsInformation[0].oid; // get the repo file if not a LFS pointer
+		throw new Error(`cannot determine etag for ${params.path}`);
 	}
 
-	const pointerPath = getFilePointer(storageFolder, commitHash ?? pathsInformation[0].lastCommit.id, params.path);
+	const snapshotId = isBucket ? "latest" : (commitHash ?? info.lastCommit?.id ?? etag);
+	const pointerPath = getFilePointer(storageFolder, snapshotId, params.path);
 	const blobPath = join(storageFolder, "blobs", etag);
 
 	// if we have the pointer file, we can shortcut the download
-	if (await exists(pointerPath, true)) return pointerPath;
+	// For buckets, snapshotId is fixed ("latest") so we must always verify the blob matches the current etag
+	if (!isBucket && (await exists(pointerPath, true))) {
+		return pointerPath;
+	}
 
 	// mkdir blob and pointer path parent directory
 	await mkdir(dirname(blobPath), { recursive: true });
@@ -121,7 +127,7 @@ export async function downloadFileToCacheDir(
 
 	const blob: Blob | null = await downloadFile({
 		...params,
-		revision: commitHash,
+		revision,
 	});
 
 	if (!blob) {

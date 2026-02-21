@@ -259,6 +259,8 @@ export function parseRepoType(type: string): RepoType {
 			return "dataset";
 		case "spaces":
 			return "space";
+		case "buckets":
+			return "bucket";
 		default:
 			throw new TypeError(`Invalid repo type: ${type}`);
 	}
