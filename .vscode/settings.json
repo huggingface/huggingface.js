@@ -20,5 +20,6 @@
 	},
 	"[json]": {
 		"editor.defaultFormatter": "oxc.oxc-vscode"
-	}
+	},
+	"githubPullRequests.pullRequestDescription": "Copilot"
 }
