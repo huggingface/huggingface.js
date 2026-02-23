@@ -1970,9 +1970,7 @@ describe.skip("InferenceClient", () => {
 	describe.concurrent(
 		"DeepInfra",
 		() => {
-			const client = new InferenceClient(
-				env.DEEPINFRA_API_KEY ?? env.HF_DEEPINFRA_KEY ?? "dummy"
-			);
+			const client = new InferenceClient(env.DEEPINFRA_API_KEY ?? env.HF_DEEPINFRA_KEY ?? "dummy");
 
 			const HF_MODEL = "google/gemma-3-4b-it";
 			const PROVIDER_ID = "google/gemma-3-4b-it";
@@ -2041,7 +2039,7 @@ describe.skip("InferenceClient", () => {
 				expect(generation.generated_text?.length ?? 0).toBeGreaterThan(0);
 			});
 		},
-		TIMEOUT
+		TIMEOUT,
 	);
 	describe.concurrent(
 		"Cerebras",

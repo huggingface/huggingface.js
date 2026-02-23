@@ -68,7 +68,7 @@ export class DeepInfraTextGenerationTask extends BaseTextGenerationTask {
 				? {
 						max_tokens: parameters.max_new_tokens,
 						...omit(parameters, ["max_new_tokens"]),
-				  }
+					}
 				: undefined),
 		};
 		return res;
@@ -88,7 +88,7 @@ export class DeepInfraTextGenerationTask extends BaseTextGenerationTask {
 		}
 
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from DeepInfra text-generation API: expected OpenAI completion payload"
+			"Received malformed response from DeepInfra text-generation API: expected OpenAI completion payload",
 		);
 	}
 }
