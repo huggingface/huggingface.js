@@ -77,7 +77,9 @@ export async function snapshotDownload(
 			});
 			break;
 		default:
-			throw new Error(`Unsupported repository type: ${repoId.type}. snapshotDownload is not supported for bucket repos.`);
+			throw new Error(
+				`Unsupported repository type: ${repoId.type}. snapshotDownload is not supported for bucket repos.`,
+			);
 	}
 
 	const commitHash = repoInfo.sha;
