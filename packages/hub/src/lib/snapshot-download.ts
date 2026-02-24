@@ -50,59 +50,51 @@ export async function snapshotDownload(
 	const repoId = toRepoId(params.repo);
 	const storageFolder = join(cacheDir, getRepoFolderName(repoId));
 
-	let commitHash: string;
-
-	if (repoId.type === "bucket") {
-		// Buckets have no revisions/commits — use a fixed snapshot name
-		commitHash = "latest";
-	} else {
-		let repoInfo: { sha: string };
-		switch (repoId.type) {
-			case "space":
-				repoInfo = await spaceInfo({
-					...params,
-					name: repoId.name,
-					additionalFields: ["sha"],
-					revision: revision,
-				});
-				break;
-			case "dataset":
-				repoInfo = await datasetInfo({
-					...params,
-					name: repoId.name,
-					additionalFields: ["sha"],
-					revision: revision,
-				});
-				break;
-			case "model":
-				repoInfo = await modelInfo({
-					...params,
-					name: repoId.name,
-					additionalFields: ["sha"],
-					revision: revision,
-				});
-				break;
-			default:
-				throw new Error(`invalid repository type ${repoId.type}`);
-		}
-
-		commitHash = repoInfo.sha;
-
-		if (revision !== commitHash) {
-			const refPath = join(storageFolder, "refs", revision);
-			await mkdir(dirname(refPath), { recursive: true });
-			await writeFile(refPath, commitHash);
-		}
+	let repoInfo: { sha: string };
+	switch (repoId.type) {
+		case "space":
+			repoInfo = await spaceInfo({
+				...params,
+				name: repoId.name,
+				additionalFields: ["sha"],
+				revision: revision,
+			});
+			break;
+		case "dataset":
+			repoInfo = await datasetInfo({
+				...params,
+				name: repoId.name,
+				additionalFields: ["sha"],
+				revision: revision,
+			});
+			break;
+		case "model":
+			repoInfo = await modelInfo({
+				...params,
+				name: repoId.name,
+				additionalFields: ["sha"],
+				revision: revision,
+			});
+			break;
+		default:
+			throw new Error(`Unsupported repository type: ${repoId.type}. snapshotDownload is not supported for bucket repos.`);
 	}
 
-	const isBucket = repoId.type === "bucket";
+	const commitHash = repoInfo.sha;
+
+	if (revision !== commitHash) {
+		const refPath = join(storageFolder, "refs", revision);
+		await mkdir(dirname(refPath), { recursive: true });
+		await writeFile(refPath, commitHash);
+	}
+
 	const snapshotFolder = join(storageFolder, "snapshots", commitHash);
 
 	const cursor = listFiles({
 		...params,
 		repo: params.repo,
 		recursive: true,
-		...(!isBucket && { revision: commitHash }),
+		revision: commitHash,
 	});
 
 	for await (const entry of cursor) {
@@ -111,7 +103,7 @@ export async function snapshotDownload(
 				await downloadFileToCacheDir({
 					...params,
 					path: entry.path,
-					...(!isBucket && { revision: commitHash }),
+					revision: commitHash,
 					cacheDir: cacheDir,
 				});
 				break;
