@@ -79,7 +79,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create GitHub Release
-        run: gh release create "$RELEASE_TAG"
+        run: |
+          git push origin "$RELEASE_TAG"
+          gh release create "$RELEASE_TAG"
         working-directory: .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
