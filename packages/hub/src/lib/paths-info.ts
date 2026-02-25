@@ -23,13 +23,27 @@ export interface SecurityFileStatus {
 export interface PathInfo {
 	path: string;
 	type: string;
-	oid: string;
+	/**
+	 * Not available for bucket repos.
+	 */
+	oid?: string;
 	size: number;
 	/**
-	 * Only defined when path is LFS pointer
+	 * Only defined when path is LFS pointer. Not available for bucket repos.
 	 */
 	lfs?: LfsPathInfo;
+	/**
+	 * Xet-backed hash. Always present for bucket file entries.
+	 */
+	xetHash?: string;
+	/**
+	 * Not available for bucket repos, use {@link uploadedAt} instead.
+	 */
 	lastCommit?: CommitInfo;
+	/**
+	 * Only available for bucket repos.
+	 */
+	uploadedAt?: string;
 	securityFileStatus?: SecurityFileStatus;
 }
 
@@ -79,9 +93,10 @@ export async function pathsInfo(
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
 
-	const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/paths-info/${encodeURIComponent(
-		params.revision ?? "main",
-	)}`;
+	const revision = repoId.type === "bucket" ? undefined : (params.revision ?? "main");
+	const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/paths-info${
+		revision ? `/${encodeURIComponent(revision)}` : ""
+	}`;
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "POST",
@@ -111,7 +126,8 @@ export async function pathsInfo(
 		type: item.type,
 		oid: item.oid,
 		size: item.size,
-		// expand fields
+		xetHash: item.xetHash,
+		uploadedAt: item.uploadedAt,
 		securityFileStatus: item.securityFileStatus,
 		lastCommit: item.lastCommit
 			? {

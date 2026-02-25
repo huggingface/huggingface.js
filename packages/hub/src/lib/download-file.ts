@@ -2,6 +2,7 @@ import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { WebBlob } from "../utils/WebBlob";
 import { XetBlob } from "../utils/XetBlob";
+import type { XetReadToken } from "../utils/XetBlob";
 import type { FileDownloadInfoOutput } from "./file-download-info";
 import { fileDownloadInfo } from "./file-download-info";
 
@@ -32,9 +33,12 @@ export async function downloadFile(
 		/**
 		 * Whether to use the xet protocol to download the file (if applicable).
 		 *
+		 * When an object with `readToken` is provided along with `downloadInfo`,
+		 * the xet download can skip the token refresh roundtrip.
+		 *
 		 * @default true
 		 */
-		xet?: boolean;
+		xet?: boolean | { readToken: XetReadToken };
 		/**
 		 * Can save an http request if provided
 		 */
@@ -66,6 +70,7 @@ export async function downloadFile(
 			fetch: params.fetch,
 			accessToken,
 			size: info.size,
+			readToken: typeof params.xet === "object" ? params.xet.readToken : undefined,
 		});
 	}
 
