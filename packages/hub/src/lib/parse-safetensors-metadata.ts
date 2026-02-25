@@ -297,7 +297,7 @@ export async function parseSafetensorsMetadata(
 
 	// Fetch model config for quantization information
 	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
-	const quantConfig = modelConfig?.quantization_config;
+	const quantConfig = modelConfig?.quantization_config ?? modelConfig?.text_config?.quantization_config;
 
 	if (
 		(params.path && RE_SAFETENSORS_FILE.test(params.path)) ||
@@ -339,10 +339,14 @@ export interface QuantizationConfig {
 	bits?: number;
 	load_in_4bit?: boolean;
 	load_in_8bit?: boolean;
+	// compressed-tensors specific
+	format?: string;
+	config_groups?: Record<string, { weights?: { num_bits?: number } }>;
 }
 
 export interface ModelConfig {
 	quantization_config?: QuantizationConfig;
+	text_config?: { quantization_config?: QuantizationConfig };
 }
 
 /**
@@ -383,6 +387,14 @@ function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig
 			}
 			if (quantConfig.bits === 2 && dtype === "U8") {
 				return 4;
+			}
+			return 1;
+
+		case "compressed-tensors":
+			if (quantConfig.format === "pack-quantized" && dtype === "I32") {
+				const numBits =
+					Object.values(quantConfig.config_groups ?? {}).find((g) => g.weights?.num_bits)?.weights?.num_bits ?? 4;
+				return Math.floor(32 / numBits);
 			}
 			return 1;
 

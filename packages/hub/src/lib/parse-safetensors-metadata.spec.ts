@@ -318,9 +318,12 @@ describe("parseSafetensorsMetadata", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "moonshotai/Kimi-K2.5",
 			revision: "2426b45b6af0da48d0dcce71bbce6225e5c73adc",
+			computeParametersCount: true,
 		});
 
 		assert(parse.sharded);
 		assert.strictEqual(Object.keys(parse.headers).length, 64);
+		assert.deepStrictEqual(parse.parameterCount, { F32: 23_040, I32: 1_014_687_129_600, BF16: 43_902_267_888 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 1_058_589_420_528);
 	});
 });
