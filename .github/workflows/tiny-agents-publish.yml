@@ -80,7 +80,7 @@ jobs:
           event-type: doc-build
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
       - name: Create GitHub Release
-        run: gh release create "$RELEASE_TAG" --generate-notes
+        run: gh release create "$RELEASE_TAG"
         working-directory: .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
