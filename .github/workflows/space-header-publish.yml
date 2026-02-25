@@ -52,6 +52,7 @@ jobs:
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           git commit . -m "🔖 @huggingface/space-header $BUMPED_VERSION"
           git tag "space-header-v$BUMPED_VERSION"
+          echo "RELEASE_TAG=space-header-v$BUMPED_VERSION" >> $GITHUB_ENV
 
       - run: (git pull --rebase && git push --follow-tags) || (git pull --rebase && git push --follow-tags)
 
@@ -70,3 +71,8 @@ jobs:
         with:
           event-type: doc-build
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
+      - name: Create GitHub Release
+        run: gh release create "$RELEASE_TAG" --generate-notes
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

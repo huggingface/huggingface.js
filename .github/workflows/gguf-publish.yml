@@ -56,6 +56,7 @@ jobs:
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           git commit . -m "🔖 @huggingface/gguf $BUMPED_VERSION"
           git tag "gguf-v$BUMPED_VERSION"
+          echo "RELEASE_TAG=gguf-v$BUMPED_VERSION" >> $GITHUB_ENV
 
       - if: ${{ !github.event.inputs.bypass_deps_check }}
         name: "Check Deps are published before publishing this package"
@@ -73,3 +74,8 @@ jobs:
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        run: gh release create "$RELEASE_TAG" --generate-notes
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
