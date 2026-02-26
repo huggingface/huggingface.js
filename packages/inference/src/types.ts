@@ -70,6 +70,7 @@ export const INFERENCE_PROVIDERS = [
 	"together",
 	"wavespeed",
 	"zai-org",
+	"zenmux",
 ] as const;
 
 export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
@@ -109,6 +110,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	together: "togethercomputer",
 	wavespeed: "wavespeed",
 	"zai-org": "zai-org",
+	zenmux: "zenmux",
 };
 
 export interface InferenceProviderMappingEntry {
