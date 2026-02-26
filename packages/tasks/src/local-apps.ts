@@ -486,6 +486,16 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
  * Ping the HF team if we can help with anything!
  */
 export const LOCAL_APPS = {
+	"inferenceport": {
+		prettyLabel: "InferencePort AI",
+		docsUrl: "https://inference.js.org",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) =>
+			new URL(
+				`inferenceport-ai:///marketplace?hf=${model.id}`,
+			),
+	},
 	"llama.cpp": {
 		prettyLabel: "llama.cpp",
 		docsUrl: "https://github.com/ggerganov/llama.cpp",
