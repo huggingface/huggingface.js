@@ -1,6 +1,7 @@
 import * as Baseten from "../providers/baseten.js";
 import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
+import * as Burncloud from "../providers/burncloud.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
 import * as DeepInfra from "../providers/deepinfra.js";
@@ -67,6 +68,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
+	},
+	burncloud: {
+		conversational: new Burncloud.BurncloudConversationalTask(),
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
