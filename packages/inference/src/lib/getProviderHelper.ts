@@ -7,6 +7,7 @@ import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
 import * as FeatherlessAI from "../providers/featherless-ai.js";
 import * as Fireworks from "../providers/fireworks-ai.js";
+import * as GMICloud from "../providers/gmicloud.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
 import * as Hyperbolic from "../providers/hyperbolic.js";
@@ -128,6 +129,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	"fireworks-ai": {
 		conversational: new Fireworks.FireworksConversationalTask(),
+	},
+	"gmicloud": {
+		conversational: new GMICloud.GMICloudConversationalTask(),
 	},
 	groq: {
 		conversational: new Groq.GroqConversationalTask(),
