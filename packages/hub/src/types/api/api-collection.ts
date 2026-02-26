@@ -57,6 +57,7 @@ interface ApiCollectionItemModel extends ApiCollectionItemBase {
 			| "groq"
 			| "hf-inference"
 			| "hyperbolic"
+			| "inceptron"
 			| "nebius"
 			| "novita"
 			| "nscale"
