@@ -67,6 +67,12 @@ import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
 import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
+import type {
+	AudioClassificationArgs,
+	ImageClassificationArgs,
+	ImageToTextArgs,
+	ObjectDetectionArgs,
+} from "../tasks/index.js";
 
 /**
  * Base class for task-specific provider helpers
@@ -195,16 +201,19 @@ export interface ImageSegmentationTaskHelper {
 export interface ImageClassificationTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageClassificationOutput>;
 	preparePayload(params: BodyParams<ImageClassificationInput & BaseArgs>): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: ImageClassificationArgs): Promise<RequestArgs>;
 }
 
 export interface ObjectDetectionTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ObjectDetectionOutput>;
 	preparePayload(params: BodyParams<ObjectDetectionInput & BaseArgs>): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: ObjectDetectionArgs): Promise<RequestArgs>;
 }
 
 export interface ImageToTextTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageToTextOutput>;
 	preparePayload(params: BodyParams<ImageToTextInput & BaseArgs>): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: ImageToTextArgs): Promise<RequestArgs>;
 }
 
 export interface ZeroShotImageClassificationTaskHelper {
@@ -294,6 +303,7 @@ export interface AutomaticSpeechRecognitionTaskHelper {
 export interface AudioClassificationTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AudioClassificationOutput>;
 	preparePayload(params: BodyParams<AudioClassificationInput & BaseArgs>): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: AudioClassificationArgs): Promise<RequestArgs>;
 }
 
 // Multimodal Tasks

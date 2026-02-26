@@ -1,6 +1,6 @@
 import { assert, describe, expect, it } from "vitest";
 
-import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
+import type { ChatCompletionStreamOutput, WidgetType } from "@huggingface/tasks";
 
 import type { TextToImageArgs } from "../src/index.js";
 import {
@@ -22,7 +22,7 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
-describe.skip("InferenceClient", () => {
+describe("InferenceClient", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
 	describe("backward compatibility", () => {
@@ -2557,7 +2557,6 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT,
 	);
-
 	describe.concurrent(
 		"PublicAI",
 		() => {
@@ -2726,4 +2725,502 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT,
 	);
+
+	describe.concurrent("Bytez", () => {
+		const client = new InferenceClient(env.HF_BYTEZ_KEY ?? "dummy");
+		const provider = "bytez-ai";
+
+		const tests: { task: WidgetType; modelId: string; test: (modelId: string) => Promise<void>; stream: boolean }[] = [
+			{
+				task: "text-generation",
+				modelId: "bigscience/mt0-small",
+				test: async (modelId: string) => {
+					const { generated_text } = await client.textGeneration({
+						model: modelId,
+						provider,
+						inputs: "Hello",
+					});
+					expect(typeof generated_text).toBe("string");
+				},
+				stream: false,
+			},
+			{
+				task: "text-generation",
+				modelId: "bigscience/mt0-small",
+				test: async (modelId: string) => {
+					const response = client.textGenerationStream({
+						model: modelId,
+						provider,
+						inputs: "Please answer the following question: complete one two and ____.",
+						parameters: {
+							max_new_tokens: 50,
+							num_beams: 1,
+						},
+					});
+					for await (const ret of response) {
+						expect(ret).toMatchObject({
+							details: null,
+							index: expect.any(Number),
+							token: {
+								id: expect.any(Number),
+								logprob: expect.any(Number),
+								special: expect.any(Boolean),
+							},
+							generated_text: ret.generated_text ? "afew" : null,
+						});
+						expect(typeof ret.token.text === "string" || ret.token.text === null).toBe(true);
+					}
+				},
+				stream: true,
+			},
+			{
+				task: "conversational",
+				modelId: "Qwen/Qwen3-1.7B",
+				test: async (modelId: string) => {
+					const { choices } = await client.chatCompletion({
+						model: modelId,
+						provider,
+						messages: [
+							{
+								role: "system",
+								content: "You are a friendly chatbot who always responds in the style of a pirate",
+							},
+							{ role: "user", content: "How many helicopters can a human eat in one sitting?" },
+						],
+					});
+					expect(typeof choices[0].message.role).toBe("string");
+					expect(typeof choices[0].message.content).toBe("string");
+				},
+				stream: false,
+			},
+			{
+				task: "conversational",
+				modelId: "Qwen/Qwen3-1.7B",
+				test: async (modelId: string) => {
+					const stream = client.chatCompletionStream({
+						model: modelId,
+						provider,
+						messages: [
+							{
+								role: "system",
+								content: "You are a friendly chatbot who always responds in the style of a pirate",
+							},
+							{ role: "user", content: "How many helicopters can a human eat in one sitting?" },
+						],
+					});
+					const chunks = [];
+					for await (const chunk of stream) {
+						if (chunk.choices && chunk.choices.length > 0) {
+							if (chunk.choices[0].finish_reason === "stop") {
+								break;
+							}
+							chunks.push(chunk);
+						}
+					}
+					const out = chunks.map((chunk) => chunk.choices[0].delta.content).join("");
+					expect(out).toContain("helicopter");
+				},
+				stream: true,
+			},
+			{
+				task: "summarization",
+				modelId: "ainize/bart-base-cnn",
+				test: async (modelId: string) => {
+					const input =
+						"The tower is 324 metres (1,063 ft) tall, about the same height as an 81-storey building, and the tallest structure in Paris...";
+					const { summary_text } = await client.summarization({
+						model: modelId,
+						provider,
+						inputs: input,
+						parameters: { max_length: 40 },
+					});
+					expect(summary_text.length).toBeLessThan(input.length);
+				},
+				stream: false,
+			},
+			{
+				task: "translation",
+				modelId: "Areeb123/En-Fr_Translation_Model",
+				test: async (modelId: string) => {
+					const { translation_text } = await client.translation({
+						model: modelId,
+						provider,
+						inputs: "Hello",
+					});
+					expect(typeof translation_text).toBe("string");
+					expect(translation_text.length).toBeGreaterThan(0);
+				},
+				stream: false,
+			},
+			{
+				task: "text-to-image",
+				modelId: "IDKiro/sdxs-512-0.9",
+				test: async (modelId: string) => {
+					const res = await client.textToImage({
+						model: modelId,
+						provider,
+						inputs: "A cat in the hat",
+					});
+					expect(res).toBeInstanceOf(Blob);
+				},
+				stream: false,
+			},
+			{
+				task: "text-to-video",
+				modelId: "ali-vilab/text-to-video-ms-1.7b",
+				test: async (modelId: string) => {
+					const res = await client.textToVideo({
+						model: modelId,
+						provider,
+						inputs: "A cat in the hat",
+					});
+					expect(res).toBeInstanceOf(Blob);
+				},
+				stream: false,
+			},
+			{
+				task: "image-to-text",
+				modelId: "captioner/caption-gen",
+				test: async (modelId: string) => {
+					const { generated_text } = await client.imageToText({
+						model: modelId,
+						provider,
+						data: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					});
+					expect(typeof generated_text).toBe("string");
+				},
+				stream: false,
+			},
+			{
+				task: "question-answering",
+				modelId: "airesearch/xlm-roberta-base-finetune-qa",
+				test: async (modelId: string) => {
+					const { answer, score, start, end } = await client.questionAnswering({
+						model: modelId,
+						provider,
+						inputs: {
+							question: "Where do I live?",
+							context: "My name is Merve and I live in İstanbul.",
+						},
+					});
+					expect(answer).toBeDefined();
+					expect(score).toBeDefined();
+					expect(start).toBeDefined();
+					expect(end).toBeDefined();
+				},
+				stream: false,
+			},
+			{
+				task: "visual-question-answering",
+				modelId: "aqachun/Vilt_fine_tune_2000",
+				test: async (modelId: string) => {
+					const output = await client.visualQuestionAnswering({
+						model: modelId,
+						provider,
+						inputs: {
+							image: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+							question: "What kind of animal is this?",
+						},
+					});
+					expect(output).toMatchObject({
+						answer: expect.any(String),
+						score: expect.any(Number),
+					});
+				},
+				stream: false,
+			},
+			{
+				task: "document-question-answering",
+				modelId: "cloudqi/CQI_Visual_Question_Awnser_PT_v0",
+				test: async (modelId: string) => {
+					const url = "https://templates.invoicehome.com/invoice-template-us-neat-750px.png";
+					const response = await fetch(url);
+					const blob = await response.blob();
+					const output = await client.documentQuestionAnswering({
+						model: modelId,
+						provider,
+						inputs: {
+							//
+							image: blob,
+							question: "What's the total cost?",
+						},
+					});
+					expect(output).toMatchObject({
+						answer: expect.any(String),
+						score: expect.any(Number),
+						// not sure what start/end refers to in this case
+						start: expect.any(Number),
+						end: expect.any(Number),
+					});
+				},
+				stream: false,
+			},
+			{
+				task: "image-segmentation",
+				modelId: "apple/deeplabv3-mobilevit-small",
+				test: async (modelId: string) => {
+					const output = await client.imageSegmentation({
+						model: modelId,
+						provider,
+						inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+					});
+					expect(output).toEqual(
+						expect.arrayContaining([
+							expect.objectContaining({
+								label: expect.any(String),
+								score: expect.any(Number),
+								mask: expect.any(String),
+							}),
+						])
+					);
+				},
+				stream: false,
+			},
+			{
+				task: "image-classification",
+				modelId: "akahana/vit-base-cats-vs-dogs",
+				test: async (modelId: string) => {
+					const output = await client.imageClassification({
+						//
+						model: modelId,
+						provider,
+						data: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					});
+					expect(output).toEqual(
+						expect.arrayContaining([
+							expect.objectContaining({
+								score: expect.any(Number),
+								label: expect.any(String),
+							}),
+						])
+					);
+				},
+				stream: false,
+			},
+			{
+				task: "zero-shot-image-classification",
+				modelId: "BilelDJ/clip-hugging-face-finetuned",
+				test: async (modelId: string) => {
+					const output = await client.zeroShotImageClassification({
+						model: modelId,
+						provider,
+						inputs: { image: new Blob([readTestFile("cheetah.png")], { type: "image/png" }) },
+						parameters: {
+							candidate_labels: ["animal", "toy", "car"],
+						},
+					});
+					expect(output).toEqual(
+						expect.arrayContaining([
+							expect.objectContaining({
+								score: expect.any(Number),
+								label: expect.any(String),
+							}),
+						])
+					);
+				},
+				stream: false,
+			},
+			{
+				task: "object-detection",
+				modelId: "aisak-ai/aisak-detect",
+				test: async (modelId: string) => {
+					const output = await client.objectDetection({
+						model: modelId,
+						provider,
+						inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+					});
+					expect(output).toEqual(
+						expect.arrayContaining([
+							expect.objectContaining({
+								score: expect.any(Number),
+								label: expect.any(String),
+								box: expect.objectContaining({
+									xmin: expect.any(Number),
+									ymin: expect.any(Number),
+									xmax: expect.any(Number),
+									ymax: expect.any(Number),
+								}),
+							}),
+						])
+					);
+				},
+				stream: false,
+			},
+			{
+				task: "feature-extraction",
+				modelId: "allenai/specter2_base",
+				test: async (modelId: string) => {
+					const output = await client.featureExtraction({
+						model: modelId,
+						provider,
+						inputs: "That is a happy person",
+					});
+					expect(output).toEqual(expect.arrayContaining([expect.any(Number)]));
+				},
+				stream: false,
+			},
+			{
+				task: "sentence-similarity",
+				modelId: "embedding-data/distilroberta-base-sentence-transformer",
+				test: async (modelId: string) => {
+					const output = await client.sentenceSimilarity({
+						model: modelId,
+						provider,
+						inputs: {
+							source_sentence: "That is a happy person",
+							sentences: ["That is a happy dog", "That is a very happy person", "Today is a sunny day"],
+						},
+					});
+					expect(output).toEqual([expect.any(Number), expect.any(Number), expect.any(Number)]);
+				},
+				stream: false,
+			},
+			{
+				task: "fill-mask",
+				modelId: "almanach/camembert-base",
+				test: async (modelId: string) => {
+					const output = await client.fillMask({ model: modelId, provider, inputs: "Hello <mask>" });
+					expect(output).toEqual(
+						expect.arrayContaining([
+							expect.objectContaining({
+								score: expect.any(Number),
+								token: expect.any(Number),
+								token_str: expect.any(String),
+								sequence: expect.any(String),
+							}),
+						])
+					);
+				},
+				stream: false,
+			},
+			{
+				task: "text-classification",
+				modelId: "AdamCodd/distilbert-base-uncased-finetuned-sentiment-amazon",
+				test: async (modelId: string) => {
+					const output = await client.textClassification({
+						model: modelId,
+						provider,
+						inputs: "I am a special unicorn",
+					});
+					expect(output.every((entry) => entry.label && entry.score)).toBe(true);
+				},
+				stream: false,
+			},
+			{
+				task: "token-classification",
+				modelId: "2rtl3/mn-xlm-roberta-base-named-entity",
+				test: async (modelId: string) => {
+					const output = await client.tokenClassification({
+						model: modelId,
+						provider,
+						inputs: "John went to NYC",
+					});
+					expect(output).toEqual(
+						expect.arrayContaining([
+							expect.objectContaining({
+								entity_group: expect.any(String),
+								score: expect.any(Number),
+								word: expect.any(String),
+								start: expect.any(Number),
+								end: expect.any(Number),
+							}),
+						])
+					);
+				},
+				stream: false,
+			},
+			{
+				task: "zero-shot-classification",
+				modelId: "AyoubChLin/DistilBERT_eco_ZeroShot",
+				test: async (modelId: string) => {
+					const testInput = "Ninja turtles are cool";
+					const testCandidateLabels = ["positive", "negative"];
+					const output = await client.zeroShotClassification({
+						model: modelId,
+						provider,
+						inputs: [
+							testInput,
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						] as any,
+						parameters: { candidate_labels: testCandidateLabels },
+					});
+					expect(output).toEqual(
+						expect.arrayContaining([
+							expect.objectContaining({
+								sequence: testInput,
+								labels: testCandidateLabels,
+								scores: [expect.closeTo(0.5206031203269958, 5), expect.closeTo(0.479396790266037, 5)],
+							}),
+						])
+					);
+				},
+				stream: false,
+			},
+			{
+				task: "audio-classification",
+				modelId: "aaraki/wav2vec2-base-finetuned-ks",
+				test: async (modelId: string) => {
+					const output = await client.audioClassification({
+						model: modelId,
+						provider,
+						data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
+					});
+					expect(output).toEqual(
+						expect.arrayContaining([
+							expect.objectContaining({
+								score: expect.any(Number),
+								label: expect.any(String),
+							}),
+						])
+					);
+				},
+				stream: false,
+			},
+			{
+				task: "text-to-speech",
+				modelId: "facebook/mms-tts-eng",
+				test: async (modelId: string) => {
+					const output = await client.textToSpeech({ model: modelId, provider, inputs: "Hello" });
+					expect(output).toBeInstanceOf(Blob);
+				},
+				stream: false,
+			},
+			{
+				task: "automatic-speech-recognition",
+				modelId: "facebook/data2vec-audio-base-960h",
+				test: async (modelId: string) => {
+					const output = await client.automaticSpeechRecognition({
+						model: modelId,
+						provider,
+						data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
+					});
+					expect(output).toMatchObject({
+						text: "GOING ALONG SLUSHY COUNTRY ROADS AND SPEAKING TO DAMP AUDIENCES IN DRAUGHTY SCHOOLROOMS DAY AFTER DAY FOR A FORTNIGHT HE'LL HAVE TO PUT IN AN APPEARANCE AT SOME PLACE OF WORSHIP ON SUNDAY MORNING AND HE CAN COME TO US IMMEDIATELY AFTERWARDS",
+					});
+				},
+				stream: false,
+			},
+		];
+
+		// bootstrap the inference mappings for testing
+		for (const { task, modelId } of tests) {
+			HARDCODED_MODEL_INFERENCE_MAPPING["bytez-ai"][modelId] = {
+				provider,
+				hfModelId: modelId,
+				providerId: modelId,
+				status: "live",
+				task,
+				adapter: undefined,
+				adapterWeightsPath: undefined,
+			};
+		}
+
+		// run the tests
+		for (const { task, modelId, test, stream } of tests) {
+			const testName = `${task} - ${modelId}${stream ? " stream" : ""}`;
+			it(testName, async () => {
+				await test(modelId);
+			});
+		}
+	});
 });

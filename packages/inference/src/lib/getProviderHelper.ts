@@ -1,6 +1,7 @@
 import * as Baseten from "../providers/baseten.js";
 import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
+import * as Bytez from "../providers/bytez-ai.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
 import * as DeepInfra from "../providers/deepinfra.js";
@@ -67,6 +68,32 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
+	},
+	["bytez-ai"]: {
+		"text-generation": new Bytez.BytezTextGenerationTask(),
+		conversational: new Bytez.BytezConversationalTask(),
+		summarization: new Bytez.BytezSummarizationTask(),
+		translation: new Bytez.BytezTranslationTask(),
+		"text-to-image": new Bytez.BytezTextToImageTask(),
+		"text-to-video": new Bytez.BytezTextToVideoTask(),
+		"question-answering": new Bytez.BytezQuestionAnsweringTask(),
+		"visual-question-answering": new Bytez.BytezVisualQuestionAnsweringTask(),
+		"document-question-answering": new Bytez.BytezDocumentQuestionAnsweringTask(),
+		"image-segmentation": new Bytez.BytezImageSegmentationTask(),
+		"zero-shot-image-classification": new Bytez.BytezZeroShotImageClassificationTask(),
+		"feature-extraction": new Bytez.BytezFeatureExtractionTask(),
+		"sentence-similarity": new Bytez.BytezSentenceSimilarityTask(),
+		"fill-mask": new Bytez.BytezFillMaskTask(),
+		"text-classification": new Bytez.BytezTextClassificationTask(),
+		"token-classification": new Bytez.BytezTokenClassificationTask(),
+		"zero-shot-classification": new Bytez.BytezZeroShotClassificationTask(),
+		"text-to-speech": new Bytez.BytezTextToSpeechTask(),
+		"automatic-speech-recognition": new Bytez.BytezAutomaticSpeechRecognitionTask(),
+		"text-to-audio": new Bytez.BytezTextToAudioTask(),
+		"audio-classification": new Bytez.BytezAudioClassificationTask(),
+		"object-detection": new Bytez.BytezObjectDetectionTask(),
+		"image-classification": new Bytez.BytezImageClassificationTask(),
+		"image-to-text": new Bytez.BytezImageToTextTask(),
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),

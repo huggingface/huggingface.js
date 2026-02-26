@@ -17,7 +17,9 @@ export async function imageClassification(
 ): Promise<ImageClassificationOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "image-classification");
-	const payload = preparePayload(args);
+	const payload = providerHelper.preparePayloadAsync
+		? await providerHelper.preparePayloadAsync(args)
+		: preparePayload(args);
 	const { data: res } = await innerRequest<ImageClassificationOutput>(payload, providerHelper, {
 		...options,
 		task: "image-classification",
