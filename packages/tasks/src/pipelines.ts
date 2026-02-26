@@ -402,6 +402,10 @@ export const PIPELINE_DATA = {
 				type: "image-captioning",
 				name: "Image Captioning",
 			},
+			{
+				type: "optical-music-recognition",
+				name: "Optical Music Recognition",
+			},
 		],
 		modality: "cv",
 	},
