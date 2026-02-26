@@ -1238,17 +1238,17 @@ describe.concurrent(
           status: "live",
           task: "conversational",
         },
-        "Qwen/qwen3-coder-next": {
+        "Qwen/Qwen3-Coder-Next": {
           provider: "regoloai",
-          hfModelId: "Qwen/qwen3-coder-next",
+          hfModelId: "Qwen/Qwen3-Coder-Next",
           providerId: "qwen3-coder-next",
           status: "live",
           task: "conversational",
         },
 
-        "deepseek-ai/deepseek-ocr": {
+        "deepseek-ai/DeepSeek-OCR": {
           provider: "regoloai",
-          hfModelId: "deepseek-ai/deepseek-ocr",
+          hfModelId: "deepseek-ai/DeepSeek-OCR",
           providerId: "deepseek-ocr",
           status: "live",
           task: "conversational",
@@ -1260,16 +1260,16 @@ describe.concurrent(
           status: "live",
           task: "conversational",
         },
-        "Qwen/qwen3-vl-32b": {
+        "Qwen/Qwen3-VL-32B-Instruct": {
           provider: "regoloai",
-          hfModelId: "Qwen/qwen3-vl-32b",
+          hfModelId: "Qwen/Qwen3-VL-32B-Instruct",
           providerId: "qwen3-vl-32b",
           status: "live",
           task: "conversational",
         },
-        "mistralai/mistral-small3.2": {
+        "mistralai/Mistral-Small-3.2-24B-Instruct-2506": {
           provider: "regoloai",
-          hfModelId: "mistralai/mistral-small3.2",
+          hfModelId: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
           providerId: "mistral-small3.2",
           status: "live",
           task: "conversational",
@@ -1283,9 +1283,9 @@ describe.concurrent(
           task: "text-to-image",
         },
 
-        "Alibaba-NLP/gte-Qwen2-7B-it": {
+        "Alibaba-NLP/gte-Qwen2-7B-instruct": {
           provider: "regoloai",
-          hfModelId: "Alibaba-NLP/gte-Qwen2-7B-it",
+          hfModelId: "Alibaba-NLP/gte-Qwen2-7B-instruct",
           providerId: "gte-Qwen2",
           status: "live",
           task: "feature-extraction",
@@ -1325,7 +1325,7 @@ describe.concurrent(
 
       it("chatCompletion multimodal (Vision)", async () => {
         const res = await client.chatCompletion({
-          model: "Qwen/qwen3-vl-32b",
+          model: "Qwen/Qwen3-VL-32B-Instruct",
           provider: "regoloai",
           messages: [
             {
@@ -1345,7 +1345,7 @@ describe.concurrent(
 
       it("chatCompletion OCR", async () => {
         const res = await client.chatCompletion({
-          model: "deepseek-ai/deepseek-ocr",
+          model: "deepseek-ai/DeepSeek-OCR",
           provider: "regoloai",
           messages: [
             {
@@ -1371,7 +1371,7 @@ describe.concurrent(
 
       it("featureExtraction", async () => {
         const res = await client.featureExtraction({
-          model: "Alibaba-NLP/gte-Qwen2-7B-it",
+          model: "Alibaba-NLP/gte-Qwen2-7B-instruct",
           provider: "regoloai",
           inputs: "Test sentence for embeddings",
         });
