@@ -552,7 +552,7 @@ export const SKUS = {
 				tflops: 26.11,
 				memory: [16, 32],
 			},
-			"Ryzen AI Max 395+": {
+			"Ryzen AI Max+ 395": {
 				tflops: 59.4,
 				memory: [64, 96, 128],
 			},
