@@ -182,6 +182,10 @@ export const SKUS = {
 				tflops: 104.8,
 				memory: [32],
 			},
+			"RTX 5090 Mobile": {
+				tflops: 31.8,
+				memory: [24],
+			},
 			"RTX 5080": {
 				tflops: 56.28,
 				memory: [16],
