@@ -777,7 +777,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "MANAS-1",
 		repoName: "manas-1",
 		repoUrl: "https://github.com/NeurodxAI/manas-1",
-		countDownloads: `path_extension:"pt"`
+		countDownloads: `path_extension:"pt"`,
 	},
 	"mars5-tts": {
 		prettyLabel: "MARS5-TTS",
