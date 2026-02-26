@@ -52,8 +52,9 @@ jobs:
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           git commit . -m "🔖 @huggingface/xetchunk-wasm $BUMPED_VERSION"
           git tag "xetchunk-wasm-v$BUMPED_VERSION"
+          echo "RELEASE_TAG=xetchunk-wasm-v$BUMPED_VERSION" >> $GITHUB_ENV
 
-      - run: (git pull --rebase && git push --follow-tags) || (git pull --rebase && git push --follow-tags)
+      - run: (git pull --rebase && git push && git push origin "$RELEASE_TAG") || (git pull --rebase && git push && git push origin "$RELEASE_TAG")
 
       - run: pnpm publish --no-git-checks .
       # hack - reuse actions/setup-node@v4 just to set a new registry
@@ -65,3 +66,8 @@ jobs:
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        run: gh release create "$RELEASE_TAG"
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
