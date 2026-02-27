@@ -40,6 +40,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	replicate: {},
 	sambanova: {},
 	scaleway: {},
+	systalyze: {},
 	together: {},
 	wavespeed: {},
 	"zai-org": {},
