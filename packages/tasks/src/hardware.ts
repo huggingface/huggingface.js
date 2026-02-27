@@ -33,6 +33,10 @@ export interface HardwareSpec {
 	 * CUDA Compute Capability (NVIDIA GPUs only)
 	 */
 	computeCapability?: number;
+	/**
+	 * GFX version / LLVM ISA target (AMD GPUs only), e.g. 11.0 for gfx1100
+	 */
+	gfxVersion?: number;
 }
 
 export const DEFAULT_MEMORY_OPTIONS = [
@@ -572,98 +576,122 @@ export const SKUS = {
 			MI300: {
 				tflops: 383.0,
 				memory: [192],
+				gfxVersion: 9.42,
 			},
 			MI250: {
 				tflops: 362.1,
 				memory: [128],
+				gfxVersion: 9.1,
 			},
 			MI210: {
 				tflops: 181.0,
 				memory: [64],
+				gfxVersion: 9.1,
 			},
 			MI100: {
 				tflops: 184.6,
 				memory: [32],
+				gfxVersion: 9.08,
 			},
 			MI60: {
 				tflops: 29.5,
 				memory: [32],
+				gfxVersion: 9.06,
 			},
 			MI50: {
 				tflops: 26.5,
 				memory: [16, 32],
+				gfxVersion: 9.06,
 			},
 			"R9700 PRO": {
 				tflops: 95.7,
 				memory: [32],
+				gfxVersion: 12.01,
 			},
 			"RX 9070 XT": {
 				tflops: 97.32,
 				memory: [16],
+				gfxVersion: 12.01,
 			},
 			"RX 9070": {
 				tflops: 72.25,
 				memory: [16],
+				gfxVersion: 12.01,
 			},
 			"RX 7900 XTX": {
 				tflops: 122.8,
 				memory: [24],
+				gfxVersion: 11,
 			},
 			"RX 7900 XT": {
 				tflops: 103.0,
 				memory: [20],
+				gfxVersion: 11,
 			},
 			"RX 7900 GRE": {
 				tflops: 91.96,
 				memory: [16],
+				gfxVersion: 11,
 			},
 			"RX 7800 XT": {
 				tflops: 74.65,
 				memory: [16],
+				gfxVersion: 11.01,
 			},
 			"RX 7700 XT": {
 				tflops: 70.34,
 				memory: [12],
+				gfxVersion: 11.01,
 			},
 			"RX 7600 XT": {
 				tflops: 45.14,
 				memory: [16, 8],
+				gfxVersion: 11.02,
 			},
 			"RX 6950 XT": {
 				tflops: 47.31,
 				memory: [16],
+				gfxVersion: 10.3,
 			},
 			"RX 6800": {
 				tflops: 32.33,
 				memory: [16],
+				gfxVersion: 10.3,
 			},
 			"RX 6700 XT": {
 				tflops: 26.43,
 				memory: [12],
+				gfxVersion: 10.31,
 			},
 			"RX 6700": {
 				tflops: 22.58,
 				memory: [10],
+				gfxVersion: 10.31,
 			},
 			"RX 6650 XT": {
 				tflops: 21.59,
 				memory: [8],
+				gfxVersion: 10.32,
 			},
 			"RX 6600 XT": {
 				tflops: 21.21,
 				memory: [8],
+				gfxVersion: 10.32,
 			},
 			"RX 6600": {
 				tflops: 17.86,
 				memory: [8],
+				gfxVersion: 10.32,
 			},
 			"Radeon Pro VII": {
 				tflops: 26.11,
 				memory: [16, 32],
+				gfxVersion: 9.06,
 			},
 			"Ryzen AI Max+ 395": {
 				tflops: 59.4,
 				memory: [64, 96, 128],
+				gfxVersion: 11.51,
 			},
 		},
 		INTEL: {
