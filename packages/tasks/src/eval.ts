@@ -32,4 +32,15 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
 		url: "https://github.com/Mercor-Intelligence/archipelago",
 	},
+	"swe-bench": {
+		name: "swe-bench",
+		description: "SWE Bench is a framework for evaluating the performance of LLMs on software engineering tasks.",
+		url: "https://github.com/swe-bench/swe-bench",
+	},
+	"swe-bench-pro": {
+		name: "swe-bench-pro",
+		description:
+			"SWE-Bench Pro is a challenging benchmark evaluating LLMs/Agents on long-horizon software engineering tasks.",
+		url: "https://github.com/scaleapi/SWE-bench_Pro-os",
+	},
 } as const;
