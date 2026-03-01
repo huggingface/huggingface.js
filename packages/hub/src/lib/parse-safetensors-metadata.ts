@@ -314,11 +314,11 @@ export async function parseSafetensorsMetadata(
 				}
 			: undefined;
 		return {
-			sharded: false, 
-			header, 
+			sharded: false,
+			header,
 			...paramStats,
 			filepaths: [params.path ?? SAFETENSORS_FILE],
-		 };
+		};
 	} else if (
 		(params.path && RE_SAFETENSORS_INDEX_FILE.test(params.path)) ||
 		(await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))
@@ -334,15 +334,12 @@ export async function parseSafetensorsMetadata(
 					parameterTotal: parseTotalParameters(index.metadata?.total_parameters),
 				}
 			: undefined;
-		return { 
+		return {
 			sharded: true,
 			index,
 			headers: shardedMap,
 			...paramStats,
-			filepaths: [
-				params.path ?? SAFETENSORS_INDEX_FILE,
-				...Object.keys(shardedMap),
-			],
+			filepaths: [params.path ?? SAFETENSORS_INDEX_FILE, ...Object.keys(shardedMap)],
 		};
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
