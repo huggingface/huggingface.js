@@ -768,7 +768,11 @@ export async function ggufAllShards(
 		parallelDownloads?: number;
 		allowLocalFile?: boolean;
 	},
-): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
+): Promise<{
+	shards: GGUFParseOutput[];
+	urls: string[];
+	parameterCount: number;
+}> {
 	const parallelDownloads = params?.parallelDownloads ?? PARALLEL_DOWNLOADS;
 	if (parallelDownloads < 1) {
 		throw new TypeError("parallelDownloads must be greater than 0");
@@ -788,6 +792,7 @@ export async function ggufAllShards(
 			parallelDownloads,
 		);
 		return {
+			urls,
 			shards,
 			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
 		};
@@ -799,6 +804,10 @@ export async function ggufAllShards(
 				computeParametersCount: true,
 			},
 		);
-		return { shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }], parameterCount };
+		return {
+			urls: [url],
+			shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }],
+			parameterCount,
+		};
 	}
 }
