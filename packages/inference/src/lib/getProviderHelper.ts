@@ -52,6 +52,7 @@ import type {
 	ZeroShotClassificationTaskHelper,
 	ZeroShotImageClassificationTaskHelper,
 } from "../providers/providerHelper.js";
+import * as RegoloAI from "../providers/regoloai.js"
 import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
@@ -165,6 +166,12 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	publicai: {
 		conversational: new PublicAI.PublicAIConversationalTask(),
+	},
+	regoloai: {
+		conversational: new RegoloAI.RegoloaiConversationalTask(),
+		"text-generation": new RegoloAI.RegoloaiTextGenerationTask(),
+		"text-to-image": new RegoloAI.RegoloaiTextToImageTask(),
+		"feature-extraction": new RegoloAI.RegoloaiFeatureExtractionTask(),
 	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
