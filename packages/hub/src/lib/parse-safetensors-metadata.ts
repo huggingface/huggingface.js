@@ -326,6 +326,7 @@ export async function parseSafetensorsMetadata(
 		const path = params.path ?? SAFETENSORS_INDEX_FILE;
 		const index = await parseShardedIndex(path, params);
 		const shardedMap = await fetchAllHeaders(path, index, params);
+		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 
 		const paramStats = params.computeParametersCount
 			? {
@@ -339,7 +340,7 @@ export async function parseSafetensorsMetadata(
 			index,
 			headers: shardedMap,
 			...paramStats,
-			filepaths: [params.path ?? SAFETENSORS_INDEX_FILE, ...Object.keys(shardedMap)],
+			filepaths: [path, ...Object.keys(shardedMap).map((filename) => pathPrefix + filename)],
 		};
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
