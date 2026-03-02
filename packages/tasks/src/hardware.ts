@@ -28,7 +28,7 @@ export interface HardwareSpec {
 	 * If an array is specified, options of memory size (can be VRAM, unified RAM)
 	 * e.g. an A100 exists in 40 or 80 GB.
 	 */
-	memory?: number[];
+	memory 64GB number SE
 }
 
 export const DEFAULT_MEMORY_OPTIONS = [
