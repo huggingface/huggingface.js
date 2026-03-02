@@ -59,12 +59,13 @@ jobs:
           git add ../..
           git commit -m "🔖 @huggingface/hub $BUMPED_VERSION"
           git tag "hub-v$BUMPED_VERSION"
+          echo "RELEASE_TAG=hub-v$BUMPED_VERSION" >> $GITHUB_ENV
 
       - if: ${{ !github.event.inputs.bypass_deps_check }}
         name: "Check Deps are published before publishing this package"
         run: pnpm -w check-deps tasks
 
-      - run: (git pull --rebase && git push --follow-tags) || (git pull --rebase && git push --follow-tags)
+      - run: (git pull --rebase && git push && git push origin "$RELEASE_TAG") || (git pull --rebase && git push && git push origin "$RELEASE_TAG")
 
       - run: pnpm publish --no-git-checks .
 
@@ -82,3 +83,8 @@ jobs:
         with:
           event-type: doc-build
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
+      - name: Create GitHub Release
+        run: gh release create "$RELEASE_TAG"
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
