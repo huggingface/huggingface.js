@@ -2,6 +2,12 @@
  * List of supported Evaluation Frameworks supported in the `eval.yaml` file in benchmarks datasets.
  */
 export const EVALUATION_FRAMEWORKS = {
+	"nemo-evaluator": {
+		name: "nemo-evaluator",
+		description:
+			"NeMo Evaluator is an open-source platform for robust, reproducible, and scalable evaluation of Large Language Models across 100+ benchmarks.",
+		url: "https://github.com/NVIDIA-NeMo/Evaluator",
+	},
 	"inspect-ai": {
 		name: "inspect-ai",
 		description: "Inspect AI is an open-source framework for large language model evaluations.",
