@@ -914,7 +914,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "OpenPeerLLM",
 		repoUrl: "https://huggingface.co/openpeerai/openpeerllm",
 		docsUrl: "https://huggingface.co/OpenPeerAI/OpenPeerLLM/blob/main/README.md",
-		countDownloads: `path:".meta-huggingface.json"`,
+		countDownloads: `path:".meta-huggingface.json"
+			OR path:"config.json"
+			OR path_extension:"safetensors"
+			OR path_extension:"gguf"`,
 		filter: false,
 	},
 	"open-sora": {
