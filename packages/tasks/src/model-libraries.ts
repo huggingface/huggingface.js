@@ -773,6 +773,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.mamba_ssm,
 	},
+	"manas-1": {
+		prettyLabel: "MANAS-1",
+		repoName: "MANAS-1",
+		repoUrl: "https://github.com/NeurodxAI/manas-1",
+		countDownloads: `path_extension:"pt"`,
+	},
 	"mars5-tts": {
 		prettyLabel: "MARS5-TTS",
 		repoName: "MARS5-TTS",
