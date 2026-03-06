@@ -78,6 +78,7 @@ import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import { omit } from "../utils/omit.js";
 import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
+import type { ImageToTextArgs } from "../tasks/cv/imageToText.js";
 interface Base64ImageGeneration {
 	data: Array<{
 		b64_json: string;
@@ -377,6 +378,10 @@ export class HFInferenceImageToTextTask extends HFInferenceTask implements Image
 			);
 		}
 		return response;
+	}
+
+	async preparePayloadAsync(args: ImageToTextArgs): Promise<RequestArgs> {
+		return "data" in args ? args : { ...omit(args, "inputs"), data: args.inputs };
 	}
 }
 
