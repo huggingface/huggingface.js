@@ -47,8 +47,6 @@ abstract class ZaiTask extends TaskProviderHelper {
 		headers["accept-language"] = "en-US,en";
 		return headers;
 	}
-
-
 }
 
 export class ZaiConversationalTask extends BaseConversationalTask {
