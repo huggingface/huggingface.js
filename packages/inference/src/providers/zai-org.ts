@@ -21,7 +21,7 @@ import {
 	InferenceClientProviderOutputError,
 } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
-import type { BaseArgs, BodyParams, HeaderParams, OutputType, RequestArgs } from "../types.js";
+import type { BodyParams, HeaderParams, OutputType, RequestArgs } from "../types.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
@@ -197,9 +197,7 @@ export class ZaiTextToImageTask extends ZaiTask implements TextToImageTaskHelper
 }
 
 interface ZaiLayoutParsingResponse {
-	document_result?: {
-		md_results?: string;
-	};
+	md_results?: string;
 }
 
 export class ZaiImageToTextTask extends ZaiTask implements ImageToTextTaskHelper {
@@ -208,28 +206,28 @@ export class ZaiImageToTextTask extends ZaiTask implements ImageToTextTaskHelper
 	}
 
 	async preparePayloadAsync(args: ImageToTextArgs): Promise<RequestArgs> {
-		let fileString: string;
-		const rest = omit(args as Record<string, unknown>, ["data", "inputs"]) as BaseArgs;
+		const blob =
+			"data" in args && args.data instanceof Blob
+				? args.data
+				: "inputs" in args
+					? typeof args.inputs === "string" && isUrl(args.inputs)
+						? await fetch(args.inputs).then((r) => r.blob())
+						: args.inputs instanceof Blob
+							? args.inputs
+							: undefined
+					: undefined;
 
-		if ("data" in args && args.data) {
-			const blob = args.data as Blob;
-			const bytes = new Uint8Array(await blob.arrayBuffer());
-			fileString = `data:image/png;base64,${base64FromBytes(bytes)}`;
-		} else {
-			const input = (args as { inputs: Blob | string }).inputs;
-			if (typeof input === "string" && isUrl(input)) {
-				fileString = input;
-			} else if (input instanceof Blob) {
-				const bytes = new Uint8Array(await input.arrayBuffer());
-				fileString = `data:image/png;base64,${base64FromBytes(bytes)}`;
-			} else {
-				throw new InferenceClientInputError("ZAI image-to-text requires a URL string or Blob as inputs");
-			}
+		if (!blob || !(blob instanceof Blob)) {
+			throw new InferenceClientInputError("ZAI image-to-text requires a URL string or Blob as inputs");
 		}
 
+		const mimeType = blob.type || "image/png";
+		const b64 = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
+		const file = `data:${mimeType};base64,${b64}`;
+
 		return {
-			...rest,
-			inputs: fileString,
+			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
+			inputs: file,
 		} as RequestArgs;
 	}
 
@@ -241,10 +239,10 @@ export class ZaiImageToTextTask extends ZaiTask implements ImageToTextTaskHelper
 	}
 
 	override async getResponse(response: ZaiLayoutParsingResponse): Promise<ImageToTextOutput> {
-		const mdResults = response?.document_result?.md_results;
+		const mdResults = response?.md_results;
 		if (typeof mdResults !== "string") {
 			throw new InferenceClientProviderOutputError(
-				`Received malformed response from ZAI layout_parsing API: expected { document_result: { md_results: string } }, got: ${JSON.stringify(response)}`,
+				`Received malformed response from ZAI layout_parsing API: expected { md_results: string }, got: ${JSON.stringify(response)}`,
 			);
 		}
 		return { generated_text: mdResults, generatedText: mdResults };
