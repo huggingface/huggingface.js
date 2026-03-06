@@ -746,6 +746,18 @@ export const SKUS = {
 			"Ryzen Zen 2 3000 (Ryzen 3)": {
 				tflops: 0.72,
 			},
+			"Ryzen AI 300 (Ryzen AI 9 HX)": {
+				tflops: 5.52,
+			},
+			"Ryzen AI 300 (Ryzen AI 9)": {
+				tflops: 5.2,
+			},
+			"Ryzen AI 300 (Ryzen AI 7)": {
+				tflops: 4.34,
+			},
+			"Ryzen AI 300 (Ryzen AI 5)": {
+				tflops: 1.57,
+			},
 		},
 	},
 	"Apple Silicon": {
