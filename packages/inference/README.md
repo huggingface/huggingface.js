@@ -71,6 +71,8 @@ Currently, we support the following providers:
 - [Groq](https://groq.com)
 - [Wavespeed.ai](https://wavespeed.ai/)
 - [Z.ai](https://z.ai/)
+- [TextCLF](https://textclf.com)
+
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. The default value of the `provider` parameter is "auto", which will select the first of the providers available for the model, sorted by your preferred order in https://hf.co/settings/inference-providers.
 
@@ -109,6 +111,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
 - [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
 - [Groq supported models](https://console.groq.com/docs/models)
+- [TextCLF supported models](https://huggingface.co/api/partners/textclf/models)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
 - [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
