@@ -604,6 +604,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`recursechat://new-hf-gguf-model?hf-model-id=${model.id}`),
 	},
+	cnvrs: {
+		prettyLabel: "cnvrs",
+		docsUrl: "https://cnvrs.ai",
+		mainTask: "text-generation",
+		macOSOnly: false,
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) => new URL(`cnvrsai:///models/search/hf?id=${model.id}`),
+	},
 	drawthings: {
 		prettyLabel: "Draw Things",
 		docsUrl: "https://drawthings.ai",
