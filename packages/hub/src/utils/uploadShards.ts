@@ -294,7 +294,7 @@ export async function* uploadShards(
 
 		// version: u64,                    // Footer version (must be 1)
 		// file_info_offset: u64,           // Offset to file info section
-		// cas_info_offset: u64,            // Offset to CAS info section
+		// xorb_info_offset: u64,           // Offset to xorb info section
 		// reserved 48 bytes
 		// chunk_hash_hmac_key: [u64; 4],   // HMAC key for chunk hashes (32 bytes)
 		// shard_creation_timestamp: u64,   // Creation time (seconds since epoch)

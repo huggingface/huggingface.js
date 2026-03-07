@@ -57,11 +57,11 @@ export async function parseShardData(shardBlob: Blob): Promise<ShardData> {
 
 	// version: u64,                    // Footer version (must be 1)
 	// file_info_offset: u64,           // Offset to file info section
-	// cas_info_offset: u64,            // Offset to CAS info section
+	// xorb_info_offset: u64,           // Offset to xorb info section
 	// file_lookup_offset: u64,         // Offset to file lookup table
 	// file_lookup_num_entry: u64,      // Number of file lookup entries
-	// cas_lookup_offset: u64,          // Offset to CAS lookup table
-	// cas_lookup_num_entry: u64,       // Number of CAS lookup entries
+	// xorb_lookup_offset: u64,         // Offset to xorb lookup table
+	// xorb_lookup_num_entry: u64,      // Number of xorb lookup entries
 	// chunk_lookup_offset: u64,        // Offset to chunk lookup table
 	// chunk_lookup_num_entry: u64,     // Number of chunk lookup entries
 	// chunk_hash_hmac_key: [u64; 4],   // HMAC key for chunk hashes (32 bytes)
