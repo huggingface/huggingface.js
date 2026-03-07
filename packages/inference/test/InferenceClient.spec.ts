@@ -2215,7 +2215,7 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["textclf"] = {
 				"meta-llama/Llama-3.1-8B-Instruct": {
-					provider: "groq",
+					provider: "textclf",
 					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
 					providerId: "meta-llama/Llama-3.1-8B-Instruct",
 					status: "live",
