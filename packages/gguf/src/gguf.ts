@@ -27,6 +27,15 @@ export {
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
 const GGUF_DEFAULT_ALIGNMENT = 32; // defined in ggml.h
+
+/**
+ * Safety limits to prevent OOM from crafted GGUF files (CWE-770).
+ * Values are set well above any known real-world model (e.g. Kimi-K2.5 at 1T params,
+ * 160K vocab, 384 experts) while still preventing billion-element allocations.
+ */
+const MAX_METADATA_ARRAY_LENGTH = 1_000_000;
+const MAX_KV_COUNT = 100_000;
+const MAX_TENSOR_COUNT = 10_000_000;
 const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); // defined in ggml.h
 const PARALLEL_DOWNLOADS = 20;
 
@@ -223,6 +232,11 @@ function readMetadataValue(
 		case GGUFValueType.ARRAY: {
 			const arrayType = view.getUint32(offset, littleEndian);
 			const arrayLength = readVersionedSize(view, offset + 4, version, littleEndian);
+			if (arrayLength.value > MAX_METADATA_ARRAY_LENGTH) {
+				throw new Error(
+					`Metadata array length ${arrayLength.value} exceeds maximum allowed (${MAX_METADATA_ARRAY_LENGTH})`,
+				);
+			}
 			let length = 4 + arrayLength.length;
 			const arrayValues: MetadataValue[] = [];
 			for (let i = 0; i < arrayLength.value; i++) {
@@ -340,8 +354,14 @@ export async function gguf(
 	// initial offset after header
 	let offset = 8;
 	const tensorCount = readVersionedSize(r.view, offset, version, littleEndian);
+	if (tensorCount.value > MAX_TENSOR_COUNT) {
+		throw new Error(`Tensor count ${tensorCount.value} exceeds maximum allowed (${MAX_TENSOR_COUNT})`);
+	}
 	offset += tensorCount.length;
 	const numKv = readVersionedSize(r.view, offset, version, littleEndian);
+	if (numKv.value > MAX_KV_COUNT) {
+		throw new Error(`KV metadata count ${numKv.value} exceeds maximum allowed (${MAX_KV_COUNT})`);
+	}
 	offset += numKv.length;
 	const metadata: GGUFMetadata<{ strict: false }> = {
 		version,
