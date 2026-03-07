@@ -1,5 +1,3 @@
-import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
-
 /**
  * See the registered mapping of HF model ID => TextCLF model ID here:
  *
@@ -16,25 +14,66 @@ import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper
  *
  * Thanks!
  */
+import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/tasks";
+import type { BodyParams } from "../types.js";
+import { omit } from "../utils/omit.js";
+import {
+	BaseConversationalTask,
+	BaseTextGenerationTask,
+} from "./providerHelper.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 
 const TEXTCLF_API_BASE_URL = "https://api.textclf.com";
 
-export class TextCLFTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("textclf", TEXTCLF_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "/v1/chat/completions";
-	}
+export interface TextCLFTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
+    choices: Array<{
+        message: { content: string };
+    }>;
 }
 
 export class TextCLFConversationalTask extends BaseConversationalTask {
-	constructor() {
-		super("textclf", TEXTCLF_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "/v1/chat/completions";
-	}
+    constructor() {
+        super("textclf", TEXTCLF_API_BASE_URL);
+    }
 }
+
+export class TextCLFTextGenerationTask extends BaseTextGenerationTask {
+    constructor() {
+        super("textclf", TEXTCLF_API_BASE_URL);
+    }
+
+    override makeRoute(): string {
+        return "v1/chat/completions";
+    }
+
+    override preparePayload(params: BodyParams): Record<string, unknown> {
+        return {
+            messages: [{ content: params.args.inputs, role: "user" }],
+            ...(params.args.parameters
+                ? {
+                        max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+                        ...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+                    }
+                : undefined),
+            ...omit(params.args, ["inputs", "parameters"]),
+            model: params.model,
+        };
+    }
+
+    override async getResponse(response: TextCLFTextCompletionOutput): Promise<TextGenerationOutput> {
+        if (
+            typeof response === "object" &&
+            "choices" in response &&
+            Array.isArray(response?.choices) &&
+            typeof response?.model === "string"
+        ) {
+            const completion = response.choices[0];
+            return {
+                generated_text: completion.message.content,
+            };
+        }
+
+        throw new InferenceClientProviderOutputError("Received malformed response from TextCLF text generation API");
+    }
+}
+
