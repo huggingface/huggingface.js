@@ -65,6 +65,7 @@ export class TextCLFTextGenerationTask extends BaseTextGenerationTask {
             typeof response === "object" &&
             "choices" in response &&
             Array.isArray(response?.choices) &&
+            response.choices.length > 0 &&
             typeof response?.model === "string"
         ) {
             const completion = response.choices[0];
