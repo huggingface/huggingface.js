@@ -597,7 +597,10 @@ export class Environment {
 		["integer", (operand) => operand instanceof IntegerValue],
 		["iterable", (operand) => operand.type === "ArrayValue" || operand.type === "StringValue"],
 		["mapping", (operand) => operand instanceof ObjectValue],
-		["sequence", (operand) => operand instanceof ArrayValue || operand instanceof ObjectValue || operand instanceof StringValue],
+		[
+			"sequence",
+			(operand) => operand instanceof ArrayValue || operand instanceof ObjectValue || operand instanceof StringValue,
+		],
 		[
 			"lower",
 			(operand) => {
@@ -971,7 +974,6 @@ export class Interpreter {
 			if (filter.value === "safe") {
 				return operand;
 			}
-
 
 			if (filter.value === "tojson") {
 				return new StringValue(toJSON(operand, {}));
