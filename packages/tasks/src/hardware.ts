@@ -550,7 +550,7 @@ export const SKUS = {
 			},
 			"RX 5500 XT": {
 				tflops: 5.2,
-				memory: [4,8],
+				memory: [4, 8],
 			},
 			"Radeon Pro VII": {
 				tflops: 26.11,
@@ -712,7 +712,7 @@ export const SKUS = {
 				tflops: 0.6,
 			},
 			"Ryzen 7 3800X (16)": {
-				tflops: 0.07,
+				tflops: 1.73,
 			},
 			"Ryzen Zen 5 9000 (Ryzen 9)": {
 				tflops: 0.56,
