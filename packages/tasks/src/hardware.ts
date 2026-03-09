@@ -549,7 +549,7 @@ export const SKUS = {
 				memory: [8],
 			},
 			"RX 5500 XT": {
-				tflops: 5.2,
+				tflops: 10.39,
 				memory: [4, 8],
 			},
 			"Radeon Pro VII": {
