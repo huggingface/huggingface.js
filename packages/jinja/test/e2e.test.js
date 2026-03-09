@@ -850,7 +850,8 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 				},
 			],
 		},
-		target: "<|im_start|>user\nWhat's the temperature in San Francisco now? How about tomorrow?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<tool_call>\n<function=get_temperature_date>\n<parameter=location>\nSan Francisco, CA, USA\n</parameter>\n<parameter=date>\n2024-10-01\n</parameter>\n</function>\n</tool_call><|im_end|>\n",
+		target:
+			"<|im_start|>user\nWhat's the temperature in San Francisco now? How about tomorrow?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n<tool_call>\n<function=get_temperature_date>\n<parameter=location>\nSan Francisco, CA, USA\n</parameter>\n<parameter=date>\n2024-10-01\n</parameter>\n</function>\n</tool_call><|im_end|>\n",
 	},
 
 	"CohereLabs/c4ai-command-a-03-2025": {
