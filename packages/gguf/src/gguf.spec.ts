@@ -28,6 +28,8 @@ const URL_V1 =
 const URL_SHARDED_GROK =
 	"https://huggingface.co/Arki05/Grok-1-GGUF/resolve/ecafa8d8eca9b8cd75d11a0d08d3a6199dc5a068/grok-1-IQ3_XS-split-00001-of-00009.gguf";
 const URL_BIG_METADATA = "https://huggingface.co/ngxson/test_gguf_models/resolve/main/gguf_test_big_metadata.gguf";
+const URL_KIMI_K25 =
+	"https://huggingface.co/unsloth/Kimi-K2.5-GGUF/resolve/5f759b07a564a5cb9fcfa9ad456cf254e539ac77/UD-Q3_K_XL/Kimi-K2.5-UD-Q3_K_XL-00001-of-00011.gguf";
 
 describe("gguf", () => {
 	beforeAll(async () => {
@@ -252,6 +254,46 @@ describe("gguf", () => {
 			name: "output.weight",
 			shape: [64n, 512n],
 			dtype: GGMLQuantizationType.F32,
+		});
+	});
+
+	it("should parse a large MoE model (Kimi-K2.5, 160K vocab)", async () => {
+		const { metadata, typedMetadata, tensorInfos } = await gguf(URL_KIMI_K25, { typedMetadata: true });
+
+		expect(metadata).toMatchObject({
+			version: 3,
+			"general.architecture": "deepseek2",
+			"general.name": "Kimi-K2.5",
+			"deepseek2.block_count": 61,
+			"deepseek2.embedding_length": 7168,
+			"deepseek2.expert_count": 384,
+			"deepseek2.expert_used_count": 8,
+			"deepseek2.expert_shared_count": 1,
+			"deepseek2.vocab_size": 163840,
+		});
+
+		expect(typedMetadata["general.architecture"]).toEqual({
+			value: "deepseek2",
+			type: GGUFValueType.STRING,
+		});
+		expect(typedMetadata["deepseek2.expert_count"]).toEqual({
+			value: 384,
+			type: GGUFValueType.UINT32,
+		});
+		expect(typedMetadata["tokenizer.ggml.tokens"]).toMatchObject({
+			type: GGUFValueType.ARRAY,
+			subType: GGUFValueType.STRING,
+		});
+		const tokens = typedMetadata["tokenizer.ggml.tokens"].value;
+		expect(Array.isArray(tokens)).toBe(true);
+		if (Array.isArray(tokens)) {
+			expect(tokens.length).toEqual(163_840);
+		}
+
+		expect(tensorInfos.length).toBeGreaterThan(0);
+		expect(tensorInfos[0]).toMatchObject({
+			name: "output.weight",
+			shape: [7168n, 163840n],
 		});
 	});
 

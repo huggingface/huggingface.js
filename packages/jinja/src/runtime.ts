@@ -596,7 +596,11 @@ export class Environment {
 		["number", (operand) => operand instanceof IntegerValue || operand instanceof FloatValue],
 		["integer", (operand) => operand instanceof IntegerValue],
 		["iterable", (operand) => operand.type === "ArrayValue" || operand.type === "StringValue"],
-		["mapping", (operand) => operand.type === "ObjectValue"],
+		["mapping", (operand) => operand instanceof ObjectValue],
+		[
+			"sequence",
+			(operand) => operand instanceof ArrayValue || operand instanceof ObjectValue || operand instanceof StringValue,
+		],
 		[
 			"lower",
 			(operand) => {
@@ -967,6 +971,10 @@ export class Interpreter {
 		if (filterNode.type === "Identifier") {
 			const filter = filterNode as Identifier;
 
+			if (filter.value === "safe") {
+				return operand;
+			}
+
 			if (filter.value === "tojson") {
 				return new StringValue(toJSON(operand, {}));
 			}
@@ -1058,6 +1066,8 @@ export class Interpreter {
 						return new IntegerValue(Math.floor(operand.value));
 					case "float":
 						return new FloatValue(operand.value);
+					case "string":
+						return new StringValue(operand.toString());
 					default:
 						throw new Error(`Unknown NumericValue filter: ${filter.value}`);
 				}

@@ -548,6 +548,10 @@ export const SKUS = {
 				tflops: 17.86,
 				memory: [8],
 			},
+			"RX 5500 XT": {
+				tflops: 10.39,
+				memory: [4, 8],
+			},
 			"Radeon Pro VII": {
 				tflops: 26.11,
 				memory: [16, 32],
@@ -706,6 +710,9 @@ export const SKUS = {
 			},
 			"Ryzen Threadripper Zen 1000 (Whitehaven)": {
 				tflops: 0.6,
+			},
+			"Ryzen 7 3800X (16)": {
+				tflops: 1.73,
 			},
 			"Ryzen Zen 5 9000 (Ryzen 9)": {
 				tflops: 0.56,

@@ -36,6 +36,8 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 
 const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000; // 25MB
+const MAX_CONFIG_LENGTH = 10_000_000; // 10MB — config.json is typically small; cap to avoid large memory use
+const MAX_SHARD_COUNT = 10_000; // well above any real sharded model; blocks crafted index with millions of entries
 const GPTQ_QWEIGHT_SUFFIX = "qweight";
 const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
 
@@ -123,7 +125,7 @@ async function fetchModelConfig(
 			return null;
 		}
 
-		const config = JSON.parse(await configBlob.text());
+		const config = JSON.parse(await configBlob.slice(0, MAX_CONFIG_LENGTH).text());
 		return config as ModelConfig;
 	} catch (error) {
 		// Config file might not exist or be inaccessible
@@ -215,6 +217,16 @@ async function fetchAllHeaders(
 ): Promise<SafetensorsShardedHeaders> {
 	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
+	if (filenames.length > MAX_SHARD_COUNT) {
+		throw new SafetensorParseError(
+			`Too many shard files (${filenames.length}). Maximum supported is ${MAX_SHARD_COUNT}.`,
+		);
+	}
+	for (const filename of filenames) {
+		if (filename.includes("..") || filename.startsWith("/") || filename.includes("://")) {
+			throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}"`);
+		}
+	}
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
 		await promisesQueue(
 			filenames.map(
@@ -364,13 +376,29 @@ export interface ModelConfig {
 }
 
 /**
+ * Glob match without RegExp: splits pattern on `*` and checks that each literal
+ * segment appears in order within `str`. Avoids RegExp entirely (no ReDoS risk,
+ * no SyntaxError from attacker-controlled patterns in config.json).
+ */
+function globMatch(pattern: string, str: string): boolean {
+	const parts = pattern.split("*");
+	let pos = 0;
+	for (const part of parts) {
+		const idx = str.indexOf(part, pos);
+		if (idx === -1) return false;
+		pos = idx + part.length;
+	}
+	return true;
+}
+
+/**
  * Determines if a tensor is quantized based on quantization config and tensor name
  */
 function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
 	if (!quantConfig) return false;
 	const patterns = quantConfig.modules_to_not_convert;
 	if (!patterns?.length) return true;
-	return !patterns.some((pattern) => new RegExp(pattern.replace(/\*/g, ".*")).test(tensorName));
+	return !patterns.some((pattern) => globMatch(pattern, tensorName));
 }
 
 /**
@@ -442,6 +470,9 @@ function computeNumOfParamsByDtypeSingleFile(
 		}
 
 		const elements = v.shape.reduce((a, b) => a * b);
+		if (!Number.isFinite(elements)) {
+			continue;
+		}
 		const multiplier = quantConfig ? getQuantizationMultiplier(tensorName, v.dtype, quantConfig) : 1;
 		if (multiplier === 0) {
 			continue;
