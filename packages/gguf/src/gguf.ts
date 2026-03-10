@@ -790,8 +790,8 @@ export async function ggufAllShards(
 	},
 ): Promise<{
 	shards: GGUFParseOutput[];
-	urls: string[];
 	parameterCount: number;
+	urls: string[];
 }> {
 	const parallelDownloads = params?.parallelDownloads ?? PARALLEL_DOWNLOADS;
 	if (parallelDownloads < 1) {
@@ -812,9 +812,9 @@ export async function ggufAllShards(
 			parallelDownloads,
 		);
 		return {
-			urls,
 			shards,
 			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
+			urls,
 		};
 	} else {
 		const { metadata, tensorInfos, tensorDataOffset, littleEndian, parameterCount, tensorInfoByteRange } = await gguf(
@@ -825,9 +825,9 @@ export async function ggufAllShards(
 			},
 		);
 		return {
-			urls: [url],
 			shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }],
 			parameterCount,
+			urls: [url],
 		};
 	}
 }
