@@ -1,5 +1,5 @@
 import { assert, it, describe } from "vitest";
-import { parseSafetensorsMetadata, parseSafetensorsShardFilename, globMatch } from "./parse-safetensors-metadata";
+import { parseSafetensorsMetadata, parseSafetensorsShardFilename, globMatch, isQuantizedTensor } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -356,6 +356,49 @@ describe("parseSafetensorsMetadata", () => {
 			assert.strictEqual(globMatch("lm_head", "lm_head"), true);
 			assert.strictEqual(globMatch("lm_head", "model.lm_head"), false);
 			assert.strictEqual(globMatch("*lm_head*", "model.lm_head.weight"), true);
+		});
+
+		it("bare module names match via substring in isQuantizedTensor context", () => {
+			// globMatch itself is a strict glob matcher — no wildcard means exact match
+			assert.strictEqual(globMatch("lm_head", "model.lm_head.weight"), false);
+			// But isQuantizedTensor uses substring matching for bare names (no *)
+			// to match Python transformers behavior. See isQuantizedTensor tests below.
+		});
+	});
+
+	describe("isQuantizedTensor", () => {
+		const makeConfig = (modules: string[]) => ({
+			quant_method: "bitsandbytes" as const,
+			modules_to_not_convert: modules,
+		});
+
+		it("returns false when no quantization config", () => {
+			assert.strictEqual(isQuantizedTensor("model.layer.weight", undefined), false);
+		});
+
+		it("returns true when modules_to_not_convert is empty", () => {
+			assert.strictEqual(isQuantizedTensor("model.layer.weight", makeConfig([])), true);
+		});
+
+		it("bare module name excludes tensors containing that substring (Python compat)", () => {
+			const config = makeConfig(["lm_head"]);
+			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("lm_head", config), false);
+			assert.strictEqual(isQuantizedTensor("lm_head.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("model.embed_tokens.weight", config), true);
+		});
+
+		it("glob pattern with wildcards uses globMatch", () => {
+			const config = makeConfig(["*lm_head*"]);
+			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("model.embed_tokens.weight", config), true);
+		});
+
+		it("multiple exclusion patterns", () => {
+			const config = makeConfig(["lm_head", "embed_tokens"]);
+			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("model.embed_tokens.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("model.layers.0.self_attn.q_proj.weight", config), true);
 		});
 	});
 

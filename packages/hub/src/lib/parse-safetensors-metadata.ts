@@ -391,13 +391,19 @@ export function globMatch(pattern: string, str: string): boolean {
 }
 
 /**
- * Determines if a tensor is quantized based on quantization config and tensor name
+ * Determines if a tensor is quantized based on quantization config and tensor name.
+ *
+ * Python's transformers uses plain substring matching for `modules_to_not_convert`,
+ * so bare names like `"lm_head"` must match `"model.lm_head.weight"`. When the
+ * pattern contains a `*` we fall back to proper glob matching for flexibility.
  */
-function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
+export function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
 	if (!quantConfig) return false;
 	const patterns = quantConfig.modules_to_not_convert;
 	if (!patterns?.length) return true;
-	return !patterns.some((pattern) => globMatch(pattern, tensorName));
+	return !patterns.some((pattern) =>
+		pattern.includes("*") ? globMatch(pattern, tensorName) : tensorName.includes(pattern)
+	);
 }
 
 /**
