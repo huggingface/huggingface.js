@@ -402,7 +402,7 @@ export function isQuantizedTensor(tensorName: string, quantConfig?: Quantization
 	const patterns = quantConfig.modules_to_not_convert;
 	if (!patterns?.length) return true;
 	return !patterns.some((pattern) =>
-		pattern.includes("*") ? globMatch(pattern, tensorName) : tensorName.includes(pattern)
+		pattern.includes("*") ? globMatch(pattern, tensorName) : tensorName.includes(pattern),
 	);
 }
 

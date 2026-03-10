@@ -1,5 +1,10 @@
 import { assert, it, describe } from "vitest";
-import { parseSafetensorsMetadata, parseSafetensorsShardFilename, globMatch, isQuantizedTensor } from "./parse-safetensors-metadata";
+import {
+	parseSafetensorsMetadata,
+	parseSafetensorsShardFilename,
+	globMatch,
+	isQuantizedTensor,
+} from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
