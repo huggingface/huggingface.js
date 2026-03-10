@@ -18,11 +18,16 @@ jobs:
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         run: |
-          if [ -z $PR_REF ]
+          if [ -z "$PR_REF" ]
           then
             echo "SINCE=$SHA^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base $BASE_REF $SHA)" >> $GITHUB_OUTPUT
+            MERGE_BASE=$(git merge-base "$BASE_REF" "$SHA")
+            if ! echo "$MERGE_BASE" | grep -qE '^[0-9a-f]{40}$'; then
+              echo "Error: Invalid merge base format"
+              exit 1
+            fi
+            echo "SINCE=$MERGE_BASE" >> $GITHUB_OUTPUT
           fi
         env:
           PR_REF: ${{  github.event.pull_request.head.ref }}
