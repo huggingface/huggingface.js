@@ -109,7 +109,7 @@ describe("uploadShards", () => {
 			return new Response(null, { status: 200 });
 		});
 
-		for await (const _event of uploadShards(toSource(), {
+		for await (const event of uploadShards(toSource(), {
 			accessToken: "test-token",
 			hubUrl: "https://hub.local",
 			fetch: fetchMock,
@@ -122,7 +122,7 @@ describe("uploadShards", () => {
 				refreshWriteTokenUrl: "https://hub.local/xet-write-token",
 			},
 		})) {
-			// consume iterator
+			void event;
 		}
 
 		expect(uploadedShards).toHaveLength(1);
@@ -147,7 +147,7 @@ describe("uploadShards", () => {
 			return new Response(null, { status: 200 });
 		});
 
-		for await (const _event of uploadShards(toSource("5".repeat(64)), {
+		for await (const event of uploadShards(toSource("5".repeat(64)), {
 			accessToken: "test-token",
 			hubUrl: "https://hub.local",
 			fetch: fetchMock,
@@ -160,7 +160,7 @@ describe("uploadShards", () => {
 				refreshWriteTokenUrl: "https://hub.local/xet-write-token",
 			},
 		})) {
-			// consume iterator
+			void event;
 		}
 
 		expect(uploadedShards).toHaveLength(1);
