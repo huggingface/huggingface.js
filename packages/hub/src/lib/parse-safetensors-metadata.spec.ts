@@ -1,5 +1,5 @@
 import { assert, it, describe } from "vitest";
-import { parseSafetensorsMetadata, parseSafetensorsShardFilename } from "./parse-safetensors-metadata";
+import { parseSafetensorsMetadata, parseSafetensorsShardFilename, globMatch } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -311,6 +311,52 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert.strictEqual(parameterCount.FP4, 20000);
 		assert.strictEqual(parameterCount.UE8, 5000);
+	});
+
+	describe("globMatch", () => {
+		it("exact match when no wildcard", () => {
+			assert.strictEqual(globMatch("foo", "foo"), true);
+			assert.strictEqual(globMatch("foo", "foobar"), false);
+			assert.strictEqual(globMatch("foo", "xfoo"), false);
+			assert.strictEqual(globMatch("foo", "xfoox"), false);
+		});
+
+		it("single leading wildcard (*.ext)", () => {
+			assert.strictEqual(globMatch("*.txt", "file.txt"), true);
+			assert.strictEqual(globMatch("*.txt", ".txt"), true);
+			assert.strictEqual(globMatch("*.txt", "file.txt.bak"), false);
+			assert.strictEqual(globMatch("*.txt", "txt"), false);
+		});
+
+		it("single trailing wildcard (prefix.*)", () => {
+			assert.strictEqual(globMatch("model.*", "model.bin"), true);
+			assert.strictEqual(globMatch("model.*", "model."), true);
+			assert.strictEqual(globMatch("model.*", "my_model.bin"), false);
+		});
+
+		it("wildcard on both sides (*mid*)", () => {
+			assert.strictEqual(globMatch("*layer*", "model.layer.weight"), true);
+			assert.strictEqual(globMatch("*layer*", "layer"), true);
+			assert.strictEqual(globMatch("*layer*", "no_match"), false);
+		});
+
+		it("multiple wildcards", () => {
+			assert.strictEqual(globMatch("a*b*c", "abc"), true);
+			assert.strictEqual(globMatch("a*b*c", "aXXbYYc"), true);
+			assert.strictEqual(globMatch("a*b*c", "aXXbYY"), false);
+			assert.strictEqual(globMatch("a*b*c", "XXbYYc"), false);
+		});
+
+		it("wildcard-only pattern matches anything", () => {
+			assert.strictEqual(globMatch("*", "anything"), true);
+			assert.strictEqual(globMatch("*", ""), true);
+		});
+
+		it("typical quantization config patterns", () => {
+			assert.strictEqual(globMatch("lm_head", "lm_head"), true);
+			assert.strictEqual(globMatch("lm_head", "model.lm_head"), false);
+			assert.strictEqual(globMatch("*lm_head*", "model.lm_head.weight"), true);
+		});
 	});
 
 	it("fetch info for moonshotai/Kimi-K2.5 (large index file >20MB)", async () => {

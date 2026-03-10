@@ -362,19 +362,32 @@ export interface ModelConfig {
 }
 
 /**
+ * @internal
  * Glob match without RegExp: splits pattern on `*` and checks that each literal
  * segment appears in order within `str`. Avoids RegExp entirely (no ReDoS risk,
  * no SyntaxError from attacker-controlled patterns in config.json).
  */
-function globMatch(pattern: string, str: string): boolean {
+export function globMatch(pattern: string, str: string): boolean {
 	const parts = pattern.split("*");
-	let pos = 0;
-	for (const part of parts) {
-		const idx = str.indexOf(part, pos);
-		if (idx === -1) return false;
-		pos = idx + part.length;
+
+	if (parts.length === 1) {
+		return pattern === str;
 	}
-	return true;
+
+	if (!str.startsWith(parts[0])) return false;
+	let pos = parts[0].length;
+
+	const lastPart = parts[parts.length - 1];
+	if (!str.endsWith(lastPart)) return false;
+	const end = str.length - lastPart.length;
+
+	for (let i = 1; i < parts.length - 1; i++) {
+		const idx = str.indexOf(parts[i], pos);
+		if (idx === -1 || idx + parts[i].length > end) return false;
+		pos = idx + parts[i].length;
+	}
+
+	return pos <= end;
 }
 
 /**
