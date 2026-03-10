@@ -1,5 +1,10 @@
 import { assert, it, describe } from "vitest";
-import { parseSafetensorsMetadata, parseSafetensorsShardFilename } from "./parse-safetensors-metadata";
+import {
+	parseSafetensorsMetadata,
+	parseSafetensorsShardFilename,
+	globMatch,
+	isQuantizedTensor,
+} from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -324,6 +329,95 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert.strictEqual(parameterCount.FP4, 20000);
 		assert.strictEqual(parameterCount.UE8, 5000);
+	});
+
+	describe("globMatch", () => {
+		it("exact match when no wildcard", () => {
+			assert.strictEqual(globMatch("foo", "foo"), true);
+			assert.strictEqual(globMatch("foo", "foobar"), false);
+			assert.strictEqual(globMatch("foo", "xfoo"), false);
+			assert.strictEqual(globMatch("foo", "xfoox"), false);
+		});
+
+		it("single leading wildcard (*.ext)", () => {
+			assert.strictEqual(globMatch("*.txt", "file.txt"), true);
+			assert.strictEqual(globMatch("*.txt", ".txt"), true);
+			assert.strictEqual(globMatch("*.txt", "file.txt.bak"), false);
+			assert.strictEqual(globMatch("*.txt", "txt"), false);
+		});
+
+		it("single trailing wildcard (prefix.*)", () => {
+			assert.strictEqual(globMatch("model.*", "model.bin"), true);
+			assert.strictEqual(globMatch("model.*", "model."), true);
+			assert.strictEqual(globMatch("model.*", "my_model.bin"), false);
+		});
+
+		it("wildcard on both sides (*mid*)", () => {
+			assert.strictEqual(globMatch("*layer*", "model.layer.weight"), true);
+			assert.strictEqual(globMatch("*layer*", "layer"), true);
+			assert.strictEqual(globMatch("*layer*", "no_match"), false);
+		});
+
+		it("multiple wildcards", () => {
+			assert.strictEqual(globMatch("a*b*c", "abc"), true);
+			assert.strictEqual(globMatch("a*b*c", "aXXbYYc"), true);
+			assert.strictEqual(globMatch("a*b*c", "aXXbYY"), false);
+			assert.strictEqual(globMatch("a*b*c", "XXbYYc"), false);
+		});
+
+		it("wildcard-only pattern matches anything", () => {
+			assert.strictEqual(globMatch("*", "anything"), true);
+			assert.strictEqual(globMatch("*", ""), true);
+		});
+
+		it("typical quantization config patterns", () => {
+			assert.strictEqual(globMatch("lm_head", "lm_head"), true);
+			assert.strictEqual(globMatch("lm_head", "model.lm_head"), false);
+			assert.strictEqual(globMatch("*lm_head*", "model.lm_head.weight"), true);
+		});
+
+		it("bare module names match via substring in isQuantizedTensor context", () => {
+			// globMatch itself is a strict glob matcher — no wildcard means exact match
+			assert.strictEqual(globMatch("lm_head", "model.lm_head.weight"), false);
+			// But isQuantizedTensor uses substring matching for bare names (no *)
+			// to match Python transformers behavior. See isQuantizedTensor tests below.
+		});
+	});
+
+	describe("isQuantizedTensor", () => {
+		const makeConfig = (modules: string[]) => ({
+			quant_method: "bitsandbytes" as const,
+			modules_to_not_convert: modules,
+		});
+
+		it("returns false when no quantization config", () => {
+			assert.strictEqual(isQuantizedTensor("model.layer.weight", undefined), false);
+		});
+
+		it("returns true when modules_to_not_convert is empty", () => {
+			assert.strictEqual(isQuantizedTensor("model.layer.weight", makeConfig([])), true);
+		});
+
+		it("bare module name excludes tensors containing that substring (Python compat)", () => {
+			const config = makeConfig(["lm_head"]);
+			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("lm_head", config), false);
+			assert.strictEqual(isQuantizedTensor("lm_head.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("model.embed_tokens.weight", config), true);
+		});
+
+		it("glob pattern with wildcards uses globMatch", () => {
+			const config = makeConfig(["*lm_head*"]);
+			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("model.embed_tokens.weight", config), true);
+		});
+
+		it("multiple exclusion patterns", () => {
+			const config = makeConfig(["lm_head", "embed_tokens"]);
+			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("model.embed_tokens.weight", config), false);
+			assert.strictEqual(isQuantizedTensor("model.layers.0.self_attn.q_proj.weight", config), true);
+		});
 	});
 
 	it("fetch info for moonshotai/Kimi-K2.5 (large index file >20MB)", async () => {

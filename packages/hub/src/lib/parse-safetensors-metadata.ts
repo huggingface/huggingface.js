@@ -376,29 +376,48 @@ export interface ModelConfig {
 }
 
 /**
+ * @internal
  * Glob match without RegExp: splits pattern on `*` and checks that each literal
  * segment appears in order within `str`. Avoids RegExp entirely (no ReDoS risk,
  * no SyntaxError from attacker-controlled patterns in config.json).
  */
-function globMatch(pattern: string, str: string): boolean {
+export function globMatch(pattern: string, str: string): boolean {
 	const parts = pattern.split("*");
-	let pos = 0;
-	for (const part of parts) {
-		const idx = str.indexOf(part, pos);
-		if (idx === -1) return false;
-		pos = idx + part.length;
+
+	if (parts.length === 1) {
+		return pattern === str;
 	}
-	return true;
+
+	if (!str.startsWith(parts[0])) return false;
+	let pos = parts[0].length;
+
+	const lastPart = parts[parts.length - 1];
+	if (!str.endsWith(lastPart)) return false;
+	const end = str.length - lastPart.length;
+
+	for (let i = 1; i < parts.length - 1; i++) {
+		const idx = str.indexOf(parts[i], pos);
+		if (idx === -1 || idx + parts[i].length > end) return false;
+		pos = idx + parts[i].length;
+	}
+
+	return pos <= end;
 }
 
 /**
- * Determines if a tensor is quantized based on quantization config and tensor name
+ * Determines if a tensor is quantized based on quantization config and tensor name.
+ *
+ * Python's transformers uses plain substring matching for `modules_to_not_convert`,
+ * so bare names like `"lm_head"` must match `"model.lm_head.weight"`. When the
+ * pattern contains a `*` we fall back to proper glob matching for flexibility.
  */
-function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
+export function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
 	if (!quantConfig) return false;
 	const patterns = quantConfig.modules_to_not_convert;
 	if (!patterns?.length) return true;
-	return !patterns.some((pattern) => globMatch(pattern, tensorName));
+	return !patterns.some((pattern) =>
+		pattern.includes("*") ? globMatch(pattern, tensorName) : tensorName.includes(pattern),
+	);
 }
 
 /**
