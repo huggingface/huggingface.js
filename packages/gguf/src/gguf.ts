@@ -498,14 +498,13 @@ export async function gguf(
 
 	// calculate absolute offset of tensor data
 	const rawAlignment = metadata["general.alignment"] ?? GGUF_DEFAULT_ALIGNMENT;
-	const alignment: number =
-		typeof rawAlignment === "bigint"
-			? rawAlignment > BigInt(Number.MAX_SAFE_INTEGER)
-				? (() => {
-						throw new Error(`general.alignment value ${rawAlignment} exceeds safe integer range`);
-					})()
-				: Number(rawAlignment)
-			: Number(rawAlignment);
+	if (typeof rawAlignment === "bigint" && rawAlignment > BigInt(Number.MAX_SAFE_INTEGER)) {
+		throw new Error(`general.alignment value ${rawAlignment} exceeds safe integer range`);
+	}
+	const alignment = Number(rawAlignment);
+	if (alignment <= 0 || !Number.isInteger(alignment)) {
+		throw new Error(`general.alignment must be a positive integer, got ${rawAlignment}`);
+	}
 	const tensorInfoEndBeforePadOffset = offset;
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
