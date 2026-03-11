@@ -58,7 +58,7 @@ export {
 } from "./snippets/index.js";
 
 export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware.js";
-export type { HardwareSpec, SkuType } from "./hardware.js";
+export type { HardwareSpec, NvidiaHardwareSpec, SkuType } from "./hardware.js";
 export { LOCAL_APPS } from "./local-apps.js";
 export type { LocalApp, LocalAppKey, LocalAppSnippet } from "./local-apps.js";
 
