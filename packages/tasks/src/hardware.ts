@@ -62,7 +62,7 @@ export enum NvidiaComputeCapabilities {
 	MAXWELL = 5.3,
 }
 
-export const NVIDIA_SKUS = {
+export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	B200: {
 		tflops: 496.6,
 		memory: [192],
@@ -588,7 +588,7 @@ export const NVIDIA_SKUS = {
 		memory: [4],
 		computeCapability: 5.3,
 	},
-} satisfies Record<string, NvidiaHardwareSpec>;
+};
 
 export const SKUS = {
 	GPU: {
