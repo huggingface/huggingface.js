@@ -200,6 +200,14 @@ export class XetBlob extends Blob {
 	}
 
 	async #fetch(): Promise<ReadableStream<Uint8Array>> {
+		if (this.size === 0) {
+			return new ReadableStream<Uint8Array>({
+				start(controller) {
+					controller.close();
+				},
+			});
+		}
+
 		if (!this.reconstructionInfo) {
 			await this.#loadReconstructionInfo();
 		}

@@ -4,6 +4,35 @@ import { bg4_regroup_bytes, bg4_split_bytes, XetBlob } from "./XetBlob";
 import { sum } from "./sum";
 
 describe("XetBlob", () => {
+	it("should handle empty files (size 0) without making network requests", async () => {
+		let fetchCount = 0;
+
+		const blob = new XetBlob({
+			hash: "test",
+			size: 0,
+			refreshUrl: "https://huggingface.co",
+			fetch: async () => {
+				fetchCount++;
+				return new Response();
+			},
+		});
+
+		const text = await blob.text();
+		expect(text).toBe("");
+		expect(fetchCount).toBe(0);
+
+		const arrayBuffer = await blob.arrayBuffer();
+		expect(arrayBuffer.byteLength).toBe(0);
+		expect(fetchCount).toBe(0);
+
+		const stream = blob.stream();
+		const reader = stream.getReader();
+		const result = await reader.read();
+		expect(result.done).toBe(true);
+		expect(result.value).toBeUndefined();
+		expect(fetchCount).toBe(0);
+	});
+
 	it("should lazy load the first 22 bytes", async () => {
 		const blob = new XetBlob({
 			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
