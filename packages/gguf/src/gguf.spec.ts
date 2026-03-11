@@ -319,8 +319,17 @@ describe("gguf", () => {
 	});
 
 	it("should get param count for sharded gguf", async () => {
-		const { parameterCount } = await ggufAllShards(URL_SHARDED_GROK);
+		const { parameterCount, urls } = await ggufAllShards(URL_SHARDED_GROK);
 		expect(parameterCount).toEqual(316_490_127_360); // 316B
+		expect(urls).toHaveLength(9);
+		expect(urls[0]).toMatch(/00001-of-00009\.gguf$/);
+		expect(urls[8]).toMatch(/00009-of-00009\.gguf$/);
+	});
+
+	it("should return urls for single (non-sharded) gguf", async () => {
+		const { urls } = await ggufAllShards(URL_LLAMA);
+		expect(urls).toHaveLength(1);
+		expect(urls[0]).toEqual(URL_LLAMA);
 	});
 
 	it("parse quant label", async () => {

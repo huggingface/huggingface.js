@@ -29,6 +29,8 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.parameterCount, { F32: 110_106_428 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 110_106_428);
 		// total params = 110m
+
+		assert.deepStrictEqual(parse.filepaths, ["model.safetensors"]);
 	});
 
 	it("fetch info for sharded (with the default conventional filename)", async () => {
@@ -54,6 +56,10 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.parameterCount, { BF16: 176_247_271_424 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 176_247_271_424);
 		// total params = 176B
+
+		assert.strictEqual(parse.filepaths[0], "model.safetensors.index.json");
+		assert.strictEqual(parse.filepaths.length, 73); // 1 index + 72 shards
+		assert.ok(parse.filepaths.includes("model_00012-of-00072.safetensors"));
 	});
 
 	it("fetch info for single-file with multiple dtypes", async () => {
@@ -91,6 +97,8 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert.deepStrictEqual(parse.parameterCount, { F32: 859_520_964 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 859_520_964);
+
+		assert.deepStrictEqual(parse.filepaths, ["unet/diffusion_pytorch_model.safetensors"]);
 	});
 
 	it("fetch info for sharded with file path", async () => {
@@ -113,6 +121,11 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert.deepStrictEqual(parse.parameterCount, { BF16: 8_537_680_896 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 8_537_680_896);
+
+		assert.strictEqual(parse.filepaths[0], "7b/1/model.safetensors.index.json");
+		assert.strictEqual(parse.filepaths.length, 5); // 1 index + 4 shards
+		assert.ok(parse.filepaths.includes("7b/1/model-00001-of-00004.safetensors"));
+		assert.ok(parse.filepaths.includes("7b/1/model-00004-of-00004.safetensors"));
 	});
 
 	it("fetch info for sharded, but get param count directly from metadata", async () => {
