@@ -34,6 +34,8 @@ export interface HardwareSpec {
 export interface NvidiaHardwareSpec extends HardwareSpec {
 	/**
 	 * CUDA Compute Capability (NVIDIA GPUs only)
+	 *
+	 * potential source https://developer.nvidia.com/cuda/gpus
 	 */
 	computeCapability: number;
 }
