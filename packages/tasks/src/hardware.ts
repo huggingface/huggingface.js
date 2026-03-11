@@ -1,3 +1,5 @@
+import { NVIDIA_SKUS } from "./hardware-nvidia.js";
+
 /**
  * Biden AI Executive Order (since revoked by President Trump):
  * https://web.archive.org/web/20250105222429/https://www.whitehouse.gov/briefing-room/presidential-actions/2023/10/30/executive-order-on-the-safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence/
@@ -34,9 +36,6 @@ export interface HardwareSpec {
 export const DEFAULT_MEMORY_OPTIONS = [
 	8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048,
 ];
-
-export { NvidiaComputeCapabilities, NVIDIA_SKUS, type NvidiaHardwareSpec } from "./hardware-nvidia.js";
-import { NVIDIA_SKUS } from "./hardware-nvidia.js";
 
 export const SKUS = {
 	GPU: {
