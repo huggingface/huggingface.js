@@ -115,6 +115,8 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_15: `|{{ "abcabcabc" | replace("a", "b") }}|{{ "abcabcabc" | replace("a", "b", 1) }}|{{ "abcabcabc" | replace("a", "b", count=1) }}|`,
 	FILTER_OPERATOR_16: `|{{ undefined | default("hello") }}|{{ false | default("hello") }}|{{ false | default("hello", true) }}|{{ 0 | default("hello", boolean=true) }}|`,
 	FILTER_OPERATOR_17: `{{ [1, 2, 1, -1, 2] | unique | list | length }}`,
+	FILTER_OPERATOR_18: `{{ "<tag>" | safe }}`,
+	FILTER_OPERATOR_19: `|{{ 3 | string }}|{{ 1.5 | string }}|`,
 	// Tests for tojson with separators, ensure_ascii, and sort_keys parameters
 	TOJSON_SEPARATORS_1: `{{ obj | tojson(separators=(',', ':')) }}`,
 	TOJSON_SEPARATORS_2: `{{ arr | tojson(separators=(',', ':')) }}`,
@@ -2462,6 +2464,28 @@ const TEST_PARSED = {
 		{ value: "|", type: "Pipe" },
 		{ value: "length", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_18: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "<tag>", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "safe", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_19: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "string", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "1.5", type: "NumericLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "string", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
 	],
 	// Tests for tojson with separators, ensure_ascii, and sort_keys parameters
 	TOJSON_SEPARATORS_1: [
@@ -4814,6 +4838,8 @@ const TEST_CONTEXT = {
 	FILTER_OPERATOR_15: {},
 	FILTER_OPERATOR_16: {},
 	FILTER_OPERATOR_17: {},
+	FILTER_OPERATOR_18: {},
+	FILTER_OPERATOR_19: {},
 	// Tests for tojson with separators, ensure_ascii, and sort_keys parameters
 	TOJSON_SEPARATORS_1: {
 		obj: { type: "function", name: "get_weather" },
@@ -5149,6 +5175,8 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_15: `|bbcbbcbbc|bbcabcabc|bbcabcabc|`,
 	FILTER_OPERATOR_16: `|hello|false|hello|hello|`,
 	FILTER_OPERATOR_17: `3`,
+	FILTER_OPERATOR_18: `<tag>`,
+	FILTER_OPERATOR_19: `|3|1.5|`,
 	// Tests for tojson with separators, ensure_ascii, and sort_keys parameters
 	TOJSON_SEPARATORS_1: `{"type":"function","name":"get_weather"}`,
 	TOJSON_SEPARATORS_2: `[1,2,3]`,

@@ -27,6 +27,19 @@ export {
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
 const GGUF_DEFAULT_ALIGNMENT = 32; // defined in ggml.h
+
+/**
+ * Safety limits to prevent OOM from crafted GGUF files (CWE-770).
+ * Values are set well above any known real-world model (e.g. Kimi-K2.5 at 1T params,
+ * 160K vocab, 384 experts) while still preventing billion-element allocations.
+ */
+const MAX_METADATA_ARRAY_LENGTH = 1_000_000;
+const MAX_KV_COUNT = 100_000;
+const MAX_TENSOR_COUNT = 10_000_000;
+const MAX_STRING_LENGTH = 10_000_000; // 10MB per string (CWE-770)
+const MAX_TENSOR_NDIMS = 8; // GGML supports up to 4, be generous (CWE-770)
+const MAX_ARRAY_RECURSION_DEPTH = 4; // nested ARRAY-of-ARRAY depth limit (CWE-674)
+const MAX_CHUNK_FETCHES_PER_VALUE = 30; // prevent infinite fetch loop (CWE-835)
 const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); // defined in ggml.h
 const PARALLEL_DOWNLOADS = 20;
 
@@ -189,6 +202,9 @@ function readVersionedSize(view: DataView, byteOffset: number, version: Version,
 
 function readString(view: DataView, offset: number, version: Version, littleEndian: boolean): Slice<string> {
 	const length = readVersionedSize(view, offset, version, littleEndian);
+	if (length.value > MAX_STRING_LENGTH) {
+		throw new Error(`String length ${length.value} exceeds maximum allowed (${MAX_STRING_LENGTH})`);
+	}
 	const off = length.length;
 	const value = new TextDecoder().decode(view.buffer.slice(offset + off, offset + off + Number(length.value)));
 	return { value, length: off + Number(length.value) };
@@ -200,6 +216,7 @@ function readMetadataValue(
 	offset: number,
 	version: Version,
 	littleEndian: boolean,
+	depth = 0,
 ): Slice<MetadataValue> {
 	switch (type) {
 		case GGUFValueType.UINT8:
@@ -221,12 +238,23 @@ function readMetadataValue(
 		case GGUFValueType.STRING:
 			return readString(view, offset, version, littleEndian);
 		case GGUFValueType.ARRAY: {
+			if (depth >= MAX_ARRAY_RECURSION_DEPTH) {
+				throw new Error(`Nested ARRAY depth ${depth} exceeds maximum allowed (${MAX_ARRAY_RECURSION_DEPTH})`);
+			}
 			const arrayType = view.getUint32(offset, littleEndian);
+			if (!isGGUFValueType(arrayType)) {
+				throw new Error(`Unsupported array element type: ${arrayType}`);
+			}
 			const arrayLength = readVersionedSize(view, offset + 4, version, littleEndian);
+			if (arrayLength.value > MAX_METADATA_ARRAY_LENGTH) {
+				throw new Error(
+					`Metadata array length ${arrayLength.value} exceeds maximum allowed (${MAX_METADATA_ARRAY_LENGTH})`,
+				);
+			}
 			let length = 4 + arrayLength.length;
 			const arrayValues: MetadataValue[] = [];
 			for (let i = 0; i < arrayLength.value; i++) {
-				const metadataValue = readMetadataValue(view, arrayType, offset + length, version, littleEndian);
+				const metadataValue = readMetadataValue(view, arrayType, offset + length, version, littleEndian, depth + 1);
 				arrayValues.push(metadataValue.value);
 				length += metadataValue.length;
 			}
@@ -340,8 +368,14 @@ export async function gguf(
 	// initial offset after header
 	let offset = 8;
 	const tensorCount = readVersionedSize(r.view, offset, version, littleEndian);
+	if (tensorCount.value > MAX_TENSOR_COUNT) {
+		throw new Error(`Tensor count ${tensorCount.value} exceeds maximum allowed (${MAX_TENSOR_COUNT})`);
+	}
 	offset += tensorCount.length;
 	const numKv = readVersionedSize(r.view, offset, version, littleEndian);
+	if (numKv.value > MAX_KV_COUNT) {
+		throw new Error(`KV metadata count ${numKv.value} exceeds maximum allowed (${MAX_KV_COUNT})`);
+	}
 	offset += numKv.length;
 	const metadata: GGUFMetadata<{ strict: false }> = {
 		version,
@@ -380,12 +414,18 @@ export async function gguf(
 		}
 
 		let valueResult: ReturnType<typeof readMetadataValue> | undefined;
+		let fetchCount = 0;
 		while (!valueResult) {
 			try {
 				// read value
 				valueResult = readMetadataValue(r.view, valueType, offset, version, littleEndian);
 			} catch (err) {
 				if (err instanceof RangeError) {
+					if (++fetchCount > MAX_CHUNK_FETCHES_PER_VALUE) {
+						throw new Error(
+							`Exceeded maximum chunk fetches (${MAX_CHUNK_FETCHES_PER_VALUE}) while reading metadata value`,
+						);
+					}
 					await r.fetchChunk();
 				} else {
 					throw err;
@@ -430,6 +470,9 @@ export async function gguf(
 		offset += keyResult.length;
 
 		const nDims = r.view.getUint32(offset, littleEndian);
+		if (nDims > MAX_TENSOR_NDIMS) {
+			throw new Error(`Tensor n_dims ${nDims} exceeds maximum allowed (${MAX_TENSOR_NDIMS})`);
+		}
 		offset += 4;
 
 		const shape: bigint[] = [];
@@ -454,7 +497,14 @@ export async function gguf(
 	}
 
 	// calculate absolute offset of tensor data
-	const alignment: number = Number(metadata["general.alignment"] ?? GGUF_DEFAULT_ALIGNMENT);
+	const rawAlignment = metadata["general.alignment"] ?? GGUF_DEFAULT_ALIGNMENT;
+	if (typeof rawAlignment === "bigint" && rawAlignment > BigInt(Number.MAX_SAFE_INTEGER)) {
+		throw new Error(`general.alignment value ${rawAlignment} exceeds safe integer range`);
+	}
+	const alignment = Number(rawAlignment);
+	if (alignment <= 0 || !Number.isInteger(alignment)) {
+		throw new Error(`general.alignment must be a positive integer, got ${rawAlignment}`);
+	}
 	const tensorInfoEndBeforePadOffset = offset;
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
@@ -768,7 +818,11 @@ export async function ggufAllShards(
 		parallelDownloads?: number;
 		allowLocalFile?: boolean;
 	},
-): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
+): Promise<{
+	shards: GGUFParseOutput[];
+	parameterCount: number;
+	urls: string[];
+}> {
 	const parallelDownloads = params?.parallelDownloads ?? PARALLEL_DOWNLOADS;
 	if (parallelDownloads < 1) {
 		throw new TypeError("parallelDownloads must be greater than 0");
@@ -790,6 +844,7 @@ export async function ggufAllShards(
 		return {
 			shards,
 			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
+			urls,
 		};
 	} else {
 		const { metadata, tensorInfos, tensorDataOffset, littleEndian, parameterCount, tensorInfoByteRange } = await gguf(
@@ -799,6 +854,10 @@ export async function ggufAllShards(
 				computeParametersCount: true,
 			},
 		);
-		return { shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }], parameterCount };
+		return {
+			shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }],
+			parameterCount,
+			urls: [url],
+		};
 	}
 }
