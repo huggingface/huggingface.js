@@ -17,8 +17,8 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Multimodal toolbox for evaluating embeddings and retrieval systems.",
 		url: "https://github.com/embeddings-benchmark/mteb",
 	},
-	"olmo-bench": {
-		name: "olmo-bench",
+	"olmocr-bench": {
+		name: "olmocr-bench",
 		description: "olmOCR-Bench is a framework for evaluating document-level OCR of various tools.",
 		url: "https://github.com/allenai/olmocr/tree/main/olmocr/bench",
 	},
@@ -31,5 +31,22 @@ export const EVALUATION_FRAMEWORKS = {
 		name: "archipelago",
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
 		url: "https://github.com/Mercor-Intelligence/archipelago",
+	},
+	"swe-bench": {
+		name: "swe-bench",
+		description: "SWE Bench is a framework for evaluating the performance of LLMs on software engineering tasks.",
+		url: "https://github.com/swe-bench/swe-bench",
+	},
+	"swe-bench-pro": {
+		name: "swe-bench-pro",
+		description:
+			"SWE-Bench Pro is a challenging benchmark evaluating LLMs/Agents on long-horizon software engineering tasks.",
+		url: "https://github.com/scaleapi/SWE-bench_Pro-os",
+	},
+	"nemo-evaluator": {
+		name: "nemo-evaluator",
+		description:
+			"NeMo Evaluator is an open-source platform for robust, reproducible, and scalable evaluation of Large Language Models across 100+ benchmarks.",
+		url: "https://github.com/NVIDIA-NeMo/Evaluator",
 	},
 } as const;

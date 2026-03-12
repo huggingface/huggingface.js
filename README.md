@@ -55,8 +55,8 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use all supported (serverless) Inference Providers or switch to Inference Endpoints (dedicated) to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
+- [@huggingface/inference](packages/inference/README.md): Use all supported (serverless) Inference Providers or switch to Inference Endpoints (dedicated) to make calls to 100,000+ Machine Learning models
 - [@huggingface/mcp-client](packages/mcp-client/README.md): A Model Context Protocol (MCP) client, and a tiny Agent library, built on top of InferenceClient.
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
 - [@huggingface/dduf](packages/dduf/README.md): Similar package for DDUF (DDUF Diffusers Unified Format)
@@ -78,16 +78,16 @@ The libraries are still very young, please help us by opening issues!
 To install via NPM, you can download the libraries as needed:
 
 ```bash
-npm install @huggingface/inference
 npm install @huggingface/hub
+npm install @huggingface/inference
 npm install @huggingface/mcp-client
 ```
 
 Then import the libraries in your code:
 
 ```ts
-import { InferenceClient } from "@huggingface/inference";
 import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
+import { InferenceClient } from "@huggingface/inference";
 import { McpClient } from "@huggingface/mcp-client";
 import type { RepoId } from "@huggingface/hub";
 ```
@@ -98,8 +98,8 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@4.13.13/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.10.4/+esm";
+    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@4.13.15/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.11.0/+esm";
 </script>
 ```
 
