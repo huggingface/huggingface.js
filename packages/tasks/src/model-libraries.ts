@@ -899,7 +899,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
 	},
-	nv-medtech: {
+	"nv-medtech": {
 		prettyLabel: "NV-MedTech",
 		repoName: "NV-MedTech",
 		filter: false,
