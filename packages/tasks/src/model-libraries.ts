@@ -899,6 +899,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
 	},
+	nv-medtech: {
+		prettyLabel: "NV-MedTech",
+		repoName: "NV-MedTech",
+		filter: false,
+		repoUrl: "https://github.com/nvidia-medtech",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors" OR path:"config.json"`,
+	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
 		repoName: "open-oasis",
