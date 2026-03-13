@@ -664,6 +664,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) && !!model.gguf?.chat_template?.includes("tools"),
 		snippet: snippetPi,
 	},
+	gpt4all: {
+		prettyLabel: "GPT4All",
+		docsUrl: "https://nomic.ai/gpt4all",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		deeplink: (model) => new URL(`gpt4all://models/huggingface/${model.id}`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
