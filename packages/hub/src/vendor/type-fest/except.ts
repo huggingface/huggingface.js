@@ -27,11 +27,8 @@ type Filtered = Filter<'bar', 'foo'>;
 
 @see {Except}
 */
-type Filter<KeyType, ExcludeType> = IsEqual<KeyType, ExcludeType> extends true
-	? never
-	: KeyType extends ExcludeType
-	  ? never
-	  : KeyType;
+type Filter<KeyType, ExcludeType> =
+	IsEqual<KeyType, ExcludeType> extends true ? never : KeyType extends ExcludeType ? never : KeyType;
 
 /**
 Create a type from an object type without certain keys.

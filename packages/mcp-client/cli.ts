@@ -74,13 +74,13 @@ async function main() {
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
-			  }
+				}
 			: {
 					provider: PROVIDER,
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
-			  }
+				},
 	);
 
 	const rl = readline.createInterface({ input: stdin, output: stdout });

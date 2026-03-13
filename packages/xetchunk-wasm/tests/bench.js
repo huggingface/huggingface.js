@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { createChunker, finalize, nextBlock } from "../build/release.js";
+import { createChunker, finalize, nextBlock } from "../dist/index.js";
 import { createReadStream } from "node:fs";
 import { Chunker } from "../vendor/chunker_wasm.js";
 

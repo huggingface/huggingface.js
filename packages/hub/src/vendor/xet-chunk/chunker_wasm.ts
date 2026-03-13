@@ -29,13 +29,13 @@ async function init(): Promise<void> {
 					// @ts-expect-error ok for any type
 					[item.module]: [...(result[item.module] || []), item.name],
 				}),
-				{}
-			)
+				{},
+			),
 		).map(([from, names]) => ({ from, names }));
 		const wasm = await WebAssembly.instantiate(wasmModule, {
 			"./hf_xet_thin_wasm_bg.js": Object.fromEntries(
 				// @ts-expect-error ok for any type
-				(imports[0].names as string[]).map((name) => [name, __glue_imports[name]])
+				(imports[0].names as string[]).map((name) => [name, __glue_imports[name]]),
 			),
 		});
 		__wbg_set_wasm(wasm.exports);

@@ -1,14 +1,31 @@
 {
 	"name": "@huggingface/agents",
-	"packageManager": "pnpm@10.10.0",
 	"version": "0.0.5",
 	"description": "Multi-modal agents using Hugging Face's models",
+	"keywords": [
+		"agents",
+		"api",
+		"client",
+		"face",
+		"hugging",
+		"huggingface"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
-	"publishConfig": {
-		"access": "public"
-	},
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"index.ts",
+		"src",
+		"tsconfig.json"
+	],
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
+	"browser": {
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
@@ -17,45 +34,28 @@
 			"import": "./dist/index.mjs"
 		}
 	},
-	"browser": {
-		"./dist/index.js": "./dist/browser/index.js",
-		"./dist/index.mjs": "./dist/browser/index.mjs"
+	"publishConfig": {
+		"access": "public"
 	},
-	"engines": {
-		"node": ">=18"
-	},
-	"source": "index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
 		"check": "tsc"
 	},
-	"files": [
-		"src",
-		"dist",
-		"index.ts",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"agents",
-		"api",
-		"client",
-		"hugging",
-		"face"
-	],
-	"author": "Hugging Face",
-	"license": "MIT",
+	"dependencies": {
+		"@huggingface/inference": "workspace:^"
+	},
 	"devDependencies": {
 		"@types/node": "^18.13.0"
 	},
-	"dependencies": {
-		"@huggingface/inference": "workspace:^"
-	}
+	"engines": {
+		"node": ">=18"
+	},
+	"packageManager": "pnpm@10.10.0"
 }

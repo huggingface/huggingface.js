@@ -98,6 +98,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.araclip,
 	},
+	"aviation-ner": {
+		prettyLabel: "Aviation NER",
+		repoName: "Aviation NER",
+		repoUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		docsUrl: "https://github.com/Boeing/aviation_ner_sdr",
+		countDownloads: `path:"gliner_config.json"`,
+		filter: false,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -261,6 +269,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://huggingface.co/OpenPeerAI/Cloud-Agents",
 		filter: false,
 		countDownloads: `path:"setup.py"`,
+	},
+	colipri: {
+		prettyLabel: "COLIPRI",
+		repoName: "COLIPRI",
+		repoUrl: "https://huggingface.co/microsoft/colipri",
+		snippets: snippets.colipri,
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	cosyvoice: {
 		prettyLabel: "CosyVoice",
@@ -500,6 +516,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.gliner2,
 		filter: false,
 	},
+	"glm-tts": {
+		prettyLabel: "GLM-TTS",
+		repoName: "GLM-TTS",
+		repoUrl: "https://github.com/zai-org/GLM-TTS",
+		filter: false,
+		countDownloads: `path:"flow/flow.pt"`,
+	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
 		repoName: "Glyph-ByT5",
@@ -513,6 +536,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/xai-org/grok-1",
 		filter: false,
 		countDownloads: `path:"ckpt/tensor00000_000" OR path:"ckpt-0/tensor00000_000"`,
+	},
+	"habibi-tts": {
+		prettyLabel: "Habibi-TTS",
+		repoName: "Habibi-TTS",
+		repoUrl: "https://github.com/SWivid/Habibi-TTS",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	hallo: {
 		prettyLabel: "Hallo",
@@ -558,6 +588,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
 	},
+	"hy-worldplay": {
+		prettyLabel: "HY-WorldPlay",
+		repoName: "HY-WorldPlay",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HY-WorldPlay",
+		filter: false,
+		countDownloads: `path_extension:"json"`,
+	},
 	"image-matching-models": {
 		prettyLabel: "Image Matching Models",
 		repoName: "Image Matching Models",
@@ -591,6 +628,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/bytedance/InfiniteYou",
 		filter: false,
 		countDownloads: `path:"infu_flux_v1.0/sim_stage1/image_proj_model.bin" OR path:"infu_flux_v1.0/aes_stage2/image_proj_model.bin"`,
+	},
+	intellifold: {
+		prettyLabel: "IntelliFold",
+		repoName: "IntelliFold",
+		repoUrl: "https://github.com/IntelliGen-AI/IntelliFold",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -729,6 +773,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.mamba_ssm,
 	},
+	"manas-1": {
+		prettyLabel: "MANAS-1",
+		repoName: "MANAS-1",
+		repoUrl: "https://github.com/NeurodxAI/manas-1",
+		countDownloads: `path_extension:"pt"`,
+	},
 	"mars5-tts": {
 		prettyLabel: "MARS5-TTS",
 		repoName: "MARS5-TTS",
@@ -781,6 +831,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
 	},
+	"ml-sharp": {
+		prettyLabel: "Sharp",
+		repoName: "Sharp",
+		repoUrl: "https://github.com/apple/ml-sharp",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	mlx: {
 		prettyLabel: "MLX",
 		repoName: "MLX",
@@ -816,6 +873,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Moshi",
 		repoName: "Moshi",
 		repoUrl: "https://github.com/kyutai-labs/moshi",
+		snippets: snippets.moshi,
 		filter: false,
 		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
 	},
@@ -915,6 +973,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"pocket-tts": {
+		prettyLabel: "Pocket-TTS",
+		repoName: "PocketTTS",
+		repoUrl: "https://github.com/kyutai-labs/pocket-tts",
+		snippets: snippets.pocket_tts,
+		filter: false,
+		countDownloads: `path:"tts_b6369a24.safetensors"`,
+	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
 		repoName: "Pruna AI",
@@ -956,6 +1022,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/OpenPeer-AI/QuantumPeer",
 		filter: false,
 		countDownloads: `path_extension:"setup.py"`,
+	},
+	qwen3_tts: {
+		prettyLabel: "Qwen3-TTS",
+		repoName: "Qwen3-TTS",
+		repoUrl: "https://github.com/QwenLM/Qwen3-TTS",
+		snippets: snippets.qwen3_tts,
+		filter: false,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
@@ -1012,6 +1085,29 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.sam2,
 		countDownloads: `path_extension:"pt"`,
+	},
+	"sam-3d-body": {
+		prettyLabel: "SAM 3D Body",
+		repoName: "SAM 3D Body",
+		repoUrl: "https://github.com/facebookresearch/sam-3d-body",
+		filter: false,
+		snippets: snippets.sam_3d_body,
+		countDownloads: `path:"model_config.yaml"`,
+	},
+	"sam-3d-objects": {
+		prettyLabel: "SAM 3D Objects",
+		repoName: "SAM 3D Objects",
+		repoUrl: "https://github.com/facebookresearch/sam-3d-objects",
+		filter: false,
+		snippets: snippets.sam_3d_objects,
+		countDownloads: `path:"checkpoints/pipeline.yaml"`,
+	},
+	same: {
+		prettyLabel: "SAME",
+		repoName: "SAME",
+		repoUrl: "https://github.com/GengzeZhou/SAME",
+		filter: false,
+		countDownloads: `path:"ckpt/SAME.pt" OR path:"pretrain/Attnq_pretrained_ckpt.pt"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
@@ -1168,6 +1264,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.stanza,
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
+	},
+	supertonic: {
+		prettyLabel: "Supertonic",
+		repoName: "Supertonic",
+		repoUrl: "https://github.com/supertone-inc/supertonic",
+		snippets: snippets.supertonic,
+		filter: false,
 	},
 	swarmformer: {
 		prettyLabel: "SwarmFormer",
@@ -1335,6 +1438,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pkl"`,
 		snippets: snippets.vfimamba,
 	},
+	vismatch: {
+		prettyLabel: "VisMatch",
+		repoName: "VisMatch",
+		repoUrl: "https://github.com/gmberton/vismatch",
+		filter: false,
+		countDownloads: `path:"vismatch.yaml"`,
+	},
 	lvface: {
 		prettyLabel: "LVFace",
 		repoName: "LVFace",
@@ -1370,6 +1480,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.vibevoice,
 		filter: false,
 	},
+	videox_fun: {
+		prettyLabel: "VideoX Fun",
+		repoName: "VideoX Fun",
+		repoUrl: "https://github.com/aigc-apps/VideoX-Fun",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"wan2.2": {
 		prettyLabel: "Wan2.2",
 		repoName: "Wan2.2",
@@ -1399,6 +1516,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/THU-MIG/yolov10",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
+	},
+	yolov26: {
+		prettyLabel: "YOLOv26",
+		repoName: "YOLOv26",
+		repoUrl: "https://github.com/ultralytics/ultralytics",
+		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 	},
 	zonos: {
 		prettyLabel: "Zonos",

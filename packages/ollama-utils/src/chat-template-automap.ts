@@ -5,31 +5,42 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/gpt-oss:20b
- * - library/llama3.1:8b
+ * - library/deepseek-r1:1.5b
+ * - library/llama3.2:1b
  * - library/llama3.2:latest
+ * - library/phi4:14b
+ * - library/gemma:latest
+ * - library/qwen2.5:0.5b
+ * - library/olmo2:latest
+ * - library/mistral-small:22b
+ * - library/qwen:latest
  * - library/gemma3:latest
- * - library/qwen2:0.5b
- * - library/tinyllama:1.1b
- * - library/qwq:latest
- * - library/codegemma:2b
+ * - library/llava-llama3:8b
+ * - library/granite3.1-moe:latest
+ * - library/all-minilm:22m
+ * - library/falcon3:latest
+ * - library/gemma3n:latest
+ * - library/qwen2:latest
+ * - library/qwen2:latest
+ * - library/mistral-small3.2:latest
+ * - library/mistral-small3.2:latest
+ * - library/mistral-small3.2:24b
  * - library/cogito:latest
- * - library/cogito:3b
- * - library/smollm:latest
- * - library/devstral:24b
- * - library/dolphin-llama3:8b
- * - library/opencoder:latest
- * - library/codegeex4:9b
- * - library/starcoder:latest
- * - library/command-r-plus:latest
- * - library/command-r-plus:104b
- * - library/llama3-chatqa:8b
- * - library/tulu3:latest
+ * - library/phi4-mini:3.8b
+ * - library/openthinker:latest
+ * - library/openthinker:latest
+ * - library/qwq:latest
+ * - library/granite-code:3b
+ * - library/neural-chat:latest
+ * - library/paraphrase-multilingual:latest
  * - library/llama3-groq-tool-use:latest
- * - library/yarn-llama2:latest
- * - library/command-r7b:7b
- * - library/phi4-mini-reasoning:latest
+ * - library/aya-expanse:latest
  * - library/reader-lm:latest
+ * - library/shieldgemma:latest
+ * - library/command-a:latest
+ * - library/sailor2:latest
+ * - library/yarn-mistral:7b
+ * - library/qwen3-next:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
@@ -1184,6 +1195,22 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 		},
 	},
 	{
+		model: "library/qwen3-next:80b",
+		gguf: "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0].role == 'system' %}\n        {{- messages[0].content + '\\n\\n' }}\n    {%- endif %}\n    {{- \"# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0].role == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0].content + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}\n{%- for message in messages[::-1] %}\n    {%- set index = (messages|length - 1) - loop.index0 %}\n    {%- if ns.multi_step_tool and message.role == \"user\" and message.content is string and not(message.content.startswith('<tool_response>') and message.content.endswith('</tool_response>')) %}\n        {%- set ns.multi_step_tool = false %}\n        {%- set ns.last_query_index = index %}\n    {%- endif %}\n{%- endfor %}\n{%- for message in messages %}\n    {%- if message.content is string %}\n        {%- set content = message.content %}\n    {%- else %}\n        {%- set content = '' %}\n    {%- endif %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) %}\n        {{- '<|im_start|>' + message.role + '\\n' + content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {%- set reasoning_content = '' %}\n        {%- if message.reasoning_content is string %}\n            {%- set reasoning_content = message.reasoning_content %}\n        {%- else %}\n            {%- if '</think>' in content %}\n                {%- set reasoning_content = content.split('</think>')[0].rstrip('\\n').split('<think>')[-1].lstrip('\\n') %}\n                {%- set content = content.split('</think>')[-1].lstrip('\\n') %}\n            {%- endif %}\n        {%- endif %}\n        {%- if loop.index0 > ns.last_query_index %}\n            {%- if loop.last or (not loop.last and reasoning_content) %}\n                {{- '<|im_start|>' + message.role + '\\n<think>\\n' + reasoning_content.strip('\\n') + '\\n</think>\\n\\n' + content.lstrip('\\n') }}\n            {%- else %}\n                {{- '<|im_start|>' + message.role + '\\n' + content }}\n            {%- endif %}\n        {%- else %}\n            {{- '<|im_start|>' + message.role + '\\n' + content }}\n        {%- endif %}\n        {%- if message.tool_calls %}\n            {%- for tool_call in message.tool_calls %}\n                {%- if (loop.first and content) or (not loop.first) %}\n                    {{- '\\n' }}\n                {%- endif %}\n                {%- if tool_call.function %}\n                    {%- set tool_call = tool_call.function %}\n                {%- endif %}\n                {{- '<tool_call>\\n{\"name\": \"' }}\n                {{- tool_call.name }}\n                {{- '\", \"arguments\": ' }}\n                {%- if tool_call.arguments is string %}\n                    {{- tool_call.arguments }}\n                {%- else %}\n                    {{- tool_call.arguments | tojson }}\n                {%- endif %}\n                {{- '}\\n</tool_call>' }}\n            {%- endfor %}\n        {%- endif %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.first or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n<think>\\n' }}\n{%- endif %}",
+		ollama: {
+			template:
+				'{{- $lastUserIdx := -1 -}}\n{{- range $idx, $msg := .Messages -}}\n{{- if eq $msg.Role "user" }}{{ $lastUserIdx = $idx }}{{ end -}}\n{{- end }}\n{{- if or .System .Tools }}<|im_start|>system\n{{ if .System }}{{ .System }}\n\n{{ end }}\n{{- if .Tools }}# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{{- range .Tools }}\n{"type": "function", "function": {{ .Function }}}\n{{- end }}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{"name": <function-name>, "arguments": <args-json-object>}\n</tool_call>\n{{- end -}}\n<|im_end|>\n{{ end }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 -}}\n{{- if eq .Role "user" }}<|im_start|>user\n{{ .Content }}<|im_end|>\n{{ else if eq .Role "assistant" }}<|im_start|>assistant\n{{ if (and $.IsThinkSet (and .Thinking (or $last (gt $i $lastUserIdx)))) -}}\n<think>{{ .Thinking }}</think>\n{{ end -}}\n{{ if .Content }}{{ .Content }}{{ end }}\n{{- if .ToolCalls }}\n{{- range .ToolCalls }}\n<tool_call>\n{"name": "{{ .Function.Name }}", "arguments": {{ .Function.Arguments }}}\n</tool_call>\n{{- end }}\n{{- end }}{{ if not $last }}<|im_end|>\n{{ end }}\n{{- else if eq .Role "tool" }}<|im_start|>user\n<tool_response>\n{{ .Content }}\n</tool_response><|im_end|>\n{{ end }}\n{{- if and (ne .Role "assistant") $last }}<|im_start|>assistant\n<think>\n{{ end }}\n{{- end }}',
+			tokens: ["<|im_start|>", "<tools>", "<tool_call>", "<|im_end|>", "<tool_response>", "<think>"],
+			params: {
+				repeat_penalty: 1,
+				stop: ["<|im_start|>", "<|im_end|>"],
+				temperature: 0.6,
+				top_k: 20,
+				top_p: 0.95,
+			},
+		},
+	},
+	{
 		model: "library/qwen3:0.6b",
 		gguf: "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0].role == 'system' %}\n        {{- messages[0].content + '\\n\\n' }}\n    {%- endif %}\n    {{- \"# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0].role == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0].content + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}\n{%- for message in messages[::-1] %}\n    {%- set index = (messages|length - 1) - loop.index0 %}\n    {%- if ns.multi_step_tool and message.role == \"user\" and not(message.content.startswith('<tool_response>') and message.content.endswith('</tool_response>')) %}\n        {%- set ns.multi_step_tool = false %}\n        {%- set ns.last_query_index = index %}\n    {%- endif %}\n{%- endfor %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {%- set content = message.content %}\n        {%- set reasoning_content = '' %}\n        {%- if message.reasoning_content is defined and message.reasoning_content is not none %}\n            {%- set reasoning_content = message.reasoning_content %}\n        {%- else %}\n            {%- if '</think>' in message.content %}\n                {%- set content = message.content.split('</think>')[-1].lstrip('\\n') %}\n                {%- set reasoning_content = message.content.split('</think>')[0].rstrip('\\n').split('<think>')[-1].lstrip('\\n') %}\n            {%- endif %}\n        {%- endif %}\n        {%- if loop.index0 > ns.last_query_index %}\n            {%- if loop.last or (not loop.last and reasoning_content) %}\n                {{- '<|im_start|>' + message.role + '\\n<think>\\n' + reasoning_content.strip('\\n') + '\\n</think>\\n\\n' + content.lstrip('\\n') }}\n            {%- else %}\n                {{- '<|im_start|>' + message.role + '\\n' + content }}\n            {%- endif %}\n        {%- else %}\n            {{- '<|im_start|>' + message.role + '\\n' + content }}\n        {%- endif %}\n        {%- if message.tool_calls %}\n            {%- for tool_call in message.tool_calls %}\n                {%- if (loop.first and content) or (not loop.first) %}\n                    {{- '\\n' }}\n                {%- endif %}\n                {%- if tool_call.function %}\n                    {%- set tool_call = tool_call.function %}\n                {%- endif %}\n                {{- '<tool_call>\\n{\"name\": \"' }}\n                {{- tool_call.name }}\n                {{- '\", \"arguments\": ' }}\n                {%- if tool_call.arguments is string %}\n                    {{- tool_call.arguments }}\n                {%- else %}\n                    {{- tool_call.arguments | tojson }}\n                {%- endif %}\n                {{- '}\\n</tool_call>' }}\n            {%- endfor %}\n        {%- endif %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.first or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n    {%- if enable_thinking is defined and enable_thinking is false %}\n        {{- '<think>\\n\\n</think>\\n\\n' }}\n    {%- endif %}\n{%- endif %}",
 		ollama: {
@@ -1262,6 +1289,19 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 			],
 			params: {
 				stop: ["<｜begin▁of▁sentence｜>", "<｜end▁of▁sentence｜>", "<｜User｜>", "<｜Assistant｜>"],
+			},
+		},
+	},
+	{
+		model: "library/rnj-1:latest",
+		gguf: "{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) -%}\n{%- set emit = namespace(started=false) -%}\n\n{# ---------- Build base system message (always emitted) ---------- #}\n{%- set base_system = 'You are rnj-1, a foundation model trained by Essential AI.\\n' -%}\n\n{# ---------- Optional tools preface as a synthetic system message ---------- #}\n{%- if tools %}\n  {%- set sys_preamble -%}\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{%- for tool in tools %}\n{{ \"\\n\" ~ (tool | tojson) }}\n{% endfor %}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call>\n  {%- endset -%}\n\n  {# If the first user-provided message is system, include it above the tools preface #}\n  {%- set combined_system = (messages and messages[0].role == 'system')\n      and (messages[0].content is string) -%}\n  {%- set sys_content = (combined_system and (messages[0].content ~ \"\\n\\n\" ~ sys_preamble)) or sys_preamble -%}\n\n  {%- set content = '<|start_header_id|>system<|end_header_id|>\\n' ~ base_system ~ '\\n' ~ sys_content ~ '<|eot_id|>' -%}\n  {%- if not emit.started -%}{%- set content = bos_token ~ content -%}{%- set emit.started = true -%}{%- endif -%}\n  {{- content -}}\n{%- else %}\n  {# No tools: always emit base_system, and include user's system message if present #}\n  {%- set user_system_content = '' -%}\n  {%- if messages and messages[0].role == 'system' and (messages[0].content is string) -%}\n    {%- set user_system_content = '\\n' ~ messages[0].content -%}\n  {%- endif -%}\n  {%- set content = '<|start_header_id|>system<|end_header_id|>\\n' ~ base_system ~ user_system_content ~ '<|eot_id|>' -%}\n  {%- if not emit.started -%}{%- set content = bos_token ~ content -%}{%- set emit.started = true -%}{%- endif -%}\n  {{- content -}}\n{%- endif -%}\n\n{# ---------- Locate last user query for multi-step tool behavior ---------- #}\n{%- for message in messages[::-1] %}\n  {%- set index = (messages|length - 1) - loop.index0 -%}\n  {%- if ns.multi_step_tool\n        and message.role == \"user\"\n        and message.content is string\n        and not (message.content.startswith('<tool_response>') and message.content.endswith('</tool_response>')) -%}\n    {%- set ns.multi_step_tool = false -%}\n    {%- set ns.last_query_index = index -%}\n  {%- endif -%}\n{%- endfor -%}\n\n{# ---------- Walk all messages and emit in Llama-3 format ---------- #}\n{%- for message in messages %}\n  {# normalize content #}\n  {%- if message.content is string -%}\n    {%- set content = message.content -%}\n  {%- else -%}\n    {%- set content = '' -%}\n  {%- endif -%}\n\n  {# --- user/system (non-initial system already handled above) --- #}\n  {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) -%}\n    {%- set block = '<|start_header_id|>' ~ message.role ~ '<|end_header_id|>\\n' ~ content ~ '<|eot_id|>' -%}\n    {%- if not emit.started -%}{%- set block = bos_token ~ block -%}{%- set emit.started = true -%}{%- endif -%}\n    {{- block -}}\n\n  {# --- assistant --- #}\n  {%- elif message.role == \"assistant\" -%}\n  \n    {%- set body = content -%}\n    {%- set header = '<|start_header_id|>assistant<|end_header_id|>\\n' -%}\n    {%- if not emit.started -%}{{ bos_token }}{%- set emit.started = true -%}{%- endif -%}\n    {{- header -}}\n    {% generation %}\n    {{- body -}}\n    {%- if message.tool_calls -%}\n      {%- for tool_call in message.tool_calls -%}\n        {%- if tool_call.function -%}{%- set tc = tool_call.function -%}{%- else -%}{%- set tc = tool_call -%}{%- endif -%}\n        {%- set args_json = (tc.arguments if (tc.arguments is string) else (tc.arguments | tojson)) -%}\n        {%- if loop.first -%}\n          {{- '<tool_call>\\n{\"name\": \"' ~ tc.name ~ '\", \"arguments\": ' ~ args_json ~ '}\\n</tool_call>' -}}\n        {%- else -%}\n          {{- '\\n<tool_call>\\n{\"name\": \"' ~ tc.name ~ '\", \"arguments\": ' ~ args_json ~ '}\\n</tool_call>' -}}\n        {%- endif -%}\n      {%- endfor -%}\n    {%- endif -%}\n    {{- '<|eot_id|>' -}}{%- endgeneration -%}\n  {# --- tool messages are wrapped as synthetic user messages with <tool_response> --- #}\n  {%- elif message.role == \"tool\" -%}\n    {%- set open_user = (loop.first or (loop.index0 > 0 and messages[loop.index0 - 1].role != \"tool\")) -%}\n    {%- set close_user = (loop.last or (loop.index0 < messages|length - 1 and messages[loop.index0 + 1].role != \"tool\")) -%}\n\n    {%- if open_user -%}\n      {%- set header = '<|start_header_id|>user<|end_header_id|>\\n' -%}\n      {%- if not emit.started -%}{%- set header = bos_token ~ header -%}{%- set emit.started = true -%}{%- endif -%}\n      {{- header -}}\n    {%- endif -%}\n    {%- if open_user -%}\n      {{- '<tool_response>\\n' -}}\n    {%- else -%}\n      {{- '\\n<tool_response>\\n' -}}\n    {%- endif -%}\n    {{- content -}}\n    {{- '\\n</tool_response>' -}}\n\n    {%- if close_user -%}\n      {{- '<|eot_id|>' -}}\n    {%- endif -%}\n  {%- endif -%}\n{%- endfor -%}\n\n{# ---------- Add generation prompt header for the model to continue ---------- #}\n{%- if add_generation_prompt -%}\n  {%- set tail = '<|start_header_id|>assistant<|end_header_id|>\\n' -%}\n  {{- tail -}}\n{%- endif -%}",
+		ollama: {
+			template:
+				'<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are rnj-1, a foundation model trained by Essential AI.\n{{- if .System }}\n\n{{ .System }}\n{{- end }}\n{{- if .Tools }}\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{{- range .Tools }}\n{{ . }}\n{{- end }}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{"name": <function-name>, "arguments": <args-json-object>}\n</tool_call>\n{{- end }}<|eot_id|>\n{{- range $i, $_ := .Messages }}\n{{- if eq .Role "system" }}{{ continue }}{{ end }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if eq .Role "user" }}<|start_header_id|>user<|end_header_id|>\n{{ .Content }}<|eot_id|>\n{{- else if eq .Role "assistant" }}<|start_header_id|>assistant<|end_header_id|>\n{{ if .Content }}{{ .Content }}{{ end }}\n{{- if .ToolCalls }}\n{{- range .ToolCalls }}\n<tool_call>\n{"name": "{{ .Function.Name }}", "arguments": {{ .Function.Arguments }}}\n</tool_call>\n{{- end }}\n{{- end }}{{ if not $last }}<|eot_id|>{{ end }}\n{{- else if eq .Role "tool" }}<|start_header_id|>user<|end_header_id|>\n<tool_response>\n{{ .Content }}\n</tool_response><|eot_id|>\n{{- end }}\n{{- if and (ne .Role "assistant") $last }}<|start_header_id|>assistant<|end_header_id|>\n{{ end }}\n{{- end }}',
+			tokens: ["<tools>", "<tool_call>", "<|start_header_id|>", "<|end_header_id|>", "<|eot_id|>", "<tool_response>"],
+			params: {
+				stop: ["<|start_header_id|>", "<|end_header_id|>", "<|eot_id|>"],
+				temperature: 0.2,
 			},
 		},
 	},

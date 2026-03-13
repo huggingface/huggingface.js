@@ -12,7 +12,7 @@ export type { TextGenerationInput, TextGenerationOutput };
  */
 export async function textGeneration(
 	args: BaseArgs & TextGenerationInput,
-	options?: Options
+	options?: Options,
 ): Promise<TextGenerationOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-generation");

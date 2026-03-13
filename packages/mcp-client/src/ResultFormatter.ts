@@ -35,7 +35,7 @@ export class ResultFormatter {
 					// Summarize image content
 					const imageSize = this.getBase64Size(item.data);
 					formattedParts.push(
-						`[Binary Content: Image ${item.mimeType}, ${imageSize} bytes]\nThe task is complete and the content accessible to the User`
+						`[Binary Content: Image ${item.mimeType}, ${imageSize} bytes]\nThe task is complete and the content accessible to the User`,
 					);
 					break;
 				}
@@ -44,7 +44,7 @@ export class ResultFormatter {
 					// Summarize audio content
 					const audioSize = this.getBase64Size(item.data);
 					formattedParts.push(
-						`[Binary Content: Audio ${item.mimeType}, ${audioSize} bytes]\nThe task is complete and the content accessible to the User`
+						`[Binary Content: Audio ${item.mimeType}, ${audioSize} bytes]\nThe task is complete and the content accessible to the User`,
 					);
 					break;
 				}
@@ -62,7 +62,7 @@ export class ResultFormatter {
 						const uri = blobResource.uri ? ` (${blobResource.uri})` : "";
 						const mimeType = blobResource.mimeType ? blobResource.mimeType : "unknown type";
 						formattedParts.push(
-							`[Binary Content${uri}: ${mimeType}, ${blobSize} bytes]\nThe task is complete and the content accessible to the User`
+							`[Binary Content${uri}: ${mimeType}, ${blobSize} bytes]\nThe task is complete and the content accessible to the User`,
 						);
 					}
 					break;

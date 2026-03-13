@@ -1,10 +1,10 @@
 {
 	"name": "yarn",
 	"version": "1.0.0",
-	"main": "index.js",
 	"license": "MIT",
+	"main": "index.js",
 	"dependencies": {
-		"@huggingface/inference": "*",
-		"@huggingface/hub": "*"
+		"@huggingface/hub": "*",
+		"@huggingface/inference": "*"
 	}
 }

@@ -51,7 +51,7 @@ abstract class InferenceClientHttpRequestError extends InferenceClientError {
 							...("Authorization" in httpRequest.headers ? { Authorization: `Bearer [redacted]` } : undefined),
 							/// redact authentication in the request headers
 						},
-				  }
+					}
 				: undefined),
 		};
 		this.httpResponse = httpResponse;

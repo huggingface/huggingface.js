@@ -23,7 +23,7 @@ export async function deleteBranch(params: {
 					Authorization: `Bearer ${params.accessToken}`,
 				}),
 			},
-		}
+		},
 	);
 
 	if (!res.ok) {

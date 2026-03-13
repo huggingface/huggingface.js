@@ -22,7 +22,7 @@ export async function modelInfo<
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<ModelEntry & Pick<ApiModelInfo, T>> {
 	const accessToken = params && checkCredentials(params);
 
@@ -33,13 +33,13 @@ export async function modelInfo<
 
 	const response = await (params.fetch || fetch)(
 		`${params?.hubUrl || HUB_URL}/api/models/${params.name}/revision/${encodeURIComponent(
-			params.revision ?? "HEAD"
+			params.revision ?? "HEAD",
 		)}?${search.toString()}`,
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {

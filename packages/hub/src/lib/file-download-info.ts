@@ -44,16 +44,17 @@ export async function fileDownloadInfo(
 		 * So that on browsers you can use the URL in an iframe for example
 		 */
 		noContentDisposition?: boolean;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<FileDownloadInfoOutput | null> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
+	const revision = repoId.type === "bucket" ? undefined : (params.revision ?? "main");
 	const url =
 		`${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/${
 			params.raw ? "raw" : "resolve"
-		}/${encodeURIComponent(params.revision ?? "main")}/${params.path}` +
+		}${revision ? `/${encodeURIComponent(revision)}` : ""}/${params.path}` +
 		(params.noContentDisposition ? "?noContentDisposition=1" : "");
 
 	const resp = await (params.fetch ?? fetch)(url, {

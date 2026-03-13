@@ -72,7 +72,7 @@ const hasTemplate = (language: InferenceSnippetLanguage, client: Client, templat
 const loadTemplate = (
 	language: InferenceSnippetLanguage,
 	client: Client,
-	templateName: string
+	templateName: string,
 ): ((data: TemplateParams) => string) => {
 	const template = templates[language]?.[client]?.[templateName];
 	if (!template) {
@@ -148,7 +148,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		model: ModelDataMinimal,
 		provider: InferenceProviderOrPolicy,
 		inferenceProviderMapping?: InferenceProviderMappingEntry,
-		opts?: InferenceSnippetOptions
+		opts?: InferenceSnippetOptions,
 	): InferenceSnippet[] => {
 		const logger = getLogger();
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
@@ -180,8 +180,8 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		const inputs = opts?.inputs
 			? { inputs: opts.inputs }
 			: inputPreparationFn
-			  ? inputPreparationFn(model, opts)
-			  : { inputs: getModelInputSnippet(model) };
+				? inputPreparationFn(model, opts)
+				: { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
 			providerModelId,
 			providerHelper,
@@ -195,7 +195,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			{
 				task,
 				billTo: opts?.billTo,
-			}
+			},
 		);
 
 		/// Parse request.info.body if not a binary.
@@ -218,11 +218,11 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 					? {
 							...inputs,
 							model: `${model.id}:${provider}`,
-					  }
+						}
 					: {
 							...inputs,
 							model: `${model.id}`, // if no :provider => auto
-					  }
+						}
 				: providerInputs;
 
 		/// Prepare template injection data
@@ -265,7 +265,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 					? provider !== "auto"
 						? `${model.id}:${provider}` // e.g. "moonshotai/Kimi-K2-Instruct:groq"
 						: model.id
-					: providerModelId ?? model.id,
+					: (providerModelId ?? model.id),
 			billTo: opts?.billTo,
 			endpointUrl: opts?.endpointUrl,
 			task,
@@ -324,7 +324,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 								snippet,
 								language,
 								provider,
-								opts?.endpointUrl
+								opts?.endpointUrl,
 							);
 						}
 
@@ -354,7 +354,7 @@ const prepareConversationalInput = (
 		temperature?: GenerationParameters["temperature"];
 		max_tokens?: GenerationParameters["max_new_tokens"];
 		top_p?: GenerationParameters["top_p"];
-	}
+	},
 ): object => {
 	return {
 		messages: opts?.messages ?? getModelInputSnippet(model),
@@ -381,7 +381,7 @@ const snippets: Partial<
 			model: ModelDataMinimal,
 			provider: InferenceProviderOrPolicy,
 			inferenceProviderMapping?: InferenceProviderMappingEntry,
-			opts?: InferenceSnippetOptions
+			opts?: InferenceSnippetOptions,
 		) => InferenceSnippet[]
 	>
 > = {
@@ -422,10 +422,10 @@ export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	provider: InferenceProviderOrPolicy,
 	inferenceProviderMapping?: InferenceProviderMappingEntry,
-	opts?: Record<string, unknown>
+	opts?: Record<string, unknown>,
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets
-		? snippets[model.pipeline_tag]?.(model, provider, inferenceProviderMapping, opts) ?? []
+		? (snippets[model.pipeline_tag]?.(model, provider, inferenceProviderMapping, opts) ?? [])
 		: [];
 }
 
@@ -447,7 +447,7 @@ function formatBody(obj: object, format: "curl" | "json" | "python" | "ts"): str
 						const formattedValue = JSON.stringify(value, null, 4).replace(/"/g, '"');
 						return `${key}=${formattedValue},`;
 					})
-					.join("\n")
+					.join("\n"),
 			);
 
 		case "ts":
@@ -507,7 +507,7 @@ function replaceAccessTokenPlaceholder(
 	snippet: string,
 	language: InferenceSnippetLanguage,
 	provider: InferenceProviderOrPolicy,
-	endpointUrl?: string
+	endpointUrl?: string,
 ): string {
 	// If "opts.accessToken" is not set, the snippets are generated with a placeholder.
 	// Once snippets are rendered, we replace the placeholder with code to fetch the access token from an environment variable.
@@ -522,49 +522,49 @@ function replaceAccessTokenPlaceholder(
 	const accessTokenEnvVar = useHfToken
 		? "HF_TOKEN" // e.g. routed request or hf-inference
 		: endpointUrl
-		  ? "API_TOKEN"
-		  : provider.toUpperCase().replace("-", "_") + "_API_KEY"; // e.g. "REPLICATE_API_KEY"
+			? "API_TOKEN"
+			: provider.toUpperCase().replace("-", "_") + "_API_KEY"; // e.g. "REPLICATE_API_KEY"
 
 	// Replace the placeholder with the env variable
 	if (language === "sh") {
 		snippet = snippet.replace(
 			`'Authorization: Bearer ${placeholder}'`,
-			`"Authorization: Bearer $${accessTokenEnvVar}"` // e.g. "Authorization: Bearer $HF_TOKEN"
+			`"Authorization: Bearer $${accessTokenEnvVar}"`, // e.g. "Authorization: Bearer $HF_TOKEN"
 		);
 	} else if (language === "python") {
 		snippet = "import os\n" + snippet;
 		snippet = snippet.replace(
 			`"${placeholder}"`,
-			`os.environ["${accessTokenEnvVar}"]` // e.g. os.environ["HF_TOKEN")
+			`os.environ["${accessTokenEnvVar}"]`, // e.g. os.environ["HF_TOKEN")
 		);
 		snippet = snippet.replace(
 			`"Bearer ${placeholder}"`,
-			`f"Bearer {os.environ['${accessTokenEnvVar}']}"` // e.g. f"Bearer {os.environ['HF_TOKEN']}"
+			`f"Bearer {os.environ['${accessTokenEnvVar}']}"`, // e.g. f"Bearer {os.environ['HF_TOKEN']}"
 		);
 		snippet = snippet.replace(
 			`"Key ${placeholder}"`,
-			`f"Key {os.environ['${accessTokenEnvVar}']}"` // e.g. f"Key {os.environ['FAL_AI_API_KEY']}"
+			`f"Key {os.environ['${accessTokenEnvVar}']}"`, // e.g. f"Key {os.environ['FAL_AI_API_KEY']}"
 		);
 		snippet = snippet.replace(
 			`"X-Key ${placeholder}"`,
-			`f"X-Key {os.environ['${accessTokenEnvVar}']}"` // e.g. f"X-Key {os.environ['BLACK_FOREST_LABS_API_KEY']}"
+			`f"X-Key {os.environ['${accessTokenEnvVar}']}"`, // e.g. f"X-Key {os.environ['BLACK_FOREST_LABS_API_KEY']}"
 		);
 	} else if (language === "js") {
 		snippet = snippet.replace(
 			`"${placeholder}"`,
-			`process.env.${accessTokenEnvVar}` // e.g. process.env.HF_TOKEN
+			`process.env.${accessTokenEnvVar}`, // e.g. process.env.HF_TOKEN
 		);
 		snippet = snippet.replace(
 			`Authorization: "Bearer ${placeholder}",`,
-			`Authorization: \`Bearer $\{process.env.${accessTokenEnvVar}}\`,` // e.g. Authorization: `Bearer ${process.env.HF_TOKEN}`,
+			`Authorization: \`Bearer $\{process.env.${accessTokenEnvVar}}\`,`, // e.g. Authorization: `Bearer ${process.env.HF_TOKEN}`,
 		);
 		snippet = snippet.replace(
 			`Authorization: "Key ${placeholder}",`,
-			`Authorization: \`Key $\{process.env.${accessTokenEnvVar}}\`,` // e.g. Authorization: `Key ${process.env.FAL_AI_API_KEY}`,
+			`Authorization: \`Key $\{process.env.${accessTokenEnvVar}}\`,`, // e.g. Authorization: `Key ${process.env.FAL_AI_API_KEY}`,
 		);
 		snippet = snippet.replace(
 			`Authorization: "X-Key ${placeholder}",`,
-			`Authorization: \`X-Key $\{process.env.${accessTokenEnvVar}}\`,` // e.g. Authorization: `X-Key ${process.env.BLACK_FOREST_LABS_AI_API_KEY}`,
+			`Authorization: \`X-Key $\{process.env.${accessTokenEnvVar}}\`,`, // e.g. Authorization: `X-Key ${process.env.BLACK_FOREST_LABS_AI_API_KEY}`,
 		);
 	}
 	return snippet;

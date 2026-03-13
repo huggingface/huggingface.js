@@ -1,6 +1,7 @@
 import { HUB_URL } from "../consts";
 import { HubApiError, createApiError, InvalidApiResponseFormatError } from "../error";
 import type {
+	ApiBucketBatchResponse,
 	ApiCommitHeader,
 	ApiCommitLfsFile,
 	ApiCommitOperation,
@@ -158,17 +159,24 @@ export type CommitProgressEvent =
 			event: "fileProgress";
 			path: string;
 			progress: number;
-			state: "hashing" | "uploading";
+			state: "hashing" | "uploading" | "error";
 	  };
 
 /**
  * Internal function for now, used by commit.
  *
  * Can be exposed later to offer fine-tuned progress info
+ *
+ * CommitOutput is not present for bucket commits
  */
-export async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressEvent, CommitOutput> {
+export async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressEvent, CommitOutput | undefined> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
+
+	if (repoId.type === "bucket") {
+		return yield* commitIterBucket(params);
+	}
+
 	yield { event: "phase", phase: "preuploading" };
 
 	let useXet = params.useXet ?? true;
@@ -199,7 +207,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						// Convert EditFile operation to a file operation with SplicedBlob
 						const splicedBlob = SplicedBlob.create(
 							operation.originalContent,
-							operation.edits.map((splice) => ({ insert: splice.content, start: splice.start, end: splice.end }))
+							operation.edits.map((splice) => ({ insert: splice.content, start: splice.start, end: splice.end })),
 						);
 						return {
 							operation: "addOrUpdate" as const,
@@ -229,7 +237,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						content: blob.blob,
 						path: blob.path,
 					}));
-				})
+				}),
 			)
 		).flat(1);
 
@@ -243,7 +251,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						path: operation.path,
 						size: operation.content.size,
 						sample: base64FromBytes(new Uint8Array(await operation.content.slice(0, 512).arrayBuffer())),
-					}))
+					})),
 				),
 			};
 
@@ -251,7 +259,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const res = await (params.fetch ?? fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/preupload/${encodeURIComponent(
-					params.branch ?? "main"
+					params.branch ?? "main",
 				)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 				{
 					method: "POST",
@@ -261,7 +269,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					},
 					body: JSON.stringify(payload),
 					signal: abortSignal,
-				}
+				},
 			);
 
 			if (!res.ok) {
@@ -281,7 +289,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 		for (const operations of chunk(
 			allOperations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
-			100
+			100,
 		)) {
 			const shas = yield* eventToGenerator<
 				{ event: "fileProgress"; state: "hashing"; path: string; progress: number },
@@ -301,7 +309,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						lfsShas.set(op.path, res.value);
 						return sha;
 					}),
-					CONCURRENT_SHAS
+					CONCURRENT_SHAS,
 				).then(returnCallback, rejectCallack);
 			});
 
@@ -336,7 +344,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					},
 					body: JSON.stringify(payload),
 					signal: abortSignal,
-				}
+				},
 			);
 
 			if (!res.ok) {
@@ -434,8 +442,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 										});
 									}
 								}
-							})
-						).then(() => returnCallback(undefined), rejectCallback)
+							}),
+						).then(() => returnCallback(undefined), rejectCallback),
 					);
 				} else {
 					// No LFS file to upload
@@ -542,7 +550,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 										completeReq.parts[Number(part) - 1].etag = eTag;
 									}),
-									MULTIPART_PARALLEL_UPLOAD
+									MULTIPART_PARALLEL_UPLOAD,
 								);
 
 								abortSignal?.throwIfAborted();
@@ -611,7 +619,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								});
 							}
 						}),
-						CONCURRENT_LFS_UPLOADS
+						CONCURRENT_LFS_UPLOADS,
 					).then(returnCallback, rejectCallback);
 				});
 			}
@@ -625,7 +633,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			async (yieldCallback, returnCallback, rejectCallback) =>
 				(params.fetch ?? fetch)(
 					`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
-						params.branch ?? "main"
+						params.branch ?? "main",
 					)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 					{
 						method: "POST",
@@ -660,7 +668,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									}
 
 									return convertOperationToNdJson(operation);
-								})
+								}),
 							)) satisfies ApiCommitOperation[]),
 						]
 							.map((x) => JSON.stringify(x))
@@ -685,7 +693,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							},
 							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						} as any),
-					}
+					},
 				)
 					.then(async (res) => {
 						if (!res.ok) {
@@ -703,7 +711,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							hookOutput: json.hookOutput,
 						});
 					})
-					.catch(rejectCallback)
+					.catch(rejectCallback),
 		);
 	} catch (err) {
 		// For parallel requests, cancel them all if one fails
@@ -712,11 +720,230 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 	}
 }
 
-export async function commit(params: CommitParams): Promise<CommitOutput> {
+export async function* commitIterBucket(params: CommitParams): AsyncGenerator<CommitProgressEvent> {
+	const accessToken = checkCredentials(params);
+	const repoId = toRepoId(params.repo);
+
+	if (params.useXet === false) {
+		throw new Error("useXet must be true or undefined for buckets");
+	}
+
+	const abortController = new AbortController();
+	const abortSignal = abortController.signal;
+
+	// Polyfill see https://discuss.huggingface.co/t/why-cant-i-upload-a-parquet-file-to-my-dataset-error-o-throwifaborted-is-not-a-function/62245
+	if (!abortSignal.throwIfAborted) {
+		abortSignal.throwIfAborted = () => {
+			if (abortSignal.aborted) {
+				throw new DOMException("Aborted", "AbortError");
+			}
+		};
+	}
+
+	if (params.abortSignal) {
+		params.abortSignal.addEventListener("abort", () => abortController.abort());
+	}
+
+	try {
+		const allOperations = (
+			await Promise.all(
+				params.operations.map(async (operation) => {
+					if (operation.operation === "edit") {
+						// Convert EditFile operation to a file operation with SplicedBlob
+						const splicedBlob = SplicedBlob.create(
+							operation.originalContent,
+							operation.edits.map((splice) => ({ insert: splice.content, start: splice.start, end: splice.end })),
+						);
+						return {
+							operation: "addOrUpdate" as const,
+							path: operation.path,
+							content: splicedBlob,
+						};
+					}
+
+					if (operation.operation !== "addOrUpdate") {
+						return operation;
+					}
+
+					if (!(operation.content instanceof URL)) {
+						/** TS trick to enforce `content` to be a `Blob` */
+						return { ...operation, content: operation.content };
+					}
+
+					const lazyBlobs = await createBlobs(operation.content, operation.path, {
+						fetch: params.fetch,
+						maxFolderDepth: params.maxFolderDepth,
+					});
+
+					abortSignal?.throwIfAborted();
+
+					return lazyBlobs.map((blob) => ({
+						...operation,
+						content: blob.blob,
+						path: blob.path,
+					}));
+				}),
+			)
+		).flat(1);
+
+		yield { event: "phase", phase: "uploadingLargeFiles" };
+
+		for (const operations of chunk(allOperations.filter(isFileOperation), 100)) {
+			const xetHashes = new Map<string, string>();
+			abortSignal?.throwIfAborted();
+
+			// First get all the files that are already uploaded out of the way
+
+			const source = (async function* () {
+				for (const operation of operations) {
+					abortSignal?.throwIfAborted();
+					yield { content: operation.content, path: operation.path };
+				}
+			})();
+
+			const xetParams: XetTokenParams = {
+				sessionId: crypto.randomUUID(),
+				refreshWriteTokenUrl: `${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/xet-write-token`,
+			};
+			const sources = splitAsyncGenerator(source, 5);
+			yield* eventToGenerator((yieldCallback, returnCallback, rejectCallback) =>
+				Promise.all(
+					sources.map(async function (source) {
+						for await (const event of uploadShards(source, {
+							fetch: params.fetch,
+							accessToken,
+							hubUrl: params.hubUrl ?? HUB_URL,
+							repo: repoId,
+							xetParams,
+							rev: params.branch ?? "main",
+							yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
+						})) {
+							if (event.event === "file") {
+								yieldCallback({
+									event: "fileProgress" as const,
+									path: event.path,
+									progress: 1,
+									state: "uploading" as const,
+								});
+								xetHashes.set(event.path, event.xetHash);
+							} else if (event.event === "fileProgress") {
+								yieldCallback({
+									event: "fileProgress" as const,
+									path: event.path,
+									progress: event.progress,
+									state: "uploading" as const,
+								});
+							}
+						}
+					}),
+				).then(() => returnCallback(undefined), rejectCallback),
+			);
+
+			const resp = await (params.fetch ?? fetch)(
+				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
+				{
+					method: "POST",
+					headers: {
+						...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+						"Content-Type": "application/x-ndjson",
+					},
+					body: [...xetHashes.entries()]
+						.map(([path, xetHash]) =>
+							JSON.stringify({
+								type: "addFile",
+								path,
+								xetHash,
+							}),
+						)
+						.join("\n"),
+					signal: abortSignal,
+				},
+			);
+
+			if (!resp.ok && resp.status !== 422) {
+				throw await createApiError(resp);
+			}
+
+			const json = (await resp.json()) as ApiBucketBatchResponse;
+
+			for (const failed of json.failed) {
+				yield {
+					event: "fileProgress",
+					path: failed.path,
+					progress: 0,
+					state: "error",
+				};
+			}
+		}
+
+		abortSignal?.throwIfAborted();
+
+		const deletedOperations = allOperations.filter((operation) => operation.operation === "delete");
+
+		if (deletedOperations.length > 0) {
+			const resp = await (params.fetch ?? fetch)(
+				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
+				{
+					method: "POST",
+					headers: {
+						...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+						"Content-Type": "application/x-ndjson",
+					},
+					body: deletedOperations
+						.map((operation) =>
+							JSON.stringify({
+								type: "deleteFile",
+								path: operation.path,
+							}),
+						)
+						.join("\n"),
+					signal: abortSignal,
+				},
+			);
+
+			if (!resp.ok) {
+				throw await createApiError(resp);
+			}
+
+			const json = await resp.json();
+
+			if (json.failed.length > 0) {
+				const failedPaths = json.failed.slice(0, 5).map((f: { path: string }) => f.path);
+				throw new Error(
+					`Failed to delete ${json.failed.length} file(s): ${failedPaths.join(", ")}${json.failed.length > 5 ? "..." : ""}, request ID: ${resp.headers.get("X-Request-Id")}`,
+				);
+			}
+		}
+
+		abortSignal?.throwIfAborted();
+	} catch (err) {
+		// For parallel requests, cancel them all if one fails
+		abortController.abort();
+		throw err;
+	}
+}
+
+/**
+ * @returns undefined for bucket uploads, CommitOutput otherwise
+ */
+export async function commit(params: CommitParams): Promise<CommitOutput | undefined> {
 	const iterator = commitIter(params);
+	const failedPaths: string[] = [];
+	let failedCount = 0;
 	let res = await iterator.next();
 	while (!res.done) {
+		if (res.value.event === "fileProgress" && res.value.state === "error") {
+			failedCount++;
+			if (failedPaths.length < 5) {
+				failedPaths.push(res.value.path);
+			}
+		}
 		res = await iterator.next();
+	}
+	if (failedCount > 0) {
+		throw new Error(
+			`Failed to upload ${failedCount} file(s): ${failedPaths.join(", ")}${failedCount > 5 ? "..." : ""}`,
+		);
 	}
 	return res.value;
 }
@@ -757,7 +984,7 @@ async function convertOperationToNdJson(operation: CommitBlobOperation): Promise
 			// Note: By the time we get here, splice operations should have been converted to addOrUpdate operations with SplicedBlob
 			// But we handle this case for completeness
 			throw new Error(
-				"Edit operations should be converted to addOrUpdate operations before reaching convertOperationToNdJson"
+				"Edit operations should be converted to addOrUpdate operations before reaching convertOperationToNdJson",
 			);
 		}
 		default:

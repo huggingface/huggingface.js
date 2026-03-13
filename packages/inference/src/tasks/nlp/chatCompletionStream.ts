@@ -11,10 +11,13 @@ import { AutoRouterConversationalTask } from "../../providers/providerHelper.js"
  */
 export async function* chatCompletionStream(
 	args: BaseArgs & ChatCompletionInput,
-	options?: Options
+	options?: Options,
 ): AsyncGenerator<ChatCompletionStreamOutput> {
 	let providerHelper: ConversationalTaskHelper & TaskProviderHelper;
-	if (!args.provider || args.provider === "auto") {
+	if (args.endpointUrl) {
+		const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+		providerHelper = getProviderHelper(provider, "conversational");
+	} else if (!args.provider || args.provider === "auto") {
 		// Special case: we have a dedicated auto-router for conversational models. No need to fetch provider mapping.
 		providerHelper = new AutoRouterConversationalTask();
 	} else {

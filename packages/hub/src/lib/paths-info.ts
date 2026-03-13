@@ -23,13 +23,27 @@ export interface SecurityFileStatus {
 export interface PathInfo {
 	path: string;
 	type: string;
-	oid: string;
+	/**
+	 * Not available for bucket repos.
+	 */
+	oid?: string;
 	size: number;
 	/**
-	 * Only defined when path is LFS pointer
+	 * Only defined when path is LFS pointer. Not available for bucket repos.
 	 */
 	lfs?: LfsPathInfo;
+	/**
+	 * Xet-backed hash. Always present for bucket file entries.
+	 */
+	xetHash?: string;
+	/**
+	 * Not available for bucket repos, use {@link uploadedAt} instead.
+	 */
 	lastCommit?: CommitInfo;
+	/**
+	 * Only available for bucket repos.
+	 */
+	uploadedAt?: string;
 	securityFileStatus?: SecurityFileStatus;
 }
 
@@ -45,7 +59,7 @@ export function pathsInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<(PathInfo & { lastCommit: CommitInfo; securityFileStatus: SecurityFileStatus })[]>;
 export function pathsInfo(
 	params: {
@@ -58,7 +72,7 @@ export function pathsInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<PathInfo[]>;
 
 export async function pathsInfo(
@@ -72,16 +86,17 @@ export async function pathsInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<PathInfo[]> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
 
-	const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/paths-info/${encodeURIComponent(
-		params.revision ?? "main"
-	)}`;
+	const revision = repoId.type === "bucket" ? undefined : (params.revision ?? "main");
+	const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/paths-info${
+		revision ? `/${encodeURIComponent(revision)}` : ""
+	}`;
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "POST",
@@ -111,14 +126,15 @@ export async function pathsInfo(
 		type: item.type,
 		oid: item.oid,
 		size: item.size,
-		// expand fields
+		xetHash: item.xetHash,
+		uploadedAt: item.uploadedAt,
 		securityFileStatus: item.securityFileStatus,
 		lastCommit: item.lastCommit
 			? {
 					date: new Date(item.lastCommit.date),
 					title: item.lastCommit.title,
 					id: item.lastCommit.id,
-			  }
+				}
 			: undefined,
 	}));
 }

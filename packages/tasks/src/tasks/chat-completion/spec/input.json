@@ -66,6 +66,11 @@
 			"example": 0.1,
 			"nullable": true
 		},
+		"reasoning_effort": {
+			"type": "string",
+			"description": "Optional. Constrains effort on reasoning for models that support reasoning. Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning. Common values: none, minimal, low, medium, high, xhigh. Support and defaults are provider and model-dependent.",
+			"nullable": true
+		},
 		"response_format": {
 			"allOf": [
 				{

@@ -19,7 +19,7 @@ export async function deleteCollectionItem(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<void> {
 	const accessToken = checkCredentials(params);
 
@@ -31,7 +31,7 @@ export async function deleteCollectionItem(
 				Authorization: `Bearer ${accessToken}`,
 				"Content-Type": "application/json",
 			},
-		}
+		},
 	);
 
 	if (!res.ok) {

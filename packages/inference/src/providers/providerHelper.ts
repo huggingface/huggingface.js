@@ -51,7 +51,15 @@ import type {
 import { HF_ROUTER_URL } from "../config.js";
 import { InferenceClientProviderOutputError, InferenceClientRoutingError } from "../errors.js";
 import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
-import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, RequestArgs, UrlParams } from "../types.js";
+import type {
+	BaseArgs,
+	BodyParams,
+	HeaderParams,
+	InferenceProvider,
+	OutputType,
+	RequestArgs,
+	UrlParams,
+} from "../types.js";
 import { toArray } from "../utils/toArray.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
@@ -59,6 +67,7 @@ import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
 import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
+import type { ImageToTextArgs } from "../tasks/cv/imageToText.js";
 
 /**
  * Base class for task-specific provider helpers
@@ -67,7 +76,7 @@ export abstract class TaskProviderHelper {
 	constructor(
 		readonly provider: InferenceProvider,
 		protected baseUrl: string,
-		readonly clientSideRoutingOnly: boolean = false
+		readonly clientSideRoutingOnly: boolean = false,
 	) {}
 
 	/**
@@ -78,7 +87,7 @@ export abstract class TaskProviderHelper {
 		response: unknown,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
+		outputType?: OutputType,
 	): Promise<unknown>;
 
 	/**
@@ -115,6 +124,9 @@ export abstract class TaskProviderHelper {
 	makeUrl(params: UrlParams): string {
 		const baseUrl = this.makeBaseUrl(params);
 		const route = this.makeRoute(params).replace(/^\/+/, "");
+		if (params.urlTransform) {
+			return params.urlTransform(`${baseUrl}/${route}`);
+		}
 		return `${baseUrl}/${route}`;
 	}
 
@@ -141,7 +153,7 @@ export interface TextToImageTaskHelper {
 		response: unknown,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>>;
 	preparePayload(params: BodyParams<TextToImageInput & BaseArgs>): Record<string, unknown>;
 }
@@ -194,6 +206,7 @@ export interface ObjectDetectionTaskHelper {
 export interface ImageToTextTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageToTextOutput>;
 	preparePayload(params: BodyParams<ImageToTextInput & BaseArgs>): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: ImageToTextArgs): Promise<RequestArgs>;
 }
 
 export interface ZeroShotImageClassificationTaskHelper {
@@ -271,7 +284,7 @@ export interface TextToAudioTaskHelper {
 export interface AudioToAudioTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AudioToAudioOutput[]>;
 	preparePayload(
-		params: BodyParams<BaseArgs & { inputs: Blob } & Record<string, unknown>>
+		params: BodyParams<BaseArgs & { inputs: Blob } & Record<string, unknown>>,
 	): Record<string, unknown> | BodyInit;
 }
 export interface AutomaticSpeechRecognitionTaskHelper {
@@ -304,14 +317,14 @@ export interface VisualQuestionAnsweringTaskHelper {
 export interface TabularClassificationTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<number[]>;
 	preparePayload(
-		params: BodyParams<BaseArgs & { inputs: { data: Record<string, string[]> } } & Record<string, unknown>>
+		params: BodyParams<BaseArgs & { inputs: { data: Record<string, string[]> } } & Record<string, unknown>>,
 	): Record<string, unknown> | BodyInit;
 }
 
 export interface TabularRegressionTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<number[]>;
 	preparePayload(
-		params: BodyParams<BaseArgs & { inputs: { data: Record<string, string[]> } } & Record<string, unknown>>
+		params: BodyParams<BaseArgs & { inputs: { data: Record<string, string[]> } } & Record<string, unknown>>,
 	): Record<string, unknown> | BodyInit;
 }
 
@@ -376,7 +389,7 @@ export class BaseTextGenerationTask extends TaskProviderHelper implements TextGe
 			res.length > 0 &&
 			res.every(
 				(x): x is { generated_text: string } =>
-					typeof x === "object" && !!x && "generated_text" in x && typeof x.generated_text === "string"
+					typeof x === "object" && !!x && "generated_text" in x && typeof x.generated_text === "string",
 			)
 		) {
 			return res[0];

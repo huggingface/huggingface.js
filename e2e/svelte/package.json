@@ -2,7 +2,7 @@
 	"name": "myapp",
 	"version": "0.0.1",
 	"private": true,
-	"packageManager": "pnpm@10.10.0",
+	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -10,6 +10,10 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless"
+	},
+	"dependencies": {
+		"@huggingface/hub": "*",
+		"@huggingface/inference": "*"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.2.0",
@@ -23,9 +27,5 @@
 		"vite": "^5.2.11",
 		"vitest": "^1.6.0"
 	},
-	"type": "module",
-	"dependencies": {
-		"@huggingface/hub": "*",
-		"@huggingface/inference": "*"
-	}
+	"packageManager": "pnpm@10.10.0"
 }

@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
  */
 export async function subPaths(
 	path: URL,
-	maxDepth = 10
+	maxDepth = 10,
 ): Promise<
 	Array<{
 		path: URL;
@@ -27,7 +27,7 @@ export async function subPaths(
 				...(await subPaths(filePath, maxDepth - 1)).map((subPath) => ({
 					...subPath,
 					relativePath: `${file.name}/${subPath.relativePath}`,
-				}))
+				})),
 			);
 		} else {
 			ret.push({ path: filePath, relativePath: file.name });

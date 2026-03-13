@@ -68,6 +68,10 @@ export async function* listModels<
 			 * Will search for models that have one of the inference providers in the list.
 			 */
 			inferenceProviders?: string[];
+			/**
+			 * Will search for models that support at least one of those local apps (eg "lmstudio", "mlx-lm", ...)
+			 */
+			apps?: string[];
 		};
 		hubUrl?: string;
 		additionalFields?: T[];
@@ -76,10 +80,23 @@ export async function* listModels<
 		 */
 		limit?: number;
 		/**
+		 * Sort models by a specific field.
+		 */
+		sort?:
+			| "createdAt"
+			| "downloads"
+			| "likes"
+			| "lastModified"
+			| "likes30d"
+			| "trendingScore"
+			| "num_parameters"
+			| "mainSize"
+			| "id";
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): AsyncGenerator<ModelEntry & Pick<ApiModelInfo, T>> {
 	const accessToken = params && checkCredentials(params);
 	let totalToFetch = params?.limit ?? Infinity;
@@ -92,6 +109,8 @@ export async function* listModels<
 			...(params?.search?.inferenceProviders
 				? { inference_provider: params.search.inferenceProviders.join(",") }
 				: undefined),
+			...(params?.search?.apps ? { apps: params.search.apps.join(",") } : undefined),
+			...(params?.sort ? { sort: params.sort } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
@@ -122,7 +141,7 @@ export async function* listModels<
 			) {
 				normalizedItem.inferenceProviderMapping = normalizeInferenceProviderMapping(
 					item.id,
-					item.inferenceProviderMapping
+					item.inferenceProviderMapping,
 				);
 			}
 

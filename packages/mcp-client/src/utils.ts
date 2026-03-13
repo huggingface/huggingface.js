@@ -54,7 +54,7 @@ export function urlToServerConfig(urlStr: string, authToken?: string): ServerCon
 									Authorization: `Bearer ${authToken}`,
 								},
 							},
-					  }
+						}
 					: undefined,
 			},
 		};
@@ -81,7 +81,7 @@ export function urlToServerConfig(urlStr: string, authToken?: string): ServerCon
 									});
 								},
 							},
-					  }
+						}
 					: undefined,
 			},
 		};

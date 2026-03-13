@@ -357,7 +357,7 @@ function generateInferenceSnippet(
 	provider: InferenceProviderOrPolicy,
 	task: WidgetType,
 	lora: boolean = false,
-	opts?: Record<string, unknown>
+	opts?: Record<string, unknown>,
 ): InferenceSnippet[] {
 	const allSnippets = snippets.getInferenceSnippets(
 		model,
@@ -372,10 +372,10 @@ function generateInferenceSnippet(
 				? {
 						adapter: "lora",
 						adapterWeightsPath: `<path to LoRA weights in .safetensors format>`,
-				  }
+					}
 				: {}),
 		},
-		opts
+		opts,
 	);
 	return allSnippets
 		.filter((snippet) => snippet.language == language)
@@ -385,7 +385,7 @@ function generateInferenceSnippet(
 async function getExpectedInferenceSnippet(
 	testName: string,
 	language: Language,
-	provider: SnippetInferenceProvider
+	provider: SnippetInferenceProvider,
 ): Promise<InferenceSnippet[]> {
 	const fixtureFolder = getFixtureFolder(testName);
 	const languageFolder = path.join(fixtureFolder, language);
@@ -407,7 +407,7 @@ async function saveExpectedInferenceSnippet(
 	testName: string,
 	language: Language,
 	provider: SnippetInferenceProvider,
-	snippets: InferenceSnippet[]
+	snippets: InferenceSnippet[],
 ) {
 	const fixtureFolder = getFixtureFolder(testName);
 	await fs.mkdir(fixtureFolder, { recursive: true });

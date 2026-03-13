@@ -15,7 +15,7 @@
  * Thanks!
  */
 import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/tasks";
-import type { BodyParams, UrlParams } from "../types.js";
+import type { BodyParams, OutputType, UrlParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
 	BaseConversationalTask,
@@ -23,7 +23,7 @@ import {
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
-import { InferenceClientProviderOutputError } from "../errors.js";
+import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
 export interface HyperbolicTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
@@ -58,7 +58,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 				? {
 						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
 						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				  }
+					}
 				: undefined),
 			...omit(params.args, ["inputs", "parameters"]),
 			model: params.model,
@@ -93,6 +93,11 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
+		if (params.outputType === "url") {
+			throw new InferenceClientInputError(
+				"hyperbolic provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead.",
+			);
+		}
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
@@ -105,7 +110,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 		response: HyperbolicTextToImageOutput,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob" | "json"
+		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
@@ -117,7 +122,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 			if (outputType === "json") {
 				return { ...response };
 			}
-			if (outputType === "url") {
+			if (outputType === "dataUrl") {
 				return `data:image/jpeg;base64,${response.images[0].image}`;
 			}
 			return fetch(`data:image/jpeg;base64,${response.images[0].image}`).then((res) => res.blob());

@@ -18,7 +18,7 @@ export type VisualQuestionAnsweringArgs = BaseArgs &
  */
 export async function visualQuestionAnswering(
 	args: VisualQuestionAnsweringArgs,
-	options?: Options
+	options?: Options,
 ): Promise<VisualQuestionAnsweringOutput[number]> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "visual-question-answering");

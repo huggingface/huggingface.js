@@ -35,8 +35,11 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 }
 
 const PARALLEL_DOWNLOADS = 20;
-const MAX_HEADER_LENGTH = 25_000_000;
+const MAX_HEADER_LENGTH = 25_000_000; // 25MB
+const MAX_CONFIG_LENGTH = 10_000_000; // 10MB — config.json is typically small; cap to avoid large memory use
+const MAX_SHARD_COUNT = 10_000; // well above any real sharded model; blocks crafted index with millions of entries
 const GPTQ_QWEIGHT_SUFFIX = "qweight";
+const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
 
 class SafetensorParseError extends Error {}
 
@@ -90,6 +93,7 @@ export type SafetensorsParseFromRepo =
 			header: SafetensorsFileHeader;
 			parameterCount?: Partial<Record<Dtype, number>>;
 			parameterTotal?: number;
+			filepaths: string[];
 	  }
 	| {
 			sharded: true;
@@ -97,6 +101,7 @@ export type SafetensorsParseFromRepo =
 			headers: SafetensorsShardedHeaders;
 			parameterCount?: Partial<Record<Dtype, number>>;
 			parameterTotal?: number;
+			filepaths: string[];
 	  };
 
 /**
@@ -108,7 +113,7 @@ async function fetchModelConfig(
 		revision?: string;
 		hubUrl?: string;
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<ModelConfig | null> {
 	try {
 		const configBlob = await downloadFile({
@@ -120,7 +125,7 @@ async function fetchModelConfig(
 			return null;
 		}
 
-		const config = JSON.parse(await configBlob.text());
+		const config = JSON.parse(await configBlob.slice(0, MAX_CONFIG_LENGTH).text());
 		return config as ModelConfig;
 	} catch (error) {
 		// Config file might not exist or be inaccessible
@@ -138,7 +143,7 @@ async function parseSingleFile(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsFileHeader> {
 	const blob = await downloadFile({ ...params, path });
 
@@ -154,7 +159,7 @@ async function parseSingleFile(
 	}
 	if (lengthOfHeader > MAX_HEADER_LENGTH) {
 		throw new SafetensorParseError(
-			`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`
+			`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`,
 		);
 	}
 
@@ -177,7 +182,7 @@ async function parseShardedIndex(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsIndexJson> {
 	const indexBlob = await downloadFile({
 		...params,
@@ -190,7 +195,7 @@ async function parseShardedIndex(
 
 	try {
 		// no validation for now, we assume it's a valid IndexJson.
-		const index = JSON.parse(await indexBlob.slice(0, 20_000_000).text());
+		const index = JSON.parse(await indexBlob.slice(0, MAX_HEADER_LENGTH).text());
 		return index;
 	} catch (error) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
@@ -208,20 +213,36 @@ async function fetchAllHeaders(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsShardedHeaders> {
 	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
+	if (filenames.length > MAX_SHARD_COUNT) {
+		throw new SafetensorParseError(
+			`Too many shard files (${filenames.length}). Maximum supported is ${MAX_SHARD_COUNT}.`,
+		);
+	}
+	for (const filename of filenames) {
+		if (filename.includes("..") || filename.startsWith("/") || filename.includes("://")) {
+			throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}"`);
+		}
+	}
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
 		await promisesQueue(
 			filenames.map(
 				(filename) => async () =>
-					[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader]
+					[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader],
 			),
-			PARALLEL_DOWNLOADS
-		)
+			PARALLEL_DOWNLOADS,
+		),
 	);
 	return shardedMap;
+}
+
+function parseTotalParameters(value: string | number | undefined): number | undefined {
+	if (!value) return undefined;
+	if (typeof value === "number") return value;
+	return parseInt(value);
 }
 
 /**
@@ -248,7 +269,7 @@ export async function parseSafetensorsMetadata(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SetRequired<SafetensorsParseFromRepo, "parameterCount">>;
 export async function parseSafetensorsMetadata(
 	params: {
@@ -267,7 +288,7 @@ export async function parseSafetensorsMetadata(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsParseFromRepo>;
 export async function parseSafetensorsMetadata(
 	params: {
@@ -280,7 +301,7 @@ export async function parseSafetensorsMetadata(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsParseFromRepo> {
 	const repoId = toRepoId(params.repo);
 
@@ -290,30 +311,25 @@ export async function parseSafetensorsMetadata(
 
 	// Fetch model config for quantization information
 	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
-	const quantConfig = modelConfig?.quantization_config;
+	const quantConfig = modelConfig?.quantization_config ?? modelConfig?.text_config?.quantization_config;
 
 	if (
 		(params.path && RE_SAFETENSORS_FILE.test(params.path)) ||
 		(await fileExists({ ...params, path: SAFETENSORS_FILE }))
 	) {
 		const header = await parseSingleFile(params.path ?? SAFETENSORS_FILE, params);
+		const paramStats = params.computeParametersCount
+			? {
+					parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
+					/// shortcut: get param count directly from metadata
+					parameterTotal: parseTotalParameters(header.__metadata__.total_parameters),
+				}
+			: undefined;
 		return {
 			sharded: false,
 			header,
-			...(params.computeParametersCount
-				? {
-						parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
-						parameterTotal:
-							/// shortcut: get param count directly from metadata
-							header.__metadata__.total_parameters
-								? typeof header.__metadata__.total_parameters === "number"
-									? header.__metadata__.total_parameters
-									: typeof header.__metadata__.total_parameters === "string"
-									  ? parseInt(header.__metadata__.total_parameters)
-									  : undefined
-								: undefined,
-				  }
-				: undefined),
+			...paramStats,
+			filepaths: [params.path ?? SAFETENSORS_FILE],
 		};
 	} else if (
 		(params.path && RE_SAFETENSORS_INDEX_FILE.test(params.path)) ||
@@ -322,25 +338,21 @@ export async function parseSafetensorsMetadata(
 		const path = params.path ?? SAFETENSORS_INDEX_FILE;
 		const index = await parseShardedIndex(path, params);
 		const shardedMap = await fetchAllHeaders(path, index, params);
+		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 
+		const paramStats = params.computeParametersCount
+			? {
+					parameterCount: computeNumOfParamsByDtypeSharded(shardedMap, quantConfig),
+					/// shortcut: get param count directly from metadata
+					parameterTotal: parseTotalParameters(index.metadata?.total_parameters),
+				}
+			: undefined;
 		return {
 			sharded: true,
 			index,
 			headers: shardedMap,
-			...(params.computeParametersCount
-				? {
-						parameterCount: computeNumOfParamsByDtypeSharded(shardedMap, quantConfig),
-						parameterTotal:
-							/// shortcut: get param count directly from metadata
-							index.metadata?.total_parameters
-								? typeof index.metadata.total_parameters === "number"
-									? index.metadata.total_parameters
-									: typeof index.metadata.total_parameters === "string"
-									  ? parseInt(index.metadata.total_parameters)
-									  : undefined
-								: undefined,
-				  }
-				: undefined),
+			...paramStats,
+			filepaths: [path, ...Object.keys(shardedMap).map((filename) => pathPrefix + filename)],
 		};
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
@@ -353,33 +365,59 @@ export interface QuantizationConfig {
 	bits?: number;
 	load_in_4bit?: boolean;
 	load_in_8bit?: boolean;
+	// compressed-tensors specific
+	format?: string;
+	config_groups?: Record<string, { weights?: { num_bits?: number } }>;
 }
 
 export interface ModelConfig {
 	quantization_config?: QuantizationConfig;
+	text_config?: { quantization_config?: QuantizationConfig };
 }
 
 /**
- * Determines if a tensor is quantized based on quantization config and tensor name
+ * @internal
+ * Glob match without RegExp: splits pattern on `*` and checks that each literal
+ * segment appears in order within `str`. Avoids RegExp entirely (no ReDoS risk,
+ * no SyntaxError from attacker-controlled patterns in config.json).
  */
-function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
-	if (!quantConfig) {
-		return false;
+export function globMatch(pattern: string, str: string): boolean {
+	const parts = pattern.split("*");
+
+	if (parts.length === 1) {
+		return pattern === str;
 	}
 
-	if (!quantConfig.modules_to_not_convert || quantConfig.modules_to_not_convert.length === 0) {
-		return true;
+	if (!str.startsWith(parts[0])) return false;
+	let pos = parts[0].length;
+
+	const lastPart = parts[parts.length - 1];
+	if (!str.endsWith(lastPart)) return false;
+	const end = str.length - lastPart.length;
+
+	for (let i = 1; i < parts.length - 1; i++) {
+		const idx = str.indexOf(parts[i], pos);
+		if (idx === -1 || idx + parts[i].length > end) return false;
+		pos = idx + parts[i].length;
 	}
 
-	for (const pattern of quantConfig.modules_to_not_convert) {
-		const regexPattern = pattern.replace(/\*/g, ".*");
-		const regex = new RegExp(regexPattern);
-		if (regex.test(tensorName)) {
-			return false;
-		}
-	}
+	return pos <= end;
+}
 
-	return true;
+/**
+ * Determines if a tensor is quantized based on quantization config and tensor name.
+ *
+ * Python's transformers uses plain substring matching for `modules_to_not_convert`,
+ * so bare names like `"lm_head"` must match `"model.lm_head.weight"`. When the
+ * pattern contains a `*` we fall back to proper glob matching for flexibility.
+ */
+export function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
+	if (!quantConfig) return false;
+	const patterns = quantConfig.modules_to_not_convert;
+	if (!patterns?.length) return true;
+	return !patterns.some((pattern) =>
+		pattern.includes("*") ? globMatch(pattern, tensorName) : tensorName.includes(pattern),
+	);
 }
 
 /**
@@ -413,20 +451,22 @@ function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig
 			}
 			return 1;
 
+		case "compressed-tensors":
+			if (quantConfig.format === "pack-quantized" && dtype === "I32") {
+				const numBits =
+					Object.values(quantConfig.config_groups ?? {}).find((g) => g.weights?.num_bits)?.weights?.num_bits ?? 4;
+				return Math.floor(32 / numBits);
+			}
+			return 1;
+
 		case "bitsandbytes":
 			if (quantConfig.load_in_4bit && dtype === "U8") {
 				return 2;
 			}
-			if (quantConfig.load_in_8bit) {
-				return 1;
-			}
 			return 1;
 
 		default:
-			if (quantConfig.load_in_4bit && dtype === "U8") {
-				return 2;
-			}
-			if (quantConfig.bits === 4 && dtype === "U8") {
+			if (dtype === "U8" && (quantConfig.load_in_4bit || quantConfig.bits === 4)) {
 				return 2;
 			}
 			return 1;
@@ -435,7 +475,7 @@ function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig
 
 function computeNumOfParamsByDtypeSingleFile(
 	header: SafetensorsFileHeader,
-	quantConfig?: QuantizationConfig
+	quantConfig?: QuantizationConfig,
 ): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
@@ -449,6 +489,9 @@ function computeNumOfParamsByDtypeSingleFile(
 		}
 
 		const elements = v.shape.reduce((a, b) => a * b);
+		if (!Number.isFinite(elements)) {
+			continue;
+		}
 		const multiplier = quantConfig ? getQuantizationMultiplier(tensorName, v.dtype, quantConfig) : 1;
 		if (multiplier === 0) {
 			continue;
@@ -460,7 +503,7 @@ function computeNumOfParamsByDtypeSingleFile(
 
 function computeNumOfParamsByDtypeSharded(
 	shardedMap: SafetensorsShardedHeaders,
-	quantConfig?: QuantizationConfig
+	quantConfig?: QuantizationConfig,
 ): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	for (const header of Object.values(shardedMap)) {
@@ -477,25 +520,10 @@ function getTensorSuffix(tensorName: string): string {
 }
 
 function shouldSkipTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
-	const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
-
-	if (!quantConfig) {
-		return false;
-	}
-
+	if (!quantConfig) return false;
 	const quantMethod = quantConfig.quant_method?.toLowerCase();
-	if (!quantMethod || (quantMethod !== "gptq" && quantMethod !== "awq")) {
-		return false;
-	}
-
-	if (!isQuantizedTensor(tensorName, quantConfig)) {
-		return false;
-	}
-
+	if (quantMethod !== "gptq" && quantMethod !== "awq") return false;
+	if (!isQuantizedTensor(tensorName, quantConfig)) return false;
 	const suffix = getTensorSuffix(tensorName);
-	if (suffix === GPTQ_QWEIGHT_SUFFIX) {
-		return false;
-	}
-
-	return GPTQ_AWQ_AUXILIARY_SUFFIXES.includes(suffix);
+	return suffix !== GPTQ_QWEIGHT_SUFFIX && GPTQ_AWQ_AUXILIARY_SUFFIXES.includes(suffix);
 }

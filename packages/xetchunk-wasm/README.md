@@ -1,6 +1,6 @@
-JS and WASM implementations of https://github.com/huggingface/xet-core/blob/main/deduplication/src/chunking.rs
+JavaScript implementation of https://github.com/huggingface/xet-core/blob/main/deduplication/src/chunking.rs
 
-Using [AssemblyScript](https://www.assemblyscript.org/) to generate a lean WASM.
+This package uses `blake3-jit` for hashing and `@huggingface/gearhash-wasm` for gearhash matching.
 
 ## Usage
 
@@ -14,7 +14,7 @@ const data = new Uint8Array(1000000); // Example: 1MB of data
 // ... fill data with your content ...
 
 const chunks = getChunks(data, TARGET_CHUNK_SIZE);
-console.log("xorbHash", xorbHasht(chunks));
+console.log("xorbHash", xorbHash(chunks));
 
 // Alternative, in case your data is streaming
 const chunker = createChunker(TARGET_CHUNK_SIZE);
@@ -27,7 +27,7 @@ for await (const data of source) {
 console.log("last chunk", finalize(chunker));
 ```
 
-## Beanchmarking chunking
+## Benchmarking chunking
 
 ```shell
 pnpm install

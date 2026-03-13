@@ -11,7 +11,7 @@ export type SentenceSimilarityArgs = BaseArgs & SentenceSimilarityInput;
  */
 export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
-	options?: Options
+	options?: Options,
 ): Promise<SentenceSimilarityOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "sentence-similarity");

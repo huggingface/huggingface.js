@@ -13,7 +13,7 @@ async function main(initialSpace: string | Space, options?: Options) {
 	const has_huggingface_ancestor = Object.values(
 		window.location?.ancestorOrigins ?? {
 			0: window.document.referrer,
-		}
+		},
 	).some((origin) => new URL(origin)?.origin === "https://huggingface.co");
 	if (has_huggingface_ancestor) return;
 
