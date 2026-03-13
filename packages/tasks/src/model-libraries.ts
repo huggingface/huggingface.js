@@ -166,6 +166,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	bionemo: {
+		prettyLabel: "BioNeMo",
+		repoName: "BioNeMo",
+		filter: false,
+		repoUrl: "https://github.com/nvidia/BioNeMo",
+		countDownloads: `path_extension:"ckpt" OR path:"config.json"`,
+	},
 	birder: {
 		prettyLabel: "Birder",
 		repoName: "Birder",
