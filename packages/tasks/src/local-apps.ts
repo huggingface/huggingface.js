@@ -474,6 +474,49 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetMlxGui = (model: ModelData): LocalAppSnippet[] => {
+	const runCommand = [
+		"# Call the API (text generation):",
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`	-H "Content-Type: application/json" \\`,
+		`	-d '{`,
+		`		"model": "${model.id}",`,
+		`		"messages": [{"role": "user", "content": "Hello!"}],`,
+		`		"max_tokens": 100`,
+		`	}'`,
+	].join("\n");
+
+	const installCommand = [
+		"# Install model:",
+		`curl -X POST "http://localhost:8000/v1/models/install" \\`,
+		`	-H "Content-Type: application/json" \\`,
+		`	-d '{"model_id": "${model.id}", "name": "${model.id.split('/').pop()}"}'`,
+	].join("\n");
+
+	return [
+		{
+			title: "Download macOS App",
+			setup: [
+				"# Download latest .app from releases:",
+				"https://github.com/RamboRogers/mlx-gui/releases/latest",
+				"# Drag to /Applications and launch",
+			].join("\n"),
+			content: [installCommand, runCommand].join("\n\n"),
+		},
+		{
+			title: "Install from source",
+			setup: [
+				"# Install MLX-GUI:",
+				"pip install git+https://github.com/RamboRogers/mlx-gui.git",
+				"# Start server:",
+				"mlx-gui start --port 8000",
+			].join("\n"),
+			content: [installCommand, runCommand].join("\n\n"),
+		},
+	];
+};
+
+
 /**
  * Add your new local app here.
  *
@@ -519,6 +562,18 @@ export const LOCAL_APPS = {
 				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetSglang,
+	},
+	"mlx-gui": {
+	prettyLabel: "MLX-GUI",
+	docsUrl: "https://github.com/RamboRogers/mlx-gui",
+	mainTask: "text-generation",
+	displayOnModelPage: (model: ModelData) =>
+		model.library_name === "mlx" && 
+		(model.pipeline_tag === "text-generation" || 
+		 model.pipeline_tag === "image-text-to-text" ||
+		 model.pipeline_tag === "automatic-speech-recognition" ||
+		 model.pipeline_tag === "feature-extraction"),
+	snippet: snippetMlxGui,
 	},
 	"mlx-lm": {
 		prettyLabel: "MLX LM",
