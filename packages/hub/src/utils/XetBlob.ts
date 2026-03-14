@@ -33,10 +33,10 @@ type XetBlobCreateOptions = {
 
 export interface ReconstructionInfo {
 	/**
-	 * List of CAS blocks
+	 * List of xorb blocks
 	 */
 	terms: Array<{
-		/** Hash of the CAS block */
+		/** Hash of the xorb */
 		hash: string;
 		/** Total uncompressed length of data of the chunks from range.start to range.end - 1 */
 		unpacked_length: number;
@@ -45,7 +45,7 @@ export interface ReconstructionInfo {
 	}>;
 
 	/**
-	 * Dictionnary of CAS block hash => list of ranges in the block + url to fetch it
+	 * Dictionary of xorb hash => list of ranges in the block + url to fetch it
 	 */
 	fetch_info: Record<
 		string,
