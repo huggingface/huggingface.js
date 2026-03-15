@@ -217,11 +217,11 @@ function takeFromExternrefTable0(idx) {
  * @param {any} chunks_array
  * @returns {string}
  */
-export function compute_xorb_hash(chunks_array) {
+export function compute_file_hash(chunks_array) {
     let deferred2_0;
     let deferred2_1;
     try {
-        const ret = wasm.compute_xorb_hash(chunks_array);
+        const ret = wasm.compute_file_hash(chunks_array);
         var ptr1 = ret[0];
         var len1 = ret[1];
         if (ret[3]) {
@@ -242,11 +242,11 @@ export function compute_xorb_hash(chunks_array) {
  * @param {any} chunks_array
  * @returns {string}
  */
-export function compute_file_hash(chunks_array) {
+export function compute_xorb_hash(chunks_array) {
     let deferred2_0;
     let deferred2_1;
     try {
-        const ret = wasm.compute_file_hash(chunks_array);
+        const ret = wasm.compute_xorb_hash(chunks_array);
         var ptr1 = ret[0];
         var len1 = ret[1];
         if (ret[3]) {
@@ -332,11 +332,11 @@ function passArray8ToWasm0(arg, malloc) {
     return ptr;
 }
 function __wbg_adapter_40(arg0, arg1, arg2) {
-    wasm.closure56_externref_shim(arg0, arg1, arg2);
+    wasm.closure60_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_102(arg0, arg1, arg2, arg3) {
-    wasm.closure74_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_126(arg0, arg1, arg2, arg3) {
+    wasm.closure78_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 const __wbindgen_enum_ReadableStreamType = ["bytes"];
@@ -647,7 +647,7 @@ export function __wbg_new_23a2665fac83c611(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_102(a, state0.b, arg0, arg1);
+                return __wbg_adapter_126(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -785,8 +785,8 @@ export function __wbindgen_cb_drop(arg0) {
     return ret;
 };
 
-export function __wbindgen_closure_wrapper263(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 57, __wbg_adapter_40);
+export function __wbindgen_closure_wrapper289(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 61, __wbg_adapter_40);
     return ret;
 };
 
