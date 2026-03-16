@@ -66,8 +66,8 @@ export async function runJob(
 		body.labels = params.labels;
 	}
 	if (params.volumes?.length) {
-		body.volumes = params.volumes.map(({ repo, ...rest }) => {
-			const repoId = toRepoId(repo);
+		body.volumes = params.volumes.map(({ source, ...rest }) => {
+			const repoId = toRepoId(source);
 			return { type: repoId.type, source: repoId.name, ...rest };
 		});
 	}

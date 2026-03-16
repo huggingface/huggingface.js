@@ -10,8 +10,8 @@ export interface ApiJobVolume {
 }
 
 export interface JobVolume {
-	/** Repo designation, e.g. "datasets/user/my-dataset", "user/my-model", or { type: "dataset", name: "user/my-dataset" } */
-	repo: RepoDesignation;
+	/** Source repo, e.g. "datasets/user/my-dataset", "user/my-model", or { type: "dataset", name: "user/my-dataset" } */
+	source: RepoDesignation;
 	/** Mount path inside the container, e.g. "/data" */
 	mountPath: string;
 	/** Git revision (only for repos, defaults to "main") */

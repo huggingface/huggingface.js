@@ -69,8 +69,8 @@ export async function createScheduledJob(
 		(body.jobSpec as Record<string, unknown>).labels = rest.jobSpec.labels;
 	}
 	if (rest.jobSpec.volumes?.length) {
-		(body.jobSpec as Record<string, unknown>).volumes = rest.jobSpec.volumes.map(({ repo, ...rest }) => {
-			const repoId = toRepoId(repo);
+		(body.jobSpec as Record<string, unknown>).volumes = rest.jobSpec.volumes.map(({ source, ...rest }) => {
+			const repoId = toRepoId(source);
 			return { type: repoId.type, source: repoId.name, ...rest };
 		});
 	}

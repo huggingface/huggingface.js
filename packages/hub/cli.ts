@@ -998,7 +998,7 @@ async function run() {
 						if (colonIdx === -1) {
 							throw new Error(`Invalid volume format: ${volumeArg}. Expected SOURCE:MOUNTPATH[:OPTIONS]`);
 						}
-						const repo = volumeArg.slice(0, colonIdx);
+						const source = volumeArg.slice(0, colonIdx);
 						const rest = volumeArg.slice(colonIdx + 1);
 
 						const secondColon = rest.indexOf(":");
@@ -1027,7 +1027,7 @@ async function run() {
 						}
 
 						volumes.push({
-							repo,
+							source,
 							mountPath,
 							...(revision ? { revision } : {}),
 							...(readOnly ? { readOnly } : {}),
