@@ -698,7 +698,10 @@ export const LOCAL_APPS = {
 		prettyLabel: "Llmpm",
 		docsUrl: "https://www.llmpm.co/docs",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel || isTransformersModel,
+		displayOnModelPage: (model) =>
+			isLlamaCppGgufModel(model) ||
+			(isTransformersModel(model) &&
+				(model.pipeline_tag === "text-generation" || model.pipeline_tag === "text-to-image")),
 		snippet: snippetLlmpm,
 	},
 } satisfies Record<string, LocalApp>;
