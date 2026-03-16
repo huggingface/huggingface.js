@@ -138,6 +138,23 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain("pi");
 	});
 
+	it("llmpm", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["llmpm"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toContain("pip install llmpm");
+		expect(snippet[0].content).toContain("llmpm run bartowski/Llama-3.2-3B-Instruct-GGUF");
+		expect(snippet[0].content).toContain(`llmpm run bartowski/Llama-3.2-3B-Instruct-GGUF --prompt "Surprise Me!"`);
+		expect(snippet[0].content).toContain("llmpm serve bartowski/Llama-3.2-3B-Instruct-GGUF");
+		expect(snippet[0].content).toContain("curl -X POST http://localhost:8080/v1/chat/completions");
+		expect(snippet[0].content).toContain(`"model": "bartowski/Llama-3.2-3B-Instruct-GGUF"`);
+	});
+
 	it("docker model runner", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
 		const model: ModelData = {
