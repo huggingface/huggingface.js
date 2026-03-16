@@ -2,6 +2,7 @@ import { HUB_URL } from "../../consts";
 import { createApiError } from "../../error";
 import type { CredentialsParams } from "../../types/public";
 import { checkCredentials } from "../../utils/checkCredentials";
+import { toRepoId } from "../../utils/toRepoId";
 import type { ApiScheduledJob, CreateScheduledJobOptions } from "../../types/api/api-jobs";
 
 /**
@@ -68,7 +69,10 @@ export async function createScheduledJob(
 		(body.jobSpec as Record<string, unknown>).labels = rest.jobSpec.labels;
 	}
 	if (rest.jobSpec.volumes?.length) {
-		(body.jobSpec as Record<string, unknown>).volumes = rest.jobSpec.volumes;
+		(body.jobSpec as Record<string, unknown>).volumes = rest.jobSpec.volumes.map(({ repo, ...rest }) => {
+			const repoId = toRepoId(repo);
+			return { type: repoId.type, source: repoId.name, ...rest };
+		});
 	}
 
 	const response = await (customFetch || fetch)(`${hubUrl || HUB_URL}/api/scheduled-jobs/${namespace}`, {

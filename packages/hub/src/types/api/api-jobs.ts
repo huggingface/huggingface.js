@@ -1,9 +1,17 @@
-import type { SpaceHardwareFlavor } from "../public";
+import type { RepoDesignation, RepoType, SpaceHardwareFlavor } from "../public";
+
+export interface ApiJobVolume {
+	type: RepoType;
+	source: string;
+	mountPath: string;
+	revision?: string;
+	readOnly?: boolean;
+	path?: string;
+}
 
 export interface JobVolume {
-	type: "bucket" | "model" | "dataset" | "space";
-	/** Source identifier, e.g. "username/my-bucket" or "username/my-model" */
-	source: string;
+	/** Repo designation, e.g. "datasets/user/my-dataset", "user/my-model", or { type: "dataset", name: "user/my-dataset" } */
+	repo: RepoDesignation;
 	/** Mount path inside the container, e.g. "/data" */
 	mountPath: string;
 	/** Git revision (only for repos, defaults to "main") */
@@ -71,7 +79,7 @@ export interface ApiJob {
 	initiator?: ApiJobUser;
 	secrets?: string[];
 	labels?: Record<string, string> | null;
-	volumes?: JobVolume[] | null;
+	volumes?: ApiJobVolume[] | null;
 }
 
 export interface ApiScheduledJob {
@@ -91,7 +99,7 @@ export interface ApiScheduledJob {
 		timeoutSeconds?: number | null;
 		attempts?: number;
 		labels?: Record<string, string> | null;
-		volumes?: JobVolume[] | null;
+		volumes?: ApiJobVolume[] | null;
 	};
 }
 

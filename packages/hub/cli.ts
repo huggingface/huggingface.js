@@ -991,75 +991,50 @@ async function run() {
 						}
 					}
 
-					const volumes: Array<{
-						type: "bucket" | "model" | "dataset" | "space";
-						source: string;
-						mountPath: string;
-						revision?: string;
-						readOnly?: boolean;
-						path?: string;
-					}> = [];
-					if (volumeArgs) {
-						for (const volumeArg of volumeArgs) {
-							const colonIdx = volumeArg.indexOf(":");
-							if (colonIdx === -1) {
-								throw new Error(`Invalid volume format: ${volumeArg}. Expected SOURCE:MOUNTPATH[:OPTIONS]`);
-							}
-							const rawSource = volumeArg.slice(0, colonIdx);
-							const rest = volumeArg.slice(colonIdx + 1);
+				const volumes: Parameters<typeof runJob>[0]["volumes"] = [];
+				if (volumeArgs) {
+					for (const volumeArg of volumeArgs) {
+						const colonIdx = volumeArg.indexOf(":");
+						if (colonIdx === -1) {
+							throw new Error(`Invalid volume format: ${volumeArg}. Expected SOURCE:MOUNTPATH[:OPTIONS]`);
+						}
+						const repo = volumeArg.slice(0, colonIdx);
+						const rest = volumeArg.slice(colonIdx + 1);
 
-							const secondColon = rest.indexOf(":");
-							const mountPath = secondColon === -1 ? rest : rest.slice(0, secondColon);
-							const optionsStr = secondColon === -1 ? "" : rest.slice(secondColon + 1);
+						const secondColon = rest.indexOf(":");
+						const mountPath = secondColon === -1 ? rest : rest.slice(0, secondColon);
+						const optionsStr = secondColon === -1 ? "" : rest.slice(secondColon + 1);
 
-							if (!mountPath.startsWith("/")) {
-								throw new Error(`Volume mountPath must start with "/": ${mountPath}`);
-							}
+						if (!mountPath.startsWith("/")) {
+							throw new Error(`Volume mountPath must start with "/": ${mountPath}`);
+						}
 
-							let type: "bucket" | "model" | "dataset" | "space";
-							let source: string;
-							const prefixes: Record<string, "bucket" | "model" | "dataset" | "space"> = {
-								"buckets/": "bucket",
-								"datasets/": "dataset",
-								"spaces/": "space",
-								"models/": "model",
-							};
-							const matchedPrefix = Object.keys(prefixes).find((p) => rawSource.startsWith(p));
-							if (matchedPrefix) {
-								type = prefixes[matchedPrefix];
-								source = rawSource.slice(matchedPrefix.length);
-							} else {
-								type = "model";
-								source = rawSource;
-							}
-
-							let readOnly: boolean | undefined;
-							let revision: string | undefined;
-							let subPath: string | undefined;
-							if (optionsStr) {
-								for (const opt of optionsStr.split(",")) {
-									if (opt === "ro") {
-										readOnly = true;
-									} else if (opt.startsWith("revision=")) {
-										revision = opt.slice("revision=".length);
-									} else if (opt.startsWith("path=")) {
-										subPath = opt.slice("path=".length);
-									} else {
-										throw new Error(`Unknown volume option: ${opt}`);
-									}
+						let readOnly: boolean | undefined;
+						let revision: string | undefined;
+						let subPath: string | undefined;
+						if (optionsStr) {
+							for (const opt of optionsStr.split(",")) {
+								if (opt === "ro") {
+									readOnly = true;
+								} else if (opt.startsWith("revision=")) {
+									revision = opt.slice("revision=".length);
+								} else if (opt.startsWith("path=")) {
+									subPath = opt.slice("path=".length);
+								} else {
+									throw new Error(`Unknown volume option: ${opt}`);
 								}
 							}
-
-							volumes.push({
-								type,
-								source,
-								mountPath,
-								...(revision ? { revision } : {}),
-								...(readOnly ? { readOnly } : {}),
-								...(subPath ? { path: subPath } : {}),
-							});
 						}
+
+						volumes.push({
+							repo,
+							mountPath,
+							...(revision ? { revision } : {}),
+							...(readOnly ? { readOnly } : {}),
+							...(subPath ? { path: subPath } : {}),
+						});
 					}
+				}
 
 					const jobParams = {
 						namespace: finalNamespace,
