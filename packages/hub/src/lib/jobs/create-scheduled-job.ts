@@ -67,6 +67,9 @@ export async function createScheduledJob(
 	if (rest.jobSpec.labels) {
 		(body.jobSpec as Record<string, unknown>).labels = rest.jobSpec.labels;
 	}
+	if (rest.jobSpec.volumes?.length) {
+		(body.jobSpec as Record<string, unknown>).volumes = rest.jobSpec.volumes;
+	}
 
 	const response = await (customFetch || fetch)(`${hubUrl || HUB_URL}/api/scheduled-jobs/${namespace}`, {
 		method: "POST",

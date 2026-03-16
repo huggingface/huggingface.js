@@ -3,6 +3,7 @@ import { createApiError } from "../../error";
 import type { CredentialsParams } from "../../types/public";
 import { checkCredentials } from "../../utils/checkCredentials";
 import type { ApiJob, CreateJobOptions } from "../../types/api/api-jobs";
+export type { JobVolume } from "../../types/api/api-jobs";
 
 /**
  * Run a new job.
@@ -62,6 +63,9 @@ export async function runJob(
 	}
 	if (params.labels) {
 		body.labels = params.labels;
+	}
+	if (params.volumes?.length) {
+		body.volumes = params.volumes;
 	}
 
 	const response = await (params.fetch || fetch)(`${params.hubUrl || HUB_URL}/api/jobs/${params.namespace}`, {

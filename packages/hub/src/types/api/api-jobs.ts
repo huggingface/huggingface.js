@@ -1,5 +1,19 @@
 import type { SpaceHardwareFlavor } from "../public";
 
+export interface JobVolume {
+	type: "bucket" | "model" | "dataset" | "space";
+	/** Source identifier, e.g. "username/my-bucket" or "username/my-model" */
+	source: string;
+	/** Mount path inside the container, e.g. "/data" */
+	mountPath: string;
+	/** Git revision (only for repos, defaults to "main") */
+	revision?: string;
+	/** Read-only mount (forced true for repos, defaults to false for buckets) */
+	readOnly?: boolean;
+	/** Subfolder prefix inside the bucket/repo to mount, e.g. "path/to/dir" */
+	path?: string;
+}
+
 export interface ApiJobHardware {
 	name: string;
 	prettyName: string;
@@ -57,6 +71,7 @@ export interface ApiJob {
 	initiator?: ApiJobUser;
 	secrets?: string[];
 	labels?: Record<string, string> | null;
+	volumes?: JobVolume[] | null;
 }
 
 export interface ApiScheduledJob {
@@ -76,6 +91,7 @@ export interface ApiScheduledJob {
 		timeoutSeconds?: number | null;
 		attempts?: number;
 		labels?: Record<string, string> | null;
+		volumes?: JobVolume[] | null;
 	};
 }
 
@@ -124,6 +140,10 @@ export interface CreateJobOptions {
 	 * Labels to attach to the job (key-value pairs)
 	 */
 	labels?: Record<string, string>;
+	/**
+	 * HuggingFace Buckets or Repos to mount as volumes in the job container
+	 */
+	volumes?: JobVolume[];
 }
 
 export interface CreateScheduledJobOptions {
