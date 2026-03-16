@@ -150,4 +150,42 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 	});
+
+	it("unsloth tagged model", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.unsloth;
+		const model: ModelData = {
+			id: "some-user/my-unsloth-finetune",
+			tags: ["unsloth", "conversational"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		const snippet = snippetFunc(model);
+		expect(snippet[0].setup).toBe("pip install unsloth");
+		expect(snippet[0].content).toBe("unsloth ...");
+		expect(snippet[1].content).toBe("unsloth ...");
+	});
+
+	it("unsloth namespace gguf model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.unsloth;
+		const model: ModelData = {
+			id: "unsloth/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+	});
+
+	it("unsloth not shown for unrelated model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.unsloth;
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			tags: ["conversational"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
 });

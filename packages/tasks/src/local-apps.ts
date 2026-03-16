@@ -115,6 +115,10 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
+function isUnslothModel(model: ModelData) {
+	return model.tags.includes("unsloth") || (model.id.startsWith("unsloth/") && isLlamaCppGgufModel(model));
+}
+
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -191,6 +195,21 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 
 const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
+};
+
+const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
+	return [
+		// TODO: Update these with actual commands once available
+		{
+			title: "Run a prompt from the CLI",
+			setup: "pip install unsloth",
+			content: `unsloth ...`,
+		},
+		{
+			title: "Open Unsloth ...",
+			content: `unsloth ...`,
+		},
+	];
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -642,6 +661,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
+	},
+	unsloth: {
+		prettyLabel: "Unsloth",
+		docsUrl: "https://unsloth.ai/docs",
+		mainTask: "text-generation",
+		displayOnModelPage: isUnslothModel,
+		snippet: snippetUnsloth,
 	},
 	"docker-model-runner": {
 		prettyLabel: "Docker Model Runner",
