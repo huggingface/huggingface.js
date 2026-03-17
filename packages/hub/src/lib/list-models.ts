@@ -35,7 +35,7 @@ export const MODEL_EXPANDABLE_KEYS = [
 	"private",
 	"safetensors",
 	"sha",
-	// "siblings",
+	"siblings",
 	"spaces",
 	"tags",
 	"transformersInfo",

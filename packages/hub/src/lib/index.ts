@@ -20,6 +20,7 @@ export * from "./list-commits";
 export * from "./list-datasets";
 export * from "./list-files";
 export * from "./list-models";
+export * from "./list-onnx-dtypes";
 export * from "./list-spaces";
 export * from "./list-collections";
 export * from "./model-info";
