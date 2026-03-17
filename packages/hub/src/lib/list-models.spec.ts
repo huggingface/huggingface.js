@@ -148,4 +148,16 @@ describe("listModels", () => {
 
 		expect(count).to.equal(10);
 	});
+
+	it("should list models with filePaths", async () => {
+		for await (const entry of listModels({
+			search: { owner: "huggingfacejs" },
+			additionalFields: ["filePaths"],
+		})) {
+			expect(entry.name).to.equal("huggingfacejs/test-model");
+			expect(entry.filePaths).to.be.an("array");
+			expect(entry.filePaths).to.include(".gitattributes");
+			expect(entry.filePaths).to.include("README.md");
+		}
+	});
 });
