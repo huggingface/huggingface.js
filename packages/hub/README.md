@@ -112,6 +112,49 @@ for await (const fileInfo of hub.listFiles({repo})) {
 await hub.deleteRepo({ repo, accessToken: "hf_..." });
 ```
 
+## ONNX Dtype Detection
+
+Use `getOnnxDtypes` to discover which ONNX quantization variants are available in a model repository. It inspects file paths (e.g. from `modelInfo` siblings or `listFiles`) and returns the available dtypes in a canonical order.
+
+Supported dtypes: `fp32`, `fp16`, `int8`, `uint8`, `q8`, `q4`, `q4f16`, `bnb4`.
+
+```ts
+import { getOnnxDtypes, modelInfo } from "@huggingface/hub";
+
+// From modelInfo siblings
+const info = await modelInfo({ name: "myname/some-model" });
+const filePaths = info.siblings.map((s) => s.rfilename);
+
+const dtypes = getOnnxDtypes({ filePaths });
+// e.g. ["fp32", "fp16", "q4"]
+```
+
+You can pass `baseNames` to require that **all** listed base names have a file for a given dtype (useful for multi-part models like encoder-decoder):
+
+```ts
+const dtypes = getOnnxDtypes({
+  filePaths,
+  baseNames: ["encoder_model", "decoder_model"],
+});
+// Only returns dtypes where both encoder and decoder files exist
+```
+
+A custom `subfolder` can also be specified (defaults to `"onnx"`):
+
+### Example from a model listing
+
+```ts
+import { listModels, getOnnxDtypes } from "@huggingface/hub";
+
+for await (const model of listModels({
+  additionalFields: ["siblings"],
+})) {
+  const filePaths = model.siblings?.map(s => s.rfilename) ?? [];
+  const dtypes = getOnnxDtypes({ filePaths });
+  console.log(model.name, dtypes);
+}
+```
+
 ## CLI usage
 
 You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo. 
