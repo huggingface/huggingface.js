@@ -178,6 +178,18 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(true);
 	});
 
+	it("non unsloth namespace gguf model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.unsloth;
+		const model: ModelData = {
+			id: "dummy/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+	})
+
 	it("unsloth not shown for unrelated model", async () => {
 		const { displayOnModelPage } = LOCAL_APPS.unsloth;
 		const model: ModelData = {

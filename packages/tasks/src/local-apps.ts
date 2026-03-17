@@ -116,7 +116,7 @@ function isMlxModel(model: ModelData) {
 }
 
 function isUnslothModel(model: ModelData) {
-	return model.tags.includes("unsloth") || (model.id.startsWith("unsloth/") && isLlamaCppGgufModel(model));
+	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
 
 function getQuantTag(filepath?: string): string {
