@@ -57,7 +57,7 @@ beforeEach(() => {
 	// mock repo info
 	vi.mocked(modelInfo).mockResolvedValue({
 		sha: DUMMY_SHA,
-	} as ModelEntry & ApiModelInfo);
+	} as unknown as Awaited<ReturnType<typeof modelInfo>>);
 	vi.mocked(datasetInfo).mockResolvedValue({
 		sha: DUMMY_SHA,
 	} as DatasetEntry & ApiDatasetInfo);
