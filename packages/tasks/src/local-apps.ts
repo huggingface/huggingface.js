@@ -47,21 +47,21 @@ export type LocalApp = {
 	 */
 	displayOnModelPage: (model: ModelData) => boolean;
 } & (
-	| {
+		| {
 			/**
 			 * If the app supports deeplink, URL to open.
 			 */
 			deeplink: (model: ModelData, filepath?: string) => URL;
-	  }
-	| {
+		}
+		| {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 * Support the placeholder {{QUANT_TAG}} that will be replaced by the list of available quant tags or will be removed if there are no multiple quant files in a same repo.
 			 */
 			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
-	  }
-);
+		}
+	);
 
 function isAwqModel(model: ModelData): boolean {
 	return model.config?.quantization_config?.quant_method === "awq";
@@ -198,18 +198,36 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 };
 
 const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
-	return [
-		// TODO: Update these with actual commands once available
-		{
-			title: "Run a prompt from the CLI",
-			setup: "pip install unsloth",
-			content: `unsloth ...`,
-		},
-		{
-			title: "Open Unsloth ...",
-			content: `unsloth ...`,
-		},
-	];
+	const isGguf = isLlamaCppGgufModel(model);
+
+	if (isGguf) {
+		return [
+			{
+				title: "Open model in Unsloth Studio",
+				setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
+				content: ["# Run unsloth studio", "unsloth studio"].join("\n"),
+			},
+		];
+	} else {
+		return [
+			{
+				title: "Open model in Unsloth Studio",
+				setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
+				content: ["# Run unsloth studio", "unsloth studio"].join("\n"),
+			},
+			{
+				title: "Load model with FastModel",
+				setup: "pip install unsloth",
+				content: [
+					"from unsloth import FastModel",
+					"model, tokenizer = FastModel.from_pretrained(",
+					"    model_name=\"" + model.id + "\",",
+					"    max_seq_length=2048,",
+					")",
+				].join("\n"),
+			},
+		];
+	}
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
