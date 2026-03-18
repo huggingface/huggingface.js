@@ -38,7 +38,8 @@ export async function createRepo(
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 	const [namespace, repoName] = repoId.name.split("/");
-	const visibility = params.visibility ?? (params.private !== undefined ? (params.private ? "private" : "public") : undefined);
+	const visibility =
+		params.visibility ?? (params.private !== undefined ? (params.private ? "private" : "public") : undefined);
 
 	if (!namespace || !repoName) {
 		throw new TypeError(
@@ -50,10 +51,10 @@ export async function createRepo(
 		repoId.type === "bucket"
 			? await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/buckets/${namespace}/${repoName}`, {
 					method: "POST",
-				body: JSON.stringify({
-					visibility,
-					resourceGroupId: params.resourceGroupId,
-				}),
+					body: JSON.stringify({
+						visibility,
+						resourceGroupId: params.resourceGroupId,
+					}),
 					headers: {
 						Authorization: `Bearer ${accessToken}`,
 						"Content-Type": "application/json",
@@ -62,8 +63,8 @@ export async function createRepo(
 			: await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
 					method: "POST",
 					body: JSON.stringify({
-					name: repoName,
-					visibility,
+						name: repoName,
+						visibility,
 						organization: namespace,
 						resourceGroupId: params.resourceGroupId,
 						license: params.license,
