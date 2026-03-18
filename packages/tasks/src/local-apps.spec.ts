@@ -162,7 +162,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(true);
 		const snippet = snippetFunc(model);
 		expect(snippet[0].setup).toBe("pip install unsloth\nunsloth studio setup");
-		expect(snippet[0].content).toBe("# Run unsloth studio\nunsloth studio");
+		expect(snippet[0].content).toBe("# Run unsloth studio\nunsloth studio\n# Then open http://localhost:8000/chat in your browser\n# Search for some-user/my-unsloth-finetune to start chatting");
 		expect(snippet[1].setup).toBe("pip install unsloth");
 		expect(snippet[1].content).toBe("from unsloth import FastModel\nmodel, tokenizer = FastModel.from_pretrained(\n    model_name=\"some-user/my-unsloth-finetune\",\n    max_seq_length=2048,\n)");
 	});
