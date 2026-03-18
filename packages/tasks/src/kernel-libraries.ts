@@ -21,7 +21,7 @@ export interface KernelLibraryUiElement {
 	/**
 	 * Code snippet(s) displayed
 	 */
-	snippets?: (kernelId: string, version?: string) => string[];
+	snippets?: (kernelId: string, version?: number) => string[];
 }
 
 export const KERNEL_LIBRARIES_UI_ELEMENTS = {
@@ -30,12 +30,14 @@ export const KERNEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Kernels",
 		repoUrl: "https://github.com/huggingface/kernels",
 		docsUrl: "https://huggingface.co/docs/kernels",
-		snippets: (kernelId: string, version?: string) => [
+		snippets: (kernelId: string, version?: number) => [
 			`# !pip install kernels
 
 from kernels import get_kernel
 
-kernel = get_kernel("${kernelId}"${version ? `,version="${version}"` : ""})`,
+kernel = get_kernel("${kernelId}"${version ? `, version=${version}` : ""})`,
 		],
 	},
 } satisfies Record<string, KernelLibraryUiElement>;
+
+export type KernelLibraryKey = keyof typeof KERNEL_LIBRARIES_UI_ELEMENTS;

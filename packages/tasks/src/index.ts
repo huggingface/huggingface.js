@@ -67,6 +67,9 @@ export type { LocalApp, LocalAppKey, LocalAppSnippet } from "./local-apps.js";
 export { DATASET_LIBRARIES_UI_ELEMENTS } from "./dataset-libraries.js";
 export type { DatasetLibraryUiElement, DatasetLibraryKey } from "./dataset-libraries.js";
 
+export { KERNEL_LIBRARIES_UI_ELEMENTS } from "./kernel-libraries.js";
+export type { KernelLibraryKey } from "./kernel-libraries.js";
+
 export * from "./inference-providers.js";
 
 export { EVALUATION_FRAMEWORKS } from "./eval.js";
