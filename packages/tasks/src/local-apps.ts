@@ -200,32 +200,32 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
 	const isGguf = isLlamaCppGgufModel(model);
 
+	const studio_instructions: LocalAppSnippet = {
+		title: "Open model in Unsloth Studio",
+		setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
+		content: ["# Run unsloth studio", "unsloth studio"].join("\n"),
+	};
+
+	const fastmodel_instructions: LocalAppSnippet = {
+		title: "Load model with FastModel",
+		setup: "pip install unsloth",
+		content: [
+			"from unsloth import FastModel",
+			"model, tokenizer = FastModel.from_pretrained(",
+			"    model_name=\"" + model.id + "\",",
+			"    max_seq_length=2048,",
+			")",
+		].join("\n"),
+	};
+
 	if (isGguf) {
 		return [
-			{
-				title: "Open model in Unsloth Studio",
-				setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
-				content: ["# Run unsloth studio", "unsloth studio"].join("\n"),
-			},
+			studio_instructions,
 		];
 	} else {
 		return [
-			{
-				title: "Open model in Unsloth Studio",
-				setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
-				content: ["# Run unsloth studio", "unsloth studio"].join("\n"),
-			},
-			{
-				title: "Load model with FastModel",
-				setup: "pip install unsloth",
-				content: [
-					"from unsloth import FastModel",
-					"model, tokenizer = FastModel.from_pretrained(",
-					"    model_name=\"" + model.id + "\",",
-					"    max_seq_length=2048,",
-					")",
-				].join("\n"),
-			},
+			studio_instructions,
+			fastmodel_instructions,
 		];
 	}
 };
