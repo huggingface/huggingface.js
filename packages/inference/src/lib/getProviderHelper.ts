@@ -58,6 +58,7 @@ import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
 import * as Wavespeed from "../providers/wavespeed.js";
 import * as Zai from "../providers/zai-org.js";
+import * as Zenmux from "../providers/zenmux.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
 
@@ -199,6 +200,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Zai.ZaiConversationalTask(),
 		"text-to-image": new Zai.ZaiTextToImageTask(),
 		"image-to-text": new Zai.ZaiImageToTextTask(),
+	},
+	zenmux: {
+		conversational: new Zenmux.ZenmuxConversationalTask(),
 	},
 };
 
