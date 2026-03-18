@@ -33,7 +33,7 @@ export const EVALUATION_FRAMEWORKS = {
 		url: "https://github.com/Mercor-Intelligence/archipelago",
 	},
 	"screenspot-pro": {
-		name: "ScreenSpot-Pro",
+		name: "screenspot-pro",
 		description:
 			"ScreenSpot-Pro is a GUI grounding benchmark designed to evaluate how well AI agents can locate and identify UI elements across professional software applications in high-resolution screenshots, covering 1,585 annotated images from 26 professional tools.",
 		url: "https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding",
