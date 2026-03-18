@@ -203,7 +203,7 @@ const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
 	const studio_instructions: LocalAppSnippet = {
 		title: "Open model in Unsloth Studio",
 		setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
-		content: ["# Run unsloth studio", "unsloth studio -H 0.0.0.0 -8000", "# Then open http://localhost:8000/chat in your browser" , "# Search for " + model.id + " to start chatting"].join("\n"),
+		content: ["# Run unsloth studio", "unsloth studio -H 0.0.0.0 -p 8000", "# Then open http://localhost:8000/chat in your browser" , "# Search for " + model.id + " to start chatting"].join("\n"),
 	};
 
 	const fastmodel_instructions: LocalAppSnippet = {
