@@ -35,7 +35,7 @@ export const KERNEL_LIBRARIES_UI_ELEMENTS = {
 
 from kernels import get_kernel
 
-kernel = get_kernel("${kernelId}"${version ? `, version=${version}` : ""})`,
+kernel = get_kernel("${kernelId}"${version !== undefined ? `, version=${version}` : ""})`,
 		],
 	},
 } satisfies Record<string, KernelLibraryUiElement>;
