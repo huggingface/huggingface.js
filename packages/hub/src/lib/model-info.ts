@@ -32,7 +32,7 @@ export async function modelInfo<const T extends ModelAdditionalField = never>(
 
 	const additionalExpandKeys =
 		params?.additionalFields?.map(
-			(field) => MODEL_DERIVED_FIELD_TO_API_KEY[field as keyof ModelDerivedFields] ?? field
+			(field) => MODEL_DERIVED_FIELD_TO_API_KEY[field as keyof ModelDerivedFields] ?? field,
 		) ?? [];
 
 	const search = new URLSearchParams([
@@ -63,10 +63,7 @@ export async function modelInfo<const T extends ModelAdditionalField = never>(
 			if (field === "filePaths") {
 				additional.filePaths = (data.siblings ?? []).map((s) => s.rfilename);
 			} else if (field === "inferenceProviderMapping" && data.inferenceProviderMapping) {
-				additional.inferenceProviderMapping = normalizeInferenceProviderMapping(
-					data.id,
-					data.inferenceProviderMapping,
-				);
+				additional.inferenceProviderMapping = normalizeInferenceProviderMapping(data.id, data.inferenceProviderMapping);
 			} else {
 				additional[field] = data[field as keyof ApiModelInfo];
 			}

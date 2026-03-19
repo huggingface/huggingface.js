@@ -51,10 +51,7 @@ export type ModelAdditionalField =
 	| Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPAND_KEYS)[number]>
 	| keyof ModelDerivedFields;
 
-export type ResolveModelAdditionalFields<T extends ModelAdditionalField> = Pick<
-	ApiModelInfo,
-	T & keyof ApiModelInfo
-> &
+export type ResolveModelAdditionalFields<T extends ModelAdditionalField> = Pick<ApiModelInfo, T & keyof ApiModelInfo> &
 	Pick<ModelDerivedFields, T & keyof ModelDerivedFields>;
 
 export interface ModelEntry {
@@ -116,7 +113,7 @@ export async function* listModels<const T extends ModelAdditionalField = never>(
 	let totalToFetch = params?.limit ?? Infinity;
 	const additionalExpandKeys =
 		params?.additionalFields?.map(
-			(field) => MODEL_DERIVED_FIELD_TO_API_KEY[field as keyof ModelDerivedFields] ?? field
+			(field) => MODEL_DERIVED_FIELD_TO_API_KEY[field as keyof ModelDerivedFields] ?? field,
 		) ?? [];
 	const search = new URLSearchParams([
 		...Object.entries({
