@@ -162,11 +162,17 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(true);
 		const snippet = snippetFunc(model);
 		expect(snippet[0].setup).toBe("pip install unsloth\nunsloth studio setup");
-		expect(snippet[0].content).toBe("# Run unsloth studio\nunsloth studio -H 0.0.0.0 -p 8000\n# Then open http://localhost:8000/chat in your browser\n# Search for some-user/my-unsloth-finetune to start chatting");
+		expect(snippet[0].content).toBe(
+			"# Run unsloth studio\nunsloth studio -H 0.0.0.0 -p 8000\n# Then open http://localhost:8000/chat in your browser\n# Search for some-user/my-unsloth-finetune to start chatting",
+		);
 		expect(snippet[1].setup).toBe("# No setup required");
-		expect(snippet[1].content).toBe("# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for some-user/my-unsloth-finetune to start chatting");
+		expect(snippet[1].content).toBe(
+			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for some-user/my-unsloth-finetune to start chatting",
+		);
 		expect(snippet[2].setup).toBe("pip install unsloth");
-		expect(snippet[2].content).toBe("from unsloth import FastModel\nmodel, tokenizer = FastModel.from_pretrained(\n    model_name=\"some-user/my-unsloth-finetune\",\n    max_seq_length=2048,\n)");
+		expect(snippet[2].content).toBe(
+			'from unsloth import FastModel\nmodel, tokenizer = FastModel.from_pretrained(\n    model_name="some-user/my-unsloth-finetune",\n    max_seq_length=2048,\n)',
+		);
 	});
 
 	it("unsloth namespace gguf model", async () => {
@@ -181,9 +187,13 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(true);
 		const snippet = snippetFunc(model);
 		expect(snippet[0].setup).toBe("pip install unsloth\nunsloth studio setup");
-		expect(snippet[0].content).toBe("# Run unsloth studio\nunsloth studio -H 0.0.0.0 -p 8000\n# Then open http://localhost:8000/chat in your browser\n# Search for unsloth/Llama-3.2-3B-Instruct-GGUF to start chatting");
+		expect(snippet[0].content).toBe(
+			"# Run unsloth studio\nunsloth studio -H 0.0.0.0 -p 8000\n# Then open http://localhost:8000/chat in your browser\n# Search for unsloth/Llama-3.2-3B-Instruct-GGUF to start chatting",
+		);
 		expect(snippet[1].setup).toBe("# No setup required");
-		expect(snippet[1].content).toBe("# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for unsloth/Llama-3.2-3B-Instruct-GGUF to start chatting");
+		expect(snippet[1].content).toBe(
+			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for unsloth/Llama-3.2-3B-Instruct-GGUF to start chatting",
+		);
 		expect(snippet).toHaveLength(2); // GGUF models only get 2 snippets
 	});
 
@@ -197,7 +207,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 
 		expect(displayOnModelPage(model)).toBe(true);
-	})
+	});
 
 	it("unsloth not shown for unrelated model", async () => {
 		const { displayOnModelPage } = LOCAL_APPS.unsloth;

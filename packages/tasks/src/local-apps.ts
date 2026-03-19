@@ -47,21 +47,21 @@ export type LocalApp = {
 	 */
 	displayOnModelPage: (model: ModelData) => boolean;
 } & (
-		| {
+	| {
 			/**
 			 * If the app supports deeplink, URL to open.
 			 */
 			deeplink: (model: ModelData, filepath?: string) => URL;
-		}
-		| {
+	  }
+	| {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 * Support the placeholder {{QUANT_TAG}} that will be replaced by the list of available quant tags or will be removed if there are no multiple quant files in a same repo.
 			 */
 			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
-		}
-	);
+	  }
+);
 
 function isAwqModel(model: ModelData): boolean {
 	return model.config?.quantization_config?.quant_method === "awq";
@@ -203,13 +203,21 @@ const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
 	const studio_instructions: LocalAppSnippet = {
 		title: "Open model in Unsloth Studio",
 		setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
-		content: ["# Run unsloth studio", "unsloth studio -H 0.0.0.0 -p 8000", "# Then open http://localhost:8000/chat in your browser", "# Search for " + model.id + " to start chatting"].join("\n"),
+		content: [
+			"# Run unsloth studio",
+			"unsloth studio -H 0.0.0.0 -p 8000",
+			"# Then open http://localhost:8000/chat in your browser",
+			"# Search for " + model.id + " to start chatting",
+		].join("\n"),
 	};
 
 	const hf_spaces_instructions: LocalAppSnippet = {
 		title: "Using HuggingFace Spaces for Unsloth",
 		setup: "# No setup required",
-		content: "# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for " + model.id + " to start chatting",
+		content:
+			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for " +
+			model.id +
+			" to start chatting",
 	};
 
 	const fastmodel_instructions: LocalAppSnippet = {
@@ -218,23 +226,16 @@ const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
 		content: [
 			"from unsloth import FastModel",
 			"model, tokenizer = FastModel.from_pretrained(",
-			"    model_name=\"" + model.id + "\",",
+			'    model_name="' + model.id + '",',
 			"    max_seq_length=2048,",
 			")",
 		].join("\n"),
 	};
 
 	if (isGguf) {
-		return [
-			studio_instructions,
-			hf_spaces_instructions,
-		];
+		return [studio_instructions, hf_spaces_instructions];
 	} else {
-		return [
-			studio_instructions,
-			hf_spaces_instructions,
-			fastmodel_instructions,
-		];
+		return [studio_instructions, hf_spaces_instructions, fastmodel_instructions];
 	}
 };
 
