@@ -25,7 +25,6 @@ export * from "./list-collections";
 export * from "./model-info";
 export * from "./oauth-handle-redirect";
 export * from "./oauth-login-url";
-export * from "./parse-onnx-dtypes";
 export * from "./parse-safetensors-metadata";
 export * from "./paths-info";
 export * from "./repo-exists";
