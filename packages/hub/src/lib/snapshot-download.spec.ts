@@ -7,8 +7,6 @@ import { snapshotDownload } from "./snapshot-download";
 import type { ListFileEntry } from "./list-files";
 import { listFiles } from "./list-files";
 import { modelInfo } from "./model-info";
-import type { ModelEntry } from "./list-models";
-import type { ApiModelInfo } from "../types/api/api-model";
 import { datasetInfo } from "./dataset-info";
 import type { DatasetEntry } from "./list-datasets";
 import type { ApiDatasetInfo } from "../types/api/api-dataset";
