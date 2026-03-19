@@ -115,6 +115,10 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
+function isUnslothModel(model: ModelData) {
+	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
+}
+
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -191,6 +195,48 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 
 const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
+};
+
+const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
+	const isGguf = isLlamaCppGgufModel(model);
+
+	const studio_instructions: LocalAppSnippet = {
+		title: "Open model in Unsloth Studio",
+		setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
+		content: [
+			"# Run unsloth studio",
+			"unsloth studio -H 0.0.0.0 -p 8000",
+			"# Then open http://localhost:8000/chat in your browser",
+			"# Search for " + model.id + " to start chatting",
+		].join("\n"),
+	};
+
+	const hf_spaces_instructions: LocalAppSnippet = {
+		title: "Using HuggingFace Spaces for Unsloth",
+		setup: "# No setup required",
+		content:
+			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for " +
+			model.id +
+			" to start chatting",
+	};
+
+	const fastmodel_instructions: LocalAppSnippet = {
+		title: "Load model with FastModel",
+		setup: "pip install unsloth",
+		content: [
+			"from unsloth import FastModel",
+			"model, tokenizer = FastModel.from_pretrained(",
+			'    model_name="' + model.id + '",',
+			"    max_seq_length=2048,",
+			")",
+		].join("\n"),
+	};
+
+	if (isGguf) {
+		return [studio_instructions, hf_spaces_instructions];
+	} else {
+		return [studio_instructions, hf_spaces_instructions, fastmodel_instructions];
+	}
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -642,6 +688,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
+	},
+	unsloth: {
+		prettyLabel: "Unsloth",
+		docsUrl: "https://unsloth.ai/docs",
+		mainTask: "text-generation",
+		displayOnModelPage: isUnslothModel,
+		snippet: snippetUnsloth,
 	},
 	"docker-model-runner": {
 		prettyLabel: "Docker Model Runner",
