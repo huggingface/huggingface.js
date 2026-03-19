@@ -1195,6 +1195,22 @@ describe.skip("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_REPLICATE_KEY ?? "dummy");
 
+			it("textGeneration - akhaliq/gpt-5", async () => {
+				const res = await client.textGeneration({
+					model: "akhaliq/gpt-5",
+					provider: "replicate",
+					inputs: "The capital city of France is",
+					parameters: {
+						max_new_tokens: 20,
+						temperature: 0.2,
+					},
+				});
+
+				expect(res).toBeDefined();
+				expect(typeof res.generated_text).toBe("string");
+				expect(res.generated_text.length).toBeGreaterThan(0);
+			});
+
 			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
