@@ -131,9 +131,6 @@ function getChatTemplate(model: ModelData): string | undefined {
 	return undefined;
 }
 
-function hasToolChatTemplate(model: ModelData): boolean {
-	return getChatTemplate(model)?.includes("tools") ?? false;
-}
 
 function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
@@ -747,7 +744,7 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) =>
 			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
 			model.pipeline_tag === "text-generation" &&
-			hasToolChatTemplate(model),
+			getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
 	},
 } satisfies Record<string, LocalApp>;
