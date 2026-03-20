@@ -126,13 +126,26 @@ function getChatTemplate(model: ModelData): string | undefined {
 		return ct;
 	}
 	if (Array.isArray(ct)) {
-		return ct.map((t) => t.template).join("\n");
+		return ct[0]?.template;
 	}
 	return undefined;
 }
 
+/**
+ * Checks if any of the model's chat templates mention tool-calling.
+ * When tokenizer_config.chat_template is an array of named templates,
+ * checks all of them (tool support may live in a "tool_use" template).
+ */
 function hasToolChatTemplate(model: ModelData): boolean {
-	return getChatTemplate(model)?.includes("tools") ?? false;
+	const ct =
+		model.gguf?.chat_template ?? model.config?.chat_template_jinja ?? model.config?.tokenizer_config?.chat_template;
+	if (typeof ct === "string") {
+		return ct.includes("tools");
+	}
+	if (Array.isArray(ct)) {
+		return ct.some((t) => t.template.includes("tools"));
+	}
+	return false;
 }
 
 function isUnslothModel(model: ModelData) {
