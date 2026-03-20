@@ -116,28 +116,23 @@ function isMlxModel(model: ModelData) {
 }
 
 /**
- * Checks if a model's chat template includes tool-calling support.
- * Works for both GGUF (via model.gguf.chat_template) and non-GGUF models
- * (via config.tokenizer_config.chat_template or config.chat_template_jinja).
+ * Returns the model's chat template string, coalescing across sources:
+ * GGUF metadata > chat_template_jinja file > tokenizer_config.json
  */
-function hasToolChatTemplate(model: ModelData): boolean {
-	// GGUF: chat template embedded in the binary
-	if (model.gguf?.chat_template?.includes("tools")) {
-		return true;
-	}
-	// Non-GGUF: chat_template_jinja file
-	if (model.config?.chat_template_jinja?.includes("tools")) {
-		return true;
-	}
-	// Non-GGUF: tokenizer_config.json chat_template (string or array of named templates)
-	const ct = model.config?.tokenizer_config?.chat_template;
+function getChatTemplate(model: ModelData): string | undefined {
+	const ct =
+		model.gguf?.chat_template ?? model.config?.chat_template_jinja ?? model.config?.tokenizer_config?.chat_template;
 	if (typeof ct === "string") {
-		return ct.includes("tools");
+		return ct;
 	}
 	if (Array.isArray(ct)) {
-		return ct.some((t) => t.template.includes("tools"));
+		return ct.map((t) => t.template).join("\n");
 	}
-	return false;
+	return undefined;
+}
+
+function hasToolChatTemplate(model: ModelData): boolean {
+	return getChatTemplate(model)?.includes("tools") ?? false;
 }
 
 function isUnslothModel(model: ModelData) {
