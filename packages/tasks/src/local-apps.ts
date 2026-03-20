@@ -131,7 +131,6 @@ function getChatTemplate(model: ModelData): string | undefined {
 	return undefined;
 }
 
-
 function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
