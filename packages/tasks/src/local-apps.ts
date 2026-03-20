@@ -750,7 +750,8 @@ export const LOCAL_APPS = {
 		docsUrl: "https://github.com/badlogic/pi-mono",
 		mainTask: "text-generation",
 		displayOnModelPage: (model) =>
-			(isLlamaCppGgufModel(model) || (isMlxModel(model) && model.pipeline_tag === "text-generation")) &&
+			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
+			model.pipeline_tag === "text-generation" &&
 			hasToolChatTemplate(model),
 		snippet: snippetPi,
 	},
