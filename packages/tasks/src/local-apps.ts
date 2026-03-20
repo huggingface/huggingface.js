@@ -472,6 +472,36 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	];
 };
 
+const snippetLlmpm = (model: ModelData): LocalAppSnippet[] => {
+	const modelId = model.id;
+	const openAICompatibleCurl = [
+		"# Invoking the OpenAI-compatible server with curl",
+		"curl -X POST http://localhost:8080/v1/chat/completions \\",
+		`  -H "Content-Type: application/json" \\`,
+		"  --data '{",
+		`    "model": "${modelId}",`,
+		`    "messages": [{"role": "user", "content": "Hello!"}]`,
+		"  }'",
+	];
+
+	return [
+		{
+			title: "Install & Start a New Chat",
+			content: [
+				"# Install Llmpm",
+				"pip install llmpm",
+				"# Run interactive chat in terminal",
+				`llmpm run ${modelId}`,
+				"# Run with a prompt",
+				`llmpm run ${modelId} --prompt "Surprise Me!"`,
+				"# Serve the model (OpenAI-compatible API)",
+				`llmpm serve ${modelId}`,
+				...openAICompatibleCurl,
+			].join("\n"),
+		},
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	// Only add quant tag for GGUF models, not safetensors
 	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
@@ -716,6 +746,16 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) && !!model.gguf?.chat_template?.includes("tools"),
 		snippet: snippetPi,
+	},
+	llmpm: {
+		prettyLabel: "Llmpm",
+		docsUrl: "https://www.llmpm.co/docs",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			isLlamaCppGgufModel(model) ||
+			(isTransformersModel(model) &&
+				(model.pipeline_tag === "text-generation" || model.pipeline_tag === "text-to-image")),
+		snippet: snippetLlmpm,
 	},
 } satisfies Record<string, LocalApp>;
 
