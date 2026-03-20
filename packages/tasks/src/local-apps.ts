@@ -116,23 +116,8 @@ function isMlxModel(model: ModelData) {
 }
 
 /**
- * Returns the model's chat template string, coalescing across sources:
- * GGUF metadata > chat_template_jinja file > tokenizer_config.json
- */
-function getChatTemplate(model: ModelData): string | undefined {
-	const ct =
-		model.gguf?.chat_template ?? model.config?.chat_template_jinja ?? model.config?.tokenizer_config?.chat_template;
-	if (typeof ct === "string") {
-		return ct;
-	}
-	if (Array.isArray(ct)) {
-		return ct[0]?.template;
-	}
-	return undefined;
-}
-
-/**
  * Checks if any of the model's chat templates mention tool-calling.
+ * Coalesces across: GGUF metadata > chat_template_jinja > tokenizer_config.
  * When tokenizer_config.chat_template is an array of named templates,
  * checks all of them (tool support may live in a "tool_use" template).
  */
