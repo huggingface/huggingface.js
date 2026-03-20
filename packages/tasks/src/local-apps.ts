@@ -473,10 +473,10 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 		{
 			providers: {
 				[isMLX ? "mlx-lm" : "llama-cpp"]: {
-					baseUrl: isMLX ? "http://localhost:8000/v1" : "http://localhost:8080/v1",
+					baseUrl: "http://localhost:8080/v1",
 					api: "openai-completions",
 					apiKey: "none",
-					models: [{ id: modelName }],
+					models: [{ id: isMLX ? model.id : modelName }],
 				},
 			},
 		},
