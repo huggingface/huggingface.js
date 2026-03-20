@@ -115,6 +115,22 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
+/**
+ * Returns the model's chat template string, coalescing across sources:
+ * GGUF metadata > chat_template_jinja file > tokenizer_config.json
+ */
+function getChatTemplate(model: ModelData): string | undefined {
+	const ct =
+		model.gguf?.chat_template ?? model.config?.chat_template_jinja ?? model.config?.tokenizer_config?.chat_template;
+	if (typeof ct === "string") {
+		return ct;
+	}
+	if (Array.isArray(ct)) {
+		return ct[0]?.template;
+	}
+	return undefined;
+}
+
 function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
@@ -436,14 +452,28 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 };
 
 const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const quantTag = getQuantTag(filepath);
 	const modelName = model.id.split("/").pop() ?? model.id;
+	const isMLX = isMlxModel(model);
 
+	// Step 1: Server — differs by backend
+	const serverStep: LocalAppSnippet = isMLX
+		? {
+				title: "Start the MLX server",
+				setup: "# Install MLX LM:\nuv tool install mlx-lm",
+				content: `# Start a local OpenAI-compatible server:\nmlx_lm.server --model "${model.id}"`,
+			}
+		: {
+				title: "Start the llama.cpp server",
+				setup: "# Install llama.cpp:\nbrew install llama.cpp",
+				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)} --jinja`,
+			};
+
+	// Step 2: Pi config — port and provider name differ
 	const modelsJson = JSON.stringify(
 		{
 			providers: {
-				"llama-cpp": {
-					baseUrl: "http://localhost:8080/v1",
+				[isMLX ? "mlx-lm" : "llama-cpp"]: {
+					baseUrl: isMLX ? "http://localhost:8000/v1" : "http://localhost:8080/v1",
 					api: "openai-completions",
 					apiKey: "none",
 					models: [{ id: modelName }],
@@ -455,11 +485,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	);
 
 	return [
-		{
-			title: "Start the llama.cpp server",
-			setup: "# Install llama.cpp:\nbrew install llama.cpp",
-			content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${quantTag} --jinja`,
-		},
+		serverStep,
 		{
 			title: "Configure the model in Pi",
 			setup: "# Install Pi:\nnpm install -g @mariozechner/pi-coding-agent",
@@ -467,7 +493,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 		},
 		{
 			title: "Run Pi",
-			content: `# Start Pi in your project directory:\npi`,
+			content: "# Start Pi in your project directory:\npi",
 		},
 	];
 };
@@ -714,7 +740,10 @@ export const LOCAL_APPS = {
 		prettyLabel: "Pi",
 		docsUrl: "https://github.com/badlogic/pi-mono",
 		mainTask: "text-generation",
-		displayOnModelPage: (model) => isLlamaCppGgufModel(model) && !!model.gguf?.chat_template?.includes("tools"),
+		displayOnModelPage: (model) =>
+			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
+			model.pipeline_tag === "text-generation" &&
+			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
 	},
 } satisfies Record<string, LocalApp>;
