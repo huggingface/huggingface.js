@@ -743,7 +743,7 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) =>
 			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
 			model.pipeline_tag === "text-generation" &&
-			getChatTemplate(model)?.includes("tools"),
+			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
 	},
 } satisfies Record<string, LocalApp>;
