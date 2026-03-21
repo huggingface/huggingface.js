@@ -690,6 +690,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/KittenML/KittenTTS",
 		snippets: snippets.kittentts,
 	},
+		kokoclone: {
+		prettyLabel: "KokoClone",
+		repoName: "kokoclone",
+		repoUrl: "https://github.com/Ashish-Patnaik/kokoclone",
+		countDownloads: `path_extension: "onnx"`,
+		snippets: snippets.kokoclone,
+	},
 	kronos: {
 		prettyLabel: "KRONOS",
 		repoName: "KRONOS",
@@ -697,6 +704,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",
