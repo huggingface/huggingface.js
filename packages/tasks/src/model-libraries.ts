@@ -697,6 +697,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	kokoclone: {
+		prettyLabel: "KokoClone",
+		repoName: "kokoclone",
+		repoUrl: "https://github.com/Ashish-Patnaik/kokoclone",
+		countDownloads: { path_extension: "onnx" },
+		snippets: snippets.kokoclone,
+	},
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",
