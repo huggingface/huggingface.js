@@ -950,7 +950,7 @@ sf.write('output.wav', audio, 24000)`,
 
 export const kokoclone = (model: ModelData): string[] => [
 	`from core.cloner import KokoClone
-	
+
 # Initialize cloner with this specific model repository
 cloner = KokoClone(hf_repo="${model.id}")
 
