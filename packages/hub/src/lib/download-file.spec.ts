@@ -50,7 +50,7 @@ Test the whole generation capabilities here: https://transformer.huggingface.co/
 		const result = await createRepo({
 			accessToken: TEST_ACCESS_TOKEN,
 			hubUrl: TEST_HUB_URL,
-			private: true,
+			visibility: "private",
 			repo: repoName,
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
