@@ -537,6 +537,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"checkpoints/byt5_model.pt"`,
 	},
+	granite_library: {
+		prettyLabel: "Granite Library",
+		repoName: "mellea",
+		repoUrl: "https://github.com/generative-computing/mellea",
+		filter: false,
+		countDownloads: `path_filename:"adapter_config" AND path_extension:"json"`,
+	},
 	grok: {
 		prettyLabel: "Grok",
 		repoName: "Grok",
