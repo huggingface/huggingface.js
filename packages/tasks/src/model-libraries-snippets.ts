@@ -958,7 +958,7 @@ cloner.generate(
     text="Hello world!",
     lang="en",
     reference_audio="reference.wav",
-    output_path="output.wav"
+    output_path="output.wav",
 )`
 ];
 
