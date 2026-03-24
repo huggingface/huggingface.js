@@ -692,7 +692,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	kokoclone: {
 		prettyLabel: "KokoClone",
-		repoName: "kokoclone",
+		repoName: "KokoClone",
 		repoUrl: "https://github.com/Ashish-Patnaik/kokoclone",
 		countDownloads: `path_extension: "onnx"`,
 		snippets: snippets.kokoclone,
