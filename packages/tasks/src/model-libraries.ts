@@ -537,7 +537,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"checkpoints/byt5_model.pt"`,
 	},
-	granite_library: {
+	"granite-library": {
 		prettyLabel: "Granite Library",
 		repoName: "mellea",
 		repoUrl: "https://github.com/generative-computing/mellea",
