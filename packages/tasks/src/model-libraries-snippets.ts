@@ -959,7 +959,7 @@ cloner.generate(
     lang="en",
     reference_audio="reference.wav",
     output_path="output.wav",
-)`
+)`,
 ];
 
 export const lightning_ir = (model: ModelData): string[] => {
