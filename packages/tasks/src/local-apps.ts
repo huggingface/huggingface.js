@@ -742,7 +742,7 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) =>
 			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
-			model.pipeline_tag === "text-generation" &&
+			model.tags.includes("conversational") &&
 			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
 	},
