@@ -704,7 +704,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
-
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",
