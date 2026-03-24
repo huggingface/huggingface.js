@@ -690,7 +690,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/KittenML/KittenTTS",
 		snippets: snippets.kittentts,
 	},
-		kokoclone: {
+	kokoclone: {
 		prettyLabel: "KokoClone",
 		repoName: "kokoclone",
 		repoUrl: "https://github.com/Ashish-Patnaik/kokoclone",
