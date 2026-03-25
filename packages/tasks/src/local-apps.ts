@@ -91,12 +91,48 @@ function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
+function isVllmModel(model: ModelData): boolean {
+	return (
+		(isAwqModel(model) ||
+			isGptqModel(model) ||
+			isAqlmModel(model) ||
+			isMarlinModel(model) ||
+			isLlamaCppGgufModel(model) ||
+			isTransformersModel(model)) &&
+		(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text")
+	);
+}
+
+function isDockerModelRunnerModel(model: ModelData): boolean {
+	return isLlamaCppGgufModel(model) || isVllmModel(model);
+}
+
 function isAmdRyzenModel(model: ModelData) {
 	return model.tags.includes("ryzenai-hybrid") || model.tags.includes("ryzenai-npu");
 }
 
 function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
+}
+
+/**
+ * Returns the model's chat template string, coalescing across sources:
+ * GGUF metadata > chat_template_jinja file > tokenizer_config.json
+ */
+function getChatTemplate(model: ModelData): string | undefined {
+	const ct =
+		model.gguf?.chat_template ?? model.config?.chat_template_jinja ?? model.config?.tokenizer_config?.chat_template;
+	if (typeof ct === "string") {
+		return ct;
+	}
+	if (Array.isArray(ct)) {
+		return ct[0]?.template;
+	}
+	return undefined;
+}
+
+function isUnslothModel(model: ModelData) {
+	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
 
 function getQuantTag(filepath?: string): string {
@@ -152,6 +188,10 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			].join("\n"),
 			content: [serverCommand("./build/bin/llama-server"), cliCommand("./build/bin/llama-cli")],
 		},
+		{
+			title: "Use Docker",
+			content: snippetDockerModelRunner(model, filepath),
+		},
 	];
 };
 
@@ -171,6 +211,48 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 
 const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
+};
+
+const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
+	const isGguf = isLlamaCppGgufModel(model);
+
+	const studio_instructions: LocalAppSnippet = {
+		title: "Open model in Unsloth Studio",
+		setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
+		content: [
+			"# Run unsloth studio",
+			"unsloth studio -H 0.0.0.0 -p 8000",
+			"# Then open http://localhost:8000/chat in your browser",
+			"# Search for " + model.id + " to start chatting",
+		].join("\n"),
+	};
+
+	const hf_spaces_instructions: LocalAppSnippet = {
+		title: "Using HuggingFace Spaces for Unsloth",
+		setup: "# No setup required",
+		content:
+			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for " +
+			model.id +
+			" to start chatting",
+	};
+
+	const fastmodel_instructions: LocalAppSnippet = {
+		title: "Load model with FastModel",
+		setup: "pip install unsloth",
+		content: [
+			"from unsloth import FastModel",
+			"model, tokenizer = FastModel.from_pretrained(",
+			'    model_name="' + model.id + '",',
+			"    max_seq_length=2048,",
+			")",
+		].join("\n"),
+	};
+
+	if (isGguf) {
+		return [studio_instructions, hf_spaces_instructions];
+	} else {
+		return [studio_instructions, hf_spaces_instructions, fastmodel_instructions];
+	}
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -216,14 +298,6 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	const serverCommand = `# Start the vLLM server:
 vllm serve "${model.id}"${mistralFlags}`;
 
-	const dockerCommand = `docker run --gpus all \\
-    -v ~/.cache/huggingface:/root/.cache/huggingface \\
-    --env "HF_TOKEN=<secret>" \\
-    -p 8000:8000 \\
-    --ipc=host \\
-    vllm/vllm-openai:latest \\
-    --model "${model.id}"${mistralFlags}`;
-
 	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
@@ -253,9 +327,8 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 			content: [serverCommand, runCommand],
 		},
 		{
-			title: "Use Docker images",
-			setup: dockerCommand,
-			content: [runCommand],
+			title: "Use Docker",
+			content: snippetDockerModelRunner(model),
 		},
 	];
 };
@@ -378,8 +451,57 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const modelName = model.id.split("/").pop() ?? model.id;
+	const isMLX = isMlxModel(model);
+
+	// Step 1: Server — differs by backend
+	const serverStep: LocalAppSnippet = isMLX
+		? {
+				title: "Start the MLX server",
+				setup: "# Install MLX LM:\nuv tool install mlx-lm",
+				content: `# Start a local OpenAI-compatible server:\nmlx_lm.server --model "${model.id}"`,
+			}
+		: {
+				title: "Start the llama.cpp server",
+				setup: "# Install llama.cpp:\nbrew install llama.cpp",
+				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)} --jinja`,
+			};
+
+	// Step 2: Pi config — port and provider name differ
+	const modelsJson = JSON.stringify(
+		{
+			providers: {
+				[isMLX ? "mlx-lm" : "llama-cpp"]: {
+					baseUrl: "http://localhost:8080/v1",
+					api: "openai-completions",
+					apiKey: "none",
+					models: [{ id: isMLX ? model.id : modelName }],
+				},
+			},
+		},
+		null,
+		2,
+	);
+
+	return [
+		serverStep,
+		{
+			title: "Configure the model in Pi",
+			setup: "# Install Pi:\nnpm install -g @mariozechner/pi-coding-agent",
+			content: `# Add to ~/.pi/agent/models.json:\n${modelsJson}`,
+		},
+		{
+			title: "Run Pi",
+			content: "# Start Pi in your project directory:\npi",
+		},
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
-	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
+	// Only add quant tag for GGUF models, not safetensors
+	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
+	return `docker model run hf.co/${model.id}${quantTag}`;
 };
 
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -454,14 +576,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "vLLM",
 		docsUrl: "https://docs.vllm.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: (model: ModelData) =>
-			(isAwqModel(model) ||
-				isGptqModel(model) ||
-				isAqlmModel(model) ||
-				isMarlinModel(model) ||
-				isLlamaCppGgufModel(model) ||
-				isTransformersModel(model)) &&
-			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
+		displayOnModelPage: isVllmModel,
 		snippet: snippetVllm,
 	},
 	sglang: {
@@ -600,11 +715,18 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
 	},
+	unsloth: {
+		prettyLabel: "Unsloth",
+		docsUrl: "https://unsloth.ai/docs",
+		mainTask: "text-generation",
+		displayOnModelPage: isUnslothModel,
+		snippet: snippetUnsloth,
+	},
 	"docker-model-runner": {
 		prettyLabel: "Docker Model Runner",
 		docsUrl: "https://docs.docker.com/ai/model-runner/",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: isDockerModelRunnerModel,
 		snippet: snippetDockerModelRunner,
 	},
 	lemonade: {
@@ -613,6 +735,16 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	pi: {
+		prettyLabel: "Pi",
+		docsUrl: "https://github.com/badlogic/pi-mono",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
+			model.tags.includes("conversational") &&
+			!!getChatTemplate(model)?.includes("tools"),
+		snippet: snippetPi,
 	},
 } satisfies Record<string, LocalApp>;
 

@@ -14,8 +14,8 @@ const multipartUploadTracking = new WeakMap<
 /**
  * Uploads with progress
  *
- * Needs XMLHttpRequest to be available for progress events for uploads
- * Set useWebWorkers to true in order to have progress events for hashing
+ * Needs XMLHttpRequest to be available for progress events for uploads on models, datasets and spaces.
+ * Set useWebWorkers to true in order to have progress events for hashing for models, datasets and spaces.
  */
 export async function* uploadFilesWithProgress(
 	params: {
@@ -35,7 +35,7 @@ export async function* uploadFilesWithProgress(
 		 */
 		useWebWorkers?: CommitParams["useWebWorkers"];
 	} & Partial<CredentialsParams>,
-): AsyncGenerator<CommitProgressEvent, CommitOutput> {
+): AsyncGenerator<CommitProgressEvent, CommitOutput | undefined> {
 	return yield* commitIter({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,

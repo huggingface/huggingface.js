@@ -16,6 +16,8 @@ export default defineConfig({
 			"src/lib/oauth-handle-redirect.spec.ts",
 			// Because we use a local file
 			"src/utils/shardParser.spec.ts",
+			// Because vi.mock is not supported in browser mode
+			"src/utils/uploadShards.spec.ts",
 		],
 	},
 });

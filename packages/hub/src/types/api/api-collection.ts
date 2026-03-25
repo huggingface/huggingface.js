@@ -293,6 +293,7 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 	authorData?: ApiAuthor;
 	shortDescription?: string;
 	semanticRelevancyScore?: number;
+	visibility?: "public" | "private" | "protected";
 }
 
 interface ApiCollectionItemPaper extends ApiCollectionItemBase {

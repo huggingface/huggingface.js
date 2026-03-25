@@ -3,6 +3,7 @@ import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
+import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
 import * as FeatherlessAI from "../providers/featherless-ai.js";
 import * as Fireworks from "../providers/fireworks-ai.js";
@@ -13,6 +14,7 @@ import * as Nebius from "../providers/nebius.js";
 import * as NearAI from "../providers/near-ai.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
+import * as Nvidia from "../providers/nvidia.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
@@ -75,6 +77,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
+	},
+	deepinfra: {
+		conversational: new DeepInfra.DeepInfraConversationalTask(),
+		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
 	},
 	"fal-ai": {
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
@@ -151,6 +157,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Nscale.NscaleTextToImageTask(),
 		conversational: new Nscale.NscaleConversationalTask(),
 	},
+	nvidia: {
+		conversational: new Nvidia.NvidiaConversationalTask(),
+	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
 	},
@@ -193,6 +202,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	"zai-org": {
 		conversational: new Zai.ZaiConversationalTask(),
 		"text-to-image": new Zai.ZaiTextToImageTask(),
+		"image-to-text": new Zai.ZaiImageToTextTask(),
 	},
 };
 

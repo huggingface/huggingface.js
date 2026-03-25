@@ -166,6 +166,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	bionemo: {
+		prettyLabel: "BioNeMo",
+		repoName: "BioNeMo",
+		filter: false,
+		repoUrl: "https://github.com/nvidia/BioNeMo",
+		countDownloads: `path_extension:"ckpt" OR path:"config.json"`,
+	},
 	birder: {
 		prettyLabel: "Birder",
 		repoName: "Birder",
@@ -530,6 +537,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"checkpoints/byt5_model.pt"`,
 	},
+	"granite-library": {
+		prettyLabel: "Granite Library",
+		repoName: "mellea",
+		repoUrl: "https://github.com/generative-computing/mellea",
+		filter: false,
+		countDownloads: `path_filename:"adapter_config" AND path_extension:"json"`,
+	},
 	grok: {
 		prettyLabel: "Grok",
 		repoName: "Grok",
@@ -628,6 +642,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/bytedance/InfiniteYou",
 		filter: false,
 		countDownloads: `path:"infu_flux_v1.0/sim_stage1/image_proj_model.bin" OR path:"infu_flux_v1.0/aes_stage2/image_proj_model.bin"`,
+	},
+	intellifold: {
+		prettyLabel: "IntelliFold",
+		repoName: "IntelliFold",
+		repoUrl: "https://github.com/IntelliGen-AI/IntelliFold",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -766,6 +787,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.mamba_ssm,
 	},
+	"manas-1": {
+		prettyLabel: "MANAS-1",
+		repoName: "MANAS-1",
+		repoUrl: "https://github.com/NeurodxAI/manas-1",
+		countDownloads: `path_extension:"pt"`,
+	},
 	"mars5-tts": {
 		prettyLabel: "MARS5-TTS",
 		repoName: "MARS5-TTS",
@@ -878,6 +905,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.nemo,
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
+	},
+	"nv-medtech": {
+		prettyLabel: "NV-MedTech",
+		repoName: "NV-MedTech",
+		filter: false,
+		repoUrl: "https://github.com/nvidia-medtech",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
@@ -1424,6 +1458,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/MCG-NJU/VFIMamba",
 		countDownloads: `path_extension:"pkl"`,
 		snippets: snippets.vfimamba,
+	},
+	vismatch: {
+		prettyLabel: "VisMatch",
+		repoName: "VisMatch",
+		repoUrl: "https://github.com/gmberton/vismatch",
+		filter: false,
+		countDownloads: `path:"vismatch.yaml"`,
 	},
 	lvface: {
 		prettyLabel: "LVFace",

@@ -1,4 +1,4 @@
-import { assert, it, describe } from "vitest";
+import { assert, it, describe, expect } from "vitest";
 
 import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts";
 import type { RepoId } from "../types/public";
@@ -25,8 +25,9 @@ describe("deleteFiles", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-			assert.deepStrictEqual(result, {
+			expect(result).toEqual({
 				repoUrl: `${TEST_HUB_URL}/${repoName}`,
+				id: expect.any(String),
 			});
 
 			let content = await downloadFile({
