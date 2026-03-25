@@ -55,4 +55,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"NeMo Evaluator is an open-source platform for robust, reproducible, and scalable evaluation of Large Language Models across 100+ benchmarks.",
 		url: "https://github.com/NVIDIA-NeMo/Evaluator",
 	},
+	"yc-bench": {
+		name: "yc-bench",
+		description:
+			"YC Bench is a long-horizon deterministic benchmark for LLM agents. The agent plays CEO of an AI startup over a simulated 1–3 year run.",
+		url: "https://github.com/collinear-ai/yc-bench",
+	},
 } as const;
