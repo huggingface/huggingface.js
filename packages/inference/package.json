@@ -54,7 +54,7 @@
 		"test": "vitest run --config vitest.config.mts",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.mts",
 		"check": "tsc",
-		"dev": "pnpm run export-templates && tsup src/index.ts --format cjs,esm --watch",
+		"dev": "pnpm run export-templates && tsdown src/index.ts --format cjs,esm --watch",
 		"export-templates": "tsx scripts/export-templates.ts",
 		"package-to-ts": "tsx scripts/package-json-to-ts.ts"
 	},

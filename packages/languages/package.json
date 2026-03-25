@@ -35,7 +35,7 @@
 		"format": "oxfmt .",
 		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsdown src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"test": "vitest run",
 		"check": "tsc"
 	},

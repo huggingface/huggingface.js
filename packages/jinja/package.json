@@ -40,7 +40,7 @@
 		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"prepare": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsdown src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless",
 		"check": "tsc"

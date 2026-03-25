@@ -2,7 +2,7 @@
 	"name": "@huggingface/xetchunk-wasm",
 	"version": "0.0.2",
 	"scripts": {
-		"build": "tsup src/index.ts --format esm --dts",
+		"build": "tsdown src/index.ts --format esm --dts",
 		"test": "vitest run",
 		"bench": "node tests/bench.js",
 		"prepare": "pnpm run build"
@@ -27,7 +27,7 @@
 	"types": "./dist/index.d.ts",
 	"devDependencies": {
 		"@huggingface/splitmix64-wasm": "workspace:*",
-		"tsup": "^8.0.0",
+		"tsdown": "^0.21.4",
 		"typescript": "^5.0.0"
 	},
 	"files": [
