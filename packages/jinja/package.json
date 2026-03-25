@@ -21,13 +21,18 @@
 	],
 	"type": "module",
 	"main": "./dist/index.cjs",
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"require": "./dist/index.cjs",
-			"import": "./dist/index.js"
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
 		}
 	},
 	"publishConfig": {
@@ -40,7 +45,7 @@
 		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"prepare": "pnpm run build",
-		"build": "tsdown src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsdown",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless",
 		"check": "tsc"

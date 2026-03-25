@@ -14,7 +14,7 @@
 	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"bin": {
-		"tiny-agent": "./dist/cli.js"
+		"tiny-agent": "./dist/cli.cjs"
 	},
 	"source": "index.ts",
 	"files": [
@@ -23,14 +23,19 @@
 		"src",
 		"tsconfig.json"
 	],
-	"main": "./dist/src/index.js",
+	"main": "./dist/src/index.cjs",
 	"module": "./dist/src/index.mjs",
-	"types": "./dist/src/index.d.ts",
+	"types": "./dist/src/index.d.mts",
 	"exports": {
 		".": {
-			"types": "./dist/src/index.d.ts",
-			"require": "./dist/src/index.js",
-			"import": "./dist/src/index.mjs"
+			"import": {
+				"types": "./dist/src/index.d.mts",
+				"default": "./dist/src/index.mjs"
+			},
+			"require": {
+				"types": "./dist/src/index.d.cts",
+				"default": "./dist/src/index.cjs"
+			}
 		}
 	},
 	"publishConfig": {
@@ -42,7 +47,7 @@
 		"format": "oxfmt .",
 		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsdown src/index.ts cli.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsdown",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"check": "tsc",

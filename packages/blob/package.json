@@ -19,27 +19,45 @@
 		"src",
 		"tsconfig.json"
 	],
-	"main": "./dist/index.js",
+	"main": "./dist/index.cjs",
 	"module": "./dist/index.mjs",
 	"browser": {
 		"./src/utils/FileBlob.ts": false,
-		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.cjs": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.mts",
 	"exports": {
 		".": {
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs"
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
 		},
 		"./package.json": "./package.json",
 		"./WebBlob": {
-			"require": "./dist/src/utils/WebBlob.js",
-			"import": "./dist/src/utils/WebBlob.mjs"
+			"import": {
+				"types": "./dist/src/utils/WebBlob.d.mts",
+				"default": "./dist/src/utils/WebBlob.mjs"
+			},
+			"require": {
+				"types": "./dist/src/utils/WebBlob.d.cts",
+				"default": "./dist/src/utils/WebBlob.cjs"
+			}
 		},
 		"./FileBlob": {
-			"require": "./dist/src/utils/FileBlob.js",
-			"import": "./dist/src/utils/FileBlob.mjs"
+			"import": {
+				"types": "./dist/src/utils/FileBlob.d.mts",
+				"default": "./dist/src/utils/FileBlob.mjs"
+			},
+			"require": {
+				"types": "./dist/src/utils/FileBlob.d.cts",
+				"default": "./dist/src/utils/FileBlob.cjs"
+			}
 		}
 	},
 	"publishConfig": {
@@ -51,7 +69,7 @@
 		"format": "oxfmt .",
 		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsdown && tsc --emitDeclarationOnly --declaration && cp dist/index.d.ts dist/index.m.d.ts && cp dist/src/utils/FileBlob.d.ts dist/src/utils/FileBlob.m.d.ts && cp dist/src/utils/WebBlob.d.ts dist/src/utils/WebBlob.m.d.ts",
+		"build": "tsdown",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",

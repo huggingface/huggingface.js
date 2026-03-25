@@ -20,18 +20,23 @@
 		"src",
 		"tsconfig.json"
 	],
-	"main": "./dist/index.js",
+	"main": "./dist/index.cjs",
 	"module": "./dist/index.mjs",
 	"browser": {
-		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.cjs": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.mts",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs"
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
 		}
 	},
 	"publishConfig": {
@@ -43,7 +48,7 @@
 		"format": "oxfmt .",
 		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsdown && tsc --emitDeclarationOnly --declaration",
+		"build": "tsdown",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
 		"check": "tsc"

@@ -1,7 +1,7 @@
 import type { UserConfig } from "tsdown";
 
 const baseConfig: UserConfig = {
-	entry: ["./index.ts"],
+	entry: ["./src/index.ts"],
 	format: ["cjs", "esm"],
 	outDir: "dist",
 	clean: true,
