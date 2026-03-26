@@ -837,6 +837,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 	},
+	"synthefy-migas": {
+  prettyLabel: "Migas",
+  repoName: "Migas",
+  repoUrl: "https://github.com/Synthefy/synthefy-migas",
+  filter: false,
+  countDownloads: `path:"model.pt"`,
+	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
