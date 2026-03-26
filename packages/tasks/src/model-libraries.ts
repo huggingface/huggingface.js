@@ -709,6 +709,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
 	},
+	lagernvs: {
+		prettyLabel: "LagerNVS",
+		repoName: "LagerNVS",
+		repoUrl: "https://github.com/facebookresearch/lagernvs",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	"lightning-ir": {
 		prettyLabel: "Lightning IR",
 		repoName: "Lightning IR",
