@@ -709,7 +709,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
 	},
-	"lagernvs":{
+	lagernvs: {
 		prettyLabel: "LagerNVS",
 		repoName: "LagerNVS",
 		repoUrl: "https://github.com/facebookresearch/lagernvs",
