@@ -837,13 +837,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 	},
-	"synthefy-migas": {
-  prettyLabel: "Migas",
-  repoName: "Migas",
-  repoUrl: "https://github.com/Synthefy/synthefy-migas",
-  filter: false,
-  countDownloads: `path:"model.pt"`,
-	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
@@ -1313,6 +1306,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/takara-ai/SwarmFormer",
 		snippets: snippets.swarmformer,
 		filter: false,
+	},
+	"synthefy-migas": {
+	prettyLabel: "Migas",
+	repoName: "Migas",
+	repoUrl: "https://github.com/Synthefy/synthefy-migas",
+	filter: false,
+	countDownloads: `path:"model.pt"`,
 	},
 	"f5-tts": {
 		prettyLabel: "F5-TTS",
