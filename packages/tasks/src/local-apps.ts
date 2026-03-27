@@ -504,6 +504,37 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 	return `docker model run hf.co/${model.id}${quantTag}`;
 };
 
+const snippetFount = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const tagName = getQuantTag(filepath);
+	const fountProtocolUrl = `https://steve02081504.github.io/fount/protocol?url=${encodeURIComponent(`fount://run/serviceGenerators:AI:local/install;hf:${model.id}${tagName}`)}`;
+	return [
+		{
+			title: "Open in fount (browser)",
+			setup: [
+				"# Install fount:",
+				"# https://steve02081504.github.io/fount/readme/#installation",
+			].join("\n"),
+			content: fountProtocolUrl,
+		},
+		{
+			title: "Use CLI (*nix)",
+			setup: [
+				"# Install fount:",
+				"bash <(curl -fsSL https://steve02081504.github.io/fount/install.sh)",
+			].join("\n"),
+			content: `fount run \${FOUNT_USERNAME:-$USER} serviceGenerators/AI/local install hf:${model.id}${tagName}`,
+		},
+		{
+			title: "Use CLI (PowerShell)",
+			setup: [
+				"# Install fount:",
+				"irm https://steve02081504.github.io/fount/install.ps1 | iex",
+			].join("\n"),
+			content: `fount run $(if ($env:FOUNT_USERNAME) { $env:FOUNT_USERNAME } else { $env:USERNAME }) serviceGenerators/AI/local install hf:${model.id}${tagName}`,
+		},
+	];
+};
+
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const tagName = getQuantTag(filepath);
 	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
@@ -745,6 +776,13 @@ export const LOCAL_APPS = {
 			model.tags.includes("conversational") &&
 			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
+	},
+	fount: {
+		prettyLabel: "fount",
+		docsUrl: "https://github.com/steve02081504/fount",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetFount,
 	},
 } satisfies Record<string, LocalApp>;
 
