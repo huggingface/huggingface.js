@@ -505,8 +505,7 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 };
 
 const snippetFount = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const tagName = getQuantTag(filepath);
-	const fountProtocolUrl = `https://steve02081504.github.io/fount/protocol?url=${encodeURIComponent(`fount://run/serviceGenerators:AI:local/install;hf:${model.id}${tagName}`)}`;
+	const fountModelName = `hf:${model.id}${getQuantTag(filepath)}`;
 	return [
 		{
 			title: "Open in fount (browser)",
@@ -514,7 +513,7 @@ const snippetFount = (model: ModelData, filepath?: string): LocalAppSnippet[] =>
 				"# Install fount:",
 				"# https://steve02081504.github.io/fount/readme/#installation",
 			].join("\n"),
-			content: fountProtocolUrl,
+			content: `https://steve02081504.github.io/fount/protocol?url=${encodeURIComponent(`fount://run/serviceGenerators:AI:local/install;__tag__`)}`.replaceAll("__tag__", fountModelName),
 		},
 		{
 			title: "Use CLI (*nix)",
@@ -522,7 +521,7 @@ const snippetFount = (model: ModelData, filepath?: string): LocalAppSnippet[] =>
 				"# Install fount:",
 				"bash <(curl -fsSL https://steve02081504.github.io/fount/install.sh)",
 			].join("\n"),
-			content: `fount run \${FOUNT_USERNAME:-$USER} serviceGenerators/AI/local install hf:${model.id}${tagName}`,
+			content: `fount run \${FOUNT_USERNAME:-$USER} serviceGenerators/AI/local install ${fountModelName}`,
 		},
 		{
 			title: "Use CLI (PowerShell)",
@@ -530,7 +529,7 @@ const snippetFount = (model: ModelData, filepath?: string): LocalAppSnippet[] =>
 				"# Install fount:",
 				"irm https://steve02081504.github.io/fount/install.ps1 | iex",
 			].join("\n"),
-			content: `fount run $(if ($env:FOUNT_USERNAME) { $env:FOUNT_USERNAME } else { $env:USERNAME }) serviceGenerators/AI/local install hf:${model.id}${tagName}`,
+			content: `fount run $(if ($env:FOUNT_USERNAME) { $env:FOUNT_USERNAME } else { $env:USERNAME }) serviceGenerators/AI/local install ${fountModelName}`,
 		},
 	];
 };
