@@ -513,7 +513,7 @@ const snippetFount = (model: ModelData, filepath?: string): LocalAppSnippet[] =>
 				"# Install fount:",
 				"# https://steve02081504.github.io/fount/readme/#installation",
 			].join("\n"),
-			content: `https://steve02081504.github.io/fount/protocol?url=${encodeURIComponent(`fount://run/serviceGenerators:AI:local/install;__tag__`)}`.replaceAll("__tag__", fountModelName),
+			content: `https://steve02081504.github.io/fount/protocol?url=${encodeURIComponent(`fount://run/serviceGenerators:AI:local/install;${fountModelName}`)}`.replaceAll("%7B%7BQUANT_TAG%7D%7D", "{{QUANT_TAG}}"),
 		},
 		{
 			title: "Use CLI (*nix)",
