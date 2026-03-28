@@ -31,6 +31,6 @@ You can also do `pnpm --filter hub test ./src/utils/XetBlob.spec.ts` to run a sp
   - `doc-<package name>` (don't forget to edit the `start` command too)
 - Add the `<package-name>-publish.yml` file in the `.github/workflows` folder, inspired from the other packages
 - Add the package in the main README.md
-- Add a `tsup.config.ts` file in the package folder, inspired from the other packages, or just use `tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration` as the build command
+- Add a `tsdown.config.ts` file in the package folder, inspired from the other packages, or just use `tsdown src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration` as the build command
 - Copy `.prettierignore` from another package
 - Add a `tsconfig.json`
