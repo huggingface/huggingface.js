@@ -777,7 +777,7 @@ export const LOCAL_APPS = {
 		snippet: snippetPi,
 	},
 	fount: {
-		prettyLabel: "fount",
+		prettyLabel: "𝓯𝓸𝓾𝓷𝓽",
 		docsUrl: "https://github.com/steve02081504/fount",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
