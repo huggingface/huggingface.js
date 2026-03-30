@@ -32,6 +32,12 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
 		url: "https://github.com/Mercor-Intelligence/archipelago",
 	},
+	"screenspot-pro": {
+		name: "screenspot-pro",
+		description:
+			"ScreenSpot-Pro is a GUI grounding benchmark designed to evaluate how well AI agents can locate and identify UI elements across professional software applications in high-resolution screenshots, covering 1,585 annotated images from 26 professional tools.",
+		url: "https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding",
+	},
 	"swe-bench": {
 		name: "swe-bench",
 		description: "SWE Bench is a framework for evaluating the performance of LLMs on software engineering tasks.",
@@ -48,5 +54,11 @@ export const EVALUATION_FRAMEWORKS = {
 		description:
 			"NeMo Evaluator is an open-source platform for robust, reproducible, and scalable evaluation of Large Language Models across 100+ benchmarks.",
 		url: "https://github.com/NVIDIA-NeMo/Evaluator",
+	},
+	"yc-bench": {
+		name: "yc-bench",
+		description:
+			"YC Bench is a long-horizon deterministic benchmark for LLM agents. The agent plays CEO of an AI startup over a simulated 1–3 year run.",
+		url: "https://github.com/collinear-ai/yc-bench",
 	},
 } as const;

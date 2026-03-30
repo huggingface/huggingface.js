@@ -138,6 +138,29 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain("pi");
 	});
 
+	it("pi - mlx", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["pi"];
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-mlx",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			config: {
+				tokenizer_config: {
+					chat_template: "{% if tools %}...{% endif %}",
+				},
+			},
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
+		expect(snippet[0].content).toContain('mlx_lm.server --model "mlx-community/Llama-3.2-3B-Instruct-mlx"');
+		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
+		expect(snippet[1].content).toContain('"baseUrl": "http://localhost:8080/v1"');
+		expect(snippet[1].content).toContain('"id": "mlx-community/Llama-3.2-3B-Instruct-mlx"');
+		expect(snippet[2].content).toContain("pi");
+	});
+
 	it("docker model runner", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
 		const model: ModelData = {
@@ -149,5 +172,74 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		const snippet = snippetFunc(model);
 
 		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
+	});
+
+	it("unsloth tagged model", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.unsloth;
+		const model: ModelData = {
+			id: "some-user/my-unsloth-finetune",
+			tags: ["unsloth", "conversational"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		const snippet = snippetFunc(model);
+		expect(snippet[0].setup).toBe("pip install unsloth\nunsloth studio setup");
+		expect(snippet[0].content).toBe(
+			"# Run unsloth studio\nunsloth studio -H 0.0.0.0 -p 8000\n# Then open http://localhost:8000/chat in your browser\n# Search for some-user/my-unsloth-finetune to start chatting",
+		);
+		expect(snippet[1].setup).toBe("# No setup required");
+		expect(snippet[1].content).toBe(
+			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for some-user/my-unsloth-finetune to start chatting",
+		);
+		expect(snippet[2].setup).toBe("pip install unsloth");
+		expect(snippet[2].content).toBe(
+			'from unsloth import FastModel\nmodel, tokenizer = FastModel.from_pretrained(\n    model_name="some-user/my-unsloth-finetune",\n    max_seq_length=2048,\n)',
+		);
+	});
+
+	it("unsloth namespace gguf model", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.unsloth;
+		const model: ModelData = {
+			id: "unsloth/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		const snippet = snippetFunc(model);
+		expect(snippet[0].setup).toBe("pip install unsloth\nunsloth studio setup");
+		expect(snippet[0].content).toBe(
+			"# Run unsloth studio\nunsloth studio -H 0.0.0.0 -p 8000\n# Then open http://localhost:8000/chat in your browser\n# Search for unsloth/Llama-3.2-3B-Instruct-GGUF to start chatting",
+		);
+		expect(snippet[1].setup).toBe("# No setup required");
+		expect(snippet[1].content).toBe(
+			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for unsloth/Llama-3.2-3B-Instruct-GGUF to start chatting",
+		);
+		expect(snippet).toHaveLength(2); // GGUF models only get 2 snippets
+	});
+
+	it("non unsloth namespace gguf model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.unsloth;
+		const model: ModelData = {
+			id: "dummy/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+	});
+
+	it("unsloth not shown for unrelated model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.unsloth;
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			tags: ["conversational"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
 	});
 });
