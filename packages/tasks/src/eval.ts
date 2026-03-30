@@ -63,8 +63,7 @@ export const EVALUATION_FRAMEWORKS = {
 	},
 	"open-asr-leaderboard": {
 		name: "open-asr-leaderboard",
-		description:
-			"The Open ASR Leaderboard ranks and evaluates speech recognition models.",
+		description: "The Open ASR Leaderboard ranks and evaluates speech recognition models.",
 		url: "https://github.com/huggingface/open_asr_leaderboard",
 	},
 } as const;
