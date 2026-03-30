@@ -123,6 +123,7 @@ describe("collectionInfo", () => {
 					title: "Push Model From Web",
 					trendingScore: 0,
 					type: "space",
+					visibility: "public",
 				},
 				{
 					_id: "690df2d0c9390ed6ab0f88b1",
