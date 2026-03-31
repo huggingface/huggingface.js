@@ -239,7 +239,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 	},
 	"RTX 5070 Ti Mobile": {
-		tflops: 29.15, // source https://www.techpowerup.com/gpu-specs/nvidia-geforce-rtx-5070-ti-mobile.b13104
+		tflops: 29.15,
 		memory: [12],
 		computeCapability: 12.0,
 	},
