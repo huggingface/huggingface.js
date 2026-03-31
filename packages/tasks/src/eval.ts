@@ -61,4 +61,9 @@ export const EVALUATION_FRAMEWORKS = {
 			"YC Bench is a long-horizon deterministic benchmark for LLM agents. The agent plays CEO of an AI startup over a simulated 1–3 year run.",
 		url: "https://github.com/collinear-ai/yc-bench",
 	},
+	"open-asr-leaderboard": {
+		name: "open-asr-leaderboard",
+		description: "The Open ASR Leaderboard ranks and evaluates speech recognition models.",
+		url: "https://github.com/huggingface/open_asr_leaderboard",
+	},
 } as const;
