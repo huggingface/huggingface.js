@@ -126,7 +126,6 @@ describe("listCollections", () => {
 								requested: 1,
 							},
 							stage: "RUNNING",
-							storage: null,
 						},
 						sdk: "static",
 						tags: ["static", "region:us"],
