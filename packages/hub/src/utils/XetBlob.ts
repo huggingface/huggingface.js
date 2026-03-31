@@ -284,7 +284,7 @@ export class XetBlob extends Blob {
 					}
 				}
 
-				const fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
+				let fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
 					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
 				);
 
@@ -307,17 +307,17 @@ export class XetBlob extends Blob {
 				if (resp.status === 403) {
 					// In case it's expired
 					reconstructionInfo = await reloadReconstructionInfo();
-					const refreshedFetchInfo = reconstructionInfo.fetch_info[term.hash]?.find(
+					fetchInfo = reconstructionInfo.fetch_info[term.hash]?.find(
 						(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
 					);
-					if (!refreshedFetchInfo) {
+					if (!fetchInfo) {
 						throw new Error(
 							`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end} after refresh`,
 						);
 					}
-					resp = await customFetch(refreshedFetchInfo.url, {
+					resp = await customFetch(fetchInfo.url, {
 						headers: {
-							Range: `bytes=${refreshedFetchInfo.url_range.start}-${refreshedFetchInfo.url_range.end}`,
+							Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
 						},
 					});
 				}
