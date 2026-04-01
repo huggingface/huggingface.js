@@ -322,7 +322,7 @@ export async function parseSafetensorsMetadata(
 			? {
 					parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
 					/// shortcut: get param count directly from metadata
-					parameterTotal: parseTotalParameters(header.__metadata__.total_parameters),
+					parameterTotal: parseTotalParameters(header.__metadata__?.total_parameters),
 				}
 			: undefined;
 		return {
