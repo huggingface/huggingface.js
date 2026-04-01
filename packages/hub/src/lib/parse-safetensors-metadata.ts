@@ -74,7 +74,7 @@ export interface TensorInfo {
 }
 
 export type SafetensorsFileHeader = Record<TensorName, TensorInfo> & {
-	__metadata__: { total_parameters?: string | number } & Record<string, string>;
+	__metadata__?: { total_parameters?: string | number } & Record<string, string>;
 };
 
 export interface SafetensorsIndexJson {
@@ -323,7 +323,7 @@ export async function parseSafetensorsMetadata(
 					parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
 					/// shortcut: get param count directly from metadata
 					parameterTotal: parseTotalParameters(header.__metadata__?.total_parameters),
-				}
+			  }
 			: undefined;
 		return {
 			sharded: false,
@@ -345,7 +345,7 @@ export async function parseSafetensorsMetadata(
 					parameterCount: computeNumOfParamsByDtypeSharded(shardedMap, quantConfig),
 					/// shortcut: get param count directly from metadata
 					parameterTotal: parseTotalParameters(index.metadata?.total_parameters),
-				}
+			  }
 			: undefined;
 		return {
 			sharded: true,
