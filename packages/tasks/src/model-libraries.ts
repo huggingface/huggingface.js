@@ -1494,6 +1494,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
+	"void-model": {
+		prettyLabel: "VOID Model",
+		repoName: "VOID Model",
+		repoUrl: "https://github.com/netflix/void-model",
+		filter: false,
+		countDownloads: `path:"void_pass1.safetensors"`,
+	},
 	voxcpm: {
 		prettyLabel: "VoxCPM",
 		repoName: "VoxCPM",
