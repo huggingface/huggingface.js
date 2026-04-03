@@ -32,6 +32,11 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
 		url: "https://github.com/Mercor-Intelligence/archipelago",
 	},
+	"apex-evals": {
+		name: "apex-evals",
+		description: "APEX Evals is a benchmark suite and evaluation harness for evaluating large language models.",
+		url: "https://github.com/Mercor-Intelligence/apex-evals",
+	},
 	"screenspot-pro": {
 		name: "screenspot-pro",
 		description:
