@@ -30,6 +30,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	groq: {},
 	"hf-inference": {},
 	hyperbolic: {},
+	"near-ai": {},
 	nebius: {},
 	novita: {},
 	nscale: {},
