@@ -720,6 +720,15 @@ export const espnet = (model: ModelData): string[] => {
 	return espnetUnknown();
 };
 
+export const eupe = (model: ModelData): string[] => [
+	`import torch
+
+REPO_DIR = <PATH/TO/A/LOCAL/DIRECTORY/WHERE/THE/EUPE/REPO/WAS/CLONED>
+
+model = torch.hub.load(REPO_DIR, "${model.id}", source="local", weights=<PATH/TO/THE/LOCAL/CHECKPOINT>)
+`,
+];
+
 export const fairseq = (model: ModelData): string[] => [
 	`from fairseq.checkpoint_utils import load_model_ensemble_and_task_from_hf_hub
 
