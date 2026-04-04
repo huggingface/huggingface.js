@@ -948,6 +948,20 @@ import soundfile as sf
 sf.write('output.wav', audio, 24000)`,
 ];
 
+export const kokoclone = (model: ModelData): string[] => [
+	`from core.cloner import KokoClone
+
+# Initialize cloner with this specific model repository
+cloner = KokoClone(hf_repo="${model.id}")
+
+cloner.generate(
+    text="Hello world!",
+    lang="en",
+    reference_audio="reference.wav",
+    output_path="output.wav",
+)`,
+];
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
