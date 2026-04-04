@@ -11,7 +11,7 @@
 	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"bin": {
-		"gguf-view": "./dist/cli.js"
+		"gguf-view": "./dist/cli.cjs"
 	},
 	"source": "index.ts",
 	"files": [
@@ -19,20 +19,25 @@
 		"src",
 		"tsconfig.json"
 	],
-	"main": "./dist/index.js",
+	"main": "./dist/index.cjs",
 	"module": "./dist/index.mjs",
 	"browser": {
 		"./src/cli.ts": false,
 		"./src/utils/FileBlob.ts": false,
-		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.cjs": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.mts",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs"
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
 		}
 	},
 	"publishConfig": {
@@ -44,7 +49,7 @@
 		"format": "oxfmt .",
 		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts src/cli.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsdown",
 		"build:llm": "tsx scripts/generate-llm.ts && pnpm run format",
 		"test": "vitest run",
 		"check": "tsc"
