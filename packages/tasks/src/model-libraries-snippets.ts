@@ -720,12 +720,20 @@ export const espnet = (model: ModelData): string[] => {
 	return espnetUnknown();
 };
 
-export const eupe = (model: ModelData): string[] => [
+export const eupe = (): string[] => [
 	`import torch
 
 REPO_DIR = <PATH/TO/A/LOCAL/DIRECTORY/WHERE/THE/EUPE/REPO/WAS/CLONED>
 
-model = torch.hub.load(REPO_DIR, "${model.id}", source="local", weights=<PATH/TO/THE/LOCAL/CHECKPOINT>)
+# EUPE ViT models pretrained on web images
+eupe_vitt16 = torch.hub.load(REPO_DIR, 'eupe_vitt16', source='local', weights=<PATH/TO/THE/LOCAL/CHECKPOINT>)
+eupe_vits16 = torch.hub.load(REPO_DIR, 'eupe_vits16', source='local', weights=<PATH/TO/THE/LOCAL/CHECKPOINT>)
+eupe_vitb16 = torch.hub.load(REPO_DIR, 'eupe_vitb16', source='local', weights=<PATH/TO/THE/LOCAL/CHECKPOINT>)
+
+# EUPE ConvNeXt models pretrained on web images
+eupe_convnext_tiny = torch.hub.load(REPO_DIR, 'eupe_convnext_tiny', source='local', weights=<PATH/TO/THE/LOCAL/CHECKPOINT>)
+eupe_convnext_small = torch.hub.load(REPO_DIR, 'eupe_convnext_small', source='local', weights=<PATH/TO/THE/LOCAL/CHECKPOINT>)
+eupe_convnext_base = torch.hub.load(REPO_DIR, 'eupe_convnext_base', source='local', weights=<PATH/TO/THE/LOCAL/CHECKPOINT>)
 `,
 ];
 
