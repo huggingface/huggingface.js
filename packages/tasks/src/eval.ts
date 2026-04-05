@@ -32,6 +32,11 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
 		url: "https://github.com/Mercor-Intelligence/archipelago",
 	},
+	"apex-evals": {
+		name: "apex-evals",
+		description: "APEX Evals is a benchmark suite and evaluation harness for evaluating large language models.",
+		url: "https://github.com/Mercor-Intelligence/apex-evals",
+	},
 	"screenspot-pro": {
 		name: "screenspot-pro",
 		description:
@@ -54,5 +59,16 @@ export const EVALUATION_FRAMEWORKS = {
 		description:
 			"NeMo Evaluator is an open-source platform for robust, reproducible, and scalable evaluation of Large Language Models across 100+ benchmarks.",
 		url: "https://github.com/NVIDIA-NeMo/Evaluator",
+	},
+	"yc-bench": {
+		name: "yc-bench",
+		description:
+			"YC Bench is a long-horizon deterministic benchmark for LLM agents. The agent plays CEO of an AI startup over a simulated 1–3 year run.",
+		url: "https://github.com/collinear-ai/yc-bench",
+	},
+	"open-asr-leaderboard": {
+		name: "open-asr-leaderboard",
+		description: "The Open ASR Leaderboard ranks and evaluates speech recognition models.",
+		url: "https://github.com/huggingface/open_asr_leaderboard",
 	},
 } as const;

@@ -250,6 +250,10 @@ export const SKUS = {
 	},
 	"Apple Silicon": {
 		"-": {
+			"Apple MacBook Neo": {
+				tflops: 1.9,
+				memory: [8],
+			},
 			"Apple M1": {
 				tflops: 2.6,
 				memory: [8, 16],

@@ -194,7 +194,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 	},
 	A2: {
-		tflops: 4.531, // source: https://www.techpowerup.com/gpu-specs/a2.c3848
+		tflops: 4.531,
 		memory: [16],
 		computeCapability: 8.6,
 	},
@@ -219,7 +219,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 	},
 	"RTX 5080 Mobile": {
-		tflops: 24.58,
+		tflops: 23.04,
 		memory: [16],
 		computeCapability: 12.0,
 	},
@@ -229,7 +229,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 	},
 	"RTX 5070 Mobile": {
-		tflops: 23.22,
+		tflops: 13.13,
 		memory: [8],
 		computeCapability: 12.0,
 	},
@@ -238,13 +238,23 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		memory: [16],
 		computeCapability: 12.0,
 	},
+	"RTX 5070 Ti Mobile": {
+		tflops: 17.04,
+		memory: [12],
+		computeCapability: 12.0,
+	},
 	"RTX 5060 Ti": {
-		tflops: 23.7, // source https://www.techpowerup.com/gpu-specs/geforce-rtx-5060-ti.c4246
+		tflops: 23.7,
 		memory: [16, 8],
 		computeCapability: 12.0,
 	},
 	"RTX 5060": {
-		tflops: 19.18, // source https://www.techpowerup.com/gpu-specs/geforce-rtx-5060.c4219
+		tflops: 19.18,
+		memory: [8],
+		computeCapability: 12.0,
+	},
+	"RTX 5060 Mobile": {
+		tflops: 9.684,
 		memory: [8],
 		computeCapability: 12.0,
 	},

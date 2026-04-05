@@ -216,15 +216,23 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
 	const isGguf = isLlamaCppGgufModel(model);
 
+	const studio_content = [
+		"# Run unsloth studio",
+		"unsloth studio -H 0.0.0.0 -p 8888",
+		"# Then open http://localhost:8888 in your browser",
+		"# Search for " + model.id + " to start chatting",
+	].join("\n");
+
 	const studio_instructions: LocalAppSnippet = {
-		title: "Open model in Unsloth Studio",
-		setup: ["pip install unsloth", "unsloth studio setup"].join("\n"),
-		content: [
-			"# Run unsloth studio",
-			"unsloth studio -H 0.0.0.0 -p 8000",
-			"# Then open http://localhost:8000/chat in your browser",
-			"# Search for " + model.id + " to start chatting",
-		].join("\n"),
+		title: "Install Unsloth Studio (macOS, Linux, WSL)",
+		setup: "curl -fsSL https://unsloth.ai/install.sh | sh",
+		content: studio_content,
+	};
+
+	const studio_instructions_windows: LocalAppSnippet = {
+		title: "Install Unsloth Studio (Windows)",
+		setup: "irm https://unsloth.ai/install.ps1 | iex",
+		content: studio_content,
 	};
 
 	const hf_spaces_instructions: LocalAppSnippet = {
@@ -249,9 +257,9 @@ const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
 	};
 
 	if (isGguf) {
-		return [studio_instructions, hf_spaces_instructions];
+		return [studio_instructions, studio_instructions_windows, hf_spaces_instructions];
 	} else {
-		return [studio_instructions, hf_spaces_instructions, fastmodel_instructions];
+		return [studio_instructions, studio_instructions_windows, hf_spaces_instructions, fastmodel_instructions];
 	}
 };
 
@@ -742,7 +750,7 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) =>
 			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
-			model.pipeline_tag === "text-generation" &&
+			model.tags.includes("conversational") &&
 			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
 	},
