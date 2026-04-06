@@ -1535,6 +1535,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/microsoft/wham/blob/main/README.md",
 		countDownloads: `path_extension:"ckpt"`,
 	},
+	wilddet3d: {
+		prettyLabel: "WildDet3D",
+		repoName: "WildDet3D",
+		repoUrl: "https://github.com/weikaih04/WildDet3D",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
