@@ -1535,13 +1535,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/microsoft/wham/blob/main/README.md",
 		countDownloads: `path_extension:"ckpt"`,
 	},
-	wilddet3d: {
-		prettyLabel: "WildDet3D",
-		repoName: "WildDet3D",
-		repoUrl: "https://github.com/allenai/WildDet3D",
-		filter: false,
-		countDownloads: `path_extension:"pt"`,
-	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
@@ -1549,6 +1542,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
+	},
+	wilddet3d: {
+		prettyLabel: "WildDet3D",
+		repoName: "WildDet3D",
+		repoUrl: "https://github.com/allenai/WildDet3D",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	yolov10: {
 		// YOLOv10 is a fork of ultraLytics. Code snippets and download count are the same but the repo is different.
