@@ -1538,7 +1538,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	wilddet3d: {
 		prettyLabel: "WildDet3D",
 		repoName: "WildDet3D",
-		repoUrl: "https://github.com/weikaih04/WildDet3D",
+		repoUrl: "https://github.com/allenai/WildDet3D",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
