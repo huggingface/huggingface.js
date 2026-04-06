@@ -125,9 +125,9 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	// 1-bit quantizations
 	GGMLFileQuantizationType.IQ1_S,
 	GGMLFileQuantizationType.IQ1_M,
-	GGMLFileQuantizationType.Q1_0,
 	GGMLFileQuantizationType.TQ1_0,
 	GGMLFileQuantizationType.TQ2_0,
+	GGMLFileQuantizationType.Q1_0,
 ];
 
 // This function finds the nearest quantization type that is less than or equal to the given quantization type.
