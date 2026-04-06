@@ -42,6 +42,7 @@ export enum GGMLFileQuantizationType {
 	TQ2_0 = 37,
 	MXFP4_MOE = 38,
 	NVFP4 = 39,
+	Q1_0 = 40,
 
 	// custom quants used by unsloth
 	// they are not officially a scheme enum value in GGUF, but only here for naming
@@ -124,6 +125,7 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	// 1-bit quantizations
 	GGMLFileQuantizationType.IQ1_S,
 	GGMLFileQuantizationType.IQ1_M,
+	GGMLFileQuantizationType.Q1_0,
 	GGMLFileQuantizationType.TQ1_0,
 	GGMLFileQuantizationType.TQ2_0,
 ];
@@ -205,4 +207,5 @@ export enum GGMLQuantizationType {
 	TQ2_0 = 35,
 	MXFP4 = 39,
 	NVFP4 = 40,
+	Q1_0 = 41,
 }
