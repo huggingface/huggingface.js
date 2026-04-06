@@ -636,6 +636,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
+	"atomic-chat": {
+		prettyLabel: "Atomic Chat",
+		docsUrl: "https://atomic.chat",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) => new URL(`atomic-chat://models/huggingface/${model.id}`),
+	},
 	backyard: {
 		prettyLabel: "Backyard AI",
 		docsUrl: "https://backyard.ai",
