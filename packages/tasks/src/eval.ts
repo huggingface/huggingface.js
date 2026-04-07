@@ -4,7 +4,8 @@
 export const EVALUATION_FRAMEWORKS = {
 	exgentic: {
 		name: "exgentic",
-		description: "Exgentic is an open evaluation framework for general-purpose AI agents across diverse domains and benchmarks.",
+		description:
+			"Exgentic is an open evaluation framework for general-purpose AI agents across diverse domains and benchmarks.",
 		url: "https://github.com/Exgentic/exgentic",
 	},
 	"inspect-ai": {
