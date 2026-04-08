@@ -447,7 +447,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "EUPE",
 		repoUrl: "https://github.com/facebookresearch/EUPE",
 		filter: false,
-		snippets: snippets.eupe,
 		countDownloads: `path_extension:"pt"`,
 	},
 	fairseq: {
