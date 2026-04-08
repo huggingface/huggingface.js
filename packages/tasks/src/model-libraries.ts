@@ -443,7 +443,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 	},
 	eupe: {
-		prettyLabel: "eupe",
+		prettyLabel: "EUPE",
 		repoName: "EUPE",
 		repoUrl: "https://github.com/facebookresearch/EUPE",
 		filter: false,
