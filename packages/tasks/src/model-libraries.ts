@@ -442,6 +442,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.espnet,
 		filter: true,
 	},
+	eupe: {
+		prettyLabel: "EUPE",
+		repoName: "EUPE",
+		repoUrl: "https://github.com/facebookresearch/EUPE",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	fairseq: {
 		prettyLabel: "Fairseq",
 		repoName: "fairseq",
