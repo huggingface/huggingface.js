@@ -513,43 +513,39 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 };
 
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const tagName = getQuantTag(filepath);
 	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
+	const isRyzenAI = model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag));
 
-	// Get recipe according to model type
-	let simplifiedModelName: string;
-	let recipe: string;
-	let checkpoint: string;
+	// Lemonade auto-registers pulled models as `user.<suggested_name>[-<variant>]`.
+	// For GGUF/llamacpp: suggested_name is the repo name and variant is the quant tag.
+	// For RyzenAI ONNX: there is no per-variant suffix.
+	let pullArg: string;
+	let runName: string;
 	let requirements: string;
-	if (model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag))) {
-		recipe = model.tags.includes("ryzenai-npu") ? "oga-npu" : "oga-hybrid";
-		checkpoint = model.id;
-		requirements = " (requires RyzenAI 300 series)";
-		simplifiedModelName = modelName.split("-awq-")[0];
-		simplifiedModelName += recipe === "oga-npu" ? "-NPU" : "-Hybrid";
+	if (isRyzenAI) {
+		pullArg = model.id;
+		runName = `user.${modelName}`;
+		requirements = " (requires XDNA 2 NPU)";
 	} else {
-		recipe = "llamacpp";
-		checkpoint = `${model.id}${tagName}`;
+		const tagName = getQuantTag(filepath);
+		pullArg = `${model.id}${tagName}`;
+		runName = `user.${modelName}${tagName.replace(":", "-")}`;
 		requirements = "";
-		simplifiedModelName = modelName;
 	}
 
 	return [
 		{
 			title: "Pull the model",
 			setup: "# Download Lemonade from https://lemonade-server.ai/",
-			content: [
-				`lemonade-server pull user.${simplifiedModelName} --checkpoint ${checkpoint} --recipe ${recipe}`,
-				"# Note: If you installed from source, use the lemonade-server-dev command instead.",
-			].join("\n"),
+			content: `lemonade pull ${pullArg}`,
 		},
 		{
 			title: `Run and chat with the model${requirements}`,
-			content: `lemonade-server run user.${simplifiedModelName}`,
+			content: `lemonade run ${runName}`,
 		},
 		{
 			title: "List all available models",
-			content: "lemonade-server list",
+			content: "lemonade list",
 		},
 	];
 };
