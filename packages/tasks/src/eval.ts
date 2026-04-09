@@ -77,4 +77,10 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "The Open ASR Leaderboard ranks and evaluates speech recognition models.",
 		url: "https://github.com/huggingface/open_asr_leaderboard",
 	},
+	mdpbench: {
+  name: "mdpbench",
+  description:
+    "MDPBench is a benchmark for evaluating multilingual document parsing across digital, photographed, Latin, and non-Latin document subsets.",
+  url: "https://huggingface.co/datasets/Delores-Lin/MDPBench",
+	},
 } as const;
