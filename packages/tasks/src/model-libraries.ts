@@ -1268,6 +1268,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"cvlm_llama2_tokenizer/tokenizer.model"`,
 		snippets: snippets.seed_story,
 	},
+	"skala": {
+		prettyLabel: "Skala",
+		repoName: "Skala",
+		repoUrl: "https://github.com/microsoft/skala",
+		filter: false,
+		countDownloads: `path_extension:"fun"`,
+	},
 	soloaudio: {
 		prettyLabel: "SoloAudio",
 		repoName: "SoloAudio",
