@@ -246,4 +246,29 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(displayOnModelPage(model)).toBe(false);
 	});
+
+	it("toolpiper gguf model", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.toolpiper;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		const snippet = snippetFunc(model);
+		expect(snippet.content).toBe("Download bartowski/Llama-3.2-3B-Instruct-GGUF");
+	});
+
+	it("toolpiper not shown for non-gguf model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.toolpiper;
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			tags: ["conversational"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
 });
