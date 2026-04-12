@@ -1,24 +1,23 @@
-import type { Options } from "tsup";
+import type { UserConfig } from "tsdown";
 
 const baseConfig = {
 	entry: ["./index.ts"],
 	format: ["cjs", "esm"],
 	outDir: "dist",
 	clean: true,
-} satisfies Options;
+} satisfies UserConfig;
 
-const nodeConfig: Options = {
+const nodeConfig = {
 	...baseConfig,
 	entry: [...baseConfig.entry, "./cli.ts"],
 	platform: "node",
-};
+} satisfies UserConfig;
 
-const browserConfig: Options = {
+const browserConfig = {
 	...baseConfig,
 	platform: "browser",
 	target: "es2022",
-	splitting: true,
 	outDir: "dist/browser",
-};
+} satisfies UserConfig;
 
 export default [nodeConfig, browserConfig];

@@ -2,7 +2,7 @@
 	"name": "@huggingface/xetchunk-wasm",
 	"version": "0.0.2",
 	"scripts": {
-		"build": "tsup src/index.ts --format esm --dts",
+		"build": "tsdown",
 		"test": "vitest run",
 		"bench": "node tests/bench.js",
 		"prepare": "pnpm run build"
@@ -19,15 +19,15 @@
 	"type": "module",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
+			"import": "./dist/index.mjs",
+			"types": "./dist/index.d.mts"
 		}
 	},
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"main": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
 	"devDependencies": {
 		"@huggingface/splitmix64-wasm": "workspace:*",
-		"tsup": "^8.0.0",
+		"tsdown": "^0.21.4",
 		"typescript": "^5.0.0"
 	},
 	"files": [
