@@ -744,6 +744,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Inferencer",
 		docsUrl: "https://inferencer.com",
 		mainTask: "text-generation",
+		macOSOnly: true,
 		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
 		deeplink: (model) => new URL(`inferencer://open_from_hf?model=${model.id}`),
   },
