@@ -78,9 +78,8 @@ export const EVALUATION_FRAMEWORKS = {
 		url: "https://github.com/huggingface/open_asr_leaderboard",
 	},
 	mdpbench: {
-  name: "mdpbench",
-  description:
-    "MDPBench is a benchmark for evaluating multilingual document parsing across digital, photographed, Latin, and non-Latin document subsets.",
-  url: "https://github.com/Yuliang-Liu/MultimodalOCR",
+		name: "mdpbench",
+		description: "MDPBench is a benchmark for evaluating multilingual document parsing across digital, photographed, Latin, and non-Latin document subsets.",
+		url: "https://github.com/Yuliang-Liu/MultimodalOCR",
 	},
 } as const;
