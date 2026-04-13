@@ -79,7 +79,8 @@ export const EVALUATION_FRAMEWORKS = {
 	},
 	mdpbench: {
 		name: "mdpbench",
-		description: "MDPBench is a benchmark for evaluating multilingual document parsing across digital, photographed, Latin, and non-Latin document subsets.",
+		description:
+			"MDPBench is a benchmark for evaluating multilingual document parsing across digital, photographed, Latin, and non-Latin document subsets.",
 		url: "https://github.com/Yuliang-Liu/MultimodalOCR",
 	},
 } as const;
