@@ -116,10 +116,10 @@ describe("listModels", () => {
 		expect(count).to.equal(10);
 	});
 
-	it("should list deepseek-ai models with inference provider mapping", async () => {
+	it("should list meta-llama models with inference provider mapping", async () => {
 		let count = 0;
 		for await (const entry of listModels({
-			search: { owner: "deepseek-ai" },
+			search: { owner: "meta-llama" },
 			additionalFields: ["inferenceProviderMapping"],
 			limit: 1,
 		})) {
@@ -147,5 +147,17 @@ describe("listModels", () => {
 		}
 
 		expect(count).to.equal(10);
+	});
+
+	it("should list models with filePaths", async () => {
+		for await (const entry of listModels({
+			search: { owner: "huggingfacejs" },
+			additionalFields: ["filePaths"],
+		})) {
+			expect(entry.name).to.equal("huggingfacejs/test-model");
+			expect(entry.filePaths).to.be.an("array");
+			expect(entry.filePaths).to.include(".gitattributes");
+			expect(entry.filePaths).to.include("README.md");
+		}
 	});
 });

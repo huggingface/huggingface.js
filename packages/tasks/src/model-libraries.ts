@@ -166,6 +166,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	bionemo: {
+		prettyLabel: "BioNeMo",
+		repoName: "BioNeMo",
+		filter: false,
+		repoUrl: "https://github.com/nvidia/BioNeMo",
+		countDownloads: `path_extension:"ckpt" OR path:"config.json"`,
+	},
 	birder: {
 		prettyLabel: "Birder",
 		repoName: "Birder",
@@ -435,6 +442,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.espnet,
 		filter: true,
 	},
+	eupe: {
+		prettyLabel: "EUPE",
+		repoName: "EUPE",
+		repoUrl: "https://github.com/facebookresearch/EUPE",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	fairseq: {
 		prettyLabel: "Fairseq",
 		repoName: "fairseq",
@@ -529,6 +543,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/AIGText/Glyph-ByT5",
 		filter: false,
 		countDownloads: `path:"checkpoints/byt5_model.pt"`,
+	},
+	"granite-library": {
+		prettyLabel: "Granite Library",
+		repoName: "mellea",
+		repoUrl: "https://github.com/generative-computing/mellea",
+		filter: false,
+		countDownloads: `path_filename:"adapter_config" AND path_extension:"json"`,
 	},
 	grok: {
 		prettyLabel: "Grok",
@@ -629,6 +650,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"infu_flux_v1.0/sim_stage1/image_proj_model.bin" OR path:"infu_flux_v1.0/aes_stage2/image_proj_model.bin"`,
 	},
+	intellifold: {
+		prettyLabel: "IntelliFold",
+		repoName: "IntelliFold",
+		repoUrl: "https://github.com/IntelliGen-AI/IntelliFold",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
@@ -687,6 +715,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "K2",
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
+	},
+	lagernvs: {
+		prettyLabel: "LagerNVS",
+		repoName: "LagerNVS",
+		repoUrl: "https://github.com/facebookresearch/lagernvs",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"lightning-ir": {
 		prettyLabel: "Lightning IR",
@@ -765,6 +800,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/state-spaces/mamba",
 		filter: false,
 		snippets: snippets.mamba_ssm,
+	},
+	"manas-1": {
+		prettyLabel: "MANAS-1",
+		repoName: "MANAS-1",
+		repoUrl: "https://github.com/NeurodxAI/manas-1",
+		countDownloads: `path_extension:"pt"`,
 	},
 	"mars5-tts": {
 		prettyLabel: "MARS5-TTS",
@@ -878,6 +919,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.nemo,
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
+	},
+	"nv-medtech": {
+		prettyLabel: "NV-MedTech",
+		repoName: "NV-MedTech",
+		filter: false,
+		repoUrl: "https://github.com/nvidia-medtech",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
@@ -1009,6 +1057,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/OpenPeer-AI/QuantumPeer",
 		filter: false,
 		countDownloads: `path_extension:"setup.py"`,
+	},
+	qwen3_tts: {
+		prettyLabel: "Qwen3-TTS",
+		repoName: "Qwen3-TTS",
+		repoUrl: "https://github.com/QwenLM/Qwen3-TTS",
+		snippets: snippets.qwen3_tts,
+		filter: false,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
@@ -1259,6 +1314,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.swarmformer,
 		filter: false,
 	},
+	"synthefy-migas": {
+		prettyLabel: "Migas",
+		repoName: "Migas",
+		repoUrl: "https://github.com/Synthefy/synthefy-migas",
+		filter: false,
+		countDownloads: `path:"model.pt"`,
+	},
 	"f5-tts": {
 		prettyLabel: "F5-TTS",
 		repoName: "F5-TTS",
@@ -1417,6 +1479,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/MCG-NJU/VFIMamba",
 		countDownloads: `path_extension:"pkl"`,
 		snippets: snippets.vfimamba,
+	},
+	vismatch: {
+		prettyLabel: "VisMatch",
+		repoName: "VisMatch",
+		repoUrl: "https://github.com/gmberton/vismatch",
+		filter: false,
+		countDownloads: `path:"vismatch.yaml"`,
 	},
 	lvface: {
 		prettyLabel: "LVFace",

@@ -4,7 +4,6 @@ import type { ApiModelInfo } from "../types/api/api-model";
 import type { CredentialsParams, PipelineType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
-import { pick } from "../utils/pick";
 import { normalizeInferenceProviderMapping } from "../utils/normalizeInferenceProviderMapping";
 
 export const MODEL_EXPAND_KEYS = [
@@ -35,11 +34,25 @@ export const MODEL_EXPANDABLE_KEYS = [
 	"private",
 	"safetensors",
 	"sha",
-	// "siblings",
 	"spaces",
 	"tags",
 	"transformersInfo",
 ] as const satisfies readonly (keyof ApiModelInfo)[];
+
+export interface ModelDerivedFields {
+	filePaths: string[];
+}
+
+export const MODEL_DERIVED_FIELD_TO_API_KEY: Record<keyof ModelDerivedFields, keyof ApiModelInfo> = {
+	filePaths: "siblings",
+};
+
+export type ModelAdditionalField =
+	| Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPAND_KEYS)[number]>
+	| keyof ModelDerivedFields;
+
+export type ResolveModelAdditionalFields<T extends ModelAdditionalField> = Pick<ApiModelInfo, T & keyof ApiModelInfo> &
+	Pick<ModelDerivedFields, T & keyof ModelDerivedFields>;
 
 export interface ModelEntry {
 	id: string;
@@ -52,9 +65,7 @@ export interface ModelEntry {
 	updatedAt: Date;
 }
 
-export async function* listModels<
-	const T extends Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPAND_KEYS)[number]> = never,
->(
+export async function* listModels<const T extends ModelAdditionalField = never>(
 	params?: {
 		search?: {
 			/**
@@ -80,13 +91,30 @@ export async function* listModels<
 		 */
 		limit?: number;
 		/**
+		 * Sort models by a specific field.
+		 */
+		sort?:
+			| "createdAt"
+			| "downloads"
+			| "likes"
+			| "lastModified"
+			| "likes30d"
+			| "trendingScore"
+			| "num_parameters"
+			| "mainSize"
+			| "id";
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
-): AsyncGenerator<ModelEntry & Pick<ApiModelInfo, T>> {
+): AsyncGenerator<ModelEntry & ResolveModelAdditionalFields<T>> {
 	const accessToken = params && checkCredentials(params);
 	let totalToFetch = params?.limit ?? Infinity;
+	const additionalExpandKeys =
+		params?.additionalFields?.map(
+			(field) => MODEL_DERIVED_FIELD_TO_API_KEY[field as keyof ModelDerivedFields] ?? field,
+		) ?? [];
 	const search = new URLSearchParams([
 		...Object.entries({
 			limit: String(Math.min(totalToFetch, 500)),
@@ -97,10 +125,11 @@ export async function* listModels<
 				? { inference_provider: params.search.inferenceProviders.join(",") }
 				: undefined),
 			...(params?.search?.apps ? { apps: params.search.apps.join(",") } : undefined),
+			...(params?.sort ? { sort: params.sort } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
-		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
+		...additionalExpandKeys.map((val) => ["expand", val] satisfies [string, string]),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/models?${search}`;
 
@@ -119,20 +148,24 @@ export async function* listModels<
 		const items: ApiModelInfo[] = await res.json();
 
 		for (const item of items) {
-			// Handle inferenceProviderMapping normalization
-			const normalizedItem = { ...item };
-			if (
-				(params?.additionalFields as string[])?.includes("inferenceProviderMapping") &&
-				item.inferenceProviderMapping
-			) {
-				normalizedItem.inferenceProviderMapping = normalizeInferenceProviderMapping(
-					item.id,
-					item.inferenceProviderMapping,
-				);
+			const additional: Record<string, unknown> = {};
+			if (params?.additionalFields) {
+				for (const field of params.additionalFields) {
+					if (field === "filePaths") {
+						additional.filePaths = (item.siblings ?? []).map((s) => s.rfilename);
+					} else if (field === "inferenceProviderMapping" && item.inferenceProviderMapping) {
+						additional.inferenceProviderMapping = normalizeInferenceProviderMapping(
+							item.id,
+							item.inferenceProviderMapping,
+						);
+					} else {
+						additional[field] = item[field as keyof ApiModelInfo];
+					}
+				}
 			}
 
 			yield {
-				...(params?.additionalFields && pick(normalizedItem, params.additionalFields)),
+				...additional,
 				id: item._id,
 				name: item.id,
 				private: item.private,
@@ -141,7 +174,7 @@ export async function* listModels<
 				gated: item.gated,
 				likes: item.likes,
 				updatedAt: new Date(item.lastModified),
-			} as ModelEntry & Pick<ApiModelInfo, T>;
+			} as ModelEntry & ResolveModelAdditionalFields<T>;
 			totalToFetch--;
 
 			if (totalToFetch <= 0) {

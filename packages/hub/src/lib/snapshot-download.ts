@@ -48,8 +48,8 @@ export async function snapshotDownload(
 	}
 
 	const repoId = toRepoId(params.repo);
+	const storageFolder = join(cacheDir, getRepoFolderName(repoId));
 
-	// get repository revision value (sha)
 	let repoInfo: { sha: string };
 	switch (repoId.type) {
 		case "space":
@@ -77,29 +77,26 @@ export async function snapshotDownload(
 			});
 			break;
 		default:
-			throw new Error(`invalid repository type ${repoId.type}`);
+			throw new Error(
+				`Unsupported repository type: ${repoId.type}. snapshotDownload is not supported for bucket repos.`,
+			);
 	}
 
-	const commitHash: string = repoInfo.sha;
+	const commitHash = repoInfo.sha;
 
-	// get storage folder
-	const storageFolder = join(cacheDir, getRepoFolderName(repoId));
-	const snapshotFolder = join(storageFolder, "snapshots", commitHash);
-
-	// if passed revision is not identical to commit_hash
-	// then revision has to be a branch name or tag name.
-	// In that case store a ref.
 	if (revision !== commitHash) {
 		const refPath = join(storageFolder, "refs", revision);
 		await mkdir(dirname(refPath), { recursive: true });
 		await writeFile(refPath, commitHash);
 	}
 
+	const snapshotFolder = join(storageFolder, "snapshots", commitHash);
+
 	const cursor = listFiles({
 		...params,
 		repo: params.repo,
 		recursive: true,
-		revision: repoInfo.sha,
+		revision: commitHash,
 	});
 
 	for await (const entry of cursor) {

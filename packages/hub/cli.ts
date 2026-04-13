@@ -10,6 +10,7 @@ import {
 	getJob,
 	listJobHardware,
 	listJobs,
+	listModels,
 	repoExists,
 	runJob,
 	streamJobLogs,
@@ -95,7 +96,9 @@ class UploadProgressManager {
 				this.fileBars.set(path, bar);
 			}
 
-			if (progress >= 1) {
+			if (state === "error") {
+				bar.update(0, { state: "✗ error" });
+			} else if (progress >= 1) {
 				// If complete, mark it as done
 				bar.update(100, { state: state === "hashing" ? "✓ hashed" : "✓ uploaded" });
 			} else {
@@ -108,7 +111,9 @@ class UploadProgressManager {
 			const percentage = Math.round(progress * 100);
 			const truncatedPath = this.truncateFilename(path, 100);
 
-			if (progress >= 1) {
+			if (state === "error") {
+				console.error(`✗ error: ${truncatedPath}`);
+			} else if (progress >= 1) {
 				const statusIcon = state === "hashing" ? "✓ hashed" : "✓ uploaded";
 				console.log(`${statusIcon}: ${truncatedPath}`);
 			} else if (percentage % 25 === 0) {
@@ -199,9 +204,9 @@ const commands = {
 			},
 			{
 				name: "repo-type" as const,
-				enum: ["dataset", "model", "space"],
+				enum: ["dataset", "model", "space", "bucket"],
 				description:
-					"The type of repo to upload to. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+					"The type of repo to upload to. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name or buckets/username/repo-name",
 			},
 			{
 				name: "revision" as const,
@@ -335,6 +340,42 @@ const commands = {
 			},
 		},
 	} satisfies CommandGroup,
+	models: {
+		description: "Manage models on the Hub",
+		subcommands: {
+			list: {
+				description: "List models on the Hub (first page)",
+				args: [
+					{
+						name: "search" as const,
+						description: "Search query to filter models by name",
+						positional: true,
+					},
+					{
+						name: "sort" as const,
+						enum: [
+							"createdAt",
+							"downloads",
+							"likes",
+							"lastModified",
+							"likes30d",
+							"trendingScore",
+							"num_parameters",
+							// "mainSize",
+							// "id",
+						],
+						description: "Sort models by a specific field",
+					},
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+		},
+	} satisfies CommandGroup,
 	version: {
 		description: "Print the version of the CLI",
 		args: [] as const,
@@ -378,6 +419,13 @@ const commands = {
 						multiple: true,
 						description:
 							"Label in the format KEY=VALUE or KEY alone (in this case VALUE defaults to empty string). Can be specified multiple times.",
+					},
+					{
+						name: "volume" as const,
+						short: "v",
+						multiple: true,
+						description:
+							"Volume to mount in the format SOURCE:MOUNTPATH[:OPTIONS]. SOURCE uses HuggingFace prefixes (datasets/user/repo, spaces/user/repo, buckets/user/bucket) or bare user/repo for models. OPTIONS are comma-separated: ro, revision=REV, path=SUBPATH. Can be specified multiple times.",
 					},
 					{
 						name: "flavor" as const,
@@ -557,7 +605,9 @@ async function run() {
 				private: isPrivate,
 			} = parsedArgs;
 
-			const repoId = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
+			const repoId = repoType
+				? { type: repoType as "model" | "dataset" | "space" | "bucket", name: repoName }
+				: repoName;
 
 			if (
 				!(await repoExists({ repo: repoId, revision, accessToken: token, hubUrl: process.env.HF_ENDPOINT ?? HUB_URL }))
@@ -734,6 +784,78 @@ async function run() {
 			}
 			break;
 		}
+		case "models": {
+			const modelCommandGroup = commands.models;
+			const currentSubCommandName = subCommandName as keyof typeof modelCommandGroup.subcommands | undefined;
+
+			// Check if --help is in subcommand position (e.g., "hfjs models --help")
+			if (subCommandName === "--help" || subCommandName === "-h") {
+				console.log(listSubcommands("models", modelCommandGroup));
+				break;
+			}
+
+			// Check if --help is in args position (e.g., "hfjs models list --help")
+			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
+				if (currentSubCommandName && modelCommandGroup.subcommands[currentSubCommandName]) {
+					console.log(detailedUsageForSubcommand("models", currentSubCommandName));
+				} else {
+					console.log(listSubcommands("models", modelCommandGroup));
+				}
+				break;
+			}
+
+			if (!currentSubCommandName || !modelCommandGroup.subcommands[currentSubCommandName]) {
+				console.error(`Error: Missing or invalid subcommand for 'models'.`);
+				console.log(listSubcommands("models", modelCommandGroup));
+				process.exitCode = 1;
+				break;
+			}
+
+			const subCmdDef = modelCommandGroup.subcommands[currentSubCommandName];
+
+			switch (currentSubCommandName) {
+				case "list": {
+					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "models list");
+					const { search, sort, token } = parsedArgs;
+
+					const models: Array<{ name: string; task?: string; downloads: number; likes: number; updatedAt: Date }> = [];
+
+					for await (const model of listModels({
+						search: search ? { query: search } : undefined,
+						sort: sort as NonNullable<Parameters<typeof listModels>[0]>["sort"],
+						limit: 20,
+						accessToken: token,
+						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+					})) {
+						models.push(model);
+					}
+
+					if (models.length === 0) {
+						console.log("No models found.");
+						break;
+					}
+
+					console.log(
+						`${"MODEL".padEnd(45)} ${"TASK".padEnd(25)} ${"DOWNLOADS".padStart(10)} ${"LIKES".padStart(7)} ${"UPDATED"}`,
+					);
+					console.log("-".repeat(110));
+					for (const model of models) {
+						const task = model.task || "N/A";
+						const updatedAt = model.updatedAt.toLocaleDateString();
+						console.log(
+							`${model.name.padEnd(45)} ${task.padEnd(25)} ${String(model.downloads).padStart(10)} ${String(model.likes).padStart(7)} ${updatedAt}`,
+						);
+					}
+					break;
+				}
+				default:
+					console.error(`Error: Unknown subcommand '${currentSubCommandName}' for 'models'.`);
+					console.log(listSubcommands("models", modelCommandGroup));
+					process.exitCode = 1;
+					break;
+			}
+			break;
+		}
 		case "version": {
 			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
 				console.log(detailedUsageForCommand("version"));
@@ -780,6 +902,7 @@ async function run() {
 						env,
 						secret,
 						label,
+						volume: volumeArgs,
 						flavor,
 						attempts: attemptsStr,
 						namespace,
@@ -868,6 +991,51 @@ async function run() {
 						}
 					}
 
+					const volumes: Parameters<typeof runJob>[0]["volumes"] = [];
+					if (volumeArgs) {
+						for (const volumeArg of volumeArgs) {
+							const colonIdx = volumeArg.indexOf(":");
+							if (colonIdx === -1) {
+								throw new Error(`Invalid volume format: ${volumeArg}. Expected SOURCE:MOUNTPATH[:OPTIONS]`);
+							}
+							const source = volumeArg.slice(0, colonIdx);
+							const rest = volumeArg.slice(colonIdx + 1);
+
+							const secondColon = rest.indexOf(":");
+							const mountPath = secondColon === -1 ? rest : rest.slice(0, secondColon);
+							const optionsStr = secondColon === -1 ? "" : rest.slice(secondColon + 1);
+
+							if (!mountPath.startsWith("/")) {
+								throw new Error(`Volume mountPath must start with "/": ${mountPath}`);
+							}
+
+							let readOnly: boolean | undefined;
+							let revision: string | undefined;
+							let subPath: string | undefined;
+							if (optionsStr) {
+								for (const opt of optionsStr.split(",")) {
+									if (opt === "ro") {
+										readOnly = true;
+									} else if (opt.startsWith("revision=")) {
+										revision = opt.slice("revision=".length);
+									} else if (opt.startsWith("path=")) {
+										subPath = opt.slice("path=".length);
+									} else {
+										throw new Error(`Unknown volume option: ${opt}`);
+									}
+								}
+							}
+
+							volumes.push({
+								source,
+								mountPath,
+								...(revision ? { revision } : {}),
+								...(readOnly ? { readOnly } : {}),
+								...(subPath ? { path: subPath } : {}),
+							});
+						}
+					}
+
 					const jobParams = {
 						namespace: finalNamespace,
 						...(dockerImage ? { dockerImage } : {}),
@@ -878,6 +1046,7 @@ async function run() {
 						secrets,
 						...(attempts !== undefined ? { attempts } : {}),
 						...(Object.keys(labels).length > 0 ? { labels } : {}),
+						...(volumes.length > 0 ? { volumes } : {}),
 						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
 						...(token ? { accessToken: token } : {}),
 					} as Parameters<typeof runJob>[0];

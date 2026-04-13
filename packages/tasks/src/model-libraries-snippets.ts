@@ -1159,8 +1159,8 @@ for res in output:
 	}
 
 	if (model.tags.includes("document-parse")) {
-		const rawVersion = model.id.replace("PaddleOCR-VL-", "v");
-		const version = rawVersion === "PaddleOCR-VL" ? "v1" : rawVersion;
+		const rawVersion = model.id.replace("PaddlePaddle/PaddleOCR-VL-", "v");
+		const version = rawVersion === "PaddlePaddle/PaddleOCR-VL" ? "v1" : rawVersion;
 		return [
 			`# See https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html to installation
 
@@ -2275,6 +2275,29 @@ export const pythae = (model: ModelData): string[] => [
 	`from pythae.models import AutoModel
 
 model = AutoModel.load_from_hf_hub("${model.id}")`,
+];
+
+export const qwen3_tts = (model: ModelData): string[] => [
+	`# pip install qwen-tts
+import torch
+import soundfile as sf
+from qwen_tts import Qwen3TTSModel
+
+model = Qwen3TTSModel.from_pretrained(
+    "${model.id}",
+    device_map="cuda:0",
+    dtype=torch.bfloat16,
+    attn_implementation="flash_attention_2",
+)
+
+wavs, sr = model.generate_custom_voice(
+    text="Your text here.",
+    language="English",
+    speaker="Ryan",
+    instruct="Speak in a natural tone.",
+)
+
+sf.write("output.wav", wavs[0], sr)`,
 ];
 
 const musicgen = (model: ModelData): string[] => [

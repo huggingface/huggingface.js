@@ -1,13 +1,18 @@
 import type { PipelineType } from "@huggingface/tasks";
 
-export type RepoType = "space" | "dataset" | "model";
+export type RepoType = "space" | "dataset" | "model" | "bucket" | "kernel";
 
 export interface RepoId {
 	name: string;
 	type: RepoType;
 }
 
-export type RepoFullName = string | `spaces/${string}` | `datasets/${string}`;
+export type RepoFullName =
+	| string
+	| `spaces/${string}`
+	| `datasets/${string}`
+	| `buckets/${string}`
+	| `kernels/${string}`;
 
 export type RepoDesignation = RepoId | RepoFullName;
 

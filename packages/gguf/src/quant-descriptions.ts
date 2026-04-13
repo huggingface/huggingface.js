@@ -136,6 +136,14 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		txt: "4-bit Microscaling Block Floating Point.",
 		src_url: "https://github.com/ggml-org/llama.cpp/pull/15091",
 	},
+	[GGMLQuantizationType.NVFP4]: {
+		txt: "4-bit Microscaling Block Floating Point with global scale.",
+		src_url: "https://github.com/ggml-org/llama.cpp/pull/19769",
+	},
+	[GGMLQuantizationType.Q1_0]: {
+		txt: "1-bit quantization with fp16 block scale. Each block has 128 weights, where 0 represents -block_scale and 1 represents +block_scale.",
+		src_url: "https://github.com/ggml-org/llama.cpp/pull/21273",
+	},
 };
 
 const QK_K = 256;
@@ -178,4 +186,6 @@ export const GGML_QUANT_SIZES = {
 	[GGMLQuantizationType.TQ1_0]: calcBPW(256, 2 + 4 * 13),
 	[GGMLQuantizationType.TQ2_0]: calcBPW(256, 2 + 64),
 	[GGMLQuantizationType.MXFP4]: calcBPW(32, 1 + 16),
+	[GGMLQuantizationType.NVFP4]: calcBPW(64, 4 + 32),
+	[GGMLQuantizationType.Q1_0]: calcBPW(128, 2 + 16),
 };
