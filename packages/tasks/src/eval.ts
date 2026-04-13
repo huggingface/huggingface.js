@@ -71,4 +71,10 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "The Open ASR Leaderboard ranks and evaluates speech recognition models.",
 		url: "https://github.com/huggingface/open_asr_leaderboard",
 	},
+	parsebench: {
+		name: "parsebench",
+		description:
+			"ParseBench is a benchmark for evaluating how well document parsing tools convert PDFs into structured output that AI agents can reliably act on.",
+		url: "https://github.com/run-llama/ParseBench",
+	},
 } as const;
