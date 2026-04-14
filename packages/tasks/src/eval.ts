@@ -2,6 +2,12 @@
  * List of supported Evaluation Frameworks supported in the `eval.yaml` file in benchmarks datasets.
  */
 export const EVALUATION_FRAMEWORKS = {
+	exgentic: {
+		name: "exgentic",
+		description:
+			"Exgentic is an open evaluation framework for general-purpose AI agents across diverse domains and benchmarks.",
+		url: "https://github.com/Exgentic/exgentic",
+	},
 	"inspect-ai": {
 		name: "inspect-ai",
 		description: "Inspect AI is an open-source framework for large language model evaluations.",
@@ -76,5 +82,10 @@ export const EVALUATION_FRAMEWORKS = {
 		description:
 			"ParseBench is a benchmark for evaluating how well document parsing tools convert PDFs into structured output that AI agents can reliably act on.",
 		url: "https://github.com/run-llama/ParseBench",
+	mdpbench: {
+		name: "mdpbench",
+		description:
+			"MDPBench is a benchmark for evaluating multilingual document parsing across digital, photographed, Latin, and non-Latin document subsets.",
+		url: "https://github.com/Yuliang-Liu/MultimodalOCR",
 	},
 } as const;
