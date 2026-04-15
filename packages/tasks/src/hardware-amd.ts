@@ -56,7 +56,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1201",
 	},	
 	"RX 9060 XT": {
-		tflops: 51,28,
+		tflops: 51.28,
 		memory: [8, 16],
 		gfxVersion: "gfx1200",
 	},
