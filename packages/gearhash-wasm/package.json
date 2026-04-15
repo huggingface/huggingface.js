@@ -1,6 +1,7 @@
 {
 	"name": "@huggingface/gearhash-wasm",
-	"version": "0.0.1",
+	"version": "0.0.2",
+	"deprecated": "This package is deprecated in favor of gearhash-jit. Please migrate to gearhash-jit for better performance and maintenance.",
 	"scripts": {
 		"build:debug": "asc assembly/index.ts --target debug",
 		"build:release": "asc assembly/index.ts --target release",
