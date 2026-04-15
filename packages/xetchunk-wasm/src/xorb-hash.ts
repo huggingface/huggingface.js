@@ -1,9 +1,8 @@
-import { createKeyed } from "blake3-jit";
+import { Hasher } from "blake3-jit";
 import type { Chunk } from "./xet-chunker";
 import { hashToHex } from "./xet-chunker";
 
 const MEAN_CHUNK_PER_NODE = 4;
-const MAX_GROUP_SIZE = 2 * MEAN_CHUNK_PER_NODE + 1; // 9
 
 const BLAKE3_NODE_KEY = new Uint8Array([
 	1, 126, 197, 199, 165, 71, 41, 150, 253, 148, 102, 102, 180, 138, 2, 230, 93, 221, 83, 111, 55, 199, 109, 210, 248,
@@ -11,6 +10,8 @@ const BLAKE3_NODE_KEY = new Uint8Array([
 ]);
 
 const INDEX_OF_LAST_BYTE_OF_LAST_U64_IN_CHUNK_HASH = 3 * 8;
+
+const nodeHasher = Hasher.newKeyed(BLAKE3_NODE_KEY);
 
 export function xorbHash(chunks: Chunk[]): Uint8Array {
 	if (chunks.length === 0) {
@@ -55,11 +56,10 @@ function mergedHashOfSequence(chunks: Chunk[]): Chunk {
 		text += hashToHex(chunk.hash) + " : " + chunk.length + "\n";
 		totalLength += chunk.length;
 	}
-	// ASCII-only string, safe to encode directly
 	const bytes = new Uint8Array(text.length);
 	for (let i = 0; i < text.length; i++) {
 		bytes[i] = text.charCodeAt(i);
 	}
-	const hash = createKeyed(BLAKE3_NODE_KEY).update(bytes).finalize(32);
+	const hash = nodeHasher.reset().update(bytes).finalize(32);
 	return { hash, length: totalLength };
 }

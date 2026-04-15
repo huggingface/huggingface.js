@@ -31,9 +31,9 @@
 	},
 	"packageManager": "pnpm@10.10.0",
 	"pnpm": {
+		"allowUnusedPatches": true,
 		"patchedDependencies": {
 			"blake3-jit@1.0.0": "packages/xetchunk-wasm/patches/blake3-jit.patch"
-		},
-		"allowNonAppliedPatches": true
+		}
 	}
 }

@@ -1,4 +1,4 @@
-import { createKeyed } from "blake3-jit";
+import { Hasher } from "blake3-jit";
 import type { Chunk } from "./xet-chunker";
 import { xorbHash } from "./xorb-hash";
 
@@ -9,6 +9,9 @@ const VERIFICATION_KEY = new Uint8Array([
 	65, 36, 152, 127, 40, 251, 148, 195,
 ]);
 
+const fileHasher = Hasher.newKeyed(ZERO_KEY);
+const verificationHasher = Hasher.newKeyed(VERIFICATION_KEY);
+
 /**
  * file_hash = hmac(xorb_hash(chunks), zero_key)
  *
@@ -17,7 +20,7 @@ const VERIFICATION_KEY = new Uint8Array([
  */
 export function fileHash(chunks: Chunk[]): Uint8Array {
 	const xorb = xorbHash(chunks);
-	return createKeyed(ZERO_KEY).update(xorb).finalize(32);
+	return fileHasher.reset().update(xorb).finalize(32);
 }
 
 /**
@@ -25,9 +28,11 @@ export function fileHash(chunks: Chunk[]): Uint8Array {
  *
  * Both inputs are 32-byte Uint8Arrays.
  * Matches Rust's `DataHash::hmac`.
+ *
+ * Uses a fresh hasher per call since the key varies.
  */
 export function hmac(hash: Uint8Array, key: Uint8Array): Uint8Array {
-	return createKeyed(key).update(hash).finalize(32);
+	return Hasher.newKeyed(key).update(hash).finalize(32);
 }
 
 /**
@@ -42,5 +47,5 @@ export function verificationHash(chunkHashes: Uint8Array[]): Uint8Array {
 	for (let i = 0; i < chunkHashes.length; i++) {
 		combined.set(chunkHashes[i], i * 32);
 	}
-	return createKeyed(VERIFICATION_KEY).update(combined).finalize(32);
+	return verificationHasher.reset().update(combined).finalize(32);
 }

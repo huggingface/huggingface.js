@@ -19,5 +19,3 @@ packages:
   - packages/xetchunk-wasm
   - packages/splitmix64-wasm
   - gearhash-jit
-patchedDependencies:
-  blake3-jit: patches/blake3-jit.patch
