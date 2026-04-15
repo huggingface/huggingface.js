@@ -14,6 +14,7 @@ packages:
   - packages/ollama-utils
   - packages/mcp-client
   - packages/tiny-agents
+  - packages/blake3-jit
   - packages/xetchunk-wasm
+  - packages/gearhash-jit
   - packages/splitmix64-wasm
-  - gearhash-jit

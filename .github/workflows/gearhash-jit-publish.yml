@@ -17,7 +17,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: gearhash-jit
+    working-directory: packages/gearhash-jit
 
 permissions:
   contents: write
@@ -37,7 +37,7 @@ jobs:
           node-version: "24"
           cache: "pnpm"
           cache-dependency-path: |
-            gearhash-jit/pnpm-lock.yaml
+            packages/gearhash-jit/pnpm-lock.yaml
       - run: pnpm install
       - run: git config --global user.name machineuser
       - run: git config --global user.email infra+machineuser@huggingface.co

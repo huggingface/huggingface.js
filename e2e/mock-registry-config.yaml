@@ -14,9 +14,6 @@ uplinks:
   npmjs:
     url: https://registry.npmjs.org/
 packages:
-  "@huggingface/blake3-jit":
-    access: $all
-    proxy: npmjs
   "@huggingface/*":
     access: $all
     publish: $all

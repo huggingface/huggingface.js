@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@huggingface/blake3-jit':
-        specifier: ^0.0.1
-        version: 0.0.1
+        specifier: workspace:*
+        version: link:../blake3-jit
       gearhash-jit:
         specifier: workspace:*
         version: link:../../gearhash-jit
@@ -18,12 +18,3 @@ importers:
       '@huggingface/splitmix64-wasm':
         specifier: workspace:*
         version: link:../splitmix64-wasm
-
-packages:
-
-  '@huggingface/blake3-jit@0.0.1':
-    resolution: {integrity: sha512-uGGfTZIOHf5WtKkRSj/aovKZvkM4O+mAYOEESmeujaNknD9520DoImdi20Tnld1ACOF1FHdoescUvPobPZt7vw==}
-
-snapshots:
-
-  '@huggingface/blake3-jit@0.0.1': {}

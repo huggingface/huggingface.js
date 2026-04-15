@@ -56,7 +56,7 @@ jobs:
 
       - name: "Check gearhash-jit is published"
         run: |
-          LOCAL_VER=$(node -p "require('../../gearhash-jit/package.json').version")
+          LOCAL_VER=$(node -p "require('../gearhash-jit/package.json').version")
           REMOTE_VER=$(npm view "gearhash-jit@${LOCAL_VER}" version 2>/dev/null || echo "")
           if [ "$REMOTE_VER" != "$LOCAL_VER" ]; then
             echo "Error: gearhash-jit@${LOCAL_VER} not found on npm. Publish it first."
