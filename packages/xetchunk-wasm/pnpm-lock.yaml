@@ -8,12 +8,12 @@ importers:
 
   .:
     dependencies:
-      '@huggingface/gearhash-wasm':
-        specifier: workspace:*
-        version: link:../gearhash-wasm
       blake3-jit:
         specifier: ^1.0.0
         version: 1.0.0
+      gearhash-jit:
+        specifier: workspace:*
+        version: link:../../gearhash-jit
     devDependencies:
       '@huggingface/splitmix64-wasm':
         specifier: workspace:*

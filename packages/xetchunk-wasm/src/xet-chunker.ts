@@ -1,7 +1,6 @@
-import { nextMatch } from "@huggingface/gearhash-wasm";
+import { Hasher } from "gearhash-jit";
 import { createKeyed } from "blake3-jit";
 
-// Constants
 const TARGET_CHUNK_SIZE = 64 * 1024; // 64KB
 const MINIMUM_CHUNK_DIVISOR = 8;
 const MAXIMUM_CHUNK_MULTIPLIER = 2;
@@ -17,7 +16,6 @@ export interface Chunk {
 	length: number;
 }
 
-// Type for the next() method return value
 interface NextResult {
 	chunk: Chunk | null;
 	bytesConsumed: number;
@@ -26,13 +24,11 @@ interface NextResult {
 class XetChunker {
 	private minimumChunk: number;
 	private maximumChunk: number;
-	private mask: bigint;
 	private chunkBuf: Uint8Array;
 	private curChunkLen: number;
-	private hash: bigint;
+	private gear: Hasher;
 
 	constructor(targetChunkSize: number = TARGET_CHUNK_SIZE) {
-		// Validate target chunk size is a power of 2
 		if (targetChunkSize <= 0) {
 			throw new Error("Target chunk size must be greater than 0");
 		}
@@ -47,7 +43,6 @@ class XetChunker {
 		}
 
 		let mask = BigInt(targetChunkSize - 1);
-		// Count leading zeros (clz for 64-bit BigInt)
 		let leadingZeros = 0;
 		for (let i = 63; i >= 0; i--) {
 			if ((mask & (1n << BigInt(i))) !== 0n) {
@@ -55,17 +50,15 @@ class XetChunker {
 			}
 			leadingZeros++;
 		}
-		// Shift mask left by leading zeros count
 		mask = mask << BigInt(leadingZeros);
 
 		const maximumChunk = targetChunkSize * MAXIMUM_CHUNK_MULTIPLIER;
 
 		this.minimumChunk = targetChunkSize / MINIMUM_CHUNK_DIVISOR;
 		this.maximumChunk = maximumChunk;
-		this.mask = mask;
 		this.chunkBuf = new Uint8Array(maximumChunk);
 		this.curChunkLen = 0;
-		this.hash = 0n;
+		this.gear = new Hasher(mask);
 	}
 
 	next(data: Uint8Array, isFinal: boolean): NextResult {
@@ -74,29 +67,24 @@ class XetChunker {
 		let consumeLen = 0;
 
 		if (nBytes !== 0) {
-			// Skip minimum chunk size
 			if (this.curChunkLen + HASH_WINDOW_SIZE < this.minimumChunk) {
 				const maxAdvance = Math.min(this.minimumChunk - this.curChunkLen - HASH_WINDOW_SIZE - 1, nBytes - consumeLen);
 				consumeLen += maxAdvance;
 				this.curChunkLen += maxAdvance;
 			}
 
-			// Calculate read end
 			const readEnd = Math.min(nBytes, consumeLen + this.maximumChunk - this.curChunkLen);
 
 			let bytesToNextBoundary: number;
-			const matchResult = nextMatch(data.subarray(consumeLen, readEnd), this.mask, this.hash);
+			const position = this.gear.nextMatch(data.subarray(consumeLen, readEnd));
 
-			if (matchResult.position !== -1) {
-				bytesToNextBoundary = matchResult.position;
+			if (position !== -1) {
+				bytesToNextBoundary = position;
 				createChunk = true;
-				this.hash = matchResult.hash;
 			} else {
 				bytesToNextBoundary = readEnd - consumeLen;
-				this.hash = matchResult.hash;
 			}
 
-			// Check if we hit maximum chunk
 			if (bytesToNextBoundary + this.curChunkLen >= this.maximumChunk) {
 				bytesToNextBoundary = this.maximumChunk - this.curChunkLen;
 				createChunk = true;
@@ -105,7 +93,6 @@ class XetChunker {
 			this.curChunkLen += bytesToNextBoundary;
 			consumeLen += bytesToNextBoundary;
 
-			// Copy data to chunk buffer
 			this.chunkBuf.set(data.subarray(0, consumeLen), this.curChunkLen - consumeLen);
 		}
 
@@ -117,7 +104,7 @@ class XetChunker {
 				hash: hash,
 			};
 			this.curChunkLen = 0;
-			this.hash = 0n;
+			this.gear.resetHash();
 			return {
 				chunk,
 				bytesConsumed: consumeLen,
@@ -151,8 +138,7 @@ class XetChunker {
 }
 
 export function createChunker(targetChunkSize: number = TARGET_CHUNK_SIZE): XetChunker {
-	const chunker = new XetChunker(targetChunkSize);
-	return chunker;
+	return new XetChunker(targetChunkSize);
 }
 
 export function nextBlock(chunker: XetChunker, data: Uint8Array): Chunk[] {

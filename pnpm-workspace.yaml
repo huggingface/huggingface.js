@@ -18,3 +18,4 @@ packages:
   - "packages/blake3-wasm"
   - "packages/xetchunk-wasm"
   - "packages/splitmix64-wasm"
+  - "gearhash-jit"

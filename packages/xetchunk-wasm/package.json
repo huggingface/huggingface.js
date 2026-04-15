@@ -13,7 +13,7 @@
 		"chunking"
 	],
 	"dependencies": {
-		"@huggingface/gearhash-wasm": "workspace:*",
+		"gearhash-jit": "workspace:*",
 		"blake3-jit": "^1.0.0"
 	},
 	"type": "module",
