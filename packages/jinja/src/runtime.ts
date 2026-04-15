@@ -114,7 +114,10 @@ export class StringValue extends RuntimeValue<string> {
 				["lower", new FunctionValue(() => new StringValue(this.value.toLowerCase()))],
 				["strip", new FunctionValue(() => new StringValue(this.value.trim()))],
 				["title", new FunctionValue(() => new StringValue(titleCase(this.value)))],
-				["capitalize", new FunctionValue(() => new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1)))],
+				[
+					"capitalize",
+					new FunctionValue(() => new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1))),
+				],
 				["length", new IntegerValue(this.value.length)],
 				["rstrip", new FunctionValue(() => new StringValue(this.value.trimEnd()))],
 				["lstrip", new FunctionValue(() => new StringValue(this.value.trimStart()))],
