@@ -20,8 +20,6 @@ describe("shardParser", () => {
 		}
 
 		const chunkHash = "9502eec19d4b0c9f7b389228fa801f68ecdf15d69ccd1da2f9ddbd0219898335";
-		expect(hashToHex(hmac(hexToBytes(chunkHash), hexToBytes(shard.hmacKey)))).toEqual(
-			shard.xorbs[1].chunks[0].hash,
-		);
+		expect(hashToHex(hmac(hexToBytes(chunkHash), hexToBytes(shard.hmacKey)))).toEqual(shard.xorbs[1].chunks[0].hash);
 	});
 });

@@ -29,6 +29,7 @@ const INTERVAL_BETWEEN_REMOTE_DEDUP = 4_000_000; // 4MB
  * 0.5 = show progress when uploading the xorb and when processing the file
  */
 const PROCESSING_PROGRESS_RATIO = 0.1;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UPLOADING_PROGRESS_RATIO = 1 - PROCESSING_PROGRESS_RATIO;
 
 function computeXorbHashHex(chunks: { hash: string; length: number }[]): string {
@@ -49,11 +50,16 @@ function computeFileHashHex(chunks: { hash: string; length: number }[]): string 
 	return hashToHex(fileHash(chunkObjs));
 }
 
-function addDataToChunker(data: Uint8Array, chunker: ReturnType<typeof createChunker>): { hash: string; length: number; dedup: boolean }[] {
+function addDataToChunker(
+	data: Uint8Array,
+	chunker: ReturnType<typeof createChunker>,
+): { hash: string; length: number; dedup: boolean }[] {
 	return nextBlock(chunker, data).map((c) => ({ hash: hashToHex(c.hash), length: c.length, dedup: false }));
 }
 
-function finalizeChunker(chunker: ReturnType<typeof createChunker>): { hash: string; length: number; dedup: boolean }[] {
+function finalizeChunker(
+	chunker: ReturnType<typeof createChunker>,
+): { hash: string; length: number; dedup: boolean }[] {
 	const last = finalize(chunker);
 	if (!last) return [];
 	return [{ hash: hashToHex(last.hash), length: last.length, dedup: false }];
@@ -278,14 +284,7 @@ export async function* createXorbs(
 
 							// We backtrack a bit to check if new dedup info contains older chunks
 							const oldDedupedBytes = dedupedBytes;
-							dedupedBytes = backtrackDedup(
-								xorb,
-								computeHmacHex,
-								shardData,
-								chunkCache,
-								chunkMetadata,
-								dedupedBytes,
-							);
+							dedupedBytes = backtrackDedup(xorb, computeHmacHex, shardData, chunkCache, chunkMetadata, dedupedBytes);
 
 							if (dedupedBytes > oldDedupedBytes) {
 								xorb.fileUploadedBytes[fileSource.path] ??= 0;
@@ -369,19 +368,15 @@ export async function* createXorbs(
 			while (true) {
 				const { done, value } = await reader.read();
 				if (done) {
-				yield* addChunks(finalizeChunker(chunker));
-				break;
+					yield* addChunks(finalizeChunker(chunker));
+					break;
 				}
 				processedBytes += value.length;
 				sourceChunks.push(value);
 				yield* addChunks(addDataToChunker(value, chunker));
 			}
 
-		const fileRepresentation = buildFileRepresentation(
-			chunkMetadata,
-			fileChunks,
-			computeVerificationHashHex,
-		);
+			const fileRepresentation = buildFileRepresentation(chunkMetadata, fileChunks, computeVerificationHashHex);
 			xorb.immutableData = {
 				chunkIndex: xorb.chunks.length,
 				offset: xorb.offset,
@@ -703,6 +698,7 @@ async function loadDedupInfoToCache(
 	const chunker = createChunker(TARGET_CHUNK_SIZE);
 	const cache = chunkCache;
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let dedupedBytes = 0;
 	let chunksProcessed = 0;
 	let totalBytes = 0;
