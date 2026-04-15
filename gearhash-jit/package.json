@@ -12,7 +12,8 @@
   "scripts": {
     "build": "rolldown -c rolldown.config.js",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "prepare": "pnpm run build"
   },
   "devDependencies": {
     "@oxc-node/cli": "^0.1.0",
