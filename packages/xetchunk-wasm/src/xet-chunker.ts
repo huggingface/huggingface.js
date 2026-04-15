@@ -1,5 +1,5 @@
 import { Hasher } from "gearhash-jit";
-import { createKeyed } from "blake3-jit";
+import { createKeyed, Hasher as Blake3Hasher } from "blake3-jit";
 
 const TARGET_CHUNK_SIZE = 64 * 1024; // 64KB
 const MINIMUM_CHUNK_DIVISOR = 8;
@@ -27,6 +27,7 @@ class XetChunker {
 	private chunkBuf: Uint8Array;
 	private curChunkLen: number;
 	private gear: Hasher;
+	private blake3: Blake3Hasher;
 
 	constructor(targetChunkSize: number = TARGET_CHUNK_SIZE) {
 		if (targetChunkSize <= 0) {
@@ -59,6 +60,7 @@ class XetChunker {
 		this.chunkBuf = new Uint8Array(maximumChunk);
 		this.curChunkLen = 0;
 		this.gear = new Hasher(mask);
+		this.blake3 = Blake3Hasher.newKeyed(BLAKE3_DATA_KEY);
 	}
 
 	/**
@@ -103,7 +105,7 @@ class XetChunker {
 
 		if (createChunk || (isFinal && this.curChunkLen > 0)) {
 			const chunkData = this.chunkBuf.subarray(0, this.curChunkLen);
-			const hash = createKeyed(BLAKE3_DATA_KEY).update(chunkData).finalize(32);
+			const hash = this.blake3.reset().update(chunkData).finalize(32);
 			const chunk: Chunk = {
 				length: chunkData.length,
 				hash: hash,
@@ -169,14 +171,14 @@ class XetChunker {
 			}
 
 			if (foundBoundary) {
-				const hash = createKeyed(BLAKE3_DATA_KEY)
+				const hash = this.blake3.reset()
 					.update(data.subarray(chunkStart, chunkEnd))
 					.finalize(32);
 				chunks.push({ length: chunkEnd - chunkStart, hash });
 				pos = chunkEnd;
 				this.gear.resetHash();
 			} else if (isFinal) {
-				const hash = createKeyed(BLAKE3_DATA_KEY)
+				const hash = this.blake3.reset()
 					.update(data.subarray(chunkStart))
 					.finalize(32);
 				chunks.push({ length: data.length - chunkStart, hash });
@@ -197,7 +199,7 @@ class XetChunker {
 	finish(): Chunk | null {
 		if (this.curChunkLen > 0) {
 			const chunkData = this.chunkBuf.subarray(0, this.curChunkLen);
-			const hash = createKeyed(BLAKE3_DATA_KEY).update(chunkData).finalize(32);
+			const hash = this.blake3.reset().update(chunkData).finalize(32);
 			const chunk: Chunk = { length: this.curChunkLen, hash };
 			this.curChunkLen = 0;
 			this.gear.resetHash();
