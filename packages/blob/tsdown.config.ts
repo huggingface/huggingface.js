@@ -1,24 +1,23 @@
-import type { Options } from "tsup";
+import type { UserConfig } from "tsdown";
 
-const baseConfig: Options = {
+const baseConfig: UserConfig = {
 	entry: ["./index.ts"],
 	format: ["cjs", "esm"],
 	outDir: "dist",
 	clean: true,
 };
 
-const nodeConfig: Options = {
+const nodeConfig: UserConfig = {
 	...baseConfig,
 	entry: ["./index.ts", "./src/utils/WebBlob.ts", "./src/utils/FileBlob.ts"],
 	platform: "node",
 };
 
-const browserConfig: Options = {
+const browserConfig: UserConfig = {
 	...baseConfig,
 	entry: ["./index.ts", "./src/utils/WebBlob.ts"],
 	platform: "browser",
 	target: "es2018",
-	splitting: true,
 	outDir: "dist/browser",
 };
 
