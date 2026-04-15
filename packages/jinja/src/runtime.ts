@@ -516,7 +516,7 @@ export class UndefinedValue extends RuntimeValue<undefined> {
 	override type = "UndefinedValue";
 }
 
-const GLOBAL_TESTS: Map<string, (...value: AnyRuntimeValue[]) => boolean> = new Map([
+const GLOBAL_TESTS: ReadonlyMap<string, (...value: AnyRuntimeValue[]) => boolean> = new Map([
 	["boolean", (operand) => operand.type === "BooleanValue"],
 	["callable", (operand) => operand instanceof FunctionValue],
 	[
@@ -592,7 +592,7 @@ export class Environment {
 		],
 	]);
 
-	tests: Map<string, (...value: AnyRuntimeValue[]) => boolean> = GLOBAL_TESTS;
+	tests: ReadonlyMap<string, (...value: AnyRuntimeValue[]) => boolean> = GLOBAL_TESTS;
 
 	constructor(public parent?: Environment) {}
 
