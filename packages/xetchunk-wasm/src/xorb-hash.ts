@@ -1,6 +1,6 @@
 import { Hasher } from "@huggingface/blake3-jit";
-import type { Chunk } from "./xet-chunker";
-import { hashToHex } from "./xet-chunker";
+import type { Chunk } from "./xet-chunker.js";
+import { hashToHex } from "./xet-chunker.js";
 
 const MEAN_CHUNK_PER_NODE = 4;
 

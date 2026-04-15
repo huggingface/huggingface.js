@@ -1,39 +1,54 @@
 {
 	"name": "@huggingface/xetchunk-wasm",
 	"version": "0.0.2",
-	"scripts": {
-		"build": "tsup src/index.ts --format esm --dts",
-		"test": "vitest run",
-		"bench": "node tests/bench.js",
-		"prepare": "pnpm run build"
-	},
+	"description": "Content-defined chunking and hashing for Hugging Face Xet storage",
 	"keywords": [
 		"xet",
 		"chunk",
 		"chunking"
 	],
+	"license": "MIT",
+	"author": "Hugging Face",
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"scripts": {
+		"prepare": "tshy",
+		"test": "vitest run",
+		"bench": "node tests/bench.js"
+	},
+	"tshy": {
+		"exports": {
+			".": "./src/index.ts",
+			"./package.json": "./package.json"
+		}
+	},
 	"dependencies": {
 		"gearhash-jit": "workspace:*",
 		"@huggingface/blake3-jit": "^0.0.1"
 	},
+	"devDependencies": {
+		"@huggingface/splitmix64-wasm": "workspace:*"
+	},
 	"type": "module",
 	"exports": {
 		".": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
-		}
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		},
+		"./package.json": "./package.json"
 	},
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"devDependencies": {
-		"@huggingface/splitmix64-wasm": "workspace:*",
-		"tsup": "^8.0.0",
-		"typescript": "^5.0.0"
-	},
-	"files": [
-		"dist",
-		"src",
-		"README.md",
-		"tsconfig.json"
-	]
+	"main": "./dist/commonjs/index.js",
+	"types": "./dist/commonjs/index.d.ts",
+	"module": "./dist/esm/index.js"
 }

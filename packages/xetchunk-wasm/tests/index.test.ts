@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { createChunker, finalize, nextBlock, getChunks, hashToHex, hexToBytes, xorbHash, fileHash, hmac, verificationHash } from "../dist/index.js";
-import type { Chunk } from "../dist/index.js";
+import { createChunker, finalize, nextBlock, getChunks, hashToHex, hexToBytes, xorbHash, fileHash, hmac, verificationHash } from "../src/index.js";
+import type { Chunk } from "../src/index.js";
 import { createRandomArray } from "@huggingface/splitmix64-wasm";
 
 // Helper function to get chunk boundaries from chunks

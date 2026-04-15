@@ -1,6 +1,6 @@
 import { Hasher } from "@huggingface/blake3-jit";
-import type { Chunk } from "./xet-chunker";
-import { xorbHash } from "./xorb-hash";
+import type { Chunk } from "./xet-chunker.js";
+import { xorbHash } from "./xorb-hash.js";
 
 const ZERO_KEY = new Uint8Array(32);
 

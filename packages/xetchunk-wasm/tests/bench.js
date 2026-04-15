@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { createChunker, finalize, nextBlock } from "../dist/index.js";
+import { createChunker, finalize, nextBlock } from "../dist/esm/index.js";
 import { createReadStream } from "node:fs";
 
 const { positionals } = parseArgs({

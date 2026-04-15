@@ -1,4 +1,4 @@
-import { Hasher } from "../dist/index.js";
+import { Hasher } from "../dist/esm/index.js";
 
 const MASK = 0x0000d90003530000n;
 const BYTES = 100_000_000;
