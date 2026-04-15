@@ -1,6 +1,6 @@
 {
   "name": "gearhash-jit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fast GEAR hash with hand-written WASM i64 bytecode for content-defined chunking",
   "keywords": ["gearhash", "cdc", "chunking", "wasm"],
   "license": "MIT",
@@ -8,7 +8,7 @@
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "README.md"],
   "scripts": {
     "build": "rolldown -c rolldown.config.js",
     "test": "vitest run",
