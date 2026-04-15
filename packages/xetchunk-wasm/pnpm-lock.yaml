@@ -13,7 +13,7 @@ importers:
         version: link:../blake3-jit
       gearhash-jit:
         specifier: workspace:*
-        version: link:../../gearhash-jit
+        version: link:../gearhash-jit
     devDependencies:
       '@huggingface/splitmix64-wasm':
         specifier: workspace:*
