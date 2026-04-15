@@ -1,0 +1,17 @@
+{
+  "name": "chunker-wasm",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "chunker_wasm_bg.wasm",
+    "chunker_wasm.js",
+    "chunker_wasm_bg.js",
+    "chunker_wasm.d.ts"
+  ],
+  "main": "chunker_wasm.js",
+  "types": "chunker_wasm.d.ts",
+  "sideEffects": [
+    "./chunker_wasm.js",
+    "./snippets/*"
+  ]
+}

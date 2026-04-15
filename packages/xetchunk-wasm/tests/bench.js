@@ -1,6 +1,7 @@
 import { parseArgs } from "node:util";
 import { createChunker, finalize, nextBlock } from "../dist/esm/index.js";
 import { createReadStream } from "node:fs";
+import { Chunker } from "../vendor/chunker_wasm.js";
 
 const { positionals } = parseArgs({
 	args: process.argv.slice(2),
@@ -42,50 +43,75 @@ if (!positionals[0]) {
 }
 
 console.log(
-	`data loaded in memory, starting to process data ${CHUNK_SIZE.toLocaleString(
-		"en-US"
-	)} bytes at a time (for a max of 30 seconds)`
+	`data loaded in memory, processing ${CHUNK_SIZE.toLocaleString("en-US")} bytes at a time\n`
 );
 
-function bench() {
+function benchJS() {
 	const start = performance.now();
 	const chunker = createChunker(64 * 1024);
 
 	let totalProcessed = 0;
 	let totalChunks = 0;
-	let stoppedEarly = false;
 
 	for (let i = 0; i < data.length; i += CHUNK_SIZE) {
 		const chunks = nextBlock(chunker, data.subarray(i, i + CHUNK_SIZE));
-		console.log("chunks", chunks.length);
 		totalProcessed += CHUNK_SIZE;
 		totalChunks += chunks.length;
-
-		if (performance.now() - start > 30_000) {
-			console.log("30 seconds elapsed, stopping");
-			stoppedEarly = true;
-			break;
-		}
 	}
 
-	if (!stoppedEarly) {
-		const lastChunk = finalize(chunker);
-		if (lastChunk) {
-			totalChunks += 1;
-			totalProcessed = data.length;
-		}
+	const lastChunk = finalize(chunker);
+	if (lastChunk) {
+		totalChunks += 1;
+		totalProcessed = data.length;
 	}
 
-	console.log(
-		`chunked ${totalChunks} chunks in ${performance.now() - start}ms, ${(
-			totalProcessed /
-			1_000_000 /
-			((performance.now() - start) / 1000)
-		).toFixed(3)} MB/s`
-	);
+	const elapsed = performance.now() - start;
+	return { elapsed, totalChunks, totalProcessed };
+}
+
+function benchRust() {
+	const start = performance.now();
+	const chunker = new Chunker(64 * 1024);
+
+	let totalProcessed = 0;
+	let totalChunks = 0;
+
+	for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+		const chunks = chunker.add_data(data.subarray(i, i + CHUNK_SIZE));
+		totalProcessed += CHUNK_SIZE;
+		totalChunks += chunks.length;
+	}
+
+	const finalChunks = chunker.finish();
+	if (finalChunks.length > 0) {
+		totalChunks += finalChunks.length;
+		totalProcessed = data.length;
+	}
+	chunker.free();
+
+	const elapsed = performance.now() - start;
+	return { elapsed, totalChunks, totalProcessed };
+}
+
+function formatResult(label, { elapsed, totalChunks, totalProcessed }) {
+	const mbps = (totalProcessed / 1_000_000 / (elapsed / 1000)).toFixed(1);
+	console.log(`${label}: ${totalChunks} chunks in ${elapsed.toFixed(1)}ms → ${mbps} MB/s`);
+	return Number(mbps);
 }
 
 // Warmup
-bench();
-// Measured
-bench();
+benchJS();
+benchRust();
+
+// Measured runs
+console.log("--- JS (gearhash-jit + blake3-jit) ---");
+const js1 = formatResult("  run 1", benchJS());
+const js2 = formatResult("  run 2", benchJS());
+
+console.log("\n--- Rust (thin-wasm) ---");
+const rs1 = formatResult("  run 1", benchRust());
+const rs2 = formatResult("  run 2", benchRust());
+
+const jsAvg = (js1 + js2) / 2;
+const rsAvg = (rs1 + rs2) / 2;
+console.log(`\nJS avg: ${jsAvg.toFixed(1)} MB/s | Rust avg: ${rsAvg.toFixed(1)} MB/s | ratio: ${((jsAvg / rsAvg) * 100).toFixed(1)}%`);
