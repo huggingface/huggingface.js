@@ -1,5 +1,5 @@
 import { Hasher } from "gearhash-jit";
-import { createKeyed, Hasher as Blake3Hasher } from "blake3-jit";
+import { createKeyed, Hasher as Blake3Hasher } from "@huggingface/blake3-jit";
 
 const TARGET_CHUNK_SIZE = 64 * 1024; // 64KB
 const MINIMUM_CHUNK_DIVISOR = 8;

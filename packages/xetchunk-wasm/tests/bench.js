@@ -1,7 +1,6 @@
 import { parseArgs } from "node:util";
 import { createChunker, finalize, nextBlock } from "../dist/index.js";
 import { createReadStream } from "node:fs";
-import { Chunker } from "../vendor/chunker_wasm.js";
 
 const { positionals } = parseArgs({
 	args: process.argv.slice(2),
@@ -13,7 +12,6 @@ const CHUNK_SIZE = 10_000_000;
 const data = new Uint8Array(BYTES);
 
 if (!positionals[0]) {
-	// Fill the data with random bytes
 	for (let i = 0; i < data.length; i++) {
 		data[i] = Math.floor(Math.random() * 256);
 	}
@@ -44,14 +42,12 @@ if (!positionals[0]) {
 }
 
 console.log(
-	`data loaded in memory, starting to process data  ${CHUNK_SIZE.toLocaleString(
+	`data loaded in memory, starting to process data ${CHUNK_SIZE.toLocaleString(
 		"en-US"
 	)} bytes at a time (for a max of 30 seconds)`
 );
 
-function testAssemblyChunker() {
-	console.log("testing assembly Chunker");
-
+function bench() {
 	const start = performance.now();
 	const chunker = createChunker(64 * 1024);
 
@@ -89,48 +85,7 @@ function testAssemblyChunker() {
 	);
 }
 
-testAssemblyChunker();
-
-function testRustChunker() {
-	console.log("testing rust Chunker");
-	const start = performance.now();
-	const chunker = new Chunker(64 * 1024);
-
-	let totalProcessed = 0;
-	let totalChunks = 0;
-	let stoppedEarly = false;
-
-	let chunks = [];
-	for (let i = 0; i < data.length; i += CHUNK_SIZE) {
-		chunks = chunker.add_data(data.subarray(i, i + CHUNK_SIZE));
-		// console.log("chunks", chunks.length, chunks.slice(0, 10));
-		totalProcessed += CHUNK_SIZE;
-		totalChunks += chunks.length;
-
-		if (performance.now() - start > 30_000) {
-			console.log("30 seconds elapsed, stopping");
-			stoppedEarly = true;
-			break;
-		}
-	}
-
-	if (!stoppedEarly) {
-		chunks = chunker.finish();
-		if (chunks.length > 0) {
-			totalChunks += chunks.length;
-			totalProcessed += chunks.length * chunks[0].length;
-		}
-	}
-
-	console.log(
-		`chunked ${totalChunks} chunks in ${performance.now() - start}ms, ${(
-			totalProcessed /
-			1_000_000 /
-			((performance.now() - start) / 1000)
-		).toFixed(3)} MB/s`
-	);
-}
-
-testRustChunker();
-
-testAssemblyChunker();
+// Warmup
+bench();
+// Measured
+bench();

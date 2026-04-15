@@ -1,4 +1,4 @@
-import { Hasher } from "blake3-jit";
+import { Hasher } from "@huggingface/blake3-jit";
 import type { Chunk } from "./xet-chunker";
 import { hashToHex } from "./xet-chunker";
 

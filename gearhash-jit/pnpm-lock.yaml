@@ -4,11 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  blake3-jit@1.0.0:
-    hash: 439f50ee6911af6b67399e2d2185ef5e23224473bdcf37289b798d3b254f1ef9
-    path: ../packages/xetchunk-wasm/patches/blake3-jit.patch
-
 importers:
 
   .:

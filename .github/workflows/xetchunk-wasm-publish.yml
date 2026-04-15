@@ -54,6 +54,15 @@ jobs:
           git tag "xetchunk-wasm-v$BUMPED_VERSION"
           echo "RELEASE_TAG=xetchunk-wasm-v$BUMPED_VERSION" >> $GITHUB_ENV
 
+      - name: "Check gearhash-jit is published"
+        run: |
+          LOCAL_VER=$(node -p "require('../../gearhash-jit/package.json').version")
+          REMOTE_VER=$(npm view "gearhash-jit@${LOCAL_VER}" version 2>/dev/null || echo "")
+          if [ "$REMOTE_VER" != "$LOCAL_VER" ]; then
+            echo "Error: gearhash-jit@${LOCAL_VER} not found on npm. Publish it first."
+            exit 1
+          fi
+
       - run: (git pull --rebase && git push && git push origin "$RELEASE_TAG") || (git pull --rebase && git push && git push origin "$RELEASE_TAG")
 
       - run: pnpm publish --no-git-checks .

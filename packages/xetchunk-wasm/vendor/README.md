@@ -1,1 +1,0 @@
-This is the WASM generated from the rust client

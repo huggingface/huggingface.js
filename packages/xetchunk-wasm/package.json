@@ -14,7 +14,7 @@
 	],
 	"dependencies": {
 		"gearhash-jit": "workspace:*",
-		"blake3-jit": "^1.0.0"
+		"@huggingface/blake3-jit": "^0.0.1"
 	},
 	"type": "module",
 	"exports": {
