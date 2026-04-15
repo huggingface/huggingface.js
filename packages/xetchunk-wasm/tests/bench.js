@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { createChunker, finalize, nextBlock } from "../dist/esm/index.js";
+import { createChunker, finalize, nextBlock, hashToHex } from "../dist/esm/index.js";
 import { createReadStream } from "node:fs";
 import { Chunker } from "../vendor/chunker_wasm.js";
 
@@ -10,6 +10,7 @@ const { positionals } = parseArgs({
 
 const BYTES = 100_000_000;
 const CHUNK_SIZE = 10_000_000;
+const ROUNDS = 5;
 const data = new Uint8Array(BYTES);
 
 if (!positionals[0]) {
@@ -43,75 +44,93 @@ if (!positionals[0]) {
 }
 
 console.log(
-	`data loaded in memory, processing ${CHUNK_SIZE.toLocaleString("en-US")} bytes at a time\n`
+	`data loaded in memory, processing ${CHUNK_SIZE.toLocaleString("en-US")} bytes at a time, ${ROUNDS} rounds\n`
 );
 
-function benchJS() {
-	const start = performance.now();
+function runJS() {
 	const chunker = createChunker(64 * 1024);
-
-	let totalProcessed = 0;
-	let totalChunks = 0;
+	const chunks = [];
 
 	for (let i = 0; i < data.length; i += CHUNK_SIZE) {
-		const chunks = nextBlock(chunker, data.subarray(i, i + CHUNK_SIZE));
-		totalProcessed += CHUNK_SIZE;
-		totalChunks += chunks.length;
+		for (const c of nextBlock(chunker, data.subarray(i, i + CHUNK_SIZE))) {
+			chunks.push({ hash: hashToHex(c.hash), length: c.length });
+		}
 	}
 
 	const lastChunk = finalize(chunker);
 	if (lastChunk) {
-		totalChunks += 1;
-		totalProcessed = data.length;
+		chunks.push({ hash: hashToHex(lastChunk.hash), length: lastChunk.length });
 	}
 
-	const elapsed = performance.now() - start;
-	return { elapsed, totalChunks, totalProcessed };
+	return chunks;
 }
 
-function benchRust() {
-	const start = performance.now();
+function runRust() {
 	const chunker = new Chunker(64 * 1024);
-
-	let totalProcessed = 0;
-	let totalChunks = 0;
+	const chunks = [];
 
 	for (let i = 0; i < data.length; i += CHUNK_SIZE) {
-		const chunks = chunker.add_data(data.subarray(i, i + CHUNK_SIZE));
-		totalProcessed += CHUNK_SIZE;
-		totalChunks += chunks.length;
+		for (const c of chunker.add_data(data.subarray(i, i + CHUNK_SIZE))) {
+			chunks.push({ hash: c.hash, length: c.length });
+		}
 	}
 
-	const finalChunks = chunker.finish();
-	if (finalChunks.length > 0) {
-		totalChunks += finalChunks.length;
-		totalProcessed = data.length;
+	for (const c of chunker.finish()) {
+		chunks.push({ hash: c.hash, length: c.length });
 	}
 	chunker.free();
 
-	const elapsed = performance.now() - start;
-	return { elapsed, totalChunks, totalProcessed };
+	return chunks;
 }
 
-function formatResult(label, { elapsed, totalChunks, totalProcessed }) {
-	const mbps = (totalProcessed / 1_000_000 / (elapsed / 1000)).toFixed(1);
-	console.log(`${label}: ${totalChunks} chunks in ${elapsed.toFixed(1)}ms → ${mbps} MB/s`);
-	return Number(mbps);
+// --- Verify identical boundaries ---
+console.log("Verifying chunk boundaries match...");
+const jsChunks = runJS();
+const rustChunks = runRust();
+
+if (jsChunks.length !== rustChunks.length) {
+	console.error(`MISMATCH: JS produced ${jsChunks.length} chunks, Rust produced ${rustChunks.length}`);
+	process.exit(1);
 }
 
-// Warmup
-benchJS();
-benchRust();
+let mismatchCount = 0;
+let offset = 0;
+for (let i = 0; i < jsChunks.length; i++) {
+	const js = jsChunks[i];
+	const rs = rustChunks[i];
+	if (js.length !== rs.length || js.hash !== rs.hash) {
+		if (mismatchCount < 5) {
+			console.error(`  chunk ${i} @ offset ${offset}: JS(len=${js.length}, hash=${js.hash}) vs Rust(len=${rs.length}, hash=${rs.hash})`);
+		}
+		mismatchCount++;
+	}
+	offset += js.length;
+}
 
-// Measured runs
-console.log("--- JS (gearhash-jit + blake3-jit) ---");
-const js1 = formatResult("  run 1", benchJS());
-const js2 = formatResult("  run 2", benchJS());
+if (mismatchCount > 0) {
+	console.error(`MISMATCH: ${mismatchCount} / ${jsChunks.length} chunks differ`);
+	process.exit(1);
+}
+console.log(`✓ ${jsChunks.length} chunks, all boundaries and hashes match\n`);
 
-console.log("\n--- Rust (thin-wasm) ---");
-const rs1 = formatResult("  run 1", benchRust());
-const rs2 = formatResult("  run 2", benchRust());
+// --- Benchmark ---
+function bench(label, fn) {
+	const times = [];
+	for (let r = 0; r < ROUNDS; r++) {
+		const start = performance.now();
+		fn();
+		times.push(performance.now() - start);
+	}
+	times.sort((a, b) => a - b);
+	const median = times[Math.floor(ROUNDS / 2)];
+	const best = times[0];
+	const worst = times[ROUNDS - 1];
+	const mbps = (BYTES / 1_000_000) / (median / 1000);
+	console.log(`${label}: median ${median.toFixed(1)}ms (best ${best.toFixed(1)}, worst ${worst.toFixed(1)}) → ${mbps.toFixed(1)} MB/s`);
+	return mbps;
+}
 
-const jsAvg = (js1 + js2) / 2;
-const rsAvg = (rs1 + rs2) / 2;
-console.log(`\nJS avg: ${jsAvg.toFixed(1)} MB/s | Rust avg: ${rsAvg.toFixed(1)} MB/s | ratio: ${((jsAvg / rsAvg) * 100).toFixed(1)}%`);
+const jsMbps = bench(`JS   (gearhash-jit + blake3-jit, ${ROUNDS} rounds)`, runJS);
+const rsMbps = bench(`Rust (thin-wasm,                ${ROUNDS} rounds)`, runRust);
+
+console.log(`\nJS: ${jsMbps.toFixed(1)} MB/s | Rust: ${rsMbps.toFixed(1)} MB/s | ratio: ${((jsMbps / rsMbps) * 100).toFixed(1)}%`);
