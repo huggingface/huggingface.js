@@ -61,6 +61,11 @@ class XetChunker {
 		this.gear = new Hasher(mask);
 	}
 
+	/**
+	 * Streaming entry point: accepts an arbitrary slice of data, accumulates
+	 * it, and emits a chunk when a boundary (or max size) is reached.
+	 * Data is copied into an internal buffer because it may span calls.
+	 */
 	next(data: Uint8Array, isFinal: boolean): NextResult {
 		const nBytes = data.length;
 		let createChunk = false;
@@ -117,23 +122,88 @@ class XetChunker {
 		};
 	}
 
+	/**
+	 * Batch entry point: processes a large contiguous buffer and returns all
+	 * complete chunks. Hashes directly from `data` — no intermediate copy
+	 * to chunkBuf — for every chunk whose bytes are fully within `data`.
+	 *
+	 * If there is leftover data from a previous call (this.curChunkLen > 0),
+	 * those bytes are already in chunkBuf and are drained first via next().
+	 */
 	nextBlock(data: Uint8Array, isFinal: boolean): Chunk[] {
 		const chunks: Chunk[] = [];
 		let pos = 0;
 
-		while (pos < data.length) {
-			const result = this.next(data.subarray(pos), isFinal);
-			if (result.chunk) {
-				chunks.push(result.chunk);
-			}
+		// Drain any leftover from a previous nextBlock / next call.
+		// These bytes live in chunkBuf so we must use the slow path.
+		while (pos < data.length && this.curChunkLen > 0) {
+			const result = this.next(data.subarray(pos), false);
+			if (result.chunk) chunks.push(result.chunk);
 			pos += result.bytesConsumed;
+		}
+
+		// Fast path: all chunk data comes from `data` — hash in-place.
+		const minSkip = this.minimumChunk > HASH_WINDOW_SIZE
+			? this.minimumChunk - HASH_WINDOW_SIZE - 1
+			: 0;
+
+		while (pos < data.length) {
+			const chunkStart = pos;
+			const scanStart = Math.min(pos + minSkip, data.length);
+			const scanEnd = Math.min(data.length, pos + this.maximumChunk);
+
+			const position = this.gear.nextMatch(data.subarray(scanStart, scanEnd));
+
+			let chunkEnd: number;
+			let foundBoundary: boolean;
+
+			if (position !== -1 && scanStart + position - chunkStart <= this.maximumChunk) {
+				chunkEnd = scanStart + position;
+				foundBoundary = true;
+			} else if (scanEnd - chunkStart >= this.maximumChunk) {
+				chunkEnd = chunkStart + this.maximumChunk;
+				foundBoundary = true;
+			} else {
+				foundBoundary = false;
+				chunkEnd = scanEnd;
+			}
+
+			if (foundBoundary) {
+				const hash = createKeyed(BLAKE3_DATA_KEY)
+					.update(data.subarray(chunkStart, chunkEnd))
+					.finalize(32);
+				chunks.push({ length: chunkEnd - chunkStart, hash });
+				pos = chunkEnd;
+				this.gear.resetHash();
+			} else if (isFinal) {
+				const hash = createKeyed(BLAKE3_DATA_KEY)
+					.update(data.subarray(chunkStart))
+					.finalize(32);
+				chunks.push({ length: data.length - chunkStart, hash });
+				pos = data.length;
+			} else {
+				// Incomplete chunk at end of data — stash in chunkBuf
+				// for the next call.
+				const remaining = data.length - chunkStart;
+				this.chunkBuf.set(data.subarray(chunkStart), 0);
+				this.curChunkLen = remaining;
+				pos = data.length;
+			}
 		}
 
 		return chunks;
 	}
 
 	finish(): Chunk | null {
-		return this.next(new Uint8Array(0), true).chunk;
+		if (this.curChunkLen > 0) {
+			const chunkData = this.chunkBuf.subarray(0, this.curChunkLen);
+			const hash = createKeyed(BLAKE3_DATA_KEY).update(chunkData).finalize(32);
+			const chunk: Chunk = { length: this.curChunkLen, hash };
+			this.curChunkLen = 0;
+			this.gear.resetHash();
+			return chunk;
+		}
+		return null;
 	}
 }
 

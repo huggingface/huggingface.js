@@ -1,23 +1,20 @@
 /**
- * gearhash-jit — Fast GEAR rolling hash via hand-written WASM i64 bytecode.
+ * gearhash-jit — Fast GEAR rolling hash for content-defined chunking.
  *
- * Designed for content-defined chunking (CDC). The hot loop runs entirely
- * in WASM using native i64 arithmetic, avoiding BigInt overhead in JS.
- *
- * @example
- * ```typescript
- * import { Hasher } from 'gearhash-jit';
- *
- * const hasher = new Hasher(mask);
- * const pos = hasher.nextMatch(buffer);
- * if (pos !== -1) {
- *   // chunk boundary at `pos` (1-based)
- * }
- * hasher.resetHash();
- * ```
+ * Uses a tiny hand-written WASM module with native i64 arithmetic.
+ * The hash state is kept as raw bytes in JS (avoiding BigInt in the hot path)
+ * and written to WASM memory only for the `nextMatch` call.
  */
 
-import { initWasm, wasmNextMatch, getView, HASH_OFFSET, MASK_OFFSET, INPUT_OFFSET, MAX_INPUT_SIZE } from "./wasm.js";
+import {
+  initWasm,
+  wasmNextMatch,
+  getView,
+  HASH_OFFSET,
+  MASK_OFFSET,
+  INPUT_OFFSET,
+  MAX_INPUT_SIZE,
+} from "./wasm.js";
 
 export { GEAR_TABLE } from "./table.js";
 
@@ -42,23 +39,17 @@ export class Hasher {
     const len = buf.length;
     if (len === 0) return -1;
     if (len > MAX_INPUT_SIZE) {
-      throw new Error(`Input exceeds WASM buffer (${len} > ${MAX_INPUT_SIZE})`);
+      throw new RangeError(`Input too large: ${len} > ${MAX_INPUT_SIZE}`);
     }
 
     const view = getView();
-
-    // Write per-instance state into the shared WASM scratchpad
     view.set(this.hashState, HASH_OFFSET);
     view.set(this.maskBytes, MASK_OFFSET);
-
-    // Copy scan data into WASM memory
     view.set(buf, INPUT_OFFSET);
 
     const pos = wasmNextMatch(len);
 
-    // Read back updated hash
     this.hashState.set(view.subarray(HASH_OFFSET, HASH_OFFSET + 8));
-
     return pos;
   }
 
