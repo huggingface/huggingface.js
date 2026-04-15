@@ -44,6 +44,8 @@ export type AnyRuntimeValue =
 class BreakControl extends Error {}
 class ContinueControl extends Error {}
 
+const EMPTY_BUILTINS: ReadonlyMap<string, AnyRuntimeValue> = new Map();
+
 /**
  * Abstract base class for all Runtime values.
  * Should not be instantiated directly.
@@ -55,7 +57,9 @@ abstract class RuntimeValue<T> {
 	/**
 	 * A collection of built-in functions for this type.
 	 */
-	builtins = new Map<string, AnyRuntimeValue>();
+	get builtins(): ReadonlyMap<string, AnyRuntimeValue> {
+		return EMPTY_BUILTINS;
+	}
 
 	/**
 	 * Creates a new RuntimeValue.
@@ -101,168 +105,131 @@ export class FloatValue extends RuntimeValue<number> {
  */
 export class StringValue extends RuntimeValue<string> {
 	override type = "StringValue";
+	private _builtins: Map<string, AnyRuntimeValue> | null = null;
 
-	override builtins = new Map<string, AnyRuntimeValue>([
-		[
-			"upper",
-			new FunctionValue(() => {
-				return new StringValue(this.value.toUpperCase());
-			}),
-		],
-		[
-			"lower",
-			new FunctionValue(() => {
-				return new StringValue(this.value.toLowerCase());
-			}),
-		],
-		[
-			"strip",
-			new FunctionValue(() => {
-				return new StringValue(this.value.trim());
-			}),
-		],
-		[
-			"title",
-			new FunctionValue(() => {
-				return new StringValue(titleCase(this.value));
-			}),
-		],
-		[
-			"capitalize",
-			new FunctionValue(() => {
-				return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
-			}),
-		],
-		["length", new IntegerValue(this.value.length)],
-		[
-			"rstrip",
-			new FunctionValue(() => {
-				return new StringValue(this.value.trimEnd());
-			}),
-		],
-		[
-			"lstrip",
-			new FunctionValue(() => {
-				return new StringValue(this.value.trimStart());
-			}),
-		],
-		[
-			"startswith",
-			new FunctionValue((args) => {
-				if (args.length === 0) {
-					throw new Error("startswith() requires at least one argument");
-				}
-				const pattern = args[0];
-				if (pattern instanceof StringValue) {
-					return new BooleanValue(this.value.startsWith(pattern.value));
-				} else if (pattern instanceof ArrayValue) {
-					for (const item of pattern.value) {
-						if (!(item instanceof StringValue)) {
-							throw new Error("startswith() tuple elements must be strings");
+	override get builtins(): Map<string, AnyRuntimeValue> {
+		if (this._builtins === null) {
+			this._builtins = new Map<string, AnyRuntimeValue>([
+				["upper", new FunctionValue(() => new StringValue(this.value.toUpperCase()))],
+				["lower", new FunctionValue(() => new StringValue(this.value.toLowerCase()))],
+				["strip", new FunctionValue(() => new StringValue(this.value.trim()))],
+				["title", new FunctionValue(() => new StringValue(titleCase(this.value)))],
+				["capitalize", new FunctionValue(() => new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1)))],
+				["length", new IntegerValue(this.value.length)],
+				["rstrip", new FunctionValue(() => new StringValue(this.value.trimEnd()))],
+				["lstrip", new FunctionValue(() => new StringValue(this.value.trimStart()))],
+				[
+					"startswith",
+					new FunctionValue((args) => {
+						if (args.length === 0) {
+							throw new Error("startswith() requires at least one argument");
 						}
-						if (this.value.startsWith(item.value)) {
-							return new BooleanValue(true);
+						const pattern = args[0];
+						if (pattern instanceof StringValue) {
+							return new BooleanValue(this.value.startsWith(pattern.value));
+						} else if (pattern instanceof ArrayValue) {
+							for (const item of pattern.value) {
+								if (!(item instanceof StringValue)) {
+									throw new Error("startswith() tuple elements must be strings");
+								}
+								if (this.value.startsWith(item.value)) {
+									return new BooleanValue(true);
+								}
+							}
+							return new BooleanValue(false);
 						}
-					}
-					return new BooleanValue(false);
-				}
-				throw new Error("startswith() argument must be a string or tuple of strings");
-			}),
-		],
-		[
-			"endswith",
-			new FunctionValue((args) => {
-				if (args.length === 0) {
-					throw new Error("endswith() requires at least one argument");
-				}
-				const pattern = args[0];
-				if (pattern instanceof StringValue) {
-					return new BooleanValue(this.value.endsWith(pattern.value));
-				} else if (pattern instanceof ArrayValue) {
-					for (const item of pattern.value) {
-						if (!(item instanceof StringValue)) {
-							throw new Error("endswith() tuple elements must be strings");
+						throw new Error("startswith() argument must be a string or tuple of strings");
+					}),
+				],
+				[
+					"endswith",
+					new FunctionValue((args) => {
+						if (args.length === 0) {
+							throw new Error("endswith() requires at least one argument");
 						}
-						if (this.value.endsWith(item.value)) {
-							return new BooleanValue(true);
+						const pattern = args[0];
+						if (pattern instanceof StringValue) {
+							return new BooleanValue(this.value.endsWith(pattern.value));
+						} else if (pattern instanceof ArrayValue) {
+							for (const item of pattern.value) {
+								if (!(item instanceof StringValue)) {
+									throw new Error("endswith() tuple elements must be strings");
+								}
+								if (this.value.endsWith(item.value)) {
+									return new BooleanValue(true);
+								}
+							}
+							return new BooleanValue(false);
 						}
-					}
-					return new BooleanValue(false);
-				}
-				throw new Error("endswith() argument must be a string or tuple of strings");
-			}),
-		],
-		[
-			"split",
-			// follows Python's `str.split(sep=None, maxsplit=-1)` function behavior
-			// https://docs.python.org/3.13/library/stdtypes.html#str.split
-			new FunctionValue((args) => {
-				const sep = args[0] ?? new NullValue();
-				if (!(sep instanceof StringValue || sep instanceof NullValue)) {
-					throw new Error("sep argument must be a string or null");
-				}
-				const maxsplit = args[1] ?? new IntegerValue(-1);
-				if (!(maxsplit instanceof IntegerValue)) {
-					throw new Error("maxsplit argument must be a number");
-				}
+						throw new Error("endswith() argument must be a string or tuple of strings");
+					}),
+				],
+				[
+					"split",
+					new FunctionValue((args) => {
+						const sep = args[0] ?? new NullValue();
+						if (!(sep instanceof StringValue || sep instanceof NullValue)) {
+							throw new Error("sep argument must be a string or null");
+						}
+						const maxsplit = args[1] ?? new IntegerValue(-1);
+						if (!(maxsplit instanceof IntegerValue)) {
+							throw new Error("maxsplit argument must be a number");
+						}
 
-				let result = [];
-				if (sep instanceof NullValue) {
-					// If sep is not specified or is None, runs of consecutive whitespace are regarded as a single separator, and the
-					// result will contain no empty strings at the start or end if the string has leading or trailing whitespace.
-					// Trailing whitespace may be present when maxsplit is specified and there aren't sufficient matches in the string.
-					const text = this.value.trimStart();
-					for (const { 0: match, index } of text.matchAll(/\S+/g)) {
-						if (maxsplit.value !== -1 && result.length >= maxsplit.value && index !== undefined) {
-							result.push(match + text.slice(index + match.length));
-							break;
+						let result = [];
+						if (sep instanceof NullValue) {
+							const text = this.value.trimStart();
+							for (const { 0: match, index } of text.matchAll(/\S+/g)) {
+								if (maxsplit.value !== -1 && result.length >= maxsplit.value && index !== undefined) {
+									result.push(match + text.slice(index + match.length));
+									break;
+								}
+								result.push(match);
+							}
+						} else {
+							if (sep.value === "") {
+								throw new Error("empty separator");
+							}
+							result = this.value.split(sep.value);
+							if (maxsplit.value !== -1 && result.length > maxsplit.value) {
+								result.push(result.splice(maxsplit.value).join(sep.value));
+							}
 						}
-						result.push(match);
-					}
-				} else {
-					// If sep is specified, consecutive delimiters are not grouped together and are deemed to delimit empty strings.
-					if (sep.value === "") {
-						throw new Error("empty separator");
-					}
-					result = this.value.split(sep.value);
-					if (maxsplit.value !== -1 && result.length > maxsplit.value) {
-						// Follow Python's behavior: If maxsplit is given, at most maxsplit splits are done,
-						// with any remaining text returned as the final element of the list.
-						result.push(result.splice(maxsplit.value).join(sep.value));
-					}
-				}
-				return new ArrayValue(result.map((part) => new StringValue(part)));
-			}),
-		],
-		[
-			"replace",
-			new FunctionValue((args): StringValue => {
-				if (args.length < 2) {
-					throw new Error("replace() requires at least two arguments");
-				}
-				const oldValue = args[0];
-				const newValue = args[1];
-				if (!(oldValue instanceof StringValue && newValue instanceof StringValue)) {
-					throw new Error("replace() arguments must be strings");
-				}
+						return new ArrayValue(result.map((part) => new StringValue(part)));
+					}),
+				],
+				[
+					"replace",
+					new FunctionValue((args): StringValue => {
+						if (args.length < 2) {
+							throw new Error("replace() requires at least two arguments");
+						}
+						const oldValue = args[0];
+						const newValue = args[1];
+						if (!(oldValue instanceof StringValue && newValue instanceof StringValue)) {
+							throw new Error("replace() arguments must be strings");
+						}
 
-				let count: AnyRuntimeValue | undefined;
-				if (args.length > 2) {
-					if (args[2].type === "KeywordArgumentsValue") {
-						count = (args[2] as KeywordArgumentsValue).value.get("count") ?? new NullValue();
-					} else {
-						count = args[2];
-					}
-				} else {
-					count = new NullValue();
-				}
-				if (!(count instanceof IntegerValue || count instanceof NullValue)) {
-					throw new Error("replace() count argument must be a number or null");
-				}
-				return new StringValue(replace(this.value, oldValue.value, newValue.value, count.value));
-			}),
-		],
-	]);
+						let count: AnyRuntimeValue | undefined;
+						if (args.length > 2) {
+							if (args[2].type === "KeywordArgumentsValue") {
+								count = (args[2] as KeywordArgumentsValue).value.get("count") ?? new NullValue();
+							} else {
+								count = args[2];
+							}
+						} else {
+							count = new NullValue();
+						}
+						if (!(count instanceof IntegerValue || count instanceof NullValue)) {
+							throw new Error("replace() count argument must be a number or null");
+						}
+						return new StringValue(replace(this.value, oldValue.value, newValue.value, count.value));
+					}),
+				],
+			]);
+		}
+		return this._builtins;
+	}
 }
 
 /**
@@ -387,6 +354,7 @@ function toJSON(
  */
 export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	override type = "ObjectValue";
+	private _builtins: Map<string, AnyRuntimeValue> | null = null;
 
 	/**
 	 * NOTE: necessary to override since all JavaScript arrays are considered truthy,
@@ -400,73 +368,68 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 		return new BooleanValue(this.value.size > 0);
 	}
 
-	override builtins: Map<string, AnyRuntimeValue> = new Map<string, AnyRuntimeValue>([
-		[
-			"get",
-			new FunctionValue(([key, defaultValue]) => {
-				if (!(key instanceof StringValue)) {
-					throw new Error(`Object key must be a string: got ${key.type}`);
-				}
-				return this.value.get(key.value) ?? defaultValue ?? new NullValue();
-			}),
-		],
-		["items", new FunctionValue(() => this.items())],
-		["keys", new FunctionValue(() => this.keys())],
-		["values", new FunctionValue(() => this.values())],
-		[
-			"dictsort",
-			new FunctionValue((args) => {
-				// https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.dictsort
-				// Sort a dictionary and yield (key, value) pairs.
-				// Optional parameters:
-				//  - case_sensitive: Sort in a case-sensitive manner (default: false)
-				//  - by: Sort by 'key' or 'value' (default: 'key')
-				//  - reverse: Reverse the sort order (default: false)
+	override get builtins(): Map<string, AnyRuntimeValue> {
+		if (this._builtins === null) {
+			this._builtins = new Map<string, AnyRuntimeValue>([
+				[
+					"get",
+					new FunctionValue(([key, defaultValue]) => {
+						if (!(key instanceof StringValue)) {
+							throw new Error(`Object key must be a string: got ${key.type}`);
+						}
+						return this.value.get(key.value) ?? defaultValue ?? new NullValue();
+					}),
+				],
+				["items", new FunctionValue(() => this.items())],
+				["keys", new FunctionValue(() => this.keys())],
+				["values", new FunctionValue(() => this.values())],
+				[
+					"dictsort",
+					new FunctionValue((args) => {
+						let kwargs = new Map<string, AnyRuntimeValue>();
+						const positionalArgs = args.filter((arg) => {
+							if (arg instanceof KeywordArgumentsValue) {
+								kwargs = arg.value;
+								return false;
+							}
+							return true;
+						});
 
-				// Extract keyword arguments if present
-				let kwargs = new Map<string, AnyRuntimeValue>();
-				const positionalArgs = args.filter((arg) => {
-					if (arg instanceof KeywordArgumentsValue) {
-						kwargs = arg.value;
-						return false;
-					}
-					return true;
-				});
+						const caseSensitive = positionalArgs.at(0) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
+						if (!(caseSensitive instanceof BooleanValue)) {
+							throw new Error("case_sensitive must be a boolean");
+						}
 
-				const caseSensitive = positionalArgs.at(0) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
-				if (!(caseSensitive instanceof BooleanValue)) {
-					throw new Error("case_sensitive must be a boolean");
-				}
+						const by = positionalArgs.at(1) ?? kwargs.get("by") ?? new StringValue("key");
+						if (!(by instanceof StringValue)) {
+							throw new Error("by must be a string");
+						}
+						if (!["key", "value"].includes(by.value)) {
+							throw new Error("by must be either 'key' or 'value'");
+						}
 
-				const by = positionalArgs.at(1) ?? kwargs.get("by") ?? new StringValue("key");
-				if (!(by instanceof StringValue)) {
-					throw new Error("by must be a string");
-				}
-				if (!["key", "value"].includes(by.value)) {
-					throw new Error("by must be either 'key' or 'value'");
-				}
+						const reverse = positionalArgs.at(2) ?? kwargs.get("reverse") ?? new BooleanValue(false);
+						if (!(reverse instanceof BooleanValue)) {
+							throw new Error("reverse must be a boolean");
+						}
 
-				const reverse = positionalArgs.at(2) ?? kwargs.get("reverse") ?? new BooleanValue(false);
-				if (!(reverse instanceof BooleanValue)) {
-					throw new Error("reverse must be a boolean");
-				}
+						const items = Array.from(this.value.entries())
+							.map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+							.sort((a, b) => {
+								const index = by.value === "key" ? 0 : 1;
+								const aVal = a.value[index];
+								const bVal = b.value[index];
+								const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
+								return reverse.value ? -result : result;
+							});
 
-				// Convert to array of [key, value] pairs and sort
-				const items = Array.from(this.value.entries())
-					.map(([key, value]) => new ArrayValue([new StringValue(key), value]))
-					.sort((a, b) => {
-						const index = by.value === "key" ? 0 : 1;
-						const aVal = a.value[index];
-						const bVal = b.value[index];
-
-						const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
-						return reverse.value ? -result : result;
-					});
-
-				return new ArrayValue(items);
-			}),
-		],
-	]);
+						return new ArrayValue(items);
+					}),
+				],
+			]);
+		}
+		return this._builtins;
+	}
 
 	items(): ArrayValue {
 		return new ArrayValue(
@@ -496,7 +459,14 @@ export class KeywordArgumentsValue extends ObjectValue {
  */
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	override type = "ArrayValue";
-	override builtins = new Map<string, AnyRuntimeValue>([["length", new IntegerValue(this.value.length)]]);
+	private _builtins: Map<string, AnyRuntimeValue> | null = null;
+
+	override get builtins(): Map<string, AnyRuntimeValue> {
+		if (this._builtins === null) {
+			this._builtins = new Map<string, AnyRuntimeValue>([["length", new IntegerValue(this.value.length)]]);
+		}
+		return this._builtins;
+	}
 
 	/**
 	 * NOTE: necessary to override since all JavaScript arrays are considered truthy,
@@ -543,6 +513,60 @@ export class UndefinedValue extends RuntimeValue<undefined> {
 	override type = "UndefinedValue";
 }
 
+const GLOBAL_TESTS: Map<string, (...value: AnyRuntimeValue[]) => boolean> = new Map([
+	["boolean", (operand) => operand.type === "BooleanValue"],
+	["callable", (operand) => operand instanceof FunctionValue],
+	[
+		"odd",
+		(operand) => {
+			if (!(operand instanceof IntegerValue)) {
+				throw new Error(`cannot odd on ${operand.type}`);
+			}
+			return operand.value % 2 !== 0;
+		},
+	],
+	[
+		"even",
+		(operand) => {
+			if (!(operand instanceof IntegerValue)) {
+				throw new Error(`cannot even on ${operand.type}`);
+			}
+			return operand.value % 2 === 0;
+		},
+	],
+	["false", (operand) => operand.type === "BooleanValue" && !(operand as BooleanValue).value],
+	["true", (operand) => operand.type === "BooleanValue" && (operand as BooleanValue).value],
+	["none", (operand) => operand.type === "NullValue"],
+	["string", (operand) => operand.type === "StringValue"],
+	["number", (operand) => operand instanceof IntegerValue || operand instanceof FloatValue],
+	["integer", (operand) => operand instanceof IntegerValue],
+	["iterable", (operand) => operand.type === "ArrayValue" || operand.type === "StringValue"],
+	["mapping", (operand) => operand instanceof ObjectValue],
+	[
+		"sequence",
+		(operand) => operand instanceof ArrayValue || operand instanceof ObjectValue || operand instanceof StringValue,
+	],
+	[
+		"lower",
+		(operand) => {
+			const str = (operand as StringValue).value;
+			return operand.type === "StringValue" && str === str.toLowerCase();
+		},
+	],
+	[
+		"upper",
+		(operand) => {
+			const str = (operand as StringValue).value;
+			return operand.type === "StringValue" && str === str.toUpperCase();
+		},
+	],
+	["none", (operand) => operand.type === "NullValue"],
+	["defined", (operand) => operand.type !== "UndefinedValue"],
+	["undefined", (operand) => operand.type === "UndefinedValue"],
+	["equalto", (a, b) => a.value === b.value],
+	["eq", (a, b) => a.value === b.value],
+]);
+
 /**
  * Represents the current environment (scope) at runtime.
  */
@@ -565,62 +589,7 @@ export class Environment {
 		],
 	]);
 
-	/**
-	 * The tests available in this environment.
-	 */
-	tests: Map<string, (...value: AnyRuntimeValue[]) => boolean> = new Map([
-		["boolean", (operand) => operand.type === "BooleanValue"],
-		["callable", (operand) => operand instanceof FunctionValue],
-		[
-			"odd",
-			(operand) => {
-				if (!(operand instanceof IntegerValue)) {
-					throw new Error(`cannot odd on ${operand.type}`);
-				}
-				return operand.value % 2 !== 0;
-			},
-		],
-		[
-			"even",
-			(operand) => {
-				if (!(operand instanceof IntegerValue)) {
-					throw new Error(`cannot even on ${operand.type}`);
-				}
-				return operand.value % 2 === 0;
-			},
-		],
-		["false", (operand) => operand.type === "BooleanValue" && !(operand as BooleanValue).value],
-		["true", (operand) => operand.type === "BooleanValue" && (operand as BooleanValue).value],
-		["none", (operand) => operand.type === "NullValue"],
-		["string", (operand) => operand.type === "StringValue"],
-		["number", (operand) => operand instanceof IntegerValue || operand instanceof FloatValue],
-		["integer", (operand) => operand instanceof IntegerValue],
-		["iterable", (operand) => operand.type === "ArrayValue" || operand.type === "StringValue"],
-		["mapping", (operand) => operand instanceof ObjectValue],
-		[
-			"sequence",
-			(operand) => operand instanceof ArrayValue || operand instanceof ObjectValue || operand instanceof StringValue,
-		],
-		[
-			"lower",
-			(operand) => {
-				const str = (operand as StringValue).value;
-				return operand.type === "StringValue" && str === str.toLowerCase();
-			},
-		],
-		[
-			"upper",
-			(operand) => {
-				const str = (operand as StringValue).value;
-				return operand.type === "StringValue" && str === str.toUpperCase();
-			},
-		],
-		["none", (operand) => operand.type === "NullValue"],
-		["defined", (operand) => operand.type !== "UndefinedValue"],
-		["undefined", (operand) => operand.type === "UndefinedValue"],
-		["equalto", (a, b) => a.value === b.value],
-		["eq", (a, b) => a.value === b.value],
-	]);
+	tests: Map<string, (...value: AnyRuntimeValue[]) => boolean> = GLOBAL_TESTS;
 
 	constructor(public parent?: Environment) {}
 
