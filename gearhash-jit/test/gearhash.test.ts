@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { Hasher } from "../src/index.js";
 
-// Deterministic 24-bit RNG (matches gearhash-wasm test suite)
+// Deterministic 24-bit RNG
 class SimpleRng {
   private state: number;
   constructor(seed: number) {
@@ -32,7 +32,7 @@ function generateTestInput(): Uint8Array {
 }
 
 // Expected results from the Rust gearhash implementation (same vectors
-// used by @huggingface/gearhash-wasm tests)
+// verified against Rust gearhash reference implementation)
 const EXPECTED: { offset: number; size: number; hash: string }[] = [
   { offset: 0, size: 3598, hash: "0x033220f080ac5f77" },
   { offset: 3598, size: 3995, hash: "0xd06b22f324ac5f28" },
