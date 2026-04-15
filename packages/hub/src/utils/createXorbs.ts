@@ -5,9 +5,20 @@ import { xetWriteToken, type XetWriteTokenParams } from "./xetWriteToken";
 import type { ShardData } from "./shardParser";
 import { parseShardData } from "./shardParser";
 import { SplicedBlob } from "./SplicedBlob";
+import {
+	createChunker,
+	nextBlock,
+	finalize,
+	hashToHex,
+	hexToBytes,
+	xorbHash,
+	fileHash,
+	hmac,
+	verificationHash,
+	type Chunk,
+} from "@huggingface/xetchunk-wasm";
 
 const TARGET_CHUNK_SIZE = 64 * 1024;
-/* eslint-disable @typescript-eslint/no-unused-vars */
 const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
@@ -19,6 +30,34 @@ const INTERVAL_BETWEEN_REMOTE_DEDUP = 4_000_000; // 4MB
  */
 const PROCESSING_PROGRESS_RATIO = 0.1;
 const UPLOADING_PROGRESS_RATIO = 1 - PROCESSING_PROGRESS_RATIO;
+
+function computeXorbHashHex(chunks: { hash: string; length: number }[]): string {
+	const chunkObjs: Chunk[] = chunks.map((c) => ({ hash: hexToBytes(c.hash), length: c.length }));
+	return hashToHex(xorbHash(chunkObjs));
+}
+
+function computeHmacHex(hash: string, key: string): string {
+	return hashToHex(hmac(hexToBytes(hash), hexToBytes(key)));
+}
+
+function computeVerificationHashHex(hashes: string[]): string {
+	return hashToHex(verificationHash(hashes.map(hexToBytes)));
+}
+
+function computeFileHashHex(chunks: { hash: string; length: number }[]): string {
+	const chunkObjs: Chunk[] = chunks.map((c) => ({ hash: hexToBytes(c.hash), length: c.length }));
+	return hashToHex(fileHash(chunkObjs));
+}
+
+function addDataToChunker(data: Uint8Array, chunker: ReturnType<typeof createChunker>): { hash: string; length: number; dedup: boolean }[] {
+	return nextBlock(chunker, data).map((c) => ({ hash: hashToHex(c.hash), length: c.length, dedup: false }));
+}
+
+function finalizeChunker(chunker: ReturnType<typeof createChunker>): { hash: string; length: number; dedup: boolean }[] {
+	const last = finalize(chunker);
+	if (!last) return [];
+	return [{ hash: hashToHex(last.hash), length: last.length, dedup: false }];
+}
 
 interface XorbEvent {
 	event: "xorb";
@@ -109,15 +148,12 @@ export async function* createXorbs(
 	undefined
 > {
 	const alreadyDoneFileSha256s: Set<string> = new Set();
-	const chunkModule = await import("../vendor/xet-chunk/chunker_wasm");
 	let xorbId = 0;
-
-	await chunkModule.init();
 	const chunkCache = new ChunkCache();
 	let xorb = new CurrentXorbInfo();
 
 	const nextXorb = (currentFile: { path: string; uploadedBytes: number; size: number }): XorbEvent => {
-		const event = xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
+		const event = xorb.event(computeXorbHashHex);
 
 		xorbId++;
 		xorb = new CurrentXorbInfo();
@@ -165,8 +201,8 @@ export async function* createXorbs(
 			alreadyDoneFileSha256s.add(fileSource.sha256);
 		}
 
-		const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
-		try {
+		const chunker = createChunker(TARGET_CHUNK_SIZE);
+		{
 			xorb.fileSize[fileSource.path] = fileSource.content.size;
 
 			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
@@ -176,7 +212,7 @@ export async function* createXorbs(
 					remoteXorbHashes,
 					params,
 					chunkCache,
-					chunkModule,
+					computeHmacHex,
 					{
 						maxChunks: 1,
 						isAtBeginning: true,
@@ -214,7 +250,7 @@ export async function* createXorbs(
 					// Remove chunks from source data
 					const chunkToCopy = removeChunkFromSourceData(sourceChunks, chunk.length);
 
-					let cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
+					let cacheData = chunkCache.getChunk(chunk.hash, computeHmacHex);
 					if (cacheData === undefined && chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
 						const token = await xetWriteToken(params);
 						bytesSinceRemoteDedup = 0;
@@ -238,13 +274,13 @@ export async function* createXorbs(
 									chunkCache.addChunkToCache(chunk.hash, remoteXorbId, i++, shardData.hmacKey);
 								}
 							}
-							cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
+							cacheData = chunkCache.getChunk(chunk.hash, computeHmacHex);
 
 							// We backtrack a bit to check if new dedup info contains older chunks
 							const oldDedupedBytes = dedupedBytes;
 							dedupedBytes = backtrackDedup(
 								xorb,
-								chunkModule.compute_hmac.bind(chunkModule),
+								computeHmacHex,
 								shardData,
 								chunkCache,
 								chunkMetadata,
@@ -333,19 +369,19 @@ export async function* createXorbs(
 			while (true) {
 				const { done, value } = await reader.read();
 				if (done) {
-					yield* addChunks(chunker.finish());
-					break;
+				yield* addChunks(finalizeChunker(chunker));
+				break;
 				}
 				processedBytes += value.length;
 				sourceChunks.push(value);
-				yield* addChunks(chunker.add_data(value));
+				yield* addChunks(addDataToChunker(value, chunker));
 			}
 
-			const fileRepresentation = buildFileRepresentation(
-				chunkMetadata,
-				fileChunks,
-				chunkModule.compute_verification_hash.bind(chunkModule),
-			);
+		const fileRepresentation = buildFileRepresentation(
+			chunkMetadata,
+			fileChunks,
+			computeVerificationHashHex,
+		);
 			xorb.immutableData = {
 				chunkIndex: xorb.chunks.length,
 				offset: xorb.offset,
@@ -355,19 +391,16 @@ export async function* createXorbs(
 			pendingFileEvents.push({
 				event: "file" as const,
 				path: fileSource.path,
-				hash: chunkModule.compute_file_hash(fileChunks),
+				hash: computeFileHashHex(fileChunks),
 				sha256: fileSource.sha256,
 				dedupRatio,
 				representation: fileRepresentation,
 			});
-		} finally {
-			chunker.free();
-			// ^ is this really needed ?
 		}
 	}
 
 	if (xorb.offset > 0) {
-		yield xorb.event(chunkModule.compute_xorb_hash.bind(chunkModule));
+		yield xorb.event(computeXorbHashHex);
 	}
 
 	for (const event of pendingFileEvents) {
@@ -649,8 +682,7 @@ async function loadDedupInfoToCache(
 	remoteXorbHashes: string[],
 	params: XetWriteTokenParams,
 	chunkCache: ChunkCache,
-	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-	chunkModule: typeof import("../vendor/xet-chunk/chunker_wasm"),
+	computeHmacHex: (hash: string, key: string) => string,
 
 	opts?: {
 		isAtBeginning?: boolean;
@@ -668,7 +700,7 @@ async function loadDedupInfoToCache(
 		maxChunks?: number;
 	},
 ): Promise<void> {
-	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
+	const chunker = createChunker(TARGET_CHUNK_SIZE);
 	const cache = chunkCache;
 
 	let dedupedBytes = 0;
@@ -677,84 +709,73 @@ async function loadDedupInfoToCache(
 	let bytesSinceRemoteDedup = Infinity;
 	const sourceChunks: Array<Uint8Array> = [];
 
-	try {
-		const reader = content.stream().getReader();
+	const reader = content.stream().getReader();
 
-		const processChunks = async (chunkData: Array<{ hash: string; length: number; dedup: boolean }>) => {
-			for (const chunk of chunkData) {
-				chunksProcessed++;
-				if (opts?.isAtBeginning && chunksProcessed === 1) {
-					chunk.dedup = true;
-				}
-				totalBytes += chunk.length;
+	const processChunks = async (chunks: Array<{ hash: string; length: number; dedup: boolean }>) => {
+		for (const chunk of chunks) {
+			chunksProcessed++;
+			if (opts?.isAtBeginning && chunksProcessed === 1) {
+				chunk.dedup = true;
+			}
+			totalBytes += chunk.length;
 
-				// Remove chunks from source data
-				removeChunkFromSourceData(sourceChunks, chunk.length);
+			removeChunkFromSourceData(sourceChunks, chunk.length);
 
-				// Check if chunk is already in cache
-				let cacheData = cache.getChunk(chunk.hash, chunkModule.compute_hmac);
+			let cacheData = cache.getChunk(chunk.hash, computeHmacHex);
 
-				// Early return if already cached - no need for remote lookup
-				if (cacheData !== undefined) {
-					dedupedBytes += chunk.length;
-					bytesSinceRemoteDedup += chunk.length;
-					continue;
-				}
-
-				// Try remote dedup lookup if conditions are met
-				if (chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
-					const token = await xetWriteToken(params);
-					bytesSinceRemoteDedup = 0;
-
-					const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {
-						headers: {
-							Authorization: `Bearer ${token.accessToken}`,
-						},
-					});
-
-					if (shardResp.ok) {
-						const shard = await shardResp.blob();
-						const shardData = await parseShardData(shard);
-
-						// Load remote dedup info into cache
-						for (const xorb of shardData.xorbs) {
-							const remoteXorbId = -remoteXorbHashes.length;
-							remoteXorbHashes.push(xorb.hash);
-							let i = 0;
-							for (const xorbChunk of xorb.chunks) {
-								cache.addChunkToCache(xorbChunk.hash, remoteXorbId, i++, shardData.hmacKey);
-							}
-						}
-						cacheData = cache.getChunk(chunk.hash, chunkModule.compute_hmac);
-					}
-				}
-
-				if (cacheData !== undefined) {
-					// Chunk found in cache after remote lookup - it's deduplicated
-					dedupedBytes += chunk.length;
-				}
-
+			if (cacheData !== undefined) {
+				dedupedBytes += chunk.length;
 				bytesSinceRemoteDedup += chunk.length;
+				continue;
 			}
-		};
 
-		// Read and process blob content
-		while (true) {
-			if (opts?.end !== undefined && totalBytes >= opts.end) {
-				break;
+			if (chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
+				const token = await xetWriteToken(params);
+				bytesSinceRemoteDedup = 0;
+
+				const shardResp = await (params.fetch ?? fetch)(token.casUrl + "/v1/chunks/default/" + chunk.hash, {
+					headers: {
+						Authorization: `Bearer ${token.accessToken}`,
+					},
+				});
+
+				if (shardResp.ok) {
+					const shard = await shardResp.blob();
+					const shardData = await parseShardData(shard);
+
+					for (const xorb of shardData.xorbs) {
+						const remoteXorbId = -remoteXorbHashes.length;
+						remoteXorbHashes.push(xorb.hash);
+						let i = 0;
+						for (const xorbChunk of xorb.chunks) {
+							cache.addChunkToCache(xorbChunk.hash, remoteXorbId, i++, shardData.hmacKey);
+						}
+					}
+					cacheData = cache.getChunk(chunk.hash, computeHmacHex);
+				}
 			}
-			if (opts?.maxChunks !== undefined && chunksProcessed >= opts.maxChunks) {
-				break;
+
+			if (cacheData !== undefined) {
+				dedupedBytes += chunk.length;
 			}
-			const { done, value } = await reader.read();
-			if (done) {
-				await processChunks(chunker.finish());
-				break;
-			}
-			sourceChunks.push(value);
-			await processChunks(chunker.add_data(value));
+
+			bytesSinceRemoteDedup += chunk.length;
 		}
-	} finally {
-		chunker.free();
+	};
+
+	while (true) {
+		if (opts?.end !== undefined && totalBytes >= opts.end) {
+			break;
+		}
+		if (opts?.maxChunks !== undefined && chunksProcessed >= opts.maxChunks) {
+			break;
+		}
+		const { done, value } = await reader.read();
+		if (done) {
+			await processChunks(finalizeChunker(chunker));
+			break;
+		}
+		sourceChunks.push(value);
+		await processChunks(addDataToChunker(value, chunker));
 	}
 }

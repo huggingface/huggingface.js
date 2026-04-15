@@ -128,23 +128,18 @@ class XetChunker {
 	 * Batch entry point: processes a large contiguous buffer and returns all
 	 * complete chunks. Hashes directly from `data` — no intermediate copy
 	 * to chunkBuf — for every chunk whose bytes are fully within `data`.
-	 *
-	 * If there is leftover data from a previous call (this.curChunkLen > 0),
-	 * those bytes are already in chunkBuf and are drained first via next().
 	 */
 	nextBlock(data: Uint8Array, isFinal: boolean): Chunk[] {
 		const chunks: Chunk[] = [];
 		let pos = 0;
 
 		// Drain any leftover from a previous nextBlock / next call.
-		// These bytes live in chunkBuf so we must use the slow path.
 		while (pos < data.length && this.curChunkLen > 0) {
 			const result = this.next(data.subarray(pos), false);
 			if (result.chunk) chunks.push(result.chunk);
 			pos += result.bytesConsumed;
 		}
 
-		// Fast path: all chunk data comes from `data` — hash in-place.
 		const minSkip = this.minimumChunk > HASH_WINDOW_SIZE
 			? this.minimumChunk - HASH_WINDOW_SIZE - 1
 			: 0;
@@ -184,11 +179,8 @@ class XetChunker {
 				chunks.push({ length: data.length - chunkStart, hash });
 				pos = data.length;
 			} else {
-				// Incomplete chunk at end of data — stash in chunkBuf
-				// for the next call.
-				const remaining = data.length - chunkStart;
 				this.chunkBuf.set(data.subarray(chunkStart), 0);
-				this.curChunkLen = remaining;
+				this.curChunkLen = data.length - chunkStart;
 				pos = data.length;
 			}
 		}
@@ -233,10 +225,20 @@ export function hashToHex(hash: Uint8Array): string {
 	const u64_3 = view.getBigUint64(16, true);
 	const u64_4 = view.getBigUint64(24, true);
 
-	const hex =
+	return (
 		u64.toString(16).padStart(16, "0") +
 		u64_2.toString(16).padStart(16, "0") +
 		u64_3.toString(16).padStart(16, "0") +
-		u64_4.toString(16).padStart(16, "0");
-	return hex;
+		u64_4.toString(16).padStart(16, "0")
+	);
+}
+
+export function hexToBytes(hex: string): Uint8Array {
+	const bytes = new Uint8Array(32);
+	const view = new DataView(bytes.buffer);
+	view.setBigUint64(0, BigInt("0x" + hex.slice(0, 16)), true);
+	view.setBigUint64(8, BigInt("0x" + hex.slice(16, 32)), true);
+	view.setBigUint64(16, BigInt("0x" + hex.slice(32, 48)), true);
+	view.setBigUint64(24, BigInt("0x" + hex.slice(48, 64)), true);
+	return bytes;
 }

@@ -47,7 +47,7 @@ export class Hasher {
     view.set(this.maskBytes, MASK_OFFSET);
     view.set(buf, INPUT_OFFSET);
 
-    const pos = wasmNextMatch(len);
+    const pos = wasmNextMatch(INPUT_OFFSET, len);
 
     this.hashState.set(view.subarray(HASH_OFFSET, HASH_OFFSET + 8));
     return pos;

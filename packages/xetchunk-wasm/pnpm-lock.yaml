@@ -4,13 +4,18 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  blake3-jit@1.0.0:
+    hash: 439f50ee6911af6b67399e2d2185ef5e23224473bdcf37289b798d3b254f1ef9
+    path: patches/blake3-jit.patch
+
 importers:
 
   .:
     dependencies:
       blake3-jit:
         specifier: ^1.0.0
-        version: 1.0.0
+        version: 1.0.0(patch_hash=439f50ee6911af6b67399e2d2185ef5e23224473bdcf37289b798d3b254f1ef9)
       gearhash-jit:
         specifier: workspace:*
         version: link:../../gearhash-jit
@@ -702,7 +707,7 @@ snapshots:
 
   any-promise@1.3.0: {}
 
-  blake3-jit@1.0.0: {}
+  blake3-jit@1.0.0(patch_hash=439f50ee6911af6b67399e2d2185ef5e23224473bdcf37289b798d3b254f1ef9): {}
 
   bundle-require@5.1.0(esbuild@0.27.2):
     dependencies:

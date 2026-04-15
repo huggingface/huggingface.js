@@ -1,7 +1,7 @@
 import { parseShardData } from "./shardParser";
 import { readFile } from "fs/promises";
 import { expect, describe, it } from "vitest";
-import { init, compute_hmac } from "../vendor/xet-chunk/chunker_wasm";
+import { hmac, hashToHex, hexToBytes } from "@huggingface/xetchunk-wasm";
 
 describe("shardParser", () => {
 	it("should parse a shard", async () => {
@@ -19,9 +19,9 @@ describe("shardParser", () => {
 			}
 		}
 
-		await init();
-
 		const chunkHash = "9502eec19d4b0c9f7b389228fa801f68ecdf15d69ccd1da2f9ddbd0219898335";
-		expect(compute_hmac(chunkHash, shard.hmacKey)).toEqual(shard.xorbs[1].chunks[0].hash);
+		expect(hashToHex(hmac(hexToBytes(chunkHash), hexToBytes(shard.hmacKey)))).toEqual(
+			shard.xorbs[1].chunks[0].hash,
+		);
 	});
 });

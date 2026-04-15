@@ -29,5 +29,11 @@
 		"vitest": "^0.34.6",
 		"webdriverio": "^8.6.7"
 	},
-	"packageManager": "pnpm@10.10.0"
+	"packageManager": "pnpm@10.10.0",
+	"pnpm": {
+		"patchedDependencies": {
+			"blake3-jit@1.0.0": "packages/xetchunk-wasm/patches/blake3-jit.patch"
+		},
+		"allowNonAppliedPatches": true
+	}
 }
