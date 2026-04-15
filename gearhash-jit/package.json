@@ -1,6 +1,6 @@
 {
 	"name": "gearhash-jit",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Fast GEAR hash with hand-written WASM i64 bytecode for content-defined chunking",
 	"keywords": [
 		"gearhash",
