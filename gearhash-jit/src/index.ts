@@ -20,12 +20,17 @@ export { GEAR_TABLE } from "./table.js";
 
 export class Hasher {
   private readonly maskBytes: Uint8Array;
-  private readonly hashState: Uint8Array;
+
+  /**
+   * The current 64-bit rolling hash state as 8 little-endian bytes.
+   * Updated after every `nextMatch` call. Zeroed by `resetHash()`.
+   */
+  readonly hash: Uint8Array;
 
   constructor(mask: bigint) {
     initWasm();
     this.maskBytes = new Uint8Array(8);
-    this.hashState = new Uint8Array(8);
+    this.hash = new Uint8Array(8);
     new DataView(this.maskBytes.buffer).setBigUint64(0, mask, true);
   }
 
@@ -43,18 +48,18 @@ export class Hasher {
     }
 
     const view = getView();
-    view.set(this.hashState, HASH_OFFSET);
+    view.set(this.hash, HASH_OFFSET);
     view.set(this.maskBytes, MASK_OFFSET);
     view.set(buf, INPUT_OFFSET);
 
     const pos = wasmNextMatch(INPUT_OFFSET, len);
 
-    this.hashState.set(view.subarray(HASH_OFFSET, HASH_OFFSET + 8));
+    this.hash.set(view.subarray(HASH_OFFSET, HASH_OFFSET + 8));
     return pos;
   }
 
   /** Reset rolling hash to zero (call when starting a new chunk). */
   resetHash(): void {
-    this.hashState.fill(0);
+    this.hash.fill(0);
   }
 }

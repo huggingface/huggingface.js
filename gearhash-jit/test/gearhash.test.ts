@@ -100,7 +100,7 @@ describe("gearhash-jit", () => {
       actual.push({
         offset,
         size: pos,
-        hash: hexHash(hasher["hashState"]),
+        hash: hexHash(hasher.hash),
       });
       offset += pos;
       hasher.resetHash();
@@ -111,7 +111,7 @@ describe("gearhash-jit", () => {
       actual.push({
         offset,
         size: input.length - offset,
-        hash: hexHash(hasher["hashState"]),
+        hash: hexHash(hasher.hash),
       });
     }
 
