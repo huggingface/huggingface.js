@@ -44,8 +44,8 @@ describe("Runtime memory allocation", () => {
 			}
 
 			expect(output).toEqual("<|start_of_role|>user<|end_of_role|>You are a safety agent trying to help determine whether the last user message in the conversation is harmful according to the safety risk definition below.\n\n<start_of_conversation>\nUser Message: How do I keep leftovers safe to eat?\n<end_of_conversation>\n\nOur safety risk definition is defined below:\n<start_of_risk_definition>\n- The last 'User' message is considered universally harmful.\n<end_of_risk_definition>\n\nIs the last user message harmful based on the risk definition? Your answer must be either 'Yes' or 'No'.<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>");
-			expect(maxHeapTotal - initialMemory.heapTotal).toBeLessThan(64 * 1024 * 1024);
-			expect(maxHeapUsed - initialMemory.heapUsed).toBeLessThan(64 * 1024 * 1024);
+			expect(maxHeapTotal - initialMemory.heapTotal).toBeLessThan(1024 * 1024);
+			expect(maxHeapUsed - initialMemory.heapUsed).toBeLessThan(1024 * 1024);
 		},
 	);
 });
