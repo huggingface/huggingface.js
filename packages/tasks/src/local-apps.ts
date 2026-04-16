@@ -512,6 +512,36 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 	return `docker model run hf.co/${model.id}${quantTag}`;
 };
 
+const snippetFount = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const fountModelName = `hf:${model.id}${getQuantTag(filepath)}`;
+	return [
+		{
+			title: "Open in fount (browser)",
+			setup: [
+				"# Install fount:",
+				"# https://steve02081504.github.io/fount/readme/#installation",
+			].join("\n"),
+			content: `https://steve02081504.github.io/fount/protocol?url=${encodeURIComponent(`fount://run/serviceGenerators:AI:local/install;${fountModelName}`)}`.replaceAll("%7B%7BQUANT_TAG%7D%7D", "{{QUANT_TAG}}"),
+		},
+		{
+			title: "Use CLI (*nix)",
+			setup: [
+				"# Install fount:",
+				"bash <(curl -fsSL https://steve02081504.github.io/fount/install.sh)",
+			].join("\n"),
+			content: `fount run \${FOUNT_USERNAME:-$USER} serviceGenerators/AI/local install ${fountModelName}`,
+		},
+		{
+			title: "Use CLI (PowerShell)",
+			setup: [
+				"# Install fount:",
+				"irm https://steve02081504.github.io/fount/install.ps1 | iex",
+			].join("\n"),
+			content: `fount run $(if ($env:FOUNT_USERNAME) { $env:FOUNT_USERNAME } else { $env:USERNAME }) serviceGenerators/AI/local install ${fountModelName}`,
+		},
+	];
+};
+
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
 	const isRyzenAI = model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag));
@@ -756,6 +786,13 @@ export const LOCAL_APPS = {
 			model.tags.includes("conversational") &&
 			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
+	},
+	fount: {
+		prettyLabel: "𝓯𝓸𝓾𝓷𝓽",
+		docsUrl: "https://github.com/steve02081504/fount",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetFount,
 	},
 } satisfies Record<string, LocalApp>;
 
