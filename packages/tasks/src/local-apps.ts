@@ -213,6 +213,13 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
+const snippetToolPiper = (model: ModelData): LocalAppSnippet => {
+	return {
+		title: "In ToolPiper chat, type",
+		content: `Download ${model.id}`,
+	};
+};
+
 const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
 	const isGguf = isLlamaCppGgufModel(model);
 
@@ -756,6 +763,14 @@ export const LOCAL_APPS = {
 			model.tags.includes("conversational") &&
 			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
+	},
+	toolpiper: {
+		prettyLabel: "ToolPiper",
+		docsUrl: "https://modelpiper.com",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetToolPiper,
 	},
 } satisfies Record<string, LocalApp>;
 
