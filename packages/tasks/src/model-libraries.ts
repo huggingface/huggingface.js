@@ -658,7 +658,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 	},
 	"ising": {
-		prettyLabel: "Ising Decoding",
+		prettyLabel: "Ising",
 		repoName: "Ising-Decoding",
 		repoUrl: "https://github.com/NVIDIA/Ising-Decoding",
 		filter: false,
