@@ -659,7 +659,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"ising": {
 		prettyLabel: "Ising",
-		repoName: "Ising-Decoding",```suggestion
 		repoName: "Ising",
 		repoUrl: "https://github.com/NVIDIA/Ising-Decoding",
 		filter: false,
