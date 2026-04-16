@@ -659,7 +659,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"ising": {
 		prettyLabel: "Ising",
-		repoName: "Ising",
+		repoName: "Ising-Decoding",
 		repoUrl: "https://github.com/NVIDIA/Ising-Decoding",
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
