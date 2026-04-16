@@ -1,17 +1,15 @@
 {
-	"name": "@huggingface/xetchunk-wasm",
-	"version": "0.0.4",
-	"description": "Content-defined chunking and hashing for Hugging Face Xet storage",
+	"name": "gearhash-jit",
+	"version": "1.0.2",
+	"description": "Fast GEAR hash with hand-written WASM i64 bytecode for content-defined chunking",
 	"keywords": [
-		"xet",
-		"chunk",
-		"chunking"
+		"gearhash",
+		"cdc",
+		"chunking",
+		"wasm"
 	],
 	"license": "MIT",
-	"author": "Hugging Face",
-	"publishConfig": {
-		"access": "public"
-	},
+	"sideEffects": false,
 	"files": [
 		"dist",
 		"src",
@@ -19,8 +17,7 @@
 	],
 	"scripts": {
 		"prepare": "tshy",
-		"test": "vitest run",
-		"bench": "node tests/bench.js"
+		"test": "vitest run"
 	},
 	"tshy": {
 		"exports": {
@@ -28,13 +25,7 @@
 			"./package.json": "./package.json"
 		}
 	},
-	"dependencies": {
-		"gearhash-jit": "workspace:*",
-		"@huggingface/blake3-jit": "workspace:*"
-	},
-	"devDependencies": {
-		"@huggingface/splitmix64-wasm": "workspace:*"
-	},
+	"devDependencies": {},
 	"type": "module",
 	"exports": {
 		".": {

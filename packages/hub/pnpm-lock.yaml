@@ -11,6 +11,9 @@ importers:
       '@huggingface/tasks':
         specifier: workspace:^
         version: link:../tasks
+      '@huggingface/xetchunk-wasm':
+        specifier: workspace:^
+        version: link:../xetchunk-wasm
     devDependencies:
       '@types/cli-progress':
         specifier: ^3.11.6
