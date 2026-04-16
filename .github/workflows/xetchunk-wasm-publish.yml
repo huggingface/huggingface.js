@@ -47,12 +47,14 @@ jobs:
       - run: git config --global user.email infra+machineuser@huggingface.co
       - run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
+          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '$NEW_VERSION')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           git commit . -m "🔖 @huggingface/xetchunk-wasm $BUMPED_VERSION"
           git tag "xetchunk-wasm-v$BUMPED_VERSION"
           echo "RELEASE_TAG=xetchunk-wasm-v$BUMPED_VERSION" >> $GITHUB_ENV
+        env:
+          NEW_VERSION: ${{ github.event.inputs.newversion }}
 
       - name: "Check gearhash-jit is published"
         run: |
