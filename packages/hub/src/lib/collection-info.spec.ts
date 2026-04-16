@@ -42,6 +42,7 @@ describe("collectionInfo", () => {
 					id: "huggingfacejs/tasks",
 					isBenchmark: false,
 					isLikedByUser: false,
+					isTraces: false,
 					lastModified: expect.any(String),
 					likes: expect.any(Number),
 					position: 0,

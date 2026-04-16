@@ -17,6 +17,9 @@ packages:
   "@huggingface/*":
     access: $all
     publish: $all
+  "gearhash-jit":
+    access: $all
+    publish: $all
   "**":
     access: $all
     proxy: npmjs
