@@ -1,11 +1,12 @@
 {
-	"name": "@huggingface/xetchunk-wasm",
-	"version": "0.0.4",
-	"description": "Content-defined chunking and hashing for Hugging Face Xet storage",
+	"name": "@huggingface/blake3-jit",
+	"version": "0.0.2",
+	"description": "Temporary fork of blake3-jit with Hasher.reset() and pre-allocated buffers. Will be deprecated once upstream blake3-jit exposes reset().",
 	"keywords": [
-		"xet",
-		"chunk",
-		"chunking"
+		"blake3",
+		"hash",
+		"fast",
+		"wasm"
 	],
 	"license": "MIT",
 	"author": "Hugging Face",
@@ -15,12 +16,13 @@
 	"files": [
 		"dist",
 		"src",
+		"LICENSE",
 		"README.md"
 	],
+	"type": "module",
+	"sideEffects": false,
 	"scripts": {
-		"prepare": "tshy",
-		"test": "vitest run",
-		"bench": "node tests/bench.js"
+		"prepare": "tshy"
 	},
 	"tshy": {
 		"exports": {
@@ -28,14 +30,6 @@
 			"./package.json": "./package.json"
 		}
 	},
-	"dependencies": {
-		"gearhash-jit": "workspace:*",
-		"@huggingface/blake3-jit": "workspace:*"
-	},
-	"devDependencies": {
-		"@huggingface/splitmix64-wasm": "workspace:*"
-	},
-	"type": "module",
 	"exports": {
 		".": {
 			"import": {

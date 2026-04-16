@@ -1,36 +1,62 @@
-JavaScript implementation of https://github.com/huggingface/xet-core/blob/main/deduplication/src/chunking.rs
+# @huggingface/xetchunk-wasm
 
-This package uses `blake3-jit` for hashing and `@huggingface/gearhash-wasm` for gearhash matching.
+Content-defined chunking and hashing for Hugging Face [Xet storage](https://huggingface.co/docs/hub/storage-regions), matching the [Rust reference implementation](https://github.com/huggingface/xet-core/blob/main/deduplication/src/chunking.rs).
+
+Uses [`gearhash-jit`](https://www.npmjs.com/package/gearhash-jit) for fast GEAR rolling hash boundary detection and [`@huggingface/blake3-jit`](https://www.npmjs.com/package/@huggingface/blake3-jit) for BLAKE3 chunk hashing.
 
 ## Usage
 
-```javascript
-import { createChunker, getChunks, nextBlock, finalize, xorbHash } from '@huggingface/xetchunk-wasm';
+```typescript
+import { createChunker, nextBlock, finalize, getChunks, hashToHex, xorbHash, fileHash } from '@huggingface/xetchunk-wasm';
 
-const TARGET_CHUNK_SIZE = Math.pow(2, 12);
+// One-shot: chunk all data at once
+const data = new Uint8Array(1_000_000);
+const chunks = getChunks(data);
 
-// Create a Uint8Array of data to search through
-const data = new Uint8Array(1000000); // Example: 1MB of data
-// ... fill data with your content ...
+console.log(`${chunks.length} chunks`);
+console.log('xorb hash:', hashToHex(xorbHash(chunks)));
+console.log('file hash:', hashToHex(fileHash(chunks)));
 
-const chunks = getChunks(data, TARGET_CHUNK_SIZE);
-console.log("xorbHash", xorbHash(chunks));
+// Streaming: process data incrementally
+const chunker = createChunker();
 
-// Alternative, in case your data is streaming
-const chunker = createChunker(TARGET_CHUNK_SIZE);
-
-for await (const data of source) {
-  const chunks = nextBlock(chunker, data);
-  console.log(chunks);
+for await (const buf of source) {
+  const chunks = nextBlock(chunker, buf);
+  for (const chunk of chunks) {
+    console.log(hashToHex(chunk.hash), chunk.length);
+  }
 }
 
-console.log("last chunk", finalize(chunker));
+const lastChunk = finalize(chunker);
 ```
 
-## Benchmarking chunking
+## API
+
+### Chunking
+
+- **`createChunker(targetChunkSize?: number)`** — Create a chunker (default 64KB target).
+- **`nextBlock(chunker, data: Uint8Array): Chunk[]`** — Feed data, get complete chunks.
+- **`finalize(chunker): Chunk | null`** — Flush remaining data as a final chunk.
+- **`getChunks(data: Uint8Array, targetChunkSize?: number): Chunk[]`** — One-shot convenience.
+
+### Hash functions
+
+All hash functions return `Uint8Array` (32 bytes). Use `hashToHex()` to convert to hex strings.
+
+- **`xorbHash(chunks: Chunk[]): Uint8Array`** — Merkle tree hash over chunks (matches Rust `xorb_hash`).
+- **`fileHash(chunks: Chunk[]): Uint8Array`** — File-level hash (matches Rust `file_hash`).
+- **`hmac(hash: Uint8Array, key: Uint8Array): Uint8Array`** — BLAKE3 keyed hash (matches Rust `DataHash::hmac`).
+- **`verificationHash(chunkHashes: Uint8Array[]): Uint8Array`** — Range verification hash (matches Rust `range_hash_from_chunks`).
+
+### Utilities
+
+- **`hashToHex(hash: Uint8Array): string`** — Convert 32-byte hash to hex string.
+- **`hexToBytes(hex: string): Uint8Array`** — Convert 64-char hex string to 32 bytes.
+
+## Benchmarking
 
 ```shell
-pnpm install
-pnpm --filter xetchunk-wasm build
-pnpm --filter xetchunk-wasm bench path/to/a-big-file
+pnpm --filter @huggingface/xetchunk-wasm bench
+# or with a specific file:
+pnpm --filter @huggingface/xetchunk-wasm bench path/to/large-file
 ```

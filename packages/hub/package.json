@@ -62,7 +62,8 @@
 		"debug-xet": "tsx scripts/debug-xet.ts"
 	},
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^"
+		"@huggingface/tasks": "workspace:^",
+		"@huggingface/xetchunk-wasm": "workspace:^"
 	},
 	"devDependencies": {
 		"@types/cli-progress": "^3.11.6"
