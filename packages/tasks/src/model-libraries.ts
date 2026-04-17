@@ -716,6 +716,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
 	},
+	lyra: {
+		prettyLabel: "Lyra",
+		repoName: "Lyra",
+		repoUrl: "https://github.com/nv-tlabs/lyra",
+		filter: false,
+		countDownloads: `path:"checkpoints/image_encoder/model.pth"`,
+	},
 	lagernvs: {
 		prettyLabel: "LagerNVS",
 		repoName: "LagerNVS",
