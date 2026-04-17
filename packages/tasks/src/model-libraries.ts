@@ -578,6 +578,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"ckpt/hermes_final.pth"`,
 	},
+	holomotion: {
+		prettyLabel: "HoloMotion",
+		repoName: "HoloMotion",
+		repoUrl: "https://github.com/HorizonRobotics/HoloMotion",
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	hezar: {
 		prettyLabel: "Hezar",
 		repoName: "Hezar",
