@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -7,8 +7,8 @@ const taskData: TaskDataCustom = {
 			id: "liuhaotian/LLaVA-Instruct-150K",
 		},
 		{
-			description: "Conversation turns where questions involve image and text.",
-			id: "liuhaotian/LLaVA-Pretrain",
+			description: "Collection of image-text pairs on scientific topics.",
+			id: "DAMO-NLP-SG/multimodal_textbook",
 		},
 		{
 			description: "A collection of datasets made for model fine-tuning.",
@@ -43,20 +43,24 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Cutting-edge vision language model that can also localize texts in images.",
-			id: "liuhaotian/llava-v1.6-34b",
+			description: "Small and efficient yet powerful vision language model.",
+			id: "HuggingFaceTB/SmolVLM-Instruct",
 		},
 		{
-			description: "Cutting-edge conversational vision language model that can take multiple image inputs.",
-			id: "HuggingFaceM4/idefics2-8b-chatty",
+			description: "Cutting-edge reasoning vision language model.",
+			id: "zai-org/GLM-4.5V",
+		},
+		{
+			description: "Cutting-edge small vision language model to convert documents to text.",
+			id: "rednote-hilab/dots.ocr",
 		},
 		{
 			description: "Small yet powerful model.",
-			id: "vikhyatk/moondream2",
+			id: "Qwen/Qwen2.5-VL-3B-Instruct",
 		},
 		{
-			description: "Strong image-text-to-text model made to understand documents.",
-			id: "mPLUG/DocOwl1.5",
+			description: "Image-text-to-text model with agentic capabilities.",
+			id: "microsoft/Magma-8B",
 		},
 	],
 	spaces: [
@@ -65,26 +69,18 @@ const taskData: TaskDataCustom = {
 			id: "opencompass/open_vlm_leaderboard",
 		},
 		{
-			description: "Vision language models arena, where models are ranked by votes of users.",
-			id: "WildVision/vision-arena",
+			description: "An application that compares object detection capabilities of different vision language models.",
+			id: "sergiopaniego/vlm_object_understanding",
 		},
 		{
-			description: "Powerful vision-language model assistant.",
-			id: "liuhaotian/LLaVA-1.6",
-		},
-		{
-			description: "An application to compare outputs of different vision language models.",
-			id: "merve/compare_VLMs",
-		},
-		{
-			description: "An application for document vision language tasks.",
-			id: "mPLUG/DocOwl",
+			description: "An application to compare different OCR models.",
+			id: "prithivMLmods/Multimodal-OCR",
 		},
 	],
 	summary:
 		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision-language models, or VLMs. The difference from image-to-text models is that these models take an additional text input, not restricting the model to certain use cases like image captioning, and may also be trained to accept a conversation as input.",
-	widgetModels: ["microsoft/kosmos-2-patch14-224"],
-	youtubeId: "",
+	widgetModels: ["zai-org/GLM-4.5V"],
+	youtubeId: "IoGaGfU1CIg",
 };
 
 export default taskData;

@@ -1,17 +1,15 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import { getDefaultTask } from "../../lib/getDefaultTask";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import type { FeatureExtractionInput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
-export type FeatureExtractionArgs = BaseArgs & {
-	/**
-	 *  The inputs is a string or a list of strings to get the features from.
-	 *
-	 *  inputs: "That is a happy person",
-	 *
-	 */
-	inputs: string | string[];
-};
+interface FeatureExtractionOAICompatInput {
+	encoding_format?: "float" | "base64";
+	dimensions?: number | null;
+}
+
+export type FeatureExtractionArgs = BaseArgs & FeatureExtractionInput & FeatureExtractionOAICompatInput;
 
 /**
  * Returned values are a multidimensional array of floats (dimension depending on if you sent a string or a list of string, and if the automatic reduction, usually mean_pooling for instance was applied for you or not. This should be explained on the model's README).
@@ -23,30 +21,13 @@ export type FeatureExtractionOutput = (number | number[] | number[][])[];
  */
 export async function featureExtraction(
 	args: FeatureExtractionArgs,
-	options?: Options
+	options?: Options,
 ): Promise<FeatureExtractionOutput> {
-	const defaultTask = args.model ? await getDefaultTask(args.model, args.accessToken, options) : undefined;
-
-	const res = await request<FeatureExtractionOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "feature-extraction");
+	const { data: res } = await innerRequest<FeatureExtractionOutput>(args, providerHelper, {
 		...options,
-		taskHint: "feature-extraction",
-		...(defaultTask === "sentence-similarity" && { forceTask: "feature-extraction" }),
+		task: "feature-extraction",
 	});
-	let isValidOutput = true;
-
-	const isNumArrayRec = (arr: unknown[], maxDepth: number, curDepth = 0): boolean => {
-		if (curDepth > maxDepth) return false;
-		if (arr.every((x) => Array.isArray(x))) {
-			return arr.every((x) => isNumArrayRec(x as unknown[], maxDepth, curDepth + 1));
-		} else {
-			return arr.every((x) => typeof x === "number");
-		}
-	};
-
-	isValidOutput = Array.isArray(res) && isNumArrayRec(res, 3, 0);
-
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<number[][][] | number[][] | number[] | number>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

@@ -27,7 +27,7 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Croissant",
 		repoName: "croissant",
 		repoUrl: "https://github.com/mlcommons/croissant/tree/main/python/mlcroissant",
-		docsUrl: "https://github.com/mlcommons/croissant/blob/main/python/mlcroissant/README.md",
+		docsUrl: "https://huggingface.co/docs/dataset-viewer/mlcroissant",
 	},
 	webdataset: {
 		prettyLabel: "WebDataset",
@@ -52,6 +52,48 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoName: "dask",
 		repoUrl: "https://github.com/dask/dask",
 		docsUrl: "https://huggingface.co/docs/hub/datasets-dask",
+	},
+	distilabel: {
+		prettyLabel: "Distilabel",
+		repoName: "distilabel",
+		repoUrl: "https://github.com/argilla-io/distilabel",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-distilabel",
+	},
+	fiftyone: {
+		prettyLabel: "FiftyOne",
+		repoName: "fiftyone",
+		repoUrl: "https://github.com/voxel51/fiftyone",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-fiftyone",
+	},
+	lance: {
+		prettyLabel: "Lance",
+		repoName: "lance",
+		repoUrl: "https://github.com/lance-format/lance",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-lance",
+	},
+	argilla: {
+		prettyLabel: "Argilla",
+		repoName: "argilla",
+		repoUrl: "https://github.com/argilla-io/argilla",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-argilla",
+	},
+	polars: {
+		prettyLabel: "Polars",
+		repoName: "polars",
+		repoUrl: "https://github.com/pola-rs/polars",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-polars",
+	},
+	duckdb: {
+		prettyLabel: "DuckDB",
+		repoName: "duckdb",
+		repoUrl: "https://github.com/duckdb/duckdb",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-duckdb",
+	},
+	datadesigner: {
+		prettyLabel: "NeMo Data Designer",
+		repoName: "datadesigner",
+		repoUrl: "https://github.com/NVIDIA-NeMo/DataDesigner",
+		docsUrl: "https://nvidia-nemo.github.io/DataDesigner/",
 	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 

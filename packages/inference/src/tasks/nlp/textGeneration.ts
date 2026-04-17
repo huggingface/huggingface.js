@@ -1,7 +1,9 @@
 import type { TextGenerationInput, TextGenerationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { HyperbolicTextCompletionOutput } from "../../providers/hyperbolic.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type { TextGenerationInput, TextGenerationOutput };
 
@@ -10,15 +12,15 @@ export type { TextGenerationInput, TextGenerationOutput };
  */
 export async function textGeneration(
 	args: BaseArgs & TextGenerationInput,
-	options?: Options
+	options?: Options,
 ): Promise<TextGenerationOutput> {
-	const res = await request<TextGenerationOutput[]>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "text-generation");
+	const { data: response } = await innerRequest<
+		HyperbolicTextCompletionOutput | TextGenerationOutput | TextGenerationOutput[]
+	>(args, providerHelper, {
 		...options,
-		taskHint: "text-generation",
+		task: "text-generation",
 	});
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{generated_text: string}>");
-	}
-	return res?.[0];
+	return providerHelper.getResponse(response);
 }

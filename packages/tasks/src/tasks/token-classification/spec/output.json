@@ -9,7 +9,11 @@
 		"properties": {
 			"entity_group": {
 				"type": "string",
-				"description": "The predicted label for that group of tokens"
+				"description": "The predicted label for a group of one or more tokens"
+			},
+			"entity": {
+				"type": "string",
+				"description": "The predicted label for a single token"
 			},
 			"score": {
 				"type": "number",
@@ -28,6 +32,6 @@
 				"description": "The character position in the input where this group ends."
 			}
 		},
-		"required": ["label", "score"]
+		"required": ["score", "word", "start", "end"]
 	}
 }

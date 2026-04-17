@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	canonicalId: "text-to-audio",
@@ -9,7 +9,11 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Multi-speaker English dataset.",
-			id: "LibriTTS",
+			id: "mythicinfinity/libritts_r",
+		},
+		{
+			description: "Multi-lingual dataset.",
+			id: "facebook/multilingual_librispeech",
 		},
 	],
 	demo: {
@@ -35,30 +39,42 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A powerful TTS model.",
-			id: "suno/bark",
+			description: "Small yet powerful TTS model.",
+			id: "KittenML/kitten-tts-nano-0.1",
+		},
+		{
+			description: "Bleeding edge TTS model.",
+			id: "ResembleAI/chatterbox",
 		},
 		{
 			description: "A massively multi-lingual TTS model.",
-			id: "facebook/mms-tts",
+			id: "fishaudio/fish-speech-1.5",
 		},
 		{
-			description: "A prompt based, powerful TTS model.",
-			id: "parler-tts/parler_tts_mini_v0.1",
+			description: "A text-to-dialogue model.",
+			id: "nari-labs/Dia-1.6B-0626",
 		},
 	],
 	spaces: [
 		{
-			description: "An application for generate highly realistic, multilingual speech.",
-			id: "suno/bark",
+			description: "An application for generate high quality speech in different languages.",
+			id: "hexgrad/Kokoro-TTS",
 		},
 		{
-			description: "XTTS is a Voice generation model that lets you clone voices into different languages.",
-			id: "coqui/xtts",
+			description: "A multilingual text-to-speech application.",
+			id: "fishaudio/fish-speech-1",
 		},
 		{
-			description: "An application that synthesizes speech for diverse speaker prompts.",
-			id: "parler-tts/parler_tts_mini",
+			description: "Performant TTS application.",
+			id: "ResembleAI/Chatterbox",
+		},
+		{
+			description: "An application to compare different TTS models.",
+			id: "TTS-AGI/TTS-Arena-V2",
+		},
+		{
+			description: "An application that generates podcast episodes.",
+			id: "ngxson/kokoro-podcast-generator",
 		},
 	],
 	summary:

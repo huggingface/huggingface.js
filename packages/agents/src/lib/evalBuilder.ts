@@ -1,4 +1,4 @@
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 import type { Data, Tool } from "../types";
 
 // this function passes the tools & files to the context before calling eval
@@ -7,7 +7,7 @@ export async function evalBuilder(
 	tools: Tool[],
 	files: FileList | undefined,
 	updateCallback: (message: string, data: undefined | string | Blob) => void,
-	accessToken?: string
+	accessToken?: string,
 ): Promise<() => Promise<void>> {
 	async function wrapperEval() {
 		if (files && files.length > 0) {
@@ -17,7 +17,7 @@ export async function evalBuilder(
 
 		// add tools to context
 		for (const tool of tools) {
-			const toolCall = (input: Promise<Data>) => tool.call?.(input, new HfInference(accessToken ?? ""));
+			const toolCall = (input: Promise<Data>) => tool.call?.(input, new InferenceClient(accessToken ?? ""));
 			// @ts-expect-error adding to the scope
 			globalThis[tool.name] = toolCall;
 		}

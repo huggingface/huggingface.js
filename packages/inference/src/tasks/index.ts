@@ -1,42 +1,46 @@
 // Custom tasks with arbitrary inputs and outputs
-export * from "./custom/request";
-export * from "./custom/streamingRequest";
+export * from "./custom/request.js";
+export * from "./custom/streamingRequest.js";
 
 // Audio tasks
-export * from "./audio/audioClassification";
-export * from "./audio/automaticSpeechRecognition";
-export * from "./audio/textToSpeech";
-export * from "./audio/audioToAudio";
+export * from "./audio/audioClassification.js";
+export * from "./audio/audioToAudio.js";
+export * from "./audio/automaticSpeechRecognition.js";
+export * from "./audio/textToSpeech.js";
 
 // Computer Vision tasks
-export * from "./cv/imageClassification";
-export * from "./cv/imageSegmentation";
-export * from "./cv/imageToText";
-export * from "./cv/objectDetection";
-export * from "./cv/textToImage";
-export * from "./cv/imageToImage";
-export * from "./cv/zeroShotImageClassification";
+export * from "./cv/imageClassification.js";
+export * from "./cv/imageSegmentation.js";
+export * from "./cv/imageToImage.js";
+export * from "./cv/imageToText.js";
+export * from "./cv/imageToVideo.js";
+export * from "./cv/imageTextToImage.js";
+export * from "./cv/imageTextToVideo.js";
+export * from "./cv/objectDetection.js";
+export * from "./cv/textToImage.js";
+export * from "./cv/textToVideo.js";
+export * from "./cv/zeroShotImageClassification.js";
 
 // Natural Language Processing tasks
-export * from "./nlp/featureExtraction";
-export * from "./nlp/fillMask";
-export * from "./nlp/questionAnswering";
-export * from "./nlp/sentenceSimilarity";
-export * from "./nlp/summarization";
-export * from "./nlp/tableQuestionAnswering";
-export * from "./nlp/textClassification";
-export * from "./nlp/textGeneration";
-export * from "./nlp/textGenerationStream";
-export * from "./nlp/tokenClassification";
-export * from "./nlp/translation";
-export * from "./nlp/zeroShotClassification";
-export * from "./nlp/chatCompletion";
-export * from "./nlp/chatCompletionStream";
+export * from "./nlp/chatCompletion.js";
+export * from "./nlp/chatCompletionStream.js";
+export * from "./nlp/featureExtraction.js";
+export * from "./nlp/fillMask.js";
+export * from "./nlp/questionAnswering.js";
+export * from "./nlp/sentenceSimilarity.js";
+export * from "./nlp/summarization.js";
+export * from "./nlp/tableQuestionAnswering.js";
+export * from "./nlp/textClassification.js";
+export * from "./nlp/textGeneration.js";
+export * from "./nlp/textGenerationStream.js";
+export * from "./nlp/tokenClassification.js";
+export * from "./nlp/translation.js";
+export * from "./nlp/zeroShotClassification.js";
 
 // Multimodal tasks
-export * from "./multimodal/documentQuestionAnswering";
-export * from "./multimodal/visualQuestionAnswering";
+export * from "./multimodal/documentQuestionAnswering.js";
+export * from "./multimodal/visualQuestionAnswering.js";
 
 // Tabular tasks
-export * from "./tabular/tabularRegression";
-export * from "./tabular/tabularClassification";
+export * from "./tabular/tabularClassification.js";
+export * from "./tabular/tabularRegression.js";

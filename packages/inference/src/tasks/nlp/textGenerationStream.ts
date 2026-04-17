@@ -1,6 +1,8 @@
 import type { TextGenerationInput } from "@huggingface/tasks";
-import type { BaseArgs, Options } from "../../types";
-import { streamingRequest } from "../custom/streamingRequest";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerStreamingRequest } from "../../utils/request.js";
 
 export interface TextGenerationStreamToken {
 	/** Token ID from the model tokenizer */
@@ -87,10 +89,12 @@ export interface TextGenerationStreamOutput {
  */
 export async function* textGenerationStream(
 	args: BaseArgs & TextGenerationInput,
-	options?: Options
+	options?: Options,
 ): AsyncGenerator<TextGenerationStreamOutput> {
-	yield* streamingRequest<TextGenerationStreamOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "text-generation");
+	yield* innerStreamingRequest<TextGenerationStreamOutput>(args, providerHelper, {
 		...options,
-		taskHint: "text-generation",
+		task: "text-generation",
 	});
 }

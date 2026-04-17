@@ -1,6 +1,6 @@
-import type { PipelineType } from "./pipelines";
-import type { WidgetExample } from "./widget-example";
-import type { TokenizerConfig } from "./tokenizer-data";
+import type { PipelineType } from "./pipelines.js";
+import type { WidgetExample } from "./widget-example.js";
+import type { TokenizerConfig } from "./tokenizer-data.js";
 
 /**
  * Public interface for model metadata
@@ -38,8 +38,16 @@ export interface ModelData {
 			bits?: number;
 			load_in_4bit?: boolean;
 			load_in_8bit?: boolean;
+			/**
+			 * awq, gptq, aqlm, marlin, … Used by vLLM
+			 */
+			quant_method?: string;
 		};
 		tokenizer_config?: TokenizerConfig;
+		processor_config?: {
+			chat_template?: string;
+		};
+		chat_template_jinja?: string;
 		adapter_transformers?: {
 			model_name?: string;
 			model_class?: string;
@@ -61,6 +69,9 @@ export interface ModelData {
 		peft?: {
 			base_model_name_or_path?: string;
 			task_type?: string;
+		};
+		keras_hub?: {
+			tasks?: string[];
 		};
 	};
 	/**
@@ -103,12 +114,24 @@ export interface ModelData {
 					parameters?: Record<string, unknown>;
 			  };
 		base_model?: string | string[];
+		instance_prompt?: string | null;
 	};
 	/**
 	 * Library name
 	 * Example: transformers, SpeechBrain, Stanza, etc.
 	 */
 	library_name?: string;
+	safetensors?: {
+		parameters: Record<string, number>;
+		total: number;
+		sharded: boolean;
+	};
+	gguf?: {
+		total: number;
+		architecture?: string;
+		context_length?: number;
+		chat_template?: string;
+	};
 }
 
 /**

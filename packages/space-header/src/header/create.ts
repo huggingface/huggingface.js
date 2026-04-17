@@ -1,20 +1,16 @@
 import type { Space } from "../type";
 
-import { Avatar } from "./components/avatar";
 import { Box } from "./components/box";
-import { Username } from "./components/username";
-import { Separation } from "./components/separation";
-import { Namespace } from "./components/namespace";
-import { Like } from "./components/like";
+import { Collapse } from "./components/collapse";
+import { Content } from "./components/content";
 
 export const create = (space: Space): HTMLElement => {
 	const box = Box();
 
-	box.appendChild(Avatar(space.author));
-	box.appendChild(Username(space.author));
-	box.appendChild(Separation());
-	box.appendChild(Namespace(space.id));
-	box.appendChild(Like(space));
+	const handleCollapse = () => (box.style.display = "none");
+
+	box.appendChild(Content(space));
+	box.appendChild(Collapse(space, handleCollapse));
 
 	return box;
 };

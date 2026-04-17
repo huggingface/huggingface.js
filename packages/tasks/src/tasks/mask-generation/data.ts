@@ -1,7 +1,16 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
-	datasets: [],
+	datasets: [
+		{
+			description: "Widely used benchmark dataset for multiple Vision tasks.",
+			id: "merve/coco2017",
+		},
+		{
+			description: "Medical Imaging dataset of the Human Brain for segmentation and mask generating tasks",
+			id: "rocky93/BraTS_segmentation",
+		},
+	],
 	demo: {
 		inputs: [
 			{
@@ -16,7 +25,12 @@ const taskData: TaskDataCustom = {
 			},
 		],
 	},
-	metrics: [],
+	metrics: [
+		{
+			description: "IoU is used to measure the overlap between predicted mask and the ground truth mask.",
+			id: "Intersection over Union (IoU)",
+		},
+	],
 	models: [
 		{
 			description: "Small yet powerful mask generation model.",
@@ -24,14 +38,14 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Very strong mask generation model.",
-			id: "facebook/sam-vit-huge",
+			id: "facebook/sam2-hiera-large",
 		},
 	],
 	spaces: [
 		{
 			description:
-				"An application that combines a mask generation model with an image embedding model for open-vocabulary image segmentation.",
-			id: "SkalskiP/SAM_and_MetaCLIP",
+				"An application that combines a mask generation model with a zero-shot object detection model for text-guided image segmentation.",
+			id: "merve/OWLSAM2",
 		},
 		{
 			description: "An application that compares the performance of a large and a small mask generation model.",
@@ -39,7 +53,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "An application based on an improved mask generation model.",
-			id: "linfanluntan/Grounded-SAM",
+			id: "SkalskiP/segment-anything-model-2",
 		},
 		{
 			description: "An application to remove objects from videos using mask generation models.",

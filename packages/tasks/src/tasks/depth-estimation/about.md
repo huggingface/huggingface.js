@@ -1,4 +1,5 @@
-## Use Cases
+## Use Cases
+
 Depth estimation models can be used to estimate the depth of different objects present in an image.
 
 ### Estimation of Volumetric Information
@@ -7,6 +8,14 @@ Depth estimation models are widely used to study volumetric formation of objects
 ### 3D Representation
 
 Depth estimation models can also be used to develop a 3D representation from a 2D image.
+
+## Depth Estimation Subtasks
+
+There are two depth estimation subtasks.
+
+- **Absolute depth estimation**: Absolute (or metric) depth estimation aims to provide exact depth measurements from the camera. Absolute depth estimation models output depth maps with real-world distances in meter or feet.
+
+- **Relative depth estimation**: Relative depth estimation aims to predict the depth order of objects or points in a scene without providing the precise measurements.
 
 ## Inference
 

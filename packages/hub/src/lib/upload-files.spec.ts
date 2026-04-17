@@ -1,4 +1,4 @@
-import { assert, it, describe } from "vitest";
+import { assert, it, describe, expect } from "vitest";
 
 import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../test/consts";
 import type { RepoId } from "../types/public";
@@ -12,23 +12,21 @@ describe("uploadFiles", () => {
 	it("should upload files", async () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo = { type: "model", name: repoName } satisfies RepoId;
-		const credentials = {
-			accessToken: TEST_ACCESS_TOKEN,
-		};
 
 		try {
 			const result = await createRepo({
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				repo,
 				hubUrl: TEST_HUB_URL,
 			});
 
-			assert.deepStrictEqual(result, {
+			expect(result).toEqual({
 				repoUrl: `${TEST_HUB_URL}/${repoName}`,
+				id: expect.any(String),
 			});
 
 			await uploadFiles({
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				repo,
 				files: [
 					{ content: new Blob(["file1"]), path: "file1" },
@@ -85,14 +83,14 @@ describe("uploadFiles", () => {
   },
   "vocab_size": 50257
 }
-      `.trim()
+      `.trim(),
 			);
 		} finally {
 			await deleteRepo({
 				repo,
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});
 		}
 	});
-}, 10_000);
+});

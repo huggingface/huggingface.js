@@ -25,7 +25,7 @@ import json
 import requests
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
-API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
+API_URL = "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3"
 
 def query(filename):
     with open(filename, "rb") as f:
@@ -39,9 +39,9 @@ data = query("sample1.flac")
 You can also use [huggingface.js](https://github.com/huggingface/huggingface.js), the JavaScript client, to transcribe audio with the Serverless Inference API.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.automaticSpeechRecognition({
 	data: await (await fetch("sample.flac")).blob(),
 	model: "openai/whisper-large-v3",

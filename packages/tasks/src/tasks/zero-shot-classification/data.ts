@@ -1,20 +1,20 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
 			description: "A widely used dataset used to benchmark multiple variants of text classification.",
-			id: "glue",
+			id: "nyu-mll/glue",
 		},
 		{
 			description:
 				"The Multi-Genre Natural Language Inference (MultiNLI) corpus is a crowd-sourced collection of 433k sentence pairs annotated with textual entailment information.",
-			id: "MultiNLI",
+			id: "nyu-mll/multi_nli",
 		},
 		{
 			description:
 				"FEVER is a publicly available dataset for fact extraction and verification against textual sources.",
-			id: "FEVER",
+			id: "fever/fever",
 		},
 	],
 	demo: {
@@ -53,8 +53,16 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Powerful zero-shot text classification model",
+			description: "Powerful zero-shot text classification model.",
 			id: "facebook/bart-large-mnli",
+		},
+		{
+			description: "Cutting-edge zero-shot multilingual text classification model.",
+			id: "MoritzLaurer/ModernBERT-large-zeroshot-v2.0",
+		},
+		{
+			description: "Zero-shot text classification model that can be used for topic and sentiment classification.",
+			id: "knowledgator/gliclass-modern-base-v2.0-init",
 		},
 	],
 	spaces: [],

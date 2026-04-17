@@ -1,0 +1,64 @@
+{
+	"name": "@huggingface/blob",
+	"version": "0.0.2",
+	"description": "Utilities to convert URLs and files to Blobs, internally used by Hugging Face libs",
+	"keywords": [
+		"blob",
+		"face",
+		"hugging",
+		"huggingface",
+		"lazy"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"index.ts",
+		"src",
+		"tsconfig.json"
+	],
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"browser": {
+		"./src/utils/FileBlob.ts": false,
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs"
+		},
+		"./package.json": "./package.json",
+		"./WebBlob": {
+			"require": "./dist/src/utils/WebBlob.js",
+			"import": "./dist/src/utils/WebBlob.mjs"
+		},
+		"./FileBlob": {
+			"require": "./dist/src/utils/FileBlob.js",
+			"import": "./dist/src/utils/FileBlob.mjs"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
+		"prepublishOnly": "pnpm run build",
+		"build": "tsup && tsc --emitDeclarationOnly --declaration && cp dist/index.d.ts dist/index.m.d.ts && cp dist/src/utils/FileBlob.d.ts dist/src/utils/FileBlob.m.d.ts && cp dist/src/utils/WebBlob.d.ts dist/src/utils/WebBlob.m.d.ts",
+		"prepare": "pnpm run build",
+		"test": "vitest run",
+		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
+		"check": "tsc"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.28"
+	},
+	"packageManager": "pnpm@10.10.0"
+}

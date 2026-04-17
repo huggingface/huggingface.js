@@ -1,9 +1,9 @@
-import type { ModelLibraryKey } from "./model-libraries";
-import type { PipelineType } from "./pipelines";
+import type { ModelLibraryKey } from "./model-libraries.js";
+import type { PipelineType } from "./pipelines.js";
 
 /**
  * Mapping from library name to its supported tasks.
- * Inference API (serverless) should be disabled for all other (library, task) pairs beyond this mapping.
+ * HF-Inference API (serverless) should be disabled for all other (library, task) pairs beyond this mapping.
  * This mapping is partially generated automatically by "python-api-export-tasks" action in
  * huggingface/api-inference-community repo upon merge. For transformers, the mapping is manually
  * based on api-inference (hf_types.rs).
@@ -35,15 +35,9 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 	sklearn: ["tabular-classification", "tabular-regression", "text-classification"],
 	spacy: ["token-classification", "text-classification", "sentence-similarity"],
 	"span-marker": ["token-classification"],
-	speechbrain: [
-		"audio-classification",
-		"audio-to-audio",
-		"automatic-speech-recognition",
-		"text-to-speech",
-		"text2text-generation",
-	],
+	speechbrain: ["audio-classification", "audio-to-audio", "automatic-speech-recognition", "text-to-speech"],
 	stanza: ["token-classification"],
-	timm: ["image-classification"],
+	timm: ["image-classification", "image-feature-extraction"],
 	transformers: [
 		"audio-classification",
 		"automatic-speech-recognition",
@@ -52,14 +46,16 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"feature-extraction",
 		"fill-mask",
 		"image-classification",
+		"image-feature-extraction",
 		"image-segmentation",
 		"image-to-image",
 		"image-to-text",
+		"image-text-to-text",
+		"mask-generation",
 		"object-detection",
 		"question-answering",
 		"summarization",
 		"table-question-answering",
-		"text2text-generation",
 		"text-classification",
 		"text-generation",
 		"text-to-audio",
@@ -74,3 +70,6 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 	],
 	mindspore: ["image-classification"],
 };
+
+// Pipeline types that were supported in legacy transformers versions (<5.0.0)
+export const REMOVED_IN_V5_TRANSFORMERS_PIPELINES: PipelineType[] = ["image-to-text", "summarization", "translation"];

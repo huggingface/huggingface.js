@@ -1,11 +1,14 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			// TODO write proper description
-			description: "Widely used benchmark dataset for multiple Vision tasks.",
+			description: "Widely used benchmark dataset for multiple vision tasks.",
 			id: "merve/coco2017",
+		},
+		{
+			description: "Multi-task computer vision benchmark.",
+			id: "merve/pascal-voc",
 		},
 	],
 	demo: {
@@ -40,34 +43,42 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "Solid object detection model trained on the benchmark dataset COCO 2017.",
+			description: "Solid object detection model pre-trained on the COCO 2017 dataset.",
 			id: "facebook/detr-resnet-50",
 		},
 		{
-			description: "Strong object detection model trained on ImageNet-21k dataset.",
-			id: "microsoft/beit-base-patch16-224-pt22k-ft22k",
+			description: "Accurate object detection model.",
+			id: "IDEA-Research/dab-detr-resnet-50",
+		},
+		{
+			description: "Fast and accurate object detection model.",
+			id: "PekingU/rtdetr_v2_r50vd",
+		},
+		{
+			description: "Object detection model for low-lying objects.",
+			id: "StephanST/WALDO30",
 		},
 	],
 	spaces: [
 		{
-			description: "Leaderboard to compare various object detection models across several metrics.",
-			id: "hf-vision/object_detection_leaderboard",
-		},
-		{
-			description: "An object detection application that can detect unseen objects out of the box.",
-			id: "merve/owlv2",
+			description: "Real-time object detection demo.",
+			id: "Roboflow/RF-DETR",
 		},
 		{
 			description: "An application that contains various object detection models to try from.",
 			id: "Gradio-Blocks/Object-Detection-With-DETR-and-YOLOS",
 		},
 		{
-			description: "An application that shows multiple cutting edge techniques for object detection and tracking.",
-			id: "kadirnar/torchyolo",
+			description: "A cutting-edge object detection application.",
+			id: "sunsmarterjieleaf/yolov12",
 		},
 		{
 			description: "An object tracking, segmentation and inpainting application.",
 			id: "VIPLab/Track-Anything",
+		},
+		{
+			description: "Very fast object tracking application based on object detection.",
+			id: "merve/RT-DETR-tracking-coco",
 		},
 	],
 	summary:

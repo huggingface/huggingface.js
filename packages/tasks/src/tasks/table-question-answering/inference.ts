@@ -12,11 +12,9 @@ export interface TableQuestionAnsweringInput {
 	 */
 	inputs: TableQuestionAnsweringInputData;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Table Question Answering
 	 */
-	parameters?: {
-		[key: string]: unknown;
-	};
+	parameters?: TableQuestionAnsweringParameters;
 	[property: string]: unknown;
 }
 /**
@@ -35,6 +33,30 @@ export interface TableQuestionAnsweringInputData {
 	};
 	[property: string]: unknown;
 }
+/**
+ * Additional inference parameters for Table Question Answering
+ */
+export interface TableQuestionAnsweringParameters {
+	/**
+	 * Activates and controls padding.
+	 */
+	padding?: Padding;
+	/**
+	 * Whether to do inference sequentially or as a batch. Batching is faster, but models like
+	 * SQA require the inference to be done sequentially to extract relations within sequences,
+	 * given their conversational nature.
+	 */
+	sequential?: boolean;
+	/**
+	 * Activates and controls truncation.
+	 */
+	truncation?: boolean;
+	[property: string]: unknown;
+}
+/**
+ * Activates and controls padding.
+ */
+export type Padding = "do_not_pad" | "longest" | "max_length";
 export type TableQuestionAnsweringOutput = TableQuestionAnsweringOutputElement[];
 /**
  * Outputs of inference for the Table Question Answering task

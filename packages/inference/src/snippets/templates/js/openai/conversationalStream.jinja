@@ -1,0 +1,21 @@
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+	baseURL: "{{ baseUrl }}",
+	apiKey: "{{ accessToken }}",
+{% if billTo %}
+    defaultHeaders: {
+		"X-HF-Bill-To": "{{ billTo }}" 
+	}
+{% endif %}
+});
+
+const stream = await client.chat.completions.create({
+    model: "{{ providerModelId }}",
+{{ inputs.asTsString }}
+    stream: true,
+});
+
+for await (const chunk of stream) {
+    process.stdout.write(chunk.choices[0]?.delta?.content || "");
+}

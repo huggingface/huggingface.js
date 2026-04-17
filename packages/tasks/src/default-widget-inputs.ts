@@ -1,5 +1,5 @@
-import type { WidgetExample } from "./widget-example";
-import type { WidgetType } from "./pipelines";
+import type { WidgetExample } from "./widget-example.js";
+import type { WidgetType } from "./pipelines.js";
 
 type LanguageCode = string;
 
@@ -69,7 +69,7 @@ const MAPPING_EN: PerLanguageMapping = new Map([
 		"zero-shot-classification",
 		[
 			{
-				text: "I have a problem with my iphone that needs to be resolved asap!!",
+				text: "I have a problem with my iphone that needs to be resolved asap!",
 				candidate_labels: "urgent, not urgent, phone, tablet, computer",
 				multi_class: true,
 			},
@@ -95,24 +95,18 @@ const MAPPING_EN: PerLanguageMapping = new Map([
 	[
 		"conversational",
 		[
-			`Hey my name is Julien! How are you?`,
-			`Hey my name is Thomas! How are you?`,
-			`Hey my name is Mariama! How are you?`,
-			`Hey my name is Clara! How are you?`,
-			`Hey my name is Julien! How are you?`,
-			`Hi.`,
+			`Hi, what can you help me with?`,
+			`What is 84 * 3 / 2?`,
+			`Tell me an interesting fact about the universe!`,
+			`Explain quantum computing in simple terms.`,
 		],
 	],
 	[
 		"text-generation",
 		[
 			`My name is Julien and I like to`,
-			`My name is Thomas and my main`,
-			`My name is Mariama, my favorite`,
-			`My name is Clara and I am`,
-			`My name is Lewis and I like to`,
-			`My name is Merve and my favorite`,
-			`My name is Teven and I am`,
+			`I like traveling by train because`,
+			`Paris is an amazing place to visit,`,
 			`Once upon a time,`,
 		],
 	],
@@ -196,7 +190,7 @@ const MAPPING_FR: PerLanguageMapping = new Map([
 	[
 		"summarization",
 		[
-			`La tour fait 324 mètres (1,063 pieds) de haut, environ la même hauteur qu'un immeuble de 81 étages, et est la plus haute structure de Paris. Sa base est carrée, mesurant 125 mètres (410 pieds) sur chaque côté. Durant sa construction, la tour Eiffel surpassa le Washington Monument pour devenir la plus haute structure construite par l'homme dans le monde, un titre qu'elle conserva pendant 41 ans jusqu'à l'achèvement du Chrysler Building à New-York City en 1930. Ce fut la première structure à atteindre une hauteur de 300 mètres. Avec l'ajout d'une antenne de radiodiffusion au sommet de la tour Eiffel en 1957, celle-ci redevint plus haute que le Chrysler Building de 5,2 mètres (17 pieds). En excluant les transmetteurs, elle est la seconde plus haute stucture autoportante de France après le viaduc de Millau.`,
+			`La tour fait 324 mètres (1,063 pieds) de haut, environ la même hauteur qu'un immeuble de 81 étages, et est la plus haute structure de Paris. Sa base est carrée, mesurant 125 mètres (410 pieds) sur chaque côté. Durant sa construction, la tour Eiffel surpassa le Washington Monument pour devenir la plus haute structure construite par l'homme dans le monde, un titre qu'elle conserva pendant 41 ans jusqu'à l'achèvement du Chrysler Building à New-York City en 1930. Ce fut la première structure à atteindre une hauteur de 300 mètres. Avec l'ajout d'une antenne de radiodiffusion au sommet de la tour Eiffel en 1957, celle-ci redevint plus haute que le Chrysler Building de 5,2 mètres (17 pieds). En excluant les transmetteurs, elle est la seconde plus haute structure autoportante de France après le viaduc de Millau.`,
 		],
 	],
 	["text-generation", [`Mon nom est Julien et j'aime`, `Mon nom est Thomas et mon principal`, `Il était une fois`]],
@@ -648,11 +642,7 @@ const MAPPING_DV: PerLanguageMapping = new Map([
 	["text-classification", [`އަހަރެން ގަޔާވޭ. އަހަރެން ލޯބިވޭ`]],
 	[
 		"token-classification",
-		[
-			`އަހަރެންގެ ނަމަކީ އަހުމަދު އަދި އަހަރެން ދިރިއުޅެނީ މާލޭގަ`,
-			`އަހަރެންގެ ނަމަކީ ސާރާ އަދި އަހަރެން ދިރިއުޅެނީ އުތީމުގަ`,
-			`އަހަރެންގެ ނަމަކީ އައިޝާ އަދި އަހަރެން ދިރިއުޅެނީ ފޭދޫ، އައްޑޫގަ`,
-		],
+		[`އަހަރެންގެ ނަމަކީ އަހުމަދު އަދި އަހަރެން ދިރިއުޅެނީ މާލޭގަ`, `އަހަރެންގެ ނަމަކީ ސާރާ އަދި އަހަރެން ދިރިއުޅެނީ އުތީމުގަ`, `އަހަރެންގެ ނަމަކީ އައިޝާ އަދި އަހަރެން ދިރިއުޅެނީ ފޭދޫ، އައްޑޫގަ`],
 	],
 	[
 		"question-answering",
@@ -675,13 +665,7 @@ const MAPPING_DV: PerLanguageMapping = new Map([
 			},
 		],
 	],
-	[
-		"translation",
-		[
-			`އަހަރެންގެ ނަމަކީ އަހުމަދު އަދި އަހަރެން ދިރިއުޅެނީ މާލޭގަ`,
-			`އަހަރެންގެ ނަމަކީ ސާރާ އަދި އަހަރެން ދިރިއުޅެނީ އުތީމުގަ`,
-		],
-	],
+	["translation", [`އަހަރެންގެ ނަމަކީ އަހުމަދު އަދި އަހަރެން ދިރިއުޅެނީ މާލޭގަ`, `އަހަރެންގެ ނަމަކީ ސާރާ އަދި އަހަރެން ދިރިއުޅެނީ އުތީމުގަ`]],
 	[
 		"summarization",
 		[
@@ -690,12 +674,7 @@ const MAPPING_DV: PerLanguageMapping = new Map([
 	],
 	[
 		"text-generation",
-		[
-			`އަހަރެންގެ ނަމަކީ ޔޫސުފް އަދި އަހަރެންގެ މައިގަނޑު`,
-			`އަހަރެންގެ ނަމަކީ މަރިއަމް، އަހަރެން އެންމެ ގަޔާވާ`,
-			`އަހަރެންގެ ނަމަކީ ފާތުމަތު އަދި އަހަރެން`,
-			`،އެއް ޒަމާނެއްގައި`,
-		],
+		[`އަހަރެންގެ ނަމަކީ ޔޫސުފް އަދި އަހަރެންގެ މައިގަނޑު`, `އަހަރެންގެ ނަމަކީ މަރިއަމް، އަހަރެން އެންމެ ގަޔާވާ`, `އަހަރެންގެ ނަމަކީ ފާތުމަތު އަދި އަހަރެން`, `،އެއް ޒަމާނެއްގައި`],
 	],
 	["fill-mask", [`.<mask> މާލެ އަކީ ދިވެހިރާއްޖޭގެ`, `ގަރުދިޔައަކީ ދިވެހިންގެ މެދުގައި <mask> ކެއުމެއް.`]],
 ]);

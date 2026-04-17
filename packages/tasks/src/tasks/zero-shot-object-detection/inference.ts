@@ -8,29 +8,23 @@
  */
 export interface ZeroShotObjectDetectionInput {
 	/**
-	 * The input image data, with candidate labels
+	 * The input image data as a base64-encoded string.
 	 */
-	inputs: ZeroShotObjectDetectionInputData;
+	inputs: Blob;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Zero Shot Object Detection
 	 */
-	parameters?: {
-		[key: string]: unknown;
-	};
+	parameters: ZeroShotObjectDetectionParameters;
 	[property: string]: unknown;
 }
 /**
- * The input image data, with candidate labels
+ * Additional inference parameters for Zero Shot Object Detection
  */
-export interface ZeroShotObjectDetectionInputData {
+export interface ZeroShotObjectDetectionParameters {
 	/**
 	 * The candidate labels for this image
 	 */
-	candidateLabels: string[];
-	/**
-	 * The image data to generate bounding boxes from
-	 */
-	image: unknown;
+	candidate_labels: string[];
 	[property: string]: unknown;
 }
 /**

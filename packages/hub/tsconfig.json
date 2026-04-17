@@ -6,6 +6,7 @@
 		"moduleResolution": "node",
 		"target": "ES2022",
 		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
 		"strict": true,
 		"noImplicitAny": true,
 		"strictNullChecks": true,
@@ -13,8 +14,9 @@
 		"noImplicitOverride": true,
 		"outDir": "./dist",
 		"declaration": true,
-		"declarationMap": true
+		"declarationMap": true,
+		"sourceMap": true
 	},
-	"include": ["src", "index.ts"],
+	"include": ["src", "index.ts", "cli.ts"],
 	"exclude": ["dist"]
 }

@@ -96,6 +96,10 @@ export class FileBlob extends Blob {
 	 * Returns a stream around the part of the file delimited by the FileBlob.
 	 */
 	override stream(): ReturnType<Blob["stream"]> {
+		if (this.start === this.end) {
+			return new Blob([]).stream();
+		}
+
 		return Readable.toWeb(createReadStream(this.path, { start: this.start, end: this.end - 1 })) as ReturnType<
 			Blob["stream"]
 		>;

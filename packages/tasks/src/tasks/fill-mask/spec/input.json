@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Fill Mask",
 			"$ref": "#/$defs/FillMaskParameters"
 		}
 	},
 	"$defs": {
 		"FillMaskParameters": {
 			"title": "FillMaskParameters",
-			"description": "Additional inference parameters for Fill Mask",
 			"type": "object",
 			"properties": {
 				"top_k": {

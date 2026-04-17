@@ -34,7 +34,7 @@ const fail = (msg: string) => { throw new Error(msg) };
 
  */
 
-import * as parse from './parse';
+import * as parse from './parse.js';
 
 describe('parse', () => {
     const encoder = new TextEncoder();

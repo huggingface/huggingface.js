@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Image To Text inference
  */
@@ -11,35 +10,29 @@ export interface ImageToTextInput {
 	/**
 	 * The input image data
 	 */
-	inputs: unknown;
+	inputs: Blob;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Image To Text
 	 */
 	parameters?: ImageToTextParameters;
 	[property: string]: unknown;
 }
-
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Image To Text
  */
 export interface ImageToTextParameters {
 	/**
 	 * Parametrization of the text generation process
 	 */
-	generate?: GenerationParameters;
+	generation_parameters?: GenerationParameters;
 	/**
 	 * The amount of maximum tokens to generate.
 	 */
 	max_new_tokens?: number;
 	[property: string]: unknown;
 }
-
 /**
  * Parametrization of the text generation process
- *
- * Ad-hoc parametrization of the text generation process
  */
 export interface GenerationParameters {
 	/**
@@ -72,7 +65,7 @@ export interface GenerationParameters {
 	 */
 	max_length?: number;
 	/**
-	 * The maximum number of tokens to generate. Takes precedence over maxLength.
+	 * The maximum number of tokens to generate. Takes precedence over max_length.
 	 */
 	max_new_tokens?: number;
 	/**
@@ -80,7 +73,7 @@ export interface GenerationParameters {
 	 */
 	min_length?: number;
 	/**
-	 * The minimum number of tokens to generate. Takes precedence over maxLength.
+	 * The minimum number of tokens to generate. Takes precedence over min_length.
 	 */
 	min_new_tokens?: number;
 	/**
@@ -124,12 +117,10 @@ export interface GenerationParameters {
 	use_cache?: boolean;
 	[property: string]: unknown;
 }
-
 /**
  * Controls the stopping condition for beam-based methods.
  */
 export type EarlyStoppingUnion = boolean | "never";
-
 /**
  * Outputs of inference for the Image To Text task
  */

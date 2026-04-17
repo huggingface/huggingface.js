@@ -1,4 +1,4 @@
-export const MODALITIES = ["cv", "nlp", "audio", "tabular", "multimodal", "rl", "other"] as const;
+export const MODALITIES = ["multimodal", "nlp", "cv", "audio", "tabular", "rl", "other"] as const;
 
 export type Modality = (typeof MODALITIES)[number];
 
@@ -43,10 +43,6 @@ export interface PipelineData {
 	name: string;
 	subtasks?: SubTask[];
 	modality: Modality;
-	/**
-	 * color for the tag icon.
-	 */
-	color: "blue" | "green" | "indigo" | "orange" | "red" | "yellow";
 	/**
 	 * whether to hide in /models filters
 	 */
@@ -143,7 +139,6 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "nlp",
-		color: "orange",
 	},
 	"token-classification": {
 		name: "Token Classification",
@@ -174,12 +169,10 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "nlp",
-		color: "blue",
 	},
 	"table-question-answering": {
 		name: "Table Question Answering",
 		modality: "nlp",
-		color: "green",
 	},
 	"question-answering": {
 		name: "Question Answering",
@@ -198,17 +191,14 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "nlp",
-		color: "blue",
 	},
 	"zero-shot-classification": {
 		name: "Zero-Shot Classification",
 		modality: "nlp",
-		color: "yellow",
 	},
 	translation: {
 		name: "Translation",
 		modality: "nlp",
-		color: "green",
 	},
 	summarization: {
 		name: "Summarization",
@@ -223,12 +213,10 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "nlp",
-		color: "indigo",
 	},
 	"feature-extraction": {
 		name: "Feature Extraction",
 		modality: "nlp",
-		color: "red",
 	},
 	"text-generation": {
 		name: "Text Generation",
@@ -249,13 +237,6 @@ export const PIPELINE_DATA = {
 				type: "language-modeling",
 				name: "Language Modeling",
 			},
-		],
-		modality: "nlp",
-		color: "indigo",
-	},
-	"text2text-generation": {
-		name: "Text2Text Generation",
-		subtasks: [
 			{
 				type: "text-simplification",
 				name: "Text simplification",
@@ -284,9 +265,12 @@ export const PIPELINE_DATA = {
 				type: "closed-book-qa",
 				name: "Closed Book QA",
 			},
+			{
+				type: "text2text-generation",
+				name: "Text2Text Generation",
+			},
 		],
 		modality: "nlp",
-		color: "indigo",
 	},
 	"fill-mask": {
 		name: "Fill-Mask",
@@ -301,32 +285,26 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "nlp",
-		color: "red",
 	},
 	"sentence-similarity": {
 		name: "Sentence Similarity",
 		modality: "nlp",
-		color: "yellow",
 	},
 	"text-to-speech": {
 		name: "Text-to-Speech",
 		modality: "audio",
-		color: "yellow",
 	},
 	"text-to-audio": {
 		name: "Text-to-Audio",
 		modality: "audio",
-		color: "yellow",
 	},
 	"automatic-speech-recognition": {
 		name: "Automatic Speech Recognition",
 		modality: "audio",
-		color: "yellow",
 	},
 	"audio-to-audio": {
 		name: "Audio-to-Audio",
 		modality: "audio",
-		color: "blue",
 	},
 	"audio-classification": {
 		name: "Audio Classification",
@@ -353,17 +331,19 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "audio",
-		color: "green",
+	},
+	"audio-text-to-text": {
+		name: "Audio-Text-to-Text",
+		modality: "multimodal",
+		hideInDatasets: true,
 	},
 	"voice-activity-detection": {
 		name: "Voice Activity Detection",
 		modality: "audio",
-		color: "red",
 	},
 	"depth-estimation": {
 		name: "Depth Estimation",
 		modality: "cv",
-		color: "yellow",
 	},
 	"image-classification": {
 		name: "Image Classification",
@@ -378,7 +358,6 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "cv",
-		color: "blue",
 	},
 	"object-detection": {
 		name: "Object Detection",
@@ -393,7 +372,6 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "cv",
-		color: "yellow",
 	},
 	"image-segmentation": {
 		name: "Image Segmentation",
@@ -412,12 +390,10 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "cv",
-		color: "green",
 	},
 	"text-to-image": {
 		name: "Text-to-Image",
 		modality: "cv",
-		color: "yellow",
 	},
 	"image-to-text": {
 		name: "Image-to-Text",
@@ -428,7 +404,6 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "cv",
-		color: "red",
 	},
 	"image-to-image": {
 		name: "Image-to-Image",
@@ -447,27 +422,22 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "cv",
-		color: "indigo",
 	},
 	"image-to-video": {
 		name: "Image-to-Video",
 		modality: "cv",
-		color: "indigo",
 	},
 	"unconditional-image-generation": {
 		name: "Unconditional Image Generation",
 		modality: "cv",
-		color: "green",
 	},
 	"video-classification": {
 		name: "Video Classification",
 		modality: "cv",
-		color: "blue",
 	},
 	"reinforcement-learning": {
 		name: "Reinforcement Learning",
 		modality: "rl",
-		color: "red",
 	},
 	robotics: {
 		name: "Robotics",
@@ -482,7 +452,6 @@ export const PIPELINE_DATA = {
 				name: "Task Planning",
 			},
 		],
-		color: "blue",
 	},
 	"tabular-classification": {
 		name: "Tabular Classification",
@@ -497,7 +466,6 @@ export const PIPELINE_DATA = {
 				name: "Tabular Multi Label Classification",
 			},
 		],
-		color: "blue",
 	},
 	"tabular-regression": {
 		name: "Tabular Regression",
@@ -508,7 +476,6 @@ export const PIPELINE_DATA = {
 				name: "Tabular Single Column Regression",
 			},
 		],
-		color: "blue",
 	},
 	"tabular-to-text": {
 		name: "Tabular to Text",
@@ -519,13 +486,11 @@ export const PIPELINE_DATA = {
 				name: "RDF to text",
 			},
 		],
-		color: "blue",
 		hideInModels: true,
 	},
 	"table-to-text": {
 		name: "Table to Text",
 		modality: "nlp",
-		color: "blue",
 		hideInModels: true,
 	},
 	"multiple-choice": {
@@ -541,8 +506,11 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "nlp",
-		color: "blue",
 		hideInModels: true,
+	},
+	"text-ranking": {
+		name: "Text Ranking",
+		modality: "nlp",
 	},
 	"text-retrieval": {
 		name: "Text Retrieval",
@@ -565,7 +533,6 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "nlp",
-		color: "indigo",
 		hideInModels: true,
 	},
 	"time-series-forecasting": {
@@ -581,18 +548,22 @@ export const PIPELINE_DATA = {
 				name: "Multivariate Time Series Forecasting",
 			},
 		],
-		color: "blue",
 	},
 	"text-to-video": {
 		name: "Text-to-Video",
 		modality: "cv",
-		color: "green",
 	},
 	"image-text-to-text": {
 		name: "Image-Text-to-Text",
 		modality: "multimodal",
-		color: "red",
-		hideInDatasets: true,
+	},
+	"image-text-to-image": {
+		name: "Image-Text-to-Image",
+		modality: "multimodal",
+	},
+	"image-text-to-video": {
+		name: "Image-Text-to-Video",
+		modality: "multimodal",
 	},
 	"visual-question-answering": {
 		name: "Visual Question Answering",
@@ -603,7 +574,6 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "multimodal",
-		color: "red",
 	},
 	"document-question-answering": {
 		name: "Document Question Answering",
@@ -614,48 +584,68 @@ export const PIPELINE_DATA = {
 			},
 		],
 		modality: "multimodal",
-		color: "blue",
 		hideInDatasets: true,
 	},
 	"zero-shot-image-classification": {
 		name: "Zero-Shot Image Classification",
 		modality: "cv",
-		color: "yellow",
 	},
 	"graph-ml": {
 		name: "Graph Machine Learning",
 		modality: "other",
-		color: "green",
 	},
 	"mask-generation": {
 		name: "Mask Generation",
 		modality: "cv",
-		color: "indigo",
 	},
 	"zero-shot-object-detection": {
 		name: "Zero-Shot Object Detection",
 		modality: "cv",
-		color: "yellow",
 	},
 	"text-to-3d": {
 		name: "Text-to-3D",
 		modality: "cv",
-		color: "yellow",
 	},
 	"image-to-3d": {
 		name: "Image-to-3D",
 		modality: "cv",
-		color: "green",
 	},
 	"image-feature-extraction": {
 		name: "Image Feature Extraction",
 		modality: "cv",
-		color: "indigo",
+	},
+	"video-text-to-text": {
+		name: "Video-Text-to-Text",
+		modality: "multimodal",
+		hideInDatasets: false,
+	},
+	"keypoint-detection": {
+		name: "Keypoint Detection",
+		subtasks: [
+			{
+				type: "pose-estimation",
+				name: "Pose Estimation",
+			},
+		],
+		modality: "cv",
+		hideInDatasets: true,
+	},
+	"visual-document-retrieval": {
+		name: "Visual Document Retrieval",
+		modality: "multimodal",
+	},
+	"any-to-any": {
+		name: "Any-to-Any",
+		modality: "multimodal",
+	},
+	"video-to-video": {
+		name: "Video-to-Video",
+		modality: "cv",
+		hideInDatasets: true,
 	},
 	other: {
 		name: "Other",
 		modality: "other",
-		color: "blue",
 		hideInModels: true,
 		hideInDatasets: true,
 	},

@@ -9,14 +9,13 @@
 			"description": "The input image data"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Depth Estimation",
 			"$ref": "#/$defs/DepthEstimationParameters"
 		}
 	},
 	"$defs": {
 		"DepthEstimationParameters": {
 			"title": "DepthEstimationParameters",
-			"description": "Additional inference parameters for Depth Estimation",
 			"type": "object",
 			"properties": {}
 		}

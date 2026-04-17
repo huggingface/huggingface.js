@@ -1,17 +1,31 @@
-import type { BaseArgs, Options } from "../../types";
-import { streamingRequest } from "../custom/streamingRequest";
 import type { ChatCompletionInput, ChatCompletionStreamOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerStreamingRequest } from "../../utils/request.js";
+import type { ConversationalTaskHelper, TaskProviderHelper } from "../../providers/providerHelper.js";
+import { AutoRouterConversationalTask } from "../../providers/providerHelper.js";
 
 /**
  * Use to continue text from a prompt. Same as `textGeneration` but returns generator that can be read one token at a time
  */
 export async function* chatCompletionStream(
 	args: BaseArgs & ChatCompletionInput,
-	options?: Options
+	options?: Options,
 ): AsyncGenerator<ChatCompletionStreamOutput> {
-	yield* streamingRequest<ChatCompletionStreamOutput>(args, {
+	let providerHelper: ConversationalTaskHelper & TaskProviderHelper;
+	if (args.endpointUrl) {
+		const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+		providerHelper = getProviderHelper(provider, "conversational");
+	} else if (!args.provider || args.provider === "auto") {
+		// Special case: we have a dedicated auto-router for conversational models. No need to fetch provider mapping.
+		providerHelper = new AutoRouterConversationalTask();
+	} else {
+		const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+		providerHelper = getProviderHelper(provider, "conversational");
+	}
+	yield* innerStreamingRequest<ChatCompletionStreamOutput>(args, providerHelper, {
 		...options,
-		taskHint: "text-generation",
-		chatCompletion: true,
+		task: "conversational",
 	});
 }

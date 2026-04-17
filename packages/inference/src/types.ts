@@ -1,28 +1,24 @@
-import type { PipelineType } from "@huggingface/tasks";
-import type { ChatCompletionInput } from "@huggingface/tasks";
+import type { ChatCompletionInput, PipelineType, WidgetType } from "@huggingface/tasks";
+
+/**
+ * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
+ */
+export type ModelId = string;
+
+export interface Logger {
+	debug: (message: string, ...args: unknown[]) => void;
+	info: (message: string, ...args: unknown[]) => void;
+	warn: (message: string, ...args: unknown[]) => void;
+	error: (message: string, ...args: unknown[]) => void;
+	log: (message: string, ...args: unknown[]) => void;
+}
 
 export interface Options {
 	/**
-	 * (Default: true) Boolean. If a request 503s and wait_for_model is set to false, the request will be retried with the same parameters but with wait_for_model set to true.
+	 * (Default: true) Boolean. If a request 503s, the request will be retried with the same parameters.
 	 */
 	retry_on_error?: boolean;
-	/**
-	 * (Default: true). Boolean. There is a cache layer on Inference API (serverless) to speedup requests we have already seen. Most models can use those results as is as models are deterministic (meaning the results will be the same anyway). However if you use a non deterministic model, you can set this parameter to prevent the caching mechanism from being used resulting in a real new query.
-	 */
-	use_cache?: boolean;
-	/**
-	 * (Default: false). Boolean. Do not load the model if it's not already available.
-	 */
-	dont_load_model?: boolean;
-	/**
-	 * (Default: false). Boolean to use GPU instead of CPU for inference (requires Startup plan at least).
-	 */
-	use_gpu?: boolean;
 
-	/**
-	 * (Default: false) Boolean. If the model is not ready, wait for it instead of receiving 503. It limits the number of requests required to get your inference done. It is advised to only set this flag to true after receiving a 503 error as it will limit hanging in your application to known places.
-	 */
-	wait_for_model?: boolean;
 	/**
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
@@ -36,37 +32,164 @@ export interface Options {
 	 * (Default: "same-origin"). String | Boolean. Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all.
 	 */
 	includeCredentials?: string | boolean;
+
+	/**
+	 * The billing account to use for the requests.
+	 *
+	 * By default the requests are billed on the user's account.
+	 * Requests can only be billed to an organization the user is a member of, and which has subscribed to Enterprise Hub.
+	 */
+	billTo?: string;
 }
 
-export type InferenceTask = Exclude<PipelineType, "other">;
+export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
+
+export const INFERENCE_PROVIDERS = [
+	"baseten",
+	"black-forest-labs",
+	"cerebras",
+	"clarifai",
+	"cohere",
+	"deepinfra",
+	"fal-ai",
+	"featherless-ai",
+	"fireworks-ai",
+	"groq",
+	"hf-inference",
+	"hyperbolic",
+	"nebius",
+	"novita",
+	"nscale",
+	"nvidia",
+	"openai",
+	"ovhcloud",
+	"publicai",
+	"replicate",
+	"sambanova",
+	"scaleway",
+	"together",
+	"wavespeed",
+	"zai-org",
+] as const;
+
+export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
+
+export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
+
+export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
+
+/**
+ * The org namespace on the HF Hub i.e. hf.co/…
+ *
+ * Whenever possible, InferenceProvider should == org namespace
+ */
+export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
+	baseten: "baseten",
+	"black-forest-labs": "black-forest-labs",
+	cerebras: "cerebras",
+	clarifai: "clarifai",
+	cohere: "CohereLabs",
+	deepinfra: "DeepInfra",
+	"fal-ai": "fal",
+	"featherless-ai": "featherless-ai",
+	"fireworks-ai": "fireworks-ai",
+	groq: "groq",
+	"hf-inference": "hf-inference",
+	hyperbolic: "Hyperbolic",
+	nebius: "nebius",
+	novita: "novita",
+	nscale: "nscale",
+	nvidia: "nvidia",
+	openai: "openai",
+	ovhcloud: "ovhcloud",
+	publicai: "publicai",
+	replicate: "replicate",
+	sambanova: "sambanovasystems",
+	scaleway: "scaleway",
+	together: "togethercomputer",
+	wavespeed: "wavespeed",
+	"zai-org": "zai-org",
+};
+
+export interface InferenceProviderMappingEntry {
+	adapter?: string;
+	adapterWeightsPath?: string;
+	hfModelId: ModelId;
+	provider: string;
+	providerId: string;
+	status: "live" | "staging";
+	task: WidgetType;
+	type?: "single-model" | "tag-filter";
+}
 
 export interface BaseArgs {
 	/**
 	 * The access token to use. Without it, you'll get rate-limited quickly.
 	 *
 	 * Can be created for free in hf.co/settings/token
+	 *
+	 * You can also pass an external Inference provider's key if you intend to call a compatible provider like Sambanova, Together, Replicate...
 	 */
 	accessToken?: string;
+
 	/**
-	 * The model to use.
+	 * The HF model to use.
 	 *
 	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
 	 *
 	 * /!\ Legacy behavior allows this to be an URL, but this is deprecated and will be removed in the future.
 	 * Use the `endpointUrl` parameter instead.
 	 */
-	model?: string;
+	model?: ModelId;
 
 	/**
-	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 * The URL of the endpoint to use.
 	 *
-	 * If specified, will use this URL instead of the default one.
+	 * If not specified, will call the default router.huggingface.co Inference Providers endpoint.
 	 */
 	endpointUrl?: string;
+
+	/**
+	 * Set an Inference provider to run this model on.
+	 *
+	 * Defaults to "auto" i.e. the first of the providers available for the model, sorted by the user's order in https://hf.co/settings/inference-providers.
+	 */
+	provider?: InferenceProviderOrPolicy;
 }
 
 export type RequestArgs = BaseArgs &
-	({ data: Blob | ArrayBuffer } | { inputs: unknown } | ChatCompletionInput) & {
+	(
+		| { data: Blob | ArrayBuffer }
+		| { inputs: unknown }
+		| { prompt: string }
+		| { text: string }
+		| { audio_url: string }
+		| ChatCompletionInput
+	) & {
 		parameters?: Record<string, unknown>;
-		accessToken?: string;
+		urlTransform?: (url: string) => string;
 	};
+
+export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
+
+export interface HeaderParams {
+	accessToken?: string;
+	authMethod: AuthMethod;
+}
+
+export interface UrlParams {
+	authMethod: AuthMethod;
+	model: string;
+	task?: InferenceTask;
+	urlTransform?: (url: string) => string;
+}
+
+export type OutputType = "url" | "dataUrl" | "blob" | "json";
+
+export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
+	args: T;
+	model: string;
+	mapping?: InferenceProviderMappingEntry | undefined;
+	task?: InferenceTask;
+	outputType?: OutputType;
+}

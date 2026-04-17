@@ -2,7 +2,7 @@ import type { JsonObject } from "./vendor/type-fest/basic";
 
 export async function createApiError(
 	response: Response,
-	opts?: { requestId?: string; message?: string }
+	opts?: { requestId?: string; message?: string },
 ): Promise<never> {
 	const error = new HubApiError(response.url, response.status, response.headers.get("X-Request-Id") ?? opts?.requestId);
 
@@ -15,6 +15,9 @@ export async function createApiError(
 	if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 		const json = await response.json();
 		error.message = json.error || json.message || error.message;
+		if (json.error_description) {
+			error.message = error.message ? error.message + `: ${json.error_description}` : json.error_description;
+		}
 		error.data = json;
 	} else {
 		error.data = { message: await response.text() };

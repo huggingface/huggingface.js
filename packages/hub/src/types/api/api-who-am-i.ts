@@ -28,6 +28,7 @@ interface ApiWhoAmIUser extends ApiWhoAmIEntityBase {
 	emailVerified: boolean;
 	isPro: boolean;
 	orgs: ApiWhoAmIOrg[];
+	billingMode: "postpaid" | "prepaid";
 }
 
 interface ApiWhoAmIApp extends ApiWhoAmIBase {

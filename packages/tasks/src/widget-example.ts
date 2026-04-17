@@ -2,7 +2,7 @@
  * See default-widget-inputs.ts for the default widget inputs, this files only contains the types
  */
 
-import type { ChatCompletionInputMessage } from "./tasks";
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
 
 type TableData = Record<string, (string | number)[]>;
 
@@ -61,8 +61,9 @@ export interface WidgetExampleTextInput<TOutput = WidgetExampleOutput> extends W
 	text: string;
 }
 
-export interface WidgetExampleTextAndContextInput<TOutput = WidgetExampleOutput>
-	extends WidgetExampleTextInput<TOutput> {
+export interface WidgetExampleTextAndContextInput<
+	TOutput = WidgetExampleOutput,
+> extends WidgetExampleTextInput<TOutput> {
 	context: string;
 }
 
@@ -73,8 +74,9 @@ export interface WidgetExampleTextAndTableInput<TOutput = WidgetExampleOutput> e
 export interface WidgetExampleAssetInput<TOutput = WidgetExampleOutput> extends WidgetExampleBase<TOutput> {
 	src: string;
 }
-export interface WidgetExampleAssetAndPromptInput<TOutput = WidgetExampleOutput>
-	extends WidgetExampleAssetInput<TOutput> {
+export interface WidgetExampleAssetAndPromptInput<
+	TOutput = WidgetExampleOutput,
+> extends WidgetExampleAssetInput<TOutput> {
 	prompt: string;
 }
 
@@ -98,8 +100,9 @@ export interface WidgetExampleZeroShotTextInput<TOutput = WidgetExampleOutput> e
 	multi_class: boolean;
 }
 
-export interface WidgetExampleSentenceSimilarityInput<TOutput = WidgetExampleOutput>
-	extends WidgetExampleBase<TOutput> {
+export interface WidgetExampleSentenceSimilarityInput<
+	TOutput = WidgetExampleOutput,
+> extends WidgetExampleBase<TOutput> {
 	source_sentence: string;
 	sentences: string[];
 }

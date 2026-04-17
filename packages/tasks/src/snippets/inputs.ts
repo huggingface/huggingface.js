@@ -1,5 +1,6 @@
-import type { PipelineType } from "../pipelines";
-import type { ModelDataMinimal } from "./types";
+import type { PipelineType } from "../pipelines.js";
+import type { ChatCompletionInputMessage } from "../tasks/index.js";
+import type { ModelDataMinimal } from "./types.js";
 
 const inputsZeroShotClassification = () =>
 	`"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!"`;
@@ -11,49 +12,70 @@ const inputsSummarization = () =>
 
 const inputsTableQuestionAnswering = () =>
 	`{
-	"query": "How many stars does the transformers repository have?",
-	"table": {
-		"Repository": ["Transformers", "Datasets", "Tokenizers"],
-		"Stars": ["36542", "4512", "3934"],
-		"Contributors": ["651", "77", "34"],
-		"Programming language": [
-			"Python",
-			"Python",
-			"Rust, Python and NodeJS"
-		]
-	}
+    "query": "How many stars does the transformers repository have?",
+    "table": {
+        "Repository": ["Transformers", "Datasets", "Tokenizers"],
+        "Stars": ["36542", "4512", "3934"],
+        "Contributors": ["651", "77", "34"],
+        "Programming language": [
+            "Python",
+            "Python",
+            "Rust, Python and NodeJS"
+        ]
+    }
 }`;
 
 const inputsVisualQuestionAnswering = () =>
 	`{
-	"image": "cat.png",
-	"question": "What is in this image?"
-}`;
+        "image": "cat.png",
+        "question": "What is in this image?"
+    }`;
 
 const inputsQuestionAnswering = () =>
 	`{
-	"question": "What is my name?",
-	"context": "My name is Clara and I live in Berkeley."
+    "question": "What is my name?",
+    "context": "My name is Clara and I live in Berkeley."
 }`;
 
 const inputsTextClassification = () => `"I like you. I love you"`;
 
 const inputsTokenClassification = () => `"My name is Sarah Jessica Parker but you can call me Jessica"`;
 
-const inputsTextGeneration = () => `"Can you please let us know more details about your "`;
-
-const inputsText2TextGeneration = () => `"The answer to the universe is"`;
+const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionInputMessage[] => {
+	if (model.tags.includes("conversational")) {
+		return model.pipeline_tag === "text-generation"
+			? [{ role: "user", content: "What is the capital of France?" }]
+			: [
+					{
+						role: "user",
+						content: [
+							{
+								type: "text",
+								text: "Describe this image in one sentence.",
+							},
+							{
+								type: "image_url",
+								image_url: {
+									url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
+								},
+							},
+						],
+					},
+				];
+	}
+	return `"Can you please let us know more details about your "`;
+};
 
 const inputsFillMask = (model: ModelDataMinimal) => `"The answer to the universe is ${model.mask_token}."`;
 
 const inputsSentenceSimilarity = () =>
 	`{
-	"source_sentence": "That is a happy person",
-	"sentences": [
-		"That is a happy dog",
-		"That is a very happy person",
-		"Today is a sunny day"
-	]
+    "source_sentence": "That is a happy person",
+    "sentences": [
+        "That is a happy dog",
+        "That is a very happy person",
+        "Today is a sunny day"
+    ]
 }`;
 
 const inputsFeatureExtraction = () => `"Today is a sunny day and I will get some ice cream."`;
@@ -61,6 +83,26 @@ const inputsFeatureExtraction = () => `"Today is a sunny day and I will get some
 const inputsImageClassification = () => `"cats.jpg"`;
 
 const inputsImageToText = () => `"cats.jpg"`;
+
+const inputsImageToImage = () => `{
+    "image": "cat.png",
+    "prompt": "Turn the cat into a tiger."
+}`;
+
+const inputsImageToVideo = () => `{
+    "image": "cat.png",
+    "prompt": "The cat starts to dance"
+}`;
+
+const inputsImageTextToImage = () => `{
+    "image": "cat.png",
+    "prompt": "Turn the cat into a tiger."
+}`;
+
+const inputsImageTextToVideo = () => `{
+    "image": "cat.png",
+    "prompt": "The cat starts to dance"
+}`;
 
 const inputsImageSegmentation = () => `"cats.jpg"`;
 
@@ -71,6 +113,8 @@ const inputsAudioToAudio = () => `"sample1.flac"`;
 const inputsAudioClassification = () => `"sample1.flac"`;
 
 const inputsTextToImage = () => `"Astronaut riding a horse"`;
+
+const inputsTextToVideo = () => `"A young man walking on the street"`;
 
 const inputsTextToSpeech = () => `"The answer to the universe is 42"`;
 
@@ -84,7 +128,7 @@ const inputsTabularPrediction = () =>
 const inputsZeroShotImageClassification = () => `"cats.jpg"`;
 
 const modelInputSnippets: {
-	[key in PipelineType]?: (model: ModelDataMinimal) => string;
+	[key in PipelineType]?: (model: ModelDataMinimal) => string | ChatCompletionInputMessage[];
 } = {
 	"audio-to-audio": inputsAudioToAudio,
 	"audio-classification": inputsAudioClassification,
@@ -94,6 +138,10 @@ const modelInputSnippets: {
 	"fill-mask": inputsFillMask,
 	"image-classification": inputsImageClassification,
 	"image-to-text": inputsImageToText,
+	"image-to-image": inputsImageToImage,
+	"image-to-video": inputsImageToVideo,
+	"image-text-to-image": inputsImageTextToImage,
+	"image-text-to-video": inputsImageTextToVideo,
 	"image-segmentation": inputsImageSegmentation,
 	"object-detection": inputsObjectDetection,
 	"question-answering": inputsQuestionAnswering,
@@ -104,10 +152,11 @@ const modelInputSnippets: {
 	"tabular-classification": inputsTabularPrediction,
 	"text-classification": inputsTextClassification,
 	"text-generation": inputsTextGeneration,
+	"image-text-to-text": inputsTextGeneration,
 	"text-to-image": inputsTextToImage,
+	"text-to-video": inputsTextToVideo,
 	"text-to-speech": inputsTextToSpeech,
 	"text-to-audio": inputsTextToAudio,
-	"text2text-generation": inputsText2TextGeneration,
 	"token-classification": inputsTokenClassification,
 	translation: inputsTranslation,
 	"zero-shot-classification": inputsZeroShotClassification,
@@ -116,18 +165,24 @@ const modelInputSnippets: {
 
 // Use noWrap to put the whole snippet on a single line (removing new lines and tabulations)
 // Use noQuotes to strip quotes from start & end (example: "abc" -> abc)
-export function getModelInputSnippet(model: ModelDataMinimal, noWrap = false, noQuotes = false): string {
+export function getModelInputSnippet(
+	model: ModelDataMinimal,
+	noWrap = false,
+	noQuotes = false,
+): string | ChatCompletionInputMessage[] {
 	if (model.pipeline_tag) {
 		const inputs = modelInputSnippets[model.pipeline_tag];
 		if (inputs) {
 			let result = inputs(model);
-			if (noWrap) {
-				result = result.replace(/(?:(?:\r?\n|\r)\t*)|\t+/g, " ");
-			}
-			if (noQuotes) {
-				const REGEX_QUOTES = /^"(.+)"$/s;
-				const match = result.match(REGEX_QUOTES);
-				result = match ? match[1] : result;
+			if (typeof result === "string") {
+				if (noWrap) {
+					result = result.replace(/(?:(?:\r?\n|\r)\t*)|\t+/g, " ");
+				}
+				if (noQuotes) {
+					const REGEX_QUOTES = /^"(.+)"$/s;
+					const match = result.match(REGEX_QUOTES);
+					result = match ? match[1] : result;
+				}
 			}
 			return result;
 		}

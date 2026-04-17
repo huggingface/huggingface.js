@@ -12,14 +12,12 @@ export interface FillMaskInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Fill Mask
 	 */
 	parameters?: FillMaskParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Fill Mask
  */
 export interface FillMaskParameters {

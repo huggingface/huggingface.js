@@ -1,0 +1,58 @@
+{
+	"name": "@huggingface/ollama-utils",
+	"version": "0.0.18",
+	"description": "Various utilities for maintaining Ollama compatibility with models on Hugging Face hub",
+	"keywords": [
+		"gguf",
+		"hub",
+		"huggingface"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"src",
+		"tsconfig.json"
+	],
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"browser": {
+		"./src/utils/FileBlob.ts": false,
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
+		"prepublishOnly": "pnpm run build",
+		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build:automap": "tsx scripts/generate-automap.ts && oxfmt ./src/chat-template-automap.ts",
+		"test": "vitest run",
+		"check": "tsc"
+	},
+	"dependencies": {
+		"@huggingface/jinja": "workspace:^"
+	},
+	"devDependencies": {
+		"@types/node": "^20.12.8"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"packageManager": "pnpm@10.10.0"
+}

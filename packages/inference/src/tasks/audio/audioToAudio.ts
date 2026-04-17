@@ -1,15 +1,20 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import type { LegacyAudioInput } from "./utils.js";
+import { preparePayload } from "./utils.js";
 
-export type AudioToAudioArgs = BaseArgs & {
-	/**
-	 * Binary audio data
-	 */
-	data: Blob | ArrayBuffer;
-};
+export type AudioToAudioArgs =
+	| (BaseArgs & {
+			/**
+			 * Binary audio data
+			 */
+			inputs: Blob;
+	  })
+	| LegacyAudioInput;
 
-export interface AudioToAudioOutputValue {
+export interface AudioToAudioOutputElem {
 	/**
 	 * The label for the audio output (model specific)
 	 */
@@ -18,32 +23,27 @@ export interface AudioToAudioOutputValue {
 	/**
 	 * Base64 encoded audio output.
 	 */
-	blob: string;
-
-	/**
-	 * Content-type for blob, e.g. audio/flac
-	 */
-	"content-type": string;
+	audio: Blob;
 }
 
-export type AudioToAudioReturn = AudioToAudioOutputValue[];
+export interface AudioToAudioOutput {
+	blob: string;
+	"content-type": string;
+	label: string;
+}
 
 /**
  * This task reads some audio input and outputs one or multiple audio files.
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
-export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioReturn> {
-	const res = await request<AudioToAudioReturn>(args, {
+export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
+	const model = "inputs" in args ? args.model : undefined;
+	const provider = await resolveProvider(args.provider, model);
+	const providerHelper = getProviderHelper(provider, "audio-to-audio");
+	const payload = preparePayload(args);
+	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, providerHelper, {
 		...options,
-		taskHint: "audio-to-audio",
+		task: "audio-to-audio",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) => typeof x.label === "string" && typeof x.blob === "string" && typeof x["content-type"] === "string"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, blob: string, content-type: string}>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

@@ -11,17 +11,17 @@ on:
       - "README.md"
       - "packages/hub/README.md"
       - "packages/inference/README.md"
-      - "packages/agents/README.md"
+      - "packages/tiny-agents/README.md"
       - ".github/workflows/documentation.yml"
 
 jobs:
   build:
-    uses: huggingface/doc-builder/.github/workflows/build_main_documentation.yml@main
+    uses: huggingface/doc-builder/.github/workflows/build_main_documentation.yml@90b4ee2c10b81b5c1a6367c4e6fc9e2fb510a7e3 # main
     with:
       commit_sha: ${{ github.sha }}
       package: huggingface.js
       path_to_docs: huggingface.js/docs
       additional_args: --not_python_module
-      pre_command: corepack enable && cd huggingface.js && pnpm install && pnpm -r build && pnpm --filter doc-internal start
+      pre_command: npm install -g corepack@latest && corepack enable && cd huggingface.js && pnpm install && pnpm -r build && pnpm --filter doc-internal start
     secrets:
       hf_token: ${{ secrets.HF_DOC_BUILD_PUSH }}

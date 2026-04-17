@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -9,6 +9,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "Multiple images of celebrities, used for facial expression translation",
 			id: "huggan/CelebA-faces",
+		},
+		{
+			description: "12M image-caption pairs.",
+			id: "Spawning/PD12M",
 		},
 	],
 	demo: {
@@ -45,56 +49,47 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A model that enhances images captured in low light conditions.",
-			id: "keras-io/low-light-image-enhancement",
+			description: "An image-to-image model to improve image resolution.",
+			id: "fal/AuraSR-v2",
 		},
 		{
-			description: "A model that increases the resolution of an image.",
-			id: "keras-io/super-resolution",
+			description: "Powerful image editing model.",
+			id: "black-forest-labs/FLUX.1-Kontext-dev",
 		},
 		{
-			description:
-				"A model that creates a set of variations of the input image in the style of DALL-E using Stable Diffusion.",
-			id: "lambdalabs/sd-image-variations-diffusers",
+			description: "Virtual try-on model.",
+			id: "yisol/IDM-VTON",
 		},
 		{
-			description: "A model that generates images based on segments in the input image and the text prompt.",
-			id: "mfidabel/controlnet-segment-anything",
+			description: "Image re-lighting model.",
+			id: "kontext-community/relighting-kontext-dev-lora-v3",
 		},
 		{
-			description: "A model that takes an image and an instruction to edit the image.",
-			id: "timbrooks/instruct-pix2pix",
+			description: "Strong model for inpainting and outpainting.",
+			id: "black-forest-labs/FLUX.1-Fill-dev",
+		},
+		{
+			description: "Strong model for image editing using depth maps.",
+			id: "black-forest-labs/FLUX.1-Depth-dev-lora",
 		},
 	],
 	spaces: [
 		{
-			description: "Image enhancer application for low light.",
-			id: "keras-io/low-light-image-enhancement",
+			description: "Image editing application.",
+			id: "black-forest-labs/FLUX.1-Kontext-Dev",
 		},
 		{
-			description: "Style transfer application.",
-			id: "keras-io/neural-style-transfer",
+			description: "Image relighting application.",
+			id: "lllyasviel/iclight-v2-vary",
 		},
 		{
-			description: "An application that generates images based on segment control.",
-			id: "mfidabel/controlnet-segment-anything",
-		},
-		{
-			description: "Image generation application that takes image control and text prompt.",
-			id: "hysts/ControlNet",
-		},
-		{
-			description: "Colorize any image using this app.",
-			id: "ioclab/brightness-controlnet",
-		},
-		{
-			description: "Edit images with instructions.",
-			id: "timbrooks/instruct-pix2pix",
+			description: "An application for image upscaling.",
+			id: "jasperai/Flux.1-dev-Controlnet-Upscaler",
 		},
 	],
 	summary:
-		"Image-to-image is the task of transforming a source image to match the characteristics of a target image or a target image domain. Any image manipulation and enhancement is possible with image to image models.",
-	widgetModels: ["lllyasviel/sd-controlnet-canny"],
+		"Image-to-image is the task of transforming an input image through a variety of possible manipulations and enhancements, such as super-resolution, image inpainting, colorization, and more.",
+	widgetModels: ["Qwen/Qwen-Image"],
 	youtubeId: "",
 };
 

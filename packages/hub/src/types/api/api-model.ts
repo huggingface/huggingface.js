@@ -1,4 +1,4 @@
-import type { ModelLibraryKey, TransformersInfo } from "@huggingface/tasks";
+import type { ModelLibraryKey, TransformersInfo, WidgetType } from "@huggingface/tasks";
 import type { License, PipelineType } from "../public";
 
 export interface ApiModelInfo {
@@ -18,6 +18,7 @@ export interface ApiModelInfo {
 	downloadsAllTime: number;
 	files: string[];
 	gitalyUid: string;
+	inferenceProviderMapping?: ApiModelInferenceProviderMappingEntry[];
 	lastAuthor: { email: string; user?: string };
 	lastModified: string; // convert to date
 	library_name?: ModelLibraryKey;
@@ -36,6 +37,7 @@ export interface ApiModelInfo {
 		parameters: Record<string, number>;
 		total: number;
 	};
+	siblings: Array<{ rfilename: string }>;
 	transformersInfo?: TransformersInfo;
 }
 
@@ -114,7 +116,7 @@ Also encode config params into the name if relevant.
 						[x: string]: string;
 				  };
 			/**
-			 * [Automatically computed, do not set] Dynamically overriden by huggingface in API calls to indicate if it was verified by Hugging Face.
+			 * [Automatically computed, do not set] Dynamically overridden by huggingface in API calls to indicate if it was verified by Hugging Face.
 			 */
 			verified?: boolean;
 			/**
@@ -267,4 +269,15 @@ export interface ApiModelMetadata {
 	extra_gated_heading?: string;
 	extra_gated_description?: string;
 	extra_gated_button_content?: string;
+}
+
+export interface ApiModelInferenceProviderMappingEntry {
+	provider: string; // Provider name
+	hfModelId: string; // ID of the model on the Hugging Face Hub
+	providerId: string; // ID of the model on the provider's side
+	status: "live" | "staging";
+	task: WidgetType;
+	adapter?: string;
+	adapterWeightsPath?: string;
+	type?: "single-file" | "tag-filter";
 }

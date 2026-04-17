@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -36,14 +36,27 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A strong image feature extraction model.",
-			id: "google/vit-base-patch16-224-in21k",
+			id: "nvidia/MambaVision-T-1K",
 		},
 		{
-			description: "A robust image feature extraction models.",
+			description: "A robust image feature extraction model.",
 			id: "facebook/dino-vitb16",
 		},
+		{
+			description: "Cutting-edge image feature extraction model.",
+			id: "apple/aimv2-large-patch14-336-distilled",
+		},
+		{
+			description: "Strong image feature extraction model that can be used on images and documents.",
+			id: "OpenGVLab/InternViT-6B-448px-V1-2",
+		},
 	],
-	spaces: [],
+	spaces: [
+		{
+			description: "A leaderboard to evaluate different image-feature-extraction models on classification performances",
+			id: "timm/leaderboard",
+		},
+	],
 	summary: "Image feature extraction is the task of extracting features learnt in a computer vision model.",
 	widgetModels: [],
 };

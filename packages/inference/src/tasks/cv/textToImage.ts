@@ -1,51 +1,47 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import type { TextToImageInput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import { makeRequestOptions } from "../../lib/makeRequestOptions.js";
+import type { BaseArgs, Options, OutputType } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
-export type TextToImageArgs = BaseArgs & {
-	/**
-	 * The text to generate an image from
-	 */
-	inputs: string;
+export type TextToImageArgs = BaseArgs & TextToImageInput;
 
-	parameters?: {
-		/**
-		 * An optional negative prompt for the image generation
-		 */
-		negative_prompt?: string;
-		/**
-		 * The height in pixels of the generated image
-		 */
-		height?: number;
-		/**
-		 * The width in pixels of the generated image
-		 */
-		width?: number;
-		/**
-		 * The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference.
-		 */
-		num_inference_steps?: number;
-		/**
-		 * Guidance scale: Higher guidance scale encourages to generate images that are closely linked to the text `prompt`, usually at the expense of lower image quality.
-		 */
-		guidance_scale?: number;
-	};
-};
-
-export type TextToImageOutput = Blob;
+interface TextToImageOptions extends Options {
+	outputType?: OutputType;
+}
 
 /**
  * This task reads some text input and outputs an image.
  * Recommended model: stabilityai/stable-diffusion-2
  */
-export async function textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageOutput> {
-	const res = await request<TextToImageOutput>(args, {
+export async function textToImage(
+	args: TextToImageArgs,
+	options?: TextToImageOptions & { outputType: "url" },
+): Promise<string>;
+export async function textToImage(
+	args: TextToImageArgs,
+	options?: TextToImageOptions & { outputType: "dataUrl" },
+): Promise<string>;
+export async function textToImage(
+	args: TextToImageArgs,
+	options?: TextToImageOptions & { outputType?: undefined | "blob" },
+): Promise<Blob>;
+export async function textToImage(
+	args: TextToImageArgs,
+	options?: TextToImageOptions & { outputType?: undefined | "json" },
+): Promise<Record<string, unknown>>;
+export async function textToImage(
+	args: TextToImageArgs,
+	options?: TextToImageOptions,
+): Promise<Blob | string | Record<string, unknown>> {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "text-to-image");
+	const { data: res } = await innerRequest<Record<string, unknown>>(args, providerHelper, {
 		...options,
-		taskHint: "text-to-image",
+		task: "text-to-image",
 	});
-	const isValidOutput = res && res instanceof Blob;
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Blob");
-	}
-	return res;
+
+	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "text-to-image" });
+	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, options?.outputType);
 }

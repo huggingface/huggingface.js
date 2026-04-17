@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Token Classification",
 			"$ref": "#/$defs/TokenClassificationParameters"
 		}
 	},
 	"$defs": {
 		"TokenClassificationParameters": {
 			"title": "TokenClassificationParameters",
-			"description": "Additional inference parameters for Token Classification",
 			"type": "object",
 			"properties": {
 				"ignore_labels": {

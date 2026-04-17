@@ -19,11 +19,8 @@ export const textToImageTool: Tool = {
 		const data = await input;
 		if (typeof data !== "string") throw "Input must be a string.";
 
-		return await inference.textToImage(
-			{
-				inputs: data,
-			},
-			{ wait_for_model: true }
-		);
+		return await inference.textToImage({
+			inputs: data,
+		});
 	},
 };

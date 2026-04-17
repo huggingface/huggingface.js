@@ -13,14 +13,11 @@ export const Box = (): HTMLDivElement => {
 	box.style.justifyContent = "space-between";
 	box.style.overflow = "hidden";
 	box.style.position = "fixed";
-	box.style.right = "1.5rem";
-	box.style.top = "1.25rem";
+	box.style.right = ".75rem";
+	box.style.top = ".75rem";
 	box.style.width = "auto";
 	box.style.zIndex = "20";
-	box.style.padding = "0.75rem";
 	box.style.paddingLeft = "1rem";
-	box.style.paddingRight = "0rem";
-
 	box.setAttribute("id", "huggingface-space-header");
 
 	window.matchMedia("(max-width: 768px)").addEventListener("change", (e) => {

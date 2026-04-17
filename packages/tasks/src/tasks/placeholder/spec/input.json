@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "TODO: describe additional parameters here.",
 			"$ref": "#/$defs/<TASK_ID>Parameters"
 		}
 	},
 	"$defs": {
 		"<TASK_ID>Parameters": {
 			"title": "<TASK_ID>Parameters",
-			"description": "TODO: describe additional parameters here.",
 			"type": "object",
 			"properties": {
 				"dummy_parameter_name": {

@@ -1,0 +1,15 @@
+import { InferenceClient } from "@huggingface/inference";
+
+const client = new InferenceClient("{{ accessToken }}");
+
+const video = await client.textToVideo({
+{% if endpointUrl %}
+    endpointUrl: "{{ endpointUrl }}",
+{% endif %}
+    provider: "{{ provider }}",
+    model: "{{ model.id }}",
+	inputs: {{ inputs.asObj.inputs }},
+}{% if billTo %}, {
+    billTo: "{{ billTo }}",
+}{% endif %});
+// Use the generated video (it's a Blob)

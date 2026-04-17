@@ -1,31 +1,69 @@
 import type { PipelineType } from "@huggingface/tasks";
 
-export type RepoType = "space" | "dataset" | "model";
+export type RepoType = "space" | "dataset" | "model" | "bucket" | "kernel";
 
 export interface RepoId {
 	name: string;
 	type: RepoType;
 }
 
-export type RepoFullName = string | `spaces/${string}` | `datasets/${string}`;
+export type RepoFullName =
+	| string
+	| `spaces/${string}`
+	| `datasets/${string}`
+	| `buckets/${string}`
+	| `kernels/${string}`;
 
 export type RepoDesignation = RepoId | RepoFullName;
 
 /** Actually `hf_${string}`, but for convenience, using the string type */
 export type AccessToken = string;
 
+/**
+ * @deprecated Use `AccessToken` instead. Pass { accessToken: "hf_..." } instead of { credentials: { accessToken: "hf_..." } }
+ */
 export interface Credentials {
 	accessToken: AccessToken;
 }
 
+export type CredentialsParams =
+	| {
+			accessToken?: undefined;
+			/**
+			 * @deprecated Use `accessToken` instead
+			 */
+			credentials: Credentials;
+	  }
+	| {
+			accessToken: AccessToken;
+			/**
+			 * @deprecated Use `accessToken` instead
+			 */
+			credentials?: undefined;
+	  };
+
 export type SpaceHardwareFlavor =
 	| "cpu-basic"
 	| "cpu-upgrade"
+	| "cpu-performance"
+	| "cpu-xl"
+	| "sprx8"
+	| "zero-a10g"
+	| "inf2x6"
 	| "t4-small"
 	| "t4-medium"
+	| "l4x1"
+	| "l4x4"
+	| "l40sx1"
+	| "l40sx4"
+	| "l40sx8"
 	| "a10g-small"
 	| "a10g-large"
-	| "a100-large";
+	| "a10g-largex2"
+	| "a10g-largex4"
+	| "a100-large"
+	| "a100x4"
+	| "a100x8";
 
 export type SpaceSdk = "streamlit" | "gradio" | "docker" | "static";
 
@@ -148,6 +186,11 @@ export type License =
 	| "deepfloyd-if-license"
 	| "llama2"
 	| "llama3"
+	| "llama3.1"
+	| "llama3.2"
+	| "llama3.3"
 	| "gemma"
+	| "apple-ascl"
+	| "apple-amlr"
 	| "unknown"
 	| "other";

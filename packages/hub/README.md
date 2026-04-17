@@ -30,23 +30,25 @@ For some of the calls, you need to create an account and generate an [access tok
 Learn how to find free models using the hub package in this [interactive tutorial](https://scrimba.com/scrim/c7BbVPcd?pl=pkVnrP7uP).
 
 ```ts
-import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
-import type { RepoDesignation, Credentials } from "@huggingface/hub";
+import * as hub from "@huggingface/hub";
+import type { RepoDesignation } from "@huggingface/hub";
 
 const repo: RepoDesignation = { type: "model", name: "myname/some-model" };
-const credentials: Credentials = { accessToken: "hf_..." };
 
-const {name: username} = await whoAmI({credentials});
+const {name: username} = await hub.whoAmI({accessToken: "hf_..."});
 
-for await (const model of listModels({search: {owner: username}, credentials})) {
+for await (const model of hub.listModels({search: {owner: username}, accessToken: "hf_..."})) {
   console.log("My model:", model);
 }
 
-await createRepo({ repo, credentials, license: "mit" });
+const specificModel = await hub.modelInfo({name: "openai-community/gpt2"});
+await hub.checkRepoAccess({repo, accessToken: "hf_..."});
 
-await uploadFiles({
+await hub.createRepo({ repo, accessToken: "hf_...", license: "mit" });
+
+await hub.uploadFiles({
   repo,
-  credentials,
+  accessToken: "hf_...",
   files: [
     // path + blob content
     {
@@ -55,6 +57,8 @@ await uploadFiles({
     },
     // Local file URL
     pathToFileURL("./pytorch-model.bin"),
+    // Local folder URL
+    pathToFileURL("./models"),
     // Web URL
     new URL("https://huggingface.co/xlm-roberta-base/resolve/main/tokenizer.json"),
     // Path + Web URL
@@ -68,9 +72,9 @@ await uploadFiles({
 
 // or
 
-for await (const progressEvent of await uploadFilesWithProgress({
+for await (const progressEvent of await hub.uploadFilesWithProgress({
   repo,
-  credentials,
+  accessToken: "hf_...",
   files: [
     ...
   ],
@@ -78,15 +82,65 @@ for await (const progressEvent of await uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
-await deleteFile({repo, credentials, path: "myfile.bin"});
+// Edit a file by adding prefix & suffix
+await commit({
+  repo,
+  accessToken: "hf_...",
+  operations: [{
+    type: "edit",
+    originalContent: originalFile,
+    edits: [{
+      start: 0,
+      end: 0,
+      content: new Blob(["prefix"])
+    }, {
+      start: originalFile.length,
+      end: originalFile.length,
+      content: new Blob(["suffix"])
+    }]
+  }]
+})
 
-await (await downloadFile({ repo, path: "README.md" })).text();
+await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
-for await (const fileInfo of listFiles({repo})) {
+await (await hub.downloadFile({ repo, path: "README.md" })).text();
+
+for await (const fileInfo of hub.listFiles({repo})) {
   console.log(fileInfo);
 }
 
-await deleteRepo({ repo, credentials });
+await hub.deleteRepo({ repo, accessToken: "hf_..." });
+```
+
+## CLI usage
+
+You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo. 
+
+```console
+npx @huggingface/hub upload coyotte508/test-model .
+npx @huggingface/hub upload datasets/coyotte508/test-dataset .
+# Same thing
+npx @huggingface/hub upload --repo-type dataset coyotte508/test-dataset .
+# Upload new data with 0 history in a separate branch
+npx @huggingface/hub branch create coyotte508/test-model release --empty
+npx @huggingface/hub upload coyotte508/test-model . --revision release
+
+npx @huggingface/hub --help
+npx @huggingface/hub upload --help
+```
+
+You can also install globally with `npm install -g @huggingface/hub`. Then you can do:
+
+```console
+hfjs upload coyotte508/test-model .
+
+hfjs branch create --repo-type dataset coyotte508/test-dataset release --empty
+hfjs upload --repo-type dataset coyotte508/test-dataset . --revision release
+
+hfjs --help
+hfjs  upload --help
+
+hfjs help jobs
 ```
 
 ## OAuth Login
@@ -111,6 +165,56 @@ console.log(oauthResult);
 
 Checkout the demo: https://huggingface.co/spaces/huggingfacejs/client-side-oauth
 
+## Hugging face cache
+
+The `@huggingface/hub` package provide basic capabilities to scan the cache directory. Learn more about [Manage huggingface_hub cache-system](https://huggingface.co/docs/huggingface_hub/en/guides/manage-cache).
+
+### `scanCacheDir`
+
+You can get the list of cached repositories using the `scanCacheDir` function.
+
+```ts
+import { scanCacheDir } from "@huggingface/hub";
+
+const result = await scanCacheDir();
+
+console.log(result);
+```
+Note: this does not work in the browser
+
+### `downloadFileToCacheDir`
+
+You can cache a file of a repository using the `downloadFileToCacheDir` function.
+
+```ts
+import { downloadFileToCacheDir } from "@huggingface/hub";
+
+const file = await downloadFileToCacheDir({
+  repo: 'foo/bar',
+  path: 'README.md'
+});
+
+console.log(file);
+```
+Note: this does not work in the browser
+
+### `snapshotDownload`
+
+You can download an entire repository at a given revision in the cache directory using the `snapshotDownload` function.
+
+```ts
+import { snapshotDownload } from "@huggingface/hub";
+
+const directory = await snapshotDownload({
+  repo: 'foo/bar',
+});
+
+console.log(directory);
+```
+The code use internally the `downloadFileToCacheDir` function.
+
+Note: this does not work in the browser
+
 ## Performance considerations
 
 When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
@@ -121,5 +225,4 @@ Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the f
 
 ## Dependencies
 
-- `hash-wasm` : Only used in the browser, when committing files over 10 MB. Browsers do not natively support streaming sha256 computations.
 - `@huggingface/tasks` : Typings only

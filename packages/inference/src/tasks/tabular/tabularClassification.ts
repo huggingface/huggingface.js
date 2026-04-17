@@ -1,6 +1,7 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type TabularClassificationArgs = BaseArgs & {
 	inputs: {
@@ -23,15 +24,13 @@ export type TabularClassificationOutput = number[];
  */
 export async function tabularClassification(
 	args: TabularClassificationArgs,
-	options?: Options
+	options?: Options,
 ): Promise<TabularClassificationOutput> {
-	const res = await request<TabularClassificationOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "tabular-classification");
+	const { data: res } = await innerRequest<TabularClassificationOutput>(args, providerHelper, {
 		...options,
-		taskHint: "tabular-classification",
+		task: "tabular-classification",
 	});
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected number[]");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

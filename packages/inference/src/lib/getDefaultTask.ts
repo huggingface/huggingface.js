@@ -1,4 +1,5 @@
-import { isUrl } from "./isUrl";
+import { HF_HUB_URL } from "../config.js";
+import { isUrl } from "./isUrl.js";
 
 /**
  * We want to make calls to the huggingface hub the least possible, eg if
@@ -8,7 +9,6 @@ import { isUrl } from "./isUrl";
 const taskCache = new Map<string, { task: string; date: Date }>();
 const CACHE_DURATION = 10 * 60 * 1000;
 const MAX_CACHE_ITEMS = 1000;
-export const HF_HUB_URL = "https://huggingface.co";
 
 export interface DefaultTaskOptions {
 	fetch?: typeof fetch;
@@ -23,7 +23,7 @@ export interface DefaultTaskOptions {
 export async function getDefaultTask(
 	model: string,
 	accessToken: string | undefined,
-	options?: DefaultTaskOptions
+	options?: DefaultTaskOptions,
 ): Promise<string | null> {
 	if (isUrl(model)) {
 		return null;
@@ -53,7 +53,8 @@ export async function getDefaultTask(
 		taskCache.set(key, { task: modelTask, date: new Date() });
 
 		if (taskCache.size > MAX_CACHE_ITEMS) {
-			taskCache.delete(taskCache.keys().next().value);
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			taskCache.delete(taskCache.keys().next().value!);
 		}
 	}
 

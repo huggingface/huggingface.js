@@ -1,73 +1,42 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import type { RequestArgs } from "../../types";
-import { toArray } from "../../utils/toArray";
-import { base64FromBytes } from "../../utils/base64FromBytes";
+import type {
+	DocumentQuestionAnsweringInput,
+	DocumentQuestionAnsweringInputData,
+	DocumentQuestionAnsweringOutput,
+} from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options, RequestArgs } from "../../types.js";
+import { base64FromBytes } from "../../utils/base64FromBytes.js";
+import { innerRequest } from "../../utils/request.js";
 
-export type DocumentQuestionAnsweringArgs = BaseArgs & {
-	inputs: {
-		/**
-		 * Raw image
-		 *
-		 * You can use native `File` in browsers, or `new Blob([buffer])` in node, or for a base64 image `new Blob([btoa(base64String)])`, or even `await (await fetch('...)).blob()`
-		 **/
-		image: Blob | ArrayBuffer;
-		question: string;
-	};
-};
-
-export interface DocumentQuestionAnsweringOutput {
-	/**
-	 * A string that’s the answer within the document.
-	 */
-	answer: string;
-	/**
-	 * ?
-	 */
-	end?: number;
-	/**
-	 * A float that represents how likely that the answer is correct
-	 */
-	score?: number;
-	/**
-	 * ?
-	 */
-	start?: number;
-}
+/// Override the type to properly set inputs.image as Blob
+export type DocumentQuestionAnsweringArgs = BaseArgs &
+	DocumentQuestionAnsweringInput & { inputs: DocumentQuestionAnsweringInputData & { image: Blob } };
 
 /**
  * Answers a question on a document image. Recommended model: impira/layoutlm-document-qa.
  */
 export async function documentQuestionAnswering(
 	args: DocumentQuestionAnsweringArgs,
-	options?: Options
-): Promise<DocumentQuestionAnsweringOutput> {
+	options?: Options,
+): Promise<DocumentQuestionAnsweringOutput[number]> {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "document-question-answering");
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {
 			question: args.inputs.question,
 			// convert Blob or ArrayBuffer to base64
-			image: base64FromBytes(
-				new Uint8Array(
-					args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer()
-				)
-			),
+			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
 		},
 	} as RequestArgs;
-	const res = toArray(
-		await request<[DocumentQuestionAnsweringOutput] | DocumentQuestionAnsweringOutput>(reqArgs, {
+	const { data: res } = await innerRequest<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(
+		reqArgs,
+		providerHelper,
+		{
 			...options,
-			taskHint: "document-question-answering",
-		})
-	)?.[0];
-	const isValidOutput =
-		typeof res?.answer === "string" &&
-		(typeof res.end === "number" || typeof res.end === "undefined") &&
-		(typeof res.score === "number" || typeof res.score === "undefined") &&
-		(typeof res.start === "number" || typeof res.start === "undefined");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{answer: string, end?: number, score?: number, start?: number}>");
-	}
-	return res;
+			task: "document-question-answering",
+		},
+	);
+	return providerHelper.getResponse(res);
 }

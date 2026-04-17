@@ -1,23 +1,34 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description: "A large multilingual dataset of text crawled from the web.",
-			id: "mc4",
+			description: "Multilingual dataset used to evaluate text generation models.",
+			id: "CohereForAI/Global-MMLU",
 		},
 		{
-			description:
-				"Diverse open-source data consisting of 22 smaller high-quality datasets. It was used to train GPT-Neo.",
-			id: "the_pile",
+			description: "High quality multilingual data used to train text-generation models.",
+			id: "HuggingFaceFW/fineweb-2",
 		},
 		{
 			description: "Truly open-source, curated and cleaned dialogue dataset.",
 			id: "HuggingFaceH4/ultrachat_200k",
 		},
 		{
-			description: "An instruction dataset with preference ratings on responses.",
-			id: "openbmb/UltraFeedback",
+			description: "A reasoning dataset.",
+			id: "open-r1/OpenThoughts-114k-math",
+		},
+		{
+			description: "A multilingual instruction dataset with preference ratings on responses.",
+			id: "allenai/tulu-3-sft-mixture",
+		},
+		{
+			description: "A large synthetic dataset for alignment of text generation models.",
+			id: "HuggingFaceTB/smoltalk",
+		},
+		{
+			description: "A dataset made for training text generation models solving math questions.",
+			id: "HuggingFaceTB/finemath",
 		},
 	],
 	demo: {
@@ -50,39 +61,48 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	models: [
+		{ description: "A text-generation model trained to follow instructions.", id: "google/gemma-2-2b-it" },
 		{
-			description: "A large language model trained for text generation.",
-			id: "bigscience/bloom-560m",
+			description: "Powerful text generation model for coding.",
+			id: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
 		},
 		{
-			description: "A large code generation model that can generate code in 80+ languages.",
-			id: "bigcode/starcoder",
+			description: "Great text generation model with top-notch tool calling capabilities.",
+			id: "openai/gpt-oss-120b",
 		},
 		{
-			description: "A very powerful text generation model.",
-			id: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+			description: "Powerful text generation model.",
+			id: "zai-org/GLM-4.5",
 		},
 		{
-			description: "Small yet powerful text generation model.",
-			id: "microsoft/phi-2",
+			description: "A powerful small model with reasoning capabilities.",
+			id: "Qwen/Qwen3-4B-Thinking-2507",
 		},
 		{
-			description: "A very powerful model that can chat, do mathematical reasoning and write code.",
-			id: "openchat/openchat-3.5-0106",
+			description: "Strong conversational model that supports very long instructions.",
+			id: "Qwen/Qwen2.5-7B-Instruct-1M",
 		},
 		{
-			description: "Very strong yet small assistant model.",
-			id: "HuggingFaceH4/zephyr-7b-beta",
+			description: "Text generation model used to write code.",
+			id: "Qwen/Qwen2.5-Coder-32B-Instruct",
 		},
 		{
-			description: "Very strong open-source large language model.",
-			id: "meta-llama/Llama-2-70b-hf",
+			description: "Powerful reasoning based open large language model.",
+			id: "deepseek-ai/DeepSeek-R1",
 		},
 	],
 	spaces: [
 		{
-			description: "A leaderboard to compare different open-source text generation models based on various benchmarks.",
-			id: "HuggingFaceH4/open_llm_leaderboard",
+			description: "An application that writes and executes code from text instructions and supports many models.",
+			id: "akhaliq/anycoder",
+		},
+		{
+			description: "An application that builds websites from natural language prompts.",
+			id: "enzostvs/deepsite",
+		},
+		{
+			description: "A leaderboard for comparing chain-of-thought performance of models.",
+			id: "logikon/open_cot_leaderboard",
 		},
 		{
 			description: "An text generation based application based on a very powerful LLaMA2 model.",
@@ -93,8 +113,8 @@ const taskData: TaskDataCustom = {
 			id: "HuggingFaceH4/zephyr-chat",
 		},
 		{
-			description: "An text generation application that combines OpenAI and Hugging Face models.",
-			id: "microsoft/HuggingGPT",
+			description: "A leaderboard that ranks text generation models based on blind votes from people.",
+			id: "lmsys/chatbot-arena-leaderboard",
 		},
 		{
 			description: "An chatbot to converse with a very powerful text generation model.",
@@ -103,8 +123,8 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Generating text is the task of generating new text given another text. These models can, for example, fill in incomplete text or paraphrase.",
-	widgetModels: ["HuggingFaceH4/zephyr-7b-beta"],
-	youtubeId: "Vpjb1lu0MDk",
+	widgetModels: ["mistralai/Mistral-Nemo-Instruct-2407"],
+	youtubeId: "e9gNEAlsOvU",
 };
 
 export default taskData;

@@ -3,3 +3,4 @@ pnpm-lock.yaml
 README.md
 dist
 sha256.js
+src/vendor/xet-chunk/chunker_wasm_bg.js

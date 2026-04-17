@@ -1,0 +1,20 @@
+import { InferenceClient } from "@huggingface/inference";
+
+const client = new InferenceClient("{{ accessToken }}");
+
+const chatCompletion = await client.chatCompletion({
+{% if endpointUrl %}
+    endpointUrl: "{{ endpointUrl }}",
+{% endif %}
+{% if directRequest %}
+    provider: "{{ provider }}",
+    model: "{{ model.id }}",
+{% else %}
+    model: "{{ providerModelId }}",
+{% endif %}
+{{ inputs.asTsString }}
+}{% if billTo %}, {
+    billTo: "{{ billTo }}",
+}{% endif %});
+
+console.log(chatCompletion.choices[0].message);

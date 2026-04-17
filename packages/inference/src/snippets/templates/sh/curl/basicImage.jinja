@@ -1,0 +1,8 @@
+curl {{ fullUrl }} \
+    -X POST \
+    -H 'Authorization: {{ authorizationHeader }}' \
+    -H 'Content-Type: image/jpeg' \
+{% if billTo %}
+    -H 'X-HF-Bill-To: {{ billTo }}' \
+{% endif %}
+    --data-binary @{{ providerInputs.asObj.inputs }}

@@ -1,3 +1,4 @@
+import type { CredentialsParams } from "../types/public";
 import { typedInclude } from "../utils/typedInclude";
 import type { CommitOutput, CommitParams, CommitProgressEvent, ContentSource } from "./commit";
 import { commitIter } from "./commit";
@@ -13,31 +14,34 @@ const multipartUploadTracking = new WeakMap<
 /**
  * Uploads with progress
  *
- * Needs XMLHttpRequest to be available for progress events for uploads
- * Set useWebWorkers to true in order to have progress events for hashing
+ * Needs XMLHttpRequest to be available for progress events for uploads on models, datasets and spaces.
+ * Set useWebWorkers to true in order to have progress events for hashing for models, datasets and spaces.
  */
-export async function* uploadFilesWithProgress(params: {
-	credentials?: CommitParams["credentials"];
-	repo: CommitParams["repo"];
-	files: Array<URL | File | { path: string; content: ContentSource }>;
-	commitTitle?: CommitParams["title"];
-	commitDescription?: CommitParams["description"];
-	hubUrl?: CommitParams["hubUrl"];
-	branch?: CommitParams["branch"];
-	isPullRequest?: CommitParams["isPullRequest"];
-	parentCommit?: CommitParams["parentCommit"];
-	abortSignal?: CommitParams["abortSignal"];
-	/**
-	 * Set this to true in order to have progress events for hashing
-	 */
-	useWebWorkers?: CommitParams["useWebWorkers"];
-}): AsyncGenerator<CommitProgressEvent, CommitOutput> {
+export async function* uploadFilesWithProgress(
+	params: {
+		repo: CommitParams["repo"];
+		files: Array<URL | File | { path: string; content: ContentSource }>;
+		commitTitle?: CommitParams["title"];
+		commitDescription?: CommitParams["description"];
+		hubUrl?: CommitParams["hubUrl"];
+		branch?: CommitParams["branch"];
+		isPullRequest?: CommitParams["isPullRequest"];
+		parentCommit?: CommitParams["parentCommit"];
+		abortSignal?: CommitParams["abortSignal"];
+		maxFolderDepth?: CommitParams["maxFolderDepth"];
+		useXet?: CommitParams["useXet"];
+		/**
+		 * Set this to true in order to have progress events for hashing
+		 */
+		useWebWorkers?: CommitParams["useWebWorkers"];
+	} & Partial<CredentialsParams>,
+): AsyncGenerator<CommitProgressEvent, CommitOutput | undefined> {
 	return yield* commitIter({
-		credentials: params.credentials,
+		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
 		operations: params.files.map((file) => ({
 			operation: "addOrUpdate",
-			path: file instanceof URL ? file.pathname.split("/").at(-1) ?? "file" : "path" in file ? file.path : file.name,
+			path: file instanceof URL ? (file.pathname.split("/").at(-1) ?? "file") : "path" in file ? file.path : file.name,
 			content: "content" in file ? file.content : file,
 		})),
 		title: params.commitTitle ?? `Add ${params.files.length} files`,
@@ -48,6 +52,7 @@ export async function* uploadFilesWithProgress(params: {
 		parentCommit: params.parentCommit,
 		useWebWorkers: params.useWebWorkers,
 		abortSignal: params.abortSignal,
+		useXet: params.useXet,
 		fetch: async (input, init) => {
 			if (!init) {
 				return fetch(input);
@@ -125,9 +130,12 @@ export async function* uploadFilesWithProgress(params: {
 									.getAllResponseHeaders()
 									.trim()
 									.split("\n")
-									.map((header) => [header.slice(0, header.indexOf(":")), header.slice(header.indexOf(":") + 1).trim()])
+									.map((header) => [
+										header.slice(0, header.indexOf(":")),
+										header.slice(header.indexOf(":") + 1).trim(),
+									]),
 							),
-						})
+						}),
 					);
 				});
 				xhr.addEventListener("error", () => {

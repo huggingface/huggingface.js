@@ -8,38 +8,26 @@
  */
 export interface ZeroShotClassificationInput {
 	/**
-	 * The input text data, with candidate labels
-	 */
-	inputs: ZeroShotClassificationInputData;
-	/**
-	 * Additional inference parameters
-	 */
-	parameters?: ZeroShotClassificationParameters;
-	[property: string]: unknown;
-}
-/**
- * The input text data, with candidate labels
- */
-export interface ZeroShotClassificationInputData {
-	/**
-	 * The set of possible class labels to classify the text into.
-	 */
-	candidateLabels: string[];
-	/**
 	 * The text to classify
 	 */
-	text: string;
+	inputs: string;
+	/**
+	 * Additional inference parameters for Zero Shot Classification
+	 */
+	parameters: ZeroShotClassificationParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Zero Shot Classification
  */
 export interface ZeroShotClassificationParameters {
 	/**
-	 * The sentence used in conjunction with candidateLabels to attempt the text classification
-	 * by replacing the placeholder with the candidate labels.
+	 * The set of possible class labels to classify the text into.
+	 */
+	candidate_labels: string[];
+	/**
+	 * The sentence used in conjunction with `candidate_labels` to attempt the text
+	 * classification by replacing the placeholder with the candidate labels.
 	 */
 	hypothesis_template?: string;
 	/**

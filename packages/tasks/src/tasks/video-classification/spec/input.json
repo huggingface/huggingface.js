@@ -9,19 +9,19 @@
 			"description": "The input video data"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Video Classification",
 			"$ref": "#/$defs/VideoClassificationParameters"
 		}
 	},
 	"$defs": {
 		"VideoClassificationParameters": {
 			"title": "VideoClassificationParameters",
-			"description": "Additional inference parameters for Video Classification",
 			"type": "object",
 			"properties": {
 				"function_to_apply": {
 					"title": "TextClassificationOutputTransform",
-					"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutputTransform"
+					"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutputTransform",
+					"description": "The function to apply to the model outputs in order to retrieve the scores."
 				},
 				"num_frames": {
 					"type": "integer",

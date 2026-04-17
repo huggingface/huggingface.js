@@ -28,16 +28,32 @@
 			"required": ["table", "question"]
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Table Question Answering",
 			"$ref": "#/$defs/TableQuestionAnsweringParameters"
 		}
 	},
 	"$defs": {
 		"TableQuestionAnsweringParameters": {
 			"title": "TableQuestionAnsweringParameters",
-			"description": "Additional inference parameters for Table Question Answering",
 			"type": "object",
-			"properties": {}
+			"properties": {
+				"padding": {
+					"type": "string",
+					"default": "do_not_pad",
+					"description": "Activates and controls padding.",
+					"enum": ["do_not_pad", "longest", "max_length"]
+				},
+				"sequential": {
+					"type": "boolean",
+					"default": "false",
+					"description": "Whether to do inference sequentially or as a batch. Batching is faster, but models like SQA require the inference to be done sequentially to extract relations within sequences, given their conversational nature."
+				},
+				"truncation": {
+					"type": "boolean",
+					"default": "false",
+					"description": "Activates and controls truncation."
+				}
+			}
 		}
 	},
 	"required": ["inputs"]

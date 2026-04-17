@@ -1,14 +1,40 @@
 {
 	"name": "@huggingface/hub",
-	"packageManager": "pnpm@8.10.5",
-	"version": "0.15.1",
+	"version": "2.11.0",
 	"description": "Utilities to interact with the Hugging Face hub",
+	"keywords": [
+		"api",
+		"client",
+		"face",
+		"hub",
+		"hugging",
+		"huggingface"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
-	"publishConfig": {
-		"access": "public"
+	"bin": {
+		"hfjs": "./dist/cli.js"
 	},
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"index.ts",
+		"src",
+		"tsconfig.json"
+	],
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
+	"browser": {
+		"./src/utils/sha256-node.ts": false,
+		"./src/utils/sub-paths.ts": false,
+		"./src/utils/FileBlob.ts": false,
+		"./src/lib/cache-management.ts": false,
+		"./src/lib/download-file-to-cache-dir.ts": false,
+		"./src/lib/snapshot-download.ts": false,
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
@@ -17,48 +43,36 @@
 			"import": "./dist/index.mjs"
 		}
 	},
-	"browser": {
-		"./src/utils/sha256-node.ts": false,
-		"./src/utils/FileBlob.ts": false,
-		"./dist/index.js": "./dist/browser/index.js",
-		"./dist/index.mjs": "./dist/browser/index.mjs"
+	"publishConfig": {
+		"access": "public"
 	},
-	"engines": {
-		"node": ">=18"
-	},
-	"source": "index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
-		"check": "tsc"
-	},
-	"files": [
-		"src",
-		"dist",
-		"index.ts",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"hub",
-		"api",
-		"client",
-		"hugging",
-		"face"
-	],
-	"author": "Hugging Face",
-	"license": "MIT",
-	"devDependencies": {
-		"@types/node": "^20.11.28"
+		"check": "tsc",
+		"build:xet-wasm": "./scripts/build-xet-wasm.sh -t bundler --clean",
+		"bench": "tsx scripts/bench.ts",
+		"debug-xet": "tsx scripts/debug-xet.ts"
 	},
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^"
-	}
+		"@huggingface/tasks": "workspace:^",
+		"@huggingface/xetchunk-wasm": "workspace:^"
+	},
+	"devDependencies": {
+		"@types/cli-progress": "^3.11.6"
+	},
+	"optionalDependencies": {
+		"cli-progress": "^3.12.0"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"packageManager": "pnpm@10.10.0"
 }

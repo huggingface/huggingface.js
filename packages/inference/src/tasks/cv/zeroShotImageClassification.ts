@@ -1,30 +1,41 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import type { RequestArgs } from "../../types";
-import { base64FromBytes } from "../../utils/base64FromBytes";
+import type { ZeroShotImageClassificationInput, ZeroShotImageClassificationOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options, RequestArgs } from "../../types.js";
+import { base64FromBytes } from "../../utils/base64FromBytes.js";
+import { innerRequest } from "../../utils/request.js";
 
-export type ZeroShotImageClassificationArgs = BaseArgs & {
-	inputs: {
-		/**
-		 * Binary image data
-		 */
-		image: Blob | ArrayBuffer;
-	};
-	parameters: {
-		/**
-		 * A list of strings that are potential classes for inputs. (max 10)
-		 */
-		candidate_labels: string[];
-	};
-};
-
-export interface ZeroShotImageClassificationOutputValue {
-	label: string;
-	score: number;
+/**
+ * @deprecated
+ */
+interface LegacyZeroShotImageClassificationInput {
+	inputs: { image: Blob | ArrayBuffer };
 }
 
-export type ZeroShotImageClassificationOutput = ZeroShotImageClassificationOutputValue[];
+export type ZeroShotImageClassificationArgs = BaseArgs &
+	(ZeroShotImageClassificationInput | LegacyZeroShotImageClassificationInput);
+
+async function preparePayload(args: ZeroShotImageClassificationArgs): Promise<RequestArgs> {
+	if (args.inputs instanceof Blob) {
+		return {
+			...args,
+			inputs: {
+				image: base64FromBytes(new Uint8Array(await args.inputs.arrayBuffer())),
+			},
+		};
+	} else {
+		return {
+			...args,
+			inputs: {
+				image: base64FromBytes(
+					new Uint8Array(
+						args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer(),
+					),
+				),
+			},
+		};
+	}
+}
 
 /**
  * Classify an image to specified classes.
@@ -32,27 +43,14 @@ export type ZeroShotImageClassificationOutput = ZeroShotImageClassificationOutpu
  */
 export async function zeroShotImageClassification(
 	args: ZeroShotImageClassificationArgs,
-	options?: Options
+	options?: Options,
 ): Promise<ZeroShotImageClassificationOutput> {
-	const reqArgs: RequestArgs = {
-		...args,
-		inputs: {
-			image: base64FromBytes(
-				new Uint8Array(
-					args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer()
-				)
-			),
-		},
-	} as RequestArgs;
-
-	const res = await request<ZeroShotImageClassificationOutput>(reqArgs, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "zero-shot-image-classification");
+	const payload = await preparePayload(args);
+	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, providerHelper, {
 		...options,
-		taskHint: "zero-shot-image-classification",
+		task: "zero-shot-image-classification",
 	});
-	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

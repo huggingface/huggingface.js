@@ -80,4 +80,84 @@ describe("listModels", () => {
 
 		expect(count).to.equal(10);
 	});
+
+	it("should search model by inference provider", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { inferenceProviders: ["together"] },
+			additionalFields: ["inferenceProviderMapping"],
+			limit: 10,
+		})) {
+			count++;
+			if (Array.isArray(entry.inferenceProviderMapping)) {
+				expect(entry.inferenceProviderMapping.map(({ provider }) => provider)).to.include("together");
+			}
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should search model by several inference providers", async () => {
+		let count = 0;
+		const inferenceProviders = ["together", "replicate"];
+		for await (const entry of listModels({
+			search: { inferenceProviders },
+			additionalFields: ["inferenceProviderMapping"],
+			limit: 10,
+		})) {
+			count++;
+			if (Array.isArray(entry.inferenceProviderMapping)) {
+				expect(
+					entry.inferenceProviderMapping.filter(({ provider }) => inferenceProviders.includes(provider)).length,
+				).toBeGreaterThan(0);
+			}
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should list meta-llama models with inference provider mapping", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { owner: "meta-llama" },
+			additionalFields: ["inferenceProviderMapping"],
+			limit: 1,
+		})) {
+			count++;
+			expect(entry.inferenceProviderMapping).to.be.an("array").that.is.not.empty;
+			for (const item of entry.inferenceProviderMapping ?? []) {
+				expect(item).to.have.property("provider").that.is.a("string").and.is.not.empty;
+				expect(item).to.have.property("hfModelId").that.is.a("string").and.is.not.empty;
+				expect(item).to.have.property("providerId").that.is.a("string").and.is.not.empty;
+			}
+		}
+
+		expect(count).to.equal(1);
+	});
+
+	it("should search models by apps", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { apps: ["mlx-lm"] },
+			additionalFields: ["tags"],
+			limit: 10,
+		})) {
+			count++;
+			expect(entry.tags).to.include("mlx");
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should list models with filePaths", async () => {
+		for await (const entry of listModels({
+			search: { owner: "huggingfacejs" },
+			additionalFields: ["filePaths"],
+		})) {
+			expect(entry.name).to.equal("huggingfacejs/test-model");
+			expect(entry.filePaths).to.be.an("array");
+			expect(entry.filePaths).to.include(".gitattributes");
+			expect(entry.filePaths).to.include("README.md");
+		}
+	});
 });

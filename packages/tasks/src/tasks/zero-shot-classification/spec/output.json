@@ -5,6 +5,7 @@
 	"title": "ZeroShotClassificationOutput",
 	"type": "array",
 	"items": {
+		"type": "object",
 		"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutput"
 	}
 }

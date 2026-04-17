@@ -12,7 +12,7 @@ export interface QuestionAnsweringInput {
 	 */
 	inputs: QuestionAnsweringInputData;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Question Answering
 	 */
 	parameters?: QuestionAnsweringParameters;
 	[property: string]: unknown;
@@ -32,8 +32,6 @@ export interface QuestionAnsweringInputData {
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Question Answering
  */
 export interface QuestionAnsweringParameters {

@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [],
@@ -39,18 +39,23 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "Solid zero-shot object detection model that uses CLIP as backbone.",
-			id: "google/owlvit-base-patch32",
+			description: "Solid zero-shot object detection model.",
+			id: "openmmlab-community/mm_grounding_dino_large_all",
 		},
 		{
-			description: "The improved version of the owlvit model.",
-			id: "google/owlv2-base-patch16-ensemble",
+			description: "Cutting-edge zero-shot object detection model.",
+			id: "fushh7/LLMDet",
 		},
 	],
 	spaces: [
 		{
-			description: "A demo to try the state-of-the-art zero-shot object detection model, OWLv2.",
-			id: "merve/owlv2",
+			description: "A demo to compare different zero-shot object detection models per output and latency.",
+			id: "ariG23498/zero-shot-od",
+		},
+		{
+			description:
+				"A demo that combines a zero-shot object detection and mask generation model for zero-shot segmentation.",
+			id: "merve/OWLSAM",
 		},
 	],
 	summary:

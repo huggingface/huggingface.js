@@ -1,4 +1,4 @@
-import { assert, it, describe } from "vitest";
+import { assert, it, describe, expect } from "vitest";
 
 import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts";
 import type { RepoId } from "../types/public";
@@ -12,13 +12,10 @@ describe("deleteFiles", () => {
 	it("should delete multiple files", async () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo = { type: "model", name: repoName } satisfies RepoId;
-		const credentials = {
-			accessToken: TEST_ACCESS_TOKEN,
-		};
 
 		try {
 			const result = await createRepo({
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				repo,
 				files: [
 					{ path: "file1", content: new Blob(["file1"]) },
@@ -28,8 +25,9 @@ describe("deleteFiles", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-			assert.deepStrictEqual(result, {
+			expect(result).toEqual({
 				repoUrl: `${TEST_HUB_URL}/${repoName}`,
+				id: expect.any(String),
 			});
 
 			let content = await downloadFile({
@@ -48,7 +46,7 @@ describe("deleteFiles", () => {
 
 			assert.strictEqual(await content?.text(), "file2");
 
-			await deleteFiles({ paths: ["file1", "file2"], repo, credentials, hubUrl: TEST_HUB_URL });
+			await deleteFiles({ paths: ["file1", "file2"], repo, accessToken: TEST_ACCESS_TOKEN, hubUrl: TEST_HUB_URL });
 
 			content = await downloadFile({
 				repo,
@@ -76,9 +74,9 @@ describe("deleteFiles", () => {
 		} finally {
 			await deleteRepo({
 				repo,
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});
 		}
 	});
-}, 10_000);
+});

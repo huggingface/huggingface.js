@@ -16,7 +16,7 @@ const lfsContent = "O123456789".repeat(100_000);
 describe("commit", () => {
 	it("should commit to a repo with blobs", async function () {
 		const tokenizerJsonUrl = new URL(
-			"https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"
+			"https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json",
 		);
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo: RepoId = {
@@ -25,9 +25,7 @@ describe("commit", () => {
 		};
 
 		await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			hubUrl: TEST_HUB_URL,
 			repo,
 			license: "mit",
@@ -35,7 +33,7 @@ describe("commit", () => {
 
 		try {
 			const readme1 = await downloadFile({ repo, path: "README.md", hubUrl: TEST_HUB_URL });
-			assert.strictEqual(readme1?.status, 200);
+			assert(readme1, "Readme doesn't exist");
 
 			const nodeOperation: CommitFile[] = isFrontend
 				? []
@@ -45,14 +43,12 @@ describe("commit", () => {
 							path: "tsconfig.json",
 							content: (await import("node:url")).pathToFileURL("./tsconfig.json") as URL,
 						},
-				  ];
+					];
 
 			await commit({
 				repo,
 				title: "Some commit",
-				credentials: {
-					accessToken: TEST_ACCESS_TOKEN,
-				},
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 				operations: [
 					{
@@ -81,11 +77,9 @@ describe("commit", () => {
 			});
 
 			const fileContent = await downloadFile({ repo, path: "test.txt", hubUrl: TEST_HUB_URL });
-			assert.strictEqual(fileContent?.status, 200);
 			assert.strictEqual(await fileContent?.text(), "This is me");
 
 			const lfsFileContent = await downloadFile({ repo, path: "test.lfs.txt", hubUrl: TEST_HUB_URL });
-			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), lfsContent);
 
 			const lfsFileUrl = `${TEST_HUB_URL}/${repoName}/raw/main/test.lfs.txt`;
@@ -97,20 +91,18 @@ describe("commit", () => {
 version https://git-lfs.github.com/spec/v1
 oid sha256:a3bbce7ee1df7233d85b5f4d60faa3755f93f537804f8b540c72b0739239ddf8
 size ${lfsContent.length}
-				`.trim()
+				`.trim(),
 			);
 
 			if (!isFrontend) {
 				const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json", hubUrl: TEST_HUB_URL });
-				assert.strictEqual(fileUrlContent?.status, 200);
 				assert.strictEqual(
 					await fileUrlContent?.text(),
-					(await import("node:fs")).readFileSync("./tsconfig.json", "utf-8")
+					(await import("node:fs")).readFileSync("./tsconfig.json", "utf-8"),
 				);
 			}
 
 			const webResourceContent = await downloadFile({ repo, path: "lamaral.json", hubUrl: TEST_HUB_URL });
-			assert.strictEqual(webResourceContent?.status, 200);
 			assert.strictEqual(await webResourceContent?.text(), await (await fetch(tokenizerJsonUrl)).text());
 
 			const readme2 = await downloadFile({ repo, path: "README.md", hubUrl: TEST_HUB_URL });
@@ -135,9 +127,7 @@ size ${lfsContent.length}
 		};
 
 		await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			repo,
 			hubUrl: TEST_HUB_URL,
 		});
@@ -159,13 +149,11 @@ size ${lfsContent.length}
 						// upload remote file
 						content: new URL(file),
 					};
-				})
+				}),
 			);
 			await commit({
 				repo,
-				credentials: {
-					accessToken: TEST_ACCESS_TOKEN,
-				},
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 				title: "upload model",
 				operations,
@@ -190,7 +178,7 @@ size ${lfsContent.length}
 version https://git-lfs.github.com/spec/v1
 oid sha256:3fb621eb9b37478239504ee083042d5b18699e8b8618e569478b03b119a85a69
 size 4194304			
-			`.trim()
+			`.trim(),
 			);
 		} finally {
 			await deleteRepo({
@@ -203,5 +191,81 @@ size 4194304
 			});
 		}
 		// https://huggingfacejs-push-model-from-web.hf.space/
+	}, 60_000);
+
+	it("should be able to create a PR and then commit to it", async function () {
+		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
+		const repo: RepoId = {
+			name: repoName,
+			type: "model",
+		};
+
+		await createRepo({
+			credentials: {
+				accessToken: TEST_ACCESS_TOKEN,
+			},
+			repo,
+			hubUrl: TEST_HUB_URL,
+		});
+
+		try {
+			const pr = await commit({
+				repo,
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
+				},
+				hubUrl: TEST_HUB_URL,
+				title: "Create PR",
+				isPullRequest: true,
+				operations: [
+					{
+						operation: "addOrUpdate",
+						content: new Blob(["This is me"]),
+						path: "test.txt",
+					},
+				],
+			});
+
+			if (!pr) {
+				throw new Error("PR creation failed");
+			}
+
+			if (!pr.pullRequestUrl) {
+				throw new Error("No pull request url");
+			}
+
+			const prNumber = pr.pullRequestUrl.split("/").pop();
+			const prRef = `refs/pr/${prNumber}`;
+
+			await commit({
+				repo,
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
+				},
+				hubUrl: TEST_HUB_URL,
+				branch: prRef,
+				title: "Some commit",
+				operations: [
+					{
+						operation: "addOrUpdate",
+						content: new URL(
+							`https://huggingface.co/spaces/huggingfacejs/push-model-from-web/resolve/main/mobilenet/group1-shard1of2`,
+						),
+						path: "mobilenet/group1-shard1of2",
+					},
+				],
+			});
+
+			assert(commit, "PR commit failed");
+		} finally {
+			await deleteRepo({
+				repo: {
+					name: repoName,
+					type: "model",
+				},
+				hubUrl: TEST_HUB_URL,
+				credentials: { accessToken: TEST_ACCESS_TOKEN },
+			});
+		}
 	}, 60_000);
 });

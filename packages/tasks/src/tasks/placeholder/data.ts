@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [],
@@ -14,7 +14,7 @@ const taskData: TaskDataCustom = {
 	widgetModels: [],
 	youtubeId: undefined,
 	/// If this is a subtask, link to the most general task ID
-	/// (eg, text2text-generation is the canonical ID of translation)
+	/// (eg, text-generation is the canonical ID of text-simplification)
 	canonicalId: undefined,
 };
 

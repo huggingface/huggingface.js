@@ -11,9 +11,7 @@ describe("createRepo", () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 
 		const result = await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			repo: {
 				name: repoName,
 				type: "model",
@@ -22,8 +20,9 @@ describe("createRepo", () => {
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
-		assert.deepStrictEqual(result, {
+		expect(result).toEqual({
 			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
 		});
 
 		const content = await downloadFile({
@@ -62,16 +61,15 @@ describe("createRepo", () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 
 		const result = await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			hubUrl: TEST_HUB_URL,
 			repo: repoName,
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
-		assert.deepStrictEqual(result, {
+		expect(result).toEqual({
 			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
 		});
 
 		await deleteRepo({
@@ -88,16 +86,15 @@ describe("createRepo", () => {
 		const repoName = `datasets/${TEST_USER}/TEST-${insecureRandomString()}`;
 
 		const result = await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			hubUrl: TEST_HUB_URL,
 			repo: repoName,
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
-		assert.deepStrictEqual(result, {
+		expect(result).toEqual({
 			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
 		});
 
 		await deleteRepo({
@@ -106,4 +103,4 @@ describe("createRepo", () => {
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
 		});
 	});
-}, 10_000);
+});

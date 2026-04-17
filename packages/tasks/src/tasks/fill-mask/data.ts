@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -61,12 +61,12 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A faster and smaller model than the famous BERT model.",
-			id: "distilbert-base-uncased",
+			description: "State-of-the-art masked language model.",
+			id: "answerdotai/ModernBERT-large",
 		},
 		{
 			description: "A multilingual model trained on 100 languages.",
-			id: "xlm-roberta-base",
+			id: "FacebookAI/xlm-roberta-base",
 		},
 	],
 	spaces: [],

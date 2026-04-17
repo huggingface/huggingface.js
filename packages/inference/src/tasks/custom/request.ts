@@ -1,46 +1,26 @@
-import type { InferenceTask, Options, RequestArgs } from "../../types";
-import { makeRequestOptions } from "../../lib/makeRequestOptions";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { InferenceTask, Options, RequestArgs } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import { getLogger } from "../../lib/logger.js";
 
 /**
- * Primitive to make custom calls to Inference Endpoints
+ * Primitive to make custom calls to the inference provider
+ * @deprecated Use specific task functions instead. This function will be removed in a future version.
  */
 export async function request<T>(
 	args: RequestArgs,
 	options?: Options & {
-		/** When a model can be used for multiple tasks, and we want to run a non-default task */
-		task?: string | InferenceTask;
-		/** To load default model if needed */
-		taskHint?: InferenceTask;
-		/** Is chat completion compatible */
-		chatCompletion?: boolean;
-	}
+		/** In most cases (unless we pass a endpointUrl) we know the task */
+		task?: InferenceTask;
+	},
 ): Promise<T> {
-	const { url, info } = await makeRequestOptions(args, options);
-	const response = await (options?.fetch ?? fetch)(url, info);
-
-	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
-		return request(args, {
-			...options,
-			wait_for_model: true,
-		});
-	}
-
-	if (!response.ok) {
-		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
-			const output = await response.json();
-			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
-				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
-			}
-			if (output.error) {
-				throw new Error(output.error);
-			}
-		}
-		throw new Error("An error occurred while fetching the blob");
-	}
-
-	if (response.headers.get("Content-Type")?.startsWith("application/json")) {
-		return await response.json();
-	}
-
-	return (await response.blob()) as T;
+	const logger = getLogger();
+	logger.warn(
+		"The request method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead.",
+	);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, options?.task);
+	const result = await innerRequest<T>(args, providerHelper, options);
+	return result.data;
 }

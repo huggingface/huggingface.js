@@ -1,0 +1,32 @@
+{
+	"name": "@huggingface/tasks-gen",
+	"version": "0.13.1",
+	"private": true,
+	"description": "Utilities to generate files for @huggingface/tasks, and avoid unnecessary deps in the published package",
+	"license": "MIT",
+	"author": "Hugging Face",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"type": "module",
+	"scripts": {
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
+		"check": "tsc",
+		"generate-snippets-fixtures": "tsx scripts/generate-snippets-fixtures.ts",
+		"inference-codegen": "tsx scripts/inference-codegen.ts && pnpm --filter tasks format",
+		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && pnpm --filter tasks format",
+		"inference-tei-import": "tsx scripts/inference-tei-import.ts && pnpm --filter tasks format",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@huggingface/inference": "workspace:^",
+		"@huggingface/tasks": "workspace:^"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.5",
+		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
+		"type-fest": "^3.13.1"
+	},
+	"packageManager": "pnpm@10.10.0"
+}

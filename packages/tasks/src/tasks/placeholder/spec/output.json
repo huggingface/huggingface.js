@@ -9,7 +9,7 @@
 		"properties": {
 			"meaningful_output_name": {
 				"type": "string",
-				"description": "TODO: Describe what is outputed by the inference here"
+				"description": "TODO: Describe what is outputted by the inference here"
 			}
 		},
 		"required": ["meaningfulOutputName"]

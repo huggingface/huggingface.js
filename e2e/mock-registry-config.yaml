@@ -4,6 +4,9 @@ auth:
       foo:
         name: test
         password: test
+web:
+  # login with foo / test
+  enable: true
 store:
   memory:
     limit: 1000
@@ -12,6 +15,9 @@ uplinks:
     url: https://registry.npmjs.org/
 packages:
   "@huggingface/*":
+    access: $all
+    publish: $all
+  "gearhash-jit":
     access: $all
     publish: $all
   "**":

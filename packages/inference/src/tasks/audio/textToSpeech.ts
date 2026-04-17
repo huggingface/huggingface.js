@@ -1,28 +1,23 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import type { TextToSpeechInput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+type TextToSpeechArgs = BaseArgs & TextToSpeechInput;
 
-export type TextToSpeechArgs = BaseArgs & {
-	/**
-	 * The text to generate an audio from
-	 */
-	inputs: string;
-};
-
-export type TextToSpeechOutput = Blob;
-
+interface OutputUrlTextToSpeechGeneration {
+	output: string | string[];
+}
 /**
  * This task synthesize an audio of a voice pronouncing a given text.
  * Recommended model: espnet/kan-bayashi_ljspeech_vits
  */
-export async function textToSpeech(args: TextToSpeechArgs, options?: Options): Promise<TextToSpeechOutput> {
-	const res = await request<TextToSpeechOutput>(args, {
+export async function textToSpeech(args: TextToSpeechArgs, options?: Options): Promise<Blob> {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "text-to-speech");
+	const { data: res } = await innerRequest<Blob | OutputUrlTextToSpeechGeneration>(args, providerHelper, {
 		...options,
-		taskHint: "text-to-speech",
+		task: "text-to-speech",
 	});
-	const isValidOutput = res && res instanceof Blob;
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Blob");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

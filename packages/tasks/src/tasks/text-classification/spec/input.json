@@ -10,19 +10,19 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Text Classification",
 			"$ref": "#/$defs/TextClassificationParameters"
 		}
 	},
 	"$defs": {
 		"TextClassificationParameters": {
 			"title": "TextClassificationParameters",
-			"description": "Additional inference parameters for Text Classification",
 			"type": "object",
 			"properties": {
 				"function_to_apply": {
 					"title": "TextClassificationOutputTransform",
-					"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutputTransform"
+					"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutputTransform",
+					"description": "The function to apply to the model outputs in order to retrieve the scores."
 				},
 				"top_k": {
 					"type": "integer",

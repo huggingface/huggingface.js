@@ -1,36 +1,25 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import type { AutomaticSpeechRecognitionInput, AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import type { LegacyAudioInput } from "./utils.js";
 
-export type AutomaticSpeechRecognitionArgs = BaseArgs & {
-	/**
-	 * Binary audio data
-	 */
-	data: Blob | ArrayBuffer;
-};
-
-export interface AutomaticSpeechRecognitionOutput {
-	/**
-	 * The text that was recognized from the audio
-	 */
-	text: string;
-}
-
+export type AutomaticSpeechRecognitionArgs = BaseArgs & (AutomaticSpeechRecognitionInput | LegacyAudioInput);
 /**
  * This task reads some audio input and outputs the said words within the audio files.
  * Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
  */
 export async function automaticSpeechRecognition(
 	args: AutomaticSpeechRecognitionArgs,
-	options?: Options
+	options?: Options,
 ): Promise<AutomaticSpeechRecognitionOutput> {
-	const res = await request<AutomaticSpeechRecognitionOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "automatic-speech-recognition");
+	const payload = await providerHelper.preparePayloadAsync(args);
+	const { data: res } = await innerRequest<AutomaticSpeechRecognitionOutput>(payload, providerHelper, {
 		...options,
-		taskHint: "automatic-speech-recognition",
+		task: "automatic-speech-recognition",
 	});
-	const isValidOutput = typeof res?.text === "string";
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected {text: string}");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

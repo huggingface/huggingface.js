@@ -1,30 +1,11 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import type { ImageSegmentationInput, ImageSegmentationOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import { makeRequestOptions } from "../../lib/makeRequestOptions.js";
 
-export type ImageSegmentationArgs = BaseArgs & {
-	/**
-	 * Binary image data
-	 */
-	data: Blob | ArrayBuffer;
-};
-
-export interface ImageSegmentationOutputValue {
-	/**
-	 * The label for the class (model specific) of a segment.
-	 */
-	label: string;
-	/**
-	 * A str (base64 str of a single channel black-and-white img) representing the mask of a segment.
-	 */
-	mask: string;
-	/**
-	 * A float that represents how likely it is that the detected object belongs to the given class.
-	 */
-	score: number;
-}
-
-export type ImageSegmentationOutput = ImageSegmentationOutputValue[];
+export type ImageSegmentationArgs = BaseArgs & ImageSegmentationInput;
 
 /**
  * This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
@@ -32,17 +13,15 @@ export type ImageSegmentationOutput = ImageSegmentationOutputValue[];
  */
 export async function imageSegmentation(
 	args: ImageSegmentationArgs,
-	options?: Options
+	options?: Options,
 ): Promise<ImageSegmentationOutput> {
-	const res = await request<ImageSegmentationOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "image-segmentation");
+	const payload = await providerHelper.preparePayloadAsync(args);
+	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, providerHelper, {
 		...options,
-		taskHint: "image-segmentation",
+		task: "image-segmentation",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every((x) => typeof x.label === "string" && typeof x.mask === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, mask: string, score: number}>");
-	}
-	return res;
+	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "image-segmentation" });
+	return providerHelper.getResponse(res, url, info.headers as Record<string, string>);
 }

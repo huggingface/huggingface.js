@@ -6,24 +6,24 @@
 	"type": "object",
 	"properties": {
 		"inputs": {
-			"description": "The input image data"
+			"description": "The input image data",
+			"comment": "type=binary"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Image To Text",
 			"$ref": "#/$defs/ImageToTextParameters"
 		}
 	},
 	"$defs": {
 		"ImageToTextParameters": {
 			"title": "ImageToTextParameters",
-			"description": "Additional inference parameters for Image To Text",
 			"type": "object",
 			"properties": {
 				"max_new_tokens": {
 					"type": "integer",
 					"description": "The amount of maximum tokens to generate."
 				},
-				"generate": {
+				"generation_parameters": {
 					"description": "Parametrization of the text generation process",
 					"$ref": "/inference/schemas/common-definitions.json#/definitions/GenerationParameters"
 				}

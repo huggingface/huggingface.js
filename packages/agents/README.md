@@ -2,6 +2,10 @@
 
 A way to call Hugging Face models and Inference Endpoints from natural language, using an LLM.
 
+> [!WARNING]
+> `@huggingface/agents` is now deprecated, and a modern version, built on top of MCP, is [Tiny Agents](https://github.com/huggingface/huggingface.js/tree/main/packages/mcp-client).
+> Go checkout the `Tiny Agents` introduction blog [here](https://huggingface.co/blog/tiny-agents).
+
 ## Install
 
 ```console
@@ -58,7 +62,7 @@ const agent = new HfAgent(
 
 
 #### From your own endpoints
-You can also specify your own endpoint, as long as it implements the same API, for exemple using [text generation inference](https://github.com/huggingface/text-generation-inference) and [Inference Endpoints](https://huggingface.co/inference-endpoints).
+You can also specify your own endpoint, as long as it implements the same API, for example using [text generation inference](https://github.com/huggingface/text-generation-inference) and [Inference Endpoints](https://huggingface.co/inference-endpoints).
 
 ```ts
 import { HfAgent, LLMFromEndpoint } from "@huggingface/agents";

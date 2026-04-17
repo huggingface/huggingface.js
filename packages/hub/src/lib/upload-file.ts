@@ -1,30 +1,32 @@
-import type { Credentials } from "../types/public";
+import type { CredentialsParams } from "../types/public";
 import type { CommitOutput, CommitParams, ContentSource } from "./commit";
 import { commit } from "./commit";
 
-export function uploadFile(params: {
-	credentials?: Credentials;
-	repo: CommitParams["repo"];
-	file: URL | File | { path: string; content: ContentSource };
-	commitTitle?: CommitParams["title"];
-	commitDescription?: CommitParams["description"];
-	hubUrl?: CommitParams["hubUrl"];
-	branch?: CommitParams["branch"];
-	isPullRequest?: CommitParams["isPullRequest"];
-	parentCommit?: CommitParams["parentCommit"];
-	fetch?: CommitParams["fetch"];
-	useWebWorkers?: CommitParams["useWebWorkers"];
-	abortSignal?: CommitParams["abortSignal"];
-}): Promise<CommitOutput> {
+export function uploadFile(
+	params: {
+		repo: CommitParams["repo"];
+		file: URL | File | { path: string; content: ContentSource };
+		commitTitle?: CommitParams["title"];
+		commitDescription?: CommitParams["description"];
+		hubUrl?: CommitParams["hubUrl"];
+		branch?: CommitParams["branch"];
+		isPullRequest?: CommitParams["isPullRequest"];
+		parentCommit?: CommitParams["parentCommit"];
+		fetch?: CommitParams["fetch"];
+		useWebWorkers?: CommitParams["useWebWorkers"];
+		abortSignal?: CommitParams["abortSignal"];
+		useXet?: CommitParams["useXet"];
+	} & Partial<CredentialsParams>,
+): Promise<CommitOutput | undefined> {
 	const path =
 		params.file instanceof URL
-			? params.file.pathname.split("/").at(-1) ?? "file"
+			? (params.file.pathname.split("/").at(-1) ?? "file")
 			: "path" in params.file
-			  ? params.file.path
-			  : params.file.name;
+				? params.file.path
+				: params.file.name;
 
 	return commit({
-		credentials: params.credentials,
+		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
 		operations: [
 			{
@@ -42,5 +44,6 @@ export function uploadFile(params: {
 		fetch: params.fetch,
 		useWebWorkers: params.useWebWorkers,
 		abortSignal: params.abortSignal,
+		useXet: params.useXet,
 	});
 }

@@ -1,12 +1,12 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiModelInfo } from "../types/api/api-model";
-import type { Credentials, PipelineType } from "../types/public";
+import type { CredentialsParams, PipelineType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
-import { pick } from "../utils/pick";
+import { normalizeInferenceProviderMapping } from "../utils/normalizeInferenceProviderMapping";
 
-const EXPAND_KEYS = [
+export const MODEL_EXPAND_KEYS = [
 	"pipeline_tag",
 	"private",
 	"gated",
@@ -15,7 +15,7 @@ const EXPAND_KEYS = [
 	"lastModified",
 ] as const satisfies readonly (keyof ApiModelInfo)[];
 
-const EXPANDABLE_KEYS = [
+export const MODEL_EXPANDABLE_KEYS = [
 	"author",
 	"cardData",
 	"config",
@@ -25,6 +25,7 @@ const EXPANDABLE_KEYS = [
 	"downloadsAllTime",
 	"gated",
 	"gitalyUid",
+	"inferenceProviderMapping",
 	"lastModified",
 	"library_name",
 	"likes",
@@ -33,11 +34,25 @@ const EXPANDABLE_KEYS = [
 	"private",
 	"safetensors",
 	"sha",
-	// "siblings",
 	"spaces",
 	"tags",
 	"transformersInfo",
 ] as const satisfies readonly (keyof ApiModelInfo)[];
+
+export interface ModelDerivedFields {
+	filePaths: string[];
+}
+
+export const MODEL_DERIVED_FIELD_TO_API_KEY: Record<keyof ModelDerivedFields, keyof ApiModelInfo> = {
+	filePaths: "siblings",
+};
+
+export type ModelAdditionalField =
+	| Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPAND_KEYS)[number]>
+	| keyof ModelDerivedFields;
+
+export type ResolveModelAdditionalFields<T extends ModelAdditionalField> = Pick<ApiModelInfo, T & keyof ApiModelInfo> &
+	Pick<ModelDerivedFields, T & keyof ModelDerivedFields>;
 
 export interface ModelEntry {
 	id: string;
@@ -50,42 +65,71 @@ export interface ModelEntry {
 	updatedAt: Date;
 }
 
-export async function* listModels<
-	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
->(params?: {
-	search?: {
+export async function* listModels<const T extends ModelAdditionalField = never>(
+	params?: {
+		search?: {
+			/**
+			 * Will search in the model name for matches
+			 */
+			query?: string;
+			owner?: string;
+			task?: PipelineType;
+			tags?: string[];
+			/**
+			 * Will search for models that have one of the inference providers in the list.
+			 */
+			inferenceProviders?: string[];
+			/**
+			 * Will search for models that support at least one of those local apps (eg "lmstudio", "mlx-lm", ...)
+			 */
+			apps?: string[];
+		};
+		hubUrl?: string;
+		additionalFields?: T[];
 		/**
-		 * Will search in the model name for matches
+		 * Set to limit the number of models returned.
 		 */
-		query?: string;
-		owner?: string;
-		task?: PipelineType;
-		tags?: string[];
-	};
-	credentials?: Credentials;
-	hubUrl?: string;
-	additionalFields?: T[];
-	/**
-	 * Set to limit the number of models returned.
-	 */
-	limit?: number;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): AsyncGenerator<ModelEntry & Pick<ApiModelInfo, T>> {
-	checkCredentials(params?.credentials);
+		limit?: number;
+		/**
+		 * Sort models by a specific field.
+		 */
+		sort?:
+			| "createdAt"
+			| "downloads"
+			| "likes"
+			| "lastModified"
+			| "likes30d"
+			| "trendingScore"
+			| "num_parameters"
+			| "mainSize"
+			| "id";
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>,
+): AsyncGenerator<ModelEntry & ResolveModelAdditionalFields<T>> {
+	const accessToken = params && checkCredentials(params);
 	let totalToFetch = params?.limit ?? Infinity;
+	const additionalExpandKeys =
+		params?.additionalFields?.map(
+			(field) => MODEL_DERIVED_FIELD_TO_API_KEY[field as keyof ModelDerivedFields] ?? field,
+		) ?? [];
 	const search = new URLSearchParams([
 		...Object.entries({
 			limit: String(Math.min(totalToFetch, 500)),
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
 			...(params?.search?.task ? { pipeline_tag: params.search.task } : undefined),
 			...(params?.search?.query ? { search: params.search.query } : undefined),
+			...(params?.search?.inferenceProviders
+				? { inference_provider: params.search.inferenceProviders.join(",") }
+				: undefined),
+			...(params?.search?.apps ? { apps: params.search.apps.join(",") } : undefined),
+			...(params?.sort ? { sort: params.sort } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
-		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
-		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
+		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
+		...additionalExpandKeys.map((val) => ["expand", val] satisfies [string, string]),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/models?${search}`;
 
@@ -93,7 +137,7 @@ export async function* listModels<
 		const res: Response = await (params?.fetch ?? fetch)(url, {
 			headers: {
 				accept: "application/json",
-				...(params?.credentials ? { Authorization: `Bearer ${params.credentials.accessToken}` } : undefined),
+				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
 			},
 		});
 
@@ -104,8 +148,24 @@ export async function* listModels<
 		const items: ApiModelInfo[] = await res.json();
 
 		for (const item of items) {
+			const additional: Record<string, unknown> = {};
+			if (params?.additionalFields) {
+				for (const field of params.additionalFields) {
+					if (field === "filePaths") {
+						additional.filePaths = (item.siblings ?? []).map((s) => s.rfilename);
+					} else if (field === "inferenceProviderMapping" && item.inferenceProviderMapping) {
+						additional.inferenceProviderMapping = normalizeInferenceProviderMapping(
+							item.id,
+							item.inferenceProviderMapping,
+						);
+					} else {
+						additional[field] = item[field as keyof ApiModelInfo];
+					}
+				}
+			}
+
 			yield {
-				...(params?.additionalFields && pick(item, params.additionalFields)),
+				...additional,
 				id: item._id,
 				name: item.id,
 				private: item.private,
@@ -114,7 +174,7 @@ export async function* listModels<
 				gated: item.gated,
 				likes: item.likes,
 				updatedAt: new Date(item.lastModified),
-			} as ModelEntry & Pick<ApiModelInfo, T>;
+			} as ModelEntry & ResolveModelAdditionalFields<T>;
 			totalToFetch--;
 
 			if (totalToFetch <= 0) {

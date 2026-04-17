@@ -1,4 +1,4 @@
-import type { HfInference } from "@huggingface/inference";
+import type { InferenceClient } from "@huggingface/inference";
 
 export type Data = string | Blob | ArrayBuffer;
 
@@ -6,7 +6,7 @@ export interface Tool {
 	name: string;
 	description: string;
 	examples: Array<Example>;
-	call?: (input: Promise<Data>, inference: HfInference) => Promise<Data>;
+	call?: (input: Promise<Data>, inference: InferenceClient) => Promise<Data>;
 }
 
 export interface Example {

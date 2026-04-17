@@ -1,6 +1,5 @@
 import { describe, expect, it, beforeAll } from "vitest";
 import { WebBlob } from "./WebBlob";
-import { base64FromBytes } from "./base64FromBytes";
 
 describe("WebBlob", () => {
 	const resourceUrl = new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json");
@@ -16,7 +15,7 @@ describe("WebBlob", () => {
 	});
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {
-		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 0 });
+		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 0, accessToken: undefined });
 
 		expect(webBlob).toMatchObject({
 			url: resourceUrl,
@@ -36,7 +35,7 @@ describe("WebBlob", () => {
 	});
 
 	it("should create a WebBlob with a slice on the entire resource, cached", async () => {
-		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 1_000_000 });
+		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 1_000_000, accessToken: undefined });
 
 		expect(webBlob).not.toBeInstanceOf(WebBlob);
 		expect(webBlob.size).toBe(size);
@@ -50,22 +49,33 @@ describe("WebBlob", () => {
 	});
 
 	it("should lazy load a LFS file hosted on Hugging Face", async () => {
+		const zephyrUrl =
+			"https://huggingface.co/HuggingFaceH4/zephyr-7b-alpha/resolve/main/model-00001-of-00008.safetensors";
+		const url = new URL(zephyrUrl);
+		const webBlob = await WebBlob.create(url);
+
+		expect(webBlob.size).toBe(1_889_587_040);
+		expect(webBlob).toBeInstanceOf(WebBlob);
+		expect(webBlob).toMatchObject({ url });
+		expect(await webBlob.slice(10, 22).text()).toBe("__metadata__");
+	});
+
+	it("should lazy load a Xet file hosted on Hugging Face", async () => {
 		const stableDiffusionUrl =
-			"https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/39593d5650112b4cc580433f6b0435385882d819/v1-5-pruned.safetensors";
+			"https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/unet/diffusion_pytorch_model.fp16.safetensors";
 		const url = new URL(stableDiffusionUrl);
 		const webBlob = await WebBlob.create(url);
 
-		expect(webBlob.size).toBe(7_703_324_286);
+		expect(webBlob.size).toBe(5_135_149_760);
 		expect(webBlob).toBeInstanceOf(WebBlob);
 		expect(webBlob).toMatchObject({ url });
-		expect(base64FromBytes(new Uint8Array(await webBlob.slice(6, 12).arrayBuffer()))).toBe("AAB7Il9f");
-		expect(base64FromBytes(new Uint8Array(await webBlob.slice(0, 12).arrayBuffer()))).toBe("ytIDAAAAAAB7Il9f");
+		expect(await webBlob.slice(10, 22).text()).toBe("__metadata__");
 	});
 
 	it("should create a slice on the file", async () => {
 		const expectedText = fullText.slice(10, 20);
 
-		const slice = (await WebBlob.create(resourceUrl, { cacheBelow: 0 })).slice(10, 20);
+		const slice = (await WebBlob.create(resourceUrl, { cacheBelow: 0, accessToken: undefined })).slice(10, 20);
 
 		expect(slice).toMatchObject({
 			url: resourceUrl,
