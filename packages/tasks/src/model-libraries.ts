@@ -722,6 +722,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/nv-tlabs/lyra",
 		filter: false,
 		countDownloads: `path:"checkpoints/image_encoder/model.pth"`,
+	},
 	lagernvs: {
 		prettyLabel: "LagerNVS",
 		repoName: "LagerNVS",
