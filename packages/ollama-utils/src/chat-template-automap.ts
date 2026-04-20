@@ -5,42 +5,50 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/deepseek-r1:1.5b
- * - library/llama3.2:1b
- * - library/llama3.2:latest
- * - library/phi4:14b
- * - library/gemma:latest
- * - library/qwen2.5:0.5b
+ * - library/gpt-oss:latest
+ * - library/qwen2.5-coder:0.5b
+ * - library/llama3.2-vision:11b
  * - library/olmo2:latest
- * - library/mistral-small:22b
- * - library/qwen:latest
- * - library/gemma3:latest
- * - library/llava-llama3:8b
- * - library/granite3.1-moe:latest
- * - library/all-minilm:22m
+ * - library/dolphin3:latest
+ * - library/bge-m3:latest
+ * - library/dolphin3:latest
+ * - library/deepseek-v3:latest
  * - library/falcon3:latest
- * - library/gemma3n:latest
- * - library/qwen2:latest
- * - library/qwen2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:24b
  * - library/cogito:latest
- * - library/phi4-mini:3.8b
- * - library/openthinker:latest
- * - library/openthinker:latest
- * - library/qwq:latest
- * - library/granite-code:3b
- * - library/neural-chat:latest
- * - library/paraphrase-multilingual:latest
- * - library/llama3-groq-tool-use:latest
- * - library/aya-expanse:latest
- * - library/reader-lm:latest
- * - library/shieldgemma:latest
- * - library/command-a:latest
+ * - library/dolphin-llama3:8b
+ * - library/dolphin-mixtral:latest
+ * - library/command-r:latest
+ * - library/command-r:35b
+ * - library/phi4:latest
+ * - library/glm4:9b
+ * - library/qwen3-coder-next:latest
+ * - library/qwen2-math:latest
+ * - library/llama-guard3:latest
+ * - library/tulu3:latest
  * - library/sailor2:latest
- * - library/yarn-mistral:7b
- * - library/qwen3-next:latest
+ * - library/granite3-guardian:latest
+ * - library/llava-phi3:latest
+ * - library/glm-ocr:latest
+ * - library/deepseek-v2.5:latest
+ * - library/command-r7b-arabic:latest
+ * - library/cogito-2.1:latest
+ * - library/cogito-2.1:latest
+ * - library/nemotron-cascade-2:latest
+ * - library/medgemma1.5:4b
+ * - library/medgemma:4b
+ * - library/codeup:13b
+ * - library/codeup:latest
+ * - library/wizardlm2:7b
+ * - library/phi4-reasoning:latest
+ * - library/phi4-reasoning:latest
+ * - library/goliath:latest
+ * - library/nemotron-cascade-2:latest
+ * - library/goliath:120b-q2_K
+ * - library/nous-hermes2-mixtral:8x7b
+ * - library/nous-hermes2-mixtral:latest
+ * - library/dbrx:132b
+ * - library/medgemma:latest
+ * - library/medgemma:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
