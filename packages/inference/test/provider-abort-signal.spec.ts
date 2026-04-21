@@ -3,13 +3,15 @@ import { BlackForestLabsTextToImageTask } from "../src/providers/black-forest-la
 import { FalAITextToImageTask } from "../src/providers/fal-ai.js";
 import { ZaiImageToTextTask } from "../src/providers/zai-org.js";
 
+const itWithFakeTimers = typeof window !== "undefined" && typeof window.document !== "undefined" ? it.skip : it;
+
 describe("Provider abort signal propagation", () => {
 	afterEach(() => {
 		vi.unstubAllGlobals();
 		vi.useRealTimers();
 	});
 
-	it("aborts before the next fal-ai polling request starts", async () => {
+	itWithFakeTimers("aborts before the next fal-ai polling request starts", async () => {
 		vi.useFakeTimers();
 		const fetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>();
 		vi.stubGlobal("fetch", fetchMock);
@@ -35,7 +37,7 @@ describe("Provider abort signal propagation", () => {
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
-	it("passes the abort signal to fal-ai status polling fetches", async () => {
+	itWithFakeTimers("passes the abort signal to fal-ai status polling fetches", async () => {
 		vi.useFakeTimers();
 		const fetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>((_url, init) => {
 			return new Promise<Response>((_resolve, reject) => {
@@ -77,7 +79,7 @@ describe("Provider abort signal propagation", () => {
 		await expect(responsePromise).rejects.toThrow(/aborted/i);
 	});
 
-	it("passes the abort signal to black-forest-labs polling fetches", async () => {
+	itWithFakeTimers("passes the abort signal to black-forest-labs polling fetches", async () => {
 		vi.useFakeTimers();
 		const fetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>((_url, init) => {
 			return new Promise<Response>((_resolve, reject) => {
