@@ -8,26 +8,26 @@ export function delay(ms: number, signal?: AbortSignal): Promise<void> {
 	}
 
 	return new Promise((resolve, reject) => {
-		const abortSignal = signal;
-		const cleanup = () => {
-			abortSignal?.removeEventListener("abort", onAbort);
-		};
-
-		const onAbort = () => {
-			clearTimeout(timeout);
-			cleanup();
-			if (!abortSignal) {
-				reject(new DOMException("The operation was aborted", "AbortError"));
-				return;
-			}
-			reject(createAbortError(abortSignal));
-		};
-
+		let cleanup = () => {};
 		const timeout = setTimeout(() => {
 			cleanup();
 			resolve();
 		}, ms);
 		timeout.unref?.();
-		abortSignal?.addEventListener("abort", onAbort, { once: true });
+
+		if (!signal) {
+			return;
+		}
+
+		const onAbort = () => {
+			clearTimeout(timeout);
+			cleanup();
+			reject(createAbortError(signal));
+		};
+		cleanup = () => {
+			signal.removeEventListener("abort", onAbort);
+		};
+
+		signal.addEventListener("abort", onAbort, { once: true });
 	});
 }
