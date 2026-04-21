@@ -12,7 +12,7 @@ export type ImageToTextArgs = BaseArgs & (ImageToTextInput | LegacyImageInput);
 export async function imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "image-to-text");
-	const payload = await providerHelper.preparePayloadAsync(args);
+	const payload = await providerHelper.preparePayloadAsync(args, options?.signal);
 	const { data: res } = await innerRequest<ImageToTextOutput>(payload, providerHelper, {
 		...options,
 		task: "image-to-text",

@@ -244,7 +244,7 @@ export interface ObjectDetectionTaskHelper {
 export interface ImageToTextTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageToTextOutput>;
 	preparePayload(params: BodyParams<ImageToTextInput & BaseArgs>): Record<string, unknown> | BodyInit;
-	preparePayloadAsync(args: ImageToTextArgs): Promise<RequestArgs>;
+	preparePayloadAsync(args: ImageToTextArgs, signal?: AbortSignal): Promise<RequestArgs>;
 }
 
 export interface ZeroShotImageClassificationTaskHelper {
@@ -332,7 +332,13 @@ export interface AudioToAudioTaskHelper {
 	): Record<string, unknown> | BodyInit;
 }
 export interface AutomaticSpeechRecognitionTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AutomaticSpeechRecognitionOutput>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<AutomaticSpeechRecognitionOutput>;
 	preparePayload(params: BodyParams<AutomaticSpeechRecognitionInput & BaseArgs>): Record<string, unknown> | BodyInit;
 	preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs>;
 }
