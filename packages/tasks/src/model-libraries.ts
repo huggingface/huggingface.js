@@ -1106,6 +1106,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/airockchip/rknn-llm",
 		countDownloads: `path_extension:"rkllm"`,
 	},
+	"robo-orchard-lab": {
+		prettyLabel: "RoboOrchardLab",
+		repoName: "RoboOrchardLab",
+		repoUrl: "https://github.com/HorizonRobotics/RoboOrchardLab",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
