@@ -20,5 +20,5 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 		task: "image-to-image",
 	});
 	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "image-to-image" });
-	return providerHelper.getResponse(res, url, info.headers as Record<string, string>);
+	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, undefined, options?.signal);
 }
