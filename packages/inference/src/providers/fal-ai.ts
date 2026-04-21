@@ -23,6 +23,7 @@ import type { BodyParams, HeaderParams, InferenceTask, ModelId, OutputType, Requ
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import type {
+	AudioToAudioTaskHelper,
 	ImageSegmentationTaskHelper,
 	ImageToImageTaskHelper,
 	ImageTextToImageTaskHelper,
@@ -37,6 +38,7 @@ import {
 } from "./providerHelper.js";
 import { HF_HUB_URL } from "../config.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import type { AudioToAudioArgs, AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import {
 	InferenceClientInputError,
 	InferenceClientProviderApiError,
@@ -577,6 +579,98 @@ export class FalAITextToSpeechTask extends FalAITask {
 		}
 	}
 }
+interface FalAIAudioToAudioResult {
+	audio: { url: string; content_type?: string };
+	text?: string;
+}
+
+export class FalAIAudioToAudioTask extends FalAiQueueTask implements AudioToAudioTaskHelper {
+	task: InferenceTask;
+
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "audio-to-audio";
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters", "data"]),
+			...(params.args.parameters as Record<string, unknown>),
+		};
+	}
+
+	async preparePayloadAsync(args: AudioToAudioArgs): Promise<RequestArgs> {
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+		if (!(blob instanceof Blob)) {
+			throw new InferenceClientInputError(
+				`Expected a Blob input for audio-to-audio with provider fal-ai, got ${typeof blob}.`,
+			);
+		}
+		const contentType = blob.type;
+		if (!contentType) {
+			throw new InferenceClientInputError(
+				`Unable to determine the input's content-type. Make sure you are passing a Blob with a "type" when using provider fal-ai.`,
+			);
+		}
+		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
+			throw new InferenceClientInputError(
+				`Provider fal-ai does not support blob type ${contentType} for audio-to-audio - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
+					", ",
+				)}`,
+			);
+		}
+		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
+		return {
+			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
+			audio_url: `data:${contentType};base64,${base64audio}`,
+		};
+	}
+
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>,
+	): Promise<AudioToAudioOutput[]> {
+		const result = (await this.getResponseFromQueueApi(response, url, headers)) as FalAIAudioToAudioResult;
+		if (
+			typeof result !== "object" ||
+			!result ||
+			typeof result.audio !== "object" ||
+			!result.audio ||
+			typeof result.audio.url !== "string" ||
+			!isUrl(result.audio.url)
+		) {
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai audio-to-audio API: expected { audio: { url: string } } result format, got instead: ${JSON.stringify(
+					result,
+				)}`,
+			);
+		}
+
+		const audioResponse = await fetch(result.audio.url);
+		if (!audioResponse.ok) {
+			throw new InferenceClientProviderApiError(
+				`Failed to fetch audio from ${result.audio.url}: ${audioResponse.statusText}`,
+				{ url: result.audio.url, method: "GET" },
+				{
+					requestId: audioResponse.headers.get("x-request-id") ?? "",
+					status: audioResponse.status,
+					body: await audioResponse.text(),
+				},
+			);
+		}
+		const audioBytes = new Uint8Array(await audioResponse.arrayBuffer());
+		const contentType = result.audio.content_type ?? audioResponse.headers.get("content-type") ?? "audio/wav";
+		return [
+			{
+				blob: base64FromBytes(audioBytes),
+				"content-type": contentType,
+				label: typeof result.text === "string" && result.text.length > 0 ? result.text : "speech",
+			},
+		];
+	}
+}
+
 export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageSegmentationTaskHelper {
 	task: InferenceTask;
 	constructor() {

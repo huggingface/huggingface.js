@@ -50,7 +50,7 @@ import type {
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
 import { InferenceClientProviderOutputError, InferenceClientRoutingError } from "../errors.js";
-import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
+import type { AudioToAudioArgs, AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import type {
 	BaseArgs,
 	BodyParams,
@@ -330,6 +330,7 @@ export interface AudioToAudioTaskHelper {
 	preparePayload(
 		params: BodyParams<BaseArgs & { inputs: Blob } & Record<string, unknown>>,
 	): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: AudioToAudioArgs): Promise<RequestArgs>;
 }
 export interface AutomaticSpeechRecognitionTaskHelper {
 	getResponse(

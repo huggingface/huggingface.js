@@ -3,7 +3,6 @@ import { getProviderHelper } from "../../lib/getProviderHelper.js";
 import type { BaseArgs, Options } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
 import type { LegacyAudioInput } from "./utils.js";
-import { preparePayload } from "./utils.js";
 
 export type AudioToAudioArgs =
 	| (BaseArgs & {
@@ -40,7 +39,7 @@ export async function audioToAudio(args: AudioToAudioArgs, options?: Options): P
 	const model = "inputs" in args ? args.model : undefined;
 	const provider = await resolveProvider(args.provider, model);
 	const providerHelper = getProviderHelper(provider, "audio-to-audio");
-	const payload = preparePayload(args);
+	const payload = await providerHelper.preparePayloadAsync(args);
 	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, providerHelper, {
 		...options,
 		task: "audio-to-audio",

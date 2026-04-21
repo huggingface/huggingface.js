@@ -82,6 +82,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
 	},
 	"fal-ai": {
+		"audio-to-audio": new FalAI.FalAIAudioToAudioTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
 		"image-text-to-image": new FalAI.FalAIImageTextToImageTask(),
 		"image-text-to-video": new FalAI.FalAIImageTextToVideoTask(),
