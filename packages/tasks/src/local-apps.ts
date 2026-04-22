@@ -33,6 +33,10 @@ export type LocalApp = {
 	 */
 	docsUrl: string;
 	/**
+	 * Additional links to display (max 2)
+	 */
+	links?: { label: string; url: string }[] | ((model: ModelData) => { label: string; url: string }[]);
+	/**
 	 * main category of app
 	 */
 	mainTask: PipelineType;
