@@ -434,6 +434,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_filename:"slicex_elm_config" AND path_extension:"json"`,
 	},
+	encoderfile: {
+		prettyLabel: "encoderfile",
+		repoName: "encoderfile",
+		repoUrl: "https://github.com/mozilla-ai/encoderfile",
+		filter: false,
+		countDownloads: `path_extension: "encoderfile"`,
+	},
 	espnet: {
 		prettyLabel: "ESPnet",
 		repoName: "ESPnet",
