@@ -161,6 +161,82 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain("pi");
 	});
 
+	it("openclaw", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.openclaw;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096, chat_template: "{% if tools %}" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toContain(`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}} --jinja`);
+		expect(snippet[1].content).toContain('--custom-base-url "http://127.0.0.1:8080/v1"');
+		expect(snippet[1].content).toContain('--custom-model-id "Llama-3.2-3B-Instruct-GGUF"');
+		expect(snippet[1].content).toContain('--custom-api-key "llama.cpp"');
+		expect(snippet[2].content).toContain("openclaw");
+	});
+
+	it("openclaw - mlx", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.openclaw;
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-mlx",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			config: {
+				tokenizer_config: {
+					chat_template: "{% if tools %}...{% endif %}",
+				},
+			},
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
+		expect(snippet[0].content).toContain('mlx_lm.server --model "mlx-community/Llama-3.2-3B-Instruct-mlx"');
+		expect(snippet[1].content).toContain('--custom-model-id "mlx-community/Llama-3.2-3B-Instruct-mlx"');
+		expect(snippet[1].content).toContain('--custom-api-key "none"');
+		expect(snippet[2].content).toContain("openclaw");
+	});
+
+	it("hermes-agent", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["hermes-agent"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096, chat_template: "{% if tools %}" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toContain(`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}} --jinja`);
+		expect(snippet[1].content).toContain("default: bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}");
+		expect(snippet[1].content).toContain("api_key: llama.cpp");
+		expect(snippet[2].content).toContain("hermes");
+	});
+
+	it("hermes-agent - mlx", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["hermes-agent"];
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-mlx",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			config: {
+				tokenizer_config: {
+					chat_template: "{% if tools %}...{% endif %}",
+				},
+			},
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
+		expect(snippet[1].content).toContain("default: mlx-community/Llama-3.2-3B-Instruct-mlx");
+		expect(snippet[1].content).toContain("api_key: none");
+		expect(snippet[2].content).toContain("hermes");
+	});
+
 	it("docker model runner", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
 		const model: ModelData = {

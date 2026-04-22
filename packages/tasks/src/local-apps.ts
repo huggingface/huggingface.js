@@ -506,6 +506,93 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	];
 };
 
+const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const isMLX = isMlxModel(model);
+	const modelName = model.id.split("/").pop() ?? model.id;
+	const serverBaseUrl = "http://127.0.0.1:8080/v1";
+
+	const serverStep: LocalAppSnippet = isMLX
+		? {
+				title: "Start the MLX server",
+				setup: "# Install MLX LM:\nuv tool install mlx-lm",
+				content: `# Start a local OpenAI-compatible server:\nmlx_lm.server --model "${model.id}"`,
+			}
+		: {
+				title: "Start the llama.cpp server",
+				setup: "# Install llama.cpp:\nbrew install llama.cpp",
+				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)} --jinja`,
+			};
+
+	return [
+		serverStep,
+		{
+			title: "Configure OpenClaw for the local server",
+			content: [
+				"# Install OpenClaw by running:",
+				"# npm install -g openclaw@latest",
+				"# Configure OpenClaw:",
+				"openclaw onboard --non-interactive \\",
+				"  --auth-choice custom-api-key \\",
+				`  --custom-base-url "${serverBaseUrl}" \\`,
+				`  --custom-model-id "${isMLX ? model.id : modelName}" \\`,
+				`  --custom-api-key "${isMLX ? "none" : "llama.cpp"}" \\`,
+				"  --secret-input-mode plaintext \\",
+				"  --custom-compatibility openai \\",
+				"  --accept-risk",
+			].join("\n"),
+		},
+		{
+			title: "Run OpenClaw",
+			content: "openclaw",
+		},
+	];
+};
+
+const snippetHermesAgent = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const isMLX = isMlxModel(model);
+	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
+
+	const serverStep: LocalAppSnippet = isMLX
+		? {
+				title: "Start the MLX server",
+				setup: "# Install MLX LM:\nuv tool install mlx-lm",
+				content: `# Start a local OpenAI-compatible server:\nmlx_lm.server --model "${model.id}"`,
+			}
+		: {
+				title: "Start the llama.cpp server",
+				setup: "# Install llama.cpp:\nbrew install llama.cpp",
+				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)} --jinja`,
+			};
+
+	return [
+		serverStep,
+		{
+			title: "Set Hermes default config",
+			content: [
+				"# Install Hermes by running:",
+				"# curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash",
+				"# hermes setup",
+				"# Add to your Hermes config file:",
+				"model:",
+				"  provider: custom",
+				`  default: ${modelId}`,
+				"  base_url: http://127.0.0.1:8080/v1",
+				`  api_key: ${isMLX ? "none" : "llama.cpp"}`,
+				"",
+				"custom_providers:",
+				"  - name: Local (127.0.0.1:8080)",
+				"    base_url: http://127.0.0.1:8080/v1",
+				`    api_key: ${isMLX ? "none" : "llama.cpp"}`,
+				`    model: ${modelId}`,
+			].join("\n"),
+		},
+		{
+			title: "Run Hermes",
+			content: "hermes",
+		},
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	// Only add quant tag for GGUF models, not safetensors
 	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
@@ -756,6 +843,26 @@ export const LOCAL_APPS = {
 			model.tags.includes("conversational") &&
 			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
+	},
+	openclaw: {
+		prettyLabel: "OpenClaw",
+		docsUrl: "https://github.com/openclaw",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
+			model.tags.includes("conversational") &&
+			!!getChatTemplate(model)?.includes("tools"),
+		snippet: snippetOpenClaw,
+	},
+	"hermes-agent": {
+		prettyLabel: "Hermes",
+		docsUrl: "https://hermes-agent.nousresearch.com/",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
+			model.tags.includes("conversational") &&
+			!!getChatTemplate(model)?.includes("tools"),
+		snippet: snippetHermesAgent,
 	},
 } satisfies Record<string, LocalApp>;
 
