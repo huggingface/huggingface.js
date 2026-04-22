@@ -102,7 +102,7 @@ jobs:
 
       - name: E2E - start mock npm registry
         run: |
-          npm i -g verdaccio verdaccio-memory verdaccio-auth-memory
+          npm i -g verdaccio verdaccio-memory
           npx verdaccio --listen 4874 --config e2e/mock-registry-config.yaml &
 
       - name: E2E test - publish packages to mock repo
