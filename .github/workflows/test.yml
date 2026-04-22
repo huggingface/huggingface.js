@@ -102,13 +102,13 @@ jobs:
 
       - name: E2E - start mock npm registry
         run: |
-          npm i -g verdaccio verdaccio-memory
+          npm i -g verdaccio verdaccio-memory verdaccio-auth-memory
           npx verdaccio --listen 4874 --config e2e/mock-registry-config.yaml &
-          until curl -sf http://localhost:4874/ > /dev/null 2>&1; do sleep 1; done
 
       - name: E2E test - publish packages to mock repo
         working-directory: e2e
         run: |
+          sleep 3
           pnpm i --filter root --filter inference... --filter hub... --filter blake3-jit... --filter xetchunk-wasm... --filter tasks-gen --frozen-lockfile
           pnpm --filter blake3-jit --filter gearhash-jit --filter xetchunk-wasm --filter inference --filter hub --filter tasks --filter jinja publish --force --no-git-checks --registry http://localhost:4874/
 
