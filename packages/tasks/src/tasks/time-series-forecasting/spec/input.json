@@ -1,0 +1,93 @@
+{
+	"$id": "/inference/schemas/time-series-forecasting/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"title": "TimeSeriesForecastingInput",
+	"description": "Inputs for Time Series Forecasting inference. Each input series lies on a regular grid defined by its `start` and `parameters.frequency`. Missing observations are encoded as `null` inside `target`; clients with irregular data should resample before calling.",
+	"type": "object",
+	"required": ["inputs"],
+	"properties": {
+		"inputs": {
+			"type": "array",
+			"description": "One or more historical time series to forecast. Output order matches input order.",
+			"minItems": 1,
+			"items": { "$ref": "#/$defs/TimeSeriesForecastingInputItem" }
+		},
+		"parameters": { "$ref": "#/$defs/TimeSeriesForecastingParameters" }
+	},
+	"$defs": {
+		"TimeSeriesForecastingInputItem": {
+			"title": "TimeSeriesForecastingInputItem",
+			"type": "object",
+			"required": ["target"],
+			"properties": {
+				"target": {
+					"description": "Historical values on a regular grid. Always a 2D array of shape [num_timesteps][num_channels]. Univariate series use a length-1 channel axis. Missing observations are encoded as `null`.",
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": { "type": ["number", "null"] }
+					}
+				},
+				"start": {
+					"description": "Optional ISO-8601 timestamp of the first observation. Combined with `parameters.frequency` it defines the time index for both the input and the returned forecast timestamps. If omitted, observations are treated as an integer sequence and the response has no `timestamps`.",
+					"type": "string",
+					"format": "date-time"
+				},
+				"past_covariates": {
+					"description": "Optional named covariates observed over the historical window. Each key maps to a 1D array aligned 1:1 with the time axis of `target`. Missing values are encoded as `null`. Models that don't support covariates silently ignore this field.",
+					"type": "object",
+					"additionalProperties": {
+						"type": "array",
+						"items": { "type": ["number", "null"] }
+					}
+				},
+				"future_covariates": {
+					"description": "Optional named covariates known over the forecast horizon. Each key maps to a 1D array of length `parameters.prediction_length`.",
+					"type": "object",
+					"additionalProperties": {
+						"type": "array",
+						"items": { "type": "number" }
+					}
+				},
+				"static_covariates": {
+					"description": "Optional static (time-invariant) numeric features for the series.",
+					"type": "object",
+					"additionalProperties": { "type": "number" }
+				},
+				"metadata": {
+					"description": "Opaque per-series metadata. Echoed verbatim in the corresponding output item. Not consumed by any model. Maximum 4KB per item.",
+					"type": "object"
+				}
+			}
+		},
+		"TimeSeriesForecastingParameters": {
+			"title": "TimeSeriesForecastingParameters",
+			"type": "object",
+			"properties": {
+				"prediction_length": {
+					"type": "integer",
+					"minimum": 1,
+					"description": "Number of future timesteps to forecast. Defaults to the model's native horizon."
+				},
+				"frequency": {
+					"type": "string",
+					"description": "Optional pandas offset alias defining the grid spacing. Common values: 's' (second), 'min' (minute), 'h' (hour), 'D' (day), 'B' (business day), 'W' (week), 'ME' / 'MS' (month end/start), 'QE' / 'QS' (quarter), 'YE' / 'YS' (year). Accepts multipliers and anchors (e.g. '15min', 'W-MON'). When provided alongside a per-item `start`, the response includes `timestamps`. Servers reject aliases they don't support."
+				},
+				"quantile_levels": {
+					"type": "array",
+					"items": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"exclusiveMaximum": 1
+					},
+					"description": "Quantile levels in (0, 1) to return alongside the mean. Omit to receive only the mean."
+				},
+				"num_samples": {
+					"type": "integer",
+					"minimum": 1,
+					"description": "For sample-based probabilistic models, the number of sample paths to draw. Ignored by models that don't produce samples. May be combined with `quantile_levels`."
+				}
+			}
+		}
+	}
+}

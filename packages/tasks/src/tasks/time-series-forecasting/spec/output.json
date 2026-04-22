@@ -1,0 +1,78 @@
+{
+	"$id": "/inference/schemas/time-series-forecasting/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"title": "TimeSeriesForecastingOutput",
+	"description": "Outputs of inference for the Time Series Forecasting task. Entries in `outputs` correspond 1:1 with the request's `inputs` in order.",
+	"type": "object",
+	"required": ["outputs"],
+	"properties": {
+		"outputs": {
+			"type": "array",
+			"items": { "$ref": "#/$defs/TimeSeriesForecastingOutputItem" }
+		}
+	},
+	"$defs": {
+		"TimeSeriesForecastingOutputItem": {
+			"title": "TimeSeriesForecastingOutputItem",
+			"type": "object",
+			"required": ["mean"],
+			"properties": {
+				"mean": {
+					"description": "Point forecast. Same shape as the corresponding input's `target`: outer dimension is time (length = prediction_length), inner dimension is channels.",
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": { "type": "number" }
+					}
+				},
+				"quantile_predictions": {
+					"description": "Optional per-quantile forecasts, sorted ascending by level. Each entry has the same shape as `mean`.",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"required": ["level", "values"],
+						"properties": {
+							"level": {
+								"type": "number",
+								"exclusiveMinimum": 0,
+								"exclusiveMaximum": 1,
+								"description": "Quantile level in (0, 1)."
+							},
+							"values": {
+								"description": "Quantile forecast with the same shape as `mean`.",
+								"type": "array",
+								"items": {
+									"type": "array",
+									"items": { "type": "number" }
+								}
+							}
+						}
+					}
+				},
+				"samples": {
+					"description": "Optional sample trajectories from probabilistic models. Outer dimension is the sample index; each sample has the same shape as `mean`. Present when `parameters.num_samples` was supplied and the model produces samples.",
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"type": "array",
+							"items": { "type": "number" }
+						}
+					}
+				},
+				"timestamps": {
+					"description": "Optional ISO-8601 timestamps for each forecast step. Present when the input item had `start` and `parameters.frequency` was supplied.",
+					"type": "array",
+					"items": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"metadata": {
+					"description": "Verbatim echo of the input item's `metadata`, if set.",
+					"type": "object"
+				}
+			}
+		}
+	}
+}
