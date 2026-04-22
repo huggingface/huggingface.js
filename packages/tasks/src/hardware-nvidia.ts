@@ -68,6 +68,11 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		memory: [128],
 		computeCapability: 12.1,
 	},
+	"DGX Spark": {
+		tflops: 29.71,
+		memory: [128],
+		computeCapability: 12.1,
+	},
 	"RTX PRO 6000 WS": {
 		tflops: 126,
 		memory: [96],
