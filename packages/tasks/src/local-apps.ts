@@ -459,12 +459,8 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
-const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const modelName = model.id.split("/").pop() ?? model.id;
-	const isMLX = isMlxModel(model);
-
-	// Step 1: Server — differs by backend
-	const serverStep: LocalAppSnippet = isMLX
+const getLocalServerStep = (model: ModelData, filepath?: string): LocalAppSnippet => {
+	return isMlxModel(model)
 		? {
 				title: "Start the MLX server",
 				setup: "# Install MLX LM:\nuv tool install mlx-lm",
@@ -475,6 +471,12 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 				setup: "# Install llama.cpp:\nbrew install llama.cpp",
 				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)} --jinja`,
 			};
+};
+
+const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const modelName = model.id.split("/").pop() ?? model.id;
+	const isMLX = isMlxModel(model);
+	const serverStep = getLocalServerStep(model, filepath);
 
 	// Step 2: Pi config — port and provider name differ
 	const modelsJson = JSON.stringify(
@@ -510,18 +512,7 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	const isMLX = isMlxModel(model);
 	const modelName = model.id.split("/").pop() ?? model.id;
 	const serverBaseUrl = "http://127.0.0.1:8080/v1";
-
-	const serverStep: LocalAppSnippet = isMLX
-		? {
-				title: "Start the MLX server",
-				setup: "# Install MLX LM:\nuv tool install mlx-lm",
-				content: `# Start a local OpenAI-compatible server:\nmlx_lm.server --model "${model.id}"`,
-			}
-		: {
-				title: "Start the llama.cpp server",
-				setup: "# Install llama.cpp:\nbrew install llama.cpp",
-				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)} --jinja`,
-			};
+	const serverStep = getLocalServerStep(model, filepath);
 
 	return [
 		serverStep,
@@ -551,18 +542,7 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 const snippetHermesAgent = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const isMLX = isMlxModel(model);
 	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
-
-	const serverStep: LocalAppSnippet = isMLX
-		? {
-				title: "Start the MLX server",
-				setup: "# Install MLX LM:\nuv tool install mlx-lm",
-				content: `# Start a local OpenAI-compatible server:\nmlx_lm.server --model "${model.id}"`,
-			}
-		: {
-				title: "Start the llama.cpp server",
-				setup: "# Install llama.cpp:\nbrew install llama.cpp",
-				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)} --jinja`,
-			};
+	const serverStep = getLocalServerStep(model, filepath);
 
 	return [
 		serverStep,
