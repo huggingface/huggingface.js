@@ -7,15 +7,32 @@ describe("WebBlob", () => {
 	let size: number;
 	let contentType: string;
 
+	const fetchWithContentLength: typeof fetch = async (input, init) => {
+		if ((init as RequestInit | undefined)?.method === "HEAD") {
+			const response = await fetch(input, init);
+			const headers = new Headers(response.headers);
+			headers.set("content-length", String(size));
+			headers.set("accept-ranges", "bytes");
+			return new Response(null, { status: response.status, headers });
+		}
+		return fetch(input, init);
+	};
+
 	beforeAll(async () => {
-		const response = await fetch(resourceUrl, { method: "HEAD" });
-		size = Number(response.headers.get("content-length"));
+		// Use a GET request so we can derive size from the actual response body —
+		// content-length from HEAD is not CORS-exposed in browsers.
+		const response = await fetch(resourceUrl);
+		fullText = await response.text();
 		contentType = response.headers.get("content-type") || "";
-		fullText = await (await fetch(resourceUrl)).text();
+		size = new TextEncoder().encode(fullText).byteLength;
 	});
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {
-		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 0, accessToken: undefined });
+		const webBlob = await WebBlob.create(resourceUrl, {
+			cacheBelow: 0,
+			accessToken: undefined,
+			fetch: fetchWithContentLength,
+		});
 
 		expect(webBlob).toMatchObject({
 			url: resourceUrl,
@@ -75,7 +92,9 @@ describe("WebBlob", () => {
 	it("should create a slice on the file", async () => {
 		const expectedText = fullText.slice(10, 20);
 
-		const slice = (await WebBlob.create(resourceUrl, { cacheBelow: 0, accessToken: undefined })).slice(10, 20);
+		const slice = (
+			await WebBlob.create(resourceUrl, { cacheBelow: 0, accessToken: undefined, fetch: fetchWithContentLength })
+		).slice(10, 20);
 
 		expect(slice).toMatchObject({
 			url: resourceUrl,
