@@ -135,6 +135,14 @@ function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
 
+function isToolCallingLocalAgentModel(model: ModelData): boolean {
+	return (
+		(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
+		model.tags.includes("conversational") &&
+		!!getChatTemplate(model)?.includes("tools")
+	);
+}
+
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -818,30 +826,21 @@ export const LOCAL_APPS = {
 		prettyLabel: "Pi",
 		docsUrl: "https://github.com/badlogic/pi-mono",
 		mainTask: "text-generation",
-		displayOnModelPage: (model) =>
-			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
-			model.tags.includes("conversational") &&
-			!!getChatTemplate(model)?.includes("tools"),
+		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetPi,
 	},
 	openclaw: {
 		prettyLabel: "OpenClaw",
 		docsUrl: "https://github.com/openclaw",
 		mainTask: "text-generation",
-		displayOnModelPage: (model) =>
-			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
-			model.tags.includes("conversational") &&
-			!!getChatTemplate(model)?.includes("tools"),
+		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
 	},
 	"hermes-agent": {
 		prettyLabel: "Hermes",
 		docsUrl: "https://hermes-agent.nousresearch.com/",
 		mainTask: "text-generation",
-		displayOnModelPage: (model) =>
-			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
-			model.tags.includes("conversational") &&
-			!!getChatTemplate(model)?.includes("tools"),
+		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetHermesAgent,
 	},
 } satisfies Record<string, LocalApp>;

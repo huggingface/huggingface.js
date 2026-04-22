@@ -3,6 +3,11 @@ import { LOCAL_APPS } from "./local-apps.js";
 import type { ModelData } from "./model-data.js";
 
 describe("local-apps", () => {
+	it("shares the same model-page predicate for pi-based tool callers", async () => {
+		expect(LOCAL_APPS.pi.displayOnModelPage).toBe(LOCAL_APPS.openclaw.displayOnModelPage);
+		expect(LOCAL_APPS.pi.displayOnModelPage).toBe(LOCAL_APPS["hermes-agent"].displayOnModelPage);
+	});
+
 	it("llama.cpp conversational", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
 		const model: ModelData = {
