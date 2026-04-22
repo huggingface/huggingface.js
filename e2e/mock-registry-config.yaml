@@ -1,11 +1,7 @@
 auth:
-  auth-memory:
-    users:
-      foo:
-        name: test
-        password: test
+  htpasswd:
+    file: ./htpasswd
 web:
-  # login with foo / test
   enable: true
 store:
   memory:
