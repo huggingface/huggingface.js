@@ -1,3 +1,9 @@
+auth:
+  auth-memory:
+    users:
+      foo:
+        name: foo
+        password: test
 web:
   enable: true
 store:
