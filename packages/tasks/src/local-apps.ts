@@ -751,6 +751,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
 	},
+	inferencer: {
+		prettyLabel: "Inferencer",
+		docsUrl: "https://inferencer.com",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
+		deeplink: (model) => new URL(`inferencer://open_from_hf?model=${model.id}`),
+  },
 	pi: {
 		prettyLabel: "Pi",
 		docsUrl: "https://github.com/badlogic/pi-mono",
