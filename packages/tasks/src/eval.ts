@@ -89,4 +89,9 @@ export const EVALUATION_FRAMEWORKS = {
 			"ParseBench is a benchmark for evaluating document parsing systems on real-world enterprise documents across tables, charts, content faithfulness, semantic formatting, and visual grounding.",
 		url: "https://github.com/run-llama/ParseBench",
 	},
+	"glotocr-bench": {
+		name: "glotocr-bench",
+		description: "GlotOCR Bench is a benchmark for evaluating OCR for different Unicode scripts.",
+		url: "https://github.com/cisnlp/glotocr-bench",
+	},
 } as const;
