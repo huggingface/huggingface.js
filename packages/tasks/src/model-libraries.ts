@@ -616,6 +616,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"json"`,
 	},
+	"hy-world-2": {
+		prettyLabel: "HY-World-2.0",
+		repoName: "HY-World-2.0",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HY-World-2.0",
+		filter: false,
+		countDownloads: `path_extension:"json"`,
+	},
 	"image-matching-models": {
 		prettyLabel: "Image Matching Models",
 		repoName: "Image Matching Models",
@@ -1112,6 +1119,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "RKLLM",
 		repoUrl: "https://github.com/airockchip/rknn-llm",
 		countDownloads: `path_extension:"rkllm"`,
+	},
+	"robo-orchard-lab": {
+		prettyLabel: "RoboOrchardLab",
+		repoName: "RoboOrchardLab",
+		repoUrl: "https://github.com/HorizonRobotics/RoboOrchardLab",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	saelens: {
 		prettyLabel: "SAELens",

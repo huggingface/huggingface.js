@@ -259,4 +259,20 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(displayOnModelPage(model)).toBe(false);
 	});
+
+	it("links as a function", async () => {
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			inference: "",
+		};
+		const appWithFnLinks = {
+			...LOCAL_APPS["llama.cpp"],
+			links: (m: ModelData) => [{ label: "Releases", url: `https://github.com/${m.id}/releases` }],
+		};
+
+		expect(appWithFnLinks.links(model)).toEqual([
+			{ label: "Releases", url: "https://github.com/bartowski/Llama-3.2-3B-Instruct-GGUF/releases" },
+		]);
+	});
 });
