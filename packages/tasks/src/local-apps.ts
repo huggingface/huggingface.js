@@ -525,9 +525,8 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 		serverStep,
 		{
 			title: "Configure OpenClaw for the local server",
+			setup: "# Install OpenClaw:\nnpm install -g openclaw@latest",
 			content: [
-				"# Install OpenClaw by running:",
-				"# npm install -g openclaw@latest",
 				"# Configure OpenClaw:",
 				"openclaw onboard --non-interactive \\",
 				"  --auth-choice custom-api-key \\",
@@ -555,10 +554,12 @@ const snippetHermesAgent = (model: ModelData, filepath?: string): LocalAppSnippe
 		serverStep,
 		{
 			title: "Set Hermes default config",
+			setup: [
+				"# Install Hermes:",
+				"curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash",
+				"hermes setup",
+			].join("\n"),
 			content: [
-				"# Install Hermes by running:",
-				"# curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash",
-				"# hermes setup",
 				"# Add to your Hermes config file:",
 				"model:",
 				"  provider: custom",
