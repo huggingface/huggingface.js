@@ -486,7 +486,6 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const isMLX = isMlxModel(model);
 	const serverStep = getLocalServerStep(model, filepath);
 
-	// Step 2: Pi config — port and provider name differ
 	const modelsJson = JSON.stringify(
 		{
 			providers: {
