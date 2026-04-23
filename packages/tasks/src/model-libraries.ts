@@ -616,6 +616,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"json"`,
 	},
+	"hy-world-2": {
+		prettyLabel: "HY-World-2.0",
+		repoName: "HY-World-2.0",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HY-World-2.0",
+		filter: false,
+		countDownloads: `path_extension:"json"`,
+	},
 	"image-matching-models": {
 		prettyLabel: "Image Matching Models",
 		repoName: "Image Matching Models",
@@ -1106,6 +1113,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/airockchip/rknn-llm",
 		countDownloads: `path_extension:"rkllm"`,
 	},
+	"robo-orchard-lab": {
+		prettyLabel: "RoboOrchardLab",
+		repoName: "RoboOrchardLab",
+		repoUrl: "https://github.com/HorizonRobotics/RoboOrchardLab",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
@@ -1267,6 +1281,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"cvlm_llama2_tokenizer/tokenizer.model"`,
 		snippets: snippets.seed_story,
+	},
+	skala: {
+		prettyLabel: "Skala",
+		repoName: "Skala",
+		repoUrl: "https://github.com/microsoft/skala",
+		filter: false,
+		countDownloads: `path_extension:"fun"`,
 	},
 	soloaudio: {
 		prettyLabel: "SoloAudio",
