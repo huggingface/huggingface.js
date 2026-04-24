@@ -4,14 +4,16 @@ import type { BaseArgs, Options } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
 import type { LegacyAudioInput } from "./utils.js";
 
-export type AudioToAudioArgs =
-	| (BaseArgs & {
-			/**
-			 * Binary audio data
-			 */
-			inputs: Blob;
-	  })
-	| LegacyAudioInput;
+export type AudioToAudioArgs = BaseArgs &
+	(
+		| {
+				/**
+				 * Binary audio data
+				 */
+				inputs: Blob;
+		  }
+		| LegacyAudioInput
+	);
 
 export interface AudioToAudioOutputElem {
 	/**
@@ -36,8 +38,7 @@ export interface AudioToAudioOutput {
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
-	const model = "inputs" in args ? args.model : undefined;
-	const provider = await resolveProvider(args.provider, model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "audio-to-audio");
 	const payload = await providerHelper.preparePayloadAsync(args);
 	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, providerHelper, {

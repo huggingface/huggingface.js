@@ -88,6 +88,31 @@ const FAL_AI_AUDIO_MIME_MAP: Record<string, string> = {
 };
 export const FAL_AI_SUPPORTED_BLOB_TYPES = Object.keys(FAL_AI_AUDIO_MIME_MAP);
 
+function getFalAiAudioDataUrlContentType(contentType: string): string {
+	const baseContentType = contentType.split(";")[0].trim().toLowerCase();
+	const falContentType = FAL_AI_AUDIO_MIME_MAP[baseContentType];
+	if (!falContentType) {
+		throw new InferenceClientInputError(
+			`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
+				", ",
+			)}`,
+		);
+	}
+	return falContentType;
+}
+
+async function buildFalAiAudioDataUrl(blob: Blob): Promise<string> {
+	const contentType = blob.type;
+	if (!contentType) {
+		throw new InferenceClientInputError(
+			`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`,
+		);
+	}
+	const falContentType = getFalAiAudioDataUrlContentType(contentType);
+	const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
+	return `data:${falContentType};base64,${base64audio}`;
+}
+
 abstract class FalAITask extends TaskProviderHelper {
 	constructor(url?: string) {
 		super("fal-ai", url || "https://fal.run");
@@ -502,28 +527,14 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 
 	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
 		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
-		const contentType = blob?.type;
-		if (!contentType) {
+		if (!(blob instanceof Blob)) {
 			throw new InferenceClientInputError(
 				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`,
 			);
 		}
-		// Blob MIME types can carry codec parameters (e.g. MediaRecorder produces
-		// "audio/webm;codecs=opus"); take the base type and remap it to a label fal's
-		// data-URL decoder accepts (see FAL_AI_AUDIO_MIME_MAP).
-		const baseContentType = contentType.split(";")[0].trim().toLowerCase();
-		const falContentType = FAL_AI_AUDIO_MIME_MAP[baseContentType];
-		if (!falContentType) {
-			throw new InferenceClientInputError(
-				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
-					", ",
-				)}`,
-			);
-		}
-		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
 		return {
 			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
-			audio_url: `data:${falContentType};base64,${base64audio}`,
+			audio_url: await buildFalAiAudioDataUrl(blob),
 		};
 	}
 }
@@ -606,23 +617,9 @@ export class FalAIAudioToAudioTask extends FalAiQueueTask implements AudioToAudi
 				`Expected a Blob input for audio-to-audio with provider fal-ai, got ${typeof blob}.`,
 			);
 		}
-		const contentType = blob.type;
-		if (!contentType) {
-			throw new InferenceClientInputError(
-				`Unable to determine the input's content-type. Make sure you are passing a Blob with a "type" when using provider fal-ai.`,
-			);
-		}
-		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
-			throw new InferenceClientInputError(
-				`Provider fal-ai does not support blob type ${contentType} for audio-to-audio - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
-					", ",
-				)}`,
-			);
-		}
-		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
 		return {
 			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
-			audio_url: `data:${contentType};base64,${base64audio}`,
+			audio_url: await buildFalAiAudioDataUrl(blob),
 		};
 	}
 
@@ -630,8 +627,10 @@ export class FalAIAudioToAudioTask extends FalAiQueueTask implements AudioToAudi
 		response: FalAiQueueOutput,
 		url?: string,
 		headers?: Record<string, string>,
+		_outputType?: undefined,
+		signal?: AbortSignal,
 	): Promise<AudioToAudioOutput[]> {
-		const result = (await this.getResponseFromQueueApi(response, url, headers)) as FalAIAudioToAudioResult;
+		const result = (await this.getResponseFromQueueApi(response, url, headers, signal)) as FalAIAudioToAudioResult;
 		if (
 			typeof result !== "object" ||
 			!result ||
@@ -647,7 +646,7 @@ export class FalAIAudioToAudioTask extends FalAiQueueTask implements AudioToAudi
 			);
 		}
 
-		const audioResponse = await fetch(result.audio.url);
+		const audioResponse = await fetch(result.audio.url, { signal });
 		if (!audioResponse.ok) {
 			throw new InferenceClientProviderApiError(
 				`Failed to fetch audio from ${result.audio.url}: ${audioResponse.statusText}`,
