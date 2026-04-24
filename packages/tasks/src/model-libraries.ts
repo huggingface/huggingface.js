@@ -439,7 +439,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "encoderfile",
 		repoUrl: "https://github.com/mozilla-ai/encoderfile",
 		filter: false,
-		countDownloads: `path_extension: "encoderfile"`,
+		countDownloads: `path_extension:"encoderfile"`,
 	},
 	espnet: {
 		prettyLabel: "ESPnet",
