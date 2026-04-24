@@ -8,7 +8,6 @@ import { deleteRepo } from "./delete-repo";
 import { commit } from "./commit";
 import { downloadFile } from "./download-file";
 
-
 describe("parseHfCopyHandle", () => {
 	it("parses a bucket handle", () => {
 		const handle = parseHfCopyHandle("hf://buckets/user/my-bucket/path/to/file");
@@ -166,7 +165,7 @@ describe("copyFiles", () => {
 				hubUrl: TEST_HUB_URL,
 				source: "hf://buckets/user/my-bucket/source.txt",
 				destination: "hf://user/my-model/destination.txt",
-			})
+			}),
 		).rejects.toThrow("Bucket-to-repo and repo-to-repo copy are not supported. Destination must be a bucket.");
 	});
 });
