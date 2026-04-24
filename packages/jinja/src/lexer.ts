@@ -142,8 +142,9 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 	// See https://github.com/huggingface/transformers/pull/30650 for more information.
 	// Also honors `{%-` / `-%}` whitespace-stripping modifiers by trimming
 	// surrounding whitespace before removing the tag.
-	return template.replace(/(\s*){%(-?)\s*(?:end)?generation\s*(-?)%}(\s*)/gs, (_, before, lstrip, rstrip, after) =>
-		(lstrip ? "" : before) + (rstrip ? "" : after),
+	return template.replace(
+		/(\s*){%(-?)\s*(?:end)?generation\s*(-?)%}(\s*)/gs,
+		(_, before, lstrip, rstrip, after) => (lstrip ? "" : before) + (rstrip ? "" : after),
 	);
 }
 
