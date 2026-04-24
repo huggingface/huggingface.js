@@ -1,8 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { CredentialsParams, RepoId, RepoType } from "../types/public";
+import type { CredentialsParams, RepoType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
-import { toRepoId } from "../utils/toRepoId";
 import { pathsInfo } from "./paths-info";
 import { listFiles } from "./list-files";
 import { downloadFile } from "./download-file";
