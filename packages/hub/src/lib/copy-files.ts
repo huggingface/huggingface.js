@@ -41,7 +41,7 @@ const SPECIAL_REFS_REVISION_REGEX = /^(refs\/convert\/\w+)|(refs\/pr\/\d+)$/;
  */
 export function parseHfCopyHandle(hfHandle: string): CopyHandle {
 	if (!hfHandle.startsWith("hf://")) {
-		throw new ValueError(`Invalid HF handle: '${hfHandle}'. Expected a path starting with 'hf://'.`);
+		throw new CopyHandleError(`Invalid HF handle: '${hfHandle}'. Expected a path starting with 'hf://'.`);
 	}
 
 	const path = hfHandle.slice("hf://".length);
@@ -51,22 +51,20 @@ export function parseHfCopyHandle(hfHandle: string): CopyHandle {
 		const remainder = path.slice("buckets/".length);
 		const firstSlash = remainder.indexOf("/");
 		if (firstSlash === -1) {
-			throw new ValueError(
+			throw new CopyHandleError(
 				`Invalid bucket HF handle: '${hfHandle}'. Expected 'hf://buckets/<namespace>/<bucket-name>[/<path>]'.`,
 			);
 		}
 		const secondSlash = remainder.indexOf("/", firstSlash + 1);
-		const bucketId =
-			secondSlash === -1 ? remainder : remainder.slice(0, secondSlash);
-		const bucketPath =
-			secondSlash === -1 ? "" : remainder.slice(secondSlash + 1).replace(/^\/+|\/+$/g, "");
+		const bucketId = secondSlash === -1 ? remainder : remainder.slice(0, secondSlash);
+		const bucketPath = secondSlash === -1 ? "" : remainder.slice(secondSlash + 1).replace(/^\/+|\/+$/g, "");
 		return { kind: "bucket", bucketId, path: bucketPath };
 	}
 
 	// --- Repo handle ---
 	path.replace(/^\/+|\/+$/g, "");
 	if (path === "") {
-		throw new ValueError(`Invalid HF handle: '${hfHandle}'.`);
+		throw new CopyHandleError(`Invalid HF handle: '${hfHandle}'.`);
 	}
 
 	const parts = path.split("/");
@@ -78,7 +76,7 @@ export function parseHfCopyHandle(hfHandle: string): CopyHandle {
 	}
 
 	if (parts.length < 2) {
-		throw new ValueError(
+		throw new CopyHandleError(
 			`Invalid repo HF handle: '${hfHandle}'. Expected 'hf://<namespace>/<repo-name>[/<path>]' or with explicit repo type prefix.`,
 		);
 	}
@@ -137,7 +135,7 @@ export type { BucketCopyHandle, RepoCopyHandle, CopyHandle };
  * @param params.hubUrl - Custom Hub URL.
  * @param params.fetch - Custom fetch function.
  *
- * @throws {ValueError} If the destination is not a bucket or if handles are invalid.
+ * @throws {CopyHandleError} If the destination is not a bucket or if handles are invalid.
  *
  * @example
  * ```ts
@@ -178,7 +176,7 @@ export async function copyFiles(
 	const destinationHandle = parseHfCopyHandle(params.destination);
 
 	if (destinationHandle.kind !== "bucket") {
-		throw new ValueError("Bucket-to-repo and repo-to-repo copy are not supported. Destination must be a bucket.");
+		throw new CopyHandleError("Bucket-to-repo and repo-to-repo copy are not supported. Destination must be a bucket.");
 	}
 
 	const destBucketId = destinationHandle.bucketId;
@@ -463,11 +461,11 @@ function resolveTargetPath(
 	} else if (srcFilePath === srcRootPath) {
 		relPath = basename;
 	} else {
-		throw new ValueError(`Unexpected source path while copying folder: '${srcFilePath}'.`);
+		throw new CopyHandleError(`Unexpected source path while copying folder: '${srcFilePath}'.`);
 	}
 
 	if (relPath === "") {
-		throw new ValueError("Cannot copy an empty relative path.");
+		throw new CopyHandleError("Cannot copy an empty relative path.");
 	}
 
 	if (destPath === "") return relPath;
@@ -540,9 +538,4 @@ function* chunkArray<T>(arr: T[], size: number): Generator<T[]> {
 /**
  * Thrown when a copy handle or parameter is invalid.
  */
-class ValueError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = "ValueError";
-	}
-}
+class CopyHandleError extends Error {}
