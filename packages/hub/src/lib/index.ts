@@ -1,6 +1,7 @@
 export * from "./cache-management";
 export * from "./check-repo-access";
 export * from "./commit";
+export * from "./copy-files";
 export * from "./count-commits";
 export * from "./create-repo";
 export * from "./create-branch";
