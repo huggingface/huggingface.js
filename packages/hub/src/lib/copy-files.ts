@@ -42,9 +42,7 @@ const SPECIAL_REFS_REVISION_REGEX = /^(refs\/convert\/\w+)|(refs\/pr\/\d+)$/;
  */
 export function parseHfCopyHandle(hfHandle: string): CopyHandle {
 	if (!hfHandle.startsWith("hf://")) {
-		throw new ValueError(
-			`Invalid HF handle: '${hfHandle}'. Expected a path starting with 'hf://'.`,
-		);
+		throw new ValueError(`Invalid HF handle: '${hfHandle}'. Expected a path starting with 'hf://'.`);
 	}
 
 	const path = hfHandle.slice("hf://".length);
@@ -178,21 +176,14 @@ export async function copyFiles(
 	const destinationHandle = parseHfCopyHandle(params.destination);
 
 	if (destinationHandle.kind !== "bucket") {
-		throw new ValueError(
-			"Bucket-to-repo and repo-to-repo copy are not supported. Destination must be a bucket.",
-		);
+		throw new ValueError("Bucket-to-repo and repo-to-repo copy are not supported. Destination must be a bucket.");
 	}
 
 	const destBucketId = destinationHandle.bucketId;
 	const destPath = destinationHandle.path;
 
 	// Determine if destination is an existing file or directory
-	const destinationIsDirectory = await resolveDestinationIsDirectory(
-		destBucketId,
-		destPath,
-		params,
-		accessToken,
-	);
+	const destinationIsDirectory = await resolveDestinationIsDirectory(destBucketId, destPath, params, accessToken);
 
 	// Collect all copy operations and pending downloads
 	const copyOps: BucketCopyOperation[] = [];
@@ -398,8 +389,7 @@ async function resolveRepoSource(
 		});
 	}
 
-	const singleFile =
-		sourcePathInfos.length === 1 && sourcePathInfos[0].type === "file";
+	const singleFile = sourcePathInfos.length === 1 && sourcePathInfos[0].type === "file";
 
 	if (singleFile) {
 		const file = sourcePathInfos[0];
@@ -497,15 +487,14 @@ async function bucketBatchCopy(
 			"Content-Type": "application/x-ndjson",
 		},
 		body: ops
-			.map(
-				(op) =>
-					JSON.stringify({
-						type: "copyFile",
-						path: op.destination,
-						xetHash: op.xetHash,
-						sourceRepoType: op.sourceRepoType,
-						sourceRepoId: op.sourceRepoId,
-					}),
+			.map((op) =>
+				JSON.stringify({
+					type: "copyFile",
+					path: op.destination,
+					xetHash: op.xetHash,
+					sourceRepoType: op.sourceRepoType,
+					sourceRepoId: op.sourceRepoId,
+				}),
 			)
 			.join("\n"),
 	});
