@@ -49,14 +49,17 @@ export function parseHfCopyHandle(hfHandle: string): CopyHandle {
 	// --- Bucket handle ---
 	if (path.startsWith("buckets/")) {
 		const remainder = path.slice("buckets/".length);
-		const slashIdx = remainder.indexOf("/");
-		if (slashIdx === -1) {
+		const firstSlash = remainder.indexOf("/");
+		if (firstSlash === -1) {
 			throw new ValueError(
 				`Invalid bucket HF handle: '${hfHandle}'. Expected 'hf://buckets/<namespace>/<bucket-name>[/<path>]'.`,
 			);
 		}
-		const bucketId = remainder.slice(0, slashIdx);
-		const bucketPath = remainder.slice(slashIdx + 1).replace(/^\/+|\/+$/g, "");
+		const secondSlash = remainder.indexOf("/", firstSlash + 1);
+		const bucketId =
+			secondSlash === -1 ? remainder : remainder.slice(0, secondSlash);
+		const bucketPath =
+			secondSlash === -1 ? "" : remainder.slice(secondSlash + 1).replace(/^\/+|\/+$/g, "");
 		return { kind: "bucket", bucketId, path: bucketPath };
 	}
 
@@ -70,7 +73,7 @@ export function parseHfCopyHandle(hfHandle: string): CopyHandle {
 	let repoType: Exclude<RepoType, "bucket" | "kernel"> = "model";
 
 	if (parts[0] === "datasets" || parts[0] === "spaces") {
-		repoType = parts[0] as Exclude<RepoType, "bucket" | "kernel">;
+		repoType = parts[0].slice(0, -1) as Exclude<RepoType, "bucket" | "kernel">;
 		parts.shift();
 	}
 
