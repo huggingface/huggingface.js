@@ -731,8 +731,8 @@ export const LOCAL_APPS = {
 		snippet: snippetOllama,
 	},
 	unsloth: {
-		prettyLabel: "Unsloth",
-		docsUrl: "https://unsloth.ai/docs",
+		prettyLabel: "Unsloth Studio",
+		docsUrl: "https://unsloth.ai/docs/new/studio",
 		mainTask: "text-generation",
 		displayOnModelPage: isUnslothModel,
 		snippet: snippetUnsloth,
