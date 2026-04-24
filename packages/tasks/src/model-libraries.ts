@@ -664,6 +664,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	"ising-decoding": {
+		prettyLabel: "Ising Decoding",
+		repoName: "Ising-Decoding",
+		repoUrl: "https://github.com/NVIDIA/Ising-Decoding",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
