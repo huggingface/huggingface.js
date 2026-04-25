@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/tasks",
-	"version": "0.20.17",
+	"version": "0.20.21",
 	"description": "List of ML tasks for huggingface.co/tasks",
 	"keywords": [
 		"hub",

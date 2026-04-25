@@ -616,6 +616,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"json"`,
 	},
+	"hy-world-2": {
+		prettyLabel: "HY-World-2.0",
+		repoName: "HY-World-2.0",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HY-World-2.0",
+		filter: false,
+		countDownloads: `path_extension:"json"`,
+	},
 	"image-matching-models": {
 		prettyLabel: "Image Matching Models",
 		repoName: "Image Matching Models",
@@ -656,6 +663,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/IntelliGen-AI/IntelliFold",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	"ising-decoding": {
+		prettyLabel: "Ising Decoding",
+		repoName: "Ising-Decoding",
+		repoUrl: "https://github.com/NVIDIA/Ising-Decoding",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -715,6 +729,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "K2",
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
+	},
+	"lyra-2.0": {
+		prettyLabel: "Lyra-2.0",
+		repoName: "Lyra-2.0",
+		repoUrl: "https://github.com/nv-tlabs/lyra",
+		filter: false,
+		countDownloads: `path:"checkpoints/image_encoder/model.pth"`,
 	},
 	lagernvs: {
 		prettyLabel: "LagerNVS",
