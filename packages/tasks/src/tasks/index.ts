@@ -31,6 +31,7 @@ import tabularClassification from "./tabular-classification/data.js";
 import tabularRegression from "./tabular-regression/data.js";
 import textToImage from "./text-to-image/data.js";
 import textToSpeech from "./text-to-speech/data.js";
+import timeSeriesForecasting from "./time-series-forecasting/data.js";
 import tokenClassification from "./token-classification/data.js";
 import translation from "./translation/data.js";
 import textClassification from "./text-classification/data.js";
@@ -95,6 +96,14 @@ export type * from "./table-question-answering/inference.js";
 export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference.js";
 export type { TextToVideoParameters, TextToVideoOutput, TextToVideoInput } from "./text-to-video/inference.js";
 export type { TextToSpeechParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference.js";
+export type {
+	QuantilePrediction,
+	TimeSeriesForecastingInput,
+	TimeSeriesForecastingInputItem,
+	TimeSeriesForecastingOutput,
+	TimeSeriesForecastingOutputItem,
+	TimeSeriesForecastingParameters,
+} from "./time-series-forecasting/inference.js";
 export type * from "./token-classification/inference.js";
 export type { TranslationInput, TranslationOutput } from "./translation/inference.js";
 export type {
@@ -262,7 +271,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"text-to-speech": getData("text-to-speech", textToSpeech),
 	"text-to-audio": undefined,
 	"text-to-video": getData("text-to-video", textToVideo),
-	"time-series-forecasting": undefined,
+	"time-series-forecasting": getData("time-series-forecasting", timeSeriesForecasting),
 	"token-classification": getData("token-classification", tokenClassification),
 	translation: getData("translation", translation),
 	"unconditional-image-generation": getData("unconditional-image-generation", unconditionalImageGeneration),
