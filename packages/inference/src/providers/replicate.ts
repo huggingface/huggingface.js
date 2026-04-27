@@ -93,6 +93,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 		url?: string,
 		headers?: Record<string, string>,
 		outputType?: OutputType,
+		signal?: AbortSignal,
 	): Promise<string | Blob | Record<string, unknown>> {
 		void url;
 		void headers;
@@ -105,7 +106,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			if (outputType === "url") {
 				return res.output;
 			}
-			const urlResponse = await fetch(res.output);
+			const urlResponse = await fetch(res.output, { signal });
 			const blob = await urlResponse.blob();
 			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
@@ -124,7 +125,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			if (outputType === "url") {
 				return res.output[0];
 			}
-			const urlResponse = await fetch(res.output[0]);
+			const urlResponse = await fetch(res.output[0], { signal });
 			const blob = await urlResponse.blob();
 			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
@@ -147,17 +148,23 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 		return payload;
 	}
 
-	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+	override async getResponse(
+		response: ReplicateOutput,
+		_url?: string,
+		_headers?: HeadersInit,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob> {
 		if (response instanceof Blob) {
 			return response;
 		}
 		if (response && typeof response === "object") {
 			if ("output" in response) {
 				if (typeof response.output === "string") {
-					const urlResponse = await fetch(response.output);
+					const urlResponse = await fetch(response.output, { signal });
 					return await urlResponse.blob();
 				} else if (Array.isArray(response.output)) {
-					const urlResponse = await fetch(response.output[0]);
+					const urlResponse = await fetch(response.output[0], { signal });
 					return await urlResponse.blob();
 				}
 			}
@@ -167,7 +174,13 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 }
 
 export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVideoTaskHelper {
-	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+	override async getResponse(
+		response: ReplicateOutput,
+		_url?: string,
+		_headers?: HeadersInit,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob> {
 		if (
 			typeof response === "object" &&
 			!!response &&
@@ -175,7 +188,7 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 			typeof response.output === "string" &&
 			isUrl(response.output)
 		) {
-			const urlResponse = await fetch(response.output);
+			const urlResponse = await fetch(response.output, { signal });
 			return await urlResponse.blob();
 		}
 
@@ -216,7 +229,13 @@ export class ReplicateAutomaticSpeechRecognitionTask
 		};
 	}
 
-	override async getResponse(response: ReplicateOutput): Promise<AutomaticSpeechRecognitionOutput> {
+	override async getResponse(
+		response: ReplicateOutput,
+		_url?: string,
+		_headers?: HeadersInit,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<AutomaticSpeechRecognitionOutput> {
 		if (typeof response?.output === "string") return { text: response.output };
 		if (Array.isArray(response?.output) && typeof response.output[0] === "string") return { text: response.output[0] };
 
@@ -231,7 +250,7 @@ export class ReplicateAutomaticSpeechRecognitionTask
 			if (typeof out.transcription === "string") return { text: out.transcription };
 			if (typeof out.translation === "string") return { text: out.translation };
 			if (typeof out.txt_file === "string") {
-				const r = await fetch(out.txt_file);
+				const r = await fetch(out.txt_file, { signal });
 				return { text: await r.text() };
 			}
 		}
@@ -276,7 +295,13 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 		};
 	}
 
-	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+	override async getResponse(
+		response: ReplicateOutput,
+		_url?: string,
+		_headers?: HeadersInit,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob> {
 		if (
 			typeof response === "object" &&
 			!!response &&
@@ -285,7 +310,7 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 			response.output.length > 0 &&
 			typeof response.output[0] === "string"
 		) {
-			const urlResponse = await fetch(response.output[0]);
+			const urlResponse = await fetch(response.output[0], { signal });
 			return await urlResponse.blob();
 		}
 
@@ -296,7 +321,7 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 			typeof response.output === "string" &&
 			isUrl(response.output)
 		) {
-			const urlResponse = await fetch(response.output);
+			const urlResponse = await fetch(response.output, { signal });
 			return await urlResponse.blob();
 		}
 

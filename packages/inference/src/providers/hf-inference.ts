@@ -139,6 +139,7 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 		url?: string,
 		headers?: HeadersInit,
 		outputType?: OutputType,
+		signal?: AbortSignal,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (!response) {
 			throw new InferenceClientProviderOutputError(
@@ -154,11 +155,11 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 				if (outputType === "dataUrl") {
 					return `data:image/jpeg;base64,${base64Data}`;
 				}
-				const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
+				const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`, { signal });
 				return await base64Response.blob();
 			}
 			if ("output" in response && Array.isArray(response.output)) {
-				const urlResponse = await fetch(response.output[0]);
+				const urlResponse = await fetch(response.output[0], { signal });
 				const blob = await urlResponse.blob();
 				return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 			}

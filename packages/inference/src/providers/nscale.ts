@@ -63,6 +63,7 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 		url?: string,
 		headers?: HeadersInit,
 		outputType?: OutputType,
+		signal?: AbortSignal,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
@@ -79,7 +80,7 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 			if (outputType === "dataUrl") {
 				return `data:image/jpeg;base64,${base64Data}`;
 			}
-			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
+			return fetch(`data:image/jpeg;base64,${base64Data}`, { signal }).then((res) => res.blob());
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Nscale text-to-image API");
