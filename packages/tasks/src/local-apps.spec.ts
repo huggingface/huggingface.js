@@ -138,6 +138,26 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain("pi");
 	});
 
+	it("pi - vision", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["pi"];
+		const model: ModelData = {
+			id: "unsloth/Qwen3.6-35B-A3B-GGUF",
+			pipeline_tag: "image-text-to-text",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096, chat_template: "{% if tools %}" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toContain(`llama-server -hf unsloth/Qwen3.6-35B-A3B-GGUF:{{QUANT_TAG}} --jinja`);
+		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
+		expect(snippet[1].content).toContain(`"id": "Qwen3.6-35B-A3B-GGUF"`);
+		expect(snippet[1].content).toContain(`"input"`);
+		expect(snippet[1].content).toContain(`"text"`);
+		expect(snippet[1].content).toContain(`"image"`);
+		expect(snippet[2].content).toContain("pi");
+	});
+
 	it("pi - mlx", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["pi"];
 		const model: ModelData = {
