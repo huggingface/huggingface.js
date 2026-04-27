@@ -62,8 +62,11 @@ jobs:
           echo "RELEASE_TAG=hub-v$BUMPED_VERSION" >> $GITHUB_ENV
 
       - if: ${{ !github.event.inputs.bypass_deps_check }}
-        name: "Check Deps are published before publishing this package"
+        name: "Check @huggingface/tasks is published"
         run: pnpm -w check-deps tasks
+      - if: ${{ !github.event.inputs.bypass_deps_check }}
+        name: "Check @huggingface/xetchunk-wasm is published"
+        run: pnpm -w check-deps xetchunk-wasm
 
       - run: (git pull --rebase && git push && git push origin "$RELEASE_TAG") || (git pull --rebase && git push && git push origin "$RELEASE_TAG")
 
