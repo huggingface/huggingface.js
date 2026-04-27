@@ -139,6 +139,14 @@ function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
 
+function isToolCallingLocalAgentModel(model: ModelData): boolean {
+	return (
+		(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
+		model.tags.includes("conversational") &&
+		!!getChatTemplate(model)?.includes("tools")
+	);
+}
+
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -463,12 +471,8 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
-const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const modelName = model.id.split("/").pop() ?? model.id;
-	const isMLX = isMlxModel(model);
-
-	// Step 1: Server — differs by backend
-	const serverStep: LocalAppSnippet = isMLX
+const getLocalServerStep = (model: ModelData, filepath?: string): LocalAppSnippet => {
+	return isMlxModel(model)
 		? {
 				title: "Start the MLX server",
 				setup: "# Install MLX LM:\nuv tool install mlx-lm",
@@ -479,8 +483,13 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 				setup: "# Install llama.cpp:\nbrew install llama.cpp",
 				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)} --jinja`,
 			};
+};
 
-	// Step 2: Pi config — port and provider name differ
+const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const modelName = model.id.split("/").pop() ?? model.id;
+	const isMLX = isMlxModel(model);
+	const serverStep = getLocalServerStep(model, filepath);
+
 	const modelsJson = JSON.stringify(
 		{
 			providers: {
@@ -506,6 +515,72 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 		{
 			title: "Run Pi",
 			content: "# Start Pi in your project directory:\npi",
+		},
+	];
+};
+
+const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const isMLX = isMlxModel(model);
+	const modelName = model.id.split("/").pop() ?? model.id;
+	const serverBaseUrl = "http://127.0.0.1:8080/v1";
+	const serverStep = getLocalServerStep(model, filepath);
+
+	return [
+		serverStep,
+		{
+			title: "Configure OpenClaw for the local server",
+			setup: "# Install OpenClaw:\nnpm install -g openclaw@latest",
+			content: [
+				"# Configure OpenClaw:",
+				"openclaw onboard --non-interactive \\",
+				"  --auth-choice custom-api-key \\",
+				`  --custom-base-url "${serverBaseUrl}" \\`,
+				`  --custom-model-id "${isMLX ? model.id : modelName}" \\`,
+				`  --custom-api-key "${isMLX ? "none" : "llama.cpp"}" \\`,
+				"  --secret-input-mode plaintext \\",
+				"  --custom-compatibility openai \\",
+				"  --accept-risk",
+			].join("\n"),
+		},
+		{
+			title: "Run OpenClaw",
+			content: "openclaw",
+		},
+	];
+};
+
+const snippetHermesAgent = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const isMLX = isMlxModel(model);
+	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
+	const serverStep = getLocalServerStep(model, filepath);
+
+	return [
+		serverStep,
+		{
+			title: "Set Hermes default config",
+			setup: [
+				"# Install Hermes:",
+				"curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash",
+				"hermes setup",
+			].join("\n"),
+			content: [
+				"# Add to your Hermes config file:",
+				"model:",
+				"  provider: custom",
+				`  default: ${modelId}`,
+				"  base_url: http://127.0.0.1:8080/v1",
+				`  api_key: ${isMLX ? "none" : "llama.cpp"}`,
+				"",
+				"custom_providers:",
+				"  - name: Local (127.0.0.1:8080)",
+				"    base_url: http://127.0.0.1:8080/v1",
+				`    api_key: ${isMLX ? "none" : "llama.cpp"}`,
+				`    model: ${modelId}`,
+			].join("\n"),
+		},
+		{
+			title: "Run Hermes",
+			content: "hermes",
 		},
 	];
 };
@@ -755,11 +830,22 @@ export const LOCAL_APPS = {
 		prettyLabel: "Pi",
 		docsUrl: "https://github.com/badlogic/pi-mono",
 		mainTask: "text-generation",
-		displayOnModelPage: (model) =>
-			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
-			model.tags.includes("conversational") &&
-			!!getChatTemplate(model)?.includes("tools"),
+		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetPi,
+	},
+	openclaw: {
+		prettyLabel: "OpenClaw",
+		docsUrl: "https://github.com/openclaw",
+		mainTask: "text-generation",
+		displayOnModelPage: isToolCallingLocalAgentModel,
+		snippet: snippetOpenClaw,
+	},
+	"hermes-agent": {
+		prettyLabel: "Hermes",
+		docsUrl: "https://hermes-agent.nousresearch.com/",
+		mainTask: "text-generation",
+		displayOnModelPage: isToolCallingLocalAgentModel,
+		snippet: snippetHermesAgent,
 	},
 } satisfies Record<string, LocalApp>;
 
