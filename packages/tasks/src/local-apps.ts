@@ -33,6 +33,10 @@ export type LocalApp = {
 	 */
 	docsUrl: string;
 	/**
+	 * Additional links to display (max 2)
+	 */
+	links?: { label: string; url: string }[] | ((model: ModelData) => { label: string; url: string }[]);
+	/**
 	 * main category of app
 	 */
 	mainTask: PipelineType;
@@ -727,8 +731,8 @@ export const LOCAL_APPS = {
 		snippet: snippetOllama,
 	},
 	unsloth: {
-		prettyLabel: "Unsloth",
-		docsUrl: "https://unsloth.ai/docs",
+		prettyLabel: "Unsloth Studio",
+		docsUrl: "https://unsloth.ai/docs/new/studio",
 		mainTask: "text-generation",
 		displayOnModelPage: isUnslothModel,
 		snippet: snippetUnsloth,
