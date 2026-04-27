@@ -477,7 +477,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 		: {
 				title: "Start the llama.cpp server",
 				setup: "# Install llama.cpp:\nbrew install llama.cpp",
-				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)} --jinja`,
+				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)}`,
 			};
 
 	// Step 2: Pi config — port and provider name differ
