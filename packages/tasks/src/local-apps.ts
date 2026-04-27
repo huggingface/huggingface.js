@@ -466,6 +466,7 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const modelName = model.id.split("/").pop() ?? model.id;
 	const isMLX = isMlxModel(model);
+	const isVision = model.pipeline_tag === "image-text-to-text";
 
 	// Step 1: Server — differs by backend
 	const serverStep: LocalAppSnippet = isMLX
@@ -481,6 +482,10 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 			};
 
 	// Step 2: Pi config — port and provider name differ
+	const modelEntry: Record<string, unknown> = { id: isMLX ? model.id : modelName };
+	if (isVision) {
+		modelEntry.input = ["text", "image"];
+	}
 	const modelsJson = JSON.stringify(
 		{
 			providers: {
@@ -488,7 +493,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 					baseUrl: "http://localhost:8080/v1",
 					api: "openai-completions",
 					apiKey: "none",
-					models: [{ id: isMLX ? model.id : modelName }],
+					models: [modelEntry],
 				},
 			},
 		},
