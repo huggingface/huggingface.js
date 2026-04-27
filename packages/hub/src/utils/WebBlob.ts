@@ -31,7 +31,7 @@ export class WebBlob extends Blob {
 			}),
 		});
 
-		const size = Number(response.headers.get("content-length"));
+		const size = Number(response.headers.get("content-length") ?? 0);
 		const contentType = response.headers.get("content-type") || "";
 		const supportRange = response.headers.get("accept-ranges") === "bytes";
 
