@@ -153,6 +153,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
 		expect(snippet[1].content).toContain(`"id": "Qwen3.6-35B-A3B-GGUF"`);
 		expect(snippet[1].content).toContain(`"input"`);
+		expect(snippet[1].content).toContain(`"text"`);
 		expect(snippet[1].content).toContain(`"image"`);
 		expect(snippet[2].content).toContain("pi");
 	});
