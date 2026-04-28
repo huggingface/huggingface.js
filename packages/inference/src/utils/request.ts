@@ -15,9 +15,11 @@ export interface ResponseWrapper<T> {
 }
 
 function bodyToJson(body?: BodyInit | null): JsonObject {
-	let data = null;
+	let data: unknown = null;
 	if (body instanceof Blob || body instanceof ArrayBuffer) {
 		data = "[Blob or ArrayBuffer]";
+	} else if (typeof FormData !== "undefined" && body instanceof FormData) {
+		data = "[FormData]";
 	} else if (typeof body === "string") {
 		try {
 			data = JSON.parse(body);
@@ -25,8 +27,8 @@ function bodyToJson(body?: BodyInit | null): JsonObject {
 			data = body;
 		}
 	}
-	if (data.accessToken) {
-		data.accessToken = "[REDACTED]";
+	if (data && typeof data === "object" && "accessToken" in data) {
+		(data as Record<string, unknown>).accessToken = "[REDACTED]";
 	}
 	return data as JsonObject;
 }
