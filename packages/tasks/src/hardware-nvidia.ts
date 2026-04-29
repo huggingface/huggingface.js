@@ -449,7 +449,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 	},
 	"RTX 2050 Mobile": {
-		tflops: 5.1, // 30W = 735-1245 MHz - https://www.techpowerup.com/gpu-specs/geforce-rtx-2050-mobile.c3859
+		tflops: 10.2,
 		memory: [4],
 		computeCapability: 8.6, // Architecture AMPERE_RTX
 	},
