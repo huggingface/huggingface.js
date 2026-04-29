@@ -59,8 +59,8 @@ export {
 
 export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware.js";
 export type { HardwareSpec, SkuType } from "./hardware.js";
-export type { AmdGpuHardwareSpec } from "./hardware-amd.js";
-export type { NvidiaHardwareSpec } from "./hardware-nvidia.js";
+export type { HardwareSpecGpuAmd } from "./hardware-gpu-amd.js";
+export type { HardwareSpecGpuNvidia } from "./hardware-gpu-nvidia.js";
 export { LOCAL_APPS } from "./local-apps.js";
 export type { LocalApp, LocalAppKey, LocalAppSnippet } from "./local-apps.js";
 

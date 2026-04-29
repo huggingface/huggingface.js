@@ -1,6 +1,6 @@
 import type { HardwareSpec } from "./hardware.js";
 
-export interface NvidiaHardwareSpec extends HardwareSpec {
+export interface HardwareSpecGpuNvidia extends HardwareSpec {
 	/**
 	 * CUDA Compute Capability (NVIDIA GPUs only)
 	 *
@@ -27,7 +27,7 @@ export enum NvidiaComputeCapabilities {
 	MAXWELL = 5.3,
 }
 
-export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
+export const GPU_NVIDIA_SKUS: Record<string, HardwareSpecGpuNvidia> = {
 	B200: {
 		tflops: 496.6,
 		memory: [192],

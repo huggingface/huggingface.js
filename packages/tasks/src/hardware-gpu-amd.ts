@@ -1,6 +1,6 @@
 import type { HardwareSpec } from "./hardware.js";
 
-export interface AmdGpuHardwareSpec extends HardwareSpec {
+export interface HardwareSpecGpuAmd extends HardwareSpec {
 	/**
 	 * GFX version / LLVM ISA target (AMD GPUs only), e.g. "gfx1100"
 	 *
@@ -9,7 +9,7 @@ export interface AmdGpuHardwareSpec extends HardwareSpec {
 	gfxVersion: string;
 }
 
-export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
+export const GPU_AMD_SKUS: Record<string, HardwareSpecGpuAmd> = {
 	MI300: {
 		tflops: 383.0,
 		memory: [192],

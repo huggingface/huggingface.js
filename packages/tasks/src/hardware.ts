@@ -1,5 +1,5 @@
-import { AMD_GPU_SKUS } from "./hardware-amd.js";
-import { NVIDIA_SKUS } from "./hardware-nvidia.js";
+import { GPU_AMD_SKUS } from "./hardware-gpu-amd.js";
+import { GPU_NVIDIA_SKUS } from "./hardware-gpu-nvidia.js";
 
 /**
  * Biden AI Executive Order (since revoked by President Trump):
@@ -40,8 +40,8 @@ export const DEFAULT_MEMORY_OPTIONS = [
 
 export const SKUS = {
 	GPU: {
-		NVIDIA: NVIDIA_SKUS,
-		AMD: AMD_GPU_SKUS,
+		NVIDIA: GPU_NVIDIA_SKUS,
+		AMD: GPU_AMD_SKUS,
 		INTEL: {
 			"Arc A750": {
 				tflops: 34.41,
