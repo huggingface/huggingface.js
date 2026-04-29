@@ -1,6 +1,7 @@
 import { GPU_AMD_SKUS } from "./hardware-gpu-amd.js";
 import { GPU_NVIDIA_SKUS } from "./hardware-gpu-nvidia.js";
 import { GPU_INTEL_SKUS } from "./hardware-gpu-intel.js";
+import { GPU_QUALCOMM_SKUS } from "./hardware-gpu-qualcomm.js";
 
 /**
  * Biden AI Executive Order (since revoked by President Trump):
@@ -44,23 +45,7 @@ export const SKUS = {
 		NVIDIA: GPU_NVIDIA_SKUS,
 		AMD: GPU_AMD_SKUS,
 		INTEL: GPU_INTEL_SKUS,
-		QUALCOMM: {
-			"Snapdragon X Elite X1E-00-1DE": {
-				tflops: 4.6,
-			},
-			"Snapdragon X Elite X1E-84-100": {
-				tflops: 4.6,
-			},
-			"Snapdragon X Elite X1E-80-100": {
-				tflops: 3.8,
-			},
-			"Snapdragon X Elite X1E-78-100": {
-				tflops: 3.8,
-			},
-			"Snapdragon X Plus X1P-64-100": {
-				tflops: 3.8,
-			},
-		},
+		QUALCOMM: GPU_QUALCOMM_SKUS,
 	},
 	CPU: {
 		Intel: {
