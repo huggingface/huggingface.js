@@ -95,4 +95,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"Video-MME-v2 is a benchmark for evaluating the next stage of video understanding capabilities of multimodal large language models.",
 		url: "https://github.com/MME-Benchmarks/Video-MME-v2",
 	},
+	"claw-eval": {
+		name: "claw-eval",
+		description:
+			"CLAW-Eval is an evaluation framework for assessing LLMs as autonomous agents across 300 human-verified tasks covering communication, finance, and productivity domains.",
+		url: "https://github.com/claw-eval/claw-eval",
+	},
 } as const;

@@ -448,6 +448,11 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		memory: [6],
 		computeCapability: 7.5,
 	},
+	"RTX 2050 Mobile": {
+		tflops: 10.2,
+		memory: [4],
+		computeCapability: 8.6, // Ampere (outlier GPU in the 20xx series)
+	},
 	"GTX 1080 Ti": {
 		tflops: 11.34, // float32 (GPU does not support native float16)
 		memory: [11],
