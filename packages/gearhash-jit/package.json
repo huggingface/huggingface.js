@@ -1,0 +1,46 @@
+{
+	"name": "gearhash-jit",
+	"version": "1.0.2",
+	"description": "Fast GEAR hash with hand-written WASM i64 bytecode for content-defined chunking",
+	"keywords": [
+		"gearhash",
+		"cdc",
+		"chunking",
+		"wasm"
+	],
+	"license": "MIT",
+	"sideEffects": false,
+	"files": [
+		"dist",
+		"src",
+		"README.md"
+	],
+	"scripts": {
+		"prepare": "tshy",
+		"test": "vitest run"
+	},
+	"tshy": {
+		"exports": {
+			".": "./src/index.ts",
+			"./package.json": "./package.json"
+		}
+	},
+	"devDependencies": {},
+	"type": "module",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		},
+		"./package.json": "./package.json"
+	},
+	"main": "./dist/commonjs/index.js",
+	"types": "./dist/commonjs/index.d.ts",
+	"module": "./dist/esm/index.js"
+}

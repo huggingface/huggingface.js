@@ -14,19 +14,40 @@
  *
  * Thanks!
  */
+import type { ImageToTextOutput } from "@huggingface/tasks";
 import {
 	InferenceClientInputError,
 	InferenceClientProviderApiError,
 	InferenceClientProviderOutputError,
 } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
-import type { BodyParams, HeaderParams, OutputType } from "../types.js";
+import type { BodyParams, HeaderParams, OutputType, RequestArgs } from "../types.js";
+import { base64FromBytes } from "../utils/base64FromBytes.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
+import type { ImageToTextArgs } from "../tasks/cv/imageToText.js";
+import {
+	BaseConversationalTask,
+	TaskProviderHelper,
+	type ImageToTextTaskHelper,
+	type TextToImageTaskHelper,
+} from "./providerHelper.js";
 
 const ZAI_API_BASE_URL = "https://api.z.ai";
+
+abstract class ZaiTask extends TaskProviderHelper {
+	constructor() {
+		super("zai-org", ZAI_API_BASE_URL);
+	}
+
+	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+		const headers = super.prepareHeaders(params, binary);
+		headers["x-source-channel"] = "hugging_face";
+		headers["accept-language"] = "en-US,en";
+		return headers;
+	}
+}
 
 export class ZaiConversationalTask extends BaseConversationalTask {
 	constructor() {
@@ -63,28 +84,12 @@ interface ZaiAsyncResultResponse {
 const MAX_POLL_ATTEMPTS = 60;
 const POLL_INTERVAL_MS = 5000;
 
-export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
-	constructor() {
-		super("zai-org", ZAI_API_BASE_URL);
-	}
-
-	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
-		const headers: Record<string, string> = {
-			Authorization: `Bearer ${params.accessToken}`,
-			"x-source-channel": "hugging_face",
-			"accept-language": "en-US,en",
-		};
-		if (!binary) {
-			headers["Content-Type"] = "application/json";
-		}
-		return headers;
-	}
-
-	makeRoute(): string {
+export class ZaiTextToImageTask extends ZaiTask implements TextToImageTaskHelper {
+	override makeRoute(): string {
 		return "/api/paas/v4/async/images/generations";
 	}
 
-	preparePayload(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
@@ -93,7 +98,7 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		};
 	}
 
-	async getResponse(
+	override async getResponse(
 		response: ZaiTextToImageResponse,
 		url?: string,
 		headers?: Record<string, string>,
@@ -188,5 +193,58 @@ export class ZaiTextToImageTask extends TaskProviderHelper implements TextToImag
 		throw new InferenceClientProviderOutputError(
 			`Timed out while waiting for the result from ZAI API - aborting after ${MAX_POLL_ATTEMPTS} attempts`,
 		);
+	}
+}
+
+interface ZaiLayoutParsingResponse {
+	md_results?: string;
+}
+
+export class ZaiImageToTextTask extends ZaiTask implements ImageToTextTaskHelper {
+	override makeRoute(): string {
+		return "/api/paas/v4/layout_parsing";
+	}
+
+	async preparePayloadAsync(args: ImageToTextArgs): Promise<RequestArgs> {
+		const blob =
+			"data" in args && args.data instanceof Blob
+				? args.data
+				: "inputs" in args
+					? typeof args.inputs === "string" && isUrl(args.inputs)
+						? await fetch(args.inputs).then((r) => r.blob())
+						: args.inputs instanceof Blob
+							? args.inputs
+							: undefined
+					: undefined;
+
+		if (!blob || !(blob instanceof Blob)) {
+			throw new InferenceClientInputError("ZAI image-to-text requires a URL string or Blob as inputs");
+		}
+
+		const mimeType = blob.type || "image/png";
+		const b64 = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
+		const file = `data:${mimeType};base64,${b64}`;
+
+		return {
+			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
+			inputs: file,
+		} as RequestArgs;
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			model: params.model,
+			file: params.args.inputs,
+		};
+	}
+
+	override async getResponse(response: ZaiLayoutParsingResponse): Promise<ImageToTextOutput> {
+		const mdResults = response?.md_results;
+		if (typeof mdResults !== "string") {
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from ZAI layout_parsing API: expected { md_results: string }, got: ${JSON.stringify(response)}`,
+			);
+		}
+		return { generated_text: mdResults, generatedText: mdResults };
 	}
 }

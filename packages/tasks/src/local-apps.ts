@@ -33,6 +33,10 @@ export type LocalApp = {
 	 */
 	docsUrl: string;
 	/**
+	 * Additional links to display (max 2)
+	 */
+	links?: { label: string; url: string }[] | ((model: ModelData) => { label: string; url: string }[]);
+	/**
 	 * main category of app
 	 */
 	mainTask: PipelineType;
@@ -115,6 +119,26 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
+/**
+ * Returns the model's chat template string, coalescing across sources:
+ * GGUF metadata > chat_template_jinja file > tokenizer_config.json
+ */
+function getChatTemplate(model: ModelData): string | undefined {
+	const ct =
+		model.gguf?.chat_template ?? model.config?.chat_template_jinja ?? model.config?.tokenizer_config?.chat_template;
+	if (typeof ct === "string") {
+		return ct;
+	}
+	if (Array.isArray(ct)) {
+		return ct[0]?.template;
+	}
+	return undefined;
+}
+
+function isUnslothModel(model: ModelData) {
+	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
+}
+
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -191,6 +215,56 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 
 const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
+};
+
+const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
+	const isGguf = isLlamaCppGgufModel(model);
+
+	const studio_content = [
+		"# Run unsloth studio",
+		"unsloth studio -H 0.0.0.0 -p 8888",
+		"# Then open http://localhost:8888 in your browser",
+		"# Search for " + model.id + " to start chatting",
+	].join("\n");
+
+	const studio_instructions: LocalAppSnippet = {
+		title: "Install Unsloth Studio (macOS, Linux, WSL)",
+		setup: "curl -fsSL https://unsloth.ai/install.sh | sh",
+		content: studio_content,
+	};
+
+	const studio_instructions_windows: LocalAppSnippet = {
+		title: "Install Unsloth Studio (Windows)",
+		setup: "irm https://unsloth.ai/install.ps1 | iex",
+		content: studio_content,
+	};
+
+	const hf_spaces_instructions: LocalAppSnippet = {
+		title: "Using HuggingFace Spaces for Unsloth",
+		setup: "# No setup required",
+		content:
+			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for " +
+			model.id +
+			" to start chatting",
+	};
+
+	const fastmodel_instructions: LocalAppSnippet = {
+		title: "Load model with FastModel",
+		setup: "pip install unsloth",
+		content: [
+			"from unsloth import FastModel",
+			"model, tokenizer = FastModel.from_pretrained(",
+			'    model_name="' + model.id + '",',
+			"    max_seq_length=2048,",
+			")",
+		].join("\n"),
+	};
+
+	if (isGguf) {
+		return [studio_instructions, studio_instructions_windows, hf_spaces_instructions];
+	} else {
+		return [studio_instructions, studio_instructions_windows, hf_spaces_instructions, fastmodel_instructions];
+	}
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -390,17 +464,31 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 };
 
 const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const quantTag = getQuantTag(filepath);
 	const modelName = model.id.split("/").pop() ?? model.id;
+	const isMLX = isMlxModel(model);
 
+	// Step 1: Server — differs by backend
+	const serverStep: LocalAppSnippet = isMLX
+		? {
+				title: "Start the MLX server",
+				setup: "# Install MLX LM:\nuv tool install mlx-lm",
+				content: `# Start a local OpenAI-compatible server:\nmlx_lm.server --model "${model.id}"`,
+			}
+		: {
+				title: "Start the llama.cpp server",
+				setup: "# Install llama.cpp:\nbrew install llama.cpp",
+				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)}`,
+			};
+
+	// Step 2: Pi config — port and provider name differ
 	const modelsJson = JSON.stringify(
 		{
 			providers: {
-				"llama-cpp": {
+				[isMLX ? "mlx-lm" : "llama-cpp"]: {
 					baseUrl: "http://localhost:8080/v1",
 					api: "openai-completions",
 					apiKey: "none",
-					models: [{ id: modelName }],
+					models: [{ id: isMLX ? model.id : modelName }],
 				},
 			},
 		},
@@ -409,11 +497,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	);
 
 	return [
-		{
-			title: "Start the llama.cpp server",
-			setup: "# Install llama.cpp:\nbrew install llama.cpp",
-			content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${quantTag} --jinja`,
-		},
+		serverStep,
 		{
 			title: "Configure the model in Pi",
 			setup: "# Install Pi:\nnpm install -g @mariozechner/pi-coding-agent",
@@ -421,7 +505,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 		},
 		{
 			title: "Run Pi",
-			content: `# Start Pi in your project directory:\npi`,
+			content: "# Start Pi in your project directory:\npi",
 		},
 	];
 };
@@ -433,43 +517,39 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 };
 
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const tagName = getQuantTag(filepath);
 	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
+	const isRyzenAI = model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag));
 
-	// Get recipe according to model type
-	let simplifiedModelName: string;
-	let recipe: string;
-	let checkpoint: string;
+	// Lemonade auto-registers pulled models as `user.<suggested_name>[-<variant>]`.
+	// For GGUF/llamacpp: suggested_name is the repo name and variant is the quant tag.
+	// For RyzenAI ONNX: there is no per-variant suffix.
+	let pullArg: string;
+	let runName: string;
 	let requirements: string;
-	if (model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag))) {
-		recipe = model.tags.includes("ryzenai-npu") ? "oga-npu" : "oga-hybrid";
-		checkpoint = model.id;
-		requirements = " (requires RyzenAI 300 series)";
-		simplifiedModelName = modelName.split("-awq-")[0];
-		simplifiedModelName += recipe === "oga-npu" ? "-NPU" : "-Hybrid";
+	if (isRyzenAI) {
+		pullArg = model.id;
+		runName = `user.${modelName}`;
+		requirements = " (requires XDNA 2 NPU)";
 	} else {
-		recipe = "llamacpp";
-		checkpoint = `${model.id}${tagName}`;
+		const tagName = getQuantTag(filepath);
+		pullArg = `${model.id}${tagName}`;
+		runName = `user.${modelName}${tagName.replace(":", "-")}`;
 		requirements = "";
-		simplifiedModelName = modelName;
 	}
 
 	return [
 		{
 			title: "Pull the model",
 			setup: "# Download Lemonade from https://lemonade-server.ai/",
-			content: [
-				`lemonade-server pull user.${simplifiedModelName} --checkpoint ${checkpoint} --recipe ${recipe}`,
-				"# Note: If you installed from source, use the lemonade-server-dev command instead.",
-			].join("\n"),
+			content: `lemonade pull ${pullArg}`,
 		},
 		{
 			title: `Run and chat with the model${requirements}`,
-			content: `lemonade-server run user.${simplifiedModelName}`,
+			content: `lemonade run ${runName}`,
 		},
 		{
 			title: "List all available models",
-			content: "lemonade-server list",
+			content: "lemonade list",
 		},
 	];
 };
@@ -566,6 +646,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
+	"atomic-chat": {
+		prettyLabel: "Atomic Chat",
+		docsUrl: "https://atomic.chat",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) => new URL(`atomic-chat://models/huggingface/${model.id}`),
+	},
 	backyard: {
 		prettyLabel: "Backyard AI",
 		docsUrl: "https://backyard.ai",
@@ -653,6 +740,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
 	},
+	unsloth: {
+		prettyLabel: "Unsloth Studio",
+		docsUrl: "https://unsloth.ai/docs/new/studio",
+		mainTask: "text-generation",
+		displayOnModelPage: isUnslothModel,
+		snippet: snippetUnsloth,
+	},
 	"docker-model-runner": {
 		prettyLabel: "Docker Model Runner",
 		docsUrl: "https://docs.docker.com/ai/model-runner/",
@@ -671,7 +765,10 @@ export const LOCAL_APPS = {
 		prettyLabel: "Pi",
 		docsUrl: "https://github.com/badlogic/pi-mono",
 		mainTask: "text-generation",
-		displayOnModelPage: (model) => isLlamaCppGgufModel(model) && !!model.gguf?.chat_template?.includes("tools"),
+		displayOnModelPage: (model) =>
+			(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
+			model.tags.includes("conversational") &&
+			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
 	},
 } satisfies Record<string, LocalApp>;

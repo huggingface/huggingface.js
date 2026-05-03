@@ -67,8 +67,10 @@ export async function downloadFileToCacheDir(
 	} & Partial<CredentialsParams>,
 ): Promise<string> {
 	const repoId = toRepoId(params.repo);
-	const isBucket = repoId.type === "bucket";
-	const revision = isBucket ? undefined : (params.revision ?? "main");
+	if (repoId.type === "bucket") {
+		throw new Error("downloadFileToCacheDir is not supported for bucket repos.");
+	}
+	const revision = params.revision ?? "main";
 	const cacheDir = params.cacheDir ?? getHFHubCachePath();
 	const storageFolder = join(cacheDir, getRepoFolderName(repoId));
 
@@ -100,13 +102,11 @@ export async function downloadFileToCacheDir(
 		throw new Error(`cannot determine etag for ${params.path}`);
 	}
 
-	const snapshotId = isBucket ? "latest" : (commitHash ?? info.lastCommit?.id ?? etag);
+	const snapshotId = commitHash ?? info.lastCommit?.id ?? etag;
 	const pointerPath = getFilePointer(storageFolder, snapshotId, params.path);
 	const blobPath = join(storageFolder, "blobs", etag);
 
-	// if we have the pointer file, we can shortcut the download
-	// For buckets, snapshotId is fixed ("latest") so we must always verify the blob matches the current etag
-	if (!isBucket && (await exists(pointerPath, true))) {
+	if (await exists(pointerPath, true)) {
 		return pointerPath;
 	}
 

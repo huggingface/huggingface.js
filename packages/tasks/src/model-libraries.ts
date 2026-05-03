@@ -166,6 +166,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	bionemo: {
+		prettyLabel: "BioNeMo",
+		repoName: "BioNeMo",
+		filter: false,
+		repoUrl: "https://github.com/nvidia/BioNeMo",
+		countDownloads: `path_extension:"ckpt" OR path:"config.json"`,
+	},
 	birder: {
 		prettyLabel: "Birder",
 		repoName: "Birder",
@@ -435,6 +442,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.espnet,
 		filter: true,
 	},
+	eupe: {
+		prettyLabel: "EUPE",
+		repoName: "EUPE",
+		repoUrl: "https://github.com/facebookresearch/EUPE",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	fairseq: {
 		prettyLabel: "Fairseq",
 		repoName: "fairseq",
@@ -530,6 +544,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"checkpoints/byt5_model.pt"`,
 	},
+	"granite-library": {
+		prettyLabel: "Granite Library",
+		repoName: "mellea",
+		repoUrl: "https://github.com/generative-computing/mellea",
+		filter: false,
+		countDownloads: `path_filename:"adapter_config" AND path_extension:"json"`,
+	},
 	grok: {
 		prettyLabel: "Grok",
 		repoName: "Grok",
@@ -556,6 +577,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/LMD0311/HERMES",
 		filter: false,
 		countDownloads: `path:"ckpt/hermes_final.pth"`,
+	},
+	holomotion: {
+		prettyLabel: "HoloMotion",
+		repoName: "HoloMotion",
+		repoUrl: "https://github.com/HorizonRobotics/HoloMotion",
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
 	},
 	hezar: {
 		prettyLabel: "Hezar",
@@ -592,6 +620,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "HY-WorldPlay",
 		repoName: "HY-WorldPlay",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HY-WorldPlay",
+		filter: false,
+		countDownloads: `path_extension:"json"`,
+	},
+	"hy-world-2": {
+		prettyLabel: "HY-World-2.0",
+		repoName: "HY-World-2.0",
+		repoUrl: "https://github.com/Tencent-Hunyuan/HY-World-2.0",
 		filter: false,
 		countDownloads: `path_extension:"json"`,
 	},
@@ -635,6 +670,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/IntelliGen-AI/IntelliFold",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	"ising-decoding": {
+		prettyLabel: "Ising Decoding",
+		repoName: "Ising-Decoding",
+		repoUrl: "https://github.com/NVIDIA/Ising-Decoding",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -694,6 +736,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "K2",
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
+	},
+	"lyra-2.0": {
+		prettyLabel: "Lyra-2.0",
+		repoName: "Lyra-2.0",
+		repoUrl: "https://github.com/nv-tlabs/lyra",
+		filter: false,
+		countDownloads: `path:"checkpoints/image_encoder/model.pth"`,
+	},
+	lagernvs: {
+		prettyLabel: "LagerNVS",
+		repoName: "LagerNVS",
+		repoUrl: "https://github.com/facebookresearch/lagernvs",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"lightning-ir": {
 		prettyLabel: "Lightning IR",
@@ -772,6 +828,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/state-spaces/mamba",
 		filter: false,
 		snippets: snippets.mamba_ssm,
+	},
+	"manas-1": {
+		prettyLabel: "MANAS-1",
+		repoName: "MANAS-1",
+		repoUrl: "https://github.com/NeurodxAI/manas-1",
+		countDownloads: `path_extension:"pt"`,
 	},
 	"mars5-tts": {
 		prettyLabel: "MARS5-TTS",
@@ -885,6 +947,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.nemo,
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
+	},
+	"nv-medtech": {
+		prettyLabel: "NV-MedTech",
+		repoName: "NV-MedTech",
+		filter: false,
+		repoUrl: "https://github.com/nvidia-medtech",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
@@ -1065,6 +1134,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/airockchip/rknn-llm",
 		countDownloads: `path_extension:"rkllm"`,
 	},
+	"robo-orchard-lab": {
+		prettyLabel: "RoboOrchardLab",
+		repoName: "RoboOrchardLab",
+		repoUrl: "https://github.com/HorizonRobotics/RoboOrchardLab",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
@@ -1227,6 +1303,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"cvlm_llama2_tokenizer/tokenizer.model"`,
 		snippets: snippets.seed_story,
 	},
+	skala: {
+		prettyLabel: "Skala",
+		repoName: "Skala",
+		repoUrl: "https://github.com/microsoft/skala",
+		filter: false,
+		countDownloads: `path_extension:"fun"`,
+	},
 	soloaudio: {
 		prettyLabel: "SoloAudio",
 		repoName: "SoloAudio",
@@ -1272,6 +1355,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/takara-ai/SwarmFormer",
 		snippets: snippets.swarmformer,
 		filter: false,
+	},
+	"synthefy-migas": {
+		prettyLabel: "Migas",
+		repoName: "Migas",
+		repoUrl: "https://github.com/Synthefy/synthefy-migas",
+		filter: false,
+		countDownloads: `path:"model.pt"`,
 	},
 	"f5-tts": {
 		prettyLabel: "F5-TTS",

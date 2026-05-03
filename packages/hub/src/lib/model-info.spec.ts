@@ -57,6 +57,16 @@ describe("modelInfo", () => {
 		});
 	});
 
+	it("should return model info with filePaths", async () => {
+		const info = await modelInfo({
+			name: "huggingfacejs/test-model",
+			additionalFields: ["filePaths"],
+		});
+		expect(info.filePaths).to.be.an("array");
+		expect(info.filePaths).to.include(".gitattributes");
+		expect(info.filePaths).to.include("README.md");
+	});
+
 	it("should return model info deepseek-ai models with inference provider mapping", async () => {
 		const info = await modelInfo({
 			name: "deepseek-ai/DeepSeek-R1-0528",

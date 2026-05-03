@@ -140,7 +140,12 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 
 	// Handle the custom transformers-specific `generation` tag.
 	// See https://github.com/huggingface/transformers/pull/30650 for more information.
-	return template.replace(/{%\s*(end)?generation\s*%}/gs, "");
+	// Also honors `{%-` / `-%}` whitespace-stripping modifiers by trimming
+	// surrounding whitespace before removing the tag.
+	return template.replace(
+		/(\s*){%(-?)\s*(?:end)?generation\s*(-?)%}(\s*)/gs,
+		(_, before, lstrip, rstrip, after) => (lstrip ? "" : before) + (rstrip ? "" : after),
+	);
 }
 
 /**

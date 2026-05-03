@@ -67,6 +67,7 @@ import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
 import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
+import type { ImageToTextArgs } from "../tasks/cv/imageToText.js";
 
 /**
  * Base class for task-specific provider helpers
@@ -205,6 +206,7 @@ export interface ObjectDetectionTaskHelper {
 export interface ImageToTextTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageToTextOutput>;
 	preparePayload(params: BodyParams<ImageToTextInput & BaseArgs>): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: ImageToTextArgs): Promise<RequestArgs>;
 }
 
 export interface ZeroShotImageClassificationTaskHelper {

@@ -1,0 +1,49 @@
+{
+	"name": "@huggingface/blake3-jit",
+	"version": "0.0.2",
+	"description": "Temporary fork of blake3-jit with Hasher.reset() and pre-allocated buffers. Will be deprecated once upstream blake3-jit exposes reset().",
+	"keywords": [
+		"blake3",
+		"hash",
+		"fast",
+		"wasm"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"dist",
+		"src",
+		"LICENSE",
+		"README.md"
+	],
+	"type": "module",
+	"sideEffects": false,
+	"scripts": {
+		"prepare": "tshy"
+	},
+	"tshy": {
+		"exports": {
+			".": "./src/index.ts",
+			"./package.json": "./package.json"
+		}
+	},
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		},
+		"./package.json": "./package.json"
+	},
+	"main": "./dist/commonjs/index.js",
+	"types": "./dist/commonjs/index.d.ts",
+	"module": "./dist/esm/index.js"
+}

@@ -27,6 +27,8 @@
 		"typescript": "^5.8.3",
 		"vite": "^5.0.2",
 		"vitest": "^0.34.6",
+		"rolldown": "1.0.0-rc.15",
+		"rolldown-plugin-dts": "^0.23.0",
 		"webdriverio": "^8.6.7"
 	},
 	"packageManager": "pnpm@10.10.0"

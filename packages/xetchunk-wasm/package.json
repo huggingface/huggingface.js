@@ -1,39 +1,55 @@
 {
 	"name": "@huggingface/xetchunk-wasm",
-	"version": "0.0.2",
-	"scripts": {
-		"build": "tsup src/index.ts --format esm --dts",
-		"test": "vitest run",
-		"bench": "node tests/bench.js",
-		"prepare": "pnpm run build"
-	},
+	"version": "0.0.4",
+	"description": "Content-defined chunking and hashing for Hugging Face Xet storage",
 	"keywords": [
 		"xet",
 		"chunk",
 		"chunking"
 	],
-	"dependencies": {
-		"@huggingface/gearhash-wasm": "workspace:*",
-		"blake3-jit": "^1.0.0"
-	},
-	"type": "module",
-	"exports": {
-		".": {
-			"import": "./dist/index.js",
-			"types": "./dist/index.d.ts"
-		}
-	},
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"devDependencies": {
-		"@huggingface/splitmix64-wasm": "workspace:*",
-		"tsup": "^8.0.0",
-		"typescript": "^5.0.0"
+	"license": "MIT",
+	"author": "Hugging Face",
+	"publishConfig": {
+		"access": "public"
 	},
 	"files": [
 		"dist",
 		"src",
-		"README.md",
-		"tsconfig.json"
-	]
+		"README.md"
+	],
+	"scripts": {
+		"prepare": "tshy",
+		"test": "vitest run",
+		"bench": "node tests/bench.js"
+	},
+	"tshy": {
+		"exports": {
+			".": "./src/index.ts",
+			"./package.json": "./package.json"
+		}
+	},
+	"dependencies": {
+		"gearhash-jit": "workspace:*",
+		"@huggingface/blake3-jit": "workspace:*"
+	},
+	"devDependencies": {
+		"@huggingface/splitmix64-wasm": "workspace:*"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		},
+		"./package.json": "./package.json"
+	},
+	"main": "./dist/commonjs/index.js",
+	"types": "./dist/commonjs/index.d.ts",
+	"module": "./dist/esm/index.js"
 }

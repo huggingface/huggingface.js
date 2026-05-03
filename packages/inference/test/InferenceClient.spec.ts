@@ -1968,6 +1968,80 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 	describe.concurrent(
+		"DeepInfra",
+		() => {
+			const client = new InferenceClient(env.DEEPINFRA_API_KEY ?? env.HF_DEEPINFRA_KEY ?? "dummy");
+
+			const HF_MODEL = "google/gemma-3-4b-it";
+			const PROVIDER_ID = "google/gemma-3-4b-it";
+
+			const setMapping = (task: "conversational" | "text-generation") => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: HF_MODEL,
+						providerId: PROVIDER_ID,
+						status: "live",
+						task,
+					},
+				};
+			};
+
+			it("chatCompletion", async () => {
+				setMapping("conversational");
+				const res = await client.chatCompletion({
+					model: HF_MODEL,
+					provider: "deepinfra",
+					messages: [{ role: "user", content: "Name one use case for open-source AI." }],
+					max_tokens: 64,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(typeof completion).toBe("string");
+					expect(completion?.length ?? 0).toBeGreaterThan(0);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				setMapping("conversational");
+				const stream = client.chatCompletionStream({
+					model: HF_MODEL,
+					provider: "deepinfra",
+					messages: [
+						{
+							role: "user",
+							content: "Respond with a two-word description of Hugging Face.",
+						},
+					],
+					max_tokens: 32,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let streamed = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const delta = chunk.choices[0].delta?.content;
+						if (delta) {
+							streamed += delta;
+						}
+					}
+				}
+				expect(streamed.trim().length).toBeGreaterThan(0);
+			});
+
+			it("textGeneration", async () => {
+				setMapping("text-generation");
+				const generation = await client.textGeneration({
+					model: HF_MODEL,
+					provider: "deepinfra",
+					inputs: "Describe Hugging Face in one short sentence.",
+					parameters: { max_new_tokens: 64 },
+				});
+				expect(typeof generation.generated_text).toBe("string");
+				expect(generation.generated_text?.length ?? 0).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
+	describe.concurrent(
 		"Cerebras",
 		() => {
 			const client = new InferenceClient(env.HF_CEREBRAS_KEY ?? "dummy");

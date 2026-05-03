@@ -23,6 +23,10 @@ export function toRepoId(repo: RepoDesignation): RepoId {
 		throw new TypeError("Buckets should start with 'buckets/', plural, not 'bucket/'");
 	}
 
+	if (repo.startsWith("kernel/")) {
+		throw new TypeError("Kernels should start with 'kernels/', plural, not 'kernel/'");
+	}
+
 	const slashes = repo.split("/").length - 1;
 
 	if (repo.startsWith("spaces/")) {
@@ -55,6 +59,17 @@ export function toRepoId(repo: RepoDesignation): RepoId {
 		return {
 			type: "bucket",
 			name: repo.slice("buckets/".length),
+		};
+	}
+
+	if (repo.startsWith("kernels/")) {
+		if (slashes !== 2) {
+			throw new TypeError("Kernel Id must include namespace and name of the kernel");
+		}
+
+		return {
+			type: "kernel",
+			name: repo.slice("kernels/".length),
 		};
 	}
 

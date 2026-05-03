@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { createChunker, finalize, nextBlock } from "../dist/index.js";
+import { createChunker, finalize, nextBlock, hashToHex } from "../dist/esm/index.js";
 import { createReadStream } from "node:fs";
 import { Chunker } from "../vendor/chunker_wasm.js";
 
@@ -10,10 +10,10 @@ const { positionals } = parseArgs({
 
 const BYTES = 100_000_000;
 const CHUNK_SIZE = 10_000_000;
+const ROUNDS = 5;
 const data = new Uint8Array(BYTES);
 
 if (!positionals[0]) {
-	// Fill the data with random bytes
 	for (let i = 0; i < data.length; i++) {
 		data[i] = Math.floor(Math.random() * 256);
 	}
@@ -44,93 +44,93 @@ if (!positionals[0]) {
 }
 
 console.log(
-	`data loaded in memory, starting to process data  ${CHUNK_SIZE.toLocaleString(
-		"en-US"
-	)} bytes at a time (for a max of 30 seconds)`
+	`data loaded in memory, processing ${CHUNK_SIZE.toLocaleString("en-US")} bytes at a time, ${ROUNDS} rounds\n`
 );
 
-function testAssemblyChunker() {
-	console.log("testing assembly Chunker");
-
-	const start = performance.now();
+function runJS() {
 	const chunker = createChunker(64 * 1024);
-
-	let totalProcessed = 0;
-	let totalChunks = 0;
-	let stoppedEarly = false;
+	const chunks = [];
 
 	for (let i = 0; i < data.length; i += CHUNK_SIZE) {
-		const chunks = nextBlock(chunker, data.subarray(i, i + CHUNK_SIZE));
-		console.log("chunks", chunks.length);
-		totalProcessed += CHUNK_SIZE;
-		totalChunks += chunks.length;
-
-		if (performance.now() - start > 30_000) {
-			console.log("30 seconds elapsed, stopping");
-			stoppedEarly = true;
-			break;
+		for (const c of nextBlock(chunker, data.subarray(i, i + CHUNK_SIZE))) {
+			chunks.push({ hash: hashToHex(c.hash), length: c.length });
 		}
 	}
 
-	if (!stoppedEarly) {
-		const lastChunk = finalize(chunker);
-		if (lastChunk) {
-			totalChunks += 1;
-			totalProcessed = data.length;
-		}
+	const lastChunk = finalize(chunker);
+	if (lastChunk) {
+		chunks.push({ hash: hashToHex(lastChunk.hash), length: lastChunk.length });
 	}
 
-	console.log(
-		`chunked ${totalChunks} chunks in ${performance.now() - start}ms, ${(
-			totalProcessed /
-			1_000_000 /
-			((performance.now() - start) / 1000)
-		).toFixed(3)} MB/s`
-	);
+	return chunks;
 }
 
-testAssemblyChunker();
-
-function testRustChunker() {
-	console.log("testing rust Chunker");
-	const start = performance.now();
+function runRust() {
 	const chunker = new Chunker(64 * 1024);
+	const chunks = [];
 
-	let totalProcessed = 0;
-	let totalChunks = 0;
-	let stoppedEarly = false;
-
-	let chunks = [];
 	for (let i = 0; i < data.length; i += CHUNK_SIZE) {
-		chunks = chunker.add_data(data.subarray(i, i + CHUNK_SIZE));
-		// console.log("chunks", chunks.length, chunks.slice(0, 10));
-		totalProcessed += CHUNK_SIZE;
-		totalChunks += chunks.length;
-
-		if (performance.now() - start > 30_000) {
-			console.log("30 seconds elapsed, stopping");
-			stoppedEarly = true;
-			break;
+		for (const c of chunker.add_data(data.subarray(i, i + CHUNK_SIZE))) {
+			chunks.push({ hash: c.hash, length: c.length });
 		}
 	}
 
-	if (!stoppedEarly) {
-		chunks = chunker.finish();
-		if (chunks.length > 0) {
-			totalChunks += chunks.length;
-			totalProcessed += chunks.length * chunks[0].length;
-		}
+	for (const c of chunker.finish()) {
+		chunks.push({ hash: c.hash, length: c.length });
 	}
+	chunker.free();
 
-	console.log(
-		`chunked ${totalChunks} chunks in ${performance.now() - start}ms, ${(
-			totalProcessed /
-			1_000_000 /
-			((performance.now() - start) / 1000)
-		).toFixed(3)} MB/s`
-	);
+	return chunks;
 }
 
-testRustChunker();
+// --- Verify identical boundaries ---
+console.log("Verifying chunk boundaries match...");
+const jsChunks = runJS();
+const rustChunks = runRust();
 
-testAssemblyChunker();
+if (jsChunks.length !== rustChunks.length) {
+	console.error(`MISMATCH: JS produced ${jsChunks.length} chunks, Rust produced ${rustChunks.length}`);
+	process.exit(1);
+}
+
+let mismatchCount = 0;
+let offset = 0;
+for (let i = 0; i < jsChunks.length; i++) {
+	const js = jsChunks[i];
+	const rs = rustChunks[i];
+	if (js.length !== rs.length || js.hash !== rs.hash) {
+		if (mismatchCount < 5) {
+			console.error(`  chunk ${i} @ offset ${offset}: JS(len=${js.length}, hash=${js.hash}) vs Rust(len=${rs.length}, hash=${rs.hash})`);
+		}
+		mismatchCount++;
+	}
+	offset += js.length;
+}
+
+if (mismatchCount > 0) {
+	console.error(`MISMATCH: ${mismatchCount} / ${jsChunks.length} chunks differ`);
+	process.exit(1);
+}
+console.log(`✓ ${jsChunks.length} chunks, all boundaries and hashes match\n`);
+
+// --- Benchmark ---
+function bench(label, fn) {
+	const times = [];
+	for (let r = 0; r < ROUNDS; r++) {
+		const start = performance.now();
+		fn();
+		times.push(performance.now() - start);
+	}
+	times.sort((a, b) => a - b);
+	const median = times[Math.floor(ROUNDS / 2)];
+	const best = times[0];
+	const worst = times[ROUNDS - 1];
+	const mbps = (BYTES / 1_000_000) / (median / 1000);
+	console.log(`${label}: median ${median.toFixed(1)}ms (best ${best.toFixed(1)}, worst ${worst.toFixed(1)}) → ${mbps.toFixed(1)} MB/s`);
+	return mbps;
+}
+
+const jsMbps = bench(`JS   (gearhash-jit + blake3-jit, ${ROUNDS} rounds)`, runJS);
+const rsMbps = bench(`Rust (thin-wasm,                ${ROUNDS} rounds)`, runRust);
+
+console.log(`\nJS: ${jsMbps.toFixed(1)} MB/s | Rust: ${rsMbps.toFixed(1)} MB/s | ratio: ${((jsMbps / rsMbps) * 100).toFixed(1)}%`);
