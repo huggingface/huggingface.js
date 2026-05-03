@@ -130,6 +130,11 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		memory: [4, 8],
 		gfxVersion: "gfx1012",
 	},
+	"Radeon Pro V620": {
+		tflops: 40.55,
+		memory: [32],
+		gfxVersion: "gfx1030",
+	},
 	"Radeon Pro VII": {
 		tflops: 26.11,
 		memory: [16, 32],
