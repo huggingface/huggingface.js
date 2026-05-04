@@ -106,11 +106,11 @@ export const SKUS = {
 			"Xeon E5v2 (Ivy Bridge)": {
 				tflops: 0.15,
 			},
-			"Intel Core Ultra 7 265KF": {
-				tflops: 1.53,
-			},
 			"Intel Core Ultra 9 275HX": {
 				tflops: 1.89,
+			},
+			"Intel Core Ultra 7 265KF": {
+				tflops: 1.53,
 			},
 			"Intel Core 14th Generation (i7)": {
 				tflops: 0.8,
