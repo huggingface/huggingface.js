@@ -541,10 +541,17 @@ export function parse(tokens: Token[]): Program {
 				// computed (i.e., bracket notation: obj[expr])
 				property = parseMemberExpressionArgumentsList();
 				expect(TOKEN_TYPES.CloseSquareBracket, "Expected closing square bracket");
-			} else {
+				} else {
 				// non-computed (i.e., dot notation: obj.expr)
-				property = parsePrimaryExpression(); // should be an identifier
-				if (property.type !== "Identifier") {
+				// Python Jinja2 also allows numeric access like obj.0 (equivalent to obj[0])
+				property = parsePrimaryExpression();
+				if (property.type === "Identifier") {
+					// Standard dot access: obj.prop
+				} else if (property.type === "IntegerLiteral") {
+					// Numeric dot access: obj.0 -> obj[0] (computed)
+					object = new MemberExpression(object, property, true);
+					continue;
+				} else {
 					throw new SyntaxError(`Expected identifier following dot operator`);
 				}
 			}
