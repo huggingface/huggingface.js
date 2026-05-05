@@ -38,6 +38,12 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
 		url: "https://github.com/Mercor-Intelligence/archipelago",
 	},
+	benchflow: {
+		name: "benchflow",
+		description:
+			"BenchFlow is an evaluation framework for AI agents on professional, skill-aware workflows. It powers SkillsBench and runs containerized agent trials with paired with-skills / without-skills configurations.",
+		url: "https://github.com/benchflow-ai/benchflow",
+	},
 	"apex-evals": {
 		name: "apex-evals",
 		description: "APEX Evals is a benchmark suite and evaluation harness for evaluating large language models.",
