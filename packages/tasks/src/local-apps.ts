@@ -761,6 +761,20 @@ export const LOCAL_APPS = {
 			!!getChatTemplate(model)?.includes("tools"),
 		snippet: snippetPi,
 	},
+	"ondeviceml": {
+		prettyLabel: "ondeviceml.space",
+		docsUrl: "https://ondeviceml.space",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => {
+			const supportedModelTypes = ["gemma3n", "gemma4", "gemma3", "qwen2"];
+			return (
+				model.library_name === "transformers" &&
+				(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text") &&
+				supportedModelTypes.some((t) => model.config?.model_type?.startsWith(t))
+			);
+		},
+		deeplink: (model) => new URL(`https://ondeviceml.space/?hf_model=${model.id}&task=${model.pipeline_tag ?? "text-generation"}`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
