@@ -21,7 +21,7 @@ import type {
 	TextGenerationOutput,
 	TextGenerationOutputFinishReason,
 } from "@huggingface/tasks";
-import type { BodyParams, HeaderParams, OutputType, RequestArgs } from "../types.js";
+import type { BodyParams, OutputType, RequestArgs } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
 	BaseConversationalTask,
@@ -37,6 +37,26 @@ import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js"
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
+
+const AUDIO_MIME_TO_EXT: Record<string, string> = {
+	"audio/wav": "wav",
+	"audio/x-wav": "wav",
+	"audio/wave": "wav",
+	"audio/mpeg": "mp3",
+	"audio/mp3": "mp3",
+	"audio/mp4": "mp4",
+	"audio/m4a": "m4a",
+	"audio/x-m4a": "m4a",
+	"audio/flac": "flac",
+	"audio/x-flac": "flac",
+	"audio/ogg": "ogg",
+	"audio/webm": "webm",
+};
+
+function mimeTypeToExtension(mimeType: string | undefined): string {
+	if (!mimeType) return "wav";
+	return AUDIO_MIME_TO_EXT[mimeType.toLowerCase()] ?? "wav";
+}
 
 interface TogetherTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{
@@ -212,7 +232,7 @@ export class TogetherFeatureExtractionTask extends TaskProviderHelper implements
 			return response.data.map((item) => item.embedding);
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from Together feature-extraction (embeddings) API",
+			`Received malformed response from Together feature-extraction (embeddings) API: ${JSON.stringify(response)}`,
 		);
 	}
 }
@@ -239,7 +259,9 @@ export class TogetherTextToSpeechTask extends TaskProviderHelper implements Text
 		if (response instanceof Blob) {
 			return response;
 		}
-		throw new InferenceClientProviderOutputError("Received malformed response from Together text-to-speech API");
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from Together text-to-speech API: ${JSON.stringify(response)}`,
+		);
 	}
 }
 
@@ -253,16 +275,6 @@ export class TogetherAutomaticSpeechRecognitionTask
 
 	makeRoute(): string {
 		return "v1/audio/transcriptions";
-	}
-
-	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
-		void binary;
-		// Don't set Content-Type so fetch can populate the multipart boundary automatically.
-		const headers: Record<string, string> = {};
-		if (params.authMethod !== "none") {
-			headers["Authorization"] = `Bearer ${params.accessToken}`;
-		}
-		return headers;
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
@@ -282,8 +294,7 @@ export class TogetherAutomaticSpeechRecognitionTask
 		}
 
 		const formData = new FormData();
-		const ext = audio.type?.split("/")[1] ?? "wav";
-		formData.append("file", audio, `audio.${ext}`);
+		formData.append("file", audio, `audio.${mimeTypeToExtension(audio.type)}`);
 
 		const fields = this.preparePayload(params);
 		for (const [key, value] of Object.entries(fields)) {
@@ -331,7 +342,7 @@ export class TogetherAutomaticSpeechRecognitionTask
 			return out;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from Together automatic-speech-recognition API",
+			`Received malformed response from Together automatic-speech-recognition API: ${JSON.stringify(response)}`,
 		);
 	}
 }
