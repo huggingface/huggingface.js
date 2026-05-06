@@ -23,10 +23,12 @@ import {
 	TaskProviderHelper,
 	type AutomaticSpeechRecognitionTaskHelper,
 	type ImageToImageTaskHelper,
+	type ImageToVideoTaskHelper,
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
 } from "./providerHelper.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
@@ -180,6 +182,70 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-video API");
+	}
+}
+
+export class ReplicateImageToVideoTask extends ReplicateTask implements ImageToVideoTaskHelper {
+	override preparePayload(params: BodyParams<ImageToVideoArgs>): Record<string, unknown> {
+		const imageInput = params.args.inputs; // This will be processed in preparePayloadAsync
+		return {
+			input: {
+				...omit(params.args, ["inputs", "parameters"]),
+				...params.args.parameters,
+				// Different Replicate models expect the input image in different keys.
+				image: imageInput,
+				images: [imageInput],
+				input_image: imageInput,
+				input_images: [imageInput],
+				lora_weights:
+					params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath
+						? `https://huggingface.co/${params.mapping.hfModelId}`
+						: undefined,
+			},
+			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		};
+	}
+
+	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
+		const { inputs, ...restArgs } = args;
+
+		// Convert Blob to base64 data URL
+		const bytes = new Uint8Array(await inputs.arrayBuffer());
+		const base64 = base64FromBytes(bytes);
+		const imageInput = `data:${inputs.type || "image/jpeg"};base64,${base64}`;
+
+		return {
+			...restArgs,
+			inputs: imageInput,
+		};
+	}
+
+	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+		if (
+			typeof response === "object" &&
+			!!response &&
+			"output" in response &&
+			Array.isArray(response.output) &&
+			response.output.length > 0 &&
+			typeof response.output[0] === "string" &&
+			isUrl(response.output[0])
+		) {
+			const urlResponse = await fetch(response.output[0]);
+			return await urlResponse.blob();
+		}
+
+		if (
+			typeof response === "object" &&
+			!!response &&
+			"output" in response &&
+			typeof response.output === "string" &&
+			isUrl(response.output)
+		) {
+			const urlResponse = await fetch(response.output);
+			return await urlResponse.blob();
+		}
+
+		throw new InferenceClientProviderOutputError("Received malformed response from Replicate image-to-video API");
 	}
 }
 
