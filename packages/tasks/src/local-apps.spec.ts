@@ -179,7 +179,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[1].content).toContain("hermes config set model.provider custom");
 		expect(snippet[1].content).toContain("hermes config set model.base_url http://127.0.0.1:8080/v1");
 		expect(snippet[1].content).toContain(
-			"hermes config set model.default bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"
+			"hermes config set model.default bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}",
 		);
 		expect(snippet[2].content).toContain("hermes");
 	});
