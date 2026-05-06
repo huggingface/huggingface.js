@@ -486,8 +486,8 @@ const getLocalServerStep = (model: ModelData, filepath?: string): LocalAppSnippe
 };
 
 const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const modelName = model.id.split("/").pop() ?? model.id;
 	const isMLX = isMlxModel(model);
+	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
 	const serverStep = getLocalServerStep(model, filepath);
 
 	const modelsJson = JSON.stringify(
@@ -497,7 +497,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 					baseUrl: "http://localhost:8080/v1",
 					api: "openai-completions",
 					apiKey: "none",
-					models: [{ id: isMLX ? model.id : modelName }],
+					models: [{ id: modelId }],
 				},
 			},
 		},
