@@ -60,12 +60,12 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		memory: [8, 16],
 		gfxVersion: "gfx1200",
 	},
-	"W7900": {
+	"PRO W7900": {
 		tflops: 122.6,
 		memory: [48],
 		gfxVersion: "gfx1100",
 	},
-	"W7800": {
+	"PRO W7800": {
 		tflops: 90.50,
 		memory: [32, 48],
 		gfxVersion: "gfx1100",
