@@ -78,6 +78,31 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		memory: [96],
 		computeCapability: 12.0,
 	},
+	"RTX PRO 5000": {
+		tflops: 66.94,
+		memory: [48, 72],
+		computeCapability: 12.0,
+	},
+	"RTX PRO 4500 WS": {
+		tflops: 50.53,
+		memory: [32],
+		computeCapability: 12.0,
+	},
+	"RTX PRO 4000": {
+		tflops: 36.83,
+		memory: [24],
+		computeCapability: 12.0,
+	},
+	"RTX PRO 4000 SFF": {
+		tflops: 24.05,
+		memory: [24],
+		computeCapability: 12.0,
+	},
+	"RTX PRO 2000": {
+		tflops: 17.03,
+		memory: [16],
+		computeCapability: 12.0,
+	},
 	"RTX 6000 Ada": {
 		tflops: 91.1,
 		memory: [48],
