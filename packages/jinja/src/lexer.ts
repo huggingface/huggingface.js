@@ -377,7 +377,11 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			// Consume integer part
 			let num = consumeWhile(isInteger);
 			// Possibly, consume fractional part
-			if (src[cursorPosition] === "." && isInteger(src[cursorPosition + 1])) {
+			if (
+				tokens.at(-1)?.type !== TOKEN_TYPES.Dot &&
+				src[cursorPosition] === "." &&
+				isInteger(src[cursorPosition + 1])
+			) {
 				++cursorPosition; // consume '.'
 				const frac = consumeWhile(isInteger);
 				num = `${num}.${frac}`;
