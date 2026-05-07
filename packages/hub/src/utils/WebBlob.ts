@@ -34,7 +34,11 @@ export class WebBlob extends Blob {
 		const contentLength = response.headers.get("content-length");
 
 		if (contentLength === null || !Number.isFinite(Number(contentLength))) {
-			throw new Error(`Invalid Content-Length: ${contentLength}, for url ${url}`);
+			const xHeaders = Array.from(response.headers.entries())
+				.filter(([key]) => key.toLowerCase().startsWith("x-"))
+				.map(([key, value]) => `${key}: ${value}`)
+				.join(", ");
+			throw new Error(`Invalid Content-Length: ${contentLength}, for url ${url}. X- headers: ${xHeaders}`);
 		}
 
 		const size = Number(contentLength);
