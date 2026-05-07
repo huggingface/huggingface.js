@@ -1,17 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Template } from "../src/index";
-import {
-	ArrayValue,
-	BooleanValue,
-	Environment,
-	FloatValue,
-	IntegerValue,
-	NullValue,
-	ObjectValue,
-	StringValue,
-	UndefinedValue,
-} from "../src/runtime";
 
 // Adapted from https://huggingface.co/ibm-granite/granite-guardian-3.2-5b
 // The template contains large embedded object literals.
@@ -23,28 +12,38 @@ const GRANITE_GUARDIAN_CONTEXT = {
 	guardian_config: null,
 };
 
-const isNode = typeof process !== "undefined" && !!process.versions?.node;
-const nodeIt = isNode ? it : it.skip;
-
 describe("Runtime memory allocation", () => {
-	nodeIt("renders template that contains large embedded object literals", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("renders template that contains large embedded object literals", () => {
+		// Spy on the Map constructor as a GC-independent proxy for runtime allocations.
+		const OriginalMap = globalThis.Map;
+		const mapSpy = vi.spyOn(globalThis, "Map").mockImplementation(function (...args) {
+			return new OriginalMap(...args);
+		});
+
 		const template = new Template(GRANITE_GUARDIAN_CHAT_TEMPLATE);
-		const initialMemory = process.memoryUsage();
-		let maxHeapTotal = initialMemory.heapTotal;
-		let maxHeapUsed = initialMemory.heapUsed;
+		const allocationsPerRender = [];
 		let output = "";
 
 		for (let i = 0; i < 10; ++i) {
+			const before = mapSpy.mock.calls.length;
 			output = template.render(GRANITE_GUARDIAN_CONTEXT);
-			const memory = process.memoryUsage();
-			maxHeapTotal = Math.max(maxHeapTotal, memory.heapTotal);
-			maxHeapUsed = Math.max(maxHeapUsed, memory.heapUsed);
+			allocationsPerRender.push(mapSpy.mock.calls.length - before);
 		}
 
+		// The template should render successfully and produce the expected output.
 		expect(output).toEqual(
 			"<|start_of_role|>user<|end_of_role|>You are a safety agent trying to help determine whether the last user message in the conversation is harmful according to the safety risk definition below.\n\n<start_of_conversation>\nUser Message: How do I keep leftovers safe to eat?\n<end_of_conversation>\n\nOur safety risk definition is defined below:\n<start_of_risk_definition>\n- The last 'User' message is considered universally harmful.\n<end_of_risk_definition>\n\nIs the last user message harmful based on the risk definition? Your answer must be either 'Yes' or 'No'.<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>",
 		);
-		expect(maxHeapTotal - initialMemory.heapTotal).toBeLessThan(1024 * 1024);
-		expect(maxHeapUsed - initialMemory.heapUsed).toBeLessThan(1024 * 1024);
+
+		// Every render must allocate the same number of Maps (no per-render growth).
+		const first = allocationsPerRender[0];
+		expect(allocationsPerRender.every((n) => n === first)).toBe(true);
+
+		// The template contains large embedded object literals, but the number of Maps allocated should be small and stable.
+		expect(first).toBeLessThan(30);
 	});
 });

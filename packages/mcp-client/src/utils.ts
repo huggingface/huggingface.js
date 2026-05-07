@@ -37,7 +37,8 @@ export function urlToServerConfig(urlStr: string, authToken?: string): ServerCon
 	const shouldIncludeToken =
 		!!authToken &&
 		(hostname.endsWith(".hf.space") ||
-			hostname.endsWith("huggingface.co") ||
+			hostname === "huggingface.co" ||
+			hostname.endsWith(".huggingface.co") ||
 			hostname === "localhost" ||
 			hostname === "127.0.0.1");
 

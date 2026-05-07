@@ -578,6 +578,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"ckpt/hermes_final.pth"`,
 	},
+	holomotion: {
+		prettyLabel: "HoloMotion",
+		repoName: "HoloMotion",
+		repoUrl: "https://github.com/HorizonRobotics/HoloMotion",
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	hezar: {
 		prettyLabel: "Hezar",
 		repoName: "Hezar",
@@ -664,6 +671,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	"ising-decoding": {
+		prettyLabel: "Ising Decoding",
+		repoName: "Ising-Decoding",
+		repoUrl: "https://github.com/NVIDIA/Ising-Decoding",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
@@ -722,6 +736,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "K2",
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
+	},
+	"lyra-2.0": {
+		prettyLabel: "Lyra-2.0",
+		repoName: "Lyra-2.0",
+		repoUrl: "https://github.com/nv-tlabs/lyra",
+		filter: false,
+		countDownloads: `path:"checkpoints/image_encoder/model.pth"`,
 	},
 	lagernvs: {
 		prettyLabel: "LagerNVS",
