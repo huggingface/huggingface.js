@@ -12,9 +12,10 @@ describe("WebBlob", () => {
 		// `Content-Length` is not reliably exposed when the response is gzipped
 		// on the fly by CloudFront.
 		const response = await fetch(resourceUrl);
-		fullText = await response.text();
+		const blob = await response.blob();
+		size = blob.size;
+		fullText = await blob.text();
 		contentType = response.headers.get("content-type") || "";
-		size = new TextEncoder().encode(fullText).byteLength;
 	});
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {
