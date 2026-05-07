@@ -395,7 +395,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	"RTX 3080 Mobile": {
 		tflops: 18.98,
-		memory: [8],
+		memory: [16, 8],
 		computeCapability: 8.6,
 	},
 	"RTX 3070": {
