@@ -44,7 +44,7 @@ export class WebBlob extends Blob {
 		});
 
 		if (!probe.ok) {
-			return createApiError(probe);
+			throw await createApiError(probe);
 		}
 
 		const contentType = probe.headers.get("content-type") || "";
@@ -63,7 +63,7 @@ export class WebBlob extends Blob {
 				...(opts?.accessToken && { headers: { Authorization: `Bearer ${opts.accessToken}` } }),
 			});
 			if (!full.ok) {
-				return createApiError(full);
+				throw await createApiError(full);
 			}
 			return full.blob();
 		}
