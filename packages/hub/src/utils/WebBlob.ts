@@ -22,36 +22,55 @@ interface WebBlobCreateOptions {
 export class WebBlob extends Blob {
 	static async create(url: URL, opts?: WebBlobCreateOptions): Promise<Blob> {
 		const customFetch = opts?.fetch ?? fetch;
-		const response = await customFetch(url, {
-			method: "HEAD",
-			...(opts?.accessToken && {
-				headers: {
-					Authorization: `Bearer ${opts.accessToken}`,
-				},
-			}),
+
+		// Probe with `Range: bytes=0-0` rather than `HEAD` to learn the file size
+		// and confirm range support in a single round trip.
+		//
+		// In browsers, when CloudFront gzips a response on the fly (typical for
+		// small text/JSON files behind `/api/resolve-cache/...`), the cached
+		// response loses both `Content-Length` and `Accept-Ranges`. Subsequent
+		// HEAD requests served from that cache inherit the missing headers, so
+		// the lib could not tell either the file size or whether ranges were
+		// supported, and silently fell back to buffering the whole blob in RAM.
+		//
+		// Range responses are never content-encoded, so `Content-Range`
+		// (carrying the total size) and the strong `ETag` always survive,
+		// regardless of the cached encoding state.
+		const probe = await customFetch(url, {
+			headers: {
+				Range: "bytes=0-0",
+				...(opts?.accessToken && { Authorization: `Bearer ${opts.accessToken}` }),
+			},
 		});
 
-		const contentLength = response.headers.get("content-length");
+		if (!probe.ok) {
+			return createApiError(probe);
+		}
 
-		if (contentLength === null || !Number.isFinite(Number(contentLength))) {
-			const xHeaders: string[] = [];
-			response.headers.forEach((value, key) => {
-				if (key.toLowerCase().startsWith("x-")) {
-					xHeaders.push(`${key}: ${value}`);
-				}
+		const contentType = probe.headers.get("content-type") || "";
+
+		// 206 → server honored the range request; total size is in `Content-Range`.
+		if (probe.status === 206) {
+			const totalSize = Number(probe.headers.get("content-range")?.split("/").pop());
+			await probe.body?.cancel();
+
+			if (Number.isFinite(totalSize) && totalSize >= (opts?.cacheBelow ?? 1_000_000)) {
+				return new WebBlob(url, 0, totalSize, contentType, true, customFetch, opts?.accessToken);
+			}
+
+			// Small file (or unknown total) → buffer it in RAM.
+			const full = await customFetch(url, {
+				...(opts?.accessToken && { headers: { Authorization: `Bearer ${opts.accessToken}` } }),
 			});
-			throw new Error(`Invalid Content-Length: ${contentLength}, for url ${url}. X- headers: ${xHeaders.join(", ")}`);
+			if (!full.ok) {
+				return createApiError(full);
+			}
+			return full.blob();
 		}
 
-		const size = Number(contentLength);
-		const contentType = response.headers.get("content-type") || "";
-		const supportRange = response.headers.get("accept-ranges") === "bytes";
-
-		if (!supportRange || size < (opts?.cacheBelow ?? 1_000_000)) {
-			return await (await customFetch(url)).blob();
-		}
-
-		return new WebBlob(url, 0, size, contentType, true, customFetch, opts?.accessToken);
+		// 200 → server ignored `Range`; we've already started downloading the
+		// full body, so just consume it.
+		return probe.blob();
 	}
 
 	private url: URL;
