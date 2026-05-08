@@ -24,7 +24,9 @@ export enum NvidiaComputeCapabilities {
 	PASCAL_TEGRA = 6.2,
 	PASCAL = 6.1,
 	PASCAL_DATACENTER = 6.0,
-	MAXWELL = 5.3,
+	MAXWELL_TEGRA = 5.3,
+	MAXWELL = 5.2,
+	KEPLER = 3.5,
 }
 
 export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
@@ -502,6 +504,41 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		tflops: 32.62,
 		memory: [24],
 		computeCapability: 7.5,
+	},
+	"Titan RTX": {
+		tflops: 16.31,
+		memory: [24],
+		computeCapability: 7.5,
+	},
+	"Titan V": {
+		tflops: 14.9,
+		memory: [12],
+		computeCapability: 7.0,
+	},
+	"Titan Xp": {
+		tflops: 12.15, // float32 (GPU does not support native float16)
+		memory: [12],
+		computeCapability: 6.1,
+	},
+	"Titan X (Pascal)": {
+		tflops: 10.97, // float32 (GPU does not support native float16)
+		memory: [12],
+		computeCapability: 6.1,
+	},
+	"GTX Titan X": {
+		tflops: 6.605, // float32 (GPU does not support native float16)
+		memory: [12],
+		computeCapability: 5.2,
+	},
+	"GTX Titan Black": {
+		tflops: 5.645, // float32 (GPU does not support native float16)
+		memory: [6],
+		computeCapability: 3.5,
+	},
+	"GTX Titan": {
+		tflops: 4.709, // float32 (GPU does not support native float16)
+		memory: [6],
+		computeCapability: 3.5,
 	},
 	"GTX 1660": {
 		tflops: 10.05,
