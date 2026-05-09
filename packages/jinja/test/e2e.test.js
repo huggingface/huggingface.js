@@ -1059,6 +1059,104 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 		},
 		target: "<|startoftext|><|im_start|>user\n<image>What is in this image?<|im_end|>\n<|im_start|>assistant\n",
 	},
+	"zai-org/GLM-5.1": {
+		chat_template:
+			"[gMASK]<sop>\n{%- if tools -%}\n{%- macro tool_to_json(tool) -%}\n    {%- set ns_tool = namespace(first=true) -%}\n    {{ '{' -}}\n    {%- for k, v in tool.items() -%}\n        {%- if k != 'defer_loading' and k != 'strict' -%}\n            {%- if not ns_tool.first -%}{{- ', ' -}}{%- endif -%}\n            {%- set ns_tool.first = false -%}\n            \"{{ k }}\": {{ v | tojson(ensure_ascii=False) }}\n        {%- endif -%}\n    {%- endfor -%}\n    {{- '}' -}}\n{%- endmacro -%}\n<|system|>\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{% for tool in tools %}\n{%- if 'function' in tool -%}\n    {%- set tool = tool['function'] -%}\n{%- endif -%}\n{% if tool.defer_loading is not defined or not tool.defer_loading %}\n{{ tool_to_json(tool) }}\n{% endif %}\n{% endfor %}\n</tools>\n\nFor each function call, output the function name and arguments within the following XML format:\n<tool_call>{function-name}<arg_key>{arg-key-1}</arg_key><arg_value>{arg-value-1}</arg_value><arg_key>{arg-key-2}</arg_key><arg_value>{arg-value-2}</arg_value>...</tool_call>{%- endif -%}\n{%- macro visible_text(content) -%}\n    {%- if content is string -%}\n        {{- content }}\n    {%- elif content is iterable and content is not mapping -%}\n        {%- for item in content -%}\n            {%- if item is mapping and item.type == 'text' -%}\n                {{- item.text }}\n            {%- elif item is string -%}\n                {{- item }}\n            {%- endif -%}\n        {%- endfor -%}\n    {%- else -%}\n        {{- content }}\n    {%- endif -%}\n{%- endmacro -%}\n{%- set ns = namespace(last_user_index=-1, thinking_indices='') -%}\n{%- for m in messages %}\n    {%- if m.role == 'user' %}\n        {%- set ns.last_user_index = loop.index0 -%}\n    {%- elif m.role == 'assistant' %}\n        {%- if m.reasoning_content is string %}\n            {%- set ns.thinking_indices = ns.thinking_indices ~ ',' ~ ns.last_user_index ~ ',' -%}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- set ns.has_thinking = false -%}\n{%- for m in messages -%}\n{%- if m.role == 'user' -%}<|user|>{{ visible_text(m.content) }}{% set ns.has_thinking = (',' ~ loop.index0 ~ ',') in ns.thinking_indices -%}\n{%- elif m.role == 'assistant' -%}\n<|assistant|>\n{%- set content = visible_text(m.content) %}\n{%- if m.reasoning_content is string %}\n    {%- set reasoning_content = m.reasoning_content %}\n{%- elif '</think>' in content %}\n    {%- set reasoning_content = content.split('</think>')[0].split('<think>')[-1] %}\n    {%- set content = content.split('</think>')[-1] %}\n{%- elif loop.index0 > ns.last_user_index and not (enable_thinking is defined and not enable_thinking) %}\n    {%- set reasoning_content = '' %}\n{%- elif loop.index0 < ns.last_user_index and ns.has_thinking %}\n    {%- set reasoning_content = '' %}\n{%- endif %}\n{%- if ((clear_thinking is defined and not clear_thinking) or loop.index0 > ns.last_user_index) and reasoning_content is defined -%}\n{{ '<think>' + reasoning_content +  '</think>'}}\n{%- else -%}\n{{ '</think>' }}\n{%- endif -%}\n{%- if content.strip() -%}\n{{ content.strip() }}\n{%- endif -%}\n{% if m.tool_calls %}\n{% for tc in m.tool_calls %}\n{%- if tc.function %}\n    {%- set tc = tc.function %}\n{%- endif %}\n{{- '<tool_call>' + tc.name -}}\n{% set _args = tc.arguments %}{% for k, v in _args.items() %}<arg_key>{{ k }}</arg_key><arg_value>{{ v | tojson(ensure_ascii=False) if v is not string else v }}</arg_value>{% endfor %}</tool_call>{% endfor %}\n{% endif %}\n{%- elif m.role == 'tool' -%}\n{%- if loop.first or (messages[loop.index0 - 1].role != \"tool\") %}\n    {{- '<|observation|>' -}}\n{%- endif %}\n{%- if m.content is string -%}\n    {{- '<tool_response>' + m.content + '</tool_response>' -}}\n{%- elif m.content is iterable and m.content is not mapping and m.content and m.content.0.type == \"tool_reference\" -%}\n    {{- '<tool_response><tools>\\n' -}}\n    {% for tr in m.content %}\n        {%- for tool in tools -%}\n            {%- if 'function' in tool -%}\n                {%- set tool = tool['function'] -%}\n            {%- endif -%}\n            {%- if tool.name == tr.name -%}\n                {{- tool_to_json(tool) + '\\n' -}}\n            {%- endif -%}\n        {%- endfor -%}\n    {%- endfor -%}\n    {{- '</tools></tool_response>' -}}\n{%- else -%}\n    {{- '<tool_response>' + visible_text(m.content) + '</tool_response>' -}}\n{% endif -%}\n{%- elif m.role == 'system' -%}\n<|system|>{{ visible_text(m.content) }}\n{%- endif -%}\n{%- endfor -%}\n{%- if add_generation_prompt -%}\n    <|assistant|>{{- '</think>' if (enable_thinking is defined and not enable_thinking) else '<think>' -}}\n{%- endif -%}",
+		data: {
+			messages: [
+				{
+					role: "user",
+					content: "Load the referenced tools.",
+				},
+				{
+					role: "assistant",
+					content: "",
+					tool_calls: [
+						{
+							function: {
+								name: "load_tools",
+								arguments: {
+									names: ["get_weather", "get_time"],
+								},
+							},
+						},
+					],
+				},
+				{
+					role: "tool",
+					tool_call_id: "call_load_tools_1",
+					content: [
+						{
+							type: "tool_reference",
+							name: "get_weather",
+						},
+						{
+							type: "tool_reference",
+							name: "get_time",
+						},
+					],
+				},
+			],
+			tools: [
+				{
+					type: "function",
+					function: {
+						name: "load_tools",
+						description: "Load one or more deferred tools by name.",
+						parameters: {
+							type: "object",
+							properties: {
+								names: {
+									type: "array",
+									items: { type: "string" },
+									description: "Tool names to load.",
+								},
+							},
+							required: ["names"],
+						},
+					},
+				},
+				{
+					type: "function",
+					function: {
+						name: "get_weather",
+						description: "Get the weather for a location.",
+						defer_loading: true,
+						parameters: {
+							type: "object",
+							properties: {
+								location: {
+									type: "string",
+									description: "City or location name.",
+								},
+							},
+							required: ["location"],
+						},
+					},
+				},
+				{
+					type: "function",
+					function: {
+						name: "get_time",
+						description: "Get the local time for a location.",
+						defer_loading: true,
+						parameters: {
+							type: "object",
+							properties: {
+								location: {
+									type: "string",
+									description: "City or location name.",
+								},
+							},
+							required: ["location"],
+						},
+					},
+				},
+			],
+		},
+		target:
+			'[gMASK]<sop><|system|>\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{"name": "load_tools", "description": "Load one or more deferred tools by name.", "parameters": {"type": "object", "properties": {"names": {"type": "array", "items": {"type": "string"}, "description": "Tool names to load."}}, "required": ["names"]}}\n</tools>\n\nFor each function call, output the function name and arguments within the following XML format:\n<tool_call>{function-name}<arg_key>{arg-key-1}</arg_key><arg_value>{arg-value-1}</arg_value><arg_key>{arg-key-2}</arg_key><arg_value>{arg-value-2}</arg_value>...</tool_call><|user|>Load the referenced tools.<|assistant|><think></think><tool_call>load_tools<arg_key>names</arg_key><arg_value>["get_weather", "get_time"]</arg_value></tool_call><|observation|><tool_response><tools>\n{"name": "get_weather", "description": "Get the weather for a location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "City or location name."}}, "required": ["location"]}}\n{"name": "get_time", "description": "Get the local time for a location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "City or location name."}}, "required": ["location"]}}\n</tools></tool_response>',
+	},
 });
 
 /**
