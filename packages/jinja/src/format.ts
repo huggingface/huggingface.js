@@ -261,7 +261,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 				obj = `(${obj})`;
 			}
 			let prop = formatExpression(n.property);
-			if (!n.computed && n.property.type !== "Identifier") {
+			if (!n.computed && n.property.type !== "Identifier" && n.property.type !== "IntegerLiteral") {
 				prop = `(${prop})`;
 			}
 			return n.computed ? `${obj}[${prop}]` : `${obj}.${prop}`;
