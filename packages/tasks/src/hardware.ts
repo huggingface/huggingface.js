@@ -56,27 +56,27 @@ export const SKUS = {
 			"Arc A750": {
 				tflops: 34.41,
 				memory: [8],
-				msrp: 249,
+				msrp: 250,
 			},
 			"Arc A770": {
 				tflops: 39.32,
 				memory: [8, 16],
-				msrp: 349,
+				msrp: 350,
 			},
 			"Arc B570": {
 				tflops: 23.04,
 				memory: [10],
-				msrp: 219,
+				msrp: 200,
 			},
 			"Arc B580": {
 				tflops: 27.34,
 				memory: [12],
-				msrp: 249,
+				msrp: 250,
 			},
 			"Arc B50": {
 				tflops: 21.3,
 				memory: [16],
-				msrp: 349,
+				msrp: 350,
 			},
 			"Arc B60": {
 				tflops: 24.58,
