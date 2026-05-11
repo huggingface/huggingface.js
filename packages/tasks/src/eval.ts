@@ -101,4 +101,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"CLAW-Eval is an evaluation framework for assessing LLMs as autonomous agents across 300 human-verified tasks covering communication, finance, and productivity domains.",
 		url: "https://github.com/claw-eval/claw-eval",
 	},
+	pbench: {
+		name: "pbench",
+		description:
+			"PBench is a multi-level referring expression segmentation benchmark for evaluating vision-language perception across a structured hierarchy of skills.",
+		url: "https://github.com/tiiuae/Falcon-Perception",
+	},
 } as const;
