@@ -1,6 +1,6 @@
-import type { HardwareSpec, WithRequired } from "./hardware.js";
+import type { HardwareSpec } from "./hardware.js";
 
-export interface NvidiaHardwareSpec extends WithRequired<HardwareSpec, "msrp"> {
+export interface NvidiaHardwareSpec extends HardwareSpec {
 	/**
 	 * CUDA Compute Capability (NVIDIA GPUs only)
 	 *

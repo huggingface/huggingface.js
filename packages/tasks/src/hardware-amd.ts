@@ -1,6 +1,6 @@
-import type { HardwareSpec, WithRequired } from "./hardware.js";
+import type { HardwareSpec } from "./hardware.js";
 
-export interface AmdGpuHardwareSpec extends WithRequired<HardwareSpec, "msrp"> {
+export interface AmdGpuHardwareSpec extends HardwareSpec {
 	/**
 	 * GFX version / LLVM ISA target (AMD GPUs only), e.g. "gfx1100"
 	 *
