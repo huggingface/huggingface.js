@@ -41,7 +41,9 @@ export interface HardwareSpec {
 	 * widely-reported street price. For mobile/laptop GPUs that are not sold
 	 * standalone, this is the approximate module/BOM cost. For Apple Silicon
 	 * SoCs, this is the price of a Mac configured with that chip and the
-	 * largest memory option.
+	 * largest memory option. For CPU "family" entries (e.g. "Xeon 4th Gen",
+	 * "Ryzen Zen 4 7000 (Ryzen 9)"), this is the tray/box price of a
+	 * representative flagship SKU at launch.
 	 */
 	msrp?: number;
 }
@@ -108,164 +110,217 @@ export const SKUS = {
 		Intel: {
 			"Xeon 4th Generation (Sapphire Rapids)": {
 				tflops: 1.3,
+				msrp: 10_500,
 			},
 			"Xeon 3th Generation (Ice Lake)": {
 				tflops: 0.8,
+				msrp: 8_000,
 			},
 			"Xeon 2th Generation (Cascade Lake)": {
 				tflops: 0.55,
+				msrp: 10_000,
 			},
 			"Xeon E5v4 (Broadwell)": {
 				tflops: 0.25,
+				msrp: 4_000,
 			},
 			"Xeon E5v3 (Haswell)": {
 				tflops: 0.2,
+				msrp: 4_000,
 			},
 			"Xeon E5v2 (Ivy Bridge)": {
 				tflops: 0.15,
+				msrp: 2_500,
 			},
 			"Intel Core Ultra 9 275HX": {
 				tflops: 1.89,
+				msrp: 700,
 			},
 			"Intel Core Ultra 7 265KF": {
 				tflops: 1.53,
+				msrp: 400,
 			},
 			"Intel Core 14th Generation (i7)": {
 				tflops: 0.8,
+				msrp: 400,
 			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,
+				msrp: 600,
 			},
 			"Intel Core 13th Generation (i7)": {
 				tflops: 0.82,
+				msrp: 400,
 			},
 			"Intel Core 13th Generation (i5)": {
 				tflops: 0.68,
+				msrp: 300,
 			},
 			"Intel Core 13th Generation (i3)": {
 				tflops: 0.57,
+				msrp: 150,
 			},
 			"Intel Core 12th Generation (i9)": {
 				tflops: 0.79,
+				msrp: 600,
 			},
 			"Intel Core 12th Generation (i7)": {
 				tflops: 0.77,
+				msrp: 400,
 			},
 			"Intel Core 12th Generation (i5)": {
 				tflops: 0.65,
+				msrp: 300,
 			},
 			"Intel Core 12th Generation (i3)": {
 				tflops: 0.53,
+				msrp: 150,
 			},
 			"Intel Core 11th Generation (i9)": {
 				tflops: 0.7,
+				msrp: 550,
 			},
 			"Intel Core 11th Generation (i7)": {
 				tflops: 0.6,
+				msrp: 400,
 			},
 			"Intel Core 11th Generation (i5)": {
 				tflops: 0.5,
+				msrp: 250,
 			},
 			"Intel Core 11th Generation (i3)": {
 				tflops: 0.35,
+				msrp: 150,
 			},
 			"Intel Core 10th Generation (i9)": {
 				tflops: 0.46,
+				msrp: 500,
 			},
 			"Intel Core 10th Generation (i7)": {
 				tflops: 0.46,
+				msrp: 400,
 			},
 			"Intel Core 10th Generation (i5)": {
 				tflops: 0.46,
+				msrp: 250,
 			},
 			"Intel Core 10th Generation (i3)": {
 				tflops: 0.44,
+				msrp: 150,
 			},
 		},
 		AMD: {
 			"EPYC 5th Generation Zen 5 (Turin)": {
 				tflops: 13.8,
+				msrp: 13_000,
 			},
 			"EPYC 4th Generation Zen 4 (Genoa)": {
 				tflops: 5,
+				msrp: 11_500,
 			},
 			"EPYC 3th Generation Zen 3 (Milan)": {
 				tflops: 2.4,
+				msrp: 8_000,
 			},
 			"EPYC 2th Generation Zen 2 (Rome)": {
 				tflops: 0.6,
+				msrp: 7_000,
 			},
 			"EPYC 1st Generation Zen (Naples)": {
 				tflops: 0.6,
+				msrp: 4_000,
 			},
 			"Ryzen Threadripper Zen 5 9000 (Shimada Peak)": {
 				tflops: 14.0,
+				msrp: 5_000,
 			},
 			"Ryzen Threadripper Zen 4 7000 (Storm Peak)": {
 				tflops: 10.0,
+				msrp: 5_000,
 			},
 			"Ryzen Threadripper Zen 3 5000 (Chagall)": {
 				tflops: 4.6,
+				msrp: 6_500,
 			},
 			"Ryzen Threadripper Zen 2 3000 (Castle Peak)": {
 				tflops: 3.2,
+				msrp: 4_000,
 			},
 			"Ryzen Threadripper Zen 1000 (Whitehaven)": {
 				tflops: 0.6,
+				msrp: 1_000,
 			},
 			"Ryzen 7 3800X (16)": {
 				tflops: 1.73,
+				msrp: 400,
 			},
 			"Ryzen Zen 5 9000 (Ryzen 9)": {
 				tflops: 0.56,
+				msrp: 650,
 			},
 			"Ryzen Zen 5 9000 (Ryzen 7)": {
 				tflops: 0.56,
+				msrp: 350,
 			},
 			"Ryzen Zen 5 9000 (Ryzen 5)": {
 				tflops: 0.56,
+				msrp: 300,
 			},
 			"Ryzen Zen 4 7000 (Ryzen 9)": {
 				tflops: 0.56,
+				msrp: 700,
 			},
 			"Ryzen Zen 4 7000 (Ryzen 7)": {
 				tflops: 0.56,
+				msrp: 400,
 			},
 			"Ryzen Zen 4 7000 (Ryzen 5)": {
 				tflops: 0.56,
+				msrp: 300,
 			},
 			"Ryzen Zen 3 5000 (Ryzen 9)": {
 				tflops: 1.33,
+				msrp: 800,
 			},
 			"Ryzen Zen 3 5000 (Ryzen 7)": {
 				tflops: 1.33,
+				msrp: 450,
 			},
 			"Ryzen Zen 3 5000 (Ryzen 5)": {
 				tflops: 0.72,
+				msrp: 300,
 			},
 			"Ryzen Zen 2 3000 (Ryzen 9)": {
 				tflops: 0.72,
+				msrp: 750,
 			},
 			"Ryzen Zen 2 3000 (Ryzen 7)": {
 				tflops: 0.72,
+				msrp: 400,
 			},
 			"Ryzen Zen 2 3000 (Ryzen 5)": {
 				tflops: 0.72,
+				msrp: 250,
 			},
 			"Ryzen Zen 2 3000 (Ryzen 3)": {
 				tflops: 0.72,
+				msrp: 150,
 			},
 			"Ryzen AI 300 (Ryzen AI 9 HX)": {
 				tflops: 5.52,
+				msrp: 500,
 			},
 			"Ryzen AI 300 (Ryzen AI 9)": {
 				tflops: 5.2,
+				msrp: 450,
 			},
 			"Ryzen AI 300 (Ryzen AI 7)": {
 				tflops: 4.34,
+				msrp: 350,
 			},
 			"Ryzen AI 300 (Ryzen AI 5)": {
 				tflops: 1.57,
+				msrp: 250,
 			},
 		},
 	},
