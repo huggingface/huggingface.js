@@ -15,6 +15,8 @@ export const TFLOPS_THRESHOLD_WHITE_HOUSE_CLUSTER = 10 ** 8;
  */
 export const TFLOPS_THRESHOLD_EU_AI_ACT_MODEL_TRAINING_TOTAL = 10 ** 13;
 
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+
 export interface HardwareSpec {
 	/**
 	 * Approximate value, in FP16 whenever possible for GPUs and FP32 for CPUs.
@@ -32,6 +34,14 @@ export interface HardwareSpec {
 	 * e.g. an A100 exists in 40 or 80 GB.
 	 */
 	memory?: number[];
+	/**
+	 * Approximate MSRP in USD at launch. For SKUs with multiple memory variants,
+	 * the price corresponds to the largest memory variant. For datacenter GPUs
+	 * sold via OEMs without a public MSRP (H100, MI300X, ...), this is a
+	 * widely-reported street price. For mobile/laptop GPUs that are not sold
+	 * standalone, this is the approximate module/BOM cost.
+	 */
+	msrp?: number;
 }
 
 export const DEFAULT_MEMORY_OPTIONS = [
@@ -46,26 +56,32 @@ export const SKUS = {
 			"Arc A750": {
 				tflops: 34.41,
 				memory: [8],
+				msrp: 249,
 			},
 			"Arc A770": {
 				tflops: 39.32,
 				memory: [8, 16],
+				msrp: 349,
 			},
 			"Arc B570": {
 				tflops: 23.04,
 				memory: [10],
+				msrp: 219,
 			},
 			"Arc B580": {
 				tflops: 27.34,
 				memory: [12],
+				msrp: 249,
 			},
 			"Arc B50": {
 				tflops: 21.3,
 				memory: [16],
+				msrp: 349,
 			},
 			"Arc B60": {
 				tflops: 24.58,
 				memory: [24, 48],
+				msrp: 1_200,
 			},
 		},
 		QUALCOMM: {

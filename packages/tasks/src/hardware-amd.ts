@@ -1,6 +1,6 @@
-import type { HardwareSpec } from "./hardware.js";
+import type { HardwareSpec, WithRequired } from "./hardware.js";
 
-export interface AmdGpuHardwareSpec extends HardwareSpec {
+export interface AmdGpuHardwareSpec extends WithRequired<HardwareSpec, "msrp"> {
 	/**
 	 * GFX version / LLVM ISA target (AMD GPUs only), e.g. "gfx1100"
 	 *
@@ -14,145 +14,174 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		tflops: 383.0,
 		memory: [192],
 		gfxVersion: "gfx942",
+		msrp: 15_000,
 	},
 	MI250: {
 		tflops: 362.1,
 		memory: [128],
 		gfxVersion: "gfx90a",
+		msrp: 10_000,
 	},
 	MI210: {
 		tflops: 181.0,
 		memory: [64],
 		gfxVersion: "gfx90a",
+		msrp: 8_000,
 	},
 	MI100: {
 		tflops: 184.6,
 		memory: [32],
 		gfxVersion: "gfx908",
+		msrp: 6_400,
 	},
 	MI60: {
 		tflops: 29.5,
 		memory: [32],
 		gfxVersion: "gfx906",
+		msrp: 3_000,
 	},
 	MI50: {
 		tflops: 26.5,
 		memory: [16, 32],
 		gfxVersion: "gfx906",
+		msrp: 1_800,
 	},
 	"R9700 PRO": {
 		tflops: 95.7,
 		memory: [32],
 		gfxVersion: "gfx1201",
+		msrp: 1_250,
 	},
 	"RX 9070 XT": {
 		tflops: 97.32,
 		memory: [16],
 		gfxVersion: "gfx1201",
+		msrp: 599,
 	},
 	"RX 9070": {
 		tflops: 72.25,
 		memory: [16],
 		gfxVersion: "gfx1201",
+		msrp: 549,
 	},
 	"RX 9060 XT": {
 		tflops: 51.28,
 		memory: [8, 16],
 		gfxVersion: "gfx1200",
+		msrp: 349,
 	},
 	"PRO W7900": {
 		tflops: 122.6,
 		memory: [48],
 		gfxVersion: "gfx1100",
+		msrp: 3_999,
 	},
 	"PRO W7800": {
 		tflops: 90.5,
 		memory: [32, 48],
 		gfxVersion: "gfx1100",
+		msrp: 2_499,
 	},
 	"RX 7900 XTX": {
 		tflops: 122.8,
 		memory: [24],
 		gfxVersion: "gfx1100",
+		msrp: 999,
 	},
 	"RX 7900 XT": {
 		tflops: 103.0,
 		memory: [20],
 		gfxVersion: "gfx1100",
+		msrp: 899,
 	},
 	"RX 7900 GRE": {
 		tflops: 91.96,
 		memory: [16],
 		gfxVersion: "gfx1100",
+		msrp: 549,
 	},
 	"RX 7800 XT": {
 		tflops: 74.65,
 		memory: [16],
 		gfxVersion: "gfx1101",
+		msrp: 499,
 	},
 	"RX 7700 XT": {
 		tflops: 70.34,
 		memory: [12],
 		gfxVersion: "gfx1101",
+		msrp: 449,
 	},
 	"RX 7600 XT": {
 		tflops: 45.14,
 		memory: [16, 8],
 		gfxVersion: "gfx1102",
+		msrp: 329,
 	},
 	"RX 6950 XT": {
 		tflops: 47.31,
 		memory: [16],
 		gfxVersion: "gfx1030",
+		msrp: 1_099,
 	},
 	"RX 6800": {
 		tflops: 32.33,
 		memory: [16],
 		gfxVersion: "gfx1030",
+		msrp: 579,
 	},
 	"RX 6700 XT": {
 		tflops: 26.43,
 		memory: [12],
 		gfxVersion: "gfx1031",
+		msrp: 479,
 	},
 	"RX 6700": {
 		tflops: 22.58,
 		memory: [10],
 		gfxVersion: "gfx1031",
+		msrp: 479,
 	},
 	"RX 6650 XT": {
 		tflops: 21.59,
 		memory: [8],
 		gfxVersion: "gfx1032",
+		msrp: 399,
 	},
 	"RX 6600 XT": {
 		tflops: 21.21,
 		memory: [8],
 		gfxVersion: "gfx1032",
+		msrp: 379,
 	},
 	"RX 6600": {
 		tflops: 17.86,
 		memory: [8],
 		gfxVersion: "gfx1032",
+		msrp: 329,
 	},
 	"RX 5500 XT": {
 		tflops: 10.39,
 		memory: [4, 8],
 		gfxVersion: "gfx1012",
+		msrp: 199,
 	},
 	"Radeon Pro V620": {
 		tflops: 40.55,
 		memory: [32],
 		gfxVersion: "gfx1030",
+		msrp: 3_000,
 	},
 	"Radeon Pro VII": {
 		tflops: 26.11,
 		memory: [16, 32],
 		gfxVersion: "gfx906",
+		msrp: 1_899,
 	},
 	"Ryzen AI Max+ 395": {
 		tflops: 59.4,
 		memory: [64, 96, 128],
 		gfxVersion: "gfx1151",
+		msrp: 1_500,
 	},
 };
