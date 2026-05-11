@@ -39,7 +39,9 @@ export interface HardwareSpec {
 	 * the price corresponds to the largest memory variant. For datacenter GPUs
 	 * sold via OEMs without a public MSRP (H100, MI300X, ...), this is a
 	 * widely-reported street price. For mobile/laptop GPUs that are not sold
-	 * standalone, this is the approximate module/BOM cost.
+	 * standalone, this is the approximate module/BOM cost. For Apple Silicon
+	 * SoCs, this is the price of a Mac configured with that chip and the
+	 * largest memory option.
 	 */
 	msrp?: number;
 }
@@ -272,78 +274,97 @@ export const SKUS = {
 			"Apple MacBook Neo": {
 				tflops: 1.9,
 				memory: [8],
+				msrp: 1_499,
 			},
 			"Apple M1": {
 				tflops: 2.6,
 				memory: [8, 16],
+				msrp: 1_249,
 			},
 			"Apple M1 Pro": {
 				tflops: 5.2,
 				memory: [16, 24, 32],
+				msrp: 2_899,
 			},
 			"Apple M1 Max": {
 				tflops: 10.4,
 				memory: [16, 24, 32, 64],
+				msrp: 3_899,
 			},
 			"Apple M1 Ultra": {
 				tflops: 21,
 				memory: [16, 24, 32, 64, 96, 128],
+				msrp: 6_199,
 			},
 			"Apple M2": {
 				tflops: 3.6,
 				memory: [8, 16, 24],
+				msrp: 1_499,
 			},
 			"Apple M2 Pro": {
 				tflops: 6.8,
 				memory: [16, 24, 32],
+				msrp: 2_799,
 			},
 			"Apple M2 Max": {
 				tflops: 13.49,
 				memory: [32, 64, 96],
+				msrp: 4_499,
 			},
 			"Apple M2 Ultra": {
 				tflops: 27.2,
 				memory: [64, 96, 128, 192],
+				msrp: 6_999,
 			},
 			"Apple M3": {
 				tflops: 4.1,
 				memory: [8, 16, 24],
+				msrp: 1_499,
 			},
 			"Apple M3 Pro": {
 				tflops: 7.4,
 				memory: [18, 36],
+				msrp: 2_399,
 			},
 			"Apple M3 Max": {
 				tflops: 14.2,
 				memory: [36, 48, 64, 96, 128],
+				msrp: 4_999,
 			},
 			"Apple M3 Ultra": {
 				tflops: 28.4,
 				memory: [96, 256, 512],
+				msrp: 9_499,
 			},
 			"Apple M4": {
 				tflops: 4.6,
 				memory: [16, 24, 32],
+				msrp: 1_599,
 			},
 			"Apple M4 Pro": {
 				tflops: 9.2,
 				memory: [24, 48, 64],
+				msrp: 2_599,
 			},
 			"Apple M4 Max": {
 				tflops: 18.4,
 				memory: [36, 48, 64, 96, 128, 256, 512],
+				msrp: 7_999,
 			},
 			"Apple M5": {
 				tflops: 5.7,
 				memory: [16, 24, 32],
+				msrp: 1_999,
 			},
 			"Apple M5 Pro": {
 				tflops: 11.4,
 				memory: [24, 36, 48, 64],
+				msrp: 2_899,
 			},
 			"Apple M5 Max": {
 				tflops: 22.8,
 				memory: [36, 48, 64, 128],
+				msrp: 4_999,
 			},
 		},
 	},
