@@ -101,4 +101,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"CLAW-Eval is an evaluation framework for assessing LLMs as autonomous agents across 300 human-verified tasks covering communication, finance, and productivity domains.",
 		url: "https://github.com/claw-eval/claw-eval",
 	},
+	wildclawbench: {
+		name: "wildclawbench",
+		description:
+			"WildClawBench is an end-to-end agent benchmark that runs inside a live OpenClaw environment with 60 practical tasks across productivity, code intelligence, multimodal synthesis, search, social interaction, and safety.",
+		url: "https://github.com/internlm/WildClawBench",
+	},
 } as const;
