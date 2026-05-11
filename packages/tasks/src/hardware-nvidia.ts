@@ -34,6 +34,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 10.0,
 		msrp: 40_000,
 		power: 1000,
+		releaseYear: 2024,
 	},
 	H200: {
 		tflops: 241.3,
@@ -41,6 +42,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 9.0,
 		msrp: 32_000,
 		power: 700,
+		releaseYear: 2024,
 	},
 	H100: {
 		tflops: 267.6,
@@ -48,6 +50,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 9.0,
 		msrp: 30_000,
 		power: 700,
+		releaseYear: 2022,
 	},
 	L40s: {
 		tflops: 91.61,
@@ -55,6 +58,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 8_500,
 		power: 350,
+		releaseYear: 2023,
 	},
 	L40: {
 		tflops: 90.52,
@@ -62,6 +66,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 7_500,
 		power: 300,
+		releaseYear: 2022,
 	},
 	L20: {
 		tflops: 59.35,
@@ -69,6 +74,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 5_000,
 		power: 275,
+		releaseYear: 2023,
 	},
 	L4: {
 		tflops: 30.29,
@@ -76,6 +82,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 2_500,
 		power: 72,
+		releaseYear: 2023,
 	},
 	GB10: {
 		tflops: 29.71,
@@ -83,6 +90,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.1,
 		msrp: 3_000,
 		power: 240,
+		releaseYear: 2025,
 	},
 	"RTX PRO 6000 WS": {
 		tflops: 126,
@@ -90,6 +98,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 8_600,
 		power: 600,
+		releaseYear: 2025,
 	},
 	"RTX PRO 6000 Max-Q": {
 		tflops: 116,
@@ -97,6 +106,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 8_600,
 		power: 300,
+		releaseYear: 2025,
 	},
 	"RTX PRO 5000": {
 		tflops: 66.94,
@@ -104,6 +114,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 4_500,
 		power: 300,
+		releaseYear: 2025,
 	},
 	"RTX PRO 4500 WS": {
 		tflops: 50.53,
@@ -111,6 +122,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 2_800,
 		power: 200,
+		releaseYear: 2025,
 	},
 	"RTX PRO 4000": {
 		tflops: 36.83,
@@ -118,6 +130,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 1_500,
 		power: 140,
+		releaseYear: 2025,
 	},
 	"RTX PRO 4000 SFF": {
 		tflops: 24.05,
@@ -125,6 +138,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 1_500,
 		power: 70,
+		releaseYear: 2025,
 	},
 	"RTX PRO 2000": {
 		tflops: 17.03,
@@ -132,6 +146,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 700,
 		power: 70,
+		releaseYear: 2025,
 	},
 	"RTX 6000 Ada": {
 		tflops: 91.1,
@@ -139,6 +154,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 6_800,
 		power: 300,
+		releaseYear: 2022,
 	},
 	"RTX 5880 Ada": {
 		tflops: 69.3,
@@ -146,6 +162,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 6_000,
 		power: 285,
+		releaseYear: 2024,
 	},
 	"RTX 5000 Ada": {
 		tflops: 65.3,
@@ -153,6 +170,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 4_000,
 		power: 250,
+		releaseYear: 2023,
 	},
 	"RTX 4500 Ada": {
 		tflops: 39.6,
@@ -160,6 +178,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 2_250,
 		power: 210,
+		releaseYear: 2023,
 	},
 	"RTX 4000 Ada": {
 		tflops: 26.7,
@@ -167,6 +186,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_250,
 		power: 130,
+		releaseYear: 2023,
 	},
 	"RTX 4000 SFF Ada": {
 		tflops: 19.2,
@@ -174,6 +194,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_250,
 		power: 70,
+		releaseYear: 2023,
 	},
 	"RTX 2000 Ada": {
 		tflops: 12.0,
@@ -181,6 +202,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 650,
 		power: 70,
+		releaseYear: 2024,
 	},
 	"RTX A6000": {
 		tflops: 38.7,
@@ -188,6 +210,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 4_650,
 		power: 300,
+		releaseYear: 2020,
 	},
 	"RTX A5000": {
 		tflops: 27.77,
@@ -195,6 +218,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 2_250,
 		power: 230,
+		releaseYear: 2021,
 	},
 	"RTX A5000 Max-Q": {
 		tflops: 16.59,
@@ -202,6 +226,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 2_000,
 		power: 80,
+		releaseYear: 2021,
 	},
 	"RTX A5000 Mobile": {
 		tflops: 19.35,
@@ -209,6 +234,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 2_000,
 		power: 165,
+		releaseYear: 2021,
 	},
 	"RTX A4000": {
 		tflops: 19.17,
@@ -216,6 +242,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 1_000,
 		power: 140,
+		releaseYear: 2021,
 	},
 	"RTX A4000 Max-Q": {
 		tflops: 14.28,
@@ -223,6 +250,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 1_000,
 		power: 35,
+		releaseYear: 2021,
 	},
 	"RTX A4000 Mobile": {
 		tflops: 17.2,
@@ -230,6 +258,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 1_000,
 		power: 80,
+		releaseYear: 2021,
 	},
 	"RTX A3000 Mobile": {
 		tflops: 10.9,
@@ -237,6 +266,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 700,
 		power: 80,
+		releaseYear: 2021,
 	},
 	"RTX A2000": {
 		tflops: 7.987,
@@ -244,6 +274,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 450,
 		power: 70,
+		releaseYear: 2021,
 	},
 	"RTX A2000 Embedded": {
 		tflops: 6.026,
@@ -251,6 +282,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 400,
 		power: 70,
+		releaseYear: 2022,
 	},
 	"RTX A2000 Max-Q": {
 		tflops: 6.1,
@@ -258,6 +290,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 450,
 		power: 35,
+		releaseYear: 2021,
 	},
 	"RTX A2000 Mobile": {
 		tflops: 8.4,
@@ -265,6 +298,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 450,
 		power: 95,
+		releaseYear: 2021,
 	},
 	A100: {
 		tflops: 77.97,
@@ -272,6 +306,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.0,
 		msrp: 15_000,
 		power: 400,
+		releaseYear: 2020,
 	},
 	A40: {
 		tflops: 37.42,
@@ -279,6 +314,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 5_500,
 		power: 300,
+		releaseYear: 2020,
 	},
 	A30: {
 		tflops: 10.32,
@@ -286,6 +322,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.0,
 		msrp: 5_000,
 		power: 165,
+		releaseYear: 2021,
 	},
 	A10: {
 		tflops: 31.24,
@@ -293,6 +330,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 3_200,
 		power: 150,
+		releaseYear: 2021,
 	},
 	A2: {
 		tflops: 4.531,
@@ -300,6 +338,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 1_000,
 		power: 60,
+		releaseYear: 2021,
 	},
 	"RTX 5090": {
 		tflops: 104.8,
@@ -307,6 +346,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 2_000,
 		power: 575,
+		releaseYear: 2025,
 	},
 	"RTX 5090 D": {
 		tflops: 104.8,
@@ -314,6 +354,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 2_000,
 		power: 575,
+		releaseYear: 2025,
 	},
 	"RTX 5090 Mobile": {
 		tflops: 31.8,
@@ -321,6 +362,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 1_500,
 		power: 175,
+		releaseYear: 2025,
 	},
 	"RTX 5080": {
 		tflops: 56.28,
@@ -328,6 +370,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 1_000,
 		power: 360,
+		releaseYear: 2025,
 	},
 	"RTX 5080 Mobile": {
 		tflops: 23.04,
@@ -335,6 +378,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 1_000,
 		power: 175,
+		releaseYear: 2025,
 	},
 	"RTX 5070": {
 		tflops: 30.84,
@@ -342,6 +386,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 550,
 		power: 250,
+		releaseYear: 2025,
 	},
 	"RTX 5070 Mobile": {
 		tflops: 13.13,
@@ -349,6 +394,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 500,
 		power: 100,
+		releaseYear: 2025,
 	},
 	"RTX 5070 Ti": {
 		tflops: 43.94,
@@ -356,6 +402,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 750,
 		power: 300,
+		releaseYear: 2025,
 	},
 	"RTX 5070 Ti Mobile": {
 		tflops: 17.04,
@@ -363,6 +410,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 700,
 		power: 140,
+		releaseYear: 2025,
 	},
 	"RTX 5060 Ti": {
 		tflops: 23.7,
@@ -370,6 +418,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 450,
 		power: 180,
+		releaseYear: 2025,
 	},
 	"RTX 5060": {
 		tflops: 19.18,
@@ -377,6 +426,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 300,
 		power: 150,
+		releaseYear: 2025,
 	},
 	"RTX 5060 Mobile": {
 		tflops: 9.684,
@@ -384,6 +434,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 12.0,
 		msrp: 300,
 		power: 100,
+		releaseYear: 2025,
 	},
 	"RTX 4090": {
 		tflops: 82.58,
@@ -391,6 +442,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_600,
 		power: 450,
+		releaseYear: 2022,
 	},
 	"RTX 4090D": {
 		tflops: 79.49,
@@ -398,6 +450,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_600,
 		power: 425,
+		releaseYear: 2023,
 	},
 	"RTX 4090 Mobile": {
 		tflops: 32.98,
@@ -405,6 +458,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_500,
 		power: 150,
+		releaseYear: 2023,
 	},
 	"RTX 4080 SUPER": {
 		tflops: 52.2,
@@ -412,6 +466,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_000,
 		power: 320,
+		releaseYear: 2024,
 	},
 	"RTX 4080": {
 		tflops: 48.7,
@@ -419,6 +474,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_200,
 		power: 320,
+		releaseYear: 2022,
 	},
 	"RTX 4080 Mobile": {
 		tflops: 24.72,
@@ -426,6 +482,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_000,
 		power: 150,
+		releaseYear: 2023,
 	},
 	"RTX 4070": {
 		tflops: 29.15,
@@ -433,6 +490,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 600,
 		power: 200,
+		releaseYear: 2023,
 	},
 	"RTX 4070 Mobile": {
 		tflops: 15.62,
@@ -440,6 +498,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 500,
 		power: 115,
+		releaseYear: 2023,
 	},
 	"RTX 4070 Ti": {
 		tflops: 40.09,
@@ -447,6 +506,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 800,
 		power: 285,
+		releaseYear: 2023,
 	},
 	"RTX 4070 Super": {
 		tflops: 35.48,
@@ -454,6 +514,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 600,
 		power: 220,
+		releaseYear: 2024,
 	},
 	"RTX 4070 Ti Super": {
 		tflops: 44.1,
@@ -461,6 +522,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 800,
 		power: 285,
+		releaseYear: 2024,
 	},
 	"RTX 4060": {
 		tflops: 15.11,
@@ -468,6 +530,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 300,
 		power: 115,
+		releaseYear: 2023,
 	},
 	"RTX 4060 Ti": {
 		tflops: 22.06,
@@ -475,6 +538,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 500,
 		power: 165,
+		releaseYear: 2023,
 	},
 	"RTX 4090 Laptop": {
 		tflops: 32.98,
@@ -482,6 +546,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_500,
 		power: 150,
+		releaseYear: 2023,
 	},
 	"RTX 4080 Laptop": {
 		tflops: 24.72,
@@ -489,6 +554,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 1_000,
 		power: 150,
+		releaseYear: 2023,
 	},
 	"RTX 4070 Laptop": {
 		tflops: 15.62,
@@ -496,6 +562,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 500,
 		power: 115,
+		releaseYear: 2023,
 	},
 	"RTX 4060 Laptop": {
 		tflops: 11.61,
@@ -503,6 +570,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 300,
 		power: 115,
+		releaseYear: 2023,
 	},
 	"RTX 4050 Laptop": {
 		tflops: 8.9,
@@ -510,6 +578,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.9,
 		msrp: 250,
 		power: 115,
+		releaseYear: 2023,
 	},
 	"RTX 3090": {
 		tflops: 35.58,
@@ -517,6 +586,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 1_500,
 		power: 350,
+		releaseYear: 2020,
 	},
 	"RTX 3090 Ti": {
 		tflops: 40,
@@ -524,6 +594,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 2_000,
 		power: 450,
+		releaseYear: 2022,
 	},
 	"RTX 3080": {
 		tflops: 30.6,
@@ -531,6 +602,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 800,
 		power: 350,
+		releaseYear: 2020,
 	},
 	"RTX 3080 Ti": {
 		tflops: 34.1,
@@ -538,6 +610,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 1_200,
 		power: 350,
+		releaseYear: 2021,
 	},
 	"RTX 3080 Mobile": {
 		tflops: 18.98,
@@ -545,6 +618,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 800,
 		power: 150,
+		releaseYear: 2021,
 	},
 	"RTX 3070": {
 		tflops: 20.31,
@@ -552,6 +626,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 500,
 		power: 220,
+		releaseYear: 2020,
 	},
 	"RTX 3070 Ti": {
 		tflops: 21.75,
@@ -559,6 +634,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 600,
 		power: 290,
+		releaseYear: 2021,
 	},
 	"RTX 3070 Ti Mobile": {
 		tflops: 16.6,
@@ -566,6 +642,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 700,
 		power: 125,
+		releaseYear: 2022,
 	},
 	"RTX 3060 Ti": {
 		tflops: 16.2,
@@ -573,6 +650,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 400,
 		power: 200,
+		releaseYear: 2020,
 	},
 	"RTX 3060": {
 		tflops: 12.74,
@@ -580,6 +658,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 350,
 		power: 170,
+		releaseYear: 2021,
 	},
 	"RTX 2080 Ti": {
 		tflops: 26.9,
@@ -587,6 +666,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 1_000,
 		power: 250,
+		releaseYear: 2018,
 	},
 	"RTX 2080": {
 		tflops: 20.14,
@@ -594,6 +674,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 700,
 		power: 215,
+		releaseYear: 2018,
 	},
 	"RTX 2070": {
 		tflops: 14.93,
@@ -601,6 +682,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 500,
 		power: 175,
+		releaseYear: 2018,
 	},
 	"RTX 2070 SUPER Mobile": {
 		tflops: 14.13,
@@ -608,6 +690,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 600,
 		power: 115,
+		releaseYear: 2020,
 	},
 	"RTX 2070 SUPER": {
 		tflops: 18.12,
@@ -615,6 +698,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 500,
 		power: 215,
+		releaseYear: 2019,
 	},
 	"RTX 3060 Mobile": {
 		tflops: 10.94,
@@ -622,6 +706,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 400,
 		power: 115,
+		releaseYear: 2021,
 	},
 	"RTX 3050 Mobile": {
 		tflops: 7.639,
@@ -629,6 +714,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6,
 		msrp: 250,
 		power: 95,
+		releaseYear: 2022,
 	},
 	"RTX 2060": {
 		tflops: 12.9,
@@ -636,6 +722,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 350,
 		power: 160,
+		releaseYear: 2019,
 	},
 	"RTX 2060 12GB": {
 		tflops: 14.36,
@@ -643,6 +730,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 300,
 		power: 184,
+		releaseYear: 2021,
 	},
 	"RTX 2060 Mobile": {
 		tflops: 9.22,
@@ -650,6 +738,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 350,
 		power: 90,
+		releaseYear: 2020,
 	},
 	"RTX 2050 Mobile": {
 		tflops: 10.2,
@@ -657,6 +746,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6, // Ampere (outlier GPU in the 20xx series)
 		msrp: 250,
 		power: 45,
+		releaseYear: 2022,
 	},
 	"GTX 1080 Ti": {
 		tflops: 11.34, // float32 (GPU does not support native float16)
@@ -664,6 +754,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 6.1,
 		msrp: 700,
 		power: 250,
+		releaseYear: 2017,
 	},
 	"GTX 1070 Ti": {
 		tflops: 8.2, // float32 (GPU does not support native float16)
@@ -671,6 +762,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 6.1,
 		msrp: 450,
 		power: 180,
+		releaseYear: 2017,
 	},
 	"GTX 1060": {
 		tflops: 3.9, // float32 (GPU does not support native float16)
@@ -678,6 +770,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 6.1,
 		msrp: 300,
 		power: 120,
+		releaseYear: 2016,
 	},
 	"GTX 1050 Ti": {
 		tflops: 2.1, // float32 (GPU does not support native float16)
@@ -685,6 +778,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 6.1,
 		msrp: 150,
 		power: 75,
+		releaseYear: 2016,
 	},
 	"RTX Titan": {
 		tflops: 32.62,
@@ -692,6 +786,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 2_500,
 		power: 280,
+		releaseYear: 2018,
 	},
 	"GTX 1660": {
 		tflops: 10.05,
@@ -699,6 +794,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 200,
 		power: 120,
+		releaseYear: 2019,
 	},
 	"GTX 1650 Mobile": {
 		tflops: 6.39,
@@ -706,6 +802,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 150,
 		power: 50,
+		releaseYear: 2019,
 	},
 	T4: {
 		tflops: 65.13,
@@ -713,6 +810,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 2_000,
 		power: 70,
+		releaseYear: 2018,
 	},
 	T10: {
 		tflops: 20.0,
@@ -720,6 +818,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 2_000,
 		power: 150,
+		releaseYear: 2019,
 	},
 	V100: {
 		tflops: 28.26,
@@ -727,6 +826,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.0,
 		msrp: 10_000,
 		power: 300,
+		releaseYear: 2017,
 	},
 	"Quadro P6000": {
 		tflops: 12.63, // float32 (GPU does not support native float16)
@@ -734,6 +834,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 6.1,
 		msrp: 5_000,
 		power: 250,
+		releaseYear: 2016,
 	},
 	P40: {
 		tflops: 11.76, // float32 (GPU does not support native float16)
@@ -741,6 +842,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 6.1,
 		msrp: 5_700,
 		power: 250,
+		releaseYear: 2016,
 	},
 	P100: {
 		tflops: 19.05,
@@ -748,6 +850,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 6.0,
 		msrp: 7_000,
 		power: 300,
+		releaseYear: 2016,
 	},
 	"Jetson AGX Orin 64GB": {
 		tflops: 10.65,
@@ -755,6 +858,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.7,
 		msrp: 2_000,
 		power: 60,
+		releaseYear: 2022,
 	},
 	"Jetson AGX Orin 32GB": {
 		tflops: 6.66,
@@ -762,6 +866,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.7,
 		msrp: 1_600,
 		power: 40,
+		releaseYear: 2022,
 	},
 	"Jetson Orin NX 16GB": {
 		tflops: 3.76,
@@ -769,6 +874,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.7,
 		msrp: 600,
 		power: 25,
+		releaseYear: 2023,
 	},
 	"Jetson Orin NX 8GB": {
 		tflops: 3.13,
@@ -776,6 +882,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.7,
 		msrp: 400,
 		power: 20,
+		releaseYear: 2023,
 	},
 	"Jetson Orin Nano 8GB": {
 		tflops: 2.56,
@@ -783,6 +890,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.7,
 		msrp: 500,
 		power: 15,
+		releaseYear: 2023,
 	},
 	"Jetson Orin Nano 4GB": {
 		tflops: 1.28,
@@ -790,6 +898,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.7,
 		msrp: 200,
 		power: 10,
+		releaseYear: 2023,
 	},
 	"Jetson AGX Xavier": {
 		tflops: 2.82,
@@ -797,6 +906,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.2,
 		msrp: 1_100,
 		power: 30,
+		releaseYear: 2018,
 	},
 	"Jetson Xavier NX": {
 		tflops: 1.69,
@@ -804,6 +914,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.2,
 		msrp: 400,
 		power: 20,
+		releaseYear: 2020,
 	},
 	"Jetson TX2": {
 		tflops: 1.33,
@@ -811,6 +922,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 6.2,
 		msrp: 400,
 		power: 15,
+		releaseYear: 2017,
 	},
 	"Jetson Nano": {
 		tflops: 0.47,
@@ -818,5 +930,6 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 5.3,
 		msrp: 100,
 		power: 10,
+		releaseYear: 2019,
 	},
 };

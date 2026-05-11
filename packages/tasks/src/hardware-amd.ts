@@ -16,6 +16,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx942",
 		msrp: 15_000,
 		power: 750,
+		releaseYear: 2023,
 	},
 	MI250: {
 		tflops: 362.1,
@@ -23,6 +24,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx90a",
 		msrp: 10_000,
 		power: 560,
+		releaseYear: 2021,
 	},
 	MI210: {
 		tflops: 181.0,
@@ -30,6 +32,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx90a",
 		msrp: 8_000,
 		power: 300,
+		releaseYear: 2022,
 	},
 	MI100: {
 		tflops: 184.6,
@@ -37,6 +40,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx908",
 		msrp: 6_400,
 		power: 300,
+		releaseYear: 2020,
 	},
 	MI60: {
 		tflops: 29.5,
@@ -44,6 +48,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx906",
 		msrp: 3_000,
 		power: 300,
+		releaseYear: 2018,
 	},
 	MI50: {
 		tflops: 26.5,
@@ -51,6 +56,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx906",
 		msrp: 1_800,
 		power: 300,
+		releaseYear: 2018,
 	},
 	"R9700 PRO": {
 		tflops: 95.7,
@@ -58,6 +64,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1201",
 		msrp: 1_250,
 		power: 300,
+		releaseYear: 2025,
 	},
 	"RX 9070 XT": {
 		tflops: 97.32,
@@ -65,6 +72,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1201",
 		msrp: 600,
 		power: 304,
+		releaseYear: 2025,
 	},
 	"RX 9070": {
 		tflops: 72.25,
@@ -72,6 +80,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1201",
 		msrp: 550,
 		power: 220,
+		releaseYear: 2025,
 	},
 	"RX 9060 XT": {
 		tflops: 51.28,
@@ -79,6 +88,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1200",
 		msrp: 350,
 		power: 160,
+		releaseYear: 2025,
 	},
 	"PRO W7900": {
 		tflops: 122.6,
@@ -86,6 +96,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1100",
 		msrp: 4_000,
 		power: 295,
+		releaseYear: 2023,
 	},
 	"PRO W7800": {
 		tflops: 90.5,
@@ -93,6 +104,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1100",
 		msrp: 2_500,
 		power: 260,
+		releaseYear: 2023,
 	},
 	"RX 7900 XTX": {
 		tflops: 122.8,
@@ -100,6 +112,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1100",
 		msrp: 1_000,
 		power: 355,
+		releaseYear: 2022,
 	},
 	"RX 7900 XT": {
 		tflops: 103.0,
@@ -107,6 +120,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1100",
 		msrp: 900,
 		power: 315,
+		releaseYear: 2022,
 	},
 	"RX 7900 GRE": {
 		tflops: 91.96,
@@ -114,6 +128,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1100",
 		msrp: 550,
 		power: 260,
+		releaseYear: 2023,
 	},
 	"RX 7800 XT": {
 		tflops: 74.65,
@@ -121,6 +136,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1101",
 		msrp: 500,
 		power: 263,
+		releaseYear: 2023,
 	},
 	"RX 7700 XT": {
 		tflops: 70.34,
@@ -128,6 +144,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1101",
 		msrp: 450,
 		power: 245,
+		releaseYear: 2023,
 	},
 	"RX 7600 XT": {
 		tflops: 45.14,
@@ -135,6 +152,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1102",
 		msrp: 350,
 		power: 190,
+		releaseYear: 2024,
 	},
 	"RX 6950 XT": {
 		tflops: 47.31,
@@ -142,6 +160,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1030",
 		msrp: 1_100,
 		power: 335,
+		releaseYear: 2022,
 	},
 	"RX 6800": {
 		tflops: 32.33,
@@ -149,6 +168,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1030",
 		msrp: 600,
 		power: 250,
+		releaseYear: 2020,
 	},
 	"RX 6700 XT": {
 		tflops: 26.43,
@@ -156,6 +176,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1031",
 		msrp: 500,
 		power: 230,
+		releaseYear: 2021,
 	},
 	"RX 6700": {
 		tflops: 22.58,
@@ -163,6 +184,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1031",
 		msrp: 500,
 		power: 175,
+		releaseYear: 2022,
 	},
 	"RX 6650 XT": {
 		tflops: 21.59,
@@ -170,6 +192,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1032",
 		msrp: 400,
 		power: 180,
+		releaseYear: 2022,
 	},
 	"RX 6600 XT": {
 		tflops: 21.21,
@@ -177,6 +200,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1032",
 		msrp: 400,
 		power: 160,
+		releaseYear: 2021,
 	},
 	"RX 6600": {
 		tflops: 17.86,
@@ -184,6 +208,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1032",
 		msrp: 350,
 		power: 132,
+		releaseYear: 2021,
 	},
 	"RX 5500 XT": {
 		tflops: 10.39,
@@ -191,6 +216,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1012",
 		msrp: 200,
 		power: 130,
+		releaseYear: 2019,
 	},
 	"Radeon Pro V620": {
 		tflops: 40.55,
@@ -198,6 +224,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1030",
 		msrp: 3_000,
 		power: 300,
+		releaseYear: 2021,
 	},
 	"Radeon Pro VII": {
 		tflops: 26.11,
@@ -205,6 +232,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx906",
 		msrp: 1_900,
 		power: 250,
+		releaseYear: 2020,
 	},
 	"Ryzen AI Max+ 395": {
 		tflops: 59.4,
@@ -212,5 +240,6 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		gfxVersion: "gfx1151",
 		msrp: 1_500,
 		power: 120,
+		releaseYear: 2025,
 	},
 };
