@@ -50,6 +50,14 @@
 		"@huggingface/transformers": "^3.0.0",
 		"typescript": "^5.3.2"
 	},
+	"pnpm": {
+		"overrides": {
+			"protobufjs": "^7.5.5",
+			"tar": "^7.5.11",
+			"glob": "^10.5.0",
+			"minimatch": "^9.0.7"
+		}
+	},
 	"engines": {
 		"node": ">=18"
 	},
