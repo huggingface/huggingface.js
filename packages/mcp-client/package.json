@@ -53,6 +53,14 @@
 		"@huggingface/tasks": "workspace:^",
 		"@modelcontextprotocol/sdk": "^1.11.2"
 	},
+	"pnpm": {
+		"overrides": {
+			"@modelcontextprotocol/sdk": "^1.26.0",
+			"body-parser": "^2.2.1",
+			"path-to-regexp": "^8.4.0",
+			"qs": "^6.14.2"
+		}
+	},
 	"engines": {
 		"node": ">=18"
 	},
