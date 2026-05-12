@@ -20,6 +20,7 @@ export interface WhoAmIUser {
 	 * Unix timestamp in seconds
 	 */
 	periodEnd: number | null;
+	billingMode: "postpaid" | "prepaid";
 }
 
 export interface WhoAmIOrg {
@@ -65,7 +66,7 @@ export async function whoAmI(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & CredentialsParams
+	} & CredentialsParams,
 ): Promise<WhoAmI & { auth: AuthInfo }> {
 	const accessToken = checkCredentials(params);
 

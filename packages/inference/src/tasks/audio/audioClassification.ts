@@ -14,7 +14,7 @@ export type AudioClassificationArgs = BaseArgs & (AudioClassificationInput | Leg
  */
 export async function audioClassification(
 	args: AudioClassificationArgs,
-	options?: Options
+	options?: Options,
 ): Promise<AudioClassificationOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "audio-classification");

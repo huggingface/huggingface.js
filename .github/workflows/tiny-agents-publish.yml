@@ -55,13 +55,14 @@ jobs:
           git add ../..
           git commit -m "🔖 @huggingface/tiny-agents $BUMPED_VERSION"
           git tag "tiny-agents-v$BUMPED_VERSION"
+          echo "RELEASE_TAG=tiny-agents-v$BUMPED_VERSION" >> $GITHUB_ENV
 
       # Add checks for dependencies if needed, similar to hub-publish.yml
       - if: ${{ !github.event.inputs.bypass_deps_check }}
         name: "Check Deps are published before publishing this package"
         run: pnpm -w check-deps inference && pnpm -w check-deps tasks # Review if these specific deps apply to tiny-agents
 
-      - run: (git pull --rebase && git push --follow-tags) || (git pull --rebase && git push --follow-tags)
+      - run: (git pull --rebase && git push && git push origin "$RELEASE_TAG") || (git pull --rebase && git push && git push origin "$RELEASE_TAG")
 
       - run: pnpm publish --no-git-checks .
       # hack - reuse actions/setup-node@v4 just to set a new registry
@@ -78,3 +79,8 @@ jobs:
         with:
           event-type: doc-build
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
+      - name: Create GitHub Release
+        run: gh release create "$RELEASE_TAG"
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

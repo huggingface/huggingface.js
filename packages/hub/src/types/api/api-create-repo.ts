@@ -6,10 +6,10 @@ export type ApiCreateRepoPayload = {
 	name: string;
 	canonical?: boolean;
 	license?: string;
+	resourceGroupId?: string;
 	template?: string;
 	organization?: string;
-	/** @default false */
-	private?: boolean;
+	visibility?: "public" | "private" | "protected";
 	lfsmultipartthresh?: number;
 	files?: SetRequired<ApiCommitFile, "content">[];
 } & (

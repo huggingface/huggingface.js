@@ -99,7 +99,7 @@ export class Agent extends McpClient {
 
 	async *run(
 		input: string | ChatCompletionInputMessage[],
-		opts: { abortSignal?: AbortSignal } = {}
+		opts: { abortSignal?: AbortSignal } = {},
 	): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
 		let messages: ChatCompletionInputMessage[];
 		if (typeof input === "string") {

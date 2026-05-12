@@ -125,6 +125,19 @@ export interface ApiPreuploadRequest {
 		sample: string;
 	}>;
 }
+export interface ApiBucketBatchResponse {
+	/** True if all files were successfully added */
+	success: boolean;
+	/** Total number of operations attempted */
+	processed: number;
+	/** Number of successful operations */
+	succeeded: number;
+	/** List of failed operations */
+	failed: Array<{
+		path: string;
+		error: string;
+	}>;
+}
 
 export interface ApiPreuploadResponse {
 	files: Array<{

@@ -300,6 +300,10 @@ async function main() {
 
 	for await (const event of uploadShards(fileSource, {
 		...uploadParams,
+		xetParams: {
+			sessionId: crypto.randomUUID(),
+			refreshWriteTokenUrl: `${uploadParams.hubUrl}/api/${repo.type}s/${repo.name}/xet-write-token/main`,
+		},
 		yieldCallback: (event) => {
 			if (!fileProgress[event.path]) {
 				fileProgress[event.path] = event.progress;
@@ -313,7 +317,8 @@ async function main() {
 		switch (event.event) {
 			case "file": {
 				console.log(`\n📁 Processed file: ${event.path}`);
-				console.log(`   SHA256: ${event.sha256}`);
+				console.log(`   Xet hash: ${event.xetHash}`);
+				console.log(`   SHA256: ${event.sha256 ?? "N/A"}`);
 				console.log(`   Dedup ratio: ${(event.dedupRatio * 100).toFixed(2)}%`);
 
 				// Find the file size

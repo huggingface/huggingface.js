@@ -4,6 +4,35 @@ import { bg4_regroup_bytes, bg4_split_bytes, XetBlob } from "./XetBlob";
 import { sum } from "./sum";
 
 describe("XetBlob", () => {
+	it("should handle empty files (size 0) without making network requests", async () => {
+		let fetchCount = 0;
+
+		const blob = new XetBlob({
+			hash: "test",
+			size: 0,
+			refreshUrl: "https://huggingface.co",
+			fetch: async () => {
+				fetchCount++;
+				return new Response();
+			},
+		});
+
+		const text = await blob.text();
+		expect(text).toBe("");
+		expect(fetchCount).toBe(0);
+
+		const arrayBuffer = await blob.arrayBuffer();
+		expect(arrayBuffer.byteLength).toBe(0);
+		expect(fetchCount).toBe(0);
+
+		const stream = blob.stream();
+		const reader = stream.getReader();
+		const result = await reader.read();
+		expect(result.done).toBe(true);
+		expect(result.value).toBeUndefined();
+		expect(fetchCount).toBe(0);
+	});
+
 	it("should lazy load the first 22 bytes", async () => {
 		const blob = new XetBlob({
 			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
@@ -35,7 +64,7 @@ describe("XetBlob", () => {
 				headers: {
 					Range: "bytes=0-29927",
 				},
-			}
+			},
 		).then((res) => res.arrayBuffer());
 
 		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
@@ -63,7 +92,7 @@ describe("XetBlob", () => {
 				headers: {
 					Range: "bytes=0-29928",
 				},
-			}
+			},
 		).then((res) => res.arrayBuffer());
 
 		expect(xetDownload.byteLength).toBe(29929);
@@ -93,7 +122,7 @@ describe("XetBlob", () => {
 				headers: {
 					Range: "bytes=0-199999",
 				},
-			}
+			},
 		).then((res) => res.arrayBuffer());
 
 		expect(xetDownload.byteLength).toBe(200_000);
@@ -116,7 +145,7 @@ describe("XetBlob", () => {
 				headers: {
 					Range: "bytes=10000000-10099999",
 				},
-			}
+			},
 		).then((res) => res.arrayBuffer());
 
 		console.log("xet", xetDownload.byteLength, "bridge", bridgeDownload.byteLength);
@@ -174,25 +203,25 @@ describe("XetBlob", () => {
 	describe("bg4_regoup_bytes", () => {
 		it("should regroup bytes when the array is %4 length", () => {
 			expect(bg4_regroup_bytes(new Uint8Array([1, 5, 2, 6, 3, 7, 4, 8]))).toEqual(
-				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]),
 			);
 		});
 
 		it("should regroup bytes when the array is %4 + 1 length", () => {
 			expect(bg4_regroup_bytes(new Uint8Array([1, 5, 9, 2, 6, 3, 7, 4, 8]))).toEqual(
-				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]),
 			);
 		});
 
 		it("should regroup bytes when the array is %4 + 2 length", () => {
 			expect(bg4_regroup_bytes(new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 4, 8]))).toEqual(
-				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
 			);
 		});
 
 		it("should regroup bytes when the array is %4 + 3 length", () => {
 			expect(bg4_regroup_bytes(new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8]))).toEqual(
-				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
 			);
 		});
 	});
@@ -200,25 +229,25 @@ describe("XetBlob", () => {
 	describe("bg4_split_bytes", () => {
 		it("should split bytes when the array is %4 length", () => {
 			expect(bg4_split_bytes(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))).toEqual(
-				new Uint8Array([1, 5, 2, 6, 3, 7, 4, 8])
+				new Uint8Array([1, 5, 2, 6, 3, 7, 4, 8]),
 			);
 		});
 
 		it("should split bytes when the array is %4 + 1 length", () => {
 			expect(bg4_split_bytes(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]))).toEqual(
-				new Uint8Array([1, 5, 9, 2, 6, 3, 7, 4, 8])
+				new Uint8Array([1, 5, 9, 2, 6, 3, 7, 4, 8]),
 			);
 		});
 
 		it("should split bytes when the array is %4 + 2 length", () => {
 			expect(bg4_split_bytes(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))).toEqual(
-				new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 4, 8])
+				new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 4, 8]),
 			);
 		});
 
 		it("should split bytes when the array is %4 + 3 length", () => {
 			expect(bg4_split_bytes(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]))).toEqual(
-				new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8])
+				new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8]),
 			);
 		});
 
@@ -273,7 +302,7 @@ describe("XetBlob", () => {
 										casUrl: "https://cas.co",
 										accessToken: "boo",
 										exp: 1_000_000,
-									})
+									}),
 								);
 							}
 							case "cas.co": {
@@ -308,7 +337,7 @@ describe("XetBlob", () => {
 											],
 										},
 										offset_into_first_range: start,
-									} satisfies ReconstructionInfo)
+									} satisfies ReconstructionInfo),
 								);
 							}
 							case "fetch.co": {
@@ -319,7 +348,7 @@ describe("XetBlob", () => {
 											controller.enqueue(new Uint8Array(mergedChunks));
 											controller.close();
 										},
-									})
+									}),
 									//mergedChunks
 								);
 							}
@@ -376,7 +405,7 @@ describe("XetBlob", () => {
 										casUrl: "https://cas.co",
 										accessToken: "boo",
 										exp: 1_000_000,
-									})
+									}),
 								);
 							}
 							case "cas.co": {
@@ -421,7 +450,7 @@ describe("XetBlob", () => {
 											],
 										},
 										offset_into_first_range: start,
-									} satisfies ReconstructionInfo)
+									} satisfies ReconstructionInfo),
 								);
 							}
 							case "fetch.co": {
@@ -432,7 +461,7 @@ describe("XetBlob", () => {
 											controller.enqueue(new Uint8Array(mergedChunks));
 											controller.close();
 										},
-									})
+									}),
 									//mergedChunks
 								);
 							}
@@ -491,7 +520,7 @@ describe("XetBlob", () => {
 										casUrl: "https://cas.co",
 										accessToken: "boo",
 										exp: 1_000_000,
-									})
+									}),
 								);
 							}
 							case "cas.co": {
@@ -526,7 +555,7 @@ describe("XetBlob", () => {
 											],
 										},
 										offset_into_first_range: start,
-									} satisfies ReconstructionInfo)
+									} satisfies ReconstructionInfo),
 								);
 							}
 							case "fetch.co": {
@@ -546,7 +575,7 @@ describe("XetBlob", () => {
 											ETag: `"test"`,
 											"Content-Length": `${totalChunkLength}`,
 										},
-									}
+									},
 								);
 							}
 							default:
@@ -601,7 +630,7 @@ describe("XetBlob", () => {
 										casUrl: "https://cas.co",
 										accessToken: "boo",
 										exp: 1_000_000,
-									})
+									}),
 								);
 							}
 							case "cas.co": {
@@ -636,7 +665,7 @@ describe("XetBlob", () => {
 											],
 										},
 										offset_into_first_range: start,
-									} satisfies ReconstructionInfo)
+									} satisfies ReconstructionInfo),
 								);
 							}
 							case "fetch.co": {
@@ -649,7 +678,7 @@ describe("XetBlob", () => {
 											}
 											controller.close();
 										},
-									})
+									}),
 								);
 							}
 							default:
@@ -709,7 +738,7 @@ describe("XetBlob", () => {
 										casUrl: "https://cas.co",
 										accessToken: "boo",
 										exp: 1_000_000,
-									})
+									}),
 								);
 							}
 							case "cas.co": {
@@ -744,7 +773,7 @@ describe("XetBlob", () => {
 											],
 										},
 										offset_into_first_range: start,
-									} satisfies ReconstructionInfo)
+									} satisfies ReconstructionInfo),
 								);
 							}
 							case "fetch.co": {
@@ -757,7 +786,7 @@ describe("XetBlob", () => {
 											}
 											controller.close();
 										},
-									})
+									}),
 								);
 							}
 							default:
@@ -816,7 +845,7 @@ describe("XetBlob", () => {
 										casUrl: "https://cas.co",
 										accessToken: "boo",
 										exp: 1_000_000,
-									})
+									}),
 								);
 							}
 							case "cas.co": {
@@ -851,7 +880,7 @@ describe("XetBlob", () => {
 											],
 										},
 										offset_into_first_range: start,
-									} satisfies ReconstructionInfo)
+									} satisfies ReconstructionInfo),
 								);
 							}
 							case "fetch.co": {
@@ -864,7 +893,7 @@ describe("XetBlob", () => {
 											}
 											controller.close();
 										},
-									})
+									}),
 								);
 							}
 							default:

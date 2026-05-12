@@ -1,8 +1,24 @@
 import { describe, it, expect } from "vitest";
 
-import { slice, strftime, replace } from "../src/utils";
+import { range, slice, strftime, replace } from "../src/utils";
 
 describe("Test utility functions", () => {
+	describe("range function", () => {
+		it("supports positive steps", async () => {
+			expect(range(4)).toEqual([0, 1, 2, 3]);
+			expect(range(1, 5, 2)).toEqual([1, 3]);
+		});
+
+		it("supports negative steps", async () => {
+			expect(range(3, -1, -1)).toEqual([3, 2, 1, 0]);
+			expect(range(5, 2, -2)).toEqual([5, 3]);
+		});
+
+		it("throws on zero step", async () => {
+			expect(() => range(0, 5, 0)).toThrowError();
+		});
+	});
+
 	describe("Slice function", () => {
 		const array = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 		it("[:]", async () => {

@@ -62,7 +62,11 @@ export async function* listSpaces<
 		 * Additional fields to fetch from huggingface.co.
 		 */
 		additionalFields?: T[];
-	} & Partial<CredentialsParams>
+		/**
+		 * Sort spaces by a specific field.
+		 */
+		sort?: "createdAt" | "downloads" | "likes" | "lastModified" | "likes30d" | "trendingScore" | "mainSize" | "id";
+	} & Partial<CredentialsParams>,
 ): AsyncGenerator<SpaceEntry & Pick<ApiSpaceInfo, T>> {
 	const accessToken = params && checkCredentials(params);
 	const search = new URLSearchParams([
@@ -70,10 +74,11 @@ export async function* listSpaces<
 			limit: "500",
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
 			...(params?.search?.query ? { search: params.search.query } : undefined),
+			...(params?.sort ? { sort: params.sort } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...[...SPACE_EXPAND_KEYS, ...(params?.additionalFields ?? [])].map(
-			(val) => ["expand", val] satisfies [string, string]
+			(val) => ["expand", val] satisfies [string, string],
 		),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/spaces?${search}`;

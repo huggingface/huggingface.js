@@ -9,7 +9,7 @@
  */
 export async function promisesQueueStreaming<T>(
 	factories: AsyncIterable<() => Promise<T>> | Iterable<() => Promise<T>>,
-	concurrency: number
+	concurrency: number,
 ): Promise<void> {
 	const executing: Promise<void>[] = [];
 	for await (const factory of factories) {

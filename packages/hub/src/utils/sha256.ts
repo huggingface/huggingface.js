@@ -71,7 +71,7 @@ function destroyWorker(worker: Worker): void {
  */
 export async function* sha256(
 	buffer: Blob,
-	opts?: { useWebWorker?: boolean | { minSize?: number; poolSize?: number }; abortSignal?: AbortSignal }
+	opts?: { useWebWorker?: boolean | { minSize?: number; poolSize?: number }; abortSignal?: AbortSignal },
 ): AsyncGenerator<number, string> {
 	yield 0;
 
@@ -82,8 +82,8 @@ export async function* sha256(
 	if (buffer.size < maxCryptoSize && globalThis.crypto?.subtle) {
 		const res = hexFromBytes(
 			new Uint8Array(
-				await globalThis.crypto.subtle.digest("SHA-256", buffer instanceof Blob ? await buffer.arrayBuffer() : buffer)
-			)
+				await globalThis.crypto.subtle.digest("SHA-256", buffer instanceof Blob ? await buffer.arrayBuffer() : buffer),
+			),
 		);
 
 		yield 1;

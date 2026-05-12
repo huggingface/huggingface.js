@@ -18,14 +18,20 @@ jobs:
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         run: |
-          if [ -z $PR_REF ]
+          if [ -z "$PR_REF" ]
           then
             echo "SINCE=$SHA^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base origin/$PR_REF $SHA)" >> $GITHUB_OUTPUT
+            MERGE_BASE=$(git merge-base "$BASE_REF" "$SHA")
+            if ! echo "$MERGE_BASE" | grep -qE '^[0-9a-f]{40}$'; then
+              echo "Error: Invalid merge base format"
+              exit 1
+            fi
+            echo "SINCE=$MERGE_BASE" >> $GITHUB_OUTPUT
           fi
         env:
           PR_REF: ${{  github.event.pull_request.head.ref }}
+          BASE_REF: origin/${{ github.event.pull_request.base.ref }}
           SHA: ${{ github.sha }}
 
       - run: npm install -g corepack@latest && corepack enable
@@ -43,13 +49,32 @@ jobs:
         run: |
           pnpm --filter ...[${{ steps.since.outputs.SINCE }}] lint:check
 
+      - name: Check types
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] check
+
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
+          fetch-depth: 0
+
+      - run: npm install -g corepack@latest && corepack enable
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+      - run: pnpm install --frozen-lockfile --filter .
+
       - name: "Checking format errors"
         run: |
-          # Could also use pnpm --filter [${{ steps.since.outputs.SINCE }}] format:check
+          # Could also use package-level format:check scripts
           # But this way we can see the diff
           pnpm -r format
           git diff | head -n 100
           git diff --name-only --exit-code
-
-      - name: Check types
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] check

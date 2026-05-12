@@ -44,6 +44,8 @@ export type AnyRuntimeValue =
 class BreakControl extends Error {}
 class ContinueControl extends Error {}
 
+const EMPTY_BUILTINS: ReadonlyMap<string, AnyRuntimeValue> = new Map();
+
 /**
  * Abstract base class for all Runtime values.
  * Should not be instantiated directly.
@@ -55,7 +57,9 @@ abstract class RuntimeValue<T> {
 	/**
 	 * A collection of built-in functions for this type.
 	 */
-	builtins = new Map<string, AnyRuntimeValue>();
+	get builtins(): ReadonlyMap<string, AnyRuntimeValue> {
+		return EMPTY_BUILTINS;
+	}
 
 	/**
 	 * Creates a new RuntimeValue.
@@ -101,168 +105,171 @@ export class FloatValue extends RuntimeValue<number> {
  */
 export class StringValue extends RuntimeValue<string> {
 	override type = "StringValue";
+	private _builtins?: Map<string, AnyRuntimeValue>;
 
-	override builtins = new Map<string, AnyRuntimeValue>([
-		[
-			"upper",
-			new FunctionValue(() => {
-				return new StringValue(this.value.toUpperCase());
-			}),
-		],
-		[
-			"lower",
-			new FunctionValue(() => {
-				return new StringValue(this.value.toLowerCase());
-			}),
-		],
-		[
-			"strip",
-			new FunctionValue(() => {
-				return new StringValue(this.value.trim());
-			}),
-		],
-		[
-			"title",
-			new FunctionValue(() => {
-				return new StringValue(titleCase(this.value));
-			}),
-		],
-		[
-			"capitalize",
-			new FunctionValue(() => {
-				return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
-			}),
-		],
-		["length", new IntegerValue(this.value.length)],
-		[
-			"rstrip",
-			new FunctionValue(() => {
-				return new StringValue(this.value.trimEnd());
-			}),
-		],
-		[
-			"lstrip",
-			new FunctionValue(() => {
-				return new StringValue(this.value.trimStart());
-			}),
-		],
-		[
-			"startswith",
-			new FunctionValue((args) => {
-				if (args.length === 0) {
-					throw new Error("startswith() requires at least one argument");
-				}
-				const pattern = args[0];
-				if (pattern instanceof StringValue) {
-					return new BooleanValue(this.value.startsWith(pattern.value));
-				} else if (pattern instanceof ArrayValue) {
-					for (const item of pattern.value) {
-						if (!(item instanceof StringValue)) {
-							throw new Error("startswith() tuple elements must be strings");
-						}
-						if (this.value.startsWith(item.value)) {
-							return new BooleanValue(true);
-						}
+	override get builtins(): Map<string, AnyRuntimeValue> {
+		return (this._builtins ??= new Map<string, AnyRuntimeValue>([
+			[
+				"upper",
+				new FunctionValue(() => {
+					return new StringValue(this.value.toUpperCase());
+				}),
+			],
+			[
+				"lower",
+				new FunctionValue(() => {
+					return new StringValue(this.value.toLowerCase());
+				}),
+			],
+			[
+				"strip",
+				new FunctionValue(() => {
+					return new StringValue(this.value.trim());
+				}),
+			],
+			[
+				"title",
+				new FunctionValue(() => {
+					return new StringValue(titleCase(this.value));
+				}),
+			],
+			[
+				"capitalize",
+				new FunctionValue(() => {
+					return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
+				}),
+			],
+			["length", new IntegerValue(this.value.length)],
+			[
+				"rstrip",
+				new FunctionValue(() => {
+					return new StringValue(this.value.trimEnd());
+				}),
+			],
+			[
+				"lstrip",
+				new FunctionValue(() => {
+					return new StringValue(this.value.trimStart());
+				}),
+			],
+			[
+				"startswith",
+				new FunctionValue((args) => {
+					if (args.length === 0) {
+						throw new Error("startswith() requires at least one argument");
 					}
-					return new BooleanValue(false);
-				}
-				throw new Error("startswith() argument must be a string or tuple of strings");
-			}),
-		],
-		[
-			"endswith",
-			new FunctionValue((args) => {
-				if (args.length === 0) {
-					throw new Error("endswith() requires at least one argument");
-				}
-				const pattern = args[0];
-				if (pattern instanceof StringValue) {
-					return new BooleanValue(this.value.endsWith(pattern.value));
-				} else if (pattern instanceof ArrayValue) {
-					for (const item of pattern.value) {
-						if (!(item instanceof StringValue)) {
-							throw new Error("endswith() tuple elements must be strings");
+					const pattern = args[0];
+					if (pattern instanceof StringValue) {
+						return new BooleanValue(this.value.startsWith(pattern.value));
+					} else if (pattern instanceof ArrayValue) {
+						for (const item of pattern.value) {
+							if (!(item instanceof StringValue)) {
+								throw new Error("startswith() tuple elements must be strings");
+							}
+							if (this.value.startsWith(item.value)) {
+								return new BooleanValue(true);
+							}
 						}
-						if (this.value.endsWith(item.value)) {
-							return new BooleanValue(true);
-						}
+						return new BooleanValue(false);
 					}
-					return new BooleanValue(false);
-				}
-				throw new Error("endswith() argument must be a string or tuple of strings");
-			}),
-		],
-		[
-			"split",
-			// follows Python's `str.split(sep=None, maxsplit=-1)` function behavior
-			// https://docs.python.org/3.13/library/stdtypes.html#str.split
-			new FunctionValue((args) => {
-				const sep = args[0] ?? new NullValue();
-				if (!(sep instanceof StringValue || sep instanceof NullValue)) {
-					throw new Error("sep argument must be a string or null");
-				}
-				const maxsplit = args[1] ?? new IntegerValue(-1);
-				if (!(maxsplit instanceof IntegerValue)) {
-					throw new Error("maxsplit argument must be a number");
-				}
+					throw new Error("startswith() argument must be a string or tuple of strings");
+				}),
+			],
+			[
+				"endswith",
+				new FunctionValue((args) => {
+					if (args.length === 0) {
+						throw new Error("endswith() requires at least one argument");
+					}
+					const pattern = args[0];
+					if (pattern instanceof StringValue) {
+						return new BooleanValue(this.value.endsWith(pattern.value));
+					} else if (pattern instanceof ArrayValue) {
+						for (const item of pattern.value) {
+							if (!(item instanceof StringValue)) {
+								throw new Error("endswith() tuple elements must be strings");
+							}
+							if (this.value.endsWith(item.value)) {
+								return new BooleanValue(true);
+							}
+						}
+						return new BooleanValue(false);
+					}
+					throw new Error("endswith() argument must be a string or tuple of strings");
+				}),
+			],
+			[
+				"split",
+				// follows Python's `str.split(sep=None, maxsplit=-1)` function behavior
+				// https://docs.python.org/3.13/library/stdtypes.html#str.split
+				new FunctionValue((args) => {
+					const sep = args[0] ?? new NullValue();
+					if (!(sep instanceof StringValue || sep instanceof NullValue)) {
+						throw new Error("sep argument must be a string or null");
+					}
+					const maxsplit = args[1] ?? new IntegerValue(-1);
+					if (!(maxsplit instanceof IntegerValue)) {
+						throw new Error("maxsplit argument must be a number");
+					}
 
-				let result = [];
-				if (sep instanceof NullValue) {
-					// If sep is not specified or is None, runs of consecutive whitespace are regarded as a single separator, and the
-					// result will contain no empty strings at the start or end if the string has leading or trailing whitespace.
-					// Trailing whitespace may be present when maxsplit is specified and there aren't sufficient matches in the string.
-					const text = this.value.trimStart();
-					for (const { 0: match, index } of text.matchAll(/\S+/g)) {
-						if (maxsplit.value !== -1 && result.length >= maxsplit.value && index !== undefined) {
-							result.push(match + text.slice(index + match.length));
-							break;
+					let result = [];
+					if (sep instanceof NullValue) {
+						// If sep is not specified or is None, runs of consecutive whitespace are regarded as a single separator, and the
+						// result will contain no empty strings at the start or end if the string has leading or trailing whitespace.
+						// Trailing whitespace may be present when maxsplit is specified and there aren't sufficient matches in the string.
+						const text = this.value.trimStart();
+						for (const { 0: match, index } of text.matchAll(/\S+/g)) {
+							if (maxsplit.value !== -1 && result.length >= maxsplit.value && index !== undefined) {
+								result.push(match + text.slice(index + match.length));
+								break;
+							}
+							result.push(match);
 						}
-						result.push(match);
-					}
-				} else {
-					// If sep is specified, consecutive delimiters are not grouped together and are deemed to delimit empty strings.
-					if (sep.value === "") {
-						throw new Error("empty separator");
-					}
-					result = this.value.split(sep.value);
-					if (maxsplit.value !== -1 && result.length > maxsplit.value) {
-						// Follow Python's behavior: If maxsplit is given, at most maxsplit splits are done,
-						// with any remaining text returned as the final element of the list.
-						result.push(result.splice(maxsplit.value).join(sep.value));
-					}
-				}
-				return new ArrayValue(result.map((part) => new StringValue(part)));
-			}),
-		],
-		[
-			"replace",
-			new FunctionValue((args): StringValue => {
-				if (args.length < 2) {
-					throw new Error("replace() requires at least two arguments");
-				}
-				const oldValue = args[0];
-				const newValue = args[1];
-				if (!(oldValue instanceof StringValue && newValue instanceof StringValue)) {
-					throw new Error("replace() arguments must be strings");
-				}
-
-				let count: AnyRuntimeValue | undefined;
-				if (args.length > 2) {
-					if (args[2].type === "KeywordArgumentsValue") {
-						count = (args[2] as KeywordArgumentsValue).value.get("count") ?? new NullValue();
 					} else {
-						count = args[2];
+						// If sep is specified, consecutive delimiters are not grouped together and are deemed to delimit empty strings.
+						if (sep.value === "") {
+							throw new Error("empty separator");
+						}
+						result = this.value.split(sep.value);
+						if (maxsplit.value !== -1 && result.length > maxsplit.value) {
+							// Follow Python's behavior: If maxsplit is given, at most maxsplit splits are done,
+							// with any remaining text returned as the final element of the list.
+							result.push(result.splice(maxsplit.value).join(sep.value));
+						}
 					}
-				} else {
-					count = new NullValue();
-				}
-				if (!(count instanceof IntegerValue || count instanceof NullValue)) {
-					throw new Error("replace() count argument must be a number or null");
-				}
-				return new StringValue(replace(this.value, oldValue.value, newValue.value, count.value));
-			}),
-		],
-	]);
+					return new ArrayValue(result.map((part) => new StringValue(part)));
+				}),
+			],
+			[
+				"replace",
+				new FunctionValue((args): StringValue => {
+					if (args.length < 2) {
+						throw new Error("replace() requires at least two arguments");
+					}
+					const oldValue = args[0];
+					const newValue = args[1];
+					if (!(oldValue instanceof StringValue && newValue instanceof StringValue)) {
+						throw new Error("replace() arguments must be strings");
+					}
+
+					let count: AnyRuntimeValue | undefined;
+					if (args.length > 2) {
+						if (args[2].type === "KeywordArgumentsValue") {
+							count = (args[2] as KeywordArgumentsValue).value.get("count") ?? new NullValue();
+						} else {
+							count = args[2];
+						}
+					} else {
+						count = new NullValue();
+					}
+					if (!(count instanceof IntegerValue || count instanceof NullValue)) {
+						throw new Error("replace() count argument must be a number or null");
+					}
+					return new StringValue(replace(this.value, oldValue.value, newValue.value, count.value));
+				}),
+			],
+		]));
+	}
 }
 
 /**
@@ -273,10 +280,121 @@ export class BooleanValue extends RuntimeValue<boolean> {
 }
 
 /**
+ * Options for JSON serialization.
+ */
+interface ToJSONOptions {
+	/** Optional indentation for pretty-printing */
+	indent?: number | null;
+	/** If true, escape non-ASCII characters. Default is false. */
+	ensureAscii?: boolean;
+	/** Custom separators: [itemSeparator, keySeparator]. Default is [", ", ": "] or [",", ": "] when indent is set. */
+	separators?: [string, string] | null;
+	/** If true, sort object keys alphabetically. Default is false. */
+	sortKeys?: boolean;
+}
+
+/**
+ * Regular expression to match non-ASCII characters (code points >= 0x7F).
+ * Used when ensure_ascii is true to escape these characters to \uXXXX format in JSON output.
+ */
+const NON_ASCII_CHARS = /[\x7f-\uffff]/g;
+
+/**
+ * Converts a string to an ASCII-safe representation by escaping non-ASCII characters.
+ * @param str The input string
+ * @returns The ASCII-safe string
+ */
+function makeAsciiSafe(str: string): string {
+	return str.replace(NON_ASCII_CHARS, (char: string) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0"));
+}
+
+/**
+ * Converts a runtime value to its JSON string representation.
+ * @param input The runtime value to convert
+ * @param options JSON serialization options
+ * @param depth Current recursion depth (used for indentation)
+ * @param convertUndefinedToNull If true, undefined becomes "null" (JSON-safe). If false, undefined becomes "undefined".
+ */
+function toJSON(
+	input: AnyRuntimeValue,
+	options: ToJSONOptions = {},
+	depth: number = 0,
+	convertUndefinedToNull: boolean = true,
+): string {
+	const { indent = null, ensureAscii = false, separators = null, sortKeys = false } = options;
+
+	// Determine the separators to use
+	let itemSeparator: string;
+	let keySeparator: string;
+	if (separators) {
+		[itemSeparator, keySeparator] = separators;
+	} else if (indent) {
+		// When indent is set and no custom separators, use compact item separator
+		// but keep the standard key separator (matches Python json.dumps behavior)
+		itemSeparator = ",";
+		keySeparator = ": ";
+	} else {
+		// Default separators (matches Python json.dumps default)
+		itemSeparator = ", ";
+		keySeparator = ": ";
+	}
+
+	switch (input.type) {
+		case "NullValue":
+			return "null";
+		case "UndefinedValue":
+			return convertUndefinedToNull ? "null" : "undefined";
+		case "IntegerValue":
+		case "FloatValue":
+		case "BooleanValue":
+			return JSON.stringify(input.value);
+		case "StringValue": {
+			let result = JSON.stringify(input.value);
+			if (ensureAscii) {
+				result = makeAsciiSafe(result);
+			}
+			return result;
+		}
+		case "ArrayValue":
+		case "ObjectValue": {
+			const indentValue = indent ? " ".repeat(indent) : "";
+			const basePadding = "\n" + indentValue.repeat(depth);
+			const childrenPadding = basePadding + indentValue; // Depth + 1
+
+			if (input.type === "ArrayValue") {
+				const core = (input as ArrayValue).value.map((x) => toJSON(x, options, depth + 1, convertUndefinedToNull));
+				return indent
+					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
+					: `[${core.join(itemSeparator)}]`;
+			} else {
+				// ObjectValue
+				let entries = Array.from((input as ObjectValue).value.entries());
+				if (sortKeys) {
+					entries = entries.sort(([a], [b]) => a.localeCompare(b));
+				}
+				const core = entries.map(([key, value]) => {
+					let keyStr = JSON.stringify(key);
+					if (ensureAscii) {
+						keyStr = makeAsciiSafe(keyStr);
+					}
+					const v = `${keyStr}${keySeparator}${toJSON(value, options, depth + 1, convertUndefinedToNull)}`;
+					return indent ? `${childrenPadding}${v}` : v;
+				});
+				return indent ? `{${core.join(itemSeparator)}${basePadding}}` : `{${core.join(itemSeparator)}}`;
+			}
+		}
+		default:
+			// e.g., FunctionValue
+			throw new Error(`Cannot convert to JSON: ${input.type}`);
+	}
+}
+
+/**
  * Represents an Object value at runtime.
  */
 export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	override type = "ObjectValue";
+	private _builtins?: Map<string, AnyRuntimeValue>;
 
 	/**
 	 * NOTE: necessary to override since all JavaScript arrays are considered truthy,
@@ -290,24 +408,79 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 		return new BooleanValue(this.value.size > 0);
 	}
 
-	override builtins: Map<string, AnyRuntimeValue> = new Map<string, AnyRuntimeValue>([
-		[
-			"get",
-			new FunctionValue(([key, defaultValue]) => {
-				if (!(key instanceof StringValue)) {
-					throw new Error(`Object key must be a string: got ${key.type}`);
-				}
-				return this.value.get(key.value) ?? defaultValue ?? new NullValue();
-			}),
-		],
-		["items", new FunctionValue(() => this.items())],
-		["keys", new FunctionValue(() => this.keys())],
-		["values", new FunctionValue(() => this.values())],
-	]);
+	override get builtins(): Map<string, AnyRuntimeValue> {
+		return (this._builtins ??= new Map<string, AnyRuntimeValue>([
+			[
+				"get",
+				new FunctionValue(([key, defaultValue]) => {
+					if (!(key instanceof StringValue)) {
+						throw new Error(`Object key must be a string: got ${key.type}`);
+					}
+					return this.value.get(key.value) ?? defaultValue ?? new NullValue();
+				}),
+			],
+			["items", new FunctionValue(() => this.items())],
+			["keys", new FunctionValue(() => this.keys())],
+			["values", new FunctionValue(() => this.values())],
+			[
+				"dictsort",
+				new FunctionValue((args) => {
+					// https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.dictsort
+					// Sort a dictionary and yield (key, value) pairs.
+					// Optional parameters:
+					//  - case_sensitive: Sort in a case-sensitive manner (default: false)
+					//  - by: Sort by 'key' or 'value' (default: 'key')
+					//  - reverse: Reverse the sort order (default: false)
+
+					// Extract keyword arguments if present
+					let kwargs = new Map<string, AnyRuntimeValue>();
+					const positionalArgs = args.filter((arg) => {
+						if (arg instanceof KeywordArgumentsValue) {
+							kwargs = arg.value;
+							return false;
+						}
+						return true;
+					});
+
+					const caseSensitive = positionalArgs.at(0) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
+					if (!(caseSensitive instanceof BooleanValue)) {
+						throw new Error("case_sensitive must be a boolean");
+					}
+
+					const by = positionalArgs.at(1) ?? kwargs.get("by") ?? new StringValue("key");
+					if (!(by instanceof StringValue)) {
+						throw new Error("by must be a string");
+					}
+					if (!["key", "value"].includes(by.value)) {
+						throw new Error("by must be either 'key' or 'value'");
+					}
+
+					const reverse = positionalArgs.at(2) ?? kwargs.get("reverse") ?? new BooleanValue(false);
+					if (!(reverse instanceof BooleanValue)) {
+						throw new Error("reverse must be a boolean");
+					}
+
+					// Convert to array of [key, value] pairs and sort
+					const items = Array.from(this.value.entries())
+						.map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+						.sort((a, b) => {
+							const index = by.value === "key" ? 0 : 1;
+							const aVal = a.value[index];
+							const bVal = b.value[index];
+
+							const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
+							return reverse.value ? -result : result;
+						});
+
+					return new ArrayValue(items);
+				}),
+			],
+		]));
+	}
 
 	items(): ArrayValue {
 		return new ArrayValue(
-			Array.from(this.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+			Array.from(this.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value])),
 		);
 	}
 	keys(): ArrayValue {
@@ -315,6 +488,9 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	}
 	values(): ArrayValue {
 		return new ArrayValue(Array.from(this.value.values()));
+	}
+	override toString(): string {
+		return toJSON(this, {}, 0, false);
 	}
 }
 
@@ -330,7 +506,11 @@ export class KeywordArgumentsValue extends ObjectValue {
  */
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	override type = "ArrayValue";
-	override builtins = new Map<string, AnyRuntimeValue>([["length", new IntegerValue(this.value.length)]]);
+	private _builtins?: Map<string, AnyRuntimeValue>;
+
+	override get builtins(): Map<string, AnyRuntimeValue> {
+		return (this._builtins ??= new Map<string, AnyRuntimeValue>([["length", new IntegerValue(this.value.length)]]));
+	}
 
 	/**
 	 * NOTE: necessary to override since all JavaScript arrays are considered truthy,
@@ -342,6 +522,9 @@ export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	 */
 	override __bool__(): BooleanValue {
 		return new BooleanValue(this.value.length > 0);
+	}
+	override toString(): string {
+		return toJSON(this, {}, 0, false);
 	}
 }
 
@@ -399,7 +582,7 @@ export class Environment {
 	/**
 	 * The tests available in this environment.
 	 */
-	tests: Map<string, (...value: AnyRuntimeValue[]) => boolean> = new Map([
+	private static readonly TESTS: ReadonlyMap<string, (...value: AnyRuntimeValue[]) => boolean> = new Map([
 		["boolean", (operand) => operand.type === "BooleanValue"],
 		["callable", (operand) => operand instanceof FunctionValue],
 		[
@@ -427,7 +610,11 @@ export class Environment {
 		["number", (operand) => operand instanceof IntegerValue || operand instanceof FloatValue],
 		["integer", (operand) => operand instanceof IntegerValue],
 		["iterable", (operand) => operand.type === "ArrayValue" || operand.type === "StringValue"],
-		["mapping", (operand) => operand.type === "ObjectValue"],
+		["mapping", (operand) => operand instanceof ObjectValue],
+		[
+			"sequence",
+			(operand) => operand instanceof ArrayValue || operand instanceof ObjectValue || operand instanceof StringValue,
+		],
 		[
 			"lower",
 			(operand) => {
@@ -448,6 +635,8 @@ export class Environment {
 		["equalto", (a, b) => a.value === b.value],
 		["eq", (a, b) => a.value === b.value],
 	]);
+
+	tests: ReadonlyMap<string, (...value: AnyRuntimeValue[]) => boolean> = Environment.TESTS;
 
 	constructor(public parent?: Environment) {}
 
@@ -526,6 +715,101 @@ export function setupGlobals(env: Environment): void {
 	env.set("True", true);
 	env.set("False", false);
 	env.set("None", null);
+}
+
+/**
+ * Helper function to get a nested attribute value from an object using dot notation.
+ * Supports both object properties and array indices.
+ * @param item The item to get the value from
+ * @param attributePath The attribute path (e.g., "details.priority" or "items.0")
+ * @returns The value at the attribute path, or UndefinedValue if not found
+ */
+function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRuntimeValue {
+	const parts = attributePath.split(".");
+	let value: AnyRuntimeValue = item;
+
+	for (const part of parts) {
+		if (value instanceof ObjectValue) {
+			value = value.value.get(part) ?? new UndefinedValue();
+		} else if (value instanceof ArrayValue) {
+			const index = parseInt(part, 10);
+			if (!isNaN(index) && index >= 0 && index < value.value.length) {
+				value = value.value[index];
+			} else {
+				return new UndefinedValue();
+			}
+		} else {
+			return new UndefinedValue();
+		}
+	}
+
+	return value;
+}
+
+/**
+ * Helper function to compare two runtime values for sorting.
+ * Enforces strict type checking, i.e., types must match exactly (with some exceptions):
+ * - Integers and floats can be compared (both are numeric)
+ * - Booleans can be compared with numbers (false=0, true=1)
+ * - Null values can be compared with null values (they are equal)
+ * - Undefined values can be compared with undefined values (they are equal)
+ * @param a The first value to compare
+ * @param b The second value to compare
+ * @param caseSensitive Whether string comparisons should be case-sensitive (default: false)
+ * @returns -1 if a < b, 1 if a > b, 0 if equal
+ */
+function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensitive: boolean = false): number {
+	// Handle null values (can only compare null with null)
+	if (a instanceof NullValue && b instanceof NullValue) {
+		return 0; // All null values are equal
+	}
+	if (a instanceof NullValue || b instanceof NullValue) {
+		throw new Error(`Cannot compare ${a.type} with ${b.type}`);
+	}
+
+	// Handle undefined values (can only compare undefined with undefined)
+	if (a instanceof UndefinedValue && b instanceof UndefinedValue) {
+		return 0; // All undefined values are equal
+	}
+	if (a instanceof UndefinedValue || b instanceof UndefinedValue) {
+		throw new Error(`Cannot compare ${a.type} with ${b.type}`);
+	}
+
+	const isNumericLike = (v: AnyRuntimeValue): boolean =>
+		v instanceof IntegerValue || v instanceof FloatValue || v instanceof BooleanValue;
+
+	const getNumericValue = (v: AnyRuntimeValue): number => {
+		if (v instanceof BooleanValue) {
+			return v.value ? 1 : 0;
+		}
+		return (v as IntegerValue | FloatValue).value;
+	};
+
+	// Allow comparing numeric-like types (integers, floats, and booleans)
+	if (isNumericLike(a) && isNumericLike(b)) {
+		const aNum = getNumericValue(a);
+		const bNum = getNumericValue(b);
+		return aNum < bNum ? -1 : aNum > bNum ? 1 : 0;
+	}
+
+	// Strict type checking for non-numeric types
+	if (a.type !== b.type) {
+		throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
+	}
+
+	switch (a.type) {
+		case "StringValue": {
+			let aStr = (a as StringValue).value;
+			let bStr = (b as StringValue).value;
+			if (!caseSensitive) {
+				aStr = aStr.toLowerCase();
+				bStr = bStr.toLowerCase();
+			}
+			return aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
+		}
+		default:
+			throw new Error(`Cannot compare type: ${a.type}`);
+	}
 }
 
 export class Interpreter {
@@ -657,7 +941,7 @@ export class Interpreter {
 
 	private evaluateArguments(
 		args: Expression[],
-		environment: Environment
+		environment: Environment,
 	): [AnyRuntimeValue[], Map<string, AnyRuntimeValue>] {
 		// Accumulate args and kwargs
 		const positionalArguments: AnyRuntimeValue[] = [];
@@ -703,8 +987,12 @@ export class Interpreter {
 		if (filterNode.type === "Identifier") {
 			const filter = filterNode as Identifier;
 
+			if (filter.value === "safe") {
+				return operand;
+			}
+
 			if (filter.value === "tojson") {
-				return new StringValue(toJSON(operand));
+				return new StringValue(toJSON(operand, {}));
 			}
 
 			if (operand instanceof ArrayValue) {
@@ -718,28 +1006,15 @@ export class Interpreter {
 					case "length":
 						return new IntegerValue(operand.value.length);
 					case "reverse":
-						return new ArrayValue(operand.value.reverse());
-					case "sort":
-						return new ArrayValue(
-							operand.value.sort((a, b) => {
-								if (a.type !== b.type) {
-									throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
-								}
-								switch (a.type) {
-									case "IntegerValue":
-									case "FloatValue":
-										return (a as IntegerValue | FloatValue).value - (b as IntegerValue | FloatValue).value;
-									case "StringValue":
-										return (a as StringValue).value.localeCompare((b as StringValue).value);
-									default:
-										throw new Error(`Cannot compare type: ${a.type}`);
-								}
-							})
-						);
+						return new ArrayValue(operand.value.slice().reverse());
+					case "sort": {
+						// Default to case-insensitive sort
+						return new ArrayValue(operand.value.slice().sort((a, b) => compareRuntimeValues(a, b, false)));
+					}
 					case "join":
 						return new StringValue(operand.value.map((x) => x.value).join(""));
 					case "string":
-						return new StringValue(toJSON(operand));
+						return new StringValue(toJSON(operand, {}, 0, false));
 					case "unique": {
 						const seen = new Set();
 						const output: AnyRuntimeValue[] = [];
@@ -779,9 +1054,9 @@ export class Interpreter {
 								.split("\n")
 								.map((x, i) =>
 									// By default, don't indent the first line or empty lines
-									i === 0 || x.length === 0 ? x : "    " + x
+									i === 0 || x.length === 0 ? x : "    " + x,
 								)
-								.join("\n")
+								.join("\n"),
 						);
 					case "join":
 					case "string":
@@ -807,6 +1082,8 @@ export class Interpreter {
 						return new IntegerValue(Math.floor(operand.value));
 					case "float":
 						return new FloatValue(operand.value);
+					case "string":
+						return new StringValue(operand.toString());
 					default:
 						throw new Error(`Unknown NumericValue filter: ${filter.value}`);
 				}
@@ -814,12 +1091,21 @@ export class Interpreter {
 				switch (filter.value) {
 					case "items":
 						return new ArrayValue(
-							Array.from(operand.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+							Array.from(operand.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value])),
 						);
 					case "length":
 						return new IntegerValue(operand.value.size);
-					default:
+					default: {
+						// Check if the filter exists in builtins
+						const builtin = operand.builtins.get(filter.value);
+						if (builtin) {
+							if (builtin instanceof FunctionValue) {
+								return builtin.value([], environment);
+							}
+							return builtin;
+						}
 						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
+					}
 				}
 			} else if (operand instanceof BooleanValue) {
 				switch (filter.value) {
@@ -846,11 +1132,49 @@ export class Interpreter {
 
 			if (filterName === "tojson") {
 				const [, kwargs] = this.evaluateArguments(filter.args, environment);
+
+				// Handle indent parameter
 				const indent = kwargs.get("indent") ?? new NullValue();
 				if (!(indent instanceof IntegerValue || indent instanceof NullValue)) {
 					throw new Error("If set, indent must be a number");
 				}
-				return new StringValue(toJSON(operand, indent.value));
+
+				// Handle ensure_ascii parameter
+				const ensureAscii = kwargs.get("ensure_ascii") ?? new BooleanValue(false);
+				if (!(ensureAscii instanceof BooleanValue)) {
+					throw new Error("If set, ensure_ascii must be a boolean");
+				}
+
+				// Handle sort_keys parameter
+				const sortKeys = kwargs.get("sort_keys") ?? new BooleanValue(false);
+				if (!(sortKeys instanceof BooleanValue)) {
+					throw new Error("If set, sort_keys must be a boolean");
+				}
+
+				// Handle separators parameter - expects a tuple/array of two strings: (item_separator, key_separator)
+				const separatorsArg = kwargs.get("separators") ?? new NullValue();
+				let separators: [string, string] | null = null;
+				if (separatorsArg instanceof ArrayValue || separatorsArg instanceof TupleValue) {
+					if (separatorsArg.value.length !== 2) {
+						throw new Error("separators must be a tuple of two strings");
+					}
+					const [itemSep, keySep] = separatorsArg.value;
+					if (!(itemSep instanceof StringValue) || !(keySep instanceof StringValue)) {
+						throw new Error("separators must be a tuple of two strings");
+					}
+					separators = [itemSep.value, keySep.value];
+				} else if (!(separatorsArg instanceof NullValue)) {
+					throw new Error("If set, separators must be a tuple of two strings");
+				}
+
+				return new StringValue(
+					toJSON(operand, {
+						indent: indent.value,
+						ensureAscii: ensureAscii.value,
+						sortKeys: sortKeys.value,
+						separators,
+					}),
+				);
 			} else if (filterName === "join") {
 				let value;
 				if (operand instanceof StringValue) {
@@ -901,6 +1225,49 @@ export class Interpreter {
 
 			if (operand instanceof ArrayValue) {
 				switch (filterName) {
+					case "sort": {
+						// https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.sort
+						// Optional parameters:
+						//  - reverse: Sort descending instead of ascending
+						//  - case_sensitive: When sorting strings, sort upper and lower case separately
+						//  - attribute: When sorting objects or dicts, an attribute or key to sort by
+						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+
+						const reverse = args.at(0) ?? kwargs.get("reverse") ?? new BooleanValue(false);
+						if (!(reverse instanceof BooleanValue)) {
+							throw new Error("reverse must be a boolean");
+						}
+
+						const caseSensitive = args.at(1) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
+						if (!(caseSensitive instanceof BooleanValue)) {
+							throw new Error("case_sensitive must be a boolean");
+						}
+
+						const attribute = args.at(2) ?? kwargs.get("attribute") ?? new NullValue();
+						if (
+							!(attribute instanceof StringValue || attribute instanceof IntegerValue || attribute instanceof NullValue)
+						) {
+							throw new Error("attribute must be a string, integer, or null");
+						}
+
+						// Helper function to get the value to sort by
+						const getSortValue = (item: AnyRuntimeValue): AnyRuntimeValue => {
+							if (attribute instanceof NullValue) {
+								return item;
+							}
+							const attrPath = attribute instanceof IntegerValue ? String(attribute.value) : attribute.value;
+							return getAttributeValue(item, attrPath);
+						};
+
+						return new ArrayValue(
+							operand.value.slice().sort((a, b) => {
+								const aVal = getSortValue(a);
+								const bVal = getSortValue(b);
+								const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
+								return reverse.value ? -result : result;
+							}),
+						);
+					}
 					case "selectattr":
 					case "rejectattr": {
 						const select = filterName === "selectattr";
@@ -951,7 +1318,9 @@ export class Interpreter {
 								if (!(item instanceof ObjectValue)) {
 									throw new Error("items in map must be an object");
 								}
-								return item.value.get(attr.value) ?? defaultValue ?? new UndefinedValue();
+
+								const value = getAttributeValue(item, attr.value);
+								return value instanceof UndefinedValue ? (defaultValue ?? new UndefinedValue()) : value;
 							});
 							return new ArrayValue(mapped);
 						} else {
@@ -982,7 +1351,7 @@ export class Interpreter {
 						const lines = operand.value.split("\n");
 						const indent = " ".repeat(width.value);
 						const indented = lines.map((x, i) =>
-							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x
+							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x,
 						);
 						return new StringValue(indented.join("\n"));
 					}
@@ -996,6 +1365,18 @@ export class Interpreter {
 					}
 				}
 				throw new Error(`Unknown StringValue filter: ${filterName}`);
+			} else if (operand instanceof ObjectValue) {
+				// Check if the filter exists in builtins for ObjectValue
+				const builtin = operand.builtins.get(filterName);
+				if (builtin && builtin instanceof FunctionValue) {
+					const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+					// Pass keyword arguments as the last argument if present
+					if (kwargs.size > 0) {
+						args.push(new KeywordArgumentsValue(kwargs));
+					}
+					return builtin.value(args, environment);
+				}
+				throw new Error(`Unknown ObjectValue filter: ${filterName}`);
 			} else {
 				throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 			}
@@ -1104,7 +1485,7 @@ export class Interpreter {
 	private evaluateSliceExpression(
 		object: AnyRuntimeValue,
 		expr: SliceExpression,
-		environment: Environment
+		environment: Environment,
 	): ArrayValue | StringValue {
 		if (!(object instanceof ArrayValue || object instanceof StringValue)) {
 			throw new Error("Slice object must be an array or string");
@@ -1142,6 +1523,8 @@ export class Interpreter {
 			} else {
 				property = this.evaluate(expr.property, environment);
 			}
+		} else if (expr.property.type === "IntegerLiteral") {
+			property = new IntegerValue((expr.property as IntegerLiteral).value);
 		} else {
 			property = new StringValue((expr.property as Identifier).value);
 		}
@@ -1374,7 +1757,7 @@ export class Interpreter {
 					}
 				}
 				return this.evaluateBlock(node.body, macroScope);
-			})
+			}),
 		);
 
 		// Macros are not evaluated immediately, so we return null
@@ -1508,7 +1891,7 @@ function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 				return new ArrayValue(input.map(convertToRuntimeValues));
 			} else {
 				return new ObjectValue(
-					new Map(Object.entries(input).map(([key, value]) => [key, convertToRuntimeValues(value)]))
+					new Map(Object.entries(input).map(([key, value]) => [key, convertToRuntimeValues(value)])),
 				);
 			}
 		case "function":
@@ -1521,49 +1904,5 @@ function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 			});
 		default:
 			throw new Error(`Cannot convert to runtime value: ${input}`);
-	}
-}
-
-/**
- * Helper function to convert runtime values to JSON
- * @param {AnyRuntimeValue} input The runtime value to convert
- * @param {number|null} [indent] The number of spaces to indent, or null for no indentation
- * @param {number} [depth] The current depth of the object
- * @returns {string} JSON representation of the input
- */
-function toJSON(input: AnyRuntimeValue, indent?: number | null, depth?: number): string {
-	const currentDepth = depth ?? 0;
-	switch (input.type) {
-		case "NullValue":
-		case "UndefinedValue": // JSON.stringify(undefined) -> undefined
-			return "null";
-		case "IntegerValue":
-		case "FloatValue":
-		case "StringValue":
-		case "BooleanValue":
-			return JSON.stringify(input.value);
-		case "ArrayValue":
-		case "ObjectValue": {
-			const indentValue = indent ? " ".repeat(indent) : "";
-			const basePadding = "\n" + indentValue.repeat(currentDepth);
-			const childrenPadding = basePadding + indentValue; // Depth + 1
-
-			if (input.type === "ArrayValue") {
-				const core = (input as ArrayValue).value.map((x) => toJSON(x, indent, currentDepth + 1));
-				return indent
-					? `[${childrenPadding}${core.join(`,${childrenPadding}`)}${basePadding}]`
-					: `[${core.join(", ")}]`;
-			} else {
-				// ObjectValue
-				const core = Array.from((input as ObjectValue).value.entries()).map(([key, value]) => {
-					const v = `"${key}": ${toJSON(value, indent, currentDepth + 1)}`;
-					return indent ? `${childrenPadding}${v}` : v;
-				});
-				return indent ? `{${core.join(",")}${basePadding}}` : `{${core.join(", ")}}`;
-			}
-		}
-		default:
-			// e.g., FunctionValue
-			throw new Error(`Cannot convert to JSON: ${input.type}`);
 	}
 }

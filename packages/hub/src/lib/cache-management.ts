@@ -75,7 +75,7 @@ export async function scanCacheDir(cacheDir: string | undefined = undefined): Pr
 	const s = await stat(cacheDir);
 	if (!s.isDirectory()) {
 		throw new Error(
-			`Scan cache expects a directory but found a file: ${cacheDir}. Please use \`cacheDir\` argument or set \`HF_HUB_CACHE\` environment variable.`
+			`Scan cache expects a directory but found a file: ${cacheDir}. Please use \`cacheDir\` argument or set \`HF_HUB_CACHE\` environment variable.`,
 		);
 	}
 
@@ -175,7 +175,7 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 	// Verify that all refs refer to a valid revision
 	if (refsByHash.size > 0) {
 		throw new Error(
-			`Reference(s) refer to missing commit hashes: ${JSON.stringify(Object.fromEntries(refsByHash))} (${repoPath})`
+			`Reference(s) refer to missing commit hashes: ${JSON.stringify(Object.fromEntries(refsByHash))} (${repoPath})`,
 		);
 	}
 
@@ -219,7 +219,7 @@ export async function scanRefsDir(refsPath: string, refsByHash: Map<string, stri
 export async function scanSnapshotDir(
 	revisionPath: string,
 	cachedFiles: CachedFileInfo[],
-	blobStats: Map<string, Stats>
+	blobStats: Map<string, Stats>,
 ): Promise<void> {
 	const files = await readdir(revisionPath, { withFileTypes: true });
 	for (const file of files) {
@@ -259,6 +259,10 @@ export function parseRepoType(type: string): RepoType {
 			return "dataset";
 		case "spaces":
 			return "space";
+		case "buckets":
+			return "bucket";
+		case "kernels":
+			return "kernel";
 		default:
 			throw new TypeError(`Invalid repo type: ${type}`);
 	}

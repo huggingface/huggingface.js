@@ -42,7 +42,7 @@ export async function innerRequest<T>(
 		task?: InferenceTask;
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
-	}
+	},
 ): Promise<ResponseWrapper<T>> {
 	const { url, info } = await makeRequestOptions(args, providerHelper, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
@@ -68,7 +68,7 @@ export async function innerRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
 				);
 			}
 			if (typeof output.error === "string" || typeof output.detail === "string" || typeof output.message === "string") {
@@ -80,7 +80,7 @@ export async function innerRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
 				);
 			} else {
 				throw new InferenceClientProviderApiError(
@@ -91,7 +91,7 @@ export async function innerRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
 				);
 			}
 		}
@@ -104,7 +104,7 @@ export async function innerRequest<T>(
 				headers: info.headers as Record<string, string>,
 				body: bodyToJson(info.body),
 			},
-			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: message ?? "" }
+			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: message ?? "" },
 		);
 	}
 
@@ -128,7 +128,7 @@ export async function* innerStreamingRequest<T>(
 		task?: InferenceTask;
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
-	}
+	},
 ): AsyncGenerator<T> {
 	const { url, info } = await makeRequestOptions({ ...args, stream: true }, providerHelper, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
@@ -150,7 +150,7 @@ export async function* innerStreamingRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
 				);
 			}
 			if (typeof output.error === "string") {
@@ -162,7 +162,7 @@ export async function* innerStreamingRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
 				);
 			}
 			if (output.error && "message" in output.error && typeof output.error.message === "string") {
@@ -175,7 +175,7 @@ export async function* innerStreamingRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
 				);
 			}
 			// Sambanova errors
@@ -188,7 +188,7 @@ export async function* innerStreamingRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
 				);
 			}
 		}
@@ -201,7 +201,7 @@ export async function* innerStreamingRequest<T>(
 				headers: info.headers as Record<string, string>,
 				body: bodyToJson(info.body),
 			},
-			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: "" }
+			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: "" },
 		);
 	}
 	if (!response.headers.get("content-type")?.startsWith("text/event-stream")) {
@@ -214,7 +214,7 @@ export async function* innerStreamingRequest<T>(
 				headers: info.headers as Record<string, string>,
 				body: bodyToJson(info.body),
 			},
-			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: "" }
+			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: "" },
 		);
 	}
 
@@ -234,8 +234,8 @@ export async function* innerStreamingRequest<T>(
 		getMessages(
 			() => {},
 			() => {},
-			onEvent
-		)
+			onEvent,
+		),
 	);
 
 	try {
@@ -256,11 +256,11 @@ export async function* innerStreamingRequest<T>(
 							typeof data.error === "string"
 								? data.error
 								: typeof data.error === "object" &&
-								    data.error &&
-								    "message" in data.error &&
-								    typeof data.error.message === "string"
-								  ? data.error.message
-								  : JSON.stringify(data.error);
+									  data.error &&
+									  "message" in data.error &&
+									  typeof data.error.message === "string"
+									? data.error.message
+									: JSON.stringify(data.error);
 						throw new InferenceClientProviderApiError(
 							`Failed to perform inference: an occurred while streaming the response: ${errorStr}`,
 							{
@@ -269,7 +269,7 @@ export async function* innerStreamingRequest<T>(
 								headers: info.headers as Record<string, string>,
 								body: bodyToJson(info.body),
 							},
-							{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: data }
+							{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: data },
 						);
 					}
 					yield data as T;

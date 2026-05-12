@@ -1,0 +1,680 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index ed26083c1e5d7ceafdd99cdf83cd49e1477a6787..bfb509da4c7f44ccf79eaeb99b7bbdc21800e5d3 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -43,6 +43,11 @@ declare class Hasher {
+   private cvStack;
+   private cvStackLen;
+   private flags;
++  private parentBlock;
++  private parentCv;
++  private chunkCv;
++  private outWords;
++  private finalizeCv;
+   /**
+    * Create a new Hasher.
+    *
+@@ -50,6 +55,11 @@ declare class Hasher {
+    * @param flags - Domain separation flags
+    */
+   constructor(keyWords?: Uint32Array, flags?: number);
++  /**
++   * Reset the hasher to process a new message with the same key/flags.
++   * Reuses all internal buffers — zero allocations.
++   */
++  reset(): this;
+   /**
+    * Create a new keyed hasher (MAC).
+    *
+@@ -129,7 +139,6 @@ declare function warmupSimd(): boolean;
+ declare function hashInto(input: Uint8Array, output: Uint8Array, outputLength?: number): void;
+ //#endregion
+ //#region src/index.d.ts
+-
+ /**
+  * Create a new keyed hasher (MAC).
+  *
+diff --git a/dist/index.js b/dist/index.js
+index 61e18709e05f99891280b335805649032ee9970a..7b94b606b09587b0c9a7e055c5795290042d4394 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -873,7 +873,6 @@ function compress(cv, cvOff, block, blockOff, out, outOff, full, counter, blockL
+ 	out[outOff + 6] = s6 ^ s14;
+ 	out[outOff + 7] = s7 ^ s15;
+ }
+-
+ //#endregion
+ //#region src/constants.ts
+ /**
+@@ -892,23 +891,8 @@ const IV = new Uint32Array([
+ 	528734635,
+ 	1541459225
+ ]);
+-const CHUNK_START = 1;
+-const CHUNK_END = 2;
+-const PARENT = 4;
+-const ROOT = 8;
+-const KEYED_HASH = 16;
+-const DERIVE_KEY_CONTEXT = 32;
+-const DERIVE_KEY_MATERIAL = 64;
+-const OUT_LEN = 32;
+-const KEY_LEN = 32;
+-const BLOCK_LEN = 64;
+ const CHUNK_LEN = 1024;
+-const MAX_DEPTH = 54;
+-/**
+-* Flattened permutation table for compress function optimization.
+-* This enables direct indexed access: PERMUTATIONS[round * 16 + index]
+-*/
+-const PERMUTATIONS = new Uint8Array([
++new Uint8Array([
+ 	0,
+ 	1,
+ 	2,
+@@ -1022,7 +1006,6 @@ const PERMUTATIONS = new Uint8Array([
+ 	7,
+ 	13
+ ]);
+-
+ //#endregion
+ //#region src/utils.ts
+ /**
+@@ -1118,12 +1101,7 @@ function encodeUTF8(str) {
+ 	}
+ 	return new Uint8Array(bytes);
+ }
+-/**
+-* De Bruijn lookup table for O(1) trailing zero count.
+-* The expression (n & -n) isolates the lowest set bit.
+-* Multiplying by the De Bruijn constant maps each power of 2 to a unique 5-bit index.
+-*/
+-const CTZ32_TABLE = new Uint8Array([
++new Uint8Array([
+ 	0,
+ 	1,
+ 	28,
+@@ -1157,7 +1135,6 @@ const CTZ32_TABLE = new Uint8Array([
+ 	10,
+ 	9
+ ]);
+-
+ //#endregion
+ //#region src/hasher.ts
+ /**
+@@ -1181,12 +1158,12 @@ var XofReader = class {
+ 	flags;
+ 	outputBlock;
+ 	outputBlockOffset;
+-	constructor(inputCv, blockWords$1, counter, blockLen, flags) {
++	constructor(inputCv, blockWords, counter, blockLen, flags) {
+ 		this.inputCv = inputCv;
+-		this.blockWords = blockWords$1;
++		this.blockWords = blockWords;
+ 		this.counter = counter;
+ 		this.blockLen = blockLen;
+-		this.flags = flags | ROOT;
++		this.flags = flags | 8;
+ 		this.outputBlock = new Uint32Array(16);
+ 		this.outputBlockOffset = 64;
+ 	}
+@@ -1242,11 +1219,18 @@ var ChunkState = class {
+ 		this.blocksCompressed = 0;
+ 		this.flags = flags;
+ 	}
++	resetTo(keyWords, chunkCounter, flags) {
++		this.chainingValue.set(keyWords);
++		this.chunkCounter = chunkCounter;
++		this.blockLen = 0;
++		this.blocksCompressed = 0;
++		this.flags = flags;
++	}
+ 	/**
+ 	* Get the flags for the current block.
+ 	*/
+ 	startFlag() {
+-		return this.blocksCompressed === 0 ? CHUNK_START : 0;
++		return this.blocksCompressed === 0 ? 1 : 0;
+ 	}
+ 	/**
+ 	* Update the chunk state with input data.
+@@ -1255,17 +1239,14 @@ var ChunkState = class {
+ 	update(input, inputOffset, inputLen) {
+ 		let consumed = 0;
+ 		while (inputLen > 0) {
+-			if (this.blockLen === BLOCK_LEN) {
+-				compress(this.chainingValue, 0, this.blockWords, 0, this.chainingValue, 0, false, this.chunkCounter, BLOCK_LEN, this.flags | this.startFlag());
++			if (this.blockLen === 64) {
++				compress(this.chainingValue, 0, this.blockWords, 0, this.chainingValue, 0, false, this.chunkCounter, 64, this.flags | this.startFlag());
+ 				this.blocksCompressed++;
+ 				this.blockLen = 0;
+ 			}
+-			const want = BLOCK_LEN - this.blockLen;
++			const want = 64 - this.blockLen;
+ 			const take = Math.min(want, inputLen);
+-			if (IS_LITTLE_ENDIAN && this.blockLen === 0 && take === BLOCK_LEN) {
+-				const inputWords = new Uint32Array(input.buffer, input.byteOffset + inputOffset, 16);
+-				this.blockWords.set(inputWords);
+-			} else if (this.blockLen === 0 && take === BLOCK_LEN) readLittleEndianWordsFull(input, inputOffset, this.blockWords);
++			if (this.blockLen === 0 && take === 64) readLittleEndianWordsFull(input, inputOffset, this.blockWords);
+ 			else for (let i = 0; i < take; i++) {
+ 				const pos = this.blockLen + i;
+ 				const wordIdx = pos >>> 2;
+@@ -1292,14 +1273,14 @@ var ChunkState = class {
+ 			blockWords: this.blockWords,
+ 			blockLen: this.blockLen,
+ 			counter: this.chunkCounter,
+-			flags: this.flags | this.startFlag() | CHUNK_END
++			flags: this.flags | this.startFlag() | 2
+ 		};
+ 	}
+ 	/**
+ 	* Get the number of bytes in this chunk.
+ 	*/
+ 	len() {
+-		return this.blocksCompressed * BLOCK_LEN + this.blockLen;
++		return this.blocksCompressed * 64 + this.blockLen;
+ 	}
+ };
+ /**
+@@ -1319,6 +1300,11 @@ var Hasher = class Hasher {
+ 	cvStack;
+ 	cvStackLen;
+ 	flags;
++	parentBlock;
++	parentCv;
++	chunkCv;
++	outWords;
++	finalizeCv;
+ 	/**
+ 	* Create a new Hasher.
+ 	*
+@@ -1329,8 +1315,22 @@ var Hasher = class Hasher {
+ 		this.keyWords = keyWords ? new Uint32Array(keyWords) : new Uint32Array(IV);
+ 		this.flags = flags ?? 0;
+ 		this.chunkState = new ChunkState(this.keyWords, 0, this.flags);
+-		this.cvStack = new Uint32Array(MAX_DEPTH * 8);
++		this.cvStack = new Uint32Array(432);
++		this.cvStackLen = 0;
++		this.parentBlock = new Uint32Array(16);
++		this.parentCv = new Uint32Array(8);
++		this.chunkCv = new Uint32Array(8);
++		this.outWords = new Uint32Array(16);
++		this.finalizeCv = new Uint32Array(8);
++	}
++	/**
++	* Reset the hasher to process a new message with the same key/flags.
++	* Reuses all internal buffers — zero allocations.
++	*/
++	reset() {
++		this.chunkState.resetTo(this.keyWords, 0, this.flags);
+ 		this.cvStackLen = 0;
++		return this;
+ 	}
+ 	/**
+ 	* Create a new keyed hasher (MAC).
+@@ -1338,7 +1338,7 @@ var Hasher = class Hasher {
+ 	* @param key - 32-byte key
+ 	*/
+ 	static newKeyed(key) {
+-		if (key.length !== KEY_LEN) throw new Error(`Key must be ${KEY_LEN} bytes, got ${key.length}`);
++		if (key.length !== 32) throw new Error(`Key must be 32 bytes, got ${key.length}`);
+ 		const keyWords = new Uint32Array(8);
+ 		if (IS_LITTLE_ENDIAN) {
+ 			const view = new Uint32Array(key.buffer, key.byteOffset, 8);
+@@ -1347,7 +1347,7 @@ var Hasher = class Hasher {
+ 			const off = i * 4;
+ 			keyWords[i] = key[off] | key[off + 1] << 8 | key[off + 2] << 16 | key[off + 3] << 24;
+ 		}
+-		return new Hasher(keyWords, KEYED_HASH);
++		return new Hasher(keyWords, 16);
+ 	}
+ 	/**
+ 	* Create a new key derivation hasher.
+@@ -1356,12 +1356,12 @@ var Hasher = class Hasher {
+ 	*/
+ 	static newDeriveKey(context) {
+ 		const contextBytes = encodeUTF8(context);
+-		const contextHasher = new Hasher(new Uint32Array(IV), DERIVE_KEY_CONTEXT);
++		const contextHasher = new Hasher(new Uint32Array(IV), 32);
+ 		contextHasher.update(contextBytes);
+ 		const contextKey = new Uint32Array(8);
+ 		const output = contextHasher.finalizeOutput();
+-		compress(output.inputCv, 0, output.blockWords, 0, contextKey, 0, false, output.counter, output.blockLen, output.flags | ROOT);
+-		return new Hasher(contextKey, DERIVE_KEY_MATERIAL);
++		compress(output.inputCv, 0, output.blockWords, 0, contextKey, 0, false, output.counter, output.blockLen, output.flags | 8);
++		return new Hasher(contextKey, 64);
+ 	}
+ 	/**
+ 	* Push a chaining value onto the stack.
+@@ -1381,12 +1381,12 @@ var Hasher = class Hasher {
+ 	* Add a chunk's chaining value and merge completed subtrees.
+ 	*/
+ 	addChunkCv(newCv, newCvOffset, totalChunks) {
+-		const parentBlock = new Uint32Array(16);
+-		const parentCv = new Uint32Array(8);
++		const parentBlock = this.parentBlock;
++		const parentCv = this.parentCv;
+ 		while ((totalChunks & 1) === 0) {
+ 			this.popCv(parentBlock, 0);
+ 			parentBlock.set(newCv.subarray(newCvOffset, newCvOffset + 8), 8);
+-			compress(this.keyWords, 0, parentBlock, 0, parentCv, 0, false, 0, BLOCK_LEN, this.flags | PARENT);
++			compress(this.keyWords, 0, parentBlock, 0, parentCv, 0, false, 0, 64, this.flags | 4);
+ 			newCv = parentCv;
+ 			newCvOffset = 0;
+ 			totalChunks >>>= 1;
+@@ -1403,13 +1403,13 @@ var Hasher = class Hasher {
+ 		let inputOffset = 0;
+ 		let inputLen = input.length;
+ 		while (inputLen > 0) {
+-			if (this.chunkState.len() === CHUNK_LEN) {
++			if (this.chunkState.len() === 1024) {
+ 				const output = this.chunkState.output();
+-				const chunkCv = new Uint32Array(8);
++				const chunkCv = this.chunkCv;
+ 				compress(output.inputCv, 0, output.blockWords, 0, chunkCv, 0, false, output.counter, output.blockLen, output.flags);
+ 				const totalChunks = this.chunkState.chunkCounter + 1;
+ 				this.addChunkCv(chunkCv, 0, totalChunks);
+-				this.chunkState = new ChunkState(this.keyWords, totalChunks, this.flags);
++				this.chunkState.resetTo(this.keyWords, totalChunks, this.flags);
+ 			}
+ 			const want = CHUNK_LEN - this.chunkState.len();
+ 			const take = Math.min(want, inputLen);
+@@ -1424,21 +1424,21 @@ var Hasher = class Hasher {
+ 	*/
+ 	finalizeOutput() {
+ 		let output = this.chunkState.output();
+-		let parentBlock = new Uint32Array(16);
+-		let cv = new Uint32Array(8);
++		let parentBlock = this.parentBlock;
++		let cv = this.finalizeCv;
+ 		if (this.cvStackLen > 0) {
+ 			compress(output.inputCv, 0, output.blockWords, 0, cv, 0, false, output.counter, output.blockLen, output.flags);
+ 			while (this.cvStackLen > 0) {
+ 				this.cvStackLen--;
+ 				parentBlock.set(this.cvStack.subarray(this.cvStackLen * 8, (this.cvStackLen + 1) * 8), 0);
+ 				parentBlock.set(cv, 8);
+-				if (this.cvStackLen > 0) compress(this.keyWords, 0, parentBlock, 0, cv, 0, false, 0, BLOCK_LEN, this.flags | PARENT);
++				if (this.cvStackLen > 0) compress(this.keyWords, 0, parentBlock, 0, cv, 0, false, 0, 64, this.flags | 4);
+ 				else return {
+ 					inputCv: this.keyWords,
+ 					blockWords: parentBlock,
+-					blockLen: BLOCK_LEN,
++					blockLen: 64,
+ 					counter: 0,
+-					flags: this.flags | PARENT
++					flags: this.flags | 4
+ 				};
+ 			}
+ 		}
+@@ -1450,12 +1450,12 @@ var Hasher = class Hasher {
+ 	* @param outputLength - Number of bytes to output (default: 32)
+ 	* @returns The hash output
+ 	*/
+-	finalize(outputLength = OUT_LEN) {
++	finalize(outputLength = 32) {
+ 		const output = this.finalizeOutput();
+ 		const result = new Uint8Array(outputLength);
+ 		if (outputLength <= 64) {
+-			const outWords = new Uint32Array(16);
+-			compress(output.inputCv, 0, output.blockWords, 0, outWords, 0, outputLength > 32, output.counter, output.blockLen, output.flags | ROOT);
++			const outWords = this.outWords;
++			compress(output.inputCv, 0, output.blockWords, 0, outWords, 0, outputLength > 32, output.counter, output.blockLen, output.flags | 8);
+ 			if (IS_LITTLE_ENDIAN) {
+ 				const outBytes = new Uint8Array(outWords.buffer);
+ 				result.set(outBytes.subarray(0, outputLength));
+@@ -1474,7 +1474,6 @@ var Hasher = class Hasher {
+ 		return new XofReader(new Uint32Array(output.inputCv), new Uint32Array(output.blockWords), output.counter, output.blockLen, output.flags);
+ 	}
+ };
+-
+ //#endregion
+ //#region src/wasm-simd.ts
+ /**
+@@ -1783,7 +1782,7 @@ function generateWasmBytes() {
+ 		]);
+ 		put([33, 16 + i]);
+ 	}
+-	const IV$1 = [
++	const IV = [
+ 		1779033703,
+ 		3144134277,
+ 		1013904242,
+@@ -1792,10 +1791,10 @@ function generateWasmBytes() {
+ 	for (let i = 0; i < 4; i++) {
+ 		const ivBytes = [];
+ 		for (let j = 0; j < 4; j++) {
+-			ivBytes.push(IV$1[i] & 255);
+-			ivBytes.push(IV$1[i] >>> 8 & 255);
+-			ivBytes.push(IV$1[i] >>> 16 & 255);
+-			ivBytes.push(IV$1[i] >>> 24 & 255);
++			ivBytes.push(IV[i] & 255);
++			ivBytes.push(IV[i] >>> 8 & 255);
++			ivBytes.push(IV[i] >>> 16 & 255);
++			ivBytes.push(IV[i] >>> 24 & 255);
+ 		}
+ 		put([
+ 			253,
+@@ -2045,7 +2044,7 @@ function generateCompressChunks4xBody() {
+ 	const BATCH_COUNTER_LOW = SIMD_MEMORY.BATCH_COUNTER_LOW;
+ 	const BATCH_FLAGS_BASE = SIMD_MEMORY.BATCH_FLAGS_BASE;
+ 	const BATCH_OUTPUT = SIMD_MEMORY.BATCH_OUTPUT;
+-	const IV$1 = [
++	const IV = [
+ 		1779033703,
+ 		3144134277,
+ 		1013904242,
+@@ -2082,10 +2081,10 @@ function generateCompressChunks4xBody() {
+ 	for (let i = 0; i < 4; i++) {
+ 		const ivBytes = [];
+ 		for (let j = 0; j < 4; j++) {
+-			ivBytes.push(IV$1[i] & 255);
+-			ivBytes.push(IV$1[i] >>> 8 & 255);
+-			ivBytes.push(IV$1[i] >>> 16 & 255);
+-			ivBytes.push(IV$1[i] >>> 24 & 255);
++			ivBytes.push(IV[i] & 255);
++			ivBytes.push(IV[i] >>> 8 & 255);
++			ivBytes.push(IV[i] >>> 16 & 255);
++			ivBytes.push(IV[i] >>> 24 & 255);
+ 		}
+ 		put([
+ 			253,
+@@ -2341,7 +2340,7 @@ function generateCompressParentBody() {
+ 	put([32, 127]);
+ 	const PARENT_BLOCK_OFFSET = SIMD_MEMORY.PARENT_BLOCK;
+ 	const CHUNK_CV_OFFSET = SIMD_MEMORY.CHUNK_CV;
+-	const IV$1 = [
++	const IV = [
+ 		1779033703,
+ 		3144134277,
+ 		1013904242,
+@@ -2361,11 +2360,11 @@ function generateCompressParentBody() {
+ 		put([33, i]);
+ 	}
+ 	for (let i = 0; i < 8; i++) {
+-		put([65, ...toSignedLeb128_i32(IV$1[i])]);
++		put([65, ...toSignedLeb128_i32(IV[i])]);
+ 		put([33, 16 + i]);
+ 	}
+ 	for (let i = 0; i < 4; i++) {
+-		put([65, ...toSignedLeb128_i32(IV$1[i])]);
++		put([65, ...toSignedLeb128_i32(IV[i])]);
+ 		put([33, 24 + i]);
+ 	}
+ 	put([65, 0]);
+@@ -2649,7 +2648,6 @@ function runCompressParent() {
+ 	if (!wasmCompressParent) throw new Error("WASM SIMD not initialized. Call initSimdSync() first.");
+ 	wasmCompressParent();
+ }
+-
+ //#endregion
+ //#region src/hash.ts
+ /**
+@@ -2877,15 +2875,15 @@ function hashChunkWithWords(input, inputWords, inputOffset, inputLen, chunkCount
+ 	const fullBlocks = inputLen >>> 6;
+ 	const remainder = inputLen & 63;
+ 	const chunkWordOffset = inputOffset >>> 2;
+-	if (inputWords && remainder === 0 && inputLen === CHUNK_LEN) {
++	if (inputWords && remainder === 0 && inputLen === 1024) {
+ 		let wordOff = chunkWordOffset;
+-		compress(reusableTempCv, 0, inputWords, wordOff, reusableTempCv, 0, false, chunkCounter, BLOCK_LEN, flags | CHUNK_START);
++		compress(reusableTempCv, 0, inputWords, wordOff, reusableTempCv, 0, false, chunkCounter, 64, flags | 1);
+ 		wordOff += 16;
+ 		for (let i = 1; i < 15; i++) {
+-			compress(reusableTempCv, 0, inputWords, wordOff, reusableTempCv, 0, false, chunkCounter, BLOCK_LEN, flags);
++			compress(reusableTempCv, 0, inputWords, wordOff, reusableTempCv, 0, false, chunkCounter, 64, flags);
+ 			wordOff += 16;
+ 		}
+-		compress(reusableTempCv, 0, inputWords, wordOff, reusableTempCv, 0, false, chunkCounter, BLOCK_LEN, flags | CHUNK_END);
++		compress(reusableTempCv, 0, inputWords, wordOff, reusableTempCv, 0, false, chunkCounter, 64, flags | 2);
+ 		cv.set(reusableTempCv, cvOffset);
+ 		return;
+ 	}
+@@ -2895,10 +2893,10 @@ function hashChunkWithWords(input, inputWords, inputOffset, inputLen, chunkCount
+ 		const isFirst = blockIdx === 0;
+ 		const isLast = blockIdx === totalBlocks - 1;
+ 		const blockStart = blockIdx << 6;
+-		const blockLen = isLast && remainder > 0 ? remainder : BLOCK_LEN;
++		const blockLen = isLast && remainder > 0 ? remainder : 64;
+ 		let blockFlags = flags;
+-		if (isFirst) blockFlags |= CHUNK_START;
+-		if (isLast) blockFlags |= CHUNK_END;
++		if (isFirst) blockFlags |= 1;
++		if (isLast) blockFlags |= 2;
+ 		if (isLast && remainder > 0) readLittleEndianWordsPartial(input, inputOffset + blockStart, blockLen, block);
+ 		else if (inputWords && chunkWordOffset + (blockStart >>> 2) + 16 <= inputWords.length) {
+ 			compress(reusableTempCv, 0, inputWords, chunkWordOffset + (blockStart >>> 2), reusableTempCv, 0, false, chunkCounter, blockLen, blockFlags);
+@@ -2917,23 +2915,23 @@ function hashPureJS(input, outputLen) {
+ 	if (inputLen === 0) {
+ 		const block = getBlockWords();
+ 		block.fill(0);
+-		const out$1 = outputLen === 32 ? reusableOut8 : new Uint32Array(outputLen > 32 ? 16 : 8);
+-		compress(IV, 0, block, 0, out$1, 0, outputLen > 32, 0, 0, CHUNK_START | CHUNK_END | ROOT);
++		const out = outputLen === 32 ? reusableOut8 : new Uint32Array(outputLen > 32 ? 16 : 8);
++		compress(IV, 0, block, 0, out, 0, outputLen > 32, 0, 0, 11);
+ 		if (outputLen === 32 && IS_LITTLE_ENDIAN) return reusableOut8View.slice();
+-		const result$1 = new Uint8Array(outputLen);
+-		if (IS_LITTLE_ENDIAN) result$1.set(new Uint8Array(out$1.buffer, 0, outputLen));
+-		else writeLittleEndianBytesPartial(out$1, 0, result$1, 0, outputLen);
+-		return result$1;
++		const result = new Uint8Array(outputLen);
++		if (IS_LITTLE_ENDIAN) result.set(new Uint8Array(out.buffer, 0, outputLen));
++		else writeLittleEndianBytesPartial(out, 0, result, 0, outputLen);
++		return result;
+ 	}
+ 	const numChunks = Math.ceil(inputLen / CHUNK_LEN);
+ 	if (numChunks === 1) {
+ 		const cv = outputLen === 32 ? reusableOut8 : new Uint32Array(outputLen > 32 ? 16 : 8);
+ 		hashChunkRoot(input, 0, inputLen, 0, 0, cv, outputLen > 32);
+ 		if (outputLen === 32 && IS_LITTLE_ENDIAN) return reusableOut8View.slice();
+-		const result$1 = new Uint8Array(outputLen);
+-		if (IS_LITTLE_ENDIAN) result$1.set(new Uint8Array(cv.buffer, 0, outputLen));
+-		else writeLittleEndianBytesPartial(cv, 0, result$1, 0, outputLen);
+-		return result$1;
++		const result = new Uint8Array(outputLen);
++		if (IS_LITTLE_ENDIAN) result.set(new Uint8Array(cv.buffer, 0, outputLen));
++		else writeLittleEndianBytesPartial(cv, 0, result, 0, outputLen);
++		return result;
+ 	}
+ 	const stack = HYPER_CV_STACK;
+ 	let stackLen = 0;
+@@ -2949,13 +2947,13 @@ function hashPureJS(input, outputLen) {
+ 		for (let chunkIdx = 0; chunkIdx < fullChunks; chunkIdx++) {
+ 			chunkCv.set(IV);
+ 			let wordOff = chunkIdx << 8;
+-			compress(chunkCv, 0, inputWords, wordOff, chunkCv, 0, false, chunkIdx, BLOCK_LEN, CHUNK_START);
++			compress(chunkCv, 0, inputWords, wordOff, chunkCv, 0, false, chunkIdx, 64, 1);
+ 			wordOff += 16;
+ 			for (let b = 1; b < 15; b++) {
+-				compress(chunkCv, 0, inputWords, wordOff, chunkCv, 0, false, chunkIdx, BLOCK_LEN, 0);
++				compress(chunkCv, 0, inputWords, wordOff, chunkCv, 0, false, chunkIdx, 64, 0);
+ 				wordOff += 16;
+ 			}
+-			compress(chunkCv, 0, inputWords, wordOff, chunkCv, 0, false, chunkIdx, BLOCK_LEN, CHUNK_END);
++			compress(chunkCv, 0, inputWords, wordOff, chunkCv, 0, false, chunkIdx, 64, 2);
+ 			let totalChunks = chunkIdx + 1;
+ 			let cvSrcOff = 0;
+ 			let cvSrc = chunkCv;
+@@ -2965,7 +2963,7 @@ function hashPureJS(input, outputLen) {
+ 				stackLen--;
+ 				copyCV8(stack, stackLen * 8, parentBlock, 0);
+ 				copyCV8(cvSrc, cvSrcOff, parentBlock, 8);
+-				compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, BLOCK_LEN, PARENT);
++				compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, 64, 4);
+ 				cvSrc = parentCv;
+ 				cvSrcOff = 0;
+ 				totalChunks >>>= 1;
+@@ -2984,7 +2982,7 @@ function hashPureJS(input, outputLen) {
+ 				stackLen--;
+ 				copyCV8(stack, stackLen * 8, parentBlock, 0);
+ 				copyCV8(newCv, newCvOffset, parentBlock, 8);
+-				compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, BLOCK_LEN, PARENT);
++				compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, 64, 4);
+ 				newCv = parentCv;
+ 				newCvOffset = 0;
+ 				totalChunks >>>= 1;
+@@ -3006,7 +3004,7 @@ function hashPureJS(input, outputLen) {
+ 			stackLen--;
+ 			copyCV8(stack, stackLen * 8, parentBlock, 0);
+ 			copyCV8(newCv, newCvOffset, parentBlock, 8);
+-			compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, BLOCK_LEN, PARENT);
++			compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, 64, 4);
+ 			newCv = parentCv;
+ 			newCvOffset = 0;
+ 			totalChunks >>>= 1;
+@@ -3022,15 +3020,15 @@ function hashPureJS(input, outputLen) {
+ 		copyCV8(stack, stackLen * 8, parentBlock, 0);
+ 		copyCV8(stack, rightOff, parentBlock, 8);
+ 		if (stackLen === 0) {
+-			const out$1 = outputLen === 32 ? reusableOut8 : new Uint32Array(outputLen > 32 ? 16 : 8);
+-			compress(IV, 0, parentBlock, 0, out$1, 0, outputLen > 32, 0, BLOCK_LEN, PARENT | ROOT);
++			const out = outputLen === 32 ? reusableOut8 : new Uint32Array(outputLen > 32 ? 16 : 8);
++			compress(IV, 0, parentBlock, 0, out, 0, outputLen > 32, 0, 64, 12);
+ 			if (outputLen === 32 && IS_LITTLE_ENDIAN) return reusableOut8View.slice();
+-			const result$1 = new Uint8Array(outputLen);
+-			if (IS_LITTLE_ENDIAN) result$1.set(new Uint8Array(out$1.buffer, 0, outputLen));
+-			else writeLittleEndianBytesPartial(out$1, 0, result$1, 0, outputLen);
+-			return result$1;
++			const result = new Uint8Array(outputLen);
++			if (IS_LITTLE_ENDIAN) result.set(new Uint8Array(out.buffer, 0, outputLen));
++			else writeLittleEndianBytesPartial(out, 0, result, 0, outputLen);
++			return result;
+ 		}
+-		compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, BLOCK_LEN, PARENT);
++		compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, 64, 4);
+ 		copyCV8(parentCv, 0, stack, stackLen * 8);
+ 		stackLen++;
+ 	}
+@@ -3038,7 +3036,7 @@ function hashPureJS(input, outputLen) {
+ 	const lastBlock = getBlockWords();
+ 	lastBlock.fill(0);
+ 	copyCV8(stack, 0, lastBlock, 0);
+-	compress(IV, 0, lastBlock, 0, out, 0, outputLen > 32, 0, BLOCK_LEN, ROOT);
++	compress(IV, 0, lastBlock, 0, out, 0, outputLen > 32, 0, 64, 8);
+ 	if (outputLen === 32 && IS_LITTLE_ENDIAN) return reusableOut8View.slice();
+ 	const result = new Uint8Array(outputLen);
+ 	if (IS_LITTLE_ENDIAN) result.set(new Uint8Array(out.buffer, 0, outputLen));
+@@ -3060,10 +3058,10 @@ function hashChunkRoot(input, inputOffset, inputLen, chunkCounter, flags, out, f
+ 		const isFirst = blockIdx === 0;
+ 		const isLast = blockIdx === totalBlocks - 1;
+ 		const blockStart = blockIdx << 6;
+-		const blockLen = isLast ? remainder || (inputLen > 0 ? BLOCK_LEN : 0) : BLOCK_LEN;
++		const blockLen = isLast ? remainder || (inputLen > 0 ? 64 : 0) : 64;
+ 		let blockFlags = flags;
+-		if (isFirst) blockFlags |= CHUNK_START;
+-		if (isLast) blockFlags |= CHUNK_END | ROOT;
++		if (isFirst) blockFlags |= 1;
++		if (isLast) blockFlags |= 10;
+ 		if (isLast && remainder > 0) readLittleEndianWordsPartial(input, inputOffset + blockStart, blockLen, block);
+ 		else if (inputLen === 0) block.fill(0);
+ 		else if (inputWords && (blockStart >>> 2) + 16 <= inputWords.length) {
+@@ -3158,17 +3156,17 @@ function hashSimd(input, outputLen) {
+ 					const thisChunkIdx = chunkIdx + g;
+ 					const chunkStart = thisChunkIdx * CHUNK_LEN;
+ 					const chunkLen = Math.min(CHUNK_LEN, inputLen - chunkStart);
+-					const thisBlockStart = chunkStart + blockIdx * BLOCK_LEN;
+-					const blockStartInChunk = blockIdx * BLOCK_LEN;
+-					let thisBlockLen = BLOCK_LEN;
++					const thisBlockStart = chunkStart + blockIdx * 64;
++					const blockStartInChunk = blockIdx * 64;
++					let thisBlockLen = 64;
+ 					if (blockStartInChunk >= chunkLen) thisBlockLen = 0;
+-					else if (blockStartInChunk + BLOCK_LEN > chunkLen) thisBlockLen = chunkLen - blockStartInChunk;
++					else if (blockStartInChunk + 64 > chunkLen) thisBlockLen = chunkLen - blockStartInChunk;
+ 					offsets[g] = thisBlockStart;
+ 					counters[g] = thisChunkIdx;
+ 					let flags = 0;
+-					if (blockIdx === 0) flags |= CHUNK_START;
+-					const totalBlocksInChunk = Math.ceil(chunkLen / BLOCK_LEN) || 1;
+-					if (blockIdx === totalBlocksInChunk - 1) flags |= CHUNK_END;
++					if (blockIdx === 0) flags |= 1;
++					const totalBlocksInChunk = Math.ceil(chunkLen / 64) || 1;
++					if (blockIdx === totalBlocksInChunk - 1) flags |= 2;
+ 					blockLens[g] = thisBlockLen;
+ 					flagsArr[g] = flags;
+ 				}
+@@ -3205,7 +3203,7 @@ function hashSimd(input, outputLen) {
+ 				copyCV8(stack, stackOff, parentBlock, 0);
+ 				copyCV8(newCvSrc, newCvBase, parentBlock, 8);
+ 				if (useWasmParent) runCompressParent();
+-				else compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, BLOCK_LEN, PARENT);
++				else compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, 64, 4);
+ 				newCvSrc = parentCv;
+ 				newCvBase = 0;
+ 				totalChunks >>>= 1;
+@@ -3225,7 +3223,7 @@ function hashSimd(input, outputLen) {
+ 		copyCV8(stack, rightOff, parentBlock, 8);
+ 		if (stackLen === 0) {
+ 			const out = outputLen === 32 ? reusableOut8 : new Uint32Array(outputLen > 32 ? 16 : 8);
+-			compress(IV, 0, parentBlock, 0, out, 0, outputLen > 32, 0, BLOCK_LEN, PARENT | ROOT);
++			compress(IV, 0, parentBlock, 0, out, 0, outputLen > 32, 0, 64, 12);
+ 			if (outputLen === 32 && IS_LITTLE_ENDIAN) return reusableOut8View.slice();
+ 			const result = new Uint8Array(outputLen);
+ 			if (IS_LITTLE_ENDIAN) result.set(new Uint8Array(out.buffer, 0, outputLen));
+@@ -3233,7 +3231,7 @@ function hashSimd(input, outputLen) {
+ 			return result;
+ 		}
+ 		if (useWasmParent) runCompressParent();
+-		else compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, BLOCK_LEN, PARENT);
++		else compress(IV, 0, parentBlock, 0, parentCv, 0, false, 0, 64, 4);
+ 		copyCV8(parentCv, 0, stack, stackLen * 8);
+ 		stackLen++;
+ 	}
+@@ -3242,7 +3240,7 @@ function hashSimd(input, outputLen) {
+ 		block.fill(0);
+ 		copyCV8(stack, 0, block, 0);
+ 		const out = outputLen === 32 ? reusableOut8 : new Uint32Array(outputLen > 32 ? 16 : 8);
+-		compress(IV, 0, block, 0, out, 0, outputLen > 32, 0, BLOCK_LEN, ROOT);
++		compress(IV, 0, block, 0, out, 0, outputLen > 32, 0, 64, 8);
+ 		if (outputLen === 32 && IS_LITTLE_ENDIAN) return reusableOut8View.slice();
+ 		const result = new Uint8Array(outputLen);
+ 		if (IS_LITTLE_ENDIAN) result.set(new Uint8Array(out.buffer, 0, outputLen));
+@@ -3259,7 +3257,7 @@ function hashSimd(input, outputLen) {
+ * @param outputLength - Number of bytes to output (default: 32)
+ * @returns The hash output
+ */
+-function hash(input, outputLength = OUT_LEN) {
++function hash(input, outputLength = 32) {
+ 	if (input.length >= SIMD_THRESHOLD && ensureSimdSync()) return hashSimd(input, outputLength);
+ 	return hashPureJS(input, outputLength);
+ }
+@@ -3277,7 +3275,7 @@ function warmupSimd() {
+ * @param output - Pre-allocated output buffer (must be at least outputLength bytes)
+ * @param outputLength - Number of bytes to output (default: 32, max: output.length)
+ */
+-function hashInto(input, output, outputLength = OUT_LEN) {
++function hashInto(input, output, outputLength = 32) {
+ 	if (output.length < outputLength) throw new Error(`Output buffer too small: ${output.length} < ${outputLength}`);
+ 	if (input.length >= SIMD_THRESHOLD && ensureSimdSync()) {
+ 		hashSimdInto(input, output, outputLength);
+@@ -3294,12 +3292,12 @@ function hashPureJSInto(input, output, outputLen) {
+ 		const block = getBlockWords();
+ 		block.fill(0);
+ 		const out = outputLen <= 32 ? reusableOut8 : new Uint32Array(16);
+-		compress(IV, 0, block, 0, out, 0, outputLen > 32, 0, 0, CHUNK_START | CHUNK_END | ROOT);
++		compress(IV, 0, block, 0, out, 0, outputLen > 32, 0, 0, 11);
+ 		if (IS_LITTLE_ENDIAN) output.set(new Uint8Array(out.buffer, out.byteOffset, outputLen));
+ 		else writeLittleEndianBytesPartial(out, 0, output, 0, outputLen);
+ 		return;
+ 	}
+-	if (Math.ceil(inputLen / CHUNK_LEN) === 1) {
++	if (Math.ceil(inputLen / 1024) === 1) {
+ 		const cv = outputLen <= 32 ? reusableOut8 : new Uint32Array(16);
+ 		hashChunkRoot(input, 0, inputLen, 0, 0, cv, outputLen > 32);
+ 		if (IS_LITTLE_ENDIAN) output.set(new Uint8Array(cv.buffer, cv.byteOffset, outputLen));
+@@ -3316,7 +3314,6 @@ function hashSimdInto(input, output, outputLen) {
+ 	const result = hashSimd(input, outputLen);
+ 	output.set(result);
+ }
+-
+ //#endregion
+ //#region src/index.ts
+ /**
+@@ -3381,7 +3378,7 @@ var src_default = {
+ 	createKeyed,
+ 	createDeriveKey
+ };
+-
+ //#endregion
+ export { Hasher, XofReader, createDeriveKey, createHasher, createKeyed, src_default as default, hash, hashInto, warmupSimd };
++
+ //# sourceMappingURL=index.js.map

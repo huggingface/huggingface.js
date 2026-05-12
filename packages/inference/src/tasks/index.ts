@@ -14,6 +14,8 @@ export * from "./cv/imageSegmentation.js";
 export * from "./cv/imageToImage.js";
 export * from "./cv/imageToText.js";
 export * from "./cv/imageToVideo.js";
+export * from "./cv/imageTextToImage.js";
+export * from "./cv/imageTextToVideo.js";
 export * from "./cv/objectDetection.js";
 export * from "./cv/textToImage.js";
 export * from "./cv/textToVideo.js";

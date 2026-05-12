@@ -79,7 +79,7 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 	override async getResponse(
 		response: NovitaAsyncAPIOutput,
 		url?: string,
-		headers?: Record<string, string>
+		headers?: Record<string, string>,
 	): Promise<Blob> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError("URL and headers are required for text-to-video task");
@@ -87,7 +87,7 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		const taskId = response.task_id;
 		if (!taskId) {
 			throw new InferenceClientProviderOutputError(
-				"Received malformed response from Novita text-to-video API: no task ID found in the response"
+				"Received malformed response from Novita text-to-video API: no task ID found in the response",
 			);
 		}
 
@@ -111,7 +111,7 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 						requestId: resultResponse.headers.get("x-request-id") ?? "",
 						status: resultResponse.status,
 						body: await resultResponse.text(),
-					}
+					},
 				);
 			}
 			try {
@@ -128,12 +128,12 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 					status = taskResult.task.status;
 				} else {
 					throw new InferenceClientProviderOutputError(
-						"Received malformed response from Novita text-to-video API: failed to get task status"
+						"Received malformed response from Novita text-to-video API: failed to get task status",
 					);
 				}
 			} catch (error) {
 				throw new InferenceClientProviderOutputError(
-					"Received malformed response from Novita text-to-video API: failed to parse task result"
+					"Received malformed response from Novita text-to-video API: failed to parse task result",
 				);
 			}
 		}
@@ -159,8 +159,8 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		} else {
 			throw new InferenceClientProviderOutputError(
 				`Received malformed response from Novita text-to-video API: expected { videos: [{ video_url: string }] } format, got instead: ${JSON.stringify(
-					taskResult
-				)}`
+					taskResult,
+				)}`,
 			);
 		}
 	}

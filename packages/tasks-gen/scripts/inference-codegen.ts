@@ -101,7 +101,7 @@ interface JSONSchemaSpec {
 async function postProcessOutput(
 	path2generated: string,
 	outputSpec: JSONSchemaSpec,
-	inputSpec: JSONSchemaSpec
+	inputSpec: JSONSchemaSpec,
 ): Promise<void> {
 	await generateBinaryInputTypes(path2generated, inputSpec, outputSpec);
 	await generateTopLevelArrays(path2generated, outputSpec);
@@ -110,12 +110,12 @@ async function postProcessOutput(
 async function generateBinaryInputTypes(
 	path2generated: string,
 	inputSpec: JSONSchemaSpec,
-	outputSpec: JSONSchemaSpec
+	outputSpec: JSONSchemaSpec,
 ): Promise<void> {
 	const tsSource = ts.createSourceFile(
 		path.basename(path2generated),
 		await fs.readFile(path2generated, { encoding: "utf-8" }),
-		ts.ScriptTarget.ES2022
+		ts.ScriptTarget.ES2022,
 	);
 
 	const inputRootName = inputSpec.title;
@@ -128,7 +128,7 @@ async function generateBinaryInputTypes(
 	let newNodes = [...topLevelNodes];
 
 	for (const interfaceNode of topLevelNodes.filter(
-		(node): node is ts.InterfaceDeclaration => node.kind === ts.SyntaxKind.InterfaceDeclaration
+		(node): node is ts.InterfaceDeclaration => node.kind === ts.SyntaxKind.InterfaceDeclaration,
 	)) {
 		if (interfaceNode.name.escapedText !== inputRootName && interfaceNode.name.escapedText !== outputRootName) {
 			continue;
@@ -150,7 +150,7 @@ async function generateBinaryInputTypes(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				typeof (spec as any)["properties"]?.[propName]?.["comment"] === "string"
 					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-					  !!(spec as any)["properties"][propName]["comment"].includes("type=binary")
+						!!(spec as any)["properties"][propName]["comment"].includes("type=binary")
 					: false;
 			if (!propIsMedia) {
 				return;
@@ -161,7 +161,7 @@ async function generateBinaryInputTypes(
 				propSignature.modifiers,
 				propSignature.name,
 				propSignature.questionToken,
-				updatedType
+				updatedType,
 			);
 			const updatedInterface = ts.factory.updateInterfaceDeclaration(
 				interfaceNode,
@@ -169,7 +169,7 @@ async function generateBinaryInputTypes(
 				interfaceNode.name,
 				interfaceNode.typeParameters,
 				interfaceNode.heritageClauses,
-				[updated, ...interfaceNode.members.filter((member) => member.name?.getText(tsSource) !== propName)]
+				[updated, ...interfaceNode.members.filter((member) => member.name?.getText(tsSource) !== propName)],
 			);
 			newNodes = [updatedInterface, ...newNodes.filter((node) => node !== interfaceNode)];
 		});
@@ -182,7 +182,7 @@ async function generateBinaryInputTypes(
 		{
 			flag: "w+",
 			encoding: "utf-8",
-		}
+		},
 	);
 }
 
@@ -201,7 +201,7 @@ async function generateTopLevelArrays(path2generated: string, outputSpec: Record
 	const source = ts.createSourceFile(
 		path.basename(path2generated),
 		await fs.readFile(path2generated, { encoding: "utf-8" }),
-		ts.ScriptTarget.ES2022
+		ts.ScriptTarget.ES2022,
 	);
 	const exportedName = outputSpec.title;
 	if (outputSpec.type !== "array" || typeof exportedName !== "string") {
@@ -212,7 +212,7 @@ async function generateTopLevelArrays(path2generated: string, outputSpec: Record
 	const hasTypeAlias = topLevelNodes.some(
 		(node) =>
 			node.kind === ts.SyntaxKind.TypeAliasDeclaration &&
-			(node as ts.TypeAliasDeclaration).name.escapedText === exportedName
+			(node as ts.TypeAliasDeclaration).name.escapedText === exportedName,
 	);
 	if (hasTypeAlias) {
 		return;
@@ -237,13 +237,13 @@ async function generateTopLevelArrays(path2generated: string, outputSpec: Record
 		ts.factory.createIdentifier(interfaceDeclaration.name.getText(source) + "Element"),
 		interfaceDeclaration.typeParameters,
 		interfaceDeclaration.heritageClauses,
-		interfaceDeclaration.members
+		interfaceDeclaration.members,
 	);
 	const arrayDeclaration = ts.factory.createTypeAliasDeclaration(
 		[ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
 		exportedName,
 		undefined,
-		ts.factory.createArrayTypeNode(ts.factory.createTypeReferenceNode(updatedInterface.name))
+		ts.factory.createArrayTypeNode(ts.factory.createTypeReferenceNode(updatedInterface.name)),
 	);
 
 	const printer = ts.createPrinter();
@@ -270,7 +270,7 @@ const allTasks = await Promise.all(
 	(await fs.readdir(tasksDir, { withFileTypes: true }))
 		.filter((entry) => entry.isDirectory())
 		.filter((entry) => entry.name !== "placeholder")
-		.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.parentPath, entry.name) }))
+		.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.parentPath, entry.name) })),
 );
 const allSpecFiles = [
 	path.join(tasksDir, "common-definitions.json"),

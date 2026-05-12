@@ -45,7 +45,7 @@ export async function createBranch(params: {
 				...(params.empty && { emptyBranch: true }),
 				overwrite: params.overwrite,
 			}),
-		}
+		},
 	);
 
 	if (!res.ok) {

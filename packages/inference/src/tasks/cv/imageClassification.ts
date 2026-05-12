@@ -13,7 +13,7 @@ export type ImageClassificationArgs = BaseArgs & (ImageClassificationInput | Leg
  */
 export async function imageClassification(
 	args: ImageClassificationArgs,
-	options?: Options
+	options?: Options,
 ): Promise<ImageClassificationOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "image-classification");

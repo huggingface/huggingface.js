@@ -195,6 +195,7 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 	likes: number;
 	pinned: boolean;
 	private: boolean;
+	featured: boolean;
 	repoType: "space";
 	title: string;
 	sdk?: "gradio" | "docker" | "static" | "streamlit";
@@ -292,6 +293,7 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 	authorData?: ApiAuthor;
 	shortDescription?: string;
 	semanticRelevancyScore?: number;
+	visibility?: "public" | "private" | "protected";
 }
 
 interface ApiCollectionItemPaper extends ApiCollectionItemBase {

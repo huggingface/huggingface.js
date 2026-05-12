@@ -11,7 +11,7 @@ export type TokenClassificationArgs = BaseArgs & TokenClassificationInput;
  */
 export async function tokenClassification(
 	args: TokenClassificationArgs,
-	options?: Options
+	options?: Options,
 ): Promise<TokenClassificationOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "token-classification");
@@ -21,7 +21,7 @@ export async function tokenClassification(
 		{
 			...options,
 			task: "token-classification",
-		}
+		},
 	);
 	return providerHelper.getResponse(res);
 }

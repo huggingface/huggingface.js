@@ -28,7 +28,7 @@ export async function repoExists(params: {
 					Authorization: `Bearer ${params.accessToken}`,
 				}),
 			},
-		}
+		},
 	);
 
 	if (res.status === 404 || res.status === 401) {

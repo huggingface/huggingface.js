@@ -74,7 +74,7 @@ async function main() {
 			}
 			strVal = strVal.length > MAX_LEN ? strVal.slice(0, MAX_LEN) + "..." : strVal;
 			return [(i + 1).toString(), count.toString(), `${key} = ${strVal}`];
-		})
+		}),
 	);
 
 	console.log();
@@ -100,7 +100,7 @@ async function main() {
 				["Overhead", (overhead / 1e9).toFixed(2) + " GB"],
 				["", "---"],
 				["TOTAL", (totalMemoryUsage / 1e9).toFixed(2) + " GB"],
-			]
+			],
 		);
 	} catch (e) {
 		console.error(`Error: ${(e as Error).message}`);
@@ -129,7 +129,7 @@ async function main() {
 					mapDtypeToName[tensorInfo.dtype],
 					tensorInfo.name,
 				];
-			})
+			}),
 		);
 	} else {
 		console.log();
@@ -141,7 +141,7 @@ function calcMemoryUsage(
 	metadata: GGUFParseOutput<{ strict: false }>["metadata"],
 	kvSize: number,
 	kvTypeK: GGMLQuantizationType = GGMLQuantizationType.F16,
-	kvTypeV: GGMLQuantizationType = GGMLQuantizationType.F16
+	kvTypeV: GGMLQuantizationType = GGMLQuantizationType.F16,
 ) {
 	const arch = metadata["general.architecture"] ?? "unknown";
 	const n_embd = (metadata[`${arch}.embedding_length`] as number) ?? 0;

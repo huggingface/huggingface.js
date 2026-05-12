@@ -15,5 +15,5 @@ export function preparePayload(args: BaseArgs & ({ inputs: Blob } | LegacyAudioI
 		: {
 				...omit(args, "inputs"),
 				data: args.inputs,
-		  };
+			};
 }

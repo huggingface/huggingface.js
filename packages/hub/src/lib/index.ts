@@ -15,6 +15,7 @@ export * from "./download-file";
 export * from "./download-file-to-cache-dir";
 export * from "./file-download-info";
 export * from "./file-exists";
+export * from "./jobs";
 export * from "./list-commits";
 export * from "./list-datasets";
 export * from "./list-files";

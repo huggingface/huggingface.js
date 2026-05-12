@@ -6,7 +6,7 @@ export function stringifyMessages(
 		indent?: string;
 		attributeKeyQuotes?: boolean;
 		customContentEscaper?: (str: string) => string;
-	}
+	},
 ): string {
 	let messagesStr = JSON.stringify(messages, null, "\t");
 	if (opts?.indent) {
@@ -29,7 +29,7 @@ export function stringifyGenerationConfig(
 		indent: string;
 		attributeValueConnector: string;
 		attributeKeyQuotes?: boolean;
-	}
+	},
 ): string {
 	const quote = opts.attributeKeyQuotes ? `"` : "";
 

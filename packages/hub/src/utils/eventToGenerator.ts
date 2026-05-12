@@ -2,8 +2,8 @@ export async function* eventToGenerator<YieldType, ReturnType>(
 	cb: (
 		yieldCallback: (y: YieldType) => void,
 		returnCallback: (r: ReturnType) => void,
-		rejectCallack: (reason: unknown) => void
-	) => unknown
+		rejectCallack: (reason: unknown) => void,
+	) => unknown,
 ): AsyncGenerator<YieldType, ReturnType> {
 	const promises: Array<{
 		p: Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>;
@@ -35,8 +35,8 @@ export async function* eventToGenerator<YieldType, ReturnType>(
 					addPromise();
 					promises.at(-2)?.resolve({ done: true, value: r });
 				},
-				(err) => promises.shift()?.reject(err)
-			)
+				(err) => promises.shift()?.reject(err),
+			),
 		)
 		.catch((err) => promises.shift()?.reject(err));
 

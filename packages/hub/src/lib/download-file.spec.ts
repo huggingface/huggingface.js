@@ -28,7 +28,7 @@ license: mit
 
 # GPT-2
 
-Test the whole generation capabilities here: https://transformer.huggingface.co/doc/gpt2-large`)
+Test the whole generation capabilities here: https://transformer.huggingface.co/doc/gpt2-large`),
 		);
 	});
 	test("should downoad xet file", async () => {
@@ -50,13 +50,14 @@ Test the whole generation capabilities here: https://transformer.huggingface.co/
 		const result = await createRepo({
 			accessToken: TEST_ACCESS_TOKEN,
 			hubUrl: TEST_HUB_URL,
-			private: true,
+			visibility: "private",
 			repo: repoName,
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
-		assert.deepStrictEqual(result, {
+		expect(result).toEqual({
 			repoUrl: `${TEST_HUB_URL}/${repoName}`,
+			id: expect.any(String),
 		});
 
 		try {

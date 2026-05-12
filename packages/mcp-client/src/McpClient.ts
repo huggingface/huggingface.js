@@ -94,7 +94,7 @@ export class McpClient {
 		const toolsResult = await mcp.listTools();
 		debug(
 			"Connected to server with tools:",
-			toolsResult.tools.map(({ name }) => name)
+			toolsResult.tools.map(({ name }) => name),
 		);
 
 		for (const tool of toolsResult.tools) {
@@ -111,7 +111,7 @@ export class McpClient {
 						parameters: tool.inputSchema,
 					},
 				} satisfies ChatCompletionInputTool;
-			})
+			}),
 		);
 	}
 
@@ -121,7 +121,7 @@ export class McpClient {
 			exitLoopTools?: ChatCompletionInputTool[];
 			exitIfFirstChunkNoTool?: boolean;
 			abortSignal?: AbortSignal;
-		} = {}
+		} = {},
 	): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
 		debug("start of single turn");
 
@@ -135,7 +135,7 @@ export class McpClient {
 			},
 			{
 				signal: opts.abortSignal,
-			}
+			},
 		);
 
 		const message = {

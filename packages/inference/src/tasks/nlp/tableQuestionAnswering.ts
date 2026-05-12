@@ -11,7 +11,7 @@ export type TableQuestionAnsweringArgs = BaseArgs & TableQuestionAnsweringInput;
  */
 export async function tableQuestionAnswering(
 	args: TableQuestionAnsweringArgs,
-	options?: Options
+	options?: Options,
 ): Promise<TableQuestionAnsweringOutput[number]> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "table-question-answering");
@@ -21,7 +21,7 @@ export async function tableQuestionAnswering(
 		{
 			...options,
 			task: "table-question-answering",
-		}
+		},
 	);
 	return providerHelper.getResponse(res);
 }

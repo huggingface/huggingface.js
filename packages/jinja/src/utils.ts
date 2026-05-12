@@ -11,9 +11,19 @@ export function range(start: number, stop?: number, step = 1): number[] {
 		start = 0;
 	}
 
+	if (step === 0) {
+		throw new Error("range() step must not be zero");
+	}
+
 	const result: number[] = [];
-	for (let i = start; i < stop; i += step) {
-		result.push(i);
+	if (step > 0) {
+		for (let i = start; i < stop; i += step) {
+			result.push(i);
+		}
+	} else {
+		for (let i = start; i > stop; i += step) {
+			result.push(i);
+		}
 	}
 	return result;
 }

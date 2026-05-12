@@ -52,7 +52,7 @@ export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
 				? {
 						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
 						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				  }
+					}
 				: undefined),
 			prompt: params.args.inputs,
 		};

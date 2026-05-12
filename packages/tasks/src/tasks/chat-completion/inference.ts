@@ -62,6 +62,10 @@ export interface ChatCompletionInput {
 	 * increasing the model's likelihood to talk about new topics
 	 */
 	presence_penalty?: number;
+	/**
+	 * Optional. Constrains effort on reasoning for reasoning models. Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning. Common values: none, minimal, low, medium, high, xhigh. Support and defaults are provider and model-dependent.
+	 */
+	reasoning_effort?: string;
 	response_format?: ChatCompletionInputGrammarType;
 	seed?: number;
 	/**

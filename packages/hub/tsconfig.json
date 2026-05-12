@@ -14,7 +14,8 @@
 		"noImplicitOverride": true,
 		"outDir": "./dist",
 		"declaration": true,
-		"declarationMap": true
+		"declarationMap": true,
+		"sourceMap": true
 	},
 	"include": ["src", "index.ts", "cli.ts"],
 	"exclude": ["dist"]

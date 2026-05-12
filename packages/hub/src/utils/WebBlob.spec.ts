@@ -8,10 +8,14 @@ describe("WebBlob", () => {
 	let contentType: string;
 
 	beforeAll(async () => {
-		const response = await fetch(resourceUrl, { method: "HEAD" });
-		size = Number(response.headers.get("content-length"));
+		// Compute the reference size from the response body itself; in browsers
+		// `Content-Length` is not reliably exposed when the response is gzipped
+		// on the fly by CloudFront.
+		const response = await fetch(resourceUrl);
+		const blob = await response.blob();
+		size = blob.size;
+		fullText = await blob.text();
 		contentType = response.headers.get("content-type") || "";
-		fullText = await (await fetch(resourceUrl)).text();
 	});
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {

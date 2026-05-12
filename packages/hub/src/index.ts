@@ -24,3 +24,4 @@ export { HUB_URL } from "./consts";
  */
 export { sha256 as __internal_sha256 } from "./utils/sha256";
 export { XetBlob as __internal_XetBlob } from "./utils/XetBlob";
+export type { XetReadToken } from "./utils/XetBlob";

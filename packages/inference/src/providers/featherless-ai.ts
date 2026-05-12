@@ -40,7 +40,7 @@ export class FeatherlessAITextGenerationTask extends BaseTextGenerationTask {
 				? {
 						max_tokens: params.args.parameters.max_new_tokens,
 						...omit(params.args.parameters, "max_new_tokens"),
-				  }
+					}
 				: undefined),
 			prompt: params.args.inputs,
 		};

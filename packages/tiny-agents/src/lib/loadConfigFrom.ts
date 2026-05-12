@@ -39,7 +39,7 @@ async function tryLoadFromDirectory(dirPath: string): Promise<TinyAgentConfig | 
 	}
 	if (undefined == prompt) {
 		debug(
-			`${PROMPT_FILENAMES.join(", ")} could not be loaded locally from ${dirPath}, continuing without prompt template`
+			`${PROMPT_FILENAMES.join(", ")} could not be loaded locally from ${dirPath}, continuing without prompt template`,
 		);
 	}
 
@@ -84,8 +84,8 @@ async function tryLoadFromHub(agentId: string): Promise<TinyAgentConfig | undefi
 	if (undefined == prompt) {
 		debug(
 			`${PROMPT_FILENAMES.join(
-				", "
-			)}  not found in https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/${agentId}, continuing without prompt template`
+				", ",
+			)}  not found in https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/${agentId}, continuing without prompt template`,
 		);
 	}
 
@@ -115,7 +115,7 @@ export async function loadConfigFrom(loadFrom: string): Promise<TinyAgentConfig>
 	}
 
 	error(
-		`Config file not found in tiny-agents! Please make sure it exists locally or in https://huggingface.co/datasets/tiny-agents/tiny-agents.`
+		`Config file not found in tiny-agents! Please make sure it exists locally or in https://huggingface.co/datasets/tiny-agents/tiny-agents.`,
 	);
 	process.exit(1);
 }

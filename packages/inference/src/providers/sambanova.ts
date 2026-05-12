@@ -54,7 +54,7 @@ export class SambanovaFeatureExtractionTask extends TaskProviderHelper implement
 			return response.data.map((item) => item.embedding);
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from Sambanova feature-extraction (embeddings) API"
+			"Received malformed response from Sambanova feature-extraction (embeddings) API",
 		);
 	}
 

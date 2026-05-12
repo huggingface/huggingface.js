@@ -7,8 +7,6 @@ import { snapshotDownload } from "./snapshot-download";
 import type { ListFileEntry } from "./list-files";
 import { listFiles } from "./list-files";
 import { modelInfo } from "./model-info";
-import type { ModelEntry } from "./list-models";
-import type { ApiModelInfo } from "../types/api/api-model";
 import { datasetInfo } from "./dataset-info";
 import type { DatasetEntry } from "./list-datasets";
 import type { ApiDatasetInfo } from "../types/api/api-dataset";
@@ -57,7 +55,7 @@ beforeEach(() => {
 	// mock repo info
 	vi.mocked(modelInfo).mockResolvedValue({
 		sha: DUMMY_SHA,
-	} as ModelEntry & ApiModelInfo);
+	} as unknown as Awaited<ReturnType<typeof modelInfo>>);
 	vi.mocked(datasetInfo).mockResolvedValue({
 		sha: DUMMY_SHA,
 	} as DatasetEntry & ApiDatasetInfo);
@@ -164,7 +162,7 @@ describe("snapshotDownload", () => {
 						title: "feat: best commit",
 					},
 				},
-			])
+			]),
 		);
 
 		await snapshotDownload({
@@ -209,7 +207,7 @@ describe("snapshotDownload", () => {
 					},
 					path: entry.path,
 					revision: DUMMY_SHA,
-				})
+				}),
 			);
 		}
 	});
@@ -233,7 +231,7 @@ describe("snapshotDownload", () => {
 						title: "feat: best commit",
 					},
 				},
-			])
+			]),
 		);
 
 		await snapshotDownload({
@@ -251,7 +249,7 @@ describe("snapshotDownload", () => {
 				fetch: fetchMock,
 				hubUrl: hubMock,
 				accessToken: accessTokenMock,
-			})
+			}),
 		);
 
 		// list files should receive custom fetch
@@ -260,7 +258,7 @@ describe("snapshotDownload", () => {
 				fetch: fetchMock,
 				hubUrl: hubMock,
 				accessToken: accessTokenMock,
-			})
+			}),
 		);
 
 		// download file to cache should receive custom fetch
@@ -269,7 +267,7 @@ describe("snapshotDownload", () => {
 				fetch: fetchMock,
 				hubUrl: hubMock,
 				accessToken: accessTokenMock,
-			})
+			}),
 		);
 	});
 });

@@ -23,7 +23,7 @@ export interface DefaultTaskOptions {
 export async function getDefaultTask(
 	model: string,
 	accessToken: string | undefined,
-	options?: DefaultTaskOptions
+	options?: DefaultTaskOptions,
 ): Promise<string | null> {
 	if (isUrl(model)) {
 		return null;

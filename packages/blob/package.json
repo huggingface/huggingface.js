@@ -1,14 +1,31 @@
 {
 	"name": "@huggingface/blob",
-	"packageManager": "pnpm@10.10.0",
 	"version": "0.0.2",
 	"description": "Utilities to convert URLs and files to Blobs, internally used by Hugging Face libs",
+	"keywords": [
+		"blob",
+		"face",
+		"hugging",
+		"huggingface",
+		"lazy"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
-	"publishConfig": {
-		"access": "public"
-	},
+	"source": "index.ts",
+	"files": [
+		"dist",
+		"index.ts",
+		"src",
+		"tsconfig.json"
+	],
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
+	"browser": {
+		"./src/utils/FileBlob.ts": false,
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
@@ -25,17 +42,14 @@
 			"import": "./dist/src/utils/FileBlob.mjs"
 		}
 	},
-	"browser": {
-		"./src/utils/FileBlob.ts": false,
-		"./dist/index.js": "./dist/browser/index.js",
-		"./dist/index.mjs": "./dist/browser/index.mjs"
+	"publishConfig": {
+		"access": "public"
 	},
-	"source": "index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup && tsc --emitDeclarationOnly --declaration && cp dist/index.d.ts dist/index.m.d.ts && cp dist/src/utils/FileBlob.d.ts dist/src/utils/FileBlob.m.d.ts && cp dist/src/utils/WebBlob.d.ts dist/src/utils/WebBlob.m.d.ts",
 		"prepare": "pnpm run build",
@@ -43,22 +57,8 @@
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
 		"check": "tsc"
 	},
-	"files": [
-		"src",
-		"dist",
-		"index.ts",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"hugging",
-		"face",
-		"blob",
-		"lazy"
-	],
-	"author": "Hugging Face",
-	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^20.11.28"
-	}
+	},
+	"packageManager": "pnpm@10.10.0"
 }
