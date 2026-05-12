@@ -31,5 +31,13 @@
 		"typedoc": "^0.25.12",
 		"typedoc-plugin-markdown": "^3.17.1"
 	},
+	"pnpm": {
+		"overrides": {
+			"handlebars": "^4.7.9",
+			"yaml": "^2.8.3",
+			"minimatch": "^9.0.7",
+			"brace-expansion": "^2.0.3"
+		}
+	},
 	"packageManager": "pnpm@10.10.0"
 }
