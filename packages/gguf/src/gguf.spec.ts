@@ -8,6 +8,7 @@ import {
 	ggufAllShards,
 	parseGgufShardFilename,
 	parseGGUFQuantLabel,
+	parseGGUFQuantMix,
 	GGUF_QUANT_ORDER,
 	findNearestQuantType,
 	serializeGgufMetadata,
@@ -341,6 +342,64 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-IQ3_XS.gguf")).toEqual("IQ3_XS");
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual("Q4_0"); // TODO: investigate Q4_0_4_4
 		expect(parseGGUFQuantLabel("Qwen3-4B-UD-Q2_K_XL.gguf")).toEqual("UD-Q2_K_XL"); // unsloth UD (Unsloth Dynamic) prefix
+		// percentage-mixed filenames — should return the dominant (largest-%) component,
+		// not the last one (which would be the smallest tail)
+		expect(parseGGUFQuantLabel("DeepSeek-V4-Flash-55IQ2_XXS-34Q2_K-07Q8_0-03F16.gguf")).toEqual("IQ2_XXS");
+		expect(parseGGUFQuantLabel("DeepSeek-V4-Flash-95Q4_K-04Q8_0-imatrix.gguf")).toEqual("Q4_K");
+	});
+
+	it("parse percentage-mixed quant filename", async () => {
+		// DeepSeek V4 Flash q2 recipe (antirez/deepseek-v4-gguf)
+		expect(parseGGUFQuantMix("DeepSeek-V4-Flash-55IQ2_XXS-34Q2_K-07Q8_0-03F16.gguf")).toEqual({
+			components: [
+				{ pct: 55, quant: "IQ2_XXS" },
+				{ pct: 34, quant: "Q2_K" },
+				{ pct: 7, quant: "Q8_0" },
+				{ pct: 3, quant: "F16" },
+			],
+			dominant: { pct: 55, quant: "IQ2_XXS" },
+		});
+
+		// trailing `-imatrix` suffix doesn't disturb the parse
+		expect(parseGGUFQuantMix("DeepSeek-V4-Flash-55IQ2_XXS-34Q2_K-07Q8_0-03F16-imatrix.gguf")?.dominant).toEqual({
+			pct: 55,
+			quant: "IQ2_XXS",
+		});
+
+		// q4 recipe (2 components is still a mix)
+		expect(parseGGUFQuantMix("DeepSeek-V4-Flash-95Q4_K-04Q8_0.gguf")).toEqual({
+			components: [
+				{ pct: 95, quant: "Q4_K" },
+				{ pct: 4, quant: "Q8_0" },
+			],
+			dominant: { pct: 95, quant: "Q4_K" },
+		});
+
+		// MTP type slot does not interfere (per ggml-org/ggml#1488)
+		expect(parseGGUFQuantMix("DeepSeek-V4-Flash-95Q4_K-04Q8_0-MTP.gguf")?.dominant).toEqual({
+			pct: 95,
+			quant: "Q4_K",
+		});
+
+		// Path prefix is stripped before parsing
+		expect(parseGGUFQuantMix("subdir/DeepSeek-V4-Flash-95Q4_K-04Q8_0.gguf")?.components.length).toBe(2);
+
+		// Plain single-quant filenames are not mixes → undefined
+		expect(parseGGUFQuantMix("Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf")).toBeUndefined();
+		expect(parseGGUFQuantMix("Codestral-22B-v0.1-Q2_K.gguf")).toBeUndefined();
+		expect(parseGGUFQuantMix("Codestral-22B-v0.1.gguf")).toBeUndefined();
+
+		// Model size labels like "7B" or "8B" should not be misread as components
+		expect(parseGGUFQuantMix("Llama-7B-8B-Q4_0.gguf")).toBeUndefined();
+
+		// Dominant is the largest pct even if input order is different
+		expect(parseGGUFQuantMix("Model-03F16-55IQ2_XXS-34Q2_K-07Q8_0.gguf")?.dominant).toEqual({
+			pct: 55,
+			quant: "IQ2_XXS",
+		});
+
+		// IQ2_XXS must win over its prefix IQ2_XS (length-sorted alternation)
+		expect(parseGGUFQuantMix("Model-55IQ2_XXS-34Q2_K.gguf")?.components[0].quant).toBe("IQ2_XXS");
 	});
 
 	it("calculate tensor data offset", async () => {
