@@ -191,6 +191,9 @@ export async function copyFiles(
 	const hubUrl = params.hubUrl ?? HUB_URL;
 	const fetchFn = params.fetch ?? fetch;
 
+	const allCopies: CopyFileOp[] = [];
+	const pendingDownloads: Array<{ filePath: string; targetPath: string }> = [];
+
 	const sourceHandle = parseHfCopyHandle(params.source);
 	const destinationHandle = parseHfCopyHandle(params.destination);
 
@@ -216,19 +219,16 @@ export async function copyFiles(
 		if (destInfo.length > 0) {
 			destinationIsDirectory = false;
 		} else {
-			let hasChildren = false;
-			for await (const _ of listFiles({
+			const listFilesIter = listFiles({
 				repo: { type: "bucket", name: destinationBucketId },
 				path: destinationPath,
 				recursive: false,
 				accessToken,
 				hubUrl,
 				fetch: fetchFn,
-			})) {
-				hasChildren = true;
-				break;
-			}
-			destinationIsDirectory = hasChildren;
+			});
+			const firstResult = await listFilesIter.next();
+			destinationIsDirectory = !firstResult.done;
 		}
 	}
 
@@ -264,8 +264,18 @@ export async function copyFiles(
 		return `${destinationPath.replace(/\/+$/, "")}/${relPath}`;
 	}
 
-	const allCopies: CopyFileOp[] = [];
-	const pendingDownloads: Array<{ filePath: string; targetPath: string }> = [];
+	function addRepoFile(file: ListFileEntry | PathInfo, targetPath: string): void {
+		if (file.xetHash && sourceHandle.type === "repo") {
+			allCopies.push({
+				path: targetPath,
+				xetHash: file.xetHash,
+				sourceRepoType: sourceHandle.repoType,
+				sourceRepoId: sourceHandle.repoId,
+			});
+		} else {
+			pendingDownloads.push({ filePath: file.path, targetPath });
+		}
+	}
 
 	if (sourceHandle.type === "bucket") {
 		const sourcePath = sourceHandle.path;
@@ -283,10 +293,13 @@ export async function copyFiles(
 
 		if (sourcePathInfo.length === 1 && sourcePathInfo[0].type === "file") {
 			const sourceFile = sourcePathInfo[0];
+			if (!sourceFile.xetHash) {
+				throw new Error(`Source file '${sourceFile.path}' does not have a xetHash, cannot copy.`);
+			}
 			const targetPath = resolveTargetPath(sourceFile.path, null, true);
 			allCopies.push({
 				path: targetPath,
-				xetHash: sourceFile.xetHash!,
+				xetHash: sourceFile.xetHash,
 				sourceRepoType: "bucket",
 				sourceRepoId: sourceHandle.bucketId,
 			});
@@ -303,13 +316,16 @@ export async function copyFiles(
 				if (item.type !== "file") {
 					continue;
 				}
+				if (!item.xetHash) {
+					continue;
+				}
 				if (sourcePath && !(item.path === sourcePath || item.path.startsWith(sourcePath + "/"))) {
 					continue;
 				}
 				const targetPath = resolveTargetPath(item.path, sourcePath || null, false);
 				allCopies.push({
 					path: targetPath,
-					xetHash: item.xetHash!,
+					xetHash: item.xetHash,
 					sourceRepoType: "bucket",
 					sourceRepoId: sourceHandle.bucketId,
 				});
@@ -318,19 +334,6 @@ export async function copyFiles(
 	} else {
 		const sourcePath = sourceHandle.path;
 		const repoDesignation = { type: sourceHandle.repoType, name: sourceHandle.repoId } as const;
-
-		function addRepoFile(file: ListFileEntry | PathInfo, targetPath: string): void {
-			if (file.xetHash && sourceHandle.type === "repo") {
-				allCopies.push({
-					path: targetPath,
-					xetHash: file.xetHash,
-					sourceRepoType: sourceHandle.repoType,
-					sourceRepoId: sourceHandle.repoId,
-				});
-			} else {
-				pendingDownloads.push({ filePath: file.path, targetPath });
-			}
-		}
 
 		let sourceRepoPathInfo: PathInfo[] = [];
 		if (sourcePath !== "") {
