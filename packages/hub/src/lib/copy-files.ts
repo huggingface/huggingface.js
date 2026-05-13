@@ -217,7 +217,7 @@ export async function copyFolder(
 	const sourceRevision = sourceRepoId.type === "bucket" ? undefined : (params.source.revision ?? "main");
 
 	const operations: CommitOperation[] = [];
-	const pendingDownloads: Array<{ index: number; sourcePath: string }> = [];
+	const pendingDownloads: PendingDownload[] = [];
 	const lfsOffenders: Array<{ path: string; size: number }> = [];
 
 	for await (const item of listFiles({
@@ -250,7 +250,12 @@ export async function copyFolder(
 				continue;
 			case "download":
 				// Regular git-stored file (small): download + re-upload in the same commit.
-				pendingDownloads.push({ index: operations.length, sourcePath: item.path });
+				pendingDownloads.push({
+					index: operations.length,
+					repoId: sourceRepoId,
+					revision: sourceRevision,
+					sourcePath: item.path,
+				});
 				operations.push({
 					operation: "addOrUpdate",
 					path: destPath,
@@ -268,17 +273,13 @@ export async function copyFolder(
 		return undefined;
 	}
 
-	if (pendingDownloads.length > 0) {
-		await downloadAndFillBlobs({
-			pendingDownloads,
-			operations,
-			sourceRepoId,
-			sourceRevision,
-			accessToken,
-			hubUrl: params.hubUrl,
-			fetch: params.fetch,
-		});
-	}
+	await downloadAndFillBlobs({
+		pendingDownloads,
+		operations,
+		accessToken,
+		hubUrl: params.hubUrl,
+		fetch: params.fetch,
+	});
 
 	await commit({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
@@ -324,8 +325,7 @@ async function resolveCopyOperations(shared: SharedParams, files: CopyFilesEntry
 	}
 
 	const operations: CommitOperation[] = new Array(files.length);
-	const pendingDownloads: Array<{ index: number; repoId: RepoId; revision: string | undefined; sourcePath: string }> =
-		[];
+	const pendingDownloads: PendingDownload[] = [];
 
 	for (const group of groups.values()) {
 		const paths = group.entries.map((e) => e.file.source.path);
@@ -391,54 +391,50 @@ async function resolveCopyOperations(shared: SharedParams, files: CopyFilesEntry
 		}
 	}
 
-	if (pendingDownloads.length > 0) {
-		await promisesQueue(
-			pendingDownloads.map(({ index, repoId, revision, sourcePath }) => async () => {
-				const blob = await downloadFile({
-					repo: repoId,
-					path: sourcePath,
-					revision,
-					accessToken,
-					hubUrl: shared.hubUrl,
-					fetch: shared.fetch,
-				});
-				if (!blob) {
-					throw new Error(`Failed to download '${sourcePath}' from ${repoId.type}s/${repoId.name}`);
-				}
-				const op = operations[index];
-				if (op.operation !== "addOrUpdate") {
-					throw new Error("Internal: expected addOrUpdate placeholder operation");
-				}
-				op.content = blob;
-			}),
-			DOWNLOAD_CONCURRENCY,
-		);
-	}
+	await downloadAndFillBlobs({
+		pendingDownloads,
+		operations,
+		accessToken,
+		hubUrl: shared.hubUrl,
+		fetch: shared.fetch,
+	});
 
 	return operations;
 }
 
+interface PendingDownload {
+	index: number;
+	repoId: RepoId;
+	revision: string | undefined;
+	sourcePath: string;
+}
+
+/**
+ * Download all `pendingDownloads` in parallel and fill the matching `addOrUpdate`
+ * placeholder ops in `operations` with the downloaded blob. No-op if the list is empty.
+ */
 async function downloadAndFillBlobs(args: {
-	pendingDownloads: Array<{ index: number; sourcePath: string }>;
+	pendingDownloads: PendingDownload[];
 	operations: CommitOperation[];
-	sourceRepoId: RepoId;
-	sourceRevision: string | undefined;
 	accessToken: string | undefined;
 	hubUrl: string | undefined;
 	fetch: typeof fetch | undefined;
 }): Promise<void> {
+	if (args.pendingDownloads.length === 0) {
+		return;
+	}
 	await promisesQueue(
-		args.pendingDownloads.map(({ index, sourcePath }) => async () => {
+		args.pendingDownloads.map(({ index, repoId, revision, sourcePath }) => async () => {
 			const blob = await downloadFile({
-				repo: args.sourceRepoId,
+				repo: repoId,
 				path: sourcePath,
-				revision: args.sourceRevision,
+				revision,
 				accessToken: args.accessToken,
 				hubUrl: args.hubUrl,
 				fetch: args.fetch,
 			});
 			if (!blob) {
-				throw new Error(`Failed to download '${sourcePath}' from ${args.sourceRepoId.type}s/${args.sourceRepoId.name}`);
+				throw new Error(`Failed to download '${sourcePath}' from ${repoId.type}s/${repoId.name}`);
 			}
 			const op = args.operations[index];
 			if (op.operation !== "addOrUpdate") {
