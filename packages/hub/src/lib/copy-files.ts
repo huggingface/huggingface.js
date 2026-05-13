@@ -1,5 +1,6 @@
 import type { BucketDesignation, CredentialsParams, RepoDesignation, RepoId } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+import { formatBytes } from "../utils/formatBytes";
 import { promisesQueue } from "../utils/promisesQueue";
 import { toRepoId } from "../utils/toRepoId";
 import type { CommitOperation, CommitParams } from "./commit";
@@ -445,24 +446,6 @@ function classifySourceFile(file: ListFileEntry | PathInfo): "copy" | "download"
 		return "lfs";
 	}
 	return "download";
-}
-
-/**
- * Format a byte count using SI units (multiples of 1000, e.g. `1.2 GB`).
- */
-function formatBytes(bytes: number): string {
-	if (!Number.isFinite(bytes) || bytes < 0) {
-		return `${bytes} B`;
-	}
-	const units = ["B", "kB", "MB", "GB", "TB", "PB"];
-	let value = bytes;
-	let i = 0;
-	while (value >= 1000 && i < units.length - 1) {
-		value /= 1000;
-		i++;
-	}
-	const formatted = i === 0 ? value.toString() : value.toFixed(value >= 100 ? 0 : value >= 10 ? 1 : 2);
-	return `${formatted} ${units[i]}`;
 }
 
 function throwUnmigratedLfsError(repoId: RepoId, entries: Array<{ path: string; size: number }>): never {
