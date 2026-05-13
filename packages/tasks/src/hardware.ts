@@ -274,7 +274,7 @@ export const SKUS = {
 			"Apple MacBook Neo": {
 				tflops: 1.9,
 				memory: [8],
-				msrp: 1_500,
+				msrp: 700,
 			},
 			"Apple M1": {
 				tflops: 2.6,
