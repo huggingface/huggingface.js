@@ -348,8 +348,8 @@ export const SKUS = {
 			},
 			"Apple M4 Max": {
 				tflops: 18.4,
-				memory: [36, 48, 64, 96, 128, 256, 512],
-				msrp: 8_000,
+				memory: [36, 48, 64, 128],
+				msrp: 5_000,
 			},
 			"Apple M5": {
 				tflops: 5.7,
