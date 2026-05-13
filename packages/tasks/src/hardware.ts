@@ -477,7 +477,7 @@ export const SKUS = {
 				memory: [8],
 				msrp: 700,
 				power: 10,
-				releaseYear: 2020,
+				releaseYear: 2026,
 			},
 			"Apple M1": {
 				tflops: 2.6,

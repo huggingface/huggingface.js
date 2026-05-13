@@ -738,7 +738,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 350,
 		power: 90,
-		releaseYear: 2020,
+		releaseYear: 2019,
 	},
 	"RTX 2050 Mobile": {
 		tflops: 10.2,
@@ -818,7 +818,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 7.5,
 		msrp: 2_000,
 		power: 150,
-		releaseYear: 2019,
+		releaseYear: 2020,
 	},
 	V100: {
 		tflops: 28.26,
