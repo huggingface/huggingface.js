@@ -400,6 +400,14 @@ describe("gguf", () => {
 
 		// IQ2_XXS must win over its prefix IQ2_XS (length-sorted alternation)
 		expect(parseGGUFQuantMix("Model-55IQ2_XXS-34Q2_K.gguf")?.components[0].quant).toBe("IQ2_XXS");
+
+		// Non-quant storage types (I8/I16/I32/I64/F64) must not be recognized as components
+		expect(parseGGUFQuantMix("Model-32I32-16I16.gguf")).toBeUndefined();
+		// F64 dropped; F32 + Q8_0 remain → still a mix, F32 dominant
+		expect(parseGGUFQuantMix("Model-50F64-30F32-20Q8_0.gguf")?.components).toEqual([
+			{ pct: 30, quant: "F32" },
+			{ pct: 20, quant: "Q8_0" },
+		]);
 	});
 
 	it("calculate tensor data offset", async () => {

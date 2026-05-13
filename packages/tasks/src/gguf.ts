@@ -221,8 +221,12 @@ export enum GGMLQuantizationType {
 // (e.g. "55IQ2_XXS", "07Q8_0"). Lookbehind/lookahead require the token to be
 // delimited by `^`, `-`, `.`, or `$` so we don't accidentally chew through
 // model size labels like "7B" or other tokens.
+// I8/I16/I32/I64/F64 are integer/float storage types for metadata tensors,
+// not quantization methods — exclude so a hypothetical "-32I32-16I16-" pair
+// isn't misread as a mix recipe.
+const _GGUF_QUANT_MIX_NON_QUANT_NAMES = new Set(["I8", "I16", "I32", "I64", "F64"]);
 const _ggmlQuantNames = Object.values(GGMLQuantizationType)
-	.filter((v): v is string => typeof v === "string")
+	.filter((v): v is string => typeof v === "string" && !_GGUF_QUANT_MIX_NON_QUANT_NAMES.has(v))
 	// Sort by length descending so "IQ2_XXS" wins over the shorter prefix "IQ2_XS".
 	.sort((a, b) => b.length - a.length);
 
