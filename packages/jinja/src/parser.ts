@@ -543,9 +543,9 @@ export function parse(tokens: Token[]): Program {
 				expect(TOKEN_TYPES.CloseSquareBracket, "Expected closing square bracket");
 			} else {
 				// non-computed (i.e., dot notation: obj.expr)
-				property = parsePrimaryExpression(); // should be an identifier
-				if (property.type !== "Identifier") {
-					throw new SyntaxError(`Expected identifier following dot operator`);
+				property = parsePrimaryExpression(); // should be an identifier or integer
+				if (property.type !== "Identifier" && property.type !== "IntegerLiteral") {
+					throw new SyntaxError(`Expected identifier or integer following dot operator`);
 				}
 			}
 			object = new MemberExpression(object, property, computed);

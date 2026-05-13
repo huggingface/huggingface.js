@@ -1044,6 +1044,119 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 		target:
 			'<|im_system|>tool_declare<|im_middle|>[{"type":"function","function":{"name":"get_current_weather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]<|im_end|><|im_system|>system<|im_middle|>You are Kimi, an AI assistant created by Moonshot AI.<|im_end|><|im_user|>user<|im_middle|>What\'s the weather like in Beijing today? Use the tool to check.<|im_end|><|im_assistant|>assistant<|im_middle|>',
 	},
+	"LiquidAI/LFM2.5-VL-450M": {
+		chat_template:
+			'{{- bos_token -}}\n{%- set keep_past_thinking = keep_past_thinking | default(false) -%}\n\n{%- macro format_arg_value(arg_value) -%}\n    {%- if arg_value is string -%}\n        {{- \'"\' + arg_value + \'"\' -}}\n    {%- elif arg_value is mapping -%}\n        {{- arg_value | tojson -}}\n    {%- else -%}\n        {{- arg_value | string -}}\n    {%- endif -%}\n{%- endmacro -%}\n\n{%- macro parse_content(content) -%}\n    {%- if content is string -%}\n        {{- content -}}\n    {%- else -%}\n        {%- set _ns = namespace(result="") -%}\n        {%- for item in content -%}\n            {%- if item.type == "image" -%}\n                {%- set _ns.result = _ns.result + "<image>" -%}\n            {%- elif item.type == "text" -%}\n                {%- set _ns.result = _ns.result + item.text -%}\n            {%- else -%}\n                {%- set _ns.result = _ns.result + item | tojson -%}\n            {%- endif -%}\n        {%- endfor -%}\n        {{- _ns.result -}}\n    {%- endif -%}\n{%- endmacro -%}\n\n{%- macro render_tool_calls(tool_calls) -%}\n    {%- set tool_calls_ns = namespace(tool_calls=[]) -%}\n    {%- for tool_call in tool_calls -%}\n        {%- set func_name = tool_call.function.name -%}\n        {%- set func_args = tool_call.function.arguments -%}\n        {%- set args_ns = namespace(arg_strings=[]) -%}\n        {%- for arg_name, arg_value in func_args.items() -%}\n            {%- set args_ns.arg_strings = args_ns.arg_strings + [arg_name + "=" + format_arg_value(arg_value)] -%}\n        {%- endfor -%}\n        {%- set tool_calls_ns.tool_calls = tool_calls_ns.tool_calls + [func_name + "(" + (args_ns.arg_strings | join(", ")) + ")"] -%}\n    {%- endfor -%}\n    {{- "<|tool_call_start|>[" + (tool_calls_ns.tool_calls | join(", ")) + "]<|tool_call_end|>" -}}\n{%- endmacro -%}\n\n{%- set ns = namespace(system_prompt="", last_assistant_index=-1) -%}\n{%- if messages[0].role == "system" -%}\n    {%- if messages[0].content is defined -%}\n        {%- set ns.system_prompt = parse_content(messages[0].content) -%}\n    {%- endif -%}\n    {%- set messages = messages[1:] -%}\n{%- endif -%}\n{%- if tools -%}\n    {%- set ns.system_prompt = ns.system_prompt + ("\\n\\n" if ns.system_prompt else "") + "Today\'s date: " + strftime_now("%Y-%m-%d") + "\\n\\nList of tools: " + (tools | tojson) -%}\n{%- endif -%}\n{%- if ns.system_prompt -%}\n    {{- "<|im_start|>system\\n" + ns.system_prompt + "<|im_end|>\\n" -}}\n{%- endif -%}\n{%- for message in messages -%}\n    {%- if message.role == "assistant" -%}\n        {%- set ns.last_assistant_index = loop.index0 -%}\n    {%- endif -%}\n{%- endfor -%}\n{%- for message in messages -%}\n    {{- "<|im_start|>" + message.role + "\\n" -}}\n    {%- if message.role == "assistant" -%}\n        {%- generation -%}\n        {%- if message.thinking is defined and (keep_past_thinking or loop.index0 == ns.last_assistant_index) -%}\n            {{- "<think>" + message.thinking + "</think>" -}}\n        {%- endif -%}\n        {%- if message.tool_calls is defined -%}\n            {{- render_tool_calls(message.tool_calls) -}}\n        {%- endif -%}\n        {%- if message.content is defined -%}\n            {%- set content = parse_content(message.content) -%}\n            {%- if not keep_past_thinking and loop.index0 != ns.last_assistant_index -%}\n                {%- if "</think>" in content -%}\n                    {%- set content = content.split("</think>")[-1] | trim -%}\n                {%- endif -%}\n            {%- endif -%}\n            {{- content + ("" if (continue_final_message and loop.last) else "<|im_end|>\\n") -}}\n        {%- endif -%}\n        {%- endgeneration -%}\n    {%- else %}\n        {%- if message.content is defined -%}\n            {{- parse_content(message.content) + "<|im_end|>\\n" -}}\n        {%- endif -%}\n    {%- endif %}\n{%- endfor -%}\n{%- if add_generation_prompt -%}\n    {{- "<|im_start|>assistant\\n" -}}\n{%- endif -%}',
+		data: {
+			messages: [
+				{
+					role: "user",
+					content: [{ type: "image" }, { type: "text", text: "What is in this image?" }],
+				},
+			],
+			add_generation_prompt: true,
+			bos_token: "<|startoftext|>",
+		},
+		target: "<|startoftext|><|im_start|>user\n<image>What is in this image?<|im_end|>\n<|im_start|>assistant\n",
+	},
+	"zai-org/GLM-5.1": {
+		chat_template:
+			"[gMASK]<sop>\n{%- if tools -%}\n{%- macro tool_to_json(tool) -%}\n    {%- set ns_tool = namespace(first=true) -%}\n    {{ '{' -}}\n    {%- for k, v in tool.items() -%}\n        {%- if k != 'defer_loading' and k != 'strict' -%}\n            {%- if not ns_tool.first -%}{{- ', ' -}}{%- endif -%}\n            {%- set ns_tool.first = false -%}\n            \"{{ k }}\": {{ v | tojson(ensure_ascii=False) }}\n        {%- endif -%}\n    {%- endfor -%}\n    {{- '}' -}}\n{%- endmacro -%}\n<|system|>\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{% for tool in tools %}\n{%- if 'function' in tool -%}\n    {%- set tool = tool['function'] -%}\n{%- endif -%}\n{% if tool.defer_loading is not defined or not tool.defer_loading %}\n{{ tool_to_json(tool) }}\n{% endif %}\n{% endfor %}\n</tools>\n\nFor each function call, output the function name and arguments within the following XML format:\n<tool_call>{function-name}<arg_key>{arg-key-1}</arg_key><arg_value>{arg-value-1}</arg_value><arg_key>{arg-key-2}</arg_key><arg_value>{arg-value-2}</arg_value>...</tool_call>{%- endif -%}\n{%- macro visible_text(content) -%}\n    {%- if content is string -%}\n        {{- content }}\n    {%- elif content is iterable and content is not mapping -%}\n        {%- for item in content -%}\n            {%- if item is mapping and item.type == 'text' -%}\n                {{- item.text }}\n            {%- elif item is string -%}\n                {{- item }}\n            {%- endif -%}\n        {%- endfor -%}\n    {%- else -%}\n        {{- content }}\n    {%- endif -%}\n{%- endmacro -%}\n{%- set ns = namespace(last_user_index=-1, thinking_indices='') -%}\n{%- for m in messages %}\n    {%- if m.role == 'user' %}\n        {%- set ns.last_user_index = loop.index0 -%}\n    {%- elif m.role == 'assistant' %}\n        {%- if m.reasoning_content is string %}\n            {%- set ns.thinking_indices = ns.thinking_indices ~ ',' ~ ns.last_user_index ~ ',' -%}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- set ns.has_thinking = false -%}\n{%- for m in messages -%}\n{%- if m.role == 'user' -%}<|user|>{{ visible_text(m.content) }}{% set ns.has_thinking = (',' ~ loop.index0 ~ ',') in ns.thinking_indices -%}\n{%- elif m.role == 'assistant' -%}\n<|assistant|>\n{%- set content = visible_text(m.content) %}\n{%- if m.reasoning_content is string %}\n    {%- set reasoning_content = m.reasoning_content %}\n{%- elif '</think>' in content %}\n    {%- set reasoning_content = content.split('</think>')[0].split('<think>')[-1] %}\n    {%- set content = content.split('</think>')[-1] %}\n{%- elif loop.index0 > ns.last_user_index and not (enable_thinking is defined and not enable_thinking) %}\n    {%- set reasoning_content = '' %}\n{%- elif loop.index0 < ns.last_user_index and ns.has_thinking %}\n    {%- set reasoning_content = '' %}\n{%- endif %}\n{%- if ((clear_thinking is defined and not clear_thinking) or loop.index0 > ns.last_user_index) and reasoning_content is defined -%}\n{{ '<think>' + reasoning_content +  '</think>'}}\n{%- else -%}\n{{ '</think>' }}\n{%- endif -%}\n{%- if content.strip() -%}\n{{ content.strip() }}\n{%- endif -%}\n{% if m.tool_calls %}\n{% for tc in m.tool_calls %}\n{%- if tc.function %}\n    {%- set tc = tc.function %}\n{%- endif %}\n{{- '<tool_call>' + tc.name -}}\n{% set _args = tc.arguments %}{% for k, v in _args.items() %}<arg_key>{{ k }}</arg_key><arg_value>{{ v | tojson(ensure_ascii=False) if v is not string else v }}</arg_value>{% endfor %}</tool_call>{% endfor %}\n{% endif %}\n{%- elif m.role == 'tool' -%}\n{%- if loop.first or (messages[loop.index0 - 1].role != \"tool\") %}\n    {{- '<|observation|>' -}}\n{%- endif %}\n{%- if m.content is string -%}\n    {{- '<tool_response>' + m.content + '</tool_response>' -}}\n{%- elif m.content is iterable and m.content is not mapping and m.content and m.content.0.type == \"tool_reference\" -%}\n    {{- '<tool_response><tools>\\n' -}}\n    {% for tr in m.content %}\n        {%- for tool in tools -%}\n            {%- if 'function' in tool -%}\n                {%- set tool = tool['function'] -%}\n            {%- endif -%}\n            {%- if tool.name == tr.name -%}\n                {{- tool_to_json(tool) + '\\n' -}}\n            {%- endif -%}\n        {%- endfor -%}\n    {%- endfor -%}\n    {{- '</tools></tool_response>' -}}\n{%- else -%}\n    {{- '<tool_response>' + visible_text(m.content) + '</tool_response>' -}}\n{% endif -%}\n{%- elif m.role == 'system' -%}\n<|system|>{{ visible_text(m.content) }}\n{%- endif -%}\n{%- endfor -%}\n{%- if add_generation_prompt -%}\n    <|assistant|>{{- '</think>' if (enable_thinking is defined and not enable_thinking) else '<think>' -}}\n{%- endif -%}",
+		data: {
+			messages: [
+				{
+					role: "user",
+					content: "Load the referenced tools.",
+				},
+				{
+					role: "assistant",
+					content: "",
+					tool_calls: [
+						{
+							function: {
+								name: "load_tools",
+								arguments: {
+									names: ["get_weather", "get_time"],
+								},
+							},
+						},
+					],
+				},
+				{
+					role: "tool",
+					tool_call_id: "call_load_tools_1",
+					content: [
+						{
+							type: "tool_reference",
+							name: "get_weather",
+						},
+						{
+							type: "tool_reference",
+							name: "get_time",
+						},
+					],
+				},
+			],
+			tools: [
+				{
+					type: "function",
+					function: {
+						name: "load_tools",
+						description: "Load one or more deferred tools by name.",
+						parameters: {
+							type: "object",
+							properties: {
+								names: {
+									type: "array",
+									items: { type: "string" },
+									description: "Tool names to load.",
+								},
+							},
+							required: ["names"],
+						},
+					},
+				},
+				{
+					type: "function",
+					function: {
+						name: "get_weather",
+						description: "Get the weather for a location.",
+						defer_loading: true,
+						parameters: {
+							type: "object",
+							properties: {
+								location: {
+									type: "string",
+									description: "City or location name.",
+								},
+							},
+							required: ["location"],
+						},
+					},
+				},
+				{
+					type: "function",
+					function: {
+						name: "get_time",
+						description: "Get the local time for a location.",
+						defer_loading: true,
+						parameters: {
+							type: "object",
+							properties: {
+								location: {
+									type: "string",
+									description: "City or location name.",
+								},
+							},
+							required: ["location"],
+						},
+					},
+				},
+			],
+		},
+		target:
+			'[gMASK]<sop><|system|>\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{"name": "load_tools", "description": "Load one or more deferred tools by name.", "parameters": {"type": "object", "properties": {"names": {"type": "array", "items": {"type": "string"}, "description": "Tool names to load."}}, "required": ["names"]}}\n</tools>\n\nFor each function call, output the function name and arguments within the following XML format:\n<tool_call>{function-name}<arg_key>{arg-key-1}</arg_key><arg_value>{arg-value-1}</arg_value><arg_key>{arg-key-2}</arg_key><arg_value>{arg-value-2}</arg_value>...</tool_call><|user|>Load the referenced tools.<|assistant|><think></think><tool_call>load_tools<arg_key>names</arg_key><arg_value>["get_weather", "get_time"]</arg_value></tool_call><|observation|><tool_response><tools>\n{"name": "get_weather", "description": "Get the weather for a location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "City or location name."}}, "required": ["location"]}}\n{"name": "get_time", "description": "Get the local time for a location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "City or location name."}}, "required": ["location"]}}\n</tools></tool_response>',
+	},
 });
 
 /**

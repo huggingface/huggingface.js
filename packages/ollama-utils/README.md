@@ -7,7 +7,7 @@ For now, we are exposing chat template conversion to the Go format used by Ollam
 ## Chat template converter
 
 ```ts
-import { convertJinjaToGoTemplate } from "@huggingface/ollama-utils";
+import { convertGGUFTemplateToOllama } from "@huggingface/ollama-utils";
 
 const MODEL_INFO_URL = "https://huggingface.co/api/models/bartowski/Llama-3.2-3B-Instruct-GGUF?expand[]=gguf";
 const modelInfo = await (await fetch(MODEL_INFO_URL)).json();
@@ -22,7 +22,7 @@ console.log(modelInfo);
  *   }
  * }
  */
-const convertedTemplate = convertJinjaToGoTemplate(modelInfo.gguf);
+const convertedTemplate = convertGGUFTemplateToOllama(modelInfo.gguf);
 if (convertedTemplate) {
   console.log(convertedTemplate.ollama);
   /**

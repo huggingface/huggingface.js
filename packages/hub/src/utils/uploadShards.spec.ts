@@ -91,6 +91,17 @@ function toSource(sha256?: string): AsyncGenerator<{ content: Blob; path: string
 	})();
 }
 
+function toMultiSource(paths: string[]): AsyncGenerator<{ content: Blob; path: string; sha256?: string }> {
+	return (async function* () {
+		for (const path of paths) {
+			yield {
+				content: new Blob(["content"]),
+				path,
+			};
+		}
+	})();
+}
+
 describe("uploadShards", () => {
 	it("omits metadata flag and metadata section when sha256 is missing", async () => {
 		const uploadedShards: Uint8Array[] = [];
@@ -165,6 +176,55 @@ describe("uploadShards", () => {
 		expect(readFileEntryInfo(uploadedShards[0])).toEqual({
 			flags: MDB_FILE_FLAG_WITH_VERIFICATION + MDB_FILE_FLAG_WITH_METADATA_EXT,
 			fileEntryLength: FILE_ENTRY_BASE_SIZE + REPRESENTATION_ENTRY_SIZE + VERIFICATION_ENTRY_SIZE + METADATA_ENTRY_SIZE,
+		});
+	});
+
+	it("dedupes file entries with the same xet hash within a shard", async () => {
+		const uploadedShards: Uint8Array[] = [];
+		const fetchMock: typeof fetch = vi.fn(async (input, init) => {
+			const url = String(input);
+
+			if (url.endsWith("/v1/shards")) {
+				if (!(init?.body instanceof Uint8Array)) {
+					throw new Error("Expected Uint8Array shard body");
+				}
+				uploadedShards.push(new Uint8Array(init.body));
+			}
+
+			return new Response(null, { status: 200 });
+		});
+
+		const fileEvents: Array<{ path: string; xetHash: string }> = [];
+		for await (const event of uploadShards(toMultiSource(["a.bin", "b.bin", "c.bin"]), {
+			accessToken: "test-token",
+			hubUrl: "https://hub.local",
+			fetch: fetchMock,
+			repo: { type: "model", name: "user/repo" },
+			rev: "main",
+			xetParams: {
+				casUrl: "https://cas.local",
+				accessToken: "cas-token",
+				expiresAt: new Date(Date.now() + 600_000),
+				refreshWriteTokenUrl: "https://hub.local/xet-write-token",
+			},
+		})) {
+			if (event.event === "file") {
+				fileEvents.push({ path: event.path, xetHash: event.xetHash });
+			}
+		}
+
+		// Each path still gets its file event yielded so callers can map path -> hash.
+		expect(fileEvents).toEqual([
+			{ path: "a.bin", xetHash: "3".repeat(64) },
+			{ path: "b.bin", xetHash: "3".repeat(64) },
+			{ path: "c.bin", xetHash: "3".repeat(64) },
+		]);
+
+		// But only one file entry is written into the shard.
+		expect(uploadedShards).toHaveLength(1);
+		expect(readFileEntryInfo(uploadedShards[0])).toEqual({
+			flags: MDB_FILE_FLAG_WITH_VERIFICATION,
+			fileEntryLength: FILE_ENTRY_BASE_SIZE + REPRESENTATION_ENTRY_SIZE + VERIFICATION_ENTRY_SIZE,
 		});
 	});
 });
