@@ -3,121 +3,121 @@ import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
-import { copyFiles, parseHfCopyHandle } from "./copy-files";
+import { copyFile, copyFiles, copyFolder, relativeUnderFolder } from "./copy-files";
 import { listFiles } from "./list-files";
 import { commit } from "./commit";
 
-describe("parseHfCopyHandle", () => {
-	it("should parse a bucket handle", () => {
-		const handle = parseHfCopyHandle("hf://buckets/namespace/bucket-name/path/to/file");
-		expect(handle).toEqual({
-			type: "bucket",
-			bucketId: "namespace/bucket-name",
-			path: "path/to/file",
-		});
+describe("relativeUnderFolder", () => {
+	it("returns the basename when filePath equals folderPath (single-file folder)", () => {
+		expect(relativeUnderFolder("data/train.parquet", "data/train.parquet")).toBe("train.parquet");
 	});
 
-	it("should parse a bucket handle without path", () => {
-		const handle = parseHfCopyHandle("hf://buckets/namespace/bucket-name");
-		expect(handle).toEqual({
-			type: "bucket",
-			bucketId: "namespace/bucket-name",
-			path: "",
-		});
+	it("returns the path relative to the folder", () => {
+		expect(relativeUnderFolder("data/2024/train.parquet", "data")).toBe("2024/train.parquet");
 	});
 
-	it("should parse a model repo handle (implicit)", () => {
-		const handle = parseHfCopyHandle("hf://username/my-model/weights.bin");
-		expect(handle).toEqual({
-			type: "repo",
-			repoType: "model",
-			repoId: "username/my-model",
-			revision: "main",
-			path: "weights.bin",
-		});
+	it("returns the filePath unchanged when folderPath is empty", () => {
+		expect(relativeUnderFolder("a/b/c.txt", "")).toBe("a/b/c.txt");
 	});
 
-	it("should parse a model repo handle (explicit)", () => {
-		const handle = parseHfCopyHandle("hf://models/username/my-model/weights.bin");
-		expect(handle).toEqual({
-			type: "repo",
-			repoType: "model",
-			repoId: "username/my-model",
-			revision: "main",
-			path: "weights.bin",
-		});
-	});
-
-	it("should parse a dataset repo handle", () => {
-		const handle = parseHfCopyHandle("hf://datasets/username/my-dataset/data/train.parquet");
-		expect(handle).toEqual({
-			type: "repo",
-			repoType: "dataset",
-			repoId: "username/my-dataset",
-			revision: "main",
-			path: "data/train.parquet",
-		});
-	});
-
-	it("should parse a space repo handle", () => {
-		const handle = parseHfCopyHandle("hf://spaces/username/my-space/app.py");
-		expect(handle).toEqual({
-			type: "repo",
-			repoType: "space",
-			repoId: "username/my-space",
-			revision: "main",
-			path: "app.py",
-		});
-	});
-
-	it("should parse a handle with revision", () => {
-		const handle = parseHfCopyHandle("hf://username/my-model@dev/weights.bin");
-		expect(handle).toEqual({
-			type: "repo",
-			repoType: "model",
-			repoId: "username/my-model",
-			revision: "dev",
-			path: "weights.bin",
-		});
-	});
-
-	it("should parse a handle with no subpath", () => {
-		const handle = parseHfCopyHandle("hf://datasets/username/my-dataset");
-		expect(handle).toEqual({
-			type: "repo",
-			repoType: "dataset",
-			repoId: "username/my-dataset",
-			revision: "main",
-			path: "",
-		});
-	});
-
-	it("should throw for invalid handle", () => {
-		expect(() => parseHfCopyHandle("not-a-hf-handle")).toThrow("Expected a path starting with 'hf://'");
-	});
-
-	it("should throw for empty handle", () => {
-		expect(() => parseHfCopyHandle("hf://")).toThrow("Invalid HF handle");
-	});
-
-	it("should throw for handle with only repo type", () => {
-		expect(() => parseHfCopyHandle("hf://models/alone")).toThrow("Invalid repo HF handle");
+	it("throws when filePath is not under folderPath", () => {
+		expect(() => relativeUnderFolder("foo/bar", "baz")).toThrow("not inside folder");
 	});
 });
 
-describe("copyFiles", () => {
-	it("should reject non-bucket destinations", async () => {
+describe("copyFiles (mocked)", () => {
+	it("rejects copy ops on a non-bucket destination", async () => {
 		await expect(
 			copyFiles({
-				source: "hf://buckets/ns/bucket/file.bin",
-				destination: "hf://models/ns/repo/file.bin",
+				destination: { type: "model", name: "ns/repo" } as never,
+				files: [
+					{
+						source: { type: "bucket", name: "ns/bucket" },
+						sourcePath: "file.bin",
+						destinationPath: "file.bin",
+					},
+				],
 				accessToken: TEST_ACCESS_TOKEN,
-				hubUrl: TEST_HUB_URL,
+				hubUrl: "https://example.invalid",
+				fetch: mockFetch({
+					"/api/buckets/ns/bucket/paths-info": () =>
+						jsonResponse([{ path: "file.bin", type: "file", size: 5, xetHash: "abc123" }]),
+				}),
 			}),
-		).rejects.toThrow("Destination must be a bucket");
+		).rejects.toThrow("'copy' operations are only supported when the destination repo is a bucket");
 	});
 
-	it("should copy files from one bucket to another", async () => {
+	it("throws when the source path is a folder", async () => {
+		await expect(
+			copyFiles({
+				destination: { type: "bucket", name: "ns/dst" },
+				files: [
+					{
+						source: { type: "model", name: "ns/model" },
+						sourcePath: "data",
+						destinationPath: "data",
+					},
+				],
+				accessToken: TEST_ACCESS_TOKEN,
+				hubUrl: "https://example.invalid",
+				fetch: mockFetch({
+					"/api/models/ns/model/paths-info": () => jsonResponse([{ path: "data", type: "directory", size: 0 }]),
+				}),
+			}),
+		).rejects.toThrow("is a folder; use copyFolder()");
+	});
+
+	it("throws a clear error when the source file is missing", async () => {
+		await expect(
+			copyFiles({
+				destination: { type: "bucket", name: "ns/dst" },
+				files: [
+					{
+						source: { type: "model", name: "ns/model" },
+						sourcePath: "missing.txt",
+						destinationPath: "missing.txt",
+					},
+				],
+				accessToken: TEST_ACCESS_TOKEN,
+				hubUrl: "https://example.invalid",
+				fetch: mockFetch({
+					"/api/models/ns/model/paths-info": () => jsonResponse([]),
+				}),
+			}),
+		).rejects.toThrow("Source file not found");
+	});
+
+	it("refuses to copy unmigrated LFS files and reports their size", async () => {
+		await expect(
+			copyFiles({
+				destination: { type: "bucket", name: "ns/dst" },
+				files: [
+					{
+						source: { type: "model", name: "ns/model" },
+						sourcePath: "model.safetensors",
+						destinationPath: "model.safetensors",
+					},
+				],
+				accessToken: TEST_ACCESS_TOKEN,
+				hubUrl: "https://example.invalid",
+				fetch: mockFetch({
+					"/api/models/ns/model/paths-info": () =>
+						jsonResponse([
+							{
+								path: "model.safetensors",
+								type: "file",
+								size: 5_300_000_000,
+								lfs: { oid: "deadbeef", size: 5_300_000_000, pointerSize: 134 },
+							},
+						]),
+				}),
+			}),
+		).rejects.toThrow(/LFS file\(s\).*'model\.safetensors' \(5\.30 GB\).*Migrate these files to xet/s);
+	});
+});
+
+describe("copyFile / copyFiles / copyFolder (integration)", () => {
+	it("copies a single file from one bucket to another", async () => {
 		const srcBucketName = `${TEST_USER}/TEST-src-${insecureRandomString()}`;
 		const dstBucketName = `${TEST_USER}/TEST-dst-${insecureRandomString()}`;
 
@@ -148,9 +148,11 @@ describe("copyFiles", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-			await copyFiles({
-				source: `hf://buckets/${srcBucketName}/test-file.txt`,
-				destination: `hf://buckets/${dstBucketName}/`,
+			await copyFile({
+				source: { type: "bucket", name: srcBucketName },
+				sourcePath: "test-file.txt",
+				destination: { type: "bucket", name: dstBucketName },
+				destinationPath: "test-file.txt",
 				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});
@@ -183,7 +185,7 @@ describe("copyFiles", () => {
 		}
 	});
 
-	it("should copy files from a repo to a bucket", async () => {
+	it("copies a folder from a model repo to a bucket", async () => {
 		const srcRepoName = `${TEST_USER}/TEST-repo-${insecureRandomString()}`;
 		const dstBucketName = `${TEST_USER}/TEST-dst-${insecureRandomString()}`;
 
@@ -214,9 +216,10 @@ describe("copyFiles", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-			await copyFiles({
-				source: `hf://models/${srcRepoName}`,
-				destination: `hf://buckets/${dstBucketName}/models/test/`,
+			await copyFolder({
+				source: { type: "model", name: srcRepoName },
+				destination: { type: "bucket", name: dstBucketName },
+				destinationPath: "models/test/",
 				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});
@@ -233,7 +236,7 @@ describe("copyFiles", () => {
 				}
 			}
 
-			expect(files.some((f) => f.includes("config.json"))).toBe(true);
+			expect(files).toContain("models/test/config.json");
 		} finally {
 			await deleteRepo({
 				repo: { name: srcRepoName, type: "model" },
@@ -249,3 +252,24 @@ describe("copyFiles", () => {
 		}
 	});
 });
+
+function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
+	return new Response(JSON.stringify(body), {
+		status: init.status ?? 200,
+		headers: { "Content-Type": "application/json", ...(init.headers ?? {}) },
+	});
+}
+
+type MockHandler = (req: Request) => Response | Promise<Response>;
+
+function mockFetch(routes: Record<string, MockHandler>): typeof fetch {
+	return async (input, init) => {
+		const req = new Request(input as RequestInfo, init);
+		const url = new URL(req.url);
+		const matched = Object.entries(routes).find(([prefix]) => url.pathname.startsWith(prefix));
+		if (!matched) {
+			throw new Error(`Unexpected request to ${req.method} ${url.pathname}`);
+		}
+		return matched[1](req);
+	};
+}
