@@ -16,25 +16,51 @@ const PATHS_INFO_BATCH_SIZE = 100;
 const MAX_REPORTED_LFS_PATHS = 5;
 
 /**
- * One file to copy in a {@link copyFiles} call.
+ * Source location of a file in {@link copyFile} / {@link copyFiles} / {@link copyFolder}.
  */
-export interface CopyFile {
-	source: RepoDesignation;
-	sourcePath: string;
+export interface CopySource {
+	repo: RepoDesignation;
+	/**
+	 * Path of the file (or folder, for {@link copyFolder}) inside the source repo.
+	 * Leave empty in {@link copyFolder} to copy the whole repo.
+	 */
+	path: string;
 	/**
 	 * Git revision to read the source from. Ignored for bucket sources.
 	 *
 	 * @default "main"
 	 */
-	sourceRevision?: string;
+	revision?: string;
+}
+
+/**
+ * Destination location for {@link copyFile} / {@link copyFolder}.
+ *
+ * The destination repo must be a bucket — server-side copy is currently only supported
+ * towards buckets.
+ */
+export interface CopyDestination {
+	repo: BucketDesignation;
 	/**
-	 * Exact destination path within the destination bucket.
+	 * Exact destination path within the destination bucket. For {@link copyFolder},
+	 * acts as a prefix; leave empty to copy under the bucket root.
+	 */
+	path: string;
+}
+
+/**
+ * One file to copy in a {@link copyFiles} call.
+ */
+export interface CopyFilesEntry {
+	source: CopySource;
+	/**
+	 * Exact path within the destination bucket. The bucket itself is shared with the
+	 * other entries via the top-level {@link copyFiles} `destination` parameter.
 	 */
 	destinationPath: string;
 }
 
 type SharedParams = {
-	destination: BucketDesignation;
 	hubUrl?: CommitParams["hubUrl"];
 	fetch?: CommitParams["fetch"];
 	abortSignal?: CommitParams["abortSignal"];
@@ -47,27 +73,37 @@ type SharedParams = {
  * For small non-xet repo files (e.g. `config.json`) the file is downloaded and
  * re-uploaded to the destination bucket in the same commit.
  *
+ * LFS pointer files that have not been migrated to xet are rejected up front
+ * (they would otherwise require downloading the full LFS blob).
+ *
  * @example
  * ```ts
  * await copyFile({
- *   source: { type: "model", name: "username/my-model" },
- *   sourcePath: "model.safetensors",
- *   destination: { type: "bucket", name: "username/my-bucket" },
- *   destinationPath: "models/my-model/model.safetensors",
+ *   source: {
+ *     repo: { type: "model", name: "username/my-model" },
+ *     path: "model.safetensors",
+ *   },
+ *   destination: {
+ *     repo: { type: "bucket", name: "username/my-bucket" },
+ *     path: "models/my-model/model.safetensors",
+ *   },
  *   accessToken: "hf_...",
  * });
  * ```
  */
-export function copyFile(params: CopyFile & SharedParams): Promise<undefined> {
+export function copyFile(
+	params: {
+		source: CopySource;
+		destination: CopyDestination;
+	} & SharedParams,
+): Promise<undefined> {
 	return copyFiles({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
-		destination: params.destination,
+		destination: params.destination.repo,
 		files: [
 			{
 				source: params.source,
-				sourcePath: params.sourcePath,
-				sourceRevision: params.sourceRevision,
-				destinationPath: params.destinationPath,
+				destinationPath: params.destination.path,
 			},
 		],
 		hubUrl: params.hubUrl,
@@ -84,19 +120,25 @@ export function copyFile(params: CopyFile & SharedParams): Promise<undefined> {
  * For non-xet source files (typically small git-stored repo files), the file is
  * downloaded and re-uploaded as part of the same commit.
  *
+ * LFS pointer files that have not been migrated to xet are rejected up front.
+ *
  * @example
  * ```ts
  * await copyFiles({
  *   destination: { type: "bucket", name: "username/my-bucket" },
  *   files: [
  *     {
- *       source: { type: "bucket", name: "username/other-bucket" },
- *       sourcePath: "data.bin",
+ *       source: {
+ *         repo: { type: "bucket", name: "username/other-bucket" },
+ *         path: "data.bin",
+ *       },
  *       destinationPath: "data.bin",
  *     },
  *     {
- *       source: { type: "model", name: "username/my-model" },
- *       sourcePath: "model.safetensors",
+ *       source: {
+ *         repo: { type: "model", name: "username/my-model" },
+ *         path: "model.safetensors",
+ *       },
  *       destinationPath: "models/my-model/model.safetensors",
  *     },
  *   ],
@@ -106,7 +148,8 @@ export function copyFile(params: CopyFile & SharedParams): Promise<undefined> {
  */
 export async function copyFiles(
 	params: {
-		files: CopyFile[];
+		destination: BucketDesignation;
+		files: CopyFilesEntry[];
 	} & SharedParams,
 ): Promise<undefined> {
 	if (params.files.length === 0) {
@@ -131,54 +174,47 @@ export async function copyFiles(
  * Copy a folder (recursively) from a source repo/bucket to the destination bucket
  * in a single commit.
  *
- * Per-file paths are resolved relative to {@link sourcePath}; the source folder
- * itself is not preserved in the destination unless {@link destinationPath} keeps it.
+ * Per-file paths are resolved relative to {@link CopySource.path}; the source folder
+ * itself is not preserved in the destination unless {@link CopyDestination.path}
+ * keeps it.
  *
  * @example
  * ```ts
  * // Copy an entire dataset under "datasets/my-dataset/" in the bucket
  * await copyFolder({
- *   source: { type: "dataset", name: "username/my-dataset" },
- *   destination: { type: "bucket", name: "username/my-bucket" },
- *   destinationPath: "datasets/my-dataset/",
+ *   source: { repo: { type: "dataset", name: "username/my-dataset" } },
+ *   destination: {
+ *     repo: { type: "bucket", name: "username/my-bucket" },
+ *     path: "datasets/my-dataset/",
+ *   },
  *   accessToken: "hf_...",
  * });
  *
  * // Copy a subfolder
  * await copyFolder({
- *   source: { type: "bucket", name: "username/src-bucket" },
- *   sourcePath: "models/",
- *   destination: { type: "bucket", name: "username/dst-bucket" },
- *   destinationPath: "backup/",
+ *   source: {
+ *     repo: { type: "bucket", name: "username/src-bucket" },
+ *     path: "models/",
+ *   },
+ *   destination: {
+ *     repo: { type: "bucket", name: "username/dst-bucket" },
+ *     path: "backup/",
+ *   },
  *   accessToken: "hf_...",
  * });
  * ```
  */
 export async function copyFolder(
 	params: {
-		source: RepoDesignation;
-		/**
-		 * Path of the folder inside the source repo. Leave empty to copy the whole repo.
-		 */
-		sourcePath?: string;
-		/**
-		 * Git revision to read the source from. Ignored for bucket sources.
-		 *
-		 * @default "main"
-		 */
-		sourceRevision?: string;
-		/**
-		 * Prefix in the destination bucket where the folder will be copied.
-		 * Leave empty to copy under the bucket root.
-		 */
-		destinationPath?: string;
+		source: Omit<CopySource, "path"> & { path?: string };
+		destination: Omit<CopyDestination, "path"> & { path?: string };
 	} & SharedParams,
 ): Promise<undefined> {
 	const accessToken = checkCredentials(params);
-	const sourceRepoId = toRepoId(params.source);
-	const sourcePath = (params.sourcePath ?? "").replace(/\/+$/, "");
-	const destinationPrefix = (params.destinationPath ?? "").replace(/\/+$/, "");
-	const sourceRevision = sourceRepoId.type === "bucket" ? undefined : (params.sourceRevision ?? "main");
+	const sourceRepoId = toRepoId(params.source.repo);
+	const sourcePath = (params.source.path ?? "").replace(/\/+$/, "");
+	const destinationPrefix = (params.destination.path ?? "").replace(/\/+$/, "");
+	const sourceRevision = sourceRepoId.type === "bucket" ? undefined : (params.source.revision ?? "main");
 
 	const operations: CommitOperation[] = [];
 	const pendingDownloads: Array<{ index: number; sourcePath: string }> = [];
@@ -246,7 +282,7 @@ export async function copyFolder(
 
 	await commit({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
-		repo: params.destination,
+		repo: params.destination.repo,
 		operations,
 		title: "",
 		hubUrl: params.hubUrl,
@@ -257,10 +293,10 @@ export async function copyFolder(
 }
 
 /**
- * Resolve a list of {@link CopyFile} entries into `CommitOperation`s, batching `pathsInfo`
- * calls per source repo and parallelizing downloads for non-xet files.
+ * Resolve a list of {@link CopyFilesEntry} entries into `CommitOperation`s, batching
+ * `pathsInfo` calls per source repo and parallelizing downloads for non-xet files.
  */
-async function resolveCopyOperations(shared: SharedParams, files: CopyFile[]): Promise<CommitOperation[]> {
+async function resolveCopyOperations(shared: SharedParams, files: CopyFilesEntry[]): Promise<CommitOperation[]> {
 	const accessToken = checkCredentials(shared);
 
 	// Group files by (source repo, source revision) so we can batch pathsInfo calls.
@@ -269,14 +305,14 @@ async function resolveCopyOperations(shared: SharedParams, files: CopyFile[]): P
 		{
 			repoId: RepoId;
 			revision: string | undefined;
-			entries: Array<{ index: number; file: CopyFile }>;
+			entries: Array<{ index: number; file: CopyFilesEntry }>;
 		}
 	>();
 
 	for (let i = 0; i < files.length; i++) {
 		const file = files[i];
-		const repoId = toRepoId(file.source);
-		const revision = repoId.type === "bucket" ? undefined : (file.sourceRevision ?? "main");
+		const repoId = toRepoId(file.source.repo);
+		const revision = repoId.type === "bucket" ? undefined : (file.source.revision ?? "main");
 		const key = `${repoId.type}\0${repoId.name}\0${revision ?? ""}`;
 
 		let group = groups.get(key);
@@ -292,7 +328,7 @@ async function resolveCopyOperations(shared: SharedParams, files: CopyFile[]): P
 		[];
 
 	for (const group of groups.values()) {
-		const paths = group.entries.map((e) => e.file.sourcePath);
+		const paths = group.entries.map((e) => e.file.source.path);
 
 		const infos: Awaited<ReturnType<typeof pathsInfo>> = [];
 		for (let offset = 0; offset < paths.length; offset += PATHS_INFO_BATCH_SIZE) {
@@ -312,13 +348,13 @@ async function resolveCopyOperations(shared: SharedParams, files: CopyFile[]): P
 		const lfsOffenders: Array<{ path: string; size: number }> = [];
 
 		for (const { index, file } of group.entries) {
-			const info = infoByPath.get(file.sourcePath);
+			const info = infoByPath.get(file.source.path);
 			if (!info) {
-				throw new Error(`Source file not found: '${file.sourcePath}' in ${group.repoId.type}s/${group.repoId.name}`);
+				throw new Error(`Source file not found: '${file.source.path}' in ${group.repoId.type}s/${group.repoId.name}`);
 			}
 			if (info.type !== "file") {
 				throw new Error(
-					`Source path '${file.sourcePath}' in ${group.repoId.type}s/${group.repoId.name} is a folder; use copyFolder() instead.`,
+					`Source path '${file.source.path}' in ${group.repoId.type}s/${group.repoId.name} is a folder; use copyFolder() instead.`,
 				);
 			}
 
@@ -332,14 +368,14 @@ async function resolveCopyOperations(shared: SharedParams, files: CopyFile[]): P
 					};
 					continue;
 				case "lfs":
-					lfsOffenders.push({ path: file.sourcePath, size: info.lfs?.size ?? info.size });
+					lfsOffenders.push({ path: file.source.path, size: info.lfs?.size ?? info.size });
 					continue;
 				case "download":
 					pendingDownloads.push({
 						index,
 						repoId: group.repoId,
 						revision: group.revision,
-						sourcePath: file.sourcePath,
+						sourcePath: file.source.path,
 					});
 					operations[index] = {
 						operation: "addOrUpdate",

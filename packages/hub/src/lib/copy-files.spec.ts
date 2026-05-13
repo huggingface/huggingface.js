@@ -32,8 +32,7 @@ describe("copyFiles (mocked)", () => {
 				destination: { type: "model", name: "ns/repo" } as never,
 				files: [
 					{
-						source: { type: "bucket", name: "ns/bucket" },
-						sourcePath: "file.bin",
+						source: { repo: { type: "bucket", name: "ns/bucket" }, path: "file.bin" },
 						destinationPath: "file.bin",
 					},
 				],
@@ -53,8 +52,7 @@ describe("copyFiles (mocked)", () => {
 				destination: { type: "bucket", name: "ns/dst" },
 				files: [
 					{
-						source: { type: "model", name: "ns/model" },
-						sourcePath: "data",
+						source: { repo: { type: "model", name: "ns/model" }, path: "data" },
 						destinationPath: "data",
 					},
 				],
@@ -73,8 +71,7 @@ describe("copyFiles (mocked)", () => {
 				destination: { type: "bucket", name: "ns/dst" },
 				files: [
 					{
-						source: { type: "model", name: "ns/model" },
-						sourcePath: "missing.txt",
+						source: { repo: { type: "model", name: "ns/model" }, path: "missing.txt" },
 						destinationPath: "missing.txt",
 					},
 				],
@@ -93,8 +90,7 @@ describe("copyFiles (mocked)", () => {
 				destination: { type: "bucket", name: "ns/dst" },
 				files: [
 					{
-						source: { type: "model", name: "ns/model" },
-						sourcePath: "model.safetensors",
+						source: { repo: { type: "model", name: "ns/model" }, path: "model.safetensors" },
 						destinationPath: "model.safetensors",
 					},
 				],
@@ -149,10 +145,8 @@ describe("copyFile / copyFiles / copyFolder (integration)", () => {
 			});
 
 			await copyFile({
-				source: { type: "bucket", name: srcBucketName },
-				sourcePath: "test-file.txt",
-				destination: { type: "bucket", name: dstBucketName },
-				destinationPath: "test-file.txt",
+				source: { repo: { type: "bucket", name: srcBucketName }, path: "test-file.txt" },
+				destination: { repo: { type: "bucket", name: dstBucketName }, path: "test-file.txt" },
 				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});
@@ -217,9 +211,11 @@ describe("copyFile / copyFiles / copyFolder (integration)", () => {
 			});
 
 			await copyFolder({
-				source: { type: "model", name: srcRepoName },
-				destination: { type: "bucket", name: dstBucketName },
-				destinationPath: "models/test/",
+				source: { repo: { type: "model", name: srcRepoName } },
+				destination: {
+					repo: { type: "bucket", name: dstBucketName },
+					path: "models/test/",
+				},
 				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});
