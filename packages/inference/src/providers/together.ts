@@ -260,8 +260,8 @@ export class TogetherImageToImageTask extends TogetherTextToImageTask implements
 			...omit(params.args, ["inputs", "parameters"]),
 			prompt: prompt ?? "",
 			...imageField,
-			response_format: "base64",
 			...restParameters,
+			response_format: "base64",
 			model: params.model,
 		};
 	}
