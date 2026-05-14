@@ -248,10 +248,10 @@ export class TogetherImageToImageTask extends TogetherTextToImageTask implements
 		// https://docs.together.ai/docs/image-to-image): FLUX.1 Kontext only accepts
 		// `image_url`; FLUX.2 [dev] and Google models (Gemini 3 Pro Image, Flash Image
 		// 2.5) only accept `reference_images`. FLUX.2 [pro]/[flex] accept either but
-		// `reference_images` is the documented default. Use `image_url` for FLUX.1
-		// (incl. all Kontext variants) and `reference_images` for everything else.
+		// `reference_images` is the documented default. Use `image_url` only for
+		// FLUX.1 Kontext models and `reference_images` for everything else.
 		const lowered = params.model.toLowerCase();
-		const useImageUrl = lowered.includes("kontext") || lowered.includes("flux.1");
+		const useImageUrl = lowered.includes("kontext") && lowered.includes("flux.1");
 		const imageField: Record<string, unknown> = useImageUrl
 			? { image_url: params.args.inputs }
 			: { reference_images: [params.args.inputs] };
