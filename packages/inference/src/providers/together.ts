@@ -22,19 +22,30 @@ import type {
 	TextGenerationOutputFinishReason,
 } from "@huggingface/tasks";
 import type { BodyParams, OutputType, RequestArgs } from "../types.js";
+import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import {
 	BaseConversationalTask,
 	BaseTextGenerationTask,
 	TaskProviderHelper,
 	type AutomaticSpeechRecognitionTaskHelper,
 	type FeatureExtractionTaskHelper,
+	type ImageToImageTaskHelper,
+	type ImageToVideoTaskHelper,
 	type TextToImageTaskHelper,
 	type TextToSpeechTaskHelper,
+	type TextToVideoTaskHelper,
 } from "./providerHelper.js";
-import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
+import {
+	InferenceClientInputError,
+	InferenceClientProviderApiError,
+	InferenceClientProviderOutputError,
+} from "../errors.js";
 import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
 
@@ -97,6 +108,17 @@ interface TogetherAudioTranscriptionResponse {
 	segments?: TogetherAudioTranscriptionSegment[];
 }
 
+interface TogetherVideoJobResponse {
+	id: string;
+	status?: string;
+	outputs?: {
+		video_url?: string;
+	};
+	error?: {
+		message?: string;
+	};
+}
+
 export class TogetherConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("together", TOGETHER_API_BASE_URL);
@@ -142,6 +164,10 @@ export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 			const completion = response.choices[0];
 			return {
 				generated_text: completion.text,
+				details: {
+					finish_reason: completion.finish_reason,
+					seed: completion.seed,
+				} as TextGenerationOutput["details"],
 			};
 		}
 		throw new InferenceClientProviderOutputError("Received malformed response from Together text generation API");
@@ -158,9 +184,16 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
+		const rawParameters = (params.args.parameters as Record<string, unknown> | undefined) ?? {};
+		const { num_inference_steps, ...restParameters } = rawParameters as {
+			num_inference_steps?: unknown;
+		} & Record<string, unknown>;
+		if (num_inference_steps !== undefined) {
+			restParameters.steps = num_inference_steps;
+		}
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
-			...(params.args.parameters as Record<string, unknown>),
+			...restParameters,
 			prompt: params.args.inputs,
 			response_format: params.outputType === "url" ? "url" : "base64",
 			model: params.model,
@@ -197,6 +230,219 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Together text-to-image API");
+	}
+}
+
+export class TogetherImageToImageTask extends TogetherTextToImageTask implements ImageToImageTaskHelper {
+	override preparePayload(params: BodyParams<ImageToImageArgs>): Record<string, unknown> {
+		const rawParameters = (params.args.parameters as Record<string, unknown> | undefined) ?? {};
+		const { prompt, num_inference_steps, ...restParameters } = rawParameters as {
+			prompt?: string;
+			num_inference_steps?: unknown;
+		} & Record<string, unknown>;
+		if (num_inference_steps !== undefined) {
+			restParameters.steps = num_inference_steps;
+		}
+
+		// Together exposes two mutually-exclusive image inputs (see
+		// https://docs.together.ai/docs/image-to-image): FLUX.1 Kontext only accepts
+		// `image_url`; FLUX.2 [dev] and Google models (Gemini 3 Pro Image, Flash Image
+		// 2.5) only accept `reference_images`. FLUX.2 [pro]/[flex] accept either but
+		// `reference_images` is the documented default. Use `image_url` for FLUX.1
+		// (incl. all Kontext variants) and `reference_images` for everything else.
+		const lowered = params.model.toLowerCase();
+		const useImageUrl = lowered.includes("kontext") || lowered.includes("flux.1");
+		const imageField: Record<string, unknown> = useImageUrl
+			? { image_url: params.args.inputs }
+			: { reference_images: [params.args.inputs] };
+
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			prompt: prompt ?? "",
+			...imageField,
+			response_format: "base64",
+			...restParameters,
+			model: params.model,
+		};
+	}
+
+	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
+		const { inputs, ...restArgs } = args;
+		if (!(inputs instanceof Blob)) {
+			throw new InferenceClientInputError("Together image-to-image expects a Blob input.");
+		}
+		const imageDataUrl = await dataUrlFromBlob(inputs, inputs.type || "image/jpeg");
+		return {
+			...restArgs,
+			inputs: imageDataUrl,
+		};
+	}
+
+	override async getResponse(
+		response: TogetherImageGeneration,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: OutputType,
+	): Promise<Blob> {
+		const result = await super.getResponse(response, url, headers, outputType);
+		if (result instanceof Blob) {
+			return result;
+		}
+		throw new InferenceClientProviderOutputError("Received malformed response from Together image-to-image API");
+	}
+}
+
+// Polling cadence for Together's async video generation.
+const TOGETHER_VIDEO_POLLING_INTERVAL_MS = 2000;
+// Upper bound on status polls (~5 minutes at TOGETHER_VIDEO_POLLING_INTERVAL_MS).
+const TOGETHER_VIDEO_MAX_POLL_ATTEMPTS = 150;
+// Statuses that mean "keep polling". Together returns "queued" before transitioning
+// to "in_progress"; anything outside this set is treated as terminal.
+const TOGETHER_VIDEO_PENDING_STATUSES = new Set(["queued", "in_progress"]);
+
+interface TogetherVideoParameters extends Record<string, unknown> {
+	num_inference_steps?: unknown;
+	target_size?: { width?: unknown; height?: unknown };
+}
+
+/** Renames HF-standard fields to Together's video API field names. */
+function normalizeTogetherVideoParameters(
+	parameters: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+	const { num_inference_steps, target_size, ...rest } = (parameters ?? {}) as TogetherVideoParameters;
+	if (num_inference_steps !== undefined) {
+		rest.steps = num_inference_steps;
+	}
+	if (target_size && typeof target_size === "object") {
+		if (target_size.width !== undefined) rest.width = target_size.width;
+		if (target_size.height !== undefined) rest.height = target_size.height;
+	}
+	return rest;
+}
+
+/** Shared base for Together's async video tasks (text-to-video, image-to-video). */
+abstract class TogetherVideoTask extends TaskProviderHelper {
+	constructor() {
+		super("together", TOGETHER_API_BASE_URL);
+	}
+
+	makeRoute(): string {
+		return "v2/videos";
+	}
+
+	async getResponse(
+		response: TogetherVideoJobResponse,
+		url?: string,
+		headers?: Record<string, string>,
+	): Promise<Blob> {
+		if (!url || !headers) {
+			throw new InferenceClientInputError("URL and headers are required for Together video tasks");
+		}
+		const jobId = response?.id;
+		if (!jobId) {
+			throw new InferenceClientProviderOutputError(
+				"Received malformed response from Together video API: no job ID found in the response",
+			);
+		}
+
+		const statusUrl = `${url}/${jobId}`;
+
+		let job: TogetherVideoJobResponse = response;
+		let status = job.status;
+		let attempt = 0;
+		while (status !== undefined && TOGETHER_VIDEO_PENDING_STATUSES.has(status)) {
+			if (attempt >= TOGETHER_VIDEO_MAX_POLL_ATTEMPTS) {
+				throw new InferenceClientProviderOutputError(
+					`Timed out while waiting for Together video generation — aborting after ${TOGETHER_VIDEO_MAX_POLL_ATTEMPTS} status polls`,
+				);
+			}
+			attempt += 1;
+			await delay(TOGETHER_VIDEO_POLLING_INTERVAL_MS);
+			const pollResponse = await fetch(statusUrl, { headers });
+			if (!pollResponse.ok) {
+				throw new InferenceClientProviderApiError(
+					"Failed to fetch Together video job result",
+					{ url: statusUrl, method: "GET", headers },
+					{
+						requestId: pollResponse.headers.get("x-request-id") ?? "",
+						status: pollResponse.status,
+						body: await pollResponse.text(),
+					},
+				);
+			}
+			try {
+				job = (await pollResponse.json()) as TogetherVideoJobResponse;
+			} catch (error) {
+				throw new InferenceClientProviderOutputError(
+					"Received malformed response from Together video API: failed to parse job result",
+				);
+			}
+			status = job.status;
+		}
+
+		if (status === "failed") {
+			throw new InferenceClientProviderOutputError(
+				`Together video generation failed: ${job.error?.message ?? "Unknown error"}`,
+			);
+		}
+		if (status !== "completed") {
+			throw new InferenceClientProviderOutputError(`Unexpected Together video job status: ${JSON.stringify(status)}`);
+		}
+
+		const videoUrl = job.outputs?.video_url;
+		if (typeof videoUrl !== "string") {
+			throw new InferenceClientProviderOutputError("No video URL found in completed Together video job.");
+		}
+
+		const videoResponse = await fetch(videoUrl);
+		return await videoResponse.blob();
+	}
+}
+
+export class TogetherTextToVideoTask extends TogetherVideoTask implements TextToVideoTaskHelper {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...normalizeTogetherVideoParameters(params.args.parameters as Record<string, unknown> | undefined),
+			prompt: params.args.inputs,
+			model: params.model,
+		};
+	}
+}
+
+export class TogetherImageToVideoTask extends TogetherVideoTask implements ImageToVideoTaskHelper {
+	override preparePayload(params: BodyParams<ImageToVideoArgs>): Record<string, unknown> {
+		const rawParameters = (params.args.parameters as Record<string, unknown> | undefined) ?? {};
+		const { prompt, ...rest } = rawParameters as { prompt?: string } & Record<string, unknown>;
+		const normalized = normalizeTogetherVideoParameters(rest);
+		const payload: Record<string, unknown> = {
+			...omit(params.args, ["inputs", "parameters"]),
+			...normalized,
+			// Together expects each keyframe as { input_image: <base64>, frame: "first" | "last" }
+			// for i2v models. See https://docs.together.ai/docs/inference/videos/reference-and-keyframes
+			frame_images: [{ input_image: params.args.inputs, frame: "first" }],
+			model: params.model,
+		};
+		if (typeof prompt === "string") {
+			payload.prompt = prompt;
+		}
+		return payload;
+	}
+
+	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
+		const { inputs, ...restArgs } = args;
+		if (!(inputs instanceof Blob)) {
+			throw new InferenceClientInputError("Together image-to-video expects a Blob input.");
+		}
+		// Together's i2v models accept the image as a data URL or as an HTTP(S) URL in
+		// `frame_images[].input_image`, but cap the field at ~60KB. Larger images will
+		// be rejected with "Range of input length should be [1, 61440]" — users with
+		// big inputs should host the image and pass parameters.frame_images directly.
+		const imageDataUrl = await dataUrlFromBlob(inputs, inputs.type || "image/png");
+		return {
+			...restArgs,
+			inputs: imageDataUrl,
+		};
 	}
 }
 
@@ -287,14 +533,18 @@ export class TogetherAutomaticSpeechRecognitionTask
 
 	override makeBody(params: BodyParams): BodyInit {
 		const audio = params.args.data;
-		if (!(audio instanceof Blob)) {
+		const formData = new FormData();
+		if (audio instanceof Blob) {
+			formData.append("file", audio, `audio.${mimeTypeToExtension(audio.type)}`);
+		} else if (typeof audio === "string") {
+			// Together's transcriptions endpoint also accepts a public HTTP(S) URL as the
+			// `file` form field (see https://docs.together.ai/docs/speech-to-text).
+			formData.append("file", audio);
+		} else {
 			throw new InferenceClientInputError(
-				"Together automatic-speech-recognition expects a Blob (or ArrayBuffer) audio input.",
+				"Together automatic-speech-recognition expects a Blob, ArrayBuffer, or HTTP(S) URL string audio input.",
 			);
 		}
-
-		const formData = new FormData();
-		formData.append("file", audio, `audio.${mimeTypeToExtension(audio.type)}`);
 
 		const fields = this.preparePayload(params);
 		for (const [key, value] of Object.entries(fields)) {
@@ -313,21 +563,27 @@ export class TogetherAutomaticSpeechRecognitionTask
 
 	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
 		const audio: unknown = "data" in args ? args.data : args.inputs;
-		let blob: Blob;
+		let data: Blob | string;
 		if (audio instanceof Blob) {
-			blob = audio;
+			data = audio;
 		} else if (audio instanceof ArrayBuffer) {
-			blob = new Blob([audio]);
+			data = new Blob([audio]);
+		} else if (typeof audio === "string" && /^https?:\/\//.test(audio)) {
+			// Pass HTTP(S) URLs through as a string; makeBody will append them to the
+			// `file` form field instead of uploading bytes.
+			data = audio;
 		} else {
 			throw new InferenceClientInputError(
-				"Together automatic-speech-recognition expects a Blob or ArrayBuffer audio input.",
+				"Together automatic-speech-recognition expects a Blob, ArrayBuffer, or HTTP(S) URL string audio input.",
 			);
 		}
 
+		// `data` is typed as `Blob | ArrayBuffer` in RequestArgs; URL-string is a
+		// Together-specific extension carried through to makeBody.
 		return {
 			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
-			data: blob,
-		};
+			data,
+		} as RequestArgs;
 	}
 
 	async getResponse(response: TogetherAudioTranscriptionResponse): Promise<AutomaticSpeechRecognitionOutput> {
