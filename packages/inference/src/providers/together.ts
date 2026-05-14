@@ -395,6 +395,17 @@ abstract class TogetherVideoTask extends TaskProviderHelper {
 		}
 
 		const videoResponse = await fetch(videoUrl);
+		if (!videoResponse.ok) {
+			throw new InferenceClientProviderApiError(
+				"Failed to download Together video output",
+				{ url: videoUrl, method: "GET" },
+				{
+					requestId: videoResponse.headers.get("x-request-id") ?? "",
+					status: videoResponse.status,
+					body: await videoResponse.text(),
+				},
+			);
+		}
 		return await videoResponse.blob();
 	}
 }
