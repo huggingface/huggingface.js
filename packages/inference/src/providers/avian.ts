@@ -19,10 +19,6 @@ import { BaseConversationalTask } from "./providerHelper.js";
 
 export class AvianConversationalTask extends BaseConversationalTask {
 	constructor() {
-		super("avian", "https://api.avian.io/v1");
-	}
-
-	override makeRoute(): string {
-		return "/chat/completions";
+		super("avian", "https://api.avian.io");
 	}
 }
