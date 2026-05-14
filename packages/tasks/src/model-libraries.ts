@@ -1476,6 +1476,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/microsoft/TRELLIS",
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	trellis2: {
+		prettyLabel: "TRELLIS.2",
+		repoName: "TRELLIS.2",
+		repoUrl: "https://github.com/microsoft/TRELLIS.2",
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	ultralytics: {
 		prettyLabel: "ultralytics",
 		repoName: "ultralytics",
