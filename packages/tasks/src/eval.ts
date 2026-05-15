@@ -101,6 +101,12 @@ export const EVALUATION_FRAMEWORKS = {
 			"CLAW-Eval is an evaluation framework for assessing LLMs as autonomous agents across 300 human-verified tasks covering communication, finance, and productivity domains.",
 		url: "https://github.com/claw-eval/claw-eval",
 	},
+	researchclawbench: {
+		name: "researchclawbench",
+		description:
+			"ResearchClawBench is a benchmark for evaluating AI agents on end-to-end scientific research tasks, from reading data and related work to producing code, figures, and publication-style reports.",
+		url: "https://github.com/InternScience/ResearchClawBench",
+	},
 	pbench: {
 		name: "pbench",
 		description:
