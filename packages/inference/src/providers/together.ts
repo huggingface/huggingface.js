@@ -211,6 +211,8 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 		headers?: HeadersInit,
 		outputType?: OutputType,
 	): Promise<string | Blob | Record<string, unknown>> {
+		void url;
+		void headers;
 		if (
 			typeof response === "object" &&
 			"data" in response &&
