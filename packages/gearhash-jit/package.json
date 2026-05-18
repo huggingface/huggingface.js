@@ -9,6 +9,7 @@
 		"wasm"
 	],
 	"license": "MIT",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"sideEffects": false,
 	"files": [
 		"dist",

@@ -24,5 +24,5 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		},
 	);
 	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "text-to-video" });
-	return providerHelper.getResponse(response, url, info.headers as Record<string, string>);
+	return providerHelper.getResponse(response, url, info.headers as Record<string, string>, undefined, options?.signal);
 }

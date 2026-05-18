@@ -1202,6 +1202,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
 	},
+	sapiens2: {
+		prettyLabel: "sapiens2",
+		repoName: "sapiens2",
+		repoUrl: "https://github.com/facebookresearch/sapiens2",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	seedvr: {
 		prettyLabel: "SeedVR",
 		repoName: "SeedVR",
