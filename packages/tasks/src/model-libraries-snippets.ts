@@ -156,6 +156,20 @@ pred_df = pipeline.predict_df(
 	return [installSnippet, exampleSnippet];
 };
 
+export const collectorvision = (model: ModelData): string[] => [
+	`pip install git+https://github.com/HanClinto/CollectorVision huggingface_hub`,
+	`from huggingface_hub import hf_hub_download
+import collector_vision as cvg
+
+checkpoint = hf_hub_download(repo_id="${model.id}", filename="model.onnx")
+
+# Detector models, such as Cornelius:
+detector = cvg.NeuralCornerDetector(checkpoint)
+
+# Embedder models, such as Milo:
+embedder = cvg.NeuralEmbedder(checkpoint)`,
+];
+
 export const colipri = (model: ModelData): string[] => {
 	const installSnippet = `pip install colipri`;
 

@@ -277,6 +277,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"setup.py"`,
 	},
+	collectorvision: {
+		prettyLabel: "CollectorVision",
+		repoName: "CollectorVision",
+		repoUrl: "https://github.com/HanClinto/CollectorVision",
+		snippets: snippets.collectorvision,
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	colipri: {
 		prettyLabel: "COLIPRI",
 		repoName: "COLIPRI",
