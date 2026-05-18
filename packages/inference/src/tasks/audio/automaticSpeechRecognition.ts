@@ -21,5 +21,5 @@ export async function automaticSpeechRecognition(
 		...options,
 		task: "automatic-speech-recognition",
 	});
-	return providerHelper.getResponse(res);
+	return providerHelper.getResponse(res, undefined, undefined, undefined, options?.signal);
 }

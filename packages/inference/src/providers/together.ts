@@ -120,6 +120,7 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 		url?: string,
 		headers?: HeadersInit,
 		outputType?: OutputType,
+		signal?: AbortSignal,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
@@ -140,7 +141,7 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 				if (outputType === "dataUrl") {
 					return `data:image/jpeg;base64,${base64Data}`;
 				}
-				return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
+				return fetch(`data:image/jpeg;base64,${base64Data}`, { signal }).then((res) => res.blob());
 			}
 		}
 
