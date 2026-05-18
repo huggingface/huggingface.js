@@ -200,6 +200,11 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 		};
 	}
 
+	/** Task label used in malformed-response errors. Overridden by subclasses. */
+	protected get imageTaskLabel(): string {
+		return "text-to-image";
+	}
+
 	async getResponse(
 		response: TogetherImageGeneration,
 		url?: string,
@@ -229,11 +234,17 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 			}
 		}
 
-		throw new InferenceClientProviderOutputError("Received malformed response from Together text-to-image API");
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from Together ${this.imageTaskLabel} API`,
+		);
 	}
 }
 
 export class TogetherImageToImageTask extends TogetherTextToImageTask implements ImageToImageTaskHelper {
+	protected override get imageTaskLabel(): string {
+		return "image-to-image";
+	}
+
 	override preparePayload(params: BodyParams<ImageToImageArgs>): Record<string, unknown> {
 		const rawParameters = (params.args.parameters as Record<string, unknown> | undefined) ?? {};
 		const { prompt, num_inference_steps, ...restParameters } = rawParameters as {
@@ -288,7 +299,7 @@ export class TogetherImageToImageTask extends TogetherTextToImageTask implements
 		if (result instanceof Blob) {
 			return result;
 		}
-		throw new InferenceClientProviderOutputError("Received malformed response from Together image-to-image API");
+		throw new InferenceClientProviderOutputError(`Received malformed response from Together ${this.imageTaskLabel} API`);
 	}
 }
 
