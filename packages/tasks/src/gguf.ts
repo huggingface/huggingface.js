@@ -55,8 +55,11 @@ export enum GGMLFileQuantizationType {
 }
 
 const ggufQuants = Object.values(GGMLFileQuantizationType).filter((v): v is string => typeof v === "string");
+// Fallback bare k-quant bases so non-standard size variations (e.g. Q3_K_P) are still
+// matched; the enum has no bare Q3_K/Q4_K/Q5_K/Q8_K, unlike Q2_K/Q6_K. See issue #2107.
+const bareKQuantsFallback = ["Q3_K", "Q4_K", "Q5_K", "Q8_K"];
 export const GGUF_QUANT_RE = new RegExp(
-	"(?<prefix>UD-)?" + `(?<quant>${ggufQuants.join("|")})` + "(_(?<sizeVariation>[A-Z]+))?",
+	"(?<prefix>UD-)?" + `(?<quant>${[...ggufQuants, ...bareKQuantsFallback].join("|")})` + "(_(?<sizeVariation>[A-Z]+))?",
 );
 export const GGUF_QUANT_RE_GLOBAL = new RegExp(GGUF_QUANT_RE, "g");
 

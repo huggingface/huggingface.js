@@ -341,6 +341,14 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-IQ3_XS.gguf")).toEqual("IQ3_XS");
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual("Q4_0"); // TODO: investigate Q4_0_4_4
 		expect(parseGGUFQuantLabel("Qwen3-4B-UD-Q2_K_XL.gguf")).toEqual("UD-Q2_K_XL"); // unsloth UD (Unsloth Dynamic) prefix
+		// issue #2107: non-standard "_K_P" size variations should all be recognized, not just Q2_K_P / Q6_K_P
+		expect(parseGGUFQuantLabel("Qwen3.6-35B-A3B-Q2_K_P.gguf")).toEqual("Q2_K_P");
+		expect(parseGGUFQuantLabel("Qwen3.6-35B-A3B-Q3_K_P.gguf")).toEqual("Q3_K_P");
+		expect(parseGGUFQuantLabel("Qwen3.6-35B-A3B-Q4_K_P.gguf")).toEqual("Q4_K_P");
+		expect(parseGGUFQuantLabel("Qwen3.6-35B-A3B-Q5_K_P.gguf")).toEqual("Q5_K_P");
+		expect(parseGGUFQuantLabel("Qwen3.6-35B-A3B-Q6_K_P.gguf")).toEqual("Q6_K_P");
+		expect(parseGGUFQuantLabel("Qwen3.6-35B-A3B-Q8_K_P.gguf")).toEqual("Q8_K_P");
+		expect(parseGGUFQuantLabel("Qwen3.6-35B-A3B-Q3_K_S.gguf")).toEqual("Q3_K_S"); // standard size variations still match exactly
 	});
 
 	it("calculate tensor data offset", async () => {
