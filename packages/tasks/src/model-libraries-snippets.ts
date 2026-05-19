@@ -1100,9 +1100,7 @@ export const multimolecule = (model: ModelData): string[] => {
 	const maskToken = model.mask_token ?? "<mask>";
 	const sequence = exampleText?.replace(maskToken, "A");
 
-	const snippets = [
-		`pip install multimolecule`,
-	];
+	const snippets = [`pip install multimolecule`];
 
 	if (sequence) {
 		snippets.push(
