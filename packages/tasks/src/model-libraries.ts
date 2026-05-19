@@ -941,12 +941,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"vae/3d-vae.pt"`,
 	},
 	multimolecule: {
-	  prettyLabel: "MultiMolecule",
-	  repoName: "MultiMolecule",
-	  repoUrl: "https://github.com/MultiMolecule/multimolecule",
-	  docsUrl: "https://multimolecule.danling.org",
-	  snippets: snippets.multimolecule,
-	  filter: false,
+		prettyLabel: "MultiMolecule",
+		repoName: "MultiMolecule",
+		repoUrl: "https://github.com/MultiMolecule/multimolecule",
+		docsUrl: "https://multimolecule.danling.org",
+		snippets: snippets.multimolecule,
+		filter: false,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
