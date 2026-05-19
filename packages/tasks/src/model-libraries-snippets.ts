@@ -1108,6 +1108,56 @@ from MeshAnything.models.meshanything import MeshAnything
 model = MeshAnything(args)`,
 ];
 
+export const multimolecule = (model: ModelData): string[] => {
+	const widgetExample = model.widgetData?.[0] as WidgetExampleTextInput | undefined;
+	const exampleText = widgetExample?.text;
+	const maskToken = model.mask_token ?? "<mask>";
+	const sequence = exampleText?.replace(maskToken, "A");
+
+	const snippets = [`pip install multimolecule`];
+
+	if (sequence) {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")
+
+inputs = tokenizer("${sequence}", return_tensors="pt")
+outputs = model(**inputs)
+embeddings = outputs.last_hidden_state`,
+		);
+	} else {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")`,
+		);
+	}
+
+	if (model.tags.includes("rna-secondary-structure") && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("rna-secondary-structure", model="${model.id}")
+output = predictor("${exampleText}")
+print(output["secondary_structure"])`,
+		);
+	} else if (model.pipeline_tag === "fill-mask" && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("fill-mask", model="${model.id}")
+output = predictor("${exampleText}")`,
+		);
+	}
+
+	return snippets;
+};
+
 export const open_clip = (model: ModelData): string[] => [
 	`import open_clip
 
