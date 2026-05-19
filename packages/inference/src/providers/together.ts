@@ -366,7 +366,10 @@ abstract class TogetherVideoTask extends TaskProviderHelper {
 		let job: TogetherVideoJobResponse = response;
 		let status = job.status;
 		let attempt = 0;
-		while (status !== undefined && TOGETHER_VIDEO_PENDING_STATUSES.has(status)) {
+		// Together usually returns status: "queued" on the initial POST, but the field is
+		// typed as optional — treat a missing status as "pending" and poll, rather than
+		// falling through to the "unexpected status" error.
+		while (status === undefined || TOGETHER_VIDEO_PENDING_STATUSES.has(status)) {
 			if (attempt >= TOGETHER_VIDEO_MAX_POLL_ATTEMPTS) {
 				throw new InferenceClientProviderOutputError(
 					`Timed out while waiting for Together video generation — aborting after ${TOGETHER_VIDEO_MAX_POLL_ATTEMPTS} status polls`,
