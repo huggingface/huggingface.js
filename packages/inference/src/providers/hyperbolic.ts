@@ -111,6 +111,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 		url?: string,
 		headers?: HeadersInit,
 		outputType?: OutputType,
+		signal?: AbortSignal,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
@@ -125,7 +126,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 			if (outputType === "dataUrl") {
 				return `data:image/jpeg;base64,${response.images[0].image}`;
 			}
-			return fetch(`data:image/jpeg;base64,${response.images[0].image}`).then((res) => res.blob());
+			return fetch(`data:image/jpeg;base64,${response.images[0].image}`, { signal }).then((res) => res.blob());
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Hyperbolic text-to-image API");

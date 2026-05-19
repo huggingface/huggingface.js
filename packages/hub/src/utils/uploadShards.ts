@@ -87,6 +87,7 @@ export async function* uploadShards(
 	| { event: "fileProgress"; path: string; progress: number }
 > {
 	const xorbHashes: Array<string> = [];
+	const seenFileXetHashes = new Set<string>();
 
 	const fileInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.25);
 	const xorbInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.75);
@@ -171,6 +172,11 @@ export async function* uploadShards(
 					sha256: output.sha256,
 					dedupRatio: output.dedupRatio,
 				}; // Maybe wait until shard is uploaded before yielding.
+
+				if (seenFileXetHashes.has(output.hash)) {
+					break;
+				}
+				seenFileXetHashes.add(output.hash);
 
 				// Calculate space needed for this file entry
 				const fileHeaderSize = HASH_LENGTH + 4 + 4 + 8; // hash + flags + rep length + reserved

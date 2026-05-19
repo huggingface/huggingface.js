@@ -80,6 +80,8 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		response: NovitaAsyncAPIOutput,
 		url?: string,
 		headers?: Record<string, string>,
+		_outputType?: undefined,
+		signal?: AbortSignal,
 	): Promise<Blob> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError("URL and headers are required for text-to-video task");
@@ -101,8 +103,8 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		let taskResult: unknown;
 
 		while (status !== "TASK_STATUS_SUCCEED" && status !== "TASK_STATUS_FAILED") {
-			await delay(500);
-			const resultResponse = await fetch(resultUrl, { headers });
+			await delay(500, signal);
+			const resultResponse = await fetch(resultUrl, { headers, signal });
 			if (!resultResponse.ok) {
 				throw new InferenceClientProviderApiError(
 					"Failed to fetch task result",
@@ -154,7 +156,7 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 			typeof taskResult.videos[0].video_url === "string" &&
 			isUrl(taskResult.videos[0].video_url)
 		) {
-			const urlResponse = await fetch(taskResult.videos[0].video_url);
+			const urlResponse = await fetch(taskResult.videos[0].video_url, { signal });
 			return await urlResponse.blob();
 		} else {
 			throw new InferenceClientProviderOutputError(
