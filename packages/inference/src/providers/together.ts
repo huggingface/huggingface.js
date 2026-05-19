@@ -302,7 +302,9 @@ export class TogetherImageToImageTask extends TogetherTextToImageTask implements
 		if (result instanceof Blob) {
 			return result;
 		}
-		throw new InferenceClientProviderOutputError(`Received malformed response from Together ${this.imageTaskLabel} API`);
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from Together ${this.imageTaskLabel} API`,
+		);
 	}
 }
 
@@ -320,9 +322,7 @@ interface TogetherVideoParameters extends Record<string, unknown> {
 }
 
 /** Renames HF-standard fields to Together's video API field names. */
-function normalizeTogetherVideoParameters(
-	parameters: Record<string, unknown> | undefined,
-): Record<string, unknown> {
+function normalizeTogetherVideoParameters(parameters: Record<string, unknown> | undefined): Record<string, unknown> {
 	const { num_inference_steps, target_size, ...rest } = (parameters ?? {}) as TogetherVideoParameters;
 	if (num_inference_steps !== undefined) {
 		rest.steps = num_inference_steps;
@@ -348,6 +348,8 @@ abstract class TogetherVideoTask extends TaskProviderHelper {
 		response: TogetherVideoJobResponse,
 		url?: string,
 		headers?: Record<string, string>,
+		_outputType?: OutputType,
+		signal?: AbortSignal,
 	): Promise<Blob> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError("URL and headers are required for Together video tasks");
@@ -371,8 +373,8 @@ abstract class TogetherVideoTask extends TaskProviderHelper {
 				);
 			}
 			attempt += 1;
-			await delay(TOGETHER_VIDEO_POLLING_INTERVAL_MS);
-			const pollResponse = await fetch(statusUrl, { headers });
+			await delay(TOGETHER_VIDEO_POLLING_INTERVAL_MS, signal);
+			const pollResponse = await fetch(statusUrl, { headers, signal });
 			if (!pollResponse.ok) {
 				throw new InferenceClientProviderApiError(
 					"Failed to fetch Together video job result",
@@ -386,7 +388,7 @@ abstract class TogetherVideoTask extends TaskProviderHelper {
 			}
 			try {
 				job = (await pollResponse.json()) as TogetherVideoJobResponse;
-			} catch (error) {
+			} catch {
 				throw new InferenceClientProviderOutputError(
 					"Received malformed response from Together video API: failed to parse job result",
 				);
@@ -408,7 +410,7 @@ abstract class TogetherVideoTask extends TaskProviderHelper {
 			throw new InferenceClientProviderOutputError("No video URL found in completed Together video job.");
 		}
 
-		const videoResponse = await fetch(videoUrl);
+		const videoResponse = await fetch(videoUrl, { signal });
 		if (!videoResponse.ok) {
 			throw new InferenceClientProviderApiError(
 				"Failed to download Together video output",
