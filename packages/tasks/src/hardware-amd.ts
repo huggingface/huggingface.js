@@ -234,6 +234,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 250,
 		releaseYear: 2020,
 	},
+	"Radeon 610M": {
+		tflops: 0.97,
+		memory: [16, 24, 32, 48, 64, 96],
+		gfxVersion: "gfx1037",
+		msrp: 300,
+		power: 15,
+		releaseYear: 2022,
+	},
 	"Ryzen AI Max+ 395": {
 		tflops: 59.4,
 		memory: [64, 96, 128],
