@@ -112,6 +112,13 @@ export const SKUS = {
 				power: 200,
 				releaseYear: 2025,
 			},
+			"Arc Pro B70": {
+				tflops: 45.88,
+				memory: [32],
+				msrp: 949,
+				power: 230,
+				releaseYear: 2026,
+			},
 		},
 		QUALCOMM: {
 			"Snapdragon X Elite X1E-00-1DE": {
