@@ -70,8 +70,8 @@ const inputsFillMask = (model: ModelDataMinimal) => `"The answer to the universe
 
 const inputsSentenceSimilarity = () =>
 	`{
-    "source_sentence": "That is a happy person",
-    "sentences": [
+    "sentence": "That is a happy person",
+    "other_sentences": [
         "That is a happy dog",
         "That is a very happy person",
         "Today is a sunny day"
