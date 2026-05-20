@@ -277,6 +277,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"setup.py"`,
 	},
+	collectorvision: {
+		prettyLabel: "CollectorVision",
+		repoName: "CollectorVision",
+		repoUrl: "https://github.com/HanClinto/CollectorVision",
+		snippets: snippets.collectorvision,
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	colipri: {
 		prettyLabel: "COLIPRI",
 		repoName: "COLIPRI",
@@ -433,6 +441,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/slicex-ai/elm",
 		filter: false,
 		countDownloads: `path_filename:"slicex_elm_config" AND path_extension:"json"`,
+	},
+	encoderfile: {
+		prettyLabel: "encoderfile",
+		repoName: "encoderfile",
+		repoUrl: "https://github.com/mozilla-ai/encoderfile",
+		filter: false,
+		countDownloads: `path_extension:"encoderfile"`,
 	},
 	espnet: {
 		prettyLabel: "ESPnet",
@@ -939,6 +954,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/baaivision/MTVCraft",
 		filter: false,
 		countDownloads: `path:"vae/3d-vae.pt"`,
+	},
+	multimolecule: {
+		prettyLabel: "MultiMolecule",
+		repoName: "MultiMolecule",
+		repoUrl: "https://github.com/MultiMolecule/multimolecule",
+		docsUrl: "https://multimolecule.danling.org",
+		snippets: snippets.multimolecule,
+		filter: false,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
