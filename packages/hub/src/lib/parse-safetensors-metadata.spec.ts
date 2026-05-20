@@ -151,6 +151,63 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.parameterTotal, 109_482_240);
 	});
 
+	it("computes MoE active-params for Mixtral-style per-expert layout", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "mistralai/Mixtral-8x7B-v0.1",
+			computeParametersCount: true,
+			revision: "fc7ac94680e38d7348cfa806e51218e6273104b0",
+		});
+
+		assert(parse.sharded);
+		assert(parse.moe, "expected `moe` field on MoE repo");
+		assert.strictEqual(parse.moe.numExperts, 8);
+		assert.strictEqual(parse.moe.topK, 2);
+		assert.strictEqual(parse.moe.hasSharedExpert, false);
+		// Published: ~12.9B active on 46.7B total. Tolerate small bucket-rounding.
+		assert.ok(Math.abs(parse.moe.active - 12.88e9) < 0.05e9, `active=${parse.moe.active}`);
+		assert.ok(parse.moe.alwaysActive > 1e9 && parse.moe.alwaysActive < 2e9);
+	});
+
+	it("computes MoE active-params for stacked-3D layout (Qwen3-30B-A3B)", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "Qwen/Qwen3-30B-A3B",
+			computeParametersCount: true,
+			revision: "ad44e777bcd18fa416d9da3bd8f70d33ebb85d39",
+		});
+
+		assert(parse.sharded);
+		assert(parse.moe, "expected `moe` field on MoE repo");
+		assert.strictEqual(parse.moe.numExperts, 128);
+		assert.strictEqual(parse.moe.topK, 8);
+		// Published: A3B (3B active).
+		assert.ok(Math.abs(parse.moe.active - 3.35e9) < 0.05e9, `active=${parse.moe.active}`);
+	});
+
+	it("detects shared experts (DeepSeek-V2-Lite)", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "deepseek-ai/DeepSeek-V2-Lite",
+			computeParametersCount: true,
+			revision: "604d5664dddd88a0433dbae533b7fe9472482de0",
+		});
+
+		assert(parse.sharded);
+		assert(parse.moe, "expected `moe` field on MoE repo");
+		assert.strictEqual(parse.moe.numExperts, 64);
+		assert.strictEqual(parse.moe.topK, 6);
+		assert.strictEqual(parse.moe.hasSharedExpert, true);
+	});
+
+	it("omits `moe` for dense models", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "google-bert/bert-base-uncased",
+			computeParametersCount: true,
+			revision: "86b5e0934494bd15c9632b12f734a8a67f723594",
+		});
+
+		assert(!parse.sharded);
+		assert.strictEqual(parse.moe, undefined);
+	});
+
 	it("should detect sharded safetensors filename", async () => {
 		const safetensorsFilename = "model_00005-of-00072.safetensors"; // https://huggingface.co/bigscience/bloom/blob/4d8e28c67403974b0f17a4ac5992e4ba0b0dbb6f/model_00005-of-00072.safetensors
 		const safetensorsShardFileInfo = parseSafetensorsShardFilename(safetensorsFilename);
