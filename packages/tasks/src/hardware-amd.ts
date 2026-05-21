@@ -309,7 +309,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		releaseYear: 2024,
 	},
 	"Ryzen AI Max+ 395": {
-		tflops: 59.4,
+		tflops: 29.7,
 		memory: [64, 96, 128],
 		gfxVersion: "gfx1151",
 		msrp: 1_500,
