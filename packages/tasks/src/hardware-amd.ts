@@ -295,7 +295,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 	"Radeon 880M": {
 		tflops: 8.91,
 		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
-		gfxVersion: "gfx1151",
+		gfxVersion: "gfx1150",
 		msrp: 0,
 		power: 15,
 		releaseYear: 2024,
@@ -303,7 +303,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 	"Radeon 890M": {
 		tflops: 11.88,
 		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
-		gfxVersion: "gfx1151",
+		gfxVersion: "gfx1150",
 		msrp: 0,
 		power: 15,
 		releaseYear: 2024,
