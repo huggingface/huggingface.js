@@ -1523,6 +1523,8 @@ export class Interpreter {
 			} else {
 				property = this.evaluate(expr.property, environment);
 			}
+		} else if (expr.property.type === "IntegerLiteral") {
+			property = new IntegerValue((expr.property as IntegerLiteral).value);
 		} else {
 			property = new StringValue((expr.property as Identifier).value);
 		}

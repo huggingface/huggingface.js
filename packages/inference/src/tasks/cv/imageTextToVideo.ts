@@ -18,5 +18,11 @@ export async function imageTextToVideo(args: ImageTextToVideoArgs, options?: Opt
 		...options,
 		task: "image-text-to-video",
 	});
-	return providerHelper.getResponse(res, requestContext.url, requestContext.info.headers as Record<string, string>);
+	return providerHelper.getResponse(
+		res,
+		requestContext.url,
+		requestContext.info.headers as Record<string, string>,
+		undefined,
+		options?.signal,
+	);
 }

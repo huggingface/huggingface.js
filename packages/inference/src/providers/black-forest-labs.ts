@@ -67,14 +67,15 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 		url?: string,
 		headers?: HeadersInit,
 		outputType?: "url" | "blob" | "json",
+		signal?: AbortSignal,
 	): Promise<string | Blob | Record<string, unknown>> {
 		const logger = getLogger();
 		const urlObj = new URL(response.polling_url);
 		for (let step = 0; step < 5; step++) {
-			await delay(1000);
+			await delay(1000, signal);
 			logger.debug(`Polling Black Forest Labs API for the result... ${step + 1}/5`);
 			urlObj.searchParams.set("attempt", step.toString(10));
-			const resp = await fetch(urlObj, { headers: { "Content-Type": "application/json" } });
+			const resp = await fetch(urlObj, { headers: { "Content-Type": "application/json" }, signal });
 			if (!resp.ok) {
 				throw new InferenceClientProviderApiError(
 					"Failed to fetch result from black forest labs API",
@@ -101,7 +102,7 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 				if (outputType === "url") {
 					return payload.result.sample;
 				}
-				const image = await fetch(payload.result.sample);
+				const image = await fetch(payload.result.sample, { signal });
 				return await image.blob();
 			}
 		}

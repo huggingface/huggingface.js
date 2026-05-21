@@ -107,4 +107,16 @@ export const EVALUATION_FRAMEWORKS = {
 			"CLAW-Eval is an evaluation framework for assessing LLMs as autonomous agents across 300 human-verified tasks covering communication, finance, and productivity domains.",
 		url: "https://github.com/claw-eval/claw-eval",
 	},
+	pbench: {
+		name: "pbench",
+		description:
+			"PBench is a multi-level referring expression segmentation benchmark for evaluating vision-language perception across a structured hierarchy of skills.",
+		url: "https://github.com/tiiuae/Falcon-Perception",
+	},
+	wildclawbench: {
+		name: "wildclawbench",
+		description:
+			"WildClawBench is an in-the-wild benchmark for evaluating AI agents in the OpenClaw environment across 60 hand-built, end-to-end tasks spanning productivity, code intelligence, social interaction, search, creative synthesis, and safety domains.",
+		url: "https://github.com/InternLM/WildClawBench",
+	},
 } as const;
