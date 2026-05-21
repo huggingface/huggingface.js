@@ -201,6 +201,51 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain("hermes");
 	});
 
+	it("openclaw", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.openclaw;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096, chat_template: "{% if tools %}" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toContain(`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
+		expect(snippet[1].setup).toContain("npm install -g openclaw@latest");
+		expect(snippet[1].content).toContain("openclaw config set models.providers.llama-cpp");
+		expect(snippet[1].content).toContain('"baseUrl": "http://127.0.0.1:8080/v1"');
+		expect(snippet[1].content).toContain('"id": "bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"');
+		expect(snippet[1].content).toContain(
+			'openclaw config set agents.defaults.model.primary "llama-cpp/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"',
+		);
+		expect(snippet[2].content).toContain("openclaw agent");
+	});
+
+	it("openclaw - mlx", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.openclaw;
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-mlx",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			config: {
+				tokenizer_config: {
+					chat_template: "{% if tools %}...{% endif %}",
+				},
+			},
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
+		expect(snippet[1].content).toContain("openclaw config set models.providers.mlx-lm");
+		expect(snippet[1].content).toContain('"id": "mlx-community/Llama-3.2-3B-Instruct-mlx"');
+		expect(snippet[1].content).toContain(
+			'openclaw config set agents.defaults.model.primary "mlx-lm/mlx-community/Llama-3.2-3B-Instruct-mlx"',
+		);
+		expect(snippet[2].content).toContain("openclaw agent");
+	});
+
 	it("docker model runner", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
 		const model: ModelData = {
