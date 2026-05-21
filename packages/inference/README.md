@@ -61,6 +61,7 @@ Currently, we support the following providers:
 - [Replicate](https://replicate.com)
 - [Sambanova](https://sambanova.ai)
 - [Scaleway](https://www.scaleway.com/en/generative-apis/)
+- [Skypool Token](https://huggingface.co/SkypoolToken)
 - [Clarifai](http://clarifai.com)
 - [Together](https://together.xyz)
 - [Baseten](https://baseten.co)
@@ -110,6 +111,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
 - [Groq supported models](https://console.groq.com/docs/models)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
+- [Skypool Token supported models](https://huggingface.co/api/partners/skypool-token/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
 - [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
 
