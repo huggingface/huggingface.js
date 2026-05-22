@@ -212,8 +212,8 @@ export async function scanRefsDir(refsPath: string, refsByHash: Map<string, stri
 	for (const refFile of refFiles) {
 		const refFilePath = join(refsPath, refFile.name);
 		if (refFile.isDirectory()) {
-			continue;
-		} // Skip directories
+			continue; // Skip directories
+		}
 
 		const commitHash = await readFile(refFilePath, "utf-8");
 		const refName = refFile.name;
@@ -232,8 +232,8 @@ export async function scanSnapshotDir(
 	const files = await readdir(revisionPath, { withFileTypes: true });
 	for (const file of files) {
 		if (file.isDirectory()) {
-			continue;
-		} // Skip directories
+			continue; // Skip directories
+		}
 
 		const filePath = join(revisionPath, file.name);
 		const blobPath = await realpath(filePath);
