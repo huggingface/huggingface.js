@@ -18,5 +18,11 @@ export async function imageTextToImage(args: ImageTextToImageArgs, options?: Opt
 		...options,
 		task: "image-text-to-image",
 	});
-	return providerHelper.getResponse(res, requestContext.url, requestContext.info.headers as Record<string, string>);
+	return providerHelper.getResponse(
+		res,
+		requestContext.url,
+		requestContext.info.headers as Record<string, string>,
+		undefined,
+		options?.signal,
+	);
 }

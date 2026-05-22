@@ -28,7 +28,6 @@ export interface CopyProgressEvent {
 	/** Total number of files that will be downloaded. */
 	total: number;
 }
-
 const DOWNLOAD_CONCURRENCY = 5;
 const PATHS_INFO_BATCH_SIZE = 100;
 const MAX_REPORTED_LFS_PATHS = 5;
