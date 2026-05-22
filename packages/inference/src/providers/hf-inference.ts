@@ -356,7 +356,9 @@ export class HFInferenceDocumentQuestionAnsweringTask
 export class HFInferenceFeatureExtractionTask extends HFInferenceTask implements FeatureExtractionTaskHelper {
 	override async getResponse(response: FeatureExtractionOutput): Promise<FeatureExtractionOutput> {
 		const isNumArrayRec = (arr: unknown[], maxDepth: number, curDepth = 0): boolean => {
-			if (curDepth > maxDepth) return false;
+			if (curDepth > maxDepth) {
+				return false;
+			}
 			if (arr.every((x) => Array.isArray(x))) {
 				return arr.every((x) => isNumArrayRec(x as unknown[], maxDepth, curDepth + 1));
 			} else {

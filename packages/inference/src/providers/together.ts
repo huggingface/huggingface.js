@@ -65,7 +65,9 @@ const AUDIO_MIME_TO_EXT: Record<string, string> = {
 };
 
 function mimeTypeToExtension(mimeType: string | undefined): string {
-	if (!mimeType) return "wav";
+	if (!mimeType) {
+		return "wav";
+	}
 	return AUDIO_MIME_TO_EXT[mimeType.toLowerCase()] ?? "wav";
 }
 
@@ -328,8 +330,12 @@ function normalizeTogetherVideoParameters(parameters: Record<string, unknown> | 
 		rest.steps = num_inference_steps;
 	}
 	if (target_size && typeof target_size === "object") {
-		if (target_size.width !== undefined) rest.width = target_size.width;
-		if (target_size.height !== undefined) rest.height = target_size.height;
+		if (target_size.width !== undefined) {
+			rest.width = target_size.width;
+		}
+		if (target_size.height !== undefined) {
+			rest.height = target_size.height;
+		}
 	}
 	return rest;
 }
@@ -586,7 +592,9 @@ export class TogetherAutomaticSpeechRecognitionTask
 
 		const fields = this.preparePayload(params);
 		for (const [key, value] of Object.entries(fields)) {
-			if (value === undefined || value === null) continue;
+			if (value === undefined || value === null) {
+				continue;
+			}
 			if (typeof value === "string") {
 				formData.append(key, value);
 			} else if (typeof value === "number" || typeof value === "boolean") {
