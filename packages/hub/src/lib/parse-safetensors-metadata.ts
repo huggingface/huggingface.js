@@ -240,8 +240,12 @@ async function fetchAllHeaders(
 }
 
 function parseTotalParameters(value: string | number | undefined): number | undefined {
-	if (!value) return undefined;
-	if (typeof value === "number") return value;
+	if (!value) {
+		return undefined;
+	}
+	if (typeof value === "number") {
+		return value;
+	}
 	return parseInt(value);
 }
 
@@ -388,16 +392,22 @@ export function globMatch(pattern: string, str: string): boolean {
 		return pattern === str;
 	}
 
-	if (!str.startsWith(parts[0])) return false;
+	if (!str.startsWith(parts[0])) {
+		return false;
+	}
 	let pos = parts[0].length;
 
 	const lastPart = parts[parts.length - 1];
-	if (!str.endsWith(lastPart)) return false;
+	if (!str.endsWith(lastPart)) {
+		return false;
+	}
 	const end = str.length - lastPart.length;
 
 	for (let i = 1; i < parts.length - 1; i++) {
 		const idx = str.indexOf(parts[i], pos);
-		if (idx === -1 || idx + parts[i].length > end) return false;
+		if (idx === -1 || idx + parts[i].length > end) {
+			return false;
+		}
 		pos = idx + parts[i].length;
 	}
 
@@ -412,9 +422,13 @@ export function globMatch(pattern: string, str: string): boolean {
  * pattern contains a `*` we fall back to proper glob matching for flexibility.
  */
 export function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
-	if (!quantConfig) return false;
+	if (!quantConfig) {
+		return false;
+	}
 	const patterns = quantConfig.modules_to_not_convert;
-	if (!patterns?.length) return true;
+	if (!patterns?.length) {
+		return true;
+	}
 	return !patterns.some((pattern) =>
 		pattern.includes("*") ? globMatch(pattern, tensorName) : tensorName.includes(pattern),
 	);
@@ -520,10 +534,16 @@ function getTensorSuffix(tensorName: string): string {
 }
 
 function shouldSkipTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
-	if (!quantConfig) return false;
+	if (!quantConfig) {
+		return false;
+	}
 	const quantMethod = quantConfig.quant_method?.toLowerCase();
-	if (quantMethod !== "gptq" && quantMethod !== "awq") return false;
-	if (!isQuantizedTensor(tensorName, quantConfig)) return false;
+	if (quantMethod !== "gptq" && quantMethod !== "awq") {
+		return false;
+	}
+	if (!isQuantizedTensor(tensorName, quantConfig)) {
+		return false;
+	}
 	const suffix = getTensorSuffix(tensorName);
 	return suffix !== GPTQ_QWEIGHT_SUFFIX && GPTQ_AWQ_AUXILIARY_SUFFIXES.includes(suffix);
 }

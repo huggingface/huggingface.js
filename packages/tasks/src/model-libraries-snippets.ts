@@ -2307,7 +2307,9 @@ export const nemo = (model: ModelData): string[] => {
 export const outetts = (model: ModelData): string[] => {
 	// Don’t show this block on GGUF / ONNX mirrors
 	const t = model.tags ?? [];
-	if (t.includes("gguf") || t.includes("onnx")) return [];
+	if (t.includes("gguf") || t.includes("onnx")) {
+		return [];
+	}
 
 	// v1.0 HF → minimal runnable snippet
 	return [
