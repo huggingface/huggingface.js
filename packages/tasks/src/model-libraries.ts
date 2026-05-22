@@ -1303,6 +1303,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:".pth"`,
 	},
+	"stable-audio-3": {
+		prettyLabel: "Stable Audio 3",
+		repoName: "stable-audio-3",
+		repoUrl: "https://github.com/Stability-AI/stable-audio-3",
+		filter: false,
+		countDownloads: `path:"model_config.json"`,
+	},
 	"stable-audio-tools": {
 		prettyLabel: "Stable Audio Tools",
 		repoName: "stable-audio-tools",
