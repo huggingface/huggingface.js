@@ -55,6 +55,7 @@ import type {
 import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
+import * as SpragAI from "../providers/sprag-ai.js";
 import * as Together from "../providers/together.js";
 import * as Wavespeed from "../providers/wavespeed.js";
 import * as Zai from "../providers/zai-org.js";
@@ -181,6 +182,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Scaleway.ScalewayConversationalTask(),
 		"text-generation": new Scaleway.ScalewayTextGenerationTask(),
 		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
+	},
+	"sprag-ai": {
+		conversational: new SpragAI.SpragAIConversationalTask(),
+		"text-to-speech": new SpragAI.SpragAITextToSpeechTask(),
 	},
 	together: {
 		"text-to-image": new Together.TogetherTextToImageTask(),

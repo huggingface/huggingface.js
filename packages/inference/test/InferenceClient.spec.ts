@@ -1626,6 +1626,108 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 
+	describe.concurrent(
+		"Sprag",
+		() => {
+			const client = new InferenceClient(env.HF_SPRAG_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["sprag-ai"] = {
+				"Qwen/Qwen3-Omni-30B-A3B-Instruct": {
+					provider: "sprag-ai",
+					hfModelId: "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+					providerId: "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice": {
+					provider: "sprag-ai",
+					hfModelId: "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+					providerId: "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+					status: "live",
+					task: "text-to-speech",
+				},
+				"Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign": {
+					provider: "sprag-ai",
+					hfModelId: "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+					providerId: "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+					status: "live",
+					task: "text-to-speech",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+					provider: "sprag-ai",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					max_tokens: 20,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toMatch(/(two|2)/i);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+					provider: "sprag-ai",
+					messages: [{ role: "user", content: "Count from 1 to 3" }],
+					stream: true,
+					max_tokens: 20,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+				expect(fullResponse).toMatch(/1.*2.*3/);
+			});
+
+			it("textToSpeech - CustomVoice", async () => {
+				const res = await client.textToSpeech({
+					model: "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+					provider: "sprag-ai",
+					inputs: "The answer to one plus one is two.",
+					parameters: {
+						generation_parameters: {
+							response_format: "wav",
+						},
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+				expect(res.size).toBeGreaterThan(0);
+			});
+
+			it("textToSpeech - VoiceDesign", async () => {
+				const res = await client.textToSpeech({
+					model: "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+					provider: "sprag-ai",
+					inputs: "The answer to one plus one is two.",
+					parameters: {
+						generation_parameters: {
+							instructions: "A calm, natural voice with clear articulation.",
+							response_format: "wav",
+						},
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+				expect(res.size).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
+
 	describe.concurrent("3rd party providers", () => {
 		it("chatCompletion - fails with unsupported model", async () => {
 			expect(
