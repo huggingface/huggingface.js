@@ -32,7 +32,7 @@ describe("UomiRouter provider helper", () => {
 		const url = helper.makeUrl({
 			accessToken: "sk-uomi-test",
 			authMethod: "provider-key",
-			model: "qwen/qwen3.6-27b",
+			model: "Qwen/Qwen3.6-27B",
 			task: "conversational",
 		});
 		expect(url).toBe("https://gateway.uomi.ai/v1/chat/completions");
