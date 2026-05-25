@@ -194,6 +194,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-speech": new Together.TogetherTextToSpeechTask(),
 		"automatic-speech-recognition": new Together.TogetherAutomaticSpeechRecognitionTask(),
 	},
+	uomirouter: {
+		conversational: new UomiRouter.UomiRouterConversationalTask(),
+	},
 	wavespeed: {
 		"text-to-image": new Wavespeed.WavespeedAITextToImageTask(),
 		"text-to-video": new Wavespeed.WavespeedAITextToVideoTask(),
@@ -206,9 +209,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Zai.ZaiConversationalTask(),
 		"text-to-image": new Zai.ZaiTextToImageTask(),
 		"image-to-text": new Zai.ZaiImageToTextTask(),
-	},
-	uomirouter: {
-		conversational: new UomiRouter.UomiRouterConversationalTask(),
 	},
 };
 
