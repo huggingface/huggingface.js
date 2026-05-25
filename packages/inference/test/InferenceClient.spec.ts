@@ -2559,6 +2559,61 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
+		"Ambient",
+		() => {
+			const client = new InferenceClient(env.HF_AMBIENT_XYZ_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["ambient-xyz"] = {
+				"Qwen/Qwen3-Coder-30B-A3B-Instruct": {
+					provider: "ambient-xyz",
+					hfModelId: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+					providerId: "qwen/qwen3-coder-30b-a3b-instruct",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+					provider: "ambient-xyz",
+					messages: [{ role: "user", content: "Reply with exactly: ok" }],
+					max_tokens: 20,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("ok");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+					provider: "ambient-xyz",
+					messages: [{ role: "user", content: "Reply with exactly: ok" }],
+					stream: true,
+					max_tokens: 20,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
+
+	describe.concurrent(
 		"PublicAI",
 		() => {
 			const client = new InferenceClient(env.HF_PUBLICAI_KEY ?? "dummy");
