@@ -17,6 +17,7 @@ import * as Nvidia from "../providers/nvidia.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
+import * as UomiRouter from "../providers/uomirouter.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -205,6 +206,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Zai.ZaiConversationalTask(),
 		"text-to-image": new Zai.ZaiTextToImageTask(),
 		"image-to-text": new Zai.ZaiImageToTextTask(),
+	},
+	uomirouter: {
+		conversational: new UomiRouter.UomiRouterConversationalTask(),
 	},
 };
 

@@ -68,6 +68,7 @@ export const INFERENCE_PROVIDERS = [
 	"sambanova",
 	"scaleway",
 	"together",
+	"uomirouter",
 	"wavespeed",
 	"zai-org",
 ] as const;
@@ -107,6 +108,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	sambanova: "sambanovasystems",
 	scaleway: "scaleway",
 	together: "togethercomputer",
+	uomirouter: "uomirouter",
 	wavespeed: "wavespeed",
 	"zai-org": "zai-org",
 };
