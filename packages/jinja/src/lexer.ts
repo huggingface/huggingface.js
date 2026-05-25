@@ -166,7 +166,9 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				// Consume the backslash
 				++cursorPosition;
 				// Check for end of input
-				if (cursorPosition >= src.length) throw new SyntaxError("Unexpected end of input");
+				if (cursorPosition >= src.length) {
+					throw new SyntaxError("Unexpected end of input");
+				}
 
 				// Add the escaped character
 				const escaped = src[cursorPosition++];
@@ -179,7 +181,9 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			}
 
 			str += src[cursorPosition++];
-			if (cursorPosition >= src.length) throw new SyntaxError("Unexpected end of input");
+			if (cursorPosition >= src.length) {
+				throw new SyntaxError("Unexpected end of input");
+			}
 		}
 		return str;
 	};

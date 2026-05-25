@@ -61,7 +61,9 @@ function finalizeChunker(
 	chunker: ReturnType<typeof createChunker>,
 ): { hash: string; length: number; dedup: boolean }[] {
 	const last = finalize(chunker);
-	if (!last) return [];
+	if (!last) {
+		return [];
+	}
 	return [{ hash: hashToHex(last.hash), length: last.length, dedup: false }];
 }
 
