@@ -18,7 +18,7 @@
  * - Gateway is OpenAI-compatible at /v1/chat/completions (streaming, tool calling, structured output).
  * - Auth: `Authorization: Bearer sk-uomi-...` user-provided keys — handled by BaseConversationalTask.
  * - Inference is dispatched across a distributed pool of operator-run GPU nodes; each response
- *   carries an `Inference-Id: <uuid>` header for verifiable on-chain attestation.
+ *   carries an `Inference-Id: <uuid>` header for verifiable response attestation (off-chain today, on-chain anchoring on UOMI L1 is the next milestone).
  * - No payload shape divergence from the OpenAI spec, so no preparePayload/getResponse override
  *   is needed — the BaseConversationalTask defaults cover the full request/response path.
  */

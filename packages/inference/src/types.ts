@@ -108,7 +108,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	sambanova: "sambanovasystems",
 	scaleway: "scaleway",
 	together: "togethercomputer",
-	uomirouter: "uomirouter",
+	uomirouter: "uomi-network",
 	wavespeed: "wavespeed",
 	"zai-org": "zai-org",
 };
