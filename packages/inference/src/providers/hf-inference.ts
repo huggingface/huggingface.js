@@ -393,10 +393,15 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 				(x) =>
 					typeof x.label === "string" &&
 					typeof x.mask === "string" &&
-					(x.score === undefined || typeof x.score === "number"),
+					(x.score === undefined || x.score === null || typeof x.score === "number"),
 			)
 		) {
-			return response;
+			// Coerce `null` scores (returned by some HF models, e.g. face-parsing)
+			// to `undefined` so the result matches the declared
+			// `ImageSegmentationOutputElement` type (`score?: number`). Without
+			// this, downstream consumers using `if (segment.score !== undefined)`
+			// would treat `null` as a valid number and crash on numeric ops.
+			return response.map((x) => (x.score === null ? { ...x, score: undefined } : x));
 		}
 		throw new InferenceClientProviderOutputError(
 			"Received malformed response from HF-Inference image-segmentation API: expected Array<{label: string, mask: string, score: number}>",
