@@ -213,12 +213,16 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet[0].content).toContain(`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 		expect(snippet[1].setup).toContain("npm install -g openclaw@latest");
-		expect(snippet[1].content).toContain("openclaw config patch --stdin <<'JSON'");
-		expect(snippet[1].content).toContain('"llama-cpp"');
-		expect(snippet[1].content).toContain('"baseUrl": "http://127.0.0.1:8080/v1"');
-		expect(snippet[1].content).toContain('"api": "openai-completions"');
-		expect(snippet[1].content).toContain('"id": "bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"');
-		expect(snippet[1].content).toContain('"primary": "llama-cpp/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"');
+		expect(snippet[1].content).toContain("openclaw onboard --non-interactive --mode local");
+		expect(snippet[1].content).toContain("--auth-choice custom-api-key");
+		expect(snippet[1].content).toContain("--custom-base-url http://127.0.0.1:8080/v1");
+		expect(snippet[1].content).toContain('--custom-model-id "bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"');
+		expect(snippet[1].content).toContain("--custom-provider-id llama-cpp");
+		expect(snippet[1].content).toContain("--custom-compatibility openai");
+		expect(snippet[1].content).not.toContain("--custom-api-key");
+		expect(snippet[1].content).not.toContain("--custom-text-input");
+		expect(snippet[1].content).toContain("--accept-risk");
+		expect(snippet[1].content).toContain("--skip-health");
 		expect(snippet[2].content).toContain("openclaw agent --local");
 	});
 
@@ -238,10 +242,9 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		const snippet = snippetFunc(model);
 
 		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
-		expect(snippet[1].content).toContain("openclaw config patch --stdin <<'JSON'");
-		expect(snippet[1].content).toContain('"mlx-lm"');
-		expect(snippet[1].content).toContain('"id": "mlx-community/Llama-3.2-3B-Instruct-mlx"');
-		expect(snippet[1].content).toContain('"primary": "mlx-lm/mlx-community/Llama-3.2-3B-Instruct-mlx"');
+		expect(snippet[1].content).toContain("openclaw onboard --non-interactive --mode local");
+		expect(snippet[1].content).toContain('--custom-model-id "mlx-community/Llama-3.2-3B-Instruct-mlx"');
+		expect(snippet[1].content).toContain("--custom-provider-id mlx-lm");
 		expect(snippet[2].content).toContain("openclaw agent --local");
 	});
 

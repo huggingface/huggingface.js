@@ -550,28 +550,6 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	const isMLX = isMlxModel(model);
 	const providerId = isMLX ? "mlx-lm" : "llama-cpp";
 	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
-	const configPatch = JSON.stringify(
-		{
-			models: {
-				providers: {
-					[providerId]: {
-						baseUrl: "http://127.0.0.1:8080/v1",
-						api: "openai-completions",
-						models: [{ id: modelId, name: modelId }],
-					},
-				},
-			},
-			agents: {
-				defaults: {
-					model: {
-						primary: `${providerId}/${modelId}`,
-					},
-				},
-			},
-		},
-		null,
-		2,
-	);
 	const serverStep = getLocalServerStep(model, filepath);
 
 	return [
@@ -579,7 +557,17 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 		{
 			title: "Configure OpenClaw",
 			setup: "# Install OpenClaw:\nnpm install -g openclaw@latest",
-			content: `# Register the local server and set it as the default model:\nopenclaw config patch --stdin <<'JSON'\n${configPatch}\nJSON`,
+			content: [
+				"# Register the local server and set it as the default model:",
+				"openclaw onboard --non-interactive --mode local \\",
+				"  --auth-choice custom-api-key \\",
+				"  --custom-base-url http://127.0.0.1:8080/v1 \\",
+				`  --custom-model-id "${modelId}" \\`,
+				`  --custom-provider-id ${providerId} \\`,
+				"  --custom-compatibility openai \\",
+				"  --accept-risk \\",
+				"  --skip-health",
+			].join("\n"),
 		},
 		{
 			title: "Run OpenClaw",
