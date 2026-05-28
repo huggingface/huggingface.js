@@ -220,7 +220,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[1].content).toContain("--custom-provider-id llama-cpp");
 		expect(snippet[1].content).toContain("--custom-compatibility openai");
 		expect(snippet[1].content).not.toContain("--custom-api-key");
-		expect(snippet[1].content).not.toContain("--custom-text-input");
+		expect(snippet[1].content).toContain("--custom-text-input");
 		expect(snippet[1].content).toContain("--accept-risk");
 		expect(snippet[1].content).toContain("--skip-health");
 		expect(snippet[2].content).toContain("openclaw agent --local");
@@ -245,6 +245,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[1].content).toContain("openclaw onboard --non-interactive --mode local");
 		expect(snippet[1].content).toContain('--custom-model-id "mlx-community/Llama-3.2-3B-Instruct-mlx"');
 		expect(snippet[1].content).toContain("--custom-provider-id mlx-lm");
+		expect(snippet[1].content).toContain("--custom-text-input");
 		expect(snippet[2].content).toContain("openclaw agent --local");
 	});
 

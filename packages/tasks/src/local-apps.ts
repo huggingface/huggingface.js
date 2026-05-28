@@ -565,6 +565,7 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				`  --custom-model-id "${modelId}" \\`,
 				`  --custom-provider-id ${providerId} \\`,
 				"  --custom-compatibility openai \\",
+				"  --custom-text-input \\",
 				"  --accept-risk \\",
 				"  --skip-health",
 			].join("\n"),
