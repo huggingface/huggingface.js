@@ -8,6 +8,7 @@
 	"properties": {
 		"outputs": {
 			"type": "array",
+			"minItems": 1,
 			"items": { "$ref": "#/$defs/TimeSeriesForecastingOutputItem" }
 		}
 	},
@@ -43,8 +44,10 @@
 							"values": {
 								"description": "Quantile forecast with the same shape as `mean`.",
 								"type": "array",
+								"minItems": 1,
 								"items": {
 									"type": "array",
+									"minItems": 1,
 									"items": { "type": "number" }
 								}
 							}
@@ -54,10 +57,13 @@
 				"samples": {
 					"description": "Optional sample trajectories from probabilistic models. Outer dimension is the sample index; each sample has the same shape as `mean`. Present when `parameters.num_samples` was supplied and the model produces samples.",
 					"type": "array",
+					"minItems": 1,
 					"items": {
 						"type": "array",
+						"minItems": 1,
 						"items": {
 							"type": "array",
+							"minItems": 1,
 							"items": { "type": "number" }
 						}
 					}
