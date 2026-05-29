@@ -5,12 +5,12 @@ const taskData: TaskDataCustom = {
 		{
 			description:
 				"A curated collection of ~30 time-series datasets from diverse domains used to pretrain and evaluate foundation models.",
-			id: "monash_tsf",
+			id: "Monash-University/monash_tsf",
 		},
 		{
 			description:
 				"A large-scale benchmark for evaluating probabilistic time-series forecasters across many domains and frequencies.",
-			id: "Salesforce/gift-eval",
+			id: "Salesforce/GiftEval",
 		},
 		{
 			description:
