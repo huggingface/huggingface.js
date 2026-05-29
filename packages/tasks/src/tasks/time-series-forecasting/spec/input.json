@@ -4,19 +4,19 @@
 	"title": "TimeSeriesForecastingInput",
 	"description": "Inputs for Time Series Forecasting inference. Each input series lies on a regular grid defined by its `start` and `parameters.frequency`. Missing observations are encoded as `null` inside `target`; clients with irregular data should resample before calling.",
 	"type": "object",
-	"required": ["inputs"],
+	"required": ["series"],
 	"properties": {
-		"inputs": {
+		"series": {
 			"type": "array",
-			"description": "One or more historical time series to forecast. Output order matches input order.",
+			"description": "A batch of historical time series to forecast; each element is one series. Output order matches input order.",
 			"minItems": 1,
-			"items": { "$ref": "#/$defs/TimeSeriesForecastingInputItem" }
+			"items": { "$ref": "#/$defs/TimeSeriesForecastingSeries" }
 		},
 		"parameters": { "$ref": "#/$defs/TimeSeriesForecastingParameters" }
 	},
 	"$defs": {
-		"TimeSeriesForecastingInputItem": {
-			"title": "TimeSeriesForecastingInputItem",
+		"TimeSeriesForecastingSeries": {
+			"title": "TimeSeriesForecastingSeries",
 			"type": "object",
 			"required": ["target"],
 			"properties": {

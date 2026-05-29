@@ -35,7 +35,7 @@ client = InferenceClient(api_key="hf_...")
 
 result = client.time_series_forecasting(
     model="amazon/chronos-bolt-small",
-    inputs=[
+    series=[
         {
             # Always 2D: [num_timesteps][num_channels]. Univariate = length-1 channel axis.
             "target": [[120], [135], [142], [158], [163], [170], [185], [190], [198], [210]],
@@ -60,7 +60,7 @@ You can also run time series foundation models locally using their native librar
 
 ## Input Shape
 
-Requests always pass a list of **structured series objects** in `inputs`, rather than a bare array. Each item's `target` is a 2D array `[num_timesteps][num_channels]`:
+Requests always pass a list of **structured series objects** in `series`, rather than a bare array. Each item's `target` is a 2D array `[num_timesteps][num_channels]`:
 
 - **Univariate** series: each timestep has a length-1 channel axis, e.g. `[[120], [135], [142]]`.
 - **Multivariate** series: each timestep has one value per channel, e.g. `[[o, h, l, c], [o, h, l, c], ...]`.

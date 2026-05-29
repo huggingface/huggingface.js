@@ -99,7 +99,7 @@ export type { TextToSpeechParameters, TextToSpeechInput, TextToSpeechOutput } fr
 export type {
 	QuantilePrediction,
 	TimeSeriesForecastingInput,
-	TimeSeriesForecastingInputItem,
+	TimeSeriesForecastingSeries,
 	TimeSeriesForecastingOutput,
 	TimeSeriesForecastingOutputItem,
 	TimeSeriesForecastingParameters,

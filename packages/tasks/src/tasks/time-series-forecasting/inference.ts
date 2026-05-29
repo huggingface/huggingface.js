@@ -9,14 +9,47 @@
  * `null` inside `target`; clients with irregular data should resample before calling.
  */
 export interface TimeSeriesForecastingInput {
-	/**
-	 * One or more historical time series to forecast. Output order matches input order.
-	 */
-	inputs: TimeSeriesForecastingInputItem[];
 	parameters?: TimeSeriesForecastingParameters;
+	/**
+	 * A batch of historical time series to forecast; each element is one series. Output order
+	 * matches input order.
+	 */
+	series: TimeSeriesForecastingSeries[];
 	[property: string]: unknown;
 }
-export interface TimeSeriesForecastingInputItem {
+export interface TimeSeriesForecastingParameters {
+	/**
+	 * Optional pandas offset alias defining the grid spacing. Common values: 's' (second),
+	 * 'min' (minute), 'h' (hour), 'D' (day), 'B' (business day), 'W' (week), 'ME' / 'MS' (month
+	 * end/start), 'QE' / 'QS' (quarter), 'YE' / 'YS' (year). Accepts multipliers and anchors
+	 * (e.g. '15min', 'W-MON'). When provided alongside a per-item `start`, the response
+	 * includes `timestamps`. Servers reject aliases they don't support.
+	 */
+	frequency?: string;
+	/**
+	 * For sample-based probabilistic models, the number of sample paths to draw. Ignored by
+	 * models that don't produce samples. May be combined with `quantile_levels`.
+	 */
+	num_samples?: number;
+	/**
+	 * Number of future timesteps to forecast. Defaults to the model's native horizon.
+	 */
+	prediction_length?: number;
+	/**
+	 * Quantile levels in (0, 1) to return alongside the mean. Duplicate levels are rejected;
+	 * the response sorts `quantile_predictions` ascending by level. Omit to receive only the
+	 * mean.
+	 */
+	quantile_levels?: number[];
+	/**
+	 * Optional random seed for reproducible sampling across retries. Only affects sample-based
+	 * probabilistic models (see `num_samples`), and even then support is best-effort: models or
+	 * providers that don't honor seeding ignore it.
+	 */
+	seed?: number;
+	[property: string]: unknown;
+}
+export interface TimeSeriesForecastingSeries {
 	/**
 	 * Optional named covariates known over both the historical window and the forecast horizon.
 	 * Each key maps to a 1D array spanning the full timeline: the first `num_timesteps` values
@@ -63,41 +96,9 @@ export interface TimeSeriesForecastingInputItem {
 	target: Array<(number | null)[]>;
 	[property: string]: unknown;
 }
-export interface TimeSeriesForecastingParameters {
-	/**
-	 * Optional pandas offset alias defining the grid spacing. Common values: 's' (second),
-	 * 'min' (minute), 'h' (hour), 'D' (day), 'B' (business day), 'W' (week), 'ME' / 'MS' (month
-	 * end/start), 'QE' / 'QS' (quarter), 'YE' / 'YS' (year). Accepts multipliers and anchors
-	 * (e.g. '15min', 'W-MON'). When provided alongside a per-item `start`, the response
-	 * includes `timestamps`. Servers reject aliases they don't support.
-	 */
-	frequency?: string;
-	/**
-	 * For sample-based probabilistic models, the number of sample paths to draw. Ignored by
-	 * models that don't produce samples. May be combined with `quantile_levels`.
-	 */
-	num_samples?: number;
-	/**
-	 * Number of future timesteps to forecast. Defaults to the model's native horizon.
-	 */
-	prediction_length?: number;
-	/**
-	 * Quantile levels in (0, 1) to return alongside the mean. Duplicate levels are rejected;
-	 * the response sorts `quantile_predictions` ascending by level. Omit to receive only the
-	 * mean.
-	 */
-	quantile_levels?: number[];
-	/**
-	 * Optional random seed for reproducible sampling across retries. Only affects sample-based
-	 * probabilistic models (see `num_samples`), and even then support is best-effort: models or
-	 * providers that don't honor seeding ignore it.
-	 */
-	seed?: number;
-	[property: string]: unknown;
-}
 /**
  * Outputs of inference for the Time Series Forecasting task. Entries in `outputs`
- * correspond 1:1 with the request's `inputs` in order.
+ * correspond 1:1 with the request's `series` in order.
  */
 export interface TimeSeriesForecastingOutput {
 	outputs: TimeSeriesForecastingOutputItem[];

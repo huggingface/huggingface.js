@@ -2,7 +2,7 @@
 	"$id": "/inference/schemas/time-series-forecasting/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"title": "TimeSeriesForecastingOutput",
-	"description": "Outputs of inference for the Time Series Forecasting task. Entries in `outputs` correspond 1:1 with the request's `inputs` in order.",
+	"description": "Outputs of inference for the Time Series Forecasting task. Entries in `outputs` correspond 1:1 with the request's `series` in order.",
 	"type": "object",
 	"required": ["outputs"],
 	"properties": {
