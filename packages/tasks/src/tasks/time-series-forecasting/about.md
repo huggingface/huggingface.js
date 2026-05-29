@@ -56,7 +56,7 @@ for output in result["outputs"]:
 
 ## Direct Inference
 
-You can also run time series foundation models locally using their native libraries. Examples include `chronos-forecasting`, `uni2ts` (Moirai), `timesfm`, `lag-llama`, `darts`, and `gluonts`. Most of these follow the input shape described above — a 2D array of observations per series — with library-specific helpers for wrapping pandas DataFrames.
+You can also run time series foundation models locally using their native libraries. Examples include `chronos-forecasting`, `uni2ts` (Moirai), `timesfm`, `lag-llama`, `darts`, and `gluonts`. Most of these follow the input shape described above — a 2D array of observations per series — with library-specific helpers for wrapping pandas DataFrames. Beyond these, Hugging Face `transformers` implements several forecasting architectures (PatchTST, PatchTSMixer, Autoformer, Informer, and the Time Series Transformer), and `transformers.js` can run PatchTST and PatchTSMixer in the browser via ONNX.
 
 ## Input Shape
 
