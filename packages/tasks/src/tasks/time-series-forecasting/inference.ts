@@ -18,11 +18,14 @@ export interface TimeSeriesForecastingInput {
 }
 export interface TimeSeriesForecastingInputItem {
 	/**
-	 * Optional named covariates known over the forecast horizon. Each key maps to a 1D array of
-	 * length `parameters.prediction_length`.
+	 * Optional named covariates known over both the historical window and the forecast horizon.
+	 * Each key maps to a 1D array spanning the full timeline: the first `num_timesteps` values
+	 * align 1:1 with `target`, followed by `parameters.prediction_length` values over the
+	 * horizon (total length `num_timesteps + prediction_length`). Missing values in the
+	 * historical portion are encoded as `null`.
 	 */
 	future_covariates?: {
-		[key: string]: number[];
+		[key: string]: (number | null)[];
 	};
 	/**
 	 * Opaque per-series metadata. Echoed verbatim in the corresponding output item. Not

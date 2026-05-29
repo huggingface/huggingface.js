@@ -43,11 +43,11 @@
 					}
 				},
 				"future_covariates": {
-					"description": "Optional named covariates known over the forecast horizon. Each key maps to a 1D array of length `parameters.prediction_length`.",
+					"description": "Optional named covariates known over both the historical window and the forecast horizon. Each key maps to a 1D array spanning the full timeline: the first `num_timesteps` values align 1:1 with `target`, followed by `parameters.prediction_length` values over the horizon (total length `num_timesteps + prediction_length`). Missing values in the historical portion are encoded as `null`.",
 					"type": "object",
 					"additionalProperties": {
 						"type": "array",
-						"items": { "type": "number" }
+						"items": { "type": ["number", "null"] }
 					}
 				},
 				"static_covariates": {
