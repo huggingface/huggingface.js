@@ -82,7 +82,9 @@ export interface TimeSeriesForecastingParameters {
 	 */
 	prediction_length?: number;
 	/**
-	 * Quantile levels in (0, 1) to return alongside the mean. Omit to receive only the mean.
+	 * Quantile levels in (0, 1) to return alongside the mean. Duplicate levels are rejected;
+	 * the response sorts `quantile_predictions` ascending by level. Omit to receive only the
+	 * mean.
 	 */
 	quantile_levels?: number[];
 	[property: string]: unknown;

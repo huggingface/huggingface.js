@@ -76,12 +76,13 @@
 				},
 				"quantile_levels": {
 					"type": "array",
+					"uniqueItems": true,
 					"items": {
 						"type": "number",
 						"exclusiveMinimum": 0,
 						"exclusiveMaximum": 1
 					},
-					"description": "Quantile levels in (0, 1) to return alongside the mean. Omit to receive only the mean."
+					"description": "Quantile levels in (0, 1) to return alongside the mean. Duplicate levels are rejected; the response sorts `quantile_predictions` ascending by level. Omit to receive only the mean."
 				},
 				"num_samples": {
 					"type": "integer",
