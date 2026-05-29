@@ -223,7 +223,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[1].content).toContain("--custom-text-input");
 		expect(snippet[1].content).toContain("--accept-risk");
 		expect(snippet[1].content).toContain("--skip-health");
-		expect(snippet[2].content).toContain("openclaw agent --local");
+		expect(snippet[2].content).toContain('openclaw agent --local --agent main --message "Hello from Hugging Face"');
 	});
 
 	it("openclaw - mlx", async () => {
@@ -246,7 +246,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[1].content).toContain('--custom-model-id "mlx-community/Llama-3.2-3B-Instruct-mlx"');
 		expect(snippet[1].content).toContain("--custom-provider-id mlx-lm");
 		expect(snippet[1].content).toContain("--custom-text-input");
-		expect(snippet[2].content).toContain("openclaw agent --local");
+		expect(snippet[2].content).toContain('openclaw agent --local --agent main --message "Hello from Hugging Face"');
 	});
 
 	it("docker model runner", async () => {

@@ -572,7 +572,7 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 		},
 		{
 			title: "Run OpenClaw",
-			content: `openclaw agent --local --message "Hello from Hugging Face"`,
+			content: `openclaw agent --local --agent main --message "Hello from Hugging Face"`,
 		},
 	];
 };
