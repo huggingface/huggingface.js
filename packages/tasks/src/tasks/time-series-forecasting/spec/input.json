@@ -23,8 +23,10 @@
 				"target": {
 					"description": "Historical values on a regular grid. Always a 2D array of shape [num_timesteps][num_channels]. Univariate series use a length-1 channel axis. Missing observations are encoded as `null`.",
 					"type": "array",
+					"minItems": 1,
 					"items": {
 						"type": "array",
+						"minItems": 1,
 						"items": { "type": ["number", "null"] }
 					}
 				},

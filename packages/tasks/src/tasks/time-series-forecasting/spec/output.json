@@ -20,8 +20,10 @@
 				"mean": {
 					"description": "Point forecast. Same shape as the corresponding input's `target`: outer dimension is time (length = prediction_length), inner dimension is channels.",
 					"type": "array",
+					"minItems": 1,
 					"items": {
 						"type": "array",
+						"minItems": 1,
 						"items": { "type": "number" }
 					}
 				},
