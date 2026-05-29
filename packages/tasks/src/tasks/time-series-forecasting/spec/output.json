@@ -64,8 +64,7 @@
 					"description": "Optional ISO-8601 timestamps for each forecast step. Present when the input item had `start` and `parameters.frequency` was supplied.",
 					"type": "array",
 					"items": {
-						"type": "string",
-						"format": "date-time"
+						"type": "string"
 					}
 				},
 				"metadata": {

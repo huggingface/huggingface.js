@@ -45,7 +45,7 @@ export interface TimeSeriesForecastingInputItem {
 	 * forecast timestamps. If omitted, observations are treated as an integer sequence and the
 	 * response has no `timestamps`.
 	 */
-	start?: Date;
+	start?: string;
 	/**
 	 * Optional static (time-invariant) numeric features for the series.
 	 */
@@ -119,7 +119,7 @@ export interface TimeSeriesForecastingOutputItem {
 	 * Optional ISO-8601 timestamps for each forecast step. Present when the input item had
 	 * `start` and `parameters.frequency` was supplied.
 	 */
-	timestamps?: Date[];
+	timestamps?: string[];
 	[property: string]: unknown;
 }
 export interface QuantilePrediction {

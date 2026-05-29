@@ -30,8 +30,7 @@
 				},
 				"start": {
 					"description": "Optional ISO-8601 timestamp of the first observation. Combined with `parameters.frequency` it defines the time index for both the input and the returned forecast timestamps. If omitted, observations are treated as an integer sequence and the response has no `timestamps`.",
-					"type": "string",
-					"format": "date-time"
+					"type": "string"
 				},
 				"past_covariates": {
 					"description": "Optional named covariates observed over the historical window. Each key maps to a 1D array aligned 1:1 with the time axis of `target`. Missing values are encoded as `null`. Models that don't support covariates silently ignore this field.",
