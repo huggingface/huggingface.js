@@ -88,6 +88,10 @@
 					"type": "integer",
 					"minimum": 1,
 					"description": "For sample-based probabilistic models, the number of sample paths to draw. Ignored by models that don't produce samples. May be combined with `quantile_levels`."
+				},
+				"seed": {
+					"type": "integer",
+					"description": "Optional random seed for reproducible sampling across retries. Only affects sample-based probabilistic models (see `num_samples`), and even then support is best-effort: models or providers that don't honor seeding ignore it."
 				}
 			}
 		}

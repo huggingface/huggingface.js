@@ -87,6 +87,12 @@ export interface TimeSeriesForecastingParameters {
 	 * mean.
 	 */
 	quantile_levels?: number[];
+	/**
+	 * Optional random seed for reproducible sampling across retries. Only affects sample-based
+	 * probabilistic models (see `num_samples`), and even then support is best-effort: models or
+	 * providers that don't honor seeding ignore it.
+	 */
+	seed?: number;
 	[property: string]: unknown;
 }
 /**
