@@ -1066,6 +1066,26 @@ python -m lerobot.record \\
 	return [];
 };
 
+export const litert_lm = (model: ModelData): string[] => [
+	`# LiteRT-LM runs on various platforms (Android, iOS, Windows, Linux, macOS, IoT, Web/WASM)
+# and supports many APIs (C++, Python, Kotlin, Swift, JavaScript, Flutter).
+# For platform-specific integration guides, please refer to the official developer website:
+# https://ai.google.dev/edge/litert-lm
+
+# To try LiteRT-LM, the easiest way is to use our CLI tool.
+# 1. Install the LiteRT-LM CLI tool via pip:
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade litert-lm
+
+# 2. Download and run this model locally:
+# See: https://ai.google.dev/edge/litert-lm/cli
+litert-lm run \\
+  --from-huggingface-repo=${model.id} \\
+  model.litertlm \\
+  --prompt="Write me a poem"`
+];
+
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
 # See https://github.com/keras-team/tf-keras for more details.
