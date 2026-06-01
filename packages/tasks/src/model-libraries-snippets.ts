@@ -1081,7 +1081,7 @@ pip install litert-lm
 litert-lm run \\
   --from-huggingface-repo=${model.id} \\
   model.litertlm \\
-  --prompt="Write me a poem"`
+  --prompt="Write me a poem"`,
 ];
 
 export const tf_keras = (model: ModelData): string[] => [
