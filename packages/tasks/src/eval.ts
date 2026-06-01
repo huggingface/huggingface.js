@@ -119,4 +119,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"WildClawBench is an in-the-wild benchmark for evaluating AI agents in the OpenClaw environment across 60 hand-built, end-to-end tasks spanning productivity, code intelligence, social interaction, search, creative synthesis, and safety domains.",
 		url: "https://github.com/InternLM/WildClawBench",
 	},
+	wbench: {
+		name: "wbench",
+		description:
+			"WBench is a comprehensive multi-turn benchmark for interactive video world model evaluation, assessing models across 5 dimensions (video quality, setting adherence, interaction adherence, consistency, physics compliance) and 22 metrics over 289 multi-turn interaction cases.",
+		url: "https://github.com/meituan-longcat/WBench",
+	},
 } as const;
