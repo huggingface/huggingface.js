@@ -73,3 +73,6 @@ export type { KernelLibraryKey, KernelLibraryUiElement } from "./kernel-librarie
 export * from "./inference-providers.js";
 
 export { EVALUATION_FRAMEWORKS } from "./eval.js";
+
+export { AGENT_HARNESSES, STANDARD_AGENT_ENV_VARS } from "./agent-harnesses.js";
+export type { AgentHarness, AgentHarnessKey } from "./agent-harnesses.js";
