@@ -20,6 +20,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	 */
 	baseten: {},
 	"black-forest-labs": {},
+	burncloud: {},
 	cerebras: {},
 	clarifai: {},
 	cohere: {},
