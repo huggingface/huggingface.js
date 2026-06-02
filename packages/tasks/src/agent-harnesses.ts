@@ -96,17 +96,19 @@ export const AGENT_HARNESSES = {
 		description: "OpenAI's lightweight coding agent that runs in your terminal.",
 		envVars: { CODEX_SANDBOX: "*", CODEX_CI: "*", CODEX_THREAD_ID: "*" },
 	},
+	"cursor-cli": {
+		// must stay before `cursor` so the more specific signal takes priority: when the CLI runs inside
+		// the Cursor editor's terminal, child processes inherit `CURSOR_TRACE_ID` and the CLI sets `CURSOR_AGENT`.
+		prettyLabel: "Cursor CLI",
+		docsUrl: "https://cursor.com/docs/cli/overview",
+		description: "Cursor's coding agent for the command line.",
+		envVars: { CURSOR_AGENT: "*" },
+	},
 	cursor: {
 		prettyLabel: "Cursor",
 		docsUrl: "https://cursor.com",
 		description: "AI-powered code editor.",
 		envVars: { CURSOR_TRACE_ID: "*" },
-	},
-	"cursor-cli": {
-		prettyLabel: "Cursor CLI",
-		docsUrl: "https://cursor.com/docs/cli/overview",
-		description: "Cursor's coding agent for the command line.",
-		envVars: { CURSOR_AGENT: "*" },
 	},
 	"github-copilot": {
 		prettyLabel: "GitHub Copilot",
