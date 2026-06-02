@@ -65,6 +65,7 @@ const TEST_STRINGS = {
 
 	// Object properties
 	PROPERTIES: `{{ obj.x + obj.y }}{{ obj['x'] + obj.y }}`,
+	PROPERTIES_1: `|{{ matrix.0 }}|{{ matrix.0.1 }}|{{ matrix.0.1.1 }}|{{ object.0.apple.banana.1.2[3]['cherry'] }}|`,
 
 	// Object methods
 	OBJ_METHODS: `{{ obj.x(x, y) }}{{ ' ' + obj.x() + ' ' }}{{ obj.z[x](x, y) }}`,
@@ -1220,6 +1221,53 @@ const TEST_PARSED = {
 		{ value: ".", type: "Dot" },
 		{ value: "y", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+	PROPERTIES_1: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "matrix", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "matrix", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "matrix", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "object", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "apple", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "banana", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "cherry", type: "StringLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
 	],
 
 	// Object methods
@@ -4715,6 +4763,24 @@ const TEST_CONTEXT = {
 	PROPERTIES: {
 		obj: { x: 10, y: 20 },
 	},
+	PROPERTIES_1: {
+		matrix: [
+			[
+				["zero-zero-zero", "zero-zero-one"],
+				["zero-one-zero", "zero-one-one"],
+			],
+		],
+		object: [
+			{
+				apple: {
+					banana: [
+						"unused",
+						["zero", "one", ["unused-zero", "unused-one", "unused-two", { cherry: "mixed-indexing" }]],
+					],
+				},
+			},
+		],
+	},
 
 	// Object methods
 	OBJ_METHODS: {
@@ -5125,6 +5191,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Object properties
 	PROPERTIES: "3030",
+	PROPERTIES_1: `|[["zero-zero-zero", "zero-zero-one"], ["zero-one-zero", "zero-one-one"]]|["zero-one-zero", "zero-one-one"]|zero-one-one|mixed-indexing|`,
 
 	// Object methods
 	OBJ_METHODS: "AB  A_B",

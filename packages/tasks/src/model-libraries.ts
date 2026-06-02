@@ -277,6 +277,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"setup.py"`,
 	},
+	collectorvision: {
+		prettyLabel: "CollectorVision",
+		repoName: "CollectorVision",
+		repoUrl: "https://github.com/HanClinto/CollectorVision",
+		snippets: snippets.collectorvision,
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	colipri: {
 		prettyLabel: "COLIPRI",
 		repoName: "COLIPRI",
@@ -434,6 +442,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_filename:"slicex_elm_config" AND path_extension:"json"`,
 	},
+	encoderfile: {
+		prettyLabel: "encoderfile",
+		repoName: "encoderfile",
+		repoUrl: "https://github.com/mozilla-ai/encoderfile",
+		filter: false,
+		countDownloads: `path_extension:"encoderfile"`,
+	},
 	espnet: {
 		prettyLabel: "ESPnet",
 		repoName: "ESPnet",
@@ -577,6 +592,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/LMD0311/HERMES",
 		filter: false,
 		countDownloads: `path:"ckpt/hermes_final.pth"`,
+	},
+	holomotion: {
+		prettyLabel: "HoloMotion",
+		repoName: "HoloMotion",
+		repoUrl: "https://github.com/HorizonRobotics/HoloMotion",
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
 	},
 	hezar: {
 		prettyLabel: "Hezar",
@@ -761,6 +783,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "LiteRT-LM",
 		repoName: "LiteRT-LM",
 		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
+		snippets: snippets.litert_lm,
 		filter: false,
 		countDownloads: `path_extension:"litertlm" OR path_extension:"task"`,
 	},
@@ -932,6 +955,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/baaivision/MTVCraft",
 		filter: false,
 		countDownloads: `path:"vae/3d-vae.pt"`,
+	},
+	multimolecule: {
+		prettyLabel: "MultiMolecule",
+		repoName: "MultiMolecule",
+		repoUrl: "https://github.com/MultiMolecule/multimolecule",
+		docsUrl: "https://multimolecule.danling.org",
+		snippets: snippets.multimolecule,
+		filter: false,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
@@ -1195,6 +1226,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
 	},
+	sapiens2: {
+		prettyLabel: "sapiens2",
+		repoName: "sapiens2",
+		repoUrl: "https://github.com/facebookresearch/sapiens2",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	seedvr: {
 		prettyLabel: "SeedVR",
 		repoName: "SeedVR",
@@ -1265,6 +1303,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/WangHelin1997/SSR-Speech",
 		filter: false,
 		countDownloads: `path_extension:".pth"`,
+	},
+	"stable-audio-3": {
+		prettyLabel: "Stable Audio 3",
+		repoName: "stable-audio-3",
+		repoUrl: "https://github.com/Stability-AI/stable-audio-3",
+		filter: false,
+		countDownloads: `path:"model_config.json"`,
 	},
 	"stable-audio-tools": {
 		prettyLabel: "Stable Audio Tools",
@@ -1460,6 +1505,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Trellis",
 		repoName: "Trellis",
 		repoUrl: "https://github.com/microsoft/TRELLIS",
+		countDownloads: `path_extension:"safetensors"`,
+	},
+	trellis2: {
+		prettyLabel: "TRELLIS.2",
+		repoName: "TRELLIS.2",
+		repoUrl: "https://github.com/microsoft/TRELLIS.2",
 		countDownloads: `path_extension:"safetensors"`,
 	},
 	ultralytics: {
