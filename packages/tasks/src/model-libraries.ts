@@ -809,6 +809,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"liveportrait/landmark.onnx"`,
 	},
+	"longcat-video": {
+		prettyLabel: "LongCat-Video",
+		repoName: "LongCat-Video",
+		repoUrl: "https://github.com/meituan-longcat/LongCat-Video",
+		filter: false,
+	}
 	"llama-cpp-python": {
 		prettyLabel: "llama-cpp-python",
 		repoName: "llama-cpp-python",
