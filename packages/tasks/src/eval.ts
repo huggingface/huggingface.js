@@ -33,6 +33,12 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Harbor is a framework for evaluating and optimizing agents and language models.",
 		url: "https://github.com/laude-institute/harbor",
 	},
+	pier: {
+		name: "pier",
+		description:
+			"Pier is a Harbor fork built for DeepSWE, with stronger support for CLI agents in no-internet tasks and more faithful, consistent agent trajectories.",
+		url: "https://github.com/datacurve-ai/pier",
+	},
 	archipelago: {
 		name: "archipelago",
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
