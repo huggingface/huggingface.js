@@ -135,6 +135,6 @@ export const EVALUATION_FRAMEWORKS = {
 		name: "nanofold",
 		description:
 			"nanoFold is a data-efficiency benchmark for protein structure prediction. Its goal is to evaluate models on scenarios with scarce data.",
-		url: "https://github.com/meituan-longcat/WBench",
+		url: "https://github.com/ChrisHayduk/nanoFold-Competition",
 	},
 } as const;
