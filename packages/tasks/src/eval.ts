@@ -131,4 +131,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"WBench is a comprehensive multi-turn benchmark for interactive video world model evaluation, assessing models across 5 dimensions (video quality, setting adherence, interaction adherence, consistency, physics compliance) and 22 metrics over 289 multi-turn interaction cases.",
 		url: "https://github.com/meituan-longcat/WBench",
 	},
+	nanofold: {
+		name: "nanofold",
+		description:
+			"nanoFold is a data-efficiency benchmark for protein structure prediction. Its goal is to evaluate models on scenarios with scarce data.",
+		url: "https://github.com/meituan-longcat/WBench",
+	},
 } as const;
