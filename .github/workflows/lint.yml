@@ -17,6 +17,10 @@ jobs:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
       - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
+      - name: Restore pnpm lifecycle scripts
+        # The proxy setup sets ignore-scripts=true in ~/.npmrc; we need
+        # postinstall (e.g. oxfmt native binary) and prepare scripts to run.
+        run: sed -i '/^ignore-scripts[[:space:]]*=/d' "$HOME/.npmrc"
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         run: |
@@ -65,6 +69,10 @@ jobs:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
       - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
+      - name: Restore pnpm lifecycle scripts
+        # The proxy setup sets ignore-scripts=true in ~/.npmrc; we need
+        # postinstall (e.g. oxfmt native binary) and prepare scripts to run.
+        run: sed -i '/^ignore-scripts[[:space:]]*=/d' "$HOME/.npmrc"
 
       - run: npm install -g corepack@latest && corepack enable
 
