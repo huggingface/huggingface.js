@@ -1,0 +1,59 @@
+name: Smoke - check-deps via proxy
+
+# Temporary: verify that pnpm -w check-deps and the inline gearhash-jit
+# check return the correct (latest) versions through the hf-registry
+# proxy, i.e. that the proxy whitelist covers @huggingface/* AND the
+# unscoped 'gearhash-jit' package. Delete before merging.
+#
+# Re-runs on every push to this file.
+
+on:
+  push:
+    branches:
+      - ci/setup-hf-registry-proxies
+    paths:
+      - .github/workflows/_smoke-check-deps.yml
+
+jobs:
+  smoke:
+    runs-on:
+      group: aws-general-8-plus
+    steps:
+      - uses: actions/checkout@v5
+      - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
+      - name: Restore pnpm lifecycle scripts
+        run: sed -i '/^ignore-scripts[[:space:]]*=/d' "$HOME/.npmrc"
+      - run: cat "$HOME/.npmrc"
+
+      - run: npm install -g corepack@latest && corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+      - run: pnpm install
+
+      - name: Direct npm view via proxy (should return latest)
+        run: |
+          set -e
+          for pkg in "@huggingface/tasks" "@huggingface/inference" "gearhash-jit"; do
+            ver=$(npm view "$pkg" version)
+            echo "via proxy: $pkg -> $ver"
+          done
+
+      - name: pnpm -w check-deps tasks
+        run: pnpm -w check-deps tasks
+
+      - name: pnpm -w check-deps inference
+        run: pnpm -w check-deps inference
+
+      - name: Inline gearhash-jit check (xetchunk-wasm-publish.yml style)
+        working-directory: packages/xetchunk-wasm
+        run: |
+          LOCAL_VER=$(node -p "require('../gearhash-jit/package.json').version")
+          REMOTE_VER=$(npm view "gearhash-jit@${LOCAL_VER}" version 2>/dev/null || echo "")
+          echo "local=$LOCAL_VER remote=$REMOTE_VER"
+          if [ "$REMOTE_VER" != "$LOCAL_VER" ]; then
+            echo "Error: gearhash-jit@${LOCAL_VER} not visible via proxy"
+            exit 1
+          fi
