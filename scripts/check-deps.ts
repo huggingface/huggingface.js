@@ -15,9 +15,16 @@ if (!dep) {
 
 process.chdir(`./packages/${dep}`);
 
+// Always query npm public directly, never the internal hf-registry
+// proxy. The proxy holds back versions newer than ~3 days; a dep
+// published minutes ago would look missing or at the wrong version
+// and break chained releases (publish tasks -> publish hub right
+// after, etc.).
+const PUBLIC_NPM = "--registry=https://registry.npmjs.org/";
+
 const localPackageJson = readFileSync(`./package.json`, "utf-8");
 const localVersion = JSON.parse(localPackageJson).version as string;
-const remoteVersion = execSync(`npm view @huggingface/${dep} version`).toString().trim();
+const remoteVersion = execSync(`npm view ${PUBLIC_NPM} @huggingface/${dep} version`).toString().trim();
 
 if (localVersion !== remoteVersion) {
 	console.error(
@@ -29,7 +36,7 @@ if (localVersion !== remoteVersion) {
 execSync(`npm pack`);
 execSync(`mv huggingface-${dep}-${localVersion}.tgz ${dep}-local.tgz`);
 
-execSync(`npm pack @huggingface/${dep}@${remoteVersion}`);
+execSync(`npm pack ${PUBLIC_NPM} @huggingface/${dep}@${remoteVersion}`);
 execSync(`mv huggingface-${dep}-${remoteVersion}.tgz ${dep}-remote.tgz`);
 
 execSync(`rm -Rf local && mkdir local && tar -xf ${dep}-local.tgz -C local`);
