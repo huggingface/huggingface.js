@@ -1,0 +1,54 @@
+name: Smoke - proxy + dry-run publish
+
+# Temporary workflow to validate the setup-hf-registry-proxies wiring
+# without actually publishing anything. Mirrors what a *-publish.yml does
+# (checkout + proxy + lifecycle-restore + corepack + setup-node + install
+# + build), then runs `pnpm publish --dry-run` against npm public.
+#
+# Trigger:
+#   gh workflow run _smoke-publish-proxy.yml --ref ci/setup-hf-registry-proxies
+#
+# Delete this file before merging.
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        type: choice
+        description: "Package to dry-run publish"
+        default: tasks
+        options:
+          - tasks
+          - inference
+          - jinja
+
+jobs:
+  smoke:
+    runs-on:
+      group: aws-general-8-plus
+    defaults:
+      run:
+        working-directory: packages/${{ github.event.inputs.package }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
+      - name: Show ~/.npmrc after proxy setup
+        run: cat "$HOME/.npmrc"
+      - name: Restore pnpm lifecycle scripts
+        run: sed -i '/^ignore-scripts[[:space:]]*=/d' "$HOME/.npmrc"
+      - name: Show ~/.npmrc after restore
+        run: cat "$HOME/.npmrc"
+
+      - run: npm install -g corepack@latest && corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: |
+            packages/${{ github.event.inputs.package }}/pnpm-lock.yaml
+
+      - name: pnpm install (via proxy)
+        run: pnpm install
+
+      - name: pnpm publish --dry-run (registry override -> npm public)
+        run: pnpm publish --registry=https://registry.npmjs.org/ --no-git-checks --dry-run .
