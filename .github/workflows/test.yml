@@ -52,8 +52,11 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
   browser:
-    runs-on:
-      group: aws-general-8-plus
+    # Kept on ubuntu-latest: this job needs google-chrome at the system
+    # level. The self-hosted runner group does not have Chrome preinstalled
+    # and its sudo configuration does not let setup-chrome apt-install the
+    # required system libs.
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
@@ -61,11 +64,6 @@ jobs:
         with:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
-      - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
-      - name: Restore pnpm lifecycle scripts
-        # The proxy setup sets ignore-scripts=true in ~/.npmrc; we need
-        # postinstall (e.g. oxfmt native binary) and prepare scripts to run.
-        run: sed -i '/^ignore-scripts[[:space:]]*=/d' "$HOME/.npmrc"
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         env:
@@ -78,9 +76,6 @@ jobs:
             echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
-      - uses: browser-actions/setup-chrome@v1
-        with:
-          install-dependencies: true
       - run: google-chrome --version
 
       - run: npm install -g corepack@latest && corepack enable
@@ -101,21 +96,16 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
   e2e:
-    runs-on:
-      group: aws-general-8-plus
+    # Kept on ubuntu-latest: the svelte step runs vitest --browser.name=chrome
+    # which needs Chrome system-installed. Same runner constraint as the
+    # browser job above. Also, this job publishes packages to a local
+    # Verdaccio mock registry, so it does not really benefit from the
+    # internal package proxies.
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v3
-      - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
-      - name: Restore pnpm lifecycle scripts
-        # The proxy setup sets ignore-scripts=true in ~/.npmrc; we need
-        # prepublishOnly to run so packages get built before being published
-        # to the local Verdaccio registry.
-        run: sed -i '/^ignore-scripts[[:space:]]*=/d' "$HOME/.npmrc"
-      - uses: browser-actions/setup-chrome@v1
-        with:
-          install-dependencies: true
 
       - run: npm install -g corepack@latest && corepack enable
 
