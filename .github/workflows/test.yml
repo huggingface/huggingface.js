@@ -7,7 +7,8 @@ on:
 
 jobs:
   node:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: aws-general-8-plus
     timeout-minutes: 10
 
     steps:
@@ -15,6 +16,7 @@ jobs:
         with:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
+      - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         env:
@@ -46,7 +48,8 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
   browser:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: aws-general-8-plus
     timeout-minutes: 10
 
     steps:
@@ -54,6 +57,7 @@ jobs:
         with:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
+      - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         env:
@@ -86,11 +90,13 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
   e2e:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: aws-general-8-plus
     timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v3
+      - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
 
       - run: npm install -g corepack@latest && corepack enable
 

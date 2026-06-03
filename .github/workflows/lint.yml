@@ -7,7 +7,8 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: aws-general-8-plus
     timeout-minutes: 10
 
     steps:
@@ -15,6 +16,7 @@ jobs:
         with:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
+      - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         run: |
@@ -53,7 +55,8 @@ jobs:
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] check
 
   format:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: aws-general-8-plus
     timeout-minutes: 10
 
     steps:
@@ -61,6 +64,7 @@ jobs:
         with:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
+      - uses: huggingface/hf-workflows/.github/actions/setup-hf-registry-proxies@21845492ef47d4e46b07a3b2a6e14fd4748c39cc
 
       - run: npm install -g corepack@latest && corepack enable
 
