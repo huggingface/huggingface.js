@@ -66,10 +66,7 @@ jobs:
       - name: "Check gearhash-jit is published"
         run: |
           LOCAL_VER=$(node -p "require('../gearhash-jit/package.json').version")
-          # Query npm public directly; the hf-registry proxy holds back versions
-          # newer than ~3 days, which would make a freshly published gearhash-jit
-          # look missing.
-          REMOTE_VER=$(npm view --registry=https://registry.npmjs.org/ "gearhash-jit@${LOCAL_VER}" version 2>/dev/null || echo "")
+          REMOTE_VER=$(npm view "gearhash-jit@${LOCAL_VER}" version 2>/dev/null || echo "")
           if [ "$REMOTE_VER" != "$LOCAL_VER" ]; then
             echo "Error: gearhash-jit@${LOCAL_VER} not found on npm. Publish it first."
             exit 1
