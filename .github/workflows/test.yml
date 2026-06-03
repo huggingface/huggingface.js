@@ -79,6 +79,8 @@ jobs:
           fi
 
       - uses: browser-actions/setup-chrome@v1
+        with:
+          install-dependencies: true
       - run: google-chrome --version
 
       - run: npm install -g corepack@latest && corepack enable
@@ -111,6 +113,9 @@ jobs:
         # prepublishOnly to run so packages get built before being published
         # to the local Verdaccio registry.
         run: sed -i '/^ignore-scripts[[:space:]]*=/d' "$HOME/.npmrc"
+      - uses: browser-actions/setup-chrome@v1
+        with:
+          install-dependencies: true
 
       - run: npm install -g corepack@latest && corepack enable
 
