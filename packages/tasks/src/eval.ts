@@ -137,4 +137,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"nanoFold is a data-efficiency benchmark for protein structure prediction. Its goal is to evaluate models on scenarios with scarce data.",
 		url: "https://github.com/ChrisHayduk/nanoFold-Competition",
 	},
+	"mmmu-pro": {
+		name: "mmmu-pro",
+		description:
+			"MMMU-Pro is a rigorous benchmark for evaluating multimodal models on college-level questions across 30+ disciplines, extending MMMU with more challenging multi-image and vision-only tasks that demand expert-level reasoning.",
+		url: "https://mmmu-benchmark.github.io/",
+	},
 } as const;
