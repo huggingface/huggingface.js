@@ -33,6 +33,12 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Harbor is a framework for evaluating and optimizing agents and language models.",
 		url: "https://github.com/laude-institute/harbor",
 	},
+	pier: {
+		name: "pier",
+		description:
+			"Pier is a Harbor fork built for DeepSWE, with stronger support for CLI agents in no-internet tasks and more faithful, consistent agent trajectories.",
+		url: "https://github.com/datacurve-ai/pier",
+	},
 	archipelago: {
 		name: "archipelago",
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
@@ -118,5 +124,17 @@ export const EVALUATION_FRAMEWORKS = {
 		description:
 			"WildClawBench is an in-the-wild benchmark for evaluating AI agents in the OpenClaw environment across 60 hand-built, end-to-end tasks spanning productivity, code intelligence, social interaction, search, creative synthesis, and safety domains.",
 		url: "https://github.com/InternLM/WildClawBench",
+	},
+	wbench: {
+		name: "wbench",
+		description:
+			"WBench is a comprehensive multi-turn benchmark for interactive video world model evaluation, assessing models across 5 dimensions (video quality, setting adherence, interaction adherence, consistency, physics compliance) and 22 metrics over 289 multi-turn interaction cases.",
+		url: "https://github.com/meituan-longcat/WBench",
+	},
+	nanofold: {
+		name: "nanofold",
+		description:
+			"nanoFold is a data-efficiency benchmark for protein structure prediction. Its goal is to evaluate models on scenarios with scarce data.",
+		url: "https://github.com/ChrisHayduk/nanoFold-Competition",
 	},
 } as const;

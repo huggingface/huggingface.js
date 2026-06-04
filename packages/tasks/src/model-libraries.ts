@@ -783,6 +783,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "LiteRT-LM",
 		repoName: "LiteRT-LM",
 		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
+		snippets: snippets.litert_lm,
 		filter: false,
 		countDownloads: `path_extension:"litertlm" OR path_extension:"task"`,
 	},
@@ -836,6 +837,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Magenta RT",
 		repoUrl: "https://github.com/magenta/magenta-realtime",
 		countDownloads: `path:"checkpoints/llm_base_x4286_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k/checkpoint"`,
+	},
+	"magenta-realtime-2": {
+		prettyLabel: "Magenta RT 2",
+		repoName: "Magenta RT 2",
+		repoUrl: "https://github.com/magenta/magenta-realtime",
+		countDownloads: `path:"models/mrt2_base/mrt2_base.mlxfn" OR path:"models/mrt2_small/mrt2_small.mlxfn" OR path:"checkpoints/mrt2_base.safetensors" OR path:"checkpoints/mrt2_small.safetensors"`,
 	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
