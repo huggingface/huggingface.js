@@ -809,9 +809,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"liveportrait/landmark.onnx"`,
 	},
-	"longcat-video": {
-		prettyLabel: "LongCat-Video",
-		repoName: "LongCat-Video",
+	"longcat-video-avatar-1.5": {
+		prettyLabel: "LongCat-Video-Avatar 1.5",
+		repoName: "LongCat-Video-Avatar 1.5",
 		repoUrl: "https://github.com/meituan-longcat/LongCat-Video",
 		filter: false,
 	},
