@@ -39,9 +39,9 @@ data = query("sample1.flac")
 You can also use [huggingface.js](https://github.com/huggingface/huggingface.js), the JavaScript client, to transcribe audio with the Serverless Inference API.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.automaticSpeechRecognition({
 	data: await (await fetch("sample.flac")).blob(),
 	model: "openai/whisper-large-v3",

@@ -1,0 +1,21 @@
+import fal_client
+import base64
+
+def on_queue_update(update):
+    if isinstance(update, fal_client.InProgress):
+        for log in update.logs:
+           print(log["message"])
+
+with open("cat.png", "rb") as image_file:
+    image_base_64 = base64.b64encode(image_file.read()).decode('utf-8')
+
+result = fal_client.subscribe(
+    "fal-ai/flux-kontext/dev",
+    arguments={
+        "prompt": f"data:image/png;base64,{image_base_64}",
+        "image_url": "cat.png",
+    },
+    with_logs=True,
+    on_queue_update=on_queue_update,
+)
+print(result)

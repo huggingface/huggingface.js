@@ -30,7 +30,7 @@ export async function* listCommits(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>,
 ): AsyncGenerator<CommitData> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);

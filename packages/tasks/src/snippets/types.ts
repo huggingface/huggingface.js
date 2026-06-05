@@ -10,7 +10,12 @@ export type ModelDataMinimal = Pick<
 	"id" | "pipeline_tag" | "mask_token" | "library_name" | "config" | "tags" | "inference"
 >;
 
+// Order of the elements in InferenceModal.svelte is determined by this const
+export const inferenceSnippetLanguages = ["python", "js", "sh"] as const;
+export type InferenceSnippetLanguage = (typeof inferenceSnippetLanguages)[number];
+
 export interface InferenceSnippet {
+	language: InferenceSnippetLanguage; // e.g. `python`, `curl`, `js`
+	client: string; // e.g. `huggingface_hub`, `openai`, `fetch`, etc.
 	content: string;
-	client: string; // for instance: `client` could be `huggingface_hub` or `openai` client for Python snippets
 }

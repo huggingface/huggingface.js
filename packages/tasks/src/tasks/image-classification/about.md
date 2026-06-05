@@ -27,9 +27,9 @@ clf("path_to_a_cat_image")
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to classify images using models on Hugging Face Hub.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.imageClassification({
 	data: await (await fetch("https://picsum.photos/300/300")).blob(),
 	model: "microsoft/resnet-50",

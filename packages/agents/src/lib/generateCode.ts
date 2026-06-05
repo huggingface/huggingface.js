@@ -7,7 +7,7 @@ export async function generateCode(
 	prompt: string,
 	tools: Tool[],
 	files: FileList | undefined,
-	llm: (input: string) => Promise<string>
+	llm: (input: string) => Promise<string>,
 ): Promise<string> {
 	const fullprompt = generatePrompt(prompt, [...tools, messageTool], {
 		image: !!files && files[0].type.startsWith("image"),

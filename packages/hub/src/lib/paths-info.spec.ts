@@ -1,12 +1,12 @@
 import { expect, it, describe } from "vitest";
-import type { CommitInfo, PathInfo, SecurityFileStatus } from "./paths-info";
+import type { CommitInfo, PathInfo } from "./paths-info";
 import { pathsInfo } from "./paths-info";
 
 describe("pathsInfo", () => {
 	it("should fetch LFS path info", async () => {
 		const result: PathInfo[] = await pathsInfo({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			paths: ["tf_model.h5"],
@@ -29,13 +29,12 @@ describe("pathsInfo", () => {
 		expect(modelPathInfo.securityFileStatus).toBeUndefined();
 	});
 
-	it("expand parmas should fetch lastCommit and securityFileStatus", async () => {
+	it("expand params should fetch lastCommit", async () => {
 		const result: (PathInfo & {
 			lastCommit: CommitInfo;
-			securityFileStatus: SecurityFileStatus;
 		})[] = await pathsInfo({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			paths: ["tf_model.h5"],
@@ -49,7 +48,6 @@ describe("pathsInfo", () => {
 
 		// should include expand info
 		expect(modelPathInfo.lastCommit).toBeDefined();
-		expect(modelPathInfo.securityFileStatus).toBeDefined();
 
 		expect(modelPathInfo.lastCommit.id).toBe("dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7");
 		expect(modelPathInfo.lastCommit.title).toBe("Update tf_model.h5");
@@ -59,7 +57,7 @@ describe("pathsInfo", () => {
 	it("non-LFS pointer should have lfs undefined", async () => {
 		const result: PathInfo[] = await pathsInfo({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			paths: ["config.json"],

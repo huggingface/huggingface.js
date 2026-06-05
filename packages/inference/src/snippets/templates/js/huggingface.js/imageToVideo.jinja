@@ -1,0 +1,20 @@
+import { InferenceClient } from "@huggingface/inference";
+
+const client = new InferenceClient("{{ accessToken }}");
+
+const data = fs.readFileSync("{{inputs.asObj.inputs}}");
+
+const video = await client.imageToVideo({
+{% if endpointUrl %}
+	endpointUrl: "{{ endpointUrl }}",
+{% endif %}
+	provider: "{{provider}}",
+	model: "{{model.id}}",
+	inputs: data,
+	parameters: { prompt: "{{inputs.asObj.parameters.prompt}}", },
+}{% if billTo %}, {
+	billTo: "{{ billTo }}",
+}{% endif %});
+
+/// Use the generated video (it's a Blob)
+// For example, you can save it to a file or display it in a video element

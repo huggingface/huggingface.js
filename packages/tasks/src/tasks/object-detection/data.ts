@@ -61,8 +61,8 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "Leaderboard to compare various object detection models across several metrics.",
-			id: "hf-vision/object_detection_leaderboard",
+			description: "Real-time object detection demo.",
+			id: "Roboflow/RF-DETR",
 		},
 		{
 			description: "An application that contains various object detection models to try from.",

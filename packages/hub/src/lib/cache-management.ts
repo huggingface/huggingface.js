@@ -70,12 +70,14 @@ export interface HFCacheInfo {
 }
 
 export async function scanCacheDir(cacheDir: string | undefined = undefined): Promise<HFCacheInfo> {
-	if (!cacheDir) cacheDir = getHFHubCachePath();
+	if (!cacheDir) {
+		cacheDir = getHFHubCachePath();
+	}
 
 	const s = await stat(cacheDir);
 	if (!s.isDirectory()) {
 		throw new Error(
-			`Scan cache expects a directory but found a file: ${cacheDir}. Please use \`cacheDir\` argument or set \`HF_HUB_CACHE\` environment variable.`
+			`Scan cache expects a directory but found a file: ${cacheDir}. Please use \`cacheDir\` argument or set \`HF_HUB_CACHE\` environment variable.`,
 		);
 	}
 
@@ -85,7 +87,9 @@ export async function scanCacheDir(cacheDir: string | undefined = undefined): Pr
 	const directories = await readdir(cacheDir);
 	for (const repo of directories) {
 		// skip .locks folder
-		if (repo === ".locks") continue;
+		if (repo === ".locks") {
+			continue;
+		}
 
 		// get the absolute path of the repo
 		const absolute = join(cacheDir, repo);
@@ -144,7 +148,9 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 
 	const snapshotDirs = await readdir(snapshotsPath);
 	for (const dir of snapshotDirs) {
-		if (FILES_TO_IGNORE.includes(dir)) continue; // Ignore unwanted files
+		if (FILES_TO_IGNORE.includes(dir)) {
+			continue;
+		} // Ignore unwanted files
 
 		const revisionPath = join(snapshotsPath, dir);
 		const revisionStat = await stat(revisionPath);
@@ -175,7 +181,7 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 	// Verify that all refs refer to a valid revision
 	if (refsByHash.size > 0) {
 		throw new Error(
-			`Reference(s) refer to missing commit hashes: ${JSON.stringify(Object.fromEntries(refsByHash))} (${repoPath})`
+			`Reference(s) refer to missing commit hashes: ${JSON.stringify(Object.fromEntries(refsByHash))} (${repoPath})`,
 		);
 	}
 
@@ -205,7 +211,9 @@ export async function scanRefsDir(refsPath: string, refsByHash: Map<string, stri
 	const refFiles = await readdir(refsPath, { withFileTypes: true });
 	for (const refFile of refFiles) {
 		const refFilePath = join(refsPath, refFile.name);
-		if (refFile.isDirectory()) continue; // Skip directories
+		if (refFile.isDirectory()) {
+			continue; // Skip directories
+		}
 
 		const commitHash = await readFile(refFilePath, "utf-8");
 		const refName = refFile.name;
@@ -219,11 +227,13 @@ export async function scanRefsDir(refsPath: string, refsByHash: Map<string, stri
 export async function scanSnapshotDir(
 	revisionPath: string,
 	cachedFiles: CachedFileInfo[],
-	blobStats: Map<string, Stats>
+	blobStats: Map<string, Stats>,
 ): Promise<void> {
 	const files = await readdir(revisionPath, { withFileTypes: true });
 	for (const file of files) {
-		if (file.isDirectory()) continue; // Skip directories
+		if (file.isDirectory()) {
+			continue; // Skip directories
+		}
 
 		const filePath = join(revisionPath, file.name);
 		const blobPath = await realpath(filePath);
@@ -259,6 +269,10 @@ export function parseRepoType(type: string): RepoType {
 			return "dataset";
 		case "spaces":
 			return "space";
+		case "buckets":
+			return "bucket";
+		case "kernels":
+			return "kernel";
 		default:
 			throw new TypeError(`Invalid repo type: ${type}`);
 	}

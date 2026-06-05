@@ -15,14 +15,15 @@ export function uploadFile(
 		fetch?: CommitParams["fetch"];
 		useWebWorkers?: CommitParams["useWebWorkers"];
 		abortSignal?: CommitParams["abortSignal"];
-	} & Partial<CredentialsParams>
-): Promise<CommitOutput> {
+		useXet?: CommitParams["useXet"];
+	} & Partial<CredentialsParams>,
+): Promise<CommitOutput | undefined> {
 	const path =
 		params.file instanceof URL
-			? params.file.pathname.split("/").at(-1) ?? "file"
+			? (params.file.pathname.split("/").at(-1) ?? "file")
 			: "path" in params.file
-			  ? params.file.path
-			  : params.file.name;
+				? params.file.path
+				: params.file.name;
 
 	return commit({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
@@ -43,5 +44,6 @@ export function uploadFile(
 		fetch: params.fetch,
 		useWebWorkers: params.useWebWorkers,
 		abortSignal: params.abortSignal,
+		useXet: params.useXet,
 	});
 }

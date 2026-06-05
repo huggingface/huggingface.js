@@ -12,10 +12,10 @@
  */
 import { tokenize } from "./lexer";
 import { parse } from "./parser";
-import { Environment, Interpreter } from "./runtime";
+import { Environment, Interpreter, setupGlobals } from "./runtime";
 import type { Program } from "./ast";
 import type { StringValue } from "./runtime";
-import { range } from "./utils";
+import { format } from "./format";
 
 export class Template {
 	parsed: Program;
@@ -34,14 +34,7 @@ export class Template {
 	render(items?: Record<string, unknown>): string {
 		// Create a new environment for this template
 		const env = new Environment();
-
-		// Declare global variables
-		env.set("false", false);
-		env.set("true", true);
-		env.set("raise_exception", (args: string) => {
-			throw new Error(args);
-		});
-		env.set("range", range);
+		setupGlobals(env);
 
 		// Add user-defined variables
 		if (items) {
@@ -54,6 +47,10 @@ export class Template {
 
 		const result = interpreter.run(this.parsed) as StringValue;
 		return result.value;
+	}
+
+	format(options?: { indent: string | number }): string {
+		return format(this.parsed, options?.indent || "\t");
 	}
 }
 

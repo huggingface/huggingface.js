@@ -20,6 +20,10 @@
 			"title": "ImageToImageParameters",
 			"type": "object",
 			"properties": {
+				"prompt": {
+					"type": "string",
+					"description": "The text prompt to guide the image generation."
+				},
 				"guidance_scale": {
 					"type": "number",
 					"description": "For diffusion models. A higher guidance scale value encourages the model to generate images closely linked to the text prompt at the expense of lower image quality."
@@ -34,7 +38,7 @@
 				},
 				"target_size": {
 					"type": "object",
-					"description": "The size in pixel of the output image.",
+					"description": "The size in pixels of the output image. This parameter is only supported by some providers and for specific models. It will be ignored when unsupported.",
 					"properties": {
 						"width": {
 							"type": "integer"

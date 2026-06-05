@@ -52,7 +52,7 @@ export interface EventSourceMessage {
  * @param onChunk A function that will be called on each new byte chunk in the stream.
  * @returns {Promise<void>} A promise that will be resolved when the stream closes.
  */
-export async function getBytes(stream: ReadableStream<Uint8Array>, onChunk: (arr: Uint8Array) => void) {
+export async function getBytes(stream: ReadableStream<Uint8Array>, onChunk: (arr: Uint8Array) => void): Promise<void> {
     const reader = stream.getReader();
     let result: ReadableStreamReadResult<Uint8Array>;
     while (!(result = await reader.read()).done) {
@@ -73,7 +73,7 @@ const enum ControlChars {
  * @param onLine A function that will be called on each new EventSource line.
  * @returns A function that should be called for each incoming byte chunk.
  */
-export function getLines(onLine: (line: Uint8Array, fieldLength: number) => void) {
+export function getLines(onLine: (line: Uint8Array, fieldLength: number) => void): (arr: Uint8Array) => void {
     let buffer: Uint8Array | undefined;
     let position: number; // current read position
     let fieldLength: number; // length of the `field` portion of the line
@@ -110,9 +110,9 @@ export function getLines(onLine: (line: Uint8Array, fieldLength: number) => void
                             fieldLength = position - lineStart;
                         }
                         break;
-                    // @ts-ignore:7029 \r case below should fallthrough to \n:
                     case ControlChars.CarriageReturn:
                         discardTrailingNewline = true;
+                    // eslint-disable-next-line no-fallthrough
                     case ControlChars.NewLine:
                         lineEnd = position;
                         break;
@@ -153,7 +153,7 @@ export function getMessages(
     onId: (id: string) => void,
     onRetry: (retry: number) => void,
     onMessage?: (msg: EventSourceMessage) => void
-) {
+): (line: Uint8Array, fieldLength: number) => void {
     let message = newMessage();
     const decoder = new TextDecoder();
 
@@ -184,12 +184,13 @@ export function getMessages(
                 case 'id':
                     onId(message.id = value);
                     break;
-                case 'retry':
+                case 'retry': {
                     const retry = parseInt(value, 10);
                     if (!isNaN(retry)) { // per spec, ignore non-integers
                         onRetry(message.retry = retry);
                     }
                     break;
+                }
             }
         }
     }

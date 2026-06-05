@@ -173,7 +173,9 @@
 			"type": "object",
 			"required": ["name", "arguments"],
 			"properties": {
-				"arguments": {},
+				"arguments": {
+					"type": "string"
+				},
 				"description": {
 					"type": "string",
 					"nullable": true

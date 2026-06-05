@@ -5,7 +5,7 @@ describe("fileExists", () => {
 	it("should return true for file that exists", async () => {
 		const info = await fileExists({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			path: "tf_model.h5",
@@ -18,7 +18,7 @@ describe("fileExists", () => {
 	it("should return false for file that does not exist", async () => {
 		const info = await fileExists({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			path: "tf_model.h5dadazdzazd",

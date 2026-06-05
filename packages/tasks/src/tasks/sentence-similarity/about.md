@@ -8,7 +8,7 @@ You can extract information from documents using Sentence Similarity models. The
 
 The [Sentence Transformers](https://www.sbert.net/) library is very powerful for calculating embeddings of sentences, paragraphs, and entire documents. An embedding is just a vector representation of a text and is useful for finding how similar two texts are.
 
-You can find and use [hundreds of Sentence Transformers](https://huggingface.co/models?library=sentence-transformers&sort=downloads) models from the Hub by directly using the library, playing with the widgets in the browser or using Inference Endpoints.
+You can find and use [thousands of Sentence Transformers](https://huggingface.co/models?library=sentence-transformers&sort=downloads) models from the Hub by directly using the library, playing with the widgets in the browser or using Inference Endpoints.
 
 ## Task Variants
 
@@ -79,8 +79,8 @@ sentences = ["I'm happy", "I'm full of happiness"]
 
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-#Compute embedding for both lists
-embedding_1= model.encode(sentences[0], convert_to_tensor=True)
+# Compute embedding for both lists
+embedding_1 = model.encode(sentences[0], convert_to_tensor=True)
 embedding_2 = model.encode(sentences[1], convert_to_tensor=True)
 
 util.pytorch_cos_sim(embedding_1, embedding_2)

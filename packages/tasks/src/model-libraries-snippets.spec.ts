@@ -12,7 +12,9 @@ describe("model-libraries-snippets", () => {
 		};
 		const snippet = llama_cpp_python(model);
 
-		expect(snippet.join("\n")).toEqual(`from llama_cpp import Llama
+		expect(snippet.join("\n")).toEqual(`# !pip install llama-cpp-python
+
+from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="bartowski/Llama-3.2-3B-Instruct-GGUF",
@@ -37,7 +39,9 @@ llm.create_chat_completion(
 		};
 		const snippet = llama_cpp_python(model);
 
-		expect(snippet.join("\n")).toEqual(`from llama_cpp import Llama
+		expect(snippet.join("\n")).toEqual(`# !pip install llama-cpp-python
+
+from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="mlabonne/gemma-2b-GGUF",

@@ -14,15 +14,17 @@ export function uploadFiles(
 		parentCommit?: CommitParams["parentCommit"];
 		fetch?: CommitParams["fetch"];
 		useWebWorkers?: CommitParams["useWebWorkers"];
+		maxFolderDepth?: CommitParams["maxFolderDepth"];
 		abortSignal?: CommitParams["abortSignal"];
-	} & Partial<CredentialsParams>
-): Promise<CommitOutput> {
+		useXet?: CommitParams["useXet"];
+	} & Partial<CredentialsParams>,
+): Promise<CommitOutput | undefined> {
 	return commit({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
 		operations: params.files.map((file) => ({
 			operation: "addOrUpdate",
-			path: file instanceof URL ? file.pathname.split("/").at(-1) ?? "file" : "path" in file ? file.path : file.name,
+			path: file instanceof URL ? (file.pathname.split("/").at(-1) ?? "file") : "path" in file ? file.path : file.name,
 			content: "content" in file ? file.content : file,
 		})),
 		title: params.commitTitle ?? `Add ${params.files.length} files`,
@@ -34,5 +36,6 @@ export function uploadFiles(
 		fetch: params.fetch,
 		useWebWorkers: params.useWebWorkers,
 		abortSignal: params.abortSignal,
+		useXet: params.useXet,
 	});
 }

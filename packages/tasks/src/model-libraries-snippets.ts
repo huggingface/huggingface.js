@@ -1,6 +1,6 @@
 import type { ModelData } from "./model-data.js";
 import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
-import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
+import { LIBRARY_TASK_MAPPING, REMOVED_IN_V5_TRANSFORMERS_PIPELINES } from "./library-to-tasks.js";
 import { getModelInputSnippet } from "./snippets/inputs.js";
 import type { ChatCompletionInputMessage } from "./tasks/index.js";
 import { stringifyMessages } from "./snippets/common.js";
@@ -46,6 +46,12 @@ export const allennlp = (model: ModelData): string[] => {
 	return allennlpUnknown(model);
 };
 
+export const araclip = (model: ModelData): string[] => [
+	`from araclip import AraClip
+
+model = AraClip.from_pretrained("${model.id}")`,
+];
+
 export const asteroid = (model: ModelData): string[] => [
 	`from asteroid.models import BaseModel
 
@@ -59,7 +65,7 @@ from audioseal import AudioSeal
 model = AudioSeal.load_generator("${model.id}")
 # pass a tensor (tensor_wav) of shape (batch, channels, samples) and a sample rate
 wav, sr = tensor_wav, 16000
-	
+
 watermark = model.get_watermark(wav, sr)
 watermarked_audio = wav + watermark`;
 
@@ -67,7 +73,7 @@ watermarked_audio = wav + watermark`;
 from audioseal import AudioSeal
 
 detector = AudioSeal.load_detector("${model.id}")
-	
+
 result, message = detector.detect_watermark(watermarked_audio, sr)`;
 	return [watermarkSnippet, detectorSnippet];
 };
@@ -108,6 +114,134 @@ export const bm25s = (model: ModelData): string[] => [
 
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
+
+export const chatterbox = (): string[] => [
+	`# pip install chatterbox-tts
+import torchaudio as ta
+from chatterbox.tts import ChatterboxTTS
+
+model = ChatterboxTTS.from_pretrained(device="cuda")
+
+text = "Ezreal and Jinx teamed up with Ahri, Yasuo, and Teemo to take down the enemy's Nexus in an epic late-game pentakill."
+wav = model.generate(text)
+ta.save("test-1.wav", wav, model.sr)
+
+# If you want to synthesize with a different voice, specify the audio prompt
+AUDIO_PROMPT_PATH="YOUR_FILE.wav"
+wav = model.generate(text, audio_prompt_path=AUDIO_PROMPT_PATH)
+ta.save("test-2.wav", wav, model.sr)`,
+];
+
+export const chronos_forecasting = (model: ModelData): string[] => {
+	const installSnippet = `pip install chronos-forecasting`;
+
+	const exampleSnippet = `import pandas as pd
+from chronos import BaseChronosPipeline
+
+pipeline = BaseChronosPipeline.from_pretrained("${model.id}", device_map="cuda")
+
+# Load historical data
+context_df = pd.read_csv("https://autogluon.s3.us-west-2.amazonaws.com/datasets/timeseries/misc/AirPassengers.csv")
+
+# Generate predictions
+pred_df = pipeline.predict_df(
+    context_df,
+    prediction_length=36,  # Number of steps to forecast
+    quantile_levels=[0.1, 0.5, 0.9],  # Quantiles for probabilistic forecast
+    id_column="item_id",  # Column identifying different time series
+    timestamp_column="Month",  # Column with datetime information
+    target="#Passengers",  # Column(s) with time series values to predict
+)`;
+
+	return [installSnippet, exampleSnippet];
+};
+
+export const collectorvision = (model: ModelData): string[] => [
+	`pip install git+https://github.com/HanClinto/CollectorVision huggingface_hub`,
+	`from huggingface_hub import hf_hub_download
+import collector_vision as cvg
+
+checkpoint = hf_hub_download(repo_id="${model.id}", filename="model.onnx")
+
+# Detector models, such as Cornelius:
+detector = cvg.NeuralCornerDetector(checkpoint)
+
+# Embedder models, such as Milo:
+embedder = cvg.NeuralEmbedder(checkpoint)`,
+];
+
+export const colipri = (model: ModelData): string[] => {
+	const installSnippet = `pip install colipri`;
+
+	const exampleSnippet = `from colipri import get_model
+from colipri import get_processor
+from colipri import load_sample_ct
+from colipri import ZeroShotImageClassificationPipeline
+
+model = get_model().cuda()
+processor = get_processor()
+pipeline = ZeroShotImageClassificationPipeline("${model.id}", processor)
+
+image = load_sample_ct()
+
+pipeline(image, ["No lung nodules", "Lung nodules"])
+`;
+
+	return [installSnippet, exampleSnippet];
+};
+
+export const sap_rpt_one_oss = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/sap-rpt-1-oss`;
+
+	const classificationSnippet = `# Run a classification task
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+from sap_rpt_oss import SAP_RPT_OSS_Classifier
+
+# Load sample data
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize a classifier, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+clf = SAP_RPT_OSS_Classifier(max_context_size=8192, bagging=8)
+
+clf.fit(X_train, y_train)
+
+# Predict probabilities
+prediction_probabilities = clf.predict_proba(X_test)
+# Predict labels
+predictions = clf.predict(X_test)
+print("Accuracy", accuracy_score(y_test, predictions))`;
+
+	const regressionsSnippet = `# Run a regression task
+from sklearn.datasets import fetch_openml
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from sap_rpt_oss import SAP_RPT_OSS_Regressor
+
+# Load sample data
+df = fetch_openml(data_id=531, as_frame=True)
+X = df.data
+y = df.target.astype(float)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize the regressor, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+regressor = SAP_RPT_OSS_Regressor(max_context_size=8192, bagging=8)
+
+regressor.fit(X_train, y_train)
+
+# Predict on the test set
+predictions = regressor.predict(X_test)
+
+r2 = r2_score(y_test, predictions)
+print("R² Score:", r2)`;
+	return [installSnippet, classificationSnippet, regressionsSnippet];
+};
 
 export const cxr_foundation = (): string[] => [
 	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
@@ -220,15 +354,93 @@ infer = loaded_model.signatures["serving_default"]
 print(infer(inputs=tf.constant([input_tensor])))`,
 ];
 
+export const dia = (model: ModelData): string[] => [
+	`import soundfile as sf
+from dia.model import Dia
+
+model = Dia.from_pretrained("${model.id}")
+text = "[S1] Dia is an open weights text to dialogue model. [S2] You get full control over scripts and voices. [S1] Wow. Amazing. (laughs) [S2] Try it now on Git hub or Hugging Face."
+output = model.generate(text)
+
+sf.write("simple.mp3", output, 44100)`,
+];
+
+export const dia2 = (model: ModelData): string[] => [
+	`from dia2 import Dia2, GenerationConfig, SamplingConfig
+
+dia = Dia2.from_repo("${model.id}", device="cuda", dtype="bfloat16")
+config = GenerationConfig(
+    cfg_scale=2.0,
+    audio=SamplingConfig(temperature=0.8, top_k=50),
+    use_cuda_graph=True,
+)
+result = dia.generate("[S1] Hello Dia2!", config=config, output_wav="hello.wav", verbose=True)
+`,
+];
+
+export const describe_anything = (model: ModelData): string[] => [
+	`# pip install git+https://github.com/NVlabs/describe-anything
+from huggingface_hub import snapshot_download
+from dam import DescribeAnythingModel
+
+snapshot_download(${model.id}, local_dir="checkpoints")
+
+dam = DescribeAnythingModel(
+	model_path="checkpoints",
+	conv_mode="v1",
+	prompt_mode="focal_prompt",
+)`,
+];
+
+const diffusers_install = "pip install -U diffusers transformers accelerate";
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
-const diffusers_default = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
 
-pipe = DiffusionPipeline.from_pretrained("${model.id}")
+const diffusersVideoDefaultPrompt = "A man with short gray hair plays a red electric guitar.";
+
+const diffusers_default = (model: ModelData) => [
+	`import torch
+from diffusers import DiffusionPipeline
+
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
+];
+
+const diffusers_image_to_image = (model: ModelData) => [
+	`import torch
+from diffusers import DiffusionPipeline
+from diffusers.utils import load_image
+
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
+input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
+
+image = pipe(image=input_image, prompt=prompt).images[0]`,
+];
+
+const diffusers_image_to_video = (model: ModelData) => [
+	`import torch
+from diffusers import DiffusionPipeline
+from diffusers.utils import load_image, export_to_video
+
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+pipe.to("cuda")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
+image = load_image(
+    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/guitar-man.png"
+)
+
+output = pipe(image=image, prompt=prompt).frames[0]
+export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_controlnet = (model: ModelData) => [
@@ -241,32 +453,156 @@ pipe = StableDiffusionControlNetPipeline.from_pretrained(
 ];
 
 const diffusers_lora = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+	`import torch
+from diffusers import DiffusionPipeline
 
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
-const diffusers_textual_inversion = (model: ModelData) => [
-	`from diffusers import DiffusionPipeline
+const diffusers_lora_image_to_image = (model: ModelData) => [
+	`import torch
+from diffusers import DiffusionPipeline
+from diffusers.utils import load_image
 
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
+input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
+
+image = pipe(image=input_image, prompt=prompt).images[0]`,
+];
+
+const diffusers_lora_text_to_video = (model: ModelData) => [
+	`import torch
+from diffusers import DiffusionPipeline
+from diffusers.utils import export_to_video
+
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
+
+output = pipe(prompt=prompt).frames[0]
+export_to_video(output, "output.mp4")`,
+];
+
+const diffusers_lora_image_to_video = (model: ModelData) => [
+	`import torch
+from diffusers import DiffusionPipeline
+from diffusers.utils import load_image, export_to_video
+
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
+input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/guitar-man.png")
+
+image = pipe(image=input_image, prompt=prompt).frames[0]
+export_to_video(output, "output.mp4")`,
+];
+
+const diffusers_textual_inversion = (model: ModelData) => [
+	`import torch
+from diffusers import DiffusionPipeline
+
+# switch to "mps" for apple devices
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
+const diffusers_flux_fill = (model: ModelData) => [
+	`import torch
+from diffusers import FluxFillPipeline
+from diffusers.utils import load_image
+
+image = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup.png")
+mask = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup_mask.png")
+
+# switch to "mps" for apple devices
+pipe = FluxFillPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+image = pipe(
+    prompt="a white paper cup",
+    image=image,
+    mask_image=mask,
+    height=1632,
+    width=1232,
+    guidance_scale=30,
+    num_inference_steps=50,
+    max_sequence_length=512,
+    generator=torch.Generator("cpu").manual_seed(0)
+).images[0]
+image.save(f"flux-fill-dev.png")`,
+];
+
+const diffusers_inpainting = (model: ModelData) => [
+	`import torch
+from diffusers import AutoPipelineForInpainting
+from diffusers.utils import load_image
+
+# switch to "mps" for apple devices
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", dtype=torch.float16, variant="fp16", device_map="cuda")
+
+img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
+mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
+
+image = load_image(img_url).resize((1024, 1024))
+mask_image = load_image(mask_url).resize((1024, 1024))
+
+prompt = "a tiger sitting on a park bench"
+generator = torch.Generator(device="cuda").manual_seed(0)
+
+image = pipe(
+  prompt=prompt,
+  image=image,
+  mask_image=mask_image,
+  guidance_scale=8.0,
+  num_inference_steps=20,  # steps between 15 and 30 work well for us
+  strength=0.99,  # make sure to use \`strength\` below 1.0
+  generator=generator,
+).images[0]`,
+];
+
 export const diffusers = (model: ModelData): string[] => {
-	if (model.tags.includes("controlnet")) {
-		return diffusers_controlnet(model);
+	let codeSnippets: string[];
+	if (
+		model.tags.includes("StableDiffusionInpaintPipeline") ||
+		model.tags.includes("StableDiffusionXLInpaintPipeline")
+	) {
+		codeSnippets = diffusers_inpainting(model);
+	} else if (model.tags.includes("controlnet")) {
+		codeSnippets = diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
-		return diffusers_lora(model);
+		if (model.pipeline_tag === "image-to-image") {
+			codeSnippets = diffusers_lora_image_to_image(model);
+		} else if (model.pipeline_tag === "image-to-video") {
+			codeSnippets = diffusers_lora_image_to_video(model);
+		} else if (model.pipeline_tag === "text-to-video") {
+			codeSnippets = diffusers_lora_text_to_video(model);
+		} else {
+			codeSnippets = diffusers_lora(model);
+		}
 	} else if (model.tags.includes("textual_inversion")) {
-		return diffusers_textual_inversion(model);
+		codeSnippets = diffusers_textual_inversion(model);
+	} else if (model.tags.includes("FluxFillPipeline")) {
+		codeSnippets = diffusers_flux_fill(model);
+	} else if (model.pipeline_tag === "image-to-video") {
+		codeSnippets = diffusers_image_to_video(model);
+	} else if (model.pipeline_tag === "image-to-image") {
+		codeSnippets = diffusers_image_to_image(model);
 	} else {
-		return diffusers_default(model);
+		codeSnippets = diffusers_default(model);
 	}
+
+	return [diffusers_install, ...codeSnippets];
 };
 
 export const diffusionkit = (model: ModelData): string[] => {
@@ -334,7 +670,7 @@ export const cartesia_mlx = (model: ModelData): string[] => [
 import cartesia_mlx as cmx
 
 model = cmx.from_pretrained("${model.id}")
-model.set_dtype(mx.float32)   
+model.set_dtype(mx.float32)
 
 prompt = "Rene Descartes was"
 
@@ -418,6 +754,36 @@ export const gliner = (model: ModelData): string[] => [
 model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
+export const gliner2 = (model: ModelData): string[] => [
+	`from gliner2 import GLiNER2
+
+model = GLiNER2.from_pretrained("${model.id}")
+
+# Extract entities
+text = "Apple CEO Tim Cook announced iPhone 15 in Cupertino yesterday."
+result = extractor.extract_entities(text, ["company", "person", "product", "location"])
+
+print(result)`,
+];
+
+export const indextts = (model: ModelData): string[] => [
+	`# Download model
+from huggingface_hub import snapshot_download
+
+snapshot_download(${model.id}, local_dir="checkpoints")
+
+from indextts.infer import IndexTTS
+
+# Ensure config.yaml is present in the checkpoints directory
+tts = IndexTTS(model_dir="checkpoints", cfg_path="checkpoints/config.yaml")
+
+voice = "path/to/your/reference_voice.wav"  # Path to the voice reference audio file
+text = "Hello, how are you?"
+output_path = "output_index.wav"
+
+tts.infer(voice, text, output_path)`,
+];
+
 export const htrflow = (model: ModelData): string[] => [
 	`# CLI usage
 # see docs: https://ai-riksarkivet.github.io/htrflow/latest/getting_started/quick_start.html
@@ -439,7 +805,7 @@ export const keras = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
 os.environ["KERAS_BACKEND"] = "jax"
-	
+
 import keras
 
 model = keras.saving.load_model("hf://${model.id}")
@@ -544,9 +910,96 @@ export const keras_hub = (model: ModelData): string[] => {
 	return snippets;
 };
 
+export const kernels = (model: ModelData): string[] => [
+	`# !pip install kernels
+
+from kernels import get_kernel
+
+kernel = get_kernel("${model.id}")`,
+];
+
+export const kimi_audio = (model: ModelData): string[] => [
+	`# Example usage for KimiAudio
+# pip install git+https://github.com/MoonshotAI/Kimi-Audio.git
+
+from kimia_infer.api.kimia import KimiAudio
+
+model = KimiAudio(model_path="${model.id}", load_detokenizer=True)
+
+sampling_params = {
+    "audio_temperature": 0.8,
+    "audio_top_k": 10,
+    "text_temperature": 0.0,
+    "text_top_k": 5,
+}
+
+# For ASR
+asr_audio = "asr_example.wav"
+messages_asr = [
+    {"role": "user", "message_type": "text", "content": "Please transcribe the following audio:"},
+    {"role": "user", "message_type": "audio", "content": asr_audio}
+]
+_, text = model.generate(messages_asr, **sampling_params, output_type="text")
+print(text)
+
+# For Q&A
+qa_audio = "qa_example.wav"
+messages_conv = [{"role": "user", "message_type": "audio", "content": qa_audio}]
+wav, text = model.generate(messages_conv, **sampling_params, output_type="both")
+sf.write("output_audio.wav", wav.cpu().view(-1).numpy(), 24000)
+print(text)
+`,
+];
+
+export const kittentts = (model: ModelData): string[] => [
+	`from kittentts import KittenTTS
+m = KittenTTS("${model.id}")
+
+audio = m.generate("This high quality TTS model works without a GPU")
+
+# Save the audio
+import soundfile as sf
+sf.write('output.wav', audio, 24000)`,
+];
+
+export const lightning_ir = (model: ModelData): string[] => {
+	if (model.tags.includes("bi-encoder")) {
+		return [
+			`#install from https://github.com/webis-de/lightning-ir
+
+from lightning_ir import BiEncoderModule
+model = BiEncoderModule("${model.id}")
+
+model.score("query", ["doc1", "doc2", "doc3"])`,
+		];
+	} else if (model.tags.includes("cross-encoder")) {
+		return [
+			`#install from https://github.com/webis-de/lightning-ir
+
+from lightning_ir import CrossEncoderModule
+model = CrossEncoderModule("${model.id}")
+
+model.score("query", ["doc1", "doc2", "doc3"])`,
+		];
+	}
+	return [
+		`#install from https://github.com/webis-de/lightning-ir
+
+from lightning_ir import BiEncoderModule, CrossEncoderModule
+
+# depending on the model type, use either BiEncoderModule or CrossEncoderModule
+model = BiEncoderModule("${model.id}")
+# model = CrossEncoderModule("${model.id}")
+
+model.score("query", ["doc1", "doc2", "doc3"])`,
+	];
+};
+
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
-		`from llama_cpp import Llama
+		`# !pip install llama-cpp-python
+
+from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
@@ -572,6 +1025,65 @@ print(output)`);
 	return snippets;
 };
 
+export const lerobot = (model: ModelData): string[] => {
+	if (model.tags.includes("smolvla")) {
+		const smolvlaSnippets = [
+			// Installation snippet
+			`# See https://github.com/huggingface/lerobot?tab=readme-ov-file#installation for more details
+git clone https://github.com/huggingface/lerobot.git
+cd lerobot
+pip install -e .[smolvla]`,
+			// Finetune snippet
+			`# Launch finetuning on your dataset
+python lerobot/scripts/train.py \\
+--policy.path=${model.id} \\
+--dataset.repo_id=lerobot/svla_so101_pickplace \\
+--batch_size=64 \\
+--steps=20000 \\
+--output_dir=outputs/train/my_smolvla \\
+--job_name=my_smolvla_training \\
+--policy.device=cuda \\
+--wandb.enable=true`,
+		];
+		if (model.id !== "lerobot/smolvla_base") {
+			// Inference snippet (only if not base model)
+			smolvlaSnippets.push(
+				`# Run the policy using the record function
+python -m lerobot.record \\
+  --robot.type=so101_follower \\
+  --robot.port=/dev/ttyACM0 \\ # <- Use your port
+  --robot.id=my_blue_follower_arm \\ # <- Use your robot id
+  --robot.cameras="{ front: {type: opencv, index_or_path: 8, width: 640, height: 480, fps: 30}}" \\ # <- Use your cameras
+  --dataset.single_task="Grasp a lego block and put it in the bin." \\ # <- Use the same task description you used in your dataset recording
+  --dataset.repo_id=HF_USER/dataset_name \\  # <- This will be the dataset name on HF Hub
+  --dataset.episode_time_s=50 \\
+  --dataset.num_episodes=10 \\
+  --policy.path=${model.id}`,
+			);
+		}
+		return smolvlaSnippets;
+	}
+	return [];
+};
+
+export const litert_lm = (model: ModelData): string[] => [
+	`# LiteRT-LM runs on various platforms (Android, iOS, Windows, Linux, macOS, IoT, Web/WASM)
+# and supports many APIs (C++, Python, Kotlin, Swift, JavaScript, Flutter).
+# For platform-specific integration guides, please refer to the official developer website:
+# https://ai.google.dev/edge/litert-lm
+
+# To try LiteRT-LM, the easiest way is to use our CLI tool.
+# 1. Install the LiteRT-LM CLI tool:
+pip install litert-lm
+
+# 2. Download and run this model locally:
+# See: https://ai.google.dev/edge/litert-lm/cli
+litert-lm run \\
+  --from-huggingface-repo=${model.id} \\
+  model.litertlm \\
+  --prompt="Write me a poem"`,
+];
+
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
 # See https://github.com/keras-team/tf-keras for more details.
@@ -594,6 +1106,16 @@ from inference import Mars5TTS
 mars5 = Mars5TTS.from_pretrained("${model.id}")`,
 ];
 
+export const matanyone = (model: ModelData): string[] => [
+	`# Install from https://github.com/pq-yang/MatAnyone.git
+
+from matanyone.model.matanyone import MatAnyone
+model = MatAnyone.from_pretrained("${model.id}")`,
+	`
+from matanyone import InferenceCore
+processor = InferenceCore("${model.id}")`,
+];
+
 export const mesh_anything = (): string[] => [
 	`# Install from https://github.com/buaacyw/MeshAnything.git
 
@@ -603,6 +1125,56 @@ from MeshAnything.models.meshanything import MeshAnything
 # and https://github.com/buaacyw/MeshAnything/blob/main/app.py regarding usage
 model = MeshAnything(args)`,
 ];
+
+export const multimolecule = (model: ModelData): string[] => {
+	const widgetExample = model.widgetData?.[0] as WidgetExampleTextInput | undefined;
+	const exampleText = widgetExample?.text;
+	const maskToken = model.mask_token ?? "<mask>";
+	const sequence = exampleText?.replace(maskToken, "A");
+
+	const snippets = [`pip install multimolecule`];
+
+	if (sequence) {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")
+
+inputs = tokenizer("${sequence}", return_tensors="pt")
+outputs = model(**inputs)
+embeddings = outputs.last_hidden_state`,
+		);
+	} else {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")`,
+		);
+	}
+
+	if (model.tags.includes("rna-secondary-structure") && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("rna-secondary-structure", model="${model.id}")
+output = predictor("${exampleText}")
+print(output["secondary_structure"])`,
+		);
+	} else if (model.pipeline_tag === "fill-mask" && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("fill-mask", model="${model.id}")
+output = predictor("${exampleText}")`,
+		);
+	}
+
+	return snippets;
+};
 
 export const open_clip = (model: ModelData): string[] => [
 	`import open_clip
@@ -635,9 +1207,124 @@ export const paddlenlp = (model: ModelData): string[] => {
 	}
 };
 
+export const paddleocr = (model: ModelData): string[] => {
+	const mapping: Record<string, { className: string }> = {
+		textline_detection: { className: "TextDetection" },
+		textline_recognition: { className: "TextRecognition" },
+		seal_text_detection: { className: "SealTextDetection" },
+		doc_img_unwarping: { className: "TextImageUnwarping" },
+		doc_img_orientation_classification: { className: "DocImgOrientationClassification" },
+		textline_orientation_classification: { className: "TextLineOrientationClassification" },
+		chart_parsing: { className: "ChartParsing" },
+		formula_recognition: { className: "FormulaRecognition" },
+		layout_detection: { className: "LayoutDetection" },
+		table_cells_detection: { className: "TableCellsDetection" },
+		wired_table_classification: { className: "TableClassification" },
+		table_structure_recognition: { className: "TableStructureRecognition" },
+	};
+
+	if (model.tags.includes("doc_vlm")) {
+		return [
+			`# 1. See https://www.paddlepaddle.org.cn/en/install to install paddlepaddle
+# 2. pip install paddleocr
+
+from paddleocr import DocVLM
+model = DocVLM(model_name="${nameWithoutNamespace(model.id)}")
+output = model.predict(
+    input={"image": "path/to/image.png", "query": "Parsing this image and output the content in Markdown format."},
+    batch_size=1
+)
+for res in output:
+    res.print()
+    res.save_to_json(save_path="./output/res.json")`,
+		];
+	}
+
+	if (model.tags.includes("document-parse")) {
+		const rawVersion = model.id.replace("PaddlePaddle/PaddleOCR-VL-", "v");
+		const version = rawVersion === "PaddlePaddle/PaddleOCR-VL" ? "v1" : rawVersion;
+		return [
+			`# See https://www.paddleocr.ai/latest/version3.x/pipeline_usage/PaddleOCR-VL.html to installation
+
+from paddleocr import PaddleOCRVL
+pipeline = PaddleOCRVL(pipeline_version="${version}")
+output = pipeline.predict("path/to/document_image.png")
+for res in output:
+	res.print()
+	res.save_to_json(save_path="output")
+	res.save_to_markdown(save_path="output")`,
+		];
+	}
+
+	for (const tag of model.tags) {
+		if (tag in mapping) {
+			const { className } = mapping[tag];
+			return [
+				`# 1. See https://www.paddlepaddle.org.cn/en/install to install paddlepaddle
+# 2. pip install paddleocr
+
+from paddleocr import ${className}
+model = ${className}(model_name="${nameWithoutNamespace(model.id)}")
+output = model.predict(input="path/to/image.png", batch_size=1)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")`,
+			];
+		}
+	}
+
+	return [
+		`# Please refer to the document for information on how to use the model.
+# https://paddlepaddle.github.io/PaddleOCR/latest/en/version3.x/module_usage/module_overview.html`,
+	];
+};
+
+export const perception_encoder = (model: ModelData): string[] => {
+	const clip_model = `# Use PE-Core models as CLIP models
+import core.vision_encoder.pe as pe
+
+model = pe.CLIP.from_config("${model.id}", pretrained=True)`;
+
+	const vision_encoder = `# Use any PE model as a vision encoder
+import core.vision_encoder.pe as pe
+
+model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
+
+	if (model.id.includes("Core")) {
+		return [clip_model, vision_encoder];
+	} else {
+		return [vision_encoder];
+	}
+};
+export const phantom_wan = (model: ModelData): string[] => [
+	`from huggingface_hub import snapshot_download
+from phantom_wan import WANI2V, configs
+
+checkpoint_dir = snapshot_download("${model.id}")
+wan_i2v = WanI2V(
+            config=configs.WAN_CONFIGS['i2v-14B'],
+            checkpoint_dir=checkpoint_dir,
+        )
+ video = wan_i2v.generate(text_prompt, image_prompt)`,
+];
+
+export const pocket_tts = (model: ModelData): string[] => [
+	`from pocket_tts import TTSModel
+import scipy.io.wavfile
+
+tts_model = TTSModel.load_model("${model.id}")
+voice_state = tts_model.get_state_for_audio_prompt(
+    "hf://kyutai/tts-voices/alba-mackenna/casual.wav"
+)
+audio = tts_model.generate_audio(voice_state, "Hello world, this is a test.")
+# Audio is a 1D torch tensor containing PCM data.
+scipy.io.wavfile.write("output.wav", tts_model.sample_rate, audio.numpy())`,
+];
+
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
 	`from pyannote.audio import Pipeline
-  
+
 pipeline = Pipeline.from_pretrained("${model.id}")
 
 # inference on the whole file
@@ -676,8 +1363,15 @@ export const pyannote_audio = (model: ModelData): string[] => {
 
 export const relik = (model: ModelData): string[] => [
 	`from relik import Relik
- 
+
 relik = Relik.from_pretrained("${model.id}")`,
+];
+
+export const renderformer = (model: ModelData): string[] => [
+	`# Install from https://github.com/microsoft/renderformer
+
+from renderformer import RenderFormerRenderingPipeline
+pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
 ];
 
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
@@ -853,7 +1547,7 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
 	const video_predictor = `# Use SAM2 with videos
 import torch
 from sam2.sam2_video_predictor import SAM2VideoPredictor
-	
+
 predictor = SAM2VideoPredictor.from_pretrained(${model.id})
 
 with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
@@ -868,19 +1562,81 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
 	return [image_predictor, video_predictor];
 };
 
+export const sam_3d_objects = (model: ModelData): string[] => [
+	`from inference import Inference, load_image, load_single_mask
+from huggingface_hub import hf_hub_download
+
+path = hf_hub_download("${model.id}", "pipeline.yaml")
+inference = Inference(path, compile=False)
+
+image = load_image("path_to_image.png")
+mask = load_single_mask("path_to_mask.png", index=14)
+
+output = inference(image, mask)`,
+];
+
+export const sam_3d_body = (model: ModelData): string[] => [
+	`from notebook.utils import setup_sam_3d_body
+
+estimator = setup_sam_3d_body(${model.id})
+outputs = estimator.process_one_image(image)
+rend_img = visualize_sample_together(image, outputs, estimator.faces)`,
+];
+
 export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];
 
 function get_widget_examples_from_st_model(model: ModelData): string[] | undefined {
 	const widgetExample = model.widgetData?.[0] as WidgetExampleSentenceSimilarityInput | undefined;
-	if (widgetExample) {
+	if (widgetExample?.source_sentence && widgetExample?.sentences?.length) {
 		return [widgetExample.source_sentence, ...widgetExample.sentences];
 	}
 }
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+
+	if (model.tags.includes("PyLate")) {
+		return [
+			`from pylate import models
+
+queries = [
+    "Which planet is known as the Red Planet?",
+    "What is the largest planet in our solar system?",
+]
+
+documents = [
+    ["Mars is the Red Planet.", "Venus is Earth's twin."],
+    ["Jupiter is the largest planet.", "Saturn has rings."],
+]
+
+model = models.ColBERT(model_name_or_path="${model.id}")
+
+queries_emb = model.encode(queries, is_query=True)
+docs_emb = model.encode(documents, is_query=False)`,
+		];
+	}
+
+	if (model.tags.includes("cross-encoder") || model.pipeline_tag == "text-ranking") {
+		return [
+			`from sentence_transformers import CrossEncoder
+
+model = CrossEncoder("${model.id}"${remote_code_snippet})
+
+query = "Which planet is known as the Red Planet?"
+passages = [
+	"Venus is often called Earth's twin because of its similar size and proximity.",
+	"Mars, known for its reddish appearance, is often referred to as the Red Planet.",
+	"Jupiter, the largest planet in our solar system, has a prominent red spot.",
+	"Saturn, famous for its rings, is sometimes mistaken for the Red Planet."
+]
+
+scores = model.predict([(query, passage) for passage in passages])
+print(scores)`,
+		];
+	}
+
 	const exampleSentences = get_widget_examples_from_st_model(model) ?? [
 		"The weather is lovely today.",
 		"It's so sunny outside!",
@@ -974,6 +1730,11 @@ export const terratorch = (model: ModelData): string[] => [
 model = BACKBONE_REGISTRY.build("${model.id}")`,
 ];
 
+const hasChatTemplate = (model: ModelData): boolean =>
+	model.config?.tokenizer_config?.chat_template !== undefined ||
+	model.config?.processor_config?.chat_template !== undefined ||
+	model.config?.chat_template_jinja !== undefined;
+
 export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	if (!info) {
@@ -981,43 +1742,112 @@ export const transformers = (model: ModelData): string[] => {
 	}
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
-	let autoSnippet: string;
+	const autoSnippet = [];
 	if (info.processor) {
-		const varName =
+		const processorVarName =
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
-		autoSnippet = [
+					? "extractor"
+					: "processor";
+		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
 			"",
-			`${varName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
+			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
 			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-		].join("\n");
+		);
+		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
+			if (model.tags.includes("image-text-to-text")) {
+				autoSnippet.push(
+					"messages = [",
+					[
+						"    {",
+						'        "role": "user",',
+						'        "content": [',
+						'            {"type": "image", "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/p-blog/candy.JPG"},',
+						'            {"type": "text", "text": "What animal is on the candy?"}',
+						"        ]",
+						"    },",
+					].join("\n"),
+					"]",
+				);
+			} else {
+				autoSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+			}
+			autoSnippet.push(
+				`inputs = ${processorVarName}.apply_chat_template(`,
+				"	messages,",
+				"	add_generation_prompt=True,",
+				"	tokenize=True,",
+				"	return_dict=True,",
+				'	return_tensors="pt",',
+				").to(model.device)",
+				"",
+				"outputs = model.generate(**inputs, max_new_tokens=40)",
+				`print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))`,
+			);
+		}
 	} else {
-		autoSnippet = [
+		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-		].join("\n");
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', dtype="auto")',
+		);
 	}
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
-		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
-
-		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
-			pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+		const pipelineSnippet = ["# Use a pipeline as a high-level helper"];
+		if (REMOVED_IN_V5_TRANSFORMERS_PIPELINES.includes(model.pipeline_tag)) {
+			pipelineSnippet.push(
+				`# Warning: Pipeline type "${model.pipeline_tag}" is no longer supported in transformers v5.`,
+				`# You must load the model directly (see below) or downgrade to v4.x with:`,
+				`# 'pip install "transformers<5.0.0'`,
+			);
 		}
-		pipelineSnippet.push(`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")");
-		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
-			pipelineSnippet.push("pipe(messages)");
+
+		pipelineSnippet.push(
+			"from transformers import pipeline",
+			"",
+			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
+		);
+
+		if (model.tags.includes("conversational")) {
+			if (model.tags.includes("image-text-to-text")) {
+				pipelineSnippet.push(
+					"messages = [",
+					[
+						"    {",
+						'        "role": "user",',
+						'        "content": [',
+						'            {"type": "image", "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/p-blog/candy.JPG"},',
+						'            {"type": "text", "text": "What animal is on the candy?"}',
+						"        ]",
+						"    },",
+					].join("\n"),
+					"]",
+				);
+				pipelineSnippet.push("pipe(text=messages)");
+			} else {
+				pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+				pipelineSnippet.push("pipe(messages)");
+			}
+		} else if (model.pipeline_tag === "zero-shot-image-classification") {
+			pipelineSnippet.push(
+				"pipe(",
+				'    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png",',
+				'    candidate_labels=["animals", "humans", "landscape"],',
+				")",
+			);
+		} else if (model.pipeline_tag === "image-classification") {
+			pipelineSnippet.push(
+				'pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png")',
+			);
 		}
 
-		return [pipelineSnippet.join("\n"), autoSnippet];
+		return [pipelineSnippet.join("\n"), autoSnippet.join("\n")];
 	}
-	return [autoSnippet];
+	return [autoSnippet.join("\n")];
 };
 
 export const transformersJS = (model: ModelData): string[] => {
@@ -1131,16 +1961,103 @@ image = sana(
 ) `,
 ];
 
+export const vibevoice = (model: ModelData): string[] => [
+	`import torch, soundfile as sf, librosa, numpy as np
+from vibevoice.processor.vibevoice_processor import VibeVoiceProcessor
+from vibevoice.modular.modeling_vibevoice_inference import VibeVoiceForConditionalGenerationInference
+
+# Load voice sample (should be 24kHz mono)
+voice, sr = sf.read("path/to/voice_sample.wav")
+if voice.ndim > 1: voice = voice.mean(axis=1)
+if sr != 24000: voice = librosa.resample(voice, sr, 24000)
+
+processor = VibeVoiceProcessor.from_pretrained("${model.id}")
+model = VibeVoiceForConditionalGenerationInference.from_pretrained(
+    "${model.id}", torch_dtype=torch.bfloat16
+).to("cuda").eval()
+model.set_ddpm_inference_steps(5)
+
+inputs = processor(text=["Speaker 0: Hello!\\nSpeaker 1: Hi there!"],
+                   voice_samples=[[voice]], return_tensors="pt")
+audio = model.generate(**inputs, cfg_scale=1.3,
+                       tokenizer=processor.tokenizer).speech_outputs[0]
+sf.write("output.wav", audio.cpu().numpy().squeeze(), 24000)`,
+];
+
+export const videoprism = (model: ModelData): string[] => [
+	`# Install from https://github.com/google-deepmind/videoprism
+import jax
+from videoprism import models as vp
+
+flax_model = vp.get_model("${model.id}")
+loaded_state = vp.load_pretrained_weights("${model.id}")
+
+@jax.jit
+def forward_fn(inputs, train=False):
+  return flax_model.apply(loaded_state, inputs, train=train)`,
+];
+
 export const vfimamba = (model: ModelData): string[] => [
 	`from Trainer_finetune import Model
 
 model = Model.from_pretrained("${model.id}")`,
 ];
 
+export const lvface = (model: ModelData): string[] => [
+	`from huggingface_hub import hf_hub_download
+	 from inference_onnx import LVFaceONNXInferencer
+
+model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K/LVFace-L_Glint360K.onnx")
+inferencer = LVFaceONNXInferencer(model_path, use_gpu=True, timeout=300)
+img_path = 'path/to/image1.jpg'
+embedding = inferencer.infer_from_image(img_path)`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
 model = VoiceCraft.from_pretrained("${model.id}")`,
+];
+
+export const voxcpm = (model: ModelData): string[] => [
+	`import soundfile as sf
+from voxcpm import VoxCPM
+
+model = VoxCPM.from_pretrained("${model.id}")
+
+wav = model.generate(
+    text="VoxCPM is an innovative end-to-end TTS model from ModelBest, designed to generate highly expressive speech.",
+    prompt_wav_path=None,      # optional: path to a prompt speech for voice cloning
+    prompt_text=None,          # optional: reference text
+    cfg_value=2.0,             # LM guidance on LocDiT, higher for better adherence to the prompt, but maybe worse
+    inference_timesteps=10,   # LocDiT inference timesteps, higher for better result, lower for fast speed
+    normalize=True,           # enable external TN tool
+    denoise=True,             # enable external Denoise tool
+    retry_badcase=True,        # enable retrying mode for some bad cases (unstoppable)
+    retry_badcase_max_times=3,  # maximum retrying times
+    retry_badcase_ratio_threshold=6.0, # maximum length restriction for bad case detection (simple but effective), it could be adjusted for slow pace speech
+)
+
+sf.write("output.wav", wav, 16000)
+print("saved: output.wav")`,
+];
+
+export const vui = (): string[] => [
+	`# !pip install git+https://github.com/fluxions-ai/vui
+
+import torchaudio
+
+from vui.inference import render
+from vui.model import Vui,
+
+model = Vui.from_pretrained().cuda()
+waveform = render(
+    model,
+    "Hey, here is some random stuff, usually something quite long as the shorter the text the less likely the model can cope!",
+)
+print(waveform.shape)
+torchaudio.save("out.opus", waveform[0], 22050)
+`,
 ];
 
 export const chattts = (): string[] => [
@@ -1190,6 +2107,19 @@ from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
+export const supertonic = (): string[] => [
+	`from supertonic import TTS
+
+tts = TTS(auto_download=True)
+
+style = tts.get_voice_style(voice_name="M1")
+
+text = "The train delay was announced at 4:45 PM on Wed, Apr 3, 2024 due to track maintenance."
+wav, duration = tts.synthesize(text, voice_style=style)
+
+tts.save_audio(wav, "output.wav")`,
+];
+
 export const swarmformer = (model: ModelData): string[] => [
 	`from swarmformer import SwarmFormerModel
 
@@ -1197,11 +2127,82 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
-export const mlx = (model: ModelData): string[] => [
-	`pip install huggingface_hub hf_transfer
+export const univa = (model: ModelData): string[] => [
+	`# Follow installation instructions at https://github.com/PKU-YuanGroup/UniWorld-V1
 
-export HF_HUB_ENABLE_HF_TRANSFER=1
+from univa.models.qwen2p5vl.modeling_univa_qwen2p5vl import UnivaQwen2p5VLForConditionalGeneration
+	model = UnivaQwen2p5VLForConditionalGeneration.from_pretrained(
+        "${model.id}",
+        torch_dtype=torch.bfloat16,
+        attn_implementation="flash_attention_2",
+    ).to("cuda")
+	processor = AutoProcessor.from_pretrained("${model.id}")
+`,
+];
+
+const mlx_unknown = (model: ModelData): string[] => [
+	`# Download the model from the Hub
+pip install huggingface_hub[hf_xet]
+
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
+];
+
+const mlxlm = (model: ModelData): string[] => [
+	`# Make sure mlx-lm is installed
+# pip install --upgrade mlx-lm
+# if on a CUDA device, also pip install mlx[cuda]
+
+# Generate text with mlx-lm
+from mlx_lm import load, generate
+
+model, tokenizer = load("${model.id}")
+
+prompt = "Once upon a time in"
+text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
+];
+
+const mlxchat = (model: ModelData): string[] => [
+	`# Make sure mlx-lm is installed
+# pip install --upgrade mlx-lm
+
+# Generate text with mlx-lm
+from mlx_lm import load, generate
+
+model, tokenizer = load("${model.id}")
+
+prompt = "Write a story about Einstein"
+messages = [{"role": "user", "content": prompt}]
+prompt = tokenizer.apply_chat_template(
+    messages, add_generation_prompt=True
+)
+
+text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
+];
+
+const mlxvlm = (model: ModelData): string[] => [
+	`# Make sure mlx-vlm is installed
+# pip install --upgrade mlx-vlm
+
+from mlx_vlm import load, generate
+from mlx_vlm.prompt_utils import apply_chat_template
+from mlx_vlm.utils import load_config
+
+# Load the model
+model, processor = load("${model.id}")
+config = load_config("${model.id}")
+
+# Prepare input
+image = ["http://images.cocodataset.org/val2017/000000039769.jpg"]
+prompt = "Describe this image."
+
+# Apply chat template
+formatted_prompt = apply_chat_template(
+    processor, config, prompt, num_images=1
+)
+
+# Generate output
+output = generate(model, processor, formatted_prompt, image)
+print(output)`,
 ];
 
 export const mlxim = (model: ModelData): string[] => [
@@ -1210,10 +2211,105 @@ export const mlxim = (model: ModelData): string[] => [
 model = create_model(${model.id})`,
 ];
 
+export const mlx = (model: ModelData): string[] => {
+	if (model.pipeline_tag === "image-text-to-text") {
+		return mlxvlm(model);
+	}
+	if (model.pipeline_tag === "text-generation") {
+		if (model.tags.includes("conversational")) {
+			return mlxchat(model);
+		} else {
+			return mlxlm(model);
+		}
+	}
+	return mlx_unknown(model);
+};
+
 export const model2vec = (model: ModelData): string[] => [
 	`from model2vec import StaticModel
 
 model = StaticModel.from_pretrained("${model.id}")`,
+];
+
+export const pruna = (model: ModelData): string[] => {
+	let snippets: string[];
+
+	if (model.tags.includes("diffusers")) {
+		snippets = pruna_diffusers(model);
+	} else if (model.tags.includes("transformers")) {
+		snippets = pruna_transformers(model);
+	} else {
+		snippets = pruna_default(model);
+	}
+
+	const ensurePrunaModelImport = (snippet: string): string => {
+		if (!/^from pruna import PrunaModel/m.test(snippet)) {
+			return `from pruna import PrunaModel\n${snippet}`;
+		}
+		return snippet;
+	};
+	snippets = snippets.map(ensurePrunaModelImport);
+
+	if (model.tags.includes("pruna_pro-ai")) {
+		return snippets.map((snippet) =>
+			snippet.replace(/\bpruna\b/g, "pruna_pro").replace(/\bPrunaModel\b/g, "PrunaProModel"),
+		);
+	}
+
+	return snippets;
+};
+
+const pruna_diffusers = (model: ModelData): string[] => {
+	const diffusersSnippets = diffusers(model);
+
+	return diffusersSnippets.map((snippet) =>
+		snippet
+			// Replace pipeline classes with PrunaModel
+			.replace(/\b\w*Pipeline\w*\b/g, "PrunaModel")
+			// Clean up diffusers imports containing PrunaModel
+			.replace(/from diffusers import ([^,\n]*PrunaModel[^,\n]*)/g, "")
+			.replace(/from diffusers import ([^,\n]+),?\s*([^,\n]*PrunaModel[^,\n]*)/g, "from diffusers import $1")
+			.replace(/from diffusers import\s*(\n|$)/g, "")
+			// Fix PrunaModel imports
+			.replace(/from diffusers import PrunaModel/g, "from pruna import PrunaModel")
+			.replace(/from diffusers import ([^,\n]+), PrunaModel/g, "from diffusers import $1")
+			.replace(/from diffusers import PrunaModel, ([^,\n]+)/g, "from diffusers import $1")
+			// Clean up whitespace
+			.replace(/\n\n+/g, "\n")
+			.trim(),
+	);
+};
+
+const pruna_transformers = (model: ModelData): string[] => {
+	const info = model.transformersInfo;
+	const transformersSnippets = transformers(model);
+
+	// Replace pipeline with PrunaModel
+	let processedSnippets = transformersSnippets.map((snippet) =>
+		snippet
+			.replace(/from transformers import pipeline/g, "from pruna import PrunaModel")
+			.replace(/pipeline\([^)]*\)/g, `PrunaModel.from_pretrained("${model.id}")`),
+	);
+
+	// Additional cleanup if auto_model info is available
+	if (info?.auto_model) {
+		processedSnippets = processedSnippets.map((snippet) =>
+			snippet
+				.replace(new RegExp(`from transformers import ${info.auto_model}\n?`, "g"), "")
+				.replace(new RegExp(`${info.auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
+				.replace(new RegExp(`^.*from.*import.*(, *${info.auto_model})+.*$`, "gm"), (line) =>
+					line.replace(new RegExp(`, *${info.auto_model}`, "g"), ""),
+				),
+		);
+	}
+
+	return processedSnippets;
+};
+
+const pruna_default = (model: ModelData): string[] => [
+	`from pruna import PrunaModel
+model = PrunaModel.from_pretrained("${model.id}")
+`,
 ];
 
 export const nemo = (model: ModelData): string[] => {
@@ -1224,6 +2320,33 @@ export const nemo = (model: ModelData): string[] => {
 	}
 
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
+};
+
+export const outetts = (model: ModelData): string[] => {
+	// Don’t show this block on GGUF / ONNX mirrors
+	const t = model.tags ?? [];
+	if (t.includes("gguf") || t.includes("onnx")) {
+		return [];
+	}
+
+	// v1.0 HF → minimal runnable snippet
+	return [
+		`
+  import outetts
+
+  enum = outetts.Models("${model.id}".split("/", 1)[1])       # VERSION_1_0_SIZE_1B
+  cfg  = outetts.ModelConfig.auto_config(enum, outetts.Backend.HF)
+  tts  = outetts.Interface(cfg)
+
+  speaker = tts.load_default_speaker("EN-FEMALE-1-NEUTRAL")
+  tts.generate(
+	  outetts.GenerationConfig(
+		  text="Hello there, how are you doing?",
+		  speaker=speaker,
+	  )
+  ).save("output.wav")
+  `,
+	];
 };
 
 export const pxia = (model: ModelData): string[] => [
@@ -1238,6 +2361,29 @@ export const pythae = (model: ModelData): string[] => [
 model = AutoModel.load_from_hf_hub("${model.id}")`,
 ];
 
+export const qwen3_tts = (model: ModelData): string[] => [
+	`# pip install qwen-tts
+import torch
+import soundfile as sf
+from qwen_tts import Qwen3TTSModel
+
+model = Qwen3TTSModel.from_pretrained(
+    "${model.id}",
+    device_map="cuda:0",
+    dtype=torch.bfloat16,
+    attn_implementation="flash_attention_2",
+)
+
+wavs, sr = model.generate_custom_voice(
+    text="Your text here.",
+    language="English",
+    speaker="Ryan",
+    instruct="Speak in a natural tone.",
+)
+
+sf.write("output.wav", wavs[0], sr)`,
+];
+
 const musicgen = (model: ModelData): string[] => [
 	`from audiocraft.models import MusicGen
 
@@ -1249,7 +2395,7 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 
 const magnet = (model: ModelData): string[] => [
 	`from audiocraft.models import MAGNeT
-	
+
 model = MAGNeT.get_pretrained("${model.id}")
 
 descriptions = ['disco beat', 'energetic EDM', 'funky groove']
@@ -1258,7 +2404,7 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 
 const audiogen = (model: ModelData): string[] => [
 	`from audiocraft.models import AudioGen
-	
+
 model = AudioGen.get_pretrained("${model.id}")
 model.set_generation_params(duration=5)  # generate 5 seconds.
 descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a corridor']
@@ -1266,9 +2412,9 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
 export const anemoi = (model: ModelData): string[] => [
 	`from anemoi.inference.runners.default import DefaultRunner
-from anemoi.inference.config import Configuration
+from anemoi.inference.config.run import RunConfiguration
 # Create Configuration
-config = Configuration(checkpoint = {"huggingface":{"repo_id":"${model.id}"}})
+config = RunConfiguration(checkpoint = {"huggingface":"${model.id}"})
 # Load Runner
 runner = DefaultRunner(config)`,
 ];
@@ -1291,7 +2437,7 @@ brew install whisperkit-cli
 
 # View all available inference options
 whisperkit-cli transcribe --help
-	
+
 # Download and run inference using whisper base model
 whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 
@@ -1311,4 +2457,74 @@ export const hezar = (model: ModelData): string[] => [
 
 model = Model.load("${model.id}")`,
 ];
+
+export const zonos = (model: ModelData): string[] => [
+	`# pip install git+https://github.com/Zyphra/Zonos.git
+import torchaudio
+from zonos.model import Zonos
+from zonos.conditioning import make_cond_dict
+
+model = Zonos.from_pretrained("${model.id}", device="cuda")
+
+wav, sr = torchaudio.load("speaker.wav")           # 5-10s reference clip
+speaker = model.make_speaker_embedding(wav, sr)
+
+cond  = make_cond_dict(text="Hello, world!", speaker=speaker, language="en-us")
+codes = model.generate(model.prepare_conditioning(cond))
+
+audio = model.autoencoder.decode(codes)[0].cpu()
+torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
+`,
+];
+
+export const moshi = (model: ModelData): string[] => {
+	// Detect backend from model name (no distinguishing tags available)
+	if (model.id.includes("-mlx")) {
+		// MLX backend (macOS Apple Silicon)
+		// -q flag only accepts 4 or 8, bf16 models don't use it
+		const quantFlag = model.id.includes("-q4") ? " -q 4" : model.id.includes("-q8") ? " -q 8" : "";
+		return [
+			`# pip install moshi_mlx
+# Run local inference (macOS Apple Silicon)
+python -m moshi_mlx.local${quantFlag} --hf-repo "${model.id}"
+
+# Or run with web UI
+python -m moshi_mlx.local_web${quantFlag} --hf-repo "${model.id}"`,
+		];
+	}
+
+	if (model.id.includes("-candle")) {
+		// Rust/Candle backend
+		return [
+			`# pip install rustymimi
+# Candle backend - see https://github.com/kyutai-labs/moshi
+# for Rust installation instructions`,
+		];
+	}
+
+	// PyTorch backend (default)
+	return [
+		`# pip install moshi
+# Run the interactive web server
+python -m moshi.server --hf-repo "${model.id}"
+# Then open https://localhost:8998 in your browser`,
+		`# pip install moshi
+import torch
+from moshi.models import loaders
+
+# Load checkpoint info from HuggingFace
+checkpoint = loaders.CheckpointInfo.from_hf_repo("${model.id}")
+
+# Load the Mimi audio codec
+mimi = checkpoint.get_mimi(device="cuda")
+mimi.set_num_codebooks(8)
+
+# Encode audio (24kHz, mono)
+wav = torch.randn(1, 1, 24000 * 10)  # [batch, channels, samples]
+with torch.no_grad():
+    codes = mimi.encode(wav.cuda())
+    decoded = mimi.decode(codes)`,
+	];
+};
+
 //#endregion

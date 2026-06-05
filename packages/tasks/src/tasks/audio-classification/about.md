@@ -51,9 +51,9 @@ data = query("sample1.flac")
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer with audio classification models on Hugging Face Hub.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.audioClassification({
 	data: await (await fetch("sample.flac")).blob(),
 	model: "facebook/mms-lid-126",

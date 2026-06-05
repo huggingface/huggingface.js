@@ -3,12 +3,17 @@ import { createApiError } from "../error";
 import type { ApiModelInfo } from "../types/api/api-model";
 import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
-import { pick } from "../utils/pick";
-import { MODEL_EXPAND_KEYS, type MODEL_EXPANDABLE_KEYS, type ModelEntry } from "./list-models";
+import { normalizeInferenceProviderMapping } from "../utils/normalizeInferenceProviderMapping";
+import {
+	MODEL_EXPAND_KEYS,
+	MODEL_DERIVED_FIELD_TO_API_KEY,
+	type ModelAdditionalField,
+	type ModelDerivedFields,
+	type ResolveModelAdditionalFields,
+	type ModelEntry,
+} from "./list-models";
 
-export async function modelInfo<
-	const T extends Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPAND_KEYS)[number]> = never,
->(
+export async function modelInfo<const T extends ModelAdditionalField = never>(
 	params: {
 		name: string;
 		hubUrl?: string;
@@ -21,35 +26,52 @@ export async function modelInfo<
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>
-): Promise<ModelEntry & Pick<ApiModelInfo, T>> {
+	} & Partial<CredentialsParams>,
+): Promise<ModelEntry & ResolveModelAdditionalFields<T>> {
 	const accessToken = params && checkCredentials(params);
+
+	const additionalExpandKeys =
+		params?.additionalFields?.map(
+			(field) => MODEL_DERIVED_FIELD_TO_API_KEY[field as keyof ModelDerivedFields] ?? field,
+		) ?? [];
 
 	const search = new URLSearchParams([
 		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
-		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
+		...additionalExpandKeys.map((val) => ["expand", val] satisfies [string, string]),
 	]).toString();
 
 	const response = await (params.fetch || fetch)(
 		`${params?.hubUrl || HUB_URL}/api/models/${params.name}/revision/${encodeURIComponent(
-			params.revision ?? "HEAD"
+			params.revision ?? "HEAD",
 		)}?${search.toString()}`,
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-				Accepts: "application/json",
 			},
-		}
+		},
 	);
 
 	if (!response.ok) {
 		throw await createApiError(response);
 	}
 
-	const data = await response.json();
+	const data: ApiModelInfo = await response.json();
+
+	const additional: Record<string, unknown> = {};
+	if (params?.additionalFields) {
+		for (const field of params.additionalFields) {
+			if (field === "filePaths") {
+				additional.filePaths = (data.siblings ?? []).map((s) => s.rfilename);
+			} else if (field === "inferenceProviderMapping" && data.inferenceProviderMapping) {
+				additional.inferenceProviderMapping = normalizeInferenceProviderMapping(data.id, data.inferenceProviderMapping);
+			} else {
+				additional[field] = data[field as keyof ApiModelInfo];
+			}
+		}
+	}
 
 	return {
-		...(params?.additionalFields && pick(data, params.additionalFields)),
+		...additional,
 		id: data._id,
 		name: data.id,
 		private: data.private,
@@ -58,5 +80,5 @@ export async function modelInfo<
 		gated: data.gated,
 		likes: data.likes,
 		updatedAt: new Date(data.lastModified),
-	} as ModelEntry & Pick<ApiModelInfo, T>;
+	} as ModelEntry & ResolveModelAdditionalFields<T>;
 }

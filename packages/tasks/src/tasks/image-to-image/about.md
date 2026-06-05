@@ -45,9 +45,9 @@ make_image_grid([init_image, image], rows=1, cols=2)
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer image-to-image models on Hugging Face Hub.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.imageToImage({
 	data: await (await fetch("image")).blob(),
 	model: "timbrooks/instruct-pix2pix",
@@ -114,7 +114,7 @@ The images below show some examples extracted from the Pix2Pix paper. This model
 ## Useful Resources
 
 - [Image-to-image guide with diffusers](https://huggingface.co/docs/diffusers/using-diffusers/img2img)
-- Image inpainting: [inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/inpaint), [demo](https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting)
+- Image inpainting: [inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#inpainting), [demo](https://huggingface.co/spaces/linoyts/Qwen-Image-Edit-Inpaint)
 - Colorization: [demo](https://huggingface.co/spaces/modelscope/old_photo_restoration)
 - Super resolution: [image upscaling with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/upscale#super-resolution), [demo](https://huggingface.co/spaces/radames/Enhance-This-HiDiffusion-SDXL)
 - [Style transfer and layout control with diffusers 🧨](https://huggingface.co/docs/diffusers/main/en/using-diffusers/ip_adapter#style--layout-control)

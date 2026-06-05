@@ -109,7 +109,7 @@ export interface TextGenerationInputGrammarType {
 	value: unknown;
 	[property: string]: unknown;
 }
-export type Type = "json" | "regex";
+export type Type = "json" | "regex" | "json_schema";
 /**
  * Text Generation Output.
  *

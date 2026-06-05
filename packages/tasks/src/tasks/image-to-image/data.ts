@@ -53,16 +53,16 @@ const taskData: TaskDataCustom = {
 			id: "fal/AuraSR-v2",
 		},
 		{
-			description: "A model that increases the resolution of an image.",
-			id: "keras-io/super-resolution",
+			description: "Powerful image editing model.",
+			id: "black-forest-labs/FLUX.1-Kontext-dev",
 		},
 		{
-			description: "A model for applying edits to images through image controls.",
-			id: "Yuanshi/OminiControl",
+			description: "Virtual try-on model.",
+			id: "yisol/IDM-VTON",
 		},
 		{
-			description: "A model that generates images based on segments in the input image and the text prompt.",
-			id: "mfidabel/controlnet-segment-anything",
+			description: "Image re-lighting model.",
+			id: "kontext-community/relighting-kontext-dev-lora-v3",
 		},
 		{
 			description: "Strong model for inpainting and outpainting.",
@@ -75,33 +75,21 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "Image enhancer application for low light.",
-			id: "keras-io/low-light-image-enhancement",
+			description: "Image editing application.",
+			id: "black-forest-labs/FLUX.1-Kontext-Dev",
 		},
 		{
-			description: "Style transfer application.",
-			id: "keras-io/neural-style-transfer",
+			description: "Image relighting application.",
+			id: "lllyasviel/iclight-v2-vary",
 		},
 		{
-			description: "An application that generates images based on segment control.",
-			id: "mfidabel/controlnet-segment-anything",
-		},
-		{
-			description: "Image generation application that takes image control and text prompt.",
-			id: "hysts/ControlNet",
-		},
-		{
-			description: "Colorize any image using this app.",
-			id: "ioclab/brightness-controlnet",
-		},
-		{
-			description: "Edit images with instructions.",
-			id: "timbrooks/instruct-pix2pix",
+			description: "An application for image upscaling.",
+			id: "jasperai/Flux.1-dev-Controlnet-Upscaler",
 		},
 	],
 	summary:
 		"Image-to-image is the task of transforming an input image through a variety of possible manipulations and enhancements, such as super-resolution, image inpainting, colorization, and more.",
-	widgetModels: ["stabilityai/stable-diffusion-2-inpainting"],
+	widgetModels: ["Qwen/Qwen-Image"],
 	youtubeId: "",
 };
 

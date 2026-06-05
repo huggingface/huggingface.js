@@ -1,3 +1,6 @@
+import { AMD_GPU_SKUS } from "./hardware-amd.js";
+import { NVIDIA_SKUS } from "./hardware-nvidia.js";
+
 /**
  * Biden AI Executive Order (since revoked by President Trump):
  * https://web.archive.org/web/20250105222429/https://www.whitehouse.gov/briefing-room/presidential-actions/2023/10/30/executive-order-on-the-safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence/
@@ -29,397 +32,124 @@ export interface HardwareSpec {
 	 * e.g. an A100 exists in 40 or 80 GB.
 	 */
 	memory?: number[];
+	/**
+	 * Approximate MSRP in USD at launch. For SKUs with multiple memory variants,
+	 * the price corresponds to the largest memory variant. For datacenter GPUs
+	 * sold via OEMs without a public MSRP (H100, MI300X, ...), this is a
+	 * widely-reported street price. For mobile/laptop GPUs that are not sold
+	 * standalone, this is the approximate module/BOM cost. For Apple Silicon
+	 * SoCs, this is the price of a Mac configured with that chip and the
+	 * largest memory option. For CPU "family" entries (e.g. "Xeon 4th Gen",
+	 * "Ryzen Zen 4 7000 (Ryzen 9)"), this is the tray/box price of a
+	 * representative flagship SKU at launch.
+	 */
+	msrp: number;
+	/**
+	 * Approximate maximum sustained power draw in watts. For GPUs with multiple
+	 * form factors (e.g. H100 SXM vs PCIe), uses the highest variant. For CPUs,
+	 * uses max turbo power (PL2 / MTP for Intel, PPT for AMD), not base TDP.
+	 * For Apple Silicon and Snapdragon SoCs, an estimated package power based
+	 * on benchmarks/teardowns (Apple does not publish TDP).
+	 */
+	power: number;
+	/**
+	 * Year the SKU first became available. For SKUs refreshed later with
+	 * additional memory variants (e.g. A100 40GB → 80GB, RTX 2060 → 12GB),
+	 * this is the original launch year. For CPU "family" entries, this is
+	 * the year the family debuted.
+	 */
+	releaseYear: number;
 }
 
-export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 256, 512];
+export const DEFAULT_MEMORY_OPTIONS = [
+	8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048,
+];
 
 export const SKUS = {
 	GPU: {
-		NVIDIA: {
-			H200: {
-				tflops: 241.3,
-				memory: [141],
-			},
-			H100: {
-				tflops: 267.6,
-				memory: [80],
-			},
-			L40s: {
-				tflops: 91.61,
-				memory: [48],
-			},
-			L40: {
-				tflops: 90.52,
-				memory: [48],
-			},
-			L20: {
-				tflops: 59.35,
-				memory: [48],
-			},
-			L4: {
-				tflops: 30.29,
-				memory: [24],
-			},
-			"RTX 6000 Ada": {
-				tflops: 91.1,
-				memory: [48],
-			},
-			"RTX 5880 Ada": {
-				tflops: 69.3,
-				memory: [48],
-			},
-			"RTX 5000 Ada": {
-				tflops: 65.3,
-				memory: [32],
-			},
-			"RTX 4500 Ada": {
-				tflops: 39.6,
-				memory: [24],
-			},
-			"RTX 4000 Ada": {
-				tflops: 26.7,
-				memory: [20],
-			},
-			"RTX 4000 SFF Ada": {
-				tflops: 19.2,
-				memory: [20],
-			},
-			"RTX 2000 Ada": {
-				tflops: 12.0,
-				memory: [16],
-			},
-			"RTX A6000": {
-				tflops: 38.7,
-				memory: [48],
-			},
-			"RTX A4000": {
-				tflops: 19.2,
-				memory: [16],
-			},
-			"RTX A2000": {
-				tflops: 7.987,
-				memory: [8, 12],
-			},
-			A100: {
-				tflops: 77.97,
-				memory: [80, 40],
-			},
-			A40: {
-				tflops: 37.42,
-				memory: [48],
-			},
-			A10: {
-				tflops: 31.24,
-				memory: [24],
-			},
-			A2: {
-				tflops: 4.531, // source: https://www.techpowerup.com/gpu-specs/a2.c3848
-				memory: [16],
-			},
-			"RTX 5090": {
-				tflops: 104.8,
-				memory: [32],
-			},
-			"RTX 5090 D": {
-				tflops: 104.8,
-				memory: [32],
-			},
-			"RTX 5080": {
-				tflops: 56.28,
-				memory: [16],
-			},
-			"RTX 5080 Mobile": {
-				tflops: 24.58,
-				memory: [16],
-			},
-			"RTX 5070": {
-				tflops: 30.84,
-				memory: [12],
-			},
-			"RTX 5070 Mobile": {
-				tflops: 23.22,
-				memory: [8],
-			},
-			"RTX 4090": {
-				tflops: 82.58,
-				memory: [24],
-			},
-			"RTX 4090D": {
-				tflops: 79.49,
-				memory: [24],
-			},
-			"RTX 4090 Mobile": {
-				tflops: 32.98,
-				memory: [16],
-			},
-			"RTX 4080 SUPER": {
-				tflops: 52.2,
-				memory: [16],
-			},
-			"RTX 4080": {
-				tflops: 48.7,
-				memory: [16],
-			},
-			"RTX 4080 Mobile": {
-				tflops: 24.72,
-				memory: [12],
-			},
-			"RTX 4070": {
-				tflops: 29.15,
-				memory: [12],
-			},
-			"RTX 4070 Mobile": {
-				tflops: 15.62,
-				memory: [8],
-			},
-			"RTX 4070 Ti": {
-				tflops: 40.09,
-				memory: [12],
-			},
-			"RTX 4070 Super": {
-				tflops: 35.48,
-				memory: [12],
-			},
-			"RTX 4070 Ti Super": {
-				tflops: 44.1,
-				memory: [16],
-			},
-			"RTX 4060": {
-				tflops: 15.11,
-				memory: [8],
-			},
-			"RTX 4060 Ti": {
-				tflops: 22.06,
-				memory: [8, 16],
-			},
-			"RTX 4060 Mobile": {
-				tflops: 11.61,
-				memory: [8],
-			},
-			"RTX 3090": {
-				tflops: 35.58,
-				memory: [24],
-			},
-			"RTX 3090 Ti": {
-				tflops: 40,
-				memory: [24],
-			},
-			"RTX 3080": {
-				tflops: 30.6,
-				memory: [12, 10],
-			},
-			"RTX 3080 Ti": {
-				tflops: 34.1,
-				memory: [12],
-			},
-			"RTX 3080 Mobile": {
-				tflops: 18.98,
-				memory: [8],
-			},
-			"RTX 3070": {
-				tflops: 20.31,
-				memory: [8],
-			},
-			"RTX 3070 Ti": {
-				tflops: 21.75,
-				memory: [8],
-			},
-			"RTX 3070 Ti Mobile": {
-				tflops: 16.6,
-				memory: [8],
-			},
-			"RTX 3060 Ti": {
-				tflops: 16.2,
-				memory: [8],
-			},
-			"RTX 3060": {
-				tflops: 12.74,
-				memory: [12, 8],
-			},
-			"RTX 2080 Ti": {
-				tflops: 26.9,
-				memory: [11],
-			},
-			"RTX 2080": {
-				tflops: 20.14,
-				memory: [8],
-			},
-			"RTX 2070": {
-				tflops: 14.93,
-				memory: [8],
-			},
-			"RTX 2070 SUPER Mobile": {
-				tflops: 14.13,
-				memory: [8],
-			},
-			"RTX 2070 SUPER": {
-				tflops: 18.12,
-				memory: [8],
-			},
-			"RTX 3060 Mobile": {
-				tflops: 10.94,
-				memory: [6],
-			},
-			"RTX 3050 Mobile": {
-				tflops: 7.639,
-				memory: [6],
-			},
-			"RTX 2060 Mobile": {
-				tflops: 9.22,
-				memory: [6],
-			},
-			"GTX 1080 Ti": {
-				tflops: 11.34, // float32 (GPU does not support native float16)
-				memory: [11],
-			},
-			"GTX 1070 Ti": {
-				tflops: 8.2, // float32 (GPU does not support native float16)
-				memory: [8],
-			},
-			"GTX 1060": {
-				tflops: 3.9, // float32 (GPU does not support native float16)
-				memory: [3, 6],
-			},
-			"GTX 1050 Ti": {
-				tflops: 2.1, // float32 (GPU does not support native float16)
-				memory: [4],
-			},
-			"RTX Titan": {
-				tflops: 32.62,
-				memory: [24],
-			},
-			"GTX 1660": {
-				tflops: 10.05,
-				memory: [6],
-			},
-			"GTX 1650 Mobile": {
-				tflops: 6.39,
-				memory: [4],
-			},
-			T4: {
-				tflops: 65.13,
-				memory: [16],
-			},
-			V100: {
-				tflops: 28.26,
-				memory: [32, 16],
-			},
-			"Quadro P6000": {
-				tflops: 12.63, // float32 (GPU does not support native float16)
-				memory: [24],
-			},
-			P40: {
-				tflops: 11.76, // float32 (GPU does not support native float16)
-				memory: [24],
-			},
-			P100: {
-				tflops: 19.05,
-				memory: [16],
-			},
-		},
-		AMD: {
-			MI300: {
-				tflops: 383.0,
-				memory: [192],
-			},
-			MI250: {
-				tflops: 362.1,
-				memory: [128],
-			},
-			MI210: {
-				tflops: 181.0,
-				memory: [64],
-			},
-			MI100: {
-				tflops: 184.6,
-				memory: [32],
-			},
-			MI60: {
-				tflops: 29.5,
-				memory: [32],
-			},
-			MI50: {
-				tflops: 26.5,
-				memory: [16],
-			},
-			"RX 7900 XTX": {
-				tflops: 122.8,
-				memory: [24],
-			},
-			"RX 7900 XT": {
-				tflops: 103.0,
-				memory: [20],
-			},
-			"RX 7900 GRE": {
-				tflops: 91.96,
-				memory: [16],
-			},
-			"RX 7800 XT": {
-				tflops: 74.65,
-				memory: [16],
-			},
-			"RX 7700 XT": {
-				tflops: 70.34,
-				memory: [12],
-			},
-			"RX 7600 XT": {
-				tflops: 45.14,
-				memory: [16, 8],
-			},
-			"RX 6950 XT": {
-				tflops: 47.31,
-				memory: [16],
-			},
-			"RX 6800": {
-				tflops: 32.33,
-				memory: [16],
-			},
-			"RX 6700 XT": {
-				tflops: 26.43,
-				memory: [12],
-			},
-			"RX 6700": {
-				tflops: 22.58,
-				memory: [10],
-			},
-			"Radeon Pro VII": {
-				tflops: 26.11,
-				memory: [16],
-			},
-		},
+		NVIDIA: NVIDIA_SKUS,
+		AMD: AMD_GPU_SKUS,
 		INTEL: {
 			"Arc A750": {
 				tflops: 34.41,
 				memory: [8],
+				msrp: 250,
+				power: 225,
+				releaseYear: 2022,
 			},
 			"Arc A770": {
 				tflops: 39.32,
 				memory: [8, 16],
+				msrp: 350,
+				power: 225,
+				releaseYear: 2022,
 			},
 			"Arc B570": {
 				tflops: 23.04,
 				memory: [10],
+				msrp: 200,
+				power: 150,
+				releaseYear: 2025,
 			},
 			"Arc B580": {
 				tflops: 27.34,
 				memory: [12],
+				msrp: 250,
+				power: 190,
+				releaseYear: 2024,
+			},
+			"Arc B50": {
+				tflops: 21.3,
+				memory: [16],
+				msrp: 350,
+				power: 70,
+				releaseYear: 2025,
+			},
+			"Arc B60": {
+				tflops: 24.58,
+				memory: [24, 48],
+				msrp: 1_200,
+				power: 200,
+				releaseYear: 2025,
+			},
+			"Arc Pro B70": {
+				tflops: 45.88,
+				memory: [32],
+				msrp: 949,
+				power: 230,
+				releaseYear: 2026,
 			},
 		},
 		QUALCOMM: {
 			"Snapdragon X Elite X1E-00-1DE": {
 				tflops: 4.6,
+				msrp: 900,
+				power: 80,
+				releaseYear: 2024,
 			},
 			"Snapdragon X Elite X1E-84-100": {
 				tflops: 4.6,
+				msrp: 1_700,
+				power: 30,
+				releaseYear: 2024,
 			},
 			"Snapdragon X Elite X1E-80-100": {
 				tflops: 3.8,
+				msrp: 1_300,
+				power: 23,
+				releaseYear: 2024,
 			},
 			"Snapdragon X Elite X1E-78-100": {
 				tflops: 3.8,
+				msrp: 1_200,
+				power: 23,
+				releaseYear: 2024,
 			},
 			"Snapdragon X Plus X1P-64-100": {
 				tflops: 3.8,
+				msrp: 1_000,
+				power: 23,
+				releaseYear: 2024,
 			},
 		},
 	},
@@ -427,170 +157,460 @@ export const SKUS = {
 		Intel: {
 			"Xeon 4th Generation (Sapphire Rapids)": {
 				tflops: 1.3,
+				msrp: 10_500,
+				power: 350,
+				releaseYear: 2023,
 			},
 			"Xeon 3th Generation (Ice Lake)": {
 				tflops: 0.8,
+				msrp: 8_000,
+				power: 270,
+				releaseYear: 2021,
 			},
 			"Xeon 2th Generation (Cascade Lake)": {
 				tflops: 0.55,
+				msrp: 10_000,
+				power: 205,
+				releaseYear: 2019,
+			},
+			"Xeon E5v4 (Broadwell)": {
+				tflops: 0.25,
+				msrp: 4_000,
+				power: 145,
+				releaseYear: 2016,
+			},
+			"Xeon E5v3 (Haswell)": {
+				tflops: 0.2,
+				msrp: 4_000,
+				power: 145,
+				releaseYear: 2014,
+			},
+			"Xeon E5v2 (Ivy Bridge)": {
+				tflops: 0.15,
+				msrp: 2_500,
+				power: 130,
+				releaseYear: 2013,
+			},
+			"Intel Core Ultra 9 275HX": {
+				tflops: 1.89,
+				msrp: 700,
+				power: 160,
+				releaseYear: 2025,
+			},
+			"Intel Core Ultra 7 265KF": {
+				tflops: 1.53,
+				msrp: 400,
+				power: 250,
+				releaseYear: 2024,
+			},
+			"Intel Core 14th Generation (i7)": {
+				tflops: 0.8,
+				msrp: 400,
+				power: 253,
+				releaseYear: 2023,
 			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,
+				msrp: 600,
+				power: 253,
+				releaseYear: 2022,
 			},
 			"Intel Core 13th Generation (i7)": {
 				tflops: 0.82,
+				msrp: 400,
+				power: 253,
+				releaseYear: 2022,
 			},
 			"Intel Core 13th Generation (i5)": {
 				tflops: 0.68,
+				msrp: 300,
+				power: 181,
+				releaseYear: 2022,
 			},
 			"Intel Core 13th Generation (i3)": {
 				tflops: 0.57,
+				msrp: 150,
+				power: 89,
+				releaseYear: 2023,
 			},
 			"Intel Core 12th Generation (i9)": {
 				tflops: 0.79,
+				msrp: 600,
+				power: 241,
+				releaseYear: 2021,
 			},
 			"Intel Core 12th Generation (i7)": {
 				tflops: 0.77,
+				msrp: 400,
+				power: 190,
+				releaseYear: 2021,
 			},
 			"Intel Core 12th Generation (i5)": {
 				tflops: 0.65,
+				msrp: 300,
+				power: 150,
+				releaseYear: 2021,
 			},
 			"Intel Core 12th Generation (i3)": {
 				tflops: 0.53,
+				msrp: 150,
+				power: 89,
+				releaseYear: 2022,
 			},
 			"Intel Core 11th Generation (i9)": {
 				tflops: 0.7,
+				msrp: 550,
+				power: 251,
+				releaseYear: 2021,
 			},
 			"Intel Core 11th Generation (i7)": {
 				tflops: 0.6,
+				msrp: 400,
+				power: 251,
+				releaseYear: 2021,
 			},
 			"Intel Core 11th Generation (i5)": {
 				tflops: 0.5,
+				msrp: 250,
+				power: 182,
+				releaseYear: 2021,
 			},
 			"Intel Core 11th Generation (i3)": {
 				tflops: 0.35,
+				msrp: 150,
+				power: 65,
+				releaseYear: 2021,
 			},
 			"Intel Core 10th Generation (i9)": {
 				tflops: 0.46,
+				msrp: 500,
+				power: 250,
+				releaseYear: 2020,
 			},
 			"Intel Core 10th Generation (i7)": {
 				tflops: 0.46,
+				msrp: 400,
+				power: 215,
+				releaseYear: 2020,
 			},
 			"Intel Core 10th Generation (i5)": {
 				tflops: 0.46,
+				msrp: 250,
+				power: 150,
+				releaseYear: 2020,
 			},
 			"Intel Core 10th Generation (i3)": {
 				tflops: 0.44,
+				msrp: 150,
+				power: 65,
+				releaseYear: 2020,
 			},
 		},
 		AMD: {
-			"EPYC 4th Generation (Genoa)": {
+			"EPYC 5th Generation Zen 5 (Turin)": {
+				tflops: 13.8,
+				msrp: 13_000,
+				power: 500,
+				releaseYear: 2024,
+			},
+			"EPYC 4th Generation Zen 4 (Genoa)": {
 				tflops: 5,
+				msrp: 11_500,
+				power: 360,
+				releaseYear: 2022,
 			},
-			"EPYC 3th Generation (Milan)": {
+			"EPYC 3th Generation Zen 3 (Milan)": {
 				tflops: 2.4,
+				msrp: 8_000,
+				power: 280,
+				releaseYear: 2021,
 			},
-			"EPYC 2th Generation (Rome)": {
+			"EPYC 2th Generation Zen 2 (Rome)": {
 				tflops: 0.6,
+				msrp: 7_000,
+				power: 225,
+				releaseYear: 2019,
 			},
-			"EPYC 1st Generation (Naples)": {
+			"EPYC 1st Generation Zen (Naples)": {
 				tflops: 0.6,
+				msrp: 4_000,
+				power: 180,
+				releaseYear: 2017,
 			},
-			"Ryzen Zen 4 7000 (Threadripper)": {
+			"Ryzen Threadripper Zen 5 9000 (Shimada Peak)": {
+				tflops: 14.0,
+				msrp: 5_000,
+				power: 350,
+				releaseYear: 2025,
+			},
+			"Ryzen Threadripper Zen 4 7000 (Storm Peak)": {
 				tflops: 10.0,
+				msrp: 5_000,
+				power: 350,
+				releaseYear: 2023,
 			},
-			"Ryzen Zen4 7000 (Ryzen 9)": {
+			"Ryzen Threadripper Zen 3 5000 (Chagall)": {
+				tflops: 4.6,
+				msrp: 6_500,
+				power: 280,
+				releaseYear: 2022,
+			},
+			"Ryzen Threadripper Zen 2 3000 (Castle Peak)": {
+				tflops: 3.2,
+				msrp: 4_000,
+				power: 280,
+				releaseYear: 2019,
+			},
+			"Ryzen Threadripper Zen 1000 (Whitehaven)": {
+				tflops: 0.6,
+				msrp: 1_000,
+				power: 180,
+				releaseYear: 2017,
+			},
+			"Ryzen 7 3800X (16)": {
+				tflops: 1.73,
+				msrp: 400,
+				power: 105,
+				releaseYear: 2019,
+			},
+			"Ryzen Zen 5 9000 (Ryzen 9)": {
 				tflops: 0.56,
+				msrp: 650,
+				power: 230,
+				releaseYear: 2024,
 			},
-			"Ryzen Zen4 7000 (Ryzen 7)": {
+			"Ryzen Zen 5 9000 (Ryzen 7)": {
 				tflops: 0.56,
+				msrp: 350,
+				power: 105,
+				releaseYear: 2024,
 			},
-			"Ryzen Zen4 7000 (Ryzen 5)": {
+			"Ryzen Zen 5 9000 (Ryzen 5)": {
 				tflops: 0.56,
+				msrp: 300,
+				power: 105,
+				releaseYear: 2024,
 			},
-			"Ryzen Zen3 5000 (Ryzen 9)": {
+			"Ryzen Zen 4 7000 (Ryzen 9)": {
+				tflops: 0.56,
+				msrp: 700,
+				power: 230,
+				releaseYear: 2022,
+			},
+			"Ryzen Zen 4 7000 (Ryzen 7)": {
+				tflops: 0.56,
+				msrp: 400,
+				power: 142,
+				releaseYear: 2022,
+			},
+			"Ryzen Zen 4 7000 (Ryzen 5)": {
+				tflops: 0.56,
+				msrp: 300,
+				power: 142,
+				releaseYear: 2022,
+			},
+			"Ryzen Zen 3 5000 (Ryzen 9)": {
 				tflops: 1.33,
+				msrp: 800,
+				power: 142,
+				releaseYear: 2020,
 			},
-			"Ryzen Zen3 5000 (Ryzen 7)": {
+			"Ryzen Zen 3 5000 (Ryzen 7)": {
 				tflops: 1.33,
+				msrp: 450,
+				power: 142,
+				releaseYear: 2020,
 			},
-			"Ryzen Zen3 5000 (Ryzen 5)": {
+			"Ryzen Zen 3 5000 (Ryzen 5)": {
 				tflops: 0.72,
+				msrp: 300,
+				power: 88,
+				releaseYear: 2020,
 			},
-			"Ryzen Zen 2  3000 (Threadripper)": {
+			"Ryzen Zen 2 3000 (Ryzen 9)": {
 				tflops: 0.72,
+				msrp: 750,
+				power: 142,
+				releaseYear: 2019,
 			},
-			"Ryzen Zen 2  3000 (Ryzen 9)": {
+			"Ryzen Zen 2 3000 (Ryzen 7)": {
 				tflops: 0.72,
+				msrp: 400,
+				power: 142,
+				releaseYear: 2019,
 			},
-			"Ryzen Zen 2  3000 (Ryzen 7)": {
+			"Ryzen Zen 2 3000 (Ryzen 5)": {
 				tflops: 0.72,
+				msrp: 250,
+				power: 88,
+				releaseYear: 2019,
 			},
-			"Ryzen Zen 2  3000 (Ryzen 5)": {
+			"Ryzen Zen 2 3000 (Ryzen 3)": {
 				tflops: 0.72,
+				msrp: 150,
+				power: 88,
+				releaseYear: 2020,
 			},
-			"Ryzen Zen 2  3000 (Ryzen 3)": {
-				tflops: 0.72,
+			"Ryzen AI 300 (Ryzen AI 9 HX)": {
+				tflops: 5.52,
+				msrp: 500,
+				power: 54,
+				releaseYear: 2024,
+			},
+			"Ryzen AI 300 (Ryzen AI 9)": {
+				tflops: 5.2,
+				msrp: 450,
+				power: 54,
+				releaseYear: 2024,
+			},
+			"Ryzen AI 300 (Ryzen AI 7)": {
+				tflops: 4.34,
+				msrp: 350,
+				power: 54,
+				releaseYear: 2024,
+			},
+			"Ryzen AI 300 (Ryzen AI 5)": {
+				tflops: 1.57,
+				msrp: 250,
+				power: 28,
+				releaseYear: 2024,
 			},
 		},
 	},
 	"Apple Silicon": {
 		"-": {
+			"Apple MacBook Neo": {
+				tflops: 1.9,
+				memory: [8],
+				msrp: 700,
+				power: 10,
+				releaseYear: 2026,
+			},
 			"Apple M1": {
 				tflops: 2.6,
 				memory: [8, 16],
+				msrp: 1_250,
+				power: 15,
+				releaseYear: 2020,
 			},
 			"Apple M1 Pro": {
 				tflops: 5.2,
 				memory: [16, 24, 32],
+				msrp: 2_900,
+				power: 30,
+				releaseYear: 2021,
 			},
 			"Apple M1 Max": {
 				tflops: 10.4,
 				memory: [16, 24, 32, 64],
+				msrp: 3_900,
+				power: 60,
+				releaseYear: 2021,
 			},
 			"Apple M1 Ultra": {
 				tflops: 21,
 				memory: [16, 24, 32, 64, 96, 128],
+				msrp: 6_200,
+				power: 120,
+				releaseYear: 2022,
 			},
 			"Apple M2": {
 				tflops: 3.6,
 				memory: [8, 16, 24],
+				msrp: 1_500,
+				power: 20,
+				releaseYear: 2022,
 			},
 			"Apple M2 Pro": {
 				tflops: 6.8,
 				memory: [16, 24, 32],
+				msrp: 2_800,
+				power: 35,
+				releaseYear: 2023,
 			},
 			"Apple M2 Max": {
 				tflops: 13.49,
 				memory: [32, 64, 96],
+				msrp: 4_500,
+				power: 80,
+				releaseYear: 2023,
 			},
 			"Apple M2 Ultra": {
 				tflops: 27.2,
 				memory: [64, 96, 128, 192],
+				msrp: 7_000,
+				power: 150,
+				releaseYear: 2023,
 			},
 			"Apple M3": {
 				tflops: 4.1,
 				memory: [8, 16, 24],
+				msrp: 1_500,
+				power: 22,
+				releaseYear: 2023,
 			},
 			"Apple M3 Pro": {
 				tflops: 7.4,
 				memory: [18, 36],
+				msrp: 2_400,
+				power: 40,
+				releaseYear: 2023,
 			},
 			"Apple M3 Max": {
 				tflops: 14.2,
 				memory: [36, 48, 64, 96, 128],
+				msrp: 5_000,
+				power: 90,
+				releaseYear: 2023,
+			},
+			"Apple M3 Ultra": {
+				tflops: 28.4,
+				memory: [96, 256, 512],
+				msrp: 9_500,
+				power: 180,
+				releaseYear: 2025,
 			},
 			"Apple M4": {
 				tflops: 4.6,
 				memory: [16, 24, 32],
+				msrp: 1_600,
+				power: 22,
+				releaseYear: 2024,
 			},
 			"Apple M4 Pro": {
 				tflops: 9.2,
 				memory: [24, 48, 64],
+				msrp: 2_600,
+				power: 45,
+				releaseYear: 2024,
 			},
 			"Apple M4 Max": {
 				tflops: 18.4,
 				memory: [36, 48, 64, 128],
+				msrp: 5_000,
+				power: 100,
+				releaseYear: 2024,
+			},
+			"Apple M5": {
+				tflops: 5.7,
+				memory: [16, 24, 32],
+				msrp: 2_000,
+				power: 25,
+				releaseYear: 2025,
+			},
+			"Apple M5 Pro": {
+				tflops: 11.4,
+				memory: [24, 36, 48, 64],
+				msrp: 2_900,
+				power: 50,
+				releaseYear: 2026,
+			},
+			"Apple M5 Max": {
+				tflops: 22.8,
+				memory: [36, 48, 64, 128],
+				msrp: 5_000,
+				power: 110,
+				releaseYear: 2026,
 			},
 		},
 	},

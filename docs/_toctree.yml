@@ -14,13 +14,16 @@
       title: Interact with the Hub
     - local: hub/modules
       title: API Reference
-- title: "@huggingface/agent"
+- title: "@huggingface/mcp-client"
   isExpanded: true
   sections:
-    - local: agents/README
-      title: Use Agents to run multi-modal workflows from a natural language API
-    - local: agents/modules
-      title: API Reference
+    - local: mcp-client/README
+      title: Simple MCP Client built on top of Inference Client
+- title: "@huggingface/tiny-agents"
+  isExpanded: true
+  sections:
+    - local: tiny-agents/README
+      title: A lightweight MCP-powered Agent built on top of Inference Client
 - title: "@huggingface/space-header"
   isExpanded: true
   sections:

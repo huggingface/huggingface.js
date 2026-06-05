@@ -57,6 +57,8 @@ await hub.uploadFiles({
     },
     // Local file URL
     pathToFileURL("./pytorch-model.bin"),
+    // Local folder URL
+    pathToFileURL("./models"),
     // Web URL
     new URL("https://huggingface.co/xlm-roberta-base/resolve/main/tokenizer.json"),
     // Path + Web URL
@@ -80,6 +82,25 @@ for await (const progressEvent of await hub.uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
+// Edit a file by adding prefix & suffix
+await commit({
+  repo,
+  accessToken: "hf_...",
+  operations: [{
+    type: "edit",
+    originalContent: originalFile,
+    edits: [{
+      start: 0,
+      end: 0,
+      content: new Blob(["prefix"])
+    }, {
+      start: originalFile.length,
+      end: originalFile.length,
+      content: new Blob(["suffix"])
+    }]
+  }]
+})
+
 await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
 await (await hub.downloadFile({ repo, path: "README.md" })).text();
@@ -89,6 +110,37 @@ for await (const fileInfo of hub.listFiles({repo})) {
 }
 
 await hub.deleteRepo({ repo, accessToken: "hf_..." });
+```
+
+## CLI usage
+
+You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo. 
+
+```console
+npx @huggingface/hub upload coyotte508/test-model .
+npx @huggingface/hub upload datasets/coyotte508/test-dataset .
+# Same thing
+npx @huggingface/hub upload --repo-type dataset coyotte508/test-dataset .
+# Upload new data with 0 history in a separate branch
+npx @huggingface/hub branch create coyotte508/test-model release --empty
+npx @huggingface/hub upload coyotte508/test-model . --revision release
+
+npx @huggingface/hub --help
+npx @huggingface/hub upload --help
+```
+
+You can also install globally with `npm install -g @huggingface/hub`. Then you can do:
+
+```console
+hfjs upload coyotte508/test-model .
+
+hfjs branch create --repo-type dataset coyotte508/test-dataset release --empty
+hfjs upload --repo-type dataset coyotte508/test-dataset . --revision release
+
+hfjs --help
+hfjs  upload --help
+
+hfjs help jobs
 ```
 
 ## OAuth Login

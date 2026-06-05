@@ -1,0 +1,60 @@
+{
+	"name": "@huggingface/mcp-client",
+	"version": "0.2.3",
+	"description": "Client for the Model Context Protocol",
+	"keywords": [
+		"agent",
+		"client",
+		"huggingface",
+		"mcp",
+		"model context protocol",
+		"tiny-agent"
+	],
+	"license": "MIT",
+	"author": "Hugging Face",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"bin": {
+		"tiny-agent": "./dist/cli.js"
+	},
+	"source": "index.ts",
+	"files": [
+		"cli.ts",
+		"dist",
+		"src",
+		"tsconfig.json"
+	],
+	"main": "./dist/src/index.js",
+	"module": "./dist/src/index.mjs",
+	"types": "./dist/src/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/src/index.d.ts",
+			"require": "./dist/src/index.js",
+			"import": "./dist/src/index.mjs"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
+		"prepublishOnly": "pnpm run build",
+		"build": "tsup src/index.ts cli.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"prepare": "pnpm run build",
+		"test": "vitest run",
+		"check": "tsc",
+		"cli": "tsx cli.ts"
+	},
+	"dependencies": {
+		"@huggingface/inference": "workspace:^",
+		"@huggingface/tasks": "workspace:^",
+		"@modelcontextprotocol/sdk": "^1.11.2"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"packageManager": "pnpm@10.10.0"
+}

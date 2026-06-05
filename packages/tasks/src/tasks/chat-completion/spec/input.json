@@ -66,6 +66,11 @@
 			"example": 0.1,
 			"nullable": true
 		},
+		"reasoning_effort": {
+			"type": "string",
+			"description": "Optional. Constrains effort on reasoning for models that support reasoning. Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning. Common values: none, minimal, low, medium, high, xhigh. Support and defaults are provider and model-dependent.",
+			"nullable": true
+		},
 		"response_format": {
 			"allOf": [
 				{
@@ -275,9 +280,9 @@
 		},
 		"ChatCompletionInputFunctionDefinition": {
 			"type": "object",
-			"required": ["name", "arguments"],
+			"required": ["name"],
 			"properties": {
-				"arguments": {},
+				"parameters": {},
 				"description": {
 					"type": "string",
 					"nullable": true
@@ -291,40 +296,81 @@
 		"ChatCompletionInputGrammarType": {
 			"oneOf": [
 				{
-					"type": "object",
-					"required": ["type", "value"],
-					"properties": {
-						"type": {
-							"type": "string",
-							"enum": ["json"]
-						},
-						"value": {
-							"description": "A string that represents a [JSON Schema](https://json-schema.org/).\n\nJSON Schema is a declarative language that allows to annotate JSON documents\nwith types and descriptions."
-						}
-					}
+					"$ref": "#/$defs/ChatCompletionInputResponseFormatText"
 				},
 				{
-					"type": "object",
-					"required": ["type", "value"],
-					"properties": {
-						"type": {
-							"type": "string",
-							"enum": ["regex"]
-						},
-						"value": {
-							"type": "string"
-						}
-					}
+					"$ref": "#/$defs/ChatCompletionInputResponseFormatJSONSchema"
+				},
+				{
+					"$ref": "#/$defs/ChatCompletionInputResponseFormatJSONObject"
 				}
 			],
-			"discriminator": {
-				"propertyName": "type"
-			},
 			"title": "ChatCompletionInputGrammarType"
+		},
+		"ChatCompletionInputResponseFormatText": {
+			"type": "object",
+			"required": ["type"],
+			"properties": {
+				"type": {
+					"type": "string",
+					"enum": ["text"]
+				}
+			},
+			"title": "ChatCompletionInputResponseFormatText"
+		},
+		"ChatCompletionInputResponseFormatJSONSchema": {
+			"type": "object",
+			"required": ["type", "json_schema"],
+			"properties": {
+				"type": {
+					"type": "string",
+					"enum": ["json_schema"]
+				},
+				"json_schema": {
+					"$ref": "#/$defs/ChatCompletionInputJsonSchemaConfig"
+				}
+			},
+			"title": "ChatCompletionInputResponseFormatJSONSchema"
+		},
+		"ChatCompletionInputResponseFormatJSONObject": {
+			"type": "object",
+			"required": ["type"],
+			"properties": {
+				"type": {
+					"type": "string",
+					"enum": ["json_object"]
+				}
+			},
+			"title": "ChatCompletionInputResponseFormatJSONObject"
+		},
+		"ChatCompletionInputJsonSchemaConfig": {
+			"type": "object",
+			"required": ["name"],
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "The name of the response format."
+				},
+				"description": {
+					"type": "string",
+					"description": "A description of what the response format is for, used by the model to determine how to respond in the format.",
+					"nullable": true
+				},
+				"schema": {
+					"type": "object",
+					"description": "The schema for the response format, described as a JSON Schema object. Learn how to build JSON schemas [here](https://json-schema.org/).",
+					"nullable": true
+				},
+				"strict": {
+					"type": "boolean",
+					"description": "Whether to enable strict schema adherence when generating the output. If set to true, the model will always follow the exact schema defined in the `schema` field.",
+					"nullable": true
+				}
+			},
+			"title": "ChatCompletionInputJsonSchemaConfig"
 		},
 		"ChatCompletionInputStreamOptions": {
 			"type": "object",
-			"required": ["include_usage"],
 			"properties": {
 				"include_usage": {
 					"type": "boolean",

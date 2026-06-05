@@ -37,13 +37,19 @@ export interface ImageToImageParameters {
 	 */
 	num_inference_steps?: number;
 	/**
-	 * The size in pixel of the output image.
+	 * The text prompt to guide the image generation.
+	 */
+	prompt?: string;
+	/**
+	 * The size in pixels of the output image. This parameter is only supported by some
+	 * providers and for specific models. It will be ignored when unsupported.
 	 */
 	target_size?: TargetSize;
 	[property: string]: unknown;
 }
 /**
- * The size in pixel of the output image.
+ * The size in pixels of the output image. This parameter is only supported by some
+ * providers and for specific models. It will be ignored when unsupported.
  */
 export interface TargetSize {
 	height: number;

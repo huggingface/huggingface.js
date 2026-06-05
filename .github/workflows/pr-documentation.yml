@@ -8,7 +8,7 @@ on:
       - "packages/hub/README.md"
       - "packages/doc-internal/**"
       - "packages/inference/README.md"
-      - "packages/agents/README.md"
+      - "packages/tiny-agents/README.md"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build:
-    uses: huggingface/doc-builder/.github/workflows/build_pr_documentation.yml@main
+    uses: huggingface/doc-builder/.github/workflows/build_pr_documentation.yml@b0f9a6e3b6aa912656cbda9f74896eb721d29421 # main
     with:
       commit_sha: ${{ github.sha }}
       pr_number: ${{ github.event.number }}

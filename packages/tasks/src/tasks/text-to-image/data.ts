@@ -50,19 +50,19 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "One of the most powerful image generation models that can generate realistic outputs.",
-			id: "black-forest-labs/FLUX.1-dev",
+			id: "black-forest-labs/FLUX.1-Krea-dev",
 		},
 		{
-			description: "A powerful yet fast image generation model.",
-			id: "latent-consistency/lcm-lora-sdxl",
+			description: "A powerful image generation model.",
+			id: "Qwen/Qwen-Image",
 		},
 		{
-			description: "Text-to-image model for photorealistic generation.",
-			id: "Kwai-Kolors/Kolors",
+			description: "Powerful and fast image generation model.",
+			id: "ByteDance/SDXL-Lightning",
 		},
 		{
 			description: "A powerful text-to-image model.",
-			id: "stabilityai/stable-diffusion-3-medium-diffusers",
+			id: "ByteDance/Hyper-SD",
 		},
 	],
 	spaces: [

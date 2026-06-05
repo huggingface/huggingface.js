@@ -34,6 +34,13 @@ function toCamelCase(str: string, joiner = "") {
 		.join(joiner);
 }
 
+const OVERRIDES_TYPES_RENAME_PROPERTIES: Record<string, Record<string, string>> = {
+	ChatCompletionInputFunctionDefinition: { arguments: "parameters" },
+};
+const OVERRIDES_TYPES_OVERRIDE_PROPERTY_TYPE: Record<string, Record<string, unknown>> = {
+	ChatCompletionOutputFunctionDefinition: { arguments: { type: "string" } },
+};
+
 async function _extractAndAdapt(task: string, mainComponentName: string, type: "input" | "output" | "stream_output") {
 	console.debug(`✨ Importing`, task, type);
 
@@ -57,6 +64,17 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 				_scan(item);
 			}
 		} else if (data && typeof data === "object") {
+			/// This next section can be removed when we don't use TGI as source of types.
+			if (typeof data.title === "string" && data.title in OVERRIDES_TYPES_RENAME_PROPERTIES) {
+				const [[oldName, newName]] = Object.entries(OVERRIDES_TYPES_RENAME_PROPERTIES[data.title]);
+				data.required = JSON.parse(JSON.stringify(data.required).replaceAll(oldName, newName));
+				data.properties = JSON.parse(JSON.stringify(data.properties).replaceAll(oldName, newName));
+			}
+			if (typeof data.title === "string" && data.title in OVERRIDES_TYPES_OVERRIDE_PROPERTY_TYPE) {
+				const [[prop, newType]] = Object.entries(OVERRIDES_TYPES_OVERRIDE_PROPERTY_TYPE[data.title]);
+				(data.properties as Record<string, unknown>)[prop] = newType;
+			}
+			/// End of overrides section
 			for (const key of Object.keys(data)) {
 				if (key === "$ref" && typeof data[key] === "string") {
 					// Verify reference exists

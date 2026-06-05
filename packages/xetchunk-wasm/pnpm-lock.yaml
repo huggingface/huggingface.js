@@ -1,0 +1,20 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@huggingface/blake3-jit':
+        specifier: workspace:*
+        version: link:../blake3-jit
+      gearhash-jit:
+        specifier: workspace:*
+        version: link:../gearhash-jit
+    devDependencies:
+      '@huggingface/splitmix64-wasm':
+        specifier: workspace:*
+        version: link:../splitmix64-wasm

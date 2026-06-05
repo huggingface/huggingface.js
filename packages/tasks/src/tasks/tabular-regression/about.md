@@ -71,7 +71,6 @@ gr.Interface.load("huggingface/username/my-awesome-model").launch()
 - [Notebook: Persisting your scikit-learn model using skops](https://www.kaggle.com/code/unofficialmerve/persisting-your-scikit-learn-model-using-skops)
 
 - For starting with tabular regression:
-
   - Doing [Exploratory Data Analysis](https://neptune.ai/blog/exploratory-data-analysis-for-tabular-data) for tabular data.
     - The data considered here consists of details of Olympic athletes and medal results from Athens 1896 to Rio 2016.
     - Here you can learn more about how to explore and analyse the data and visualize them in order to get a better understanding of dataset.

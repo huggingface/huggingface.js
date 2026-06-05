@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { HfAgent, defaultTools, LLMFromHub, LLMFromEndpoint } from "../src";
 import type { Data } from "../src/types";
-import type { HfInference } from "@huggingface/inference";
+import type { InferenceClient } from "@huggingface/inference";
 
 const env = import.meta.env;
 if (!env.HF_TOKEN) {
@@ -33,7 +33,7 @@ describe("HfAgent", () => {
 				},
 			],
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			call: async (input: Promise<Data>, inference: HfInference): Promise<Data> => {
+			call: async (input: Promise<Data>, inference: InferenceClient): Promise<Data> => {
 				const data = await input;
 				if (typeof data !== "string") {
 					throw new Error("Input must be a string");

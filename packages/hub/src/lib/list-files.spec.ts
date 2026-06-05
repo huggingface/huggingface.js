@@ -6,7 +6,7 @@ describe("listFiles", () => {
 	it("should fetch the list of files from the repo", async () => {
 		const cursor = listFiles({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
@@ -37,6 +37,7 @@ describe("listFiles", () => {
 					size: 440473133,
 					pointerSize: 134,
 				},
+				xetHash: "2d8408d3a894d02517d04956e2f7546ff08362594072f3527ce144b5212a3296",
 				oid: "ba5d19791be1dd7992e33bd61f20207b0f7f50a5",
 				path: "pytorch_model.bin",
 				size: 440473133,
@@ -48,6 +49,7 @@ describe("listFiles", () => {
 					size: 536063208,
 					pointerSize: 134,
 				},
+				xetHash: "879c5715c18a0b7f051dd33f70f0a5c8dd1522e0a43f6f75520f16167f29279b",
 				oid: "9eb98c817f04b051b3bcca591bcd4e03cec88018",
 				path: "tf_model.h5",
 				size: 536063208,
@@ -65,7 +67,7 @@ describe("listFiles", () => {
 	it("should fetch the list of files from the repo, including last commit", async () => {
 		const cursor = listFiles({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
@@ -113,6 +115,7 @@ describe("listFiles", () => {
 					size: 440473133,
 					pointerSize: 134,
 				},
+				xetHash: "2d8408d3a894d02517d04956e2f7546ff08362594072f3527ce144b5212a3296",
 				oid: "ba5d19791be1dd7992e33bd61f20207b0f7f50a5",
 				path: "pytorch_model.bin",
 				size: 440473133,
@@ -129,6 +132,7 @@ describe("listFiles", () => {
 					size: 536063208,
 					pointerSize: 134,
 				},
+				xetHash: "879c5715c18a0b7f051dd33f70f0a5c8dd1522e0a43f6f75520f16167f29279b",
 				oid: "9eb98c817f04b051b3bcca591bcd4e03cec88018",
 				path: "tf_model.h5",
 				size: 536063208,

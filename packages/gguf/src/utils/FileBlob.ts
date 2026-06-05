@@ -69,7 +69,9 @@ export class FileBlob extends Blob {
 			new TypeError("Unsupported negative start/end on FileBlob.slice");
 		}
 
-		const slice = new FileBlob(this.path, this.start + start, Math.min(this.start + end, this.end));
+		const newStart = Math.min(this.start + start, this.end);
+		const newEnd = Math.min(this.start + end, this.end);
+		const slice = new FileBlob(this.path, newStart, newEnd);
 
 		return slice;
 	}

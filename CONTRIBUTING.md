@@ -8,7 +8,7 @@ We use `pnpm` as our package manager. You need to use it, eg `pnpm install` inst
 
 If you want to format the whole codebase, you can do `pnpm -r format` at the root.
 
-Other than that, we avoid runtime dependencies unless they're strictly needed. For example, our only dependency is `hash-wasm`, and it's only in the browser context and when uploaded files are > 10MB.
+Other than that, we avoid runtime dependencies unless they're strictly needed. Even then, we prefer vendoring the code.
 
 ## Pull requests
 
@@ -18,7 +18,9 @@ It's not a hard requirement, but please consider using an icon from [Gitmoji](ht
 
 ## Tests
 
-If you want to run only specific tests, you can do `pnpm test -- -t "test name"`
+If you want to run only specific tests, you can do `pnpm test -- -t "test name"`.
+
+You can also do `pnpm --filter hub test ./src/utils/XetBlob.spec.ts` to run a specific test file.
 
 ## Adding a package
 

@@ -208,12 +208,40 @@
 							"type": "string"
 						}
 					}
+				},
+				{
+					"type": "object",
+					"required": ["type", "value"],
+					"properties": {
+						"type": {
+							"type": "string",
+							"enum": ["json_schema"]
+						},
+						"value": {
+							"$ref": "#/$defs/TextGenerationInputJsonSchemaConfig"
+						}
+					}
 				}
 			],
 			"discriminator": {
 				"propertyName": "type"
 			},
 			"title": "TextGenerationInputGrammarType"
+		},
+		"TextGenerationInputJsonSchemaConfig": {
+			"type": "object",
+			"required": ["schema"],
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "Optional name identifier for the schema",
+					"nullable": true
+				},
+				"schema": {
+					"description": "The actual JSON schema definition"
+				}
+			},
+			"title": "TextGenerationInputJsonSchemaConfig"
 		}
 	}
 }

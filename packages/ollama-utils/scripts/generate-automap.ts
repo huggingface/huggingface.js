@@ -46,7 +46,9 @@ const getSpecialTokens = (tmpl: string): string[] => {
 };
 
 (async () => {
-	if (DEBUG) writeFileSync("ollama_tmp.jsonl", ""); // clear the file
+	if (DEBUG) {
+		writeFileSync("ollama_tmp.jsonl", "");
+	} // clear the file
 
 	const models: string[] = [];
 	const output: OutputItem[] = [];
@@ -69,7 +71,9 @@ const getSpecialTokens = (tmpl: string): string[] => {
 	const workerGetTags = async () => {
 		while (true) {
 			const model = models.shift();
-			if (!model) return;
+			if (!model) {
+				return;
+			}
 			nDoing++;
 			console.log(`Getting tags ${nDoing} / ${nAll}`);
 			const html = await (await fetch(`https://ollama.com/${model}`)).text();
@@ -88,7 +92,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 	await Promise.all(
 		Array(N_WORKERS)
 			.fill(null)
-			.map(() => workerGetTags())
+			.map(() => workerGetTags()),
 	);
 	console.log({ modelsWithTag });
 
@@ -113,7 +117,9 @@ const getSpecialTokens = (tmpl: string): string[] => {
 	const workerGetTemplate = async () => {
 		while (true) {
 			const modelWithTag = modelsWithTag.shift();
-			if (!modelWithTag) return;
+			if (!modelWithTag) {
+				return;
+			}
 
 			nDoing++;
 			const [model, tag] = modelWithTag.split(":");
@@ -155,7 +161,9 @@ const getSpecialTokens = (tmpl: string): string[] => {
 					seenGGUFTemplate.add(ggufTmpl);
 					console.log(" --> GGUF chat template OK");
 					const tmplBlob = manifest.layers.find((l) => l.mediaType.match(/\.template/));
-					if (!tmplBlob) continue;
+					if (!tmplBlob) {
+						continue;
+					}
 					const ollamaTmplUrl = getBlobUrl(tmplBlob.digest);
 					if (!ollamaTmplUrl) {
 						console.log(" --> [X] No ollama template");
@@ -180,7 +188,9 @@ const getSpecialTokens = (tmpl: string): string[] => {
 					}
 					output.push(record);
 					addedModels.push(modelWithTag);
-					if (DEBUG) appendFileSync("ollama_tmp.jsonl", JSON.stringify(record) + "\n");
+					if (DEBUG) {
+						appendFileSync("ollama_tmp.jsonl", JSON.stringify(record) + "\n");
+					}
 				} catch (e) {
 					console.log(` --> [X] Skipping ${modelWithTag} due to error`, e);
 					skippedModelsDueToErr.push(modelWithTag);
@@ -198,7 +208,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 	await Promise.all(
 		Array(N_WORKERS)
 			.fill(null)
-			.map(() => workerGetTemplate())
+			.map(() => workerGetTemplate()),
 	);
 
 	console.log("====================================");
@@ -216,7 +226,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 // This file is auto generated, please do not modify manually
 // To update it, run "pnpm run build:automap"
 
-import { OllamaChatTemplateMapEntry } from "./types";
+import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
@@ -224,6 +234,6 @@ ${skippedModelsDueToErr.map((m) => ` * - ${m}`).join("\n")}
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = ${JSON.stringify(output, null, "\t")};
-  `.trim()
+  `.trim(),
 	);
 })();

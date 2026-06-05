@@ -1,18 +1,16 @@
 # Ownership for the Inference Package
 
-/packages/inference/ @julien-c @hanouticelina @SBrandeis @coyotte508
+/packages/inference/ @julien-c @hanouticelina @SBrandeis
 
 # Ownership for the Tasks Package
 
 /packages/tasks/ @SBrandeis @gary149 @Wauplin @julien-c @pcuenca @ngxson
+/packages/tasks/src/eval.ts @krampstudio @NathanHB @gary149 @julien-c @pcuenca
+/packages/tasks/src/agent-harnesses.ts @Wauplin @hanouticelina @davanstrien @gary149 @julien-c @pcuenca
 
 # Ownership for the Hub Package
 
 /packages/hub/ @coyotte508
-
-# Ownership for the Agents Package
-
-/packages/agents/ @nsarrazin
 
 # Ownership for the Jinja Package
 

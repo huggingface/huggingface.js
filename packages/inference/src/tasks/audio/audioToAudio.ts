@@ -1,8 +1,9 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import type { LegacyAudioInput } from "./utils";
-import { preparePayload } from "./utils";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import type { LegacyAudioInput } from "./utils.js";
+import { preparePayload } from "./utils.js";
 
 export type AudioToAudioArgs =
 	| (BaseArgs & {
@@ -36,34 +37,13 @@ export interface AudioToAudioOutput {
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
+	const model = "inputs" in args ? args.model : undefined;
+	const provider = await resolveProvider(args.provider, model);
+	const providerHelper = getProviderHelper(provider, "audio-to-audio");
 	const payload = preparePayload(args);
-	const res = await request<AudioToAudioOutput>(payload, {
+	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, providerHelper, {
 		...options,
 		task: "audio-to-audio",
 	});
-
-	return validateOutput(res);
-}
-
-function validateOutput(output: unknown): AudioToAudioOutput[] {
-	if (!Array.isArray(output)) {
-		throw new InferenceOutputError("Expected Array");
-	}
-	if (
-		!output.every((elem): elem is AudioToAudioOutput => {
-			return (
-				typeof elem === "object" &&
-				elem &&
-				"label" in elem &&
-				typeof elem.label === "string" &&
-				"content-type" in elem &&
-				typeof elem["content-type"] === "string" &&
-				"blob" in elem &&
-				typeof elem.blob === "string"
-			);
-		})
-	) {
-		throw new InferenceOutputError("Expected Array<{label: string, audio: Blob}>");
-	}
-	return output;
+	return providerHelper.getResponse(res);
 }

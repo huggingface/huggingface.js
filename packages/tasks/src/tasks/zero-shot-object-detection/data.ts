@@ -40,17 +40,17 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "Solid zero-shot object detection model.",
-			id: "IDEA-Research/grounding-dino-base",
+			id: "openmmlab-community/mm_grounding_dino_large_all",
 		},
 		{
 			description: "Cutting-edge zero-shot object detection model.",
-			id: "google/owlv2-base-patch16-ensemble",
+			id: "fushh7/LLMDet",
 		},
 	],
 	spaces: [
 		{
-			description: "A demo to try the state-of-the-art zero-shot object detection model, OWLv2.",
-			id: "merve/owlv2",
+			description: "A demo to compare different zero-shot object detection models per output and latency.",
+			id: "ariG23498/zero-shot-od",
 		},
 		{
 			description:

@@ -190,7 +190,7 @@ const MAPPING_FR: PerLanguageMapping = new Map([
 	[
 		"summarization",
 		[
-			`La tour fait 324 mètres (1,063 pieds) de haut, environ la même hauteur qu'un immeuble de 81 étages, et est la plus haute structure de Paris. Sa base est carrée, mesurant 125 mètres (410 pieds) sur chaque côté. Durant sa construction, la tour Eiffel surpassa le Washington Monument pour devenir la plus haute structure construite par l'homme dans le monde, un titre qu'elle conserva pendant 41 ans jusqu'à l'achèvement du Chrysler Building à New-York City en 1930. Ce fut la première structure à atteindre une hauteur de 300 mètres. Avec l'ajout d'une antenne de radiodiffusion au sommet de la tour Eiffel en 1957, celle-ci redevint plus haute que le Chrysler Building de 5,2 mètres (17 pieds). En excluant les transmetteurs, elle est la seconde plus haute stucture autoportante de France après le viaduc de Millau.`,
+			`La tour fait 324 mètres (1,063 pieds) de haut, environ la même hauteur qu'un immeuble de 81 étages, et est la plus haute structure de Paris. Sa base est carrée, mesurant 125 mètres (410 pieds) sur chaque côté. Durant sa construction, la tour Eiffel surpassa le Washington Monument pour devenir la plus haute structure construite par l'homme dans le monde, un titre qu'elle conserva pendant 41 ans jusqu'à l'achèvement du Chrysler Building à New-York City en 1930. Ce fut la première structure à atteindre une hauteur de 300 mètres. Avec l'ajout d'une antenne de radiodiffusion au sommet de la tour Eiffel en 1957, celle-ci redevint plus haute que le Chrysler Building de 5,2 mètres (17 pieds). En excluant les transmetteurs, elle est la seconde plus haute structure autoportante de France après le viaduc de Millau.`,
 		],
 	],
 	["text-generation", [`Mon nom est Julien et j'aime`, `Mon nom est Thomas et mon principal`, `Il était une fois`]],
@@ -642,11 +642,7 @@ const MAPPING_DV: PerLanguageMapping = new Map([
 	["text-classification", [`އަހަރެން ގަޔާވޭ. އަހަރެން ލޯބިވޭ`]],
 	[
 		"token-classification",
-		[
-			`އަހަރެންގެ ނަމަކީ އަހުމަދު އަދި އަހަރެން ދިރިއުޅެނީ މާލޭގަ`,
-			`އަހަރެންގެ ނަމަކީ ސާރާ އަދި އަހަރެން ދިރިއުޅެނީ އުތީމުގަ`,
-			`އަހަރެންގެ ނަމަކީ އައިޝާ އަދި އަހަރެން ދިރިއުޅެނީ ފޭދޫ، އައްޑޫގަ`,
-		],
+		[`އަހަރެންގެ ނަމަކީ އަހުމަދު އަދި އަހަރެން ދިރިއުޅެނީ މާލޭގަ`, `އަހަރެންގެ ނަމަކީ ސާރާ އަދި އަހަރެން ދިރިއުޅެނީ އުތީމުގަ`, `އަހަރެންގެ ނަމަކީ އައިޝާ އަދި އަހަރެން ދިރިއުޅެނީ ފޭދޫ، އައްޑޫގަ`],
 	],
 	[
 		"question-answering",
@@ -669,13 +665,7 @@ const MAPPING_DV: PerLanguageMapping = new Map([
 			},
 		],
 	],
-	[
-		"translation",
-		[
-			`އަހަރެންގެ ނަމަކީ އަހުމަދު އަދި އަހަރެން ދިރިއުޅެނީ މާލޭގަ`,
-			`އަހަރެންގެ ނަމަކީ ސާރާ އަދި އަހަރެން ދިރިއުޅެނީ އުތީމުގަ`,
-		],
-	],
+	["translation", [`އަހަރެންގެ ނަމަކީ އަހުމަދު އަދި އަހަރެން ދިރިއުޅެނީ މާލޭގަ`, `އަހަރެންގެ ނަމަކީ ސާރާ އަދި އަހަރެން ދިރިއުޅެނީ އުތީމުގަ`]],
 	[
 		"summarization",
 		[
@@ -684,12 +674,7 @@ const MAPPING_DV: PerLanguageMapping = new Map([
 	],
 	[
 		"text-generation",
-		[
-			`އަހަރެންގެ ނަމަކީ ޔޫސުފް އަދި އަހަރެންގެ މައިގަނޑު`,
-			`އަހަރެންގެ ނަމަކީ މަރިއަމް، އަހަރެން އެންމެ ގަޔާވާ`,
-			`އަހަރެންގެ ނަމަކީ ފާތުމަތު އަދި އަހަރެން`,
-			`،އެއް ޒަމާނެއްގައި`,
-		],
+		[`އަހަރެންގެ ނަމަކީ ޔޫސުފް އަދި އަހަރެންގެ މައިގަނޑު`, `އަހަރެންގެ ނަމަކީ މަރިއަމް، އަހަރެން އެންމެ ގަޔާވާ`, `އަހަރެންގެ ނަމަކީ ފާތުމަތު އަދި އަހަރެން`, `،އެއް ޒަމާނެއްގައި`],
 	],
 	["fill-mask", [`.<mask> މާލެ އަކީ ދިވެހިރާއްޖޭގެ`, `ގަރުދިޔައަކީ ދިވެހިންގެ މެދުގައި <mask> ކެއުމެއް.`]],
 ]);

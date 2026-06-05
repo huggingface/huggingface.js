@@ -63,20 +63,20 @@ const taskData: TaskDataCustom = {
 	models: [
 		{ description: "A text-generation model trained to follow instructions.", id: "google/gemma-2-2b-it" },
 		{
-			description: "Smaller variant of one of the most powerful models.",
-			id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+			description: "Powerful text generation model for coding.",
+			id: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
 		},
 		{
-			description: "Very powerful text generation model trained to follow instructions.",
-			id: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+			description: "Great text generation model with top-notch tool calling capabilities.",
+			id: "openai/gpt-oss-120b",
 		},
 		{
-			description: "Powerful text generation model by Microsoft.",
-			id: "microsoft/phi-4",
+			description: "Powerful text generation model.",
+			id: "zai-org/GLM-4.5",
 		},
 		{
-			description: "A very powerful model with reasoning capabilities.",
-			id: "simplescaling/s1.1-32B",
+			description: "A powerful small model with reasoning capabilities.",
+			id: "Qwen/Qwen3-4B-Thinking-2507",
 		},
 		{
 			description: "Strong conversational model that supports very long instructions.",
@@ -93,8 +93,12 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "A leaderboard to compare different open-source text generation models based on various benchmarks.",
-			id: "open-llm-leaderboard/open_llm_leaderboard",
+			description: "An application that writes and executes code from text instructions and supports many models.",
+			id: "akhaliq/anycoder",
+		},
+		{
+			description: "An application that builds websites from natural language prompts.",
+			id: "enzostvs/deepsite",
 		},
 		{
 			description: "A leaderboard for comparing chain-of-thought performance of models.",

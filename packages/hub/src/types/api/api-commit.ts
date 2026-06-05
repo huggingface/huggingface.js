@@ -1,7 +1,7 @@
 export interface ApiLfsBatchRequest {
 	/// github.com/git-lfs/git-lfs/blob/master/docs/api/batch.md
 	operation: "download" | "upload";
-	transfers?: string[];
+	transfers?: Array<ApiLfsResponseTransfer>;
 	/**
 	 * Optional object describing the server ref that the objects belong to. Note: Added in v2.4.
 	 *
@@ -29,7 +29,7 @@ export interface ApiLfsBatchResponse {
 	objects: ApiLfsResponseObject[];
 }
 
-export type ApiLfsResponseTransfer = "basic" | "multipart";
+export type ApiLfsResponseTransfer = "basic" | "multipart" | "xet";
 
 export interface ApiLfsCompleteMultipartRequest {
 	oid: string;
@@ -123,6 +123,19 @@ export interface ApiPreuploadRequest {
 		 * Base64-encoded sample of the first 512 bytes of the file
 		 */
 		sample: string;
+	}>;
+}
+export interface ApiBucketBatchResponse {
+	/** True if all files were successfully added */
+	success: boolean;
+	/** Total number of operations attempted */
+	processed: number;
+	/** Number of successful operations */
+	succeeded: number;
+	/** List of failed operations */
+	failed: Array<{
+		path: string;
+		error: string;
 	}>;
 }
 

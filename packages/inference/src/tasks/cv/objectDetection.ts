@@ -1,8 +1,9 @@
-import { request } from "../custom/request";
-import type { BaseArgs, Options } from "../../types";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { ObjectDetectionInput, ObjectDetectionOutput } from "@huggingface/tasks";
-import { preparePayload, type LegacyImageInput } from "./utils";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import { preparePayload, type LegacyImageInput } from "./utils.js";
 
 export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImageInput);
 
@@ -11,26 +12,12 @@ export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImage
  * Recommended model: facebook/detr-resnet-50
  */
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "object-detection");
 	const payload = preparePayload(args);
-	const res = await request<ObjectDetectionOutput>(payload, {
+	const { data: res } = await innerRequest<ObjectDetectionOutput>(payload, providerHelper, {
 		...options,
 		task: "object-detection",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) =>
-				typeof x.label === "string" &&
-				typeof x.score === "number" &&
-				typeof x.box.xmin === "number" &&
-				typeof x.box.ymin === "number" &&
-				typeof x.box.xmax === "number" &&
-				typeof x.box.ymax === "number"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError(
-			"Expected Array<{label:string; score:number; box:{xmin:number; ymin:number; xmax:number; ymax:number}}>"
-		);
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

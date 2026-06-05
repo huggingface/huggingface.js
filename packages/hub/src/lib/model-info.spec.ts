@@ -56,4 +56,30 @@ describe("modelInfo", () => {
 			sha: "f27b190eeac4c2302d24068eabf5e9d6044389ae",
 		});
 	});
+
+	it("should return model info with filePaths", async () => {
+		const info = await modelInfo({
+			name: "huggingfacejs/test-model",
+			additionalFields: ["filePaths"],
+		});
+		expect(info.filePaths).to.be.an("array");
+		expect(info.filePaths).to.include(".gitattributes");
+		expect(info.filePaths).to.include("README.md");
+	});
+
+	it("should return model info deepseek-ai models with inference provider mapping", async () => {
+		const info = await modelInfo({
+			name: "deepseek-ai/DeepSeek-R1-0528",
+			additionalFields: ["inferenceProviderMapping"],
+		});
+
+		expect(info.inferenceProviderMapping).toBeDefined();
+		expect(info.inferenceProviderMapping).toBeInstanceOf(Array);
+		expect(info.inferenceProviderMapping?.length).toBeGreaterThan(0);
+		info.inferenceProviderMapping?.forEach((item) => {
+			expect(item).toHaveProperty("provider");
+			expect(item).toHaveProperty("hfModelId", "deepseek-ai/DeepSeek-R1-0528");
+			expect(item).toHaveProperty("providerId");
+		});
+	});
 });

@@ -1,0 +1,5 @@
+# audio is returned as bytes
+audio = client.text_to_speech(
+    {{ inputs.asObj.inputs }},
+    model="{{ model.id }}",
+) 
