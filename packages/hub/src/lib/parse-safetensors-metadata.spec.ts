@@ -4,6 +4,7 @@ import {
 	parseSafetensorsShardFilename,
 	globMatch,
 	isQuantizedTensor,
+	matchesCompressedTensorsTarget,
 } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
@@ -417,6 +418,46 @@ describe("parseSafetensorsMetadata", () => {
 			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", config), false);
 			assert.strictEqual(isQuantizedTensor("model.embed_tokens.weight", config), false);
 			assert.strictEqual(isQuantizedTensor("model.layers.0.self_attn.q_proj.weight", config), true);
+		});
+	});
+
+	describe("matchesCompressedTensorsTarget", () => {
+		it("exact module name match", () => {
+			assert.strictEqual(
+				matchesCompressedTensorsTarget("model.language_model.embed_tokens", "model.language_model.embed_tokens"),
+				true,
+			);
+			assert.strictEqual(
+				matchesCompressedTensorsTarget(
+					"model.language_model.embed_tokens",
+					"model.language_model.embed_tokens_per_layer",
+				),
+				false,
+			);
+		});
+
+		it("class-name targets do not match module names", () => {
+			assert.strictEqual(matchesCompressedTensorsTarget("Linear", "model.layers.0.mlp.down_proj"), false);
+		});
+
+		it("re: targets with .* wildcard and $ anchor", () => {
+			assert.strictEqual(matchesCompressedTensorsTarget("re:.*lm_head$", "model.lm_head"), true);
+			assert.strictEqual(matchesCompressedTensorsTarget("re:.*lm_head$", "model.lm_head.weight"), false);
+			assert.strictEqual(matchesCompressedTensorsTarget("re:.*lm_head$", "lm_head"), true);
+		});
+
+		it("re: targets are anchored at the start, open-ended without $", () => {
+			assert.strictEqual(matchesCompressedTensorsTarget("re:model\\.layers.*", "model.layers.0.mlp.gate_proj"), true);
+			assert.strictEqual(matchesCompressedTensorsTarget("re:model\\.layers.*", "lm.model.layers.0"), false);
+			assert.strictEqual(matchesCompressedTensorsTarget("re:^model\\.layers.*", "model.layers.0"), true);
+		});
+
+		it("re: targets with unsupported regex syntax never match", () => {
+			assert.strictEqual(
+				matchesCompressedTensorsTarget("re:.*mlp\\.(gate|up)_proj.*", "model.layers.0.mlp.gate_proj"),
+				false,
+			);
+			assert.strictEqual(matchesCompressedTensorsTarget("re:(a+)+$", "aaaaaaaaaaaaaaaaaaaaab"), false);
 		});
 	});
 
