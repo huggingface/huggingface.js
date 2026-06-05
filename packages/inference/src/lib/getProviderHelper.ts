@@ -1,7 +1,7 @@
 import * as Baseten from "../providers/baseten.js";
-import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
+import * as Clarifai from "../providers/clarifai.js";
 import * as Cohere from "../providers/cohere.js";
 import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
@@ -55,6 +55,7 @@ import type {
 import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
+import * as Telnyx from "../providers/telnyx.js";
 import * as Together from "../providers/together.js";
 import * as Wavespeed from "../providers/wavespeed.js";
 import * as Zai from "../providers/zai-org.js";
@@ -181,6 +182,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Scaleway.ScalewayConversationalTask(),
 		"text-generation": new Scaleway.ScalewayTextGenerationTask(),
 		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
+	},
+	telnyx: {
+		conversational: new Telnyx.TelnyxConversationalTask(),
 	},
 	together: {
 		"text-to-image": new Together.TogetherTextToImageTask(),
