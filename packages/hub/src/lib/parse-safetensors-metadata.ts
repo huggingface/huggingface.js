@@ -1,4 +1,6 @@
+import { HUB_URL } from "../consts";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
+import { checkCredentials } from "../utils/checkCredentials";
 import { omit } from "../utils/omit";
 import { toRepoId } from "../utils/toRepoId";
 import { typedEntries } from "../utils/typedEntries";
@@ -178,6 +180,117 @@ async function parseSingleFile(
 	}
 }
 
+/**
+ * Build the same `resolve` URL `fileDownloadInfo` would request, so we can hit
+ * it directly with a Range request and skip the metadata round-trip when we
+ * only need the safetensors header.
+ */
+function buildResolveUrl(
+	repo: RepoDesignation,
+	path: string,
+	hubUrl: string | undefined,
+	revision: string | undefined,
+): string {
+	const repoId = toRepoId(repo);
+	const base = hubUrl ?? HUB_URL;
+	const rev = repoId.type === "bucket" ? undefined : (revision ?? "main");
+	return `${base}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/resolve${rev ? `/${encodeURIComponent(rev)}` : ""}/${path}`;
+}
+
+/**
+ * Fetch a safetensors header in 2 HTTP requests instead of 3.
+ *
+ * The slow path (`parseSingleFile`) goes through `downloadFile`, which calls
+ * `fileDownloadInfo` (a `Range: bytes=0-0` probe to learn size + etag + xet
+ * info) and then `WebBlob.slice().arrayBuffer()` twice (8-byte length, then
+ * header body). Three round-trips per shard becomes prohibitive on heavily
+ * sharded models (Kimi-K2.5: 64 shards × 3 = 192 requests;
+ * DeepSeek-Math-V2: 163 shards × 3 = 489 requests, fails 100% in benches).
+ *
+ * The fast path issues two direct range requests against the resolve URL:
+ *   - bytes 0..7      → 8-byte little-endian header length
+ *   - bytes 8..8+N-1  → JSON header body
+ *
+ * We reject any non-206 response: a 200 means the server ignored the Range
+ * header and is about to stream a multi-GB shard body into memory. Failing
+ * loudly here is safer than silently buffering 100+ GB.
+ */
+async function parseSingleFileFast(
+	path: string,
+	params: {
+		repo: RepoDesignation;
+		revision?: string;
+		hubUrl?: string;
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>,
+): Promise<SafetensorsFileHeader> {
+	const accessToken = checkCredentials(params);
+	const url = buildResolveUrl(params.repo, path, params.hubUrl, params.revision);
+	const customFetch = params.fetch ?? fetch;
+	const baseHeaders: Record<string, string> = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+
+	// Request #1: 8-byte little-endian header length.
+	const lenResp = await customFetch(url, {
+		method: "GET",
+		headers: { ...baseHeaders, Range: "bytes=0-7" },
+	});
+
+	if (lenResp.status === 404) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: not found.`);
+	}
+	if (lenResp.status !== 206) {
+		// 200 here means the server is sending the entire (multi-GB) shard body.
+		// Drain and discard rather than buffering it.
+		try {
+			await lenResp.body?.cancel();
+		} catch {
+			// ignore
+		}
+		throw new SafetensorParseError(
+			`Failed to parse file ${path}: server did not honor Range request (status ${lenResp.status}).`,
+		);
+	}
+
+	const lenBuf = await lenResp.arrayBuffer();
+	if (lenBuf.byteLength < 8) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: expected 8 bytes of header length, got ${lenBuf.byteLength}.`);
+	}
+	const lengthOfHeader = new DataView(lenBuf).getBigUint64(0, true);
+	if (lengthOfHeader <= 0n) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
+	}
+	if (lengthOfHeader > BigInt(MAX_HEADER_LENGTH)) {
+		throw new SafetensorParseError(
+			`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`,
+		);
+	}
+
+	// Request #2: JSON header body.
+	const endByte = 8 + Number(lengthOfHeader) - 1;
+	const headerResp = await customFetch(url, {
+		method: "GET",
+		headers: { ...baseHeaders, Range: `bytes=8-${endByte}` },
+	});
+
+	if (headerResp.status !== 206) {
+		try {
+			await headerResp.body?.cancel();
+		} catch {
+			// ignore
+		}
+		throw new SafetensorParseError(
+			`Failed to parse file ${path}: server did not honor Range request for header bytes (status ${headerResp.status}).`,
+		);
+	}
+
+	try {
+		const headerText = await headerResp.text();
+		return JSON.parse(headerText) as SafetensorsFileHeader;
+	} catch {
+		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
+	}
+}
+
 async function parseShardedIndex(
 	path: string,
 	params: {
@@ -237,7 +350,7 @@ async function fetchAllHeaders(
 		await promisesQueue(
 			filenames.map(
 				(filename) => async () =>
-					[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader],
+					[filename, await parseSingleFileFast(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader],
 			),
 			PARALLEL_DOWNLOADS,
 		),
