@@ -1412,6 +1412,67 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
+		"Inceptron",
+		() => {
+			const client = new InferenceClient(env.HF_INCEPTRON_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING.inceptron = {
+				"meta-llama/Llama-3.3-70B-Instruct": {
+					provider: "inceptron",
+					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
+					providerId: "meta-llama/Llama-3.3-70B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.3-70B-Instruct",
+					provider: "inceptron",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toMatch(/(two|2)/i);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.3-70B-Instruct",
+					provider: "inceptron",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toMatch(/(two|2)/i);
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "meta-llama/Llama-3.3-70B-Instruct",
+					provider: "inceptron",
+					inputs: "Once upon a time,",
+					parameters: {
+						temperature: 0,
+						max_new_tokens: 20,
+					},
+				});
+
+				expect(res).toHaveProperty("generated_text");
+				expect(typeof res.generated_text).toBe("string");
+				expect(res.generated_text.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
 		"Nebius",
 		() => {
 			const client = new InferenceClient(env.HF_NEBIUS_KEY ?? "dummy");
