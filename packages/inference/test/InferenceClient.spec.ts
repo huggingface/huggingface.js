@@ -1194,6 +1194,13 @@ describe.skip("InferenceClient", () => {
 		"Replicate",
 		() => {
 			const client = new InferenceClient(env.HF_REPLICATE_KEY ?? "dummy");
+			HARDCODED_MODEL_INFERENCE_MAPPING["replicate"]["Wan-AI/Wan2.1-I2V-14B-720P"] = {
+				provider: "replicate",
+				hfModelId: "Wan-AI/Wan2.1-I2V-14B-720P",
+				providerId: "wavespeedai/wan-2.1-i2v-720p",
+				status: "live",
+				task: "image-to-video",
+			};
 
 			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
 				const res = await client.textToImage({
@@ -1306,6 +1313,18 @@ describe.skip("InferenceClient", () => {
 					inputs: new Blob([readTestFile("stormtrooper_depth.png")], { type: "image/png" }),
 					parameters: {
 						prompt: "Change the stormtrooper armor to golden color while keeping the same pose and helmet design",
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("imageToVideo - Wan 2.1 I2V", async () => {
+				const res = await client.imageToVideo({
+					model: "Wan-AI/Wan2.1-I2V-14B-720P",
+					provider: "replicate",
+					inputs: new Blob([readTestFile("stormtrooper_depth.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "A stormtrooper standing still while cinematic light moves across the armor",
 					},
 				});
 				expect(res).toBeInstanceOf(Blob);
