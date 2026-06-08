@@ -250,6 +250,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	chexmix: {
+		prettyLabel: "CheXmix",
+		repoName: "CheXmix",
+		repoUrl: "https://github.com/StanfordMIMI/CheXmix",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"chronos-forecasting": {
 		prettyLabel: "Chronos",
 		repoName: "Chronos",
