@@ -69,6 +69,7 @@ Currently, we support the following providers:
 - [Cerebras](https://cerebras.ai/)
 - [DeepInfra](https://deepinfra.com)
 - [Groq](https://groq.com)
+- [Venice.ai](https://venice.ai)
 - [Wavespeed.ai](https://wavespeed.ai/)
 - [Z.ai](https://z.ai/)
 
@@ -110,6 +111,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
 - [Groq supported models](https://console.groq.com/docs/models)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
+- [Venice.ai supported models](https://huggingface.co/api/partners/venice-ai/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
 - [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
 

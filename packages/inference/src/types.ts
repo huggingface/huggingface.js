@@ -68,6 +68,7 @@ export const INFERENCE_PROVIDERS = [
 	"sambanova",
 	"scaleway",
 	"together",
+	"venice-ai",
 	"wavespeed",
 	"zai-org",
 ] as const;
@@ -107,6 +108,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	sambanova: "sambanovasystems",
 	scaleway: "scaleway",
 	together: "togethercomputer",
+	"venice-ai": "venice-ai",
 	wavespeed: "wavespeed",
 	"zai-org": "zai-org",
 };

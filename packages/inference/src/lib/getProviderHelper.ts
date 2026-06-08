@@ -56,6 +56,7 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
+import * as VeniceAI from "../providers/venice-ai.js";
 import * as Wavespeed from "../providers/wavespeed.js";
 import * as Zai from "../providers/zai-org.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
@@ -192,6 +193,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"feature-extraction": new Together.TogetherFeatureExtractionTask(),
 		"text-to-speech": new Together.TogetherTextToSpeechTask(),
 		"automatic-speech-recognition": new Together.TogetherAutomaticSpeechRecognitionTask(),
+	},
+	"venice-ai": {
+		conversational: new VeniceAI.VeniceAIConversationalTask(),
 	},
 	wavespeed: {
 		"text-to-image": new Wavespeed.WavespeedAITextToImageTask(),
