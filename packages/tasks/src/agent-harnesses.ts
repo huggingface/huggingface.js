@@ -104,20 +104,6 @@ export const AGENT_HARNESSES = {
 		// `CrushEnvMarkers()` unconditionally sets `CRUSH=1` (plus `AGENT=crush`/`AI_AGENT=crush`) on every spawned shell.
 		envVars: { CRUSH: "*" },
 	},
-	"cursor-cli": {
-		// must stay before `cursor` so the more specific signal takes priority: when the CLI runs inside
-		// the Cursor editor's terminal, child processes inherit `CURSOR_TRACE_ID` and the CLI sets `CURSOR_AGENT`.
-		prettyLabel: "Cursor CLI",
-		docsUrl: "https://cursor.com/docs/cli/overview",
-		description: "Cursor's coding agent for the command line.",
-		envVars: { CURSOR_AGENT: "*" },
-	},
-	cursor: {
-		prettyLabel: "Cursor",
-		docsUrl: "https://cursor.com",
-		description: "AI-powered code editor.",
-		envVars: { CURSOR_TRACE_ID: "*" },
-	},
 	"gemini-cli": {
 		prettyLabel: "Gemini CLI",
 		repoUrl: "https://github.com/google-gemini/gemini-cli",
@@ -202,6 +188,21 @@ export const AGENT_HARNESSES = {
 		description: "High-performance code editor with an integrated AI agent panel and terminal.",
 		// `insert_zed_terminal_env()` sets `ZED_TERM=true` (and `TERM_PROGRAM=zed`) on the integrated terminal.
 		envVars: { ZED_TERM: "*" },
+	},
+	"cursor-cli": {
+		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
+		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
+		// the agent's own marker. `cursor-cli` is the more specific Cursor signal (`CURSOR_AGENT`), so it comes first.
+		prettyLabel: "Cursor CLI",
+		docsUrl: "https://cursor.com/docs/cli/overview",
+		description: "Cursor's coding agent for the command line.",
+		envVars: { CURSOR_AGENT: "*" },
+	},
+	cursor: {
+		prettyLabel: "Cursor",
+		docsUrl: "https://cursor.com",
+		description: "AI-powered code editor.",
+		envVars: { CURSOR_TRACE_ID: "*" },
 	},
 	devin: {
 		prettyLabel: "Devin",
