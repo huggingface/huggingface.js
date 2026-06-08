@@ -55,14 +55,6 @@ export const STANDARD_AGENT_ENV_VARS = ["AI_AGENT", "AGENT"] as const;
  * `CLAUDE_CODE` and `CLAUDE_CODE_IS_COWORK` are set.
  */
 export const AGENT_HARNESSES = {
-	"amazon-q-cli": {
-		prettyLabel: "Amazon Q Developer CLI",
-		repoUrl: "https://github.com/aws/amazon-q-developer-cli",
-		docsUrl: "https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line.html",
-		description: "AWS's agentic AI assistant for the command line.",
-		// Injected into every shell command via `env_vars_with_user_agent()` as `AWS_EXECUTION_ENV=AmazonQ-For-CLI Version/<ver>`.
-		envVars: { AWS_EXECUTION_ENV: "AmazonQ-For-CLI*" },
-	},
 	antigravity: {
 		prettyLabel: "Antigravity",
 		docsUrl: "https://antigravity.google",
@@ -188,14 +180,6 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://replit.com",
 		description: "Cloud development environment with an AI coding agent.",
 		envVars: { REPL_ID: "*" },
-	},
-	"roo-code": {
-		prettyLabel: "Roo Code",
-		repoUrl: "https://github.com/RooCodeInc/Roo-Code",
-		docsUrl: "https://docs.roocode.com",
-		description: "Open-source autonomous AI coding agent for VS Code.",
-		// `Terminal.getEnv()` sets `ROO_ACTIVE=true` on every command the agent runs through its terminal.
-		envVars: { ROO_ACTIVE: "*" },
 	},
 	trae: {
 		prettyLabel: "Trae",
