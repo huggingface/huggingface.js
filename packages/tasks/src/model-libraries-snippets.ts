@@ -58,6 +58,24 @@ export const asteroid = (model: ModelData): string[] => [
 model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
+export const hailo = (model: ModelData): string[] => [
+	`# Hailo HEFs are compiled INT8 binaries for the Hailo-8 / Hailo-15 accelerators.
+# Install hailort + the Python bindings (aarch64 wheel) from
+# https://hailo.ai/developer-zone/.
+from huggingface_hub import hf_hub_download
+from hailo_platform import HEF, VDevice
+
+hef_path = hf_hub_download("${model.id}", "model.hef")  # replace with the actual filename
+hef = HEF(hef_path)
+
+with VDevice() as target:
+    infer_model = target.create_infer_model(hef_path)
+    with infer_model.configure() as configured:
+        # Allocate input/output buffers per configured.input_vstreams_params /
+        # output_vstreams_params, then run inference.
+        ...`,
+];
+
 export const audioseal = (model: ModelData): string[] => {
 	const watermarkSnippet = `# Watermark Generator
 from audioseal import AudioSeal
