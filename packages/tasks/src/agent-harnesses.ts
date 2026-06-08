@@ -55,6 +55,14 @@ export const STANDARD_AGENT_ENV_VARS = ["AI_AGENT", "AGENT"] as const;
  * `CLAUDE_CODE` and `CLAUDE_CODE_IS_COWORK` are set.
  */
 export const AGENT_HARNESSES = {
+	"amazon-q-cli": {
+		prettyLabel: "Amazon Q Developer CLI",
+		repoUrl: "https://github.com/aws/amazon-q-developer-cli",
+		docsUrl: "https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line.html",
+		description: "AWS's agentic AI assistant for the command line.",
+		// Injected into every shell command via `env_vars_with_user_agent()` as `AWS_EXECUTION_ENV=AmazonQ-For-CLI Version/<ver>`.
+		envVars: { AWS_EXECUTION_ENV: "AmazonQ-For-CLI*" },
+	},
 	antigravity: {
 		prettyLabel: "Antigravity",
 		docsUrl: "https://antigravity.google",
@@ -96,6 +104,14 @@ export const AGENT_HARNESSES = {
 		description: "OpenAI's lightweight coding agent that runs in your terminal.",
 		envVars: { CODEX_SANDBOX: "*", CODEX_CI: "*", CODEX_THREAD_ID: "*" },
 	},
+	crush: {
+		prettyLabel: "Crush",
+		repoUrl: "https://github.com/charmbracelet/crush",
+		docsUrl: "https://github.com/charmbracelet/crush",
+		description: "Charm's open-source AI coding agent for the terminal.",
+		// `CrushEnvMarkers()` unconditionally sets `CRUSH=1` (plus `AGENT=crush`/`AI_AGENT=crush`) on every spawned shell.
+		envVars: { CRUSH: "*" },
+	},
 	"cursor-cli": {
 		// must stay before `cursor` so the more specific signal takes priority: when the CLI runs inside
 		// the Cursor editor's terminal, child processes inherit `CURSOR_TRACE_ID` and the CLI sets `CURSOR_AGENT`.
@@ -110,6 +126,14 @@ export const AGENT_HARNESSES = {
 		description: "AI-powered code editor.",
 		envVars: { CURSOR_TRACE_ID: "*" },
 	},
+	"gemini-cli": {
+		prettyLabel: "Gemini CLI",
+		repoUrl: "https://github.com/google-gemini/gemini-cli",
+		docsUrl: "https://geminicli.com",
+		description: "Google's open-source terminal AI coding agent powered by Gemini models.",
+		// `ShellExecutionService` injects `GEMINI_CLI=1` into the environment of every spawned shell command.
+		envVars: { GEMINI_CLI: "*" },
+	},
 	"github-copilot": {
 		prettyLabel: "GitHub Copilot",
 		docsUrl: "https://docs.github.com/copilot",
@@ -122,6 +146,21 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://goose-docs.ai/",
 		description: "Open-source, extensible AI agent, originally from Block and now part of the Agentic AI Foundation.",
 		envVars: { GOOSE_TERMINAL: "*" },
+	},
+	"kilo-code": {
+		prettyLabel: "Kilo Code",
+		repoUrl: "https://github.com/Kilo-Org/kilocode",
+		docsUrl: "https://kilocode.ai/docs",
+		description: "Open-source agentic coding agent for VS Code, JetBrains, and the terminal.",
+		// `KILOCODE_FEATURE` (e.g. `cli` / `vscode-extension`) is set in-process and inherited by shell-tool subprocesses.
+		envVars: { KILOCODE_FEATURE: "*" },
+	},
+	kiro: {
+		prettyLabel: "Kiro",
+		docsUrl: "https://kiro.dev",
+		description: "AWS's agentic IDE for spec-driven AI software development.",
+		// `AGENT_CONTEXT_OUT` / `AGENT_DISPLAY_OUT` (FIFO paths) are exported only while the agent is driving a shell command.
+		envVars: { AGENT_CONTEXT_OUT: "*" },
 	},
 	openclaw: {
 		prettyLabel: "OpenClaw",
@@ -150,11 +189,35 @@ export const AGENT_HARNESSES = {
 		description: "Cloud development environment with an AI coding agent.",
 		envVars: { REPL_ID: "*" },
 	},
+	"roo-code": {
+		prettyLabel: "Roo Code",
+		repoUrl: "https://github.com/RooCodeInc/Roo-Code",
+		docsUrl: "https://docs.roocode.com",
+		description: "Open-source autonomous AI coding agent for VS Code.",
+		// `Terminal.getEnv()` sets `ROO_ACTIVE=true` on every command the agent runs through its terminal.
+		envVars: { ROO_ACTIVE: "*" },
+	},
 	trae: {
 		prettyLabel: "Trae",
 		docsUrl: "https://trae.ai",
 		description: "AI-powered IDE from ByteDance.",
 		envVars: { TRAE_AI_SHELL_ID: "*" },
+	},
+	warp: {
+		prettyLabel: "Warp",
+		repoUrl: "https://github.com/warpdotdev/Warp",
+		docsUrl: "https://docs.warp.dev",
+		description: "AI-powered terminal with an agentic Agent Mode.",
+		// Warp shell sessions set `TERM_PROGRAM=WarpTerminal`.
+		envVars: { TERM_PROGRAM: "WarpTerminal" },
+	},
+	zed: {
+		prettyLabel: "Zed",
+		repoUrl: "https://github.com/zed-industries/zed",
+		docsUrl: "https://zed.dev",
+		description: "High-performance code editor with an integrated AI agent panel and terminal.",
+		// `insert_zed_terminal_env()` sets `ZED_TERM=true` (and `TERM_PROGRAM=zed`) on the integrated terminal.
+		envVars: { ZED_TERM: "*" },
 	},
 	devin: {
 		prettyLabel: "Devin",
