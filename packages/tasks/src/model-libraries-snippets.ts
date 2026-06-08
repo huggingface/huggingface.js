@@ -59,21 +59,17 @@ model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
 export const hailo = (model: ModelData): string[] => [
-	`# Hailo HEFs are compiled INT8 binaries for the Hailo-8 / Hailo-15 accelerators.
-# Install hailort + the Python bindings (aarch64 wheel) from
-# https://hailo.ai/developer-zone/.
+	`# Requires hailort + the hailo_platform Python wheel from
+# https://hailo.ai/developer-zone/ (Hailo-8 / Hailo-15 targets).
 from huggingface_hub import hf_hub_download
 from hailo_platform import HEF, VDevice
 
-hef_path = hf_hub_download("${model.id}", "model.hef")  # replace with the actual filename
+hef_path = hf_hub_download("${model.id}", "model.hef")  # set to the actual HEF filename
 hef = HEF(hef_path)
 
 with VDevice() as target:
     infer_model = target.create_infer_model(hef_path)
-    with infer_model.configure() as configured:
-        # Allocate input/output buffers per configured.input_vstreams_params /
-        # output_vstreams_params, then run inference.
-        ...`,
+    # See https://github.com/hailo-ai/hailort for the full inference API.`,
 ];
 
 export const audioseal = (model: ModelData): string[] => {
