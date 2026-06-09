@@ -101,7 +101,6 @@ export const AGENT_HARNESSES = {
 		repoUrl: "https://github.com/charmbracelet/crush",
 		docsUrl: "https://github.com/charmbracelet/crush",
 		description: "Charm's open-source AI coding agent for the terminal.",
-		// `CrushEnvMarkers()` unconditionally sets `CRUSH=1` (plus `AGENT=crush`/`AI_AGENT=crush`) on every spawned shell.
 		envVars: { CRUSH: "*" },
 	},
 	"gemini-cli": {
@@ -109,7 +108,6 @@ export const AGENT_HARNESSES = {
 		repoUrl: "https://github.com/google-gemini/gemini-cli",
 		docsUrl: "https://geminicli.com",
 		description: "Google's open-source terminal AI coding agent powered by Gemini models.",
-		// `ShellExecutionService` injects `GEMINI_CLI=1` into the environment of every spawned shell command.
 		envVars: { GEMINI_CLI: "*" },
 	},
 	"github-copilot": {
@@ -130,14 +128,12 @@ export const AGENT_HARNESSES = {
 		repoUrl: "https://github.com/Kilo-Org/kilocode",
 		docsUrl: "https://kilocode.ai/docs",
 		description: "Open-source agentic coding agent for VS Code, JetBrains, and the terminal.",
-		// `KILOCODE_FEATURE` (e.g. `cli` / `vscode-extension`) is set in-process and inherited by shell-tool subprocesses.
 		envVars: { KILOCODE_FEATURE: "*" },
 	},
 	kiro: {
 		prettyLabel: "Kiro",
 		docsUrl: "https://kiro.dev",
 		description: "AWS's agentic IDE for spec-driven AI software development.",
-		// `AGENT_CONTEXT_OUT` / `AGENT_DISPLAY_OUT` (FIFO paths) are exported only while the agent is driving a shell command.
 		envVars: { AGENT_CONTEXT_OUT: "*" },
 	},
 	openclaw: {
@@ -178,7 +174,6 @@ export const AGENT_HARNESSES = {
 		repoUrl: "https://github.com/warpdotdev/Warp",
 		docsUrl: "https://docs.warp.dev",
 		description: "AI-powered terminal with an agentic Agent Mode.",
-		// Warp shell sessions set `TERM_PROGRAM=WarpTerminal`.
 		envVars: { TERM_PROGRAM: "WarpTerminal" },
 	},
 	zed: {
@@ -186,7 +181,6 @@ export const AGENT_HARNESSES = {
 		repoUrl: "https://github.com/zed-industries/zed",
 		docsUrl: "https://zed.dev",
 		description: "High-performance code editor with an integrated AI agent panel and terminal.",
-		// `insert_zed_terminal_env()` sets `ZED_TERM=true` (and `TERM_PROGRAM=zed`) on the integrated terminal.
 		envVars: { ZED_TERM: "*" },
 	},
 	"cursor-cli": {
