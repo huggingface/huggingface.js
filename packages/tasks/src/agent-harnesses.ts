@@ -123,6 +123,13 @@ export const AGENT_HARNESSES = {
 		description: "Open-source, extensible AI agent, originally from Block and now part of the Agentic AI Foundation.",
 		envVars: { GOOSE_TERMINAL: "*" },
 	},
+	"hermes-agent": {
+		prettyLabel: "Hermes Agent",
+		repoUrl: "https://github.com/NousResearch/hermes-agent",
+		docsUrl: "https://hermes-agent.nousresearch.com/docs",
+		description: "Nous Research's self-improving, multi-provider terminal AI agent.",
+		envVars: { HERMES_SESSION_ID: "*" },
+	},
 	"kilo-code": {
 		prettyLabel: "Kilo Code",
 		repoUrl: "https://github.com/Kilo-Org/kilocode",
