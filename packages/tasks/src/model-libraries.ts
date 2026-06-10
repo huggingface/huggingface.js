@@ -587,6 +587,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	hailo: {
+		prettyLabel: "Hailo",
+		repoName: "hailort",
+		repoUrl: "https://github.com/hailo-ai/hailort",
+		countDownloads: `path_extension:"hef"`,
+		snippets: snippets.hailo,
+		filter: false,
+	},
 	hallo: {
 		prettyLabel: "Hallo",
 		repoName: "Hallo",
