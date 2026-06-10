@@ -11,6 +11,7 @@ import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
 import * as Hyperbolic from "../providers/hyperbolic.js";
 import * as Nebius from "../providers/nebius.js";
+import * as NearAI from "../providers/near-ai.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as Nvidia from "../providers/nvidia.js";
@@ -143,6 +144,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Nebius.NebiusConversationalTask(),
 		"text-generation": new Nebius.NebiusTextGenerationTask(),
 		"feature-extraction": new Nebius.NebiusFeatureExtractionTask(),
+	},
+	"near-ai": {
+		conversational: new NearAI.NearAIConversationalTask(),
 	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
