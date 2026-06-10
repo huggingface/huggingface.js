@@ -69,6 +69,7 @@ Currently, we support the following providers:
 - [Cerebras](https://cerebras.ai/)
 - [DeepInfra](https://deepinfra.com)
 - [Groq](https://groq.com)
+- [MiniMax](https://minimax.io)
 - [Wavespeed.ai](https://wavespeed.ai/)
 - [Z.ai](https://z.ai/)
 
@@ -109,6 +110,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
 - [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
 - [Groq supported models](https://console.groq.com/docs/models)
+- [MiniMax supported models](https://platform.minimax.io/docs/api-reference/text-openai-api)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
 - [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
