@@ -61,6 +61,13 @@ export const GGUF_QUANT_RE = new RegExp(
 export const GGUF_QUANT_RE_GLOBAL = new RegExp(GGUF_QUANT_RE, "g");
 
 export function parseGGUFQuantLabel(fname: string): string | undefined {
+	// Percentage-mixed filenames (e.g. "Model-55IQ2_XXS-34Q2_K-07Q8_0-03F16.gguf")
+	// encode a per-tensor-class recipe; for those we return the dominant (largest-%)
+	// component rather than picking by file-order, which would surface the smallest tail.
+	const mix = parseGGUFQuantMix(fname);
+	if (mix) {
+		return mix.dominant.quant;
+	}
 	const quantLabel = fname.toUpperCase().match(GGUF_QUANT_RE_GLOBAL)?.at(-1); // if there is multiple quant substrings in a name, we prefer the last one
 	return quantLabel;
 }
@@ -208,4 +215,54 @@ export enum GGMLQuantizationType {
 	MXFP4 = 39,
 	NVFP4 = 40,
 	Q1_0 = 41,
+}
+
+// Match one "<pct><quant>" component of a percentage-mixed GGUF filename
+// (e.g. "55IQ2_XXS", "07Q8_0"). Lookbehind/lookahead require the token to be
+// delimited by `^`, `-`, `.`, or `$` so we don't accidentally chew through
+// model size labels like "7B" or other tokens.
+// I8/I16/I32/I64/F64 are integer/float storage types for metadata tensors,
+// not quantization methods — exclude so a hypothetical "-32I32-16I16-" pair
+// isn't misread as a mix recipe.
+const _GGUF_QUANT_MIX_NON_QUANT_NAMES = new Set(["I8", "I16", "I32", "I64", "F64"]);
+const _ggmlQuantNames = Object.values(GGMLQuantizationType)
+	.filter((v): v is string => typeof v === "string" && !_GGUF_QUANT_MIX_NON_QUANT_NAMES.has(v))
+	// Sort by length descending so "IQ2_XXS" wins over the shorter prefix "IQ2_XS".
+	.sort((a, b) => b.length - a.length);
+
+export const GGUF_QUANT_MIX_COMPONENT_RE = new RegExp(
+	`(?<=^|-)(?<pct>\\d{1,3})(?<quant>${_ggmlQuantNames.join("|")})(?=$|[-.])`,
+	"g",
+);
+
+export interface GGUFQuantMixComponent {
+	/** Percentage of bytes this component contributes to the file (0-100). */
+	pct: number;
+	/** Tensor-level quantization type name (matches `GGMLQuantizationType` keys). */
+	quant: keyof typeof GGMLQuantizationType;
+}
+
+export interface GGUFQuantMix {
+	/** All "<pct><quant>" components found in the filename, in file order. */
+	components: GGUFQuantMixComponent[];
+	/** Component with the largest percentage share. */
+	dominant: GGUFQuantMixComponent;
+}
+
+/** Parse a percentage-mixed GGUF filename (e.g. `Model-55IQ2_XXS-34Q2_K.gguf`). */
+export function parseGGUFQuantMix(fname: string): GGUFQuantMix | undefined {
+	const base = (fname.split("/").pop() ?? fname).toUpperCase();
+	const stem = base.replace(/\.GGUF$/, "");
+	// Re-create the regex per call so we don't share lastIndex across callers.
+	const re = new RegExp(GGUF_QUANT_MIX_COMPONENT_RE.source, "g");
+	const matches = [...stem.matchAll(re)];
+	if (matches.length < 2) {
+		return undefined;
+	}
+	const components: GGUFQuantMixComponent[] = matches.map((m) => ({
+		pct: Number(m.groups?.pct ?? 0),
+		quant: m.groups?.quant as keyof typeof GGMLQuantizationType,
+	}));
+	const dominant = components.reduce((a, b) => (b.pct > a.pct ? b : a));
+	return { components, dominant };
 }
