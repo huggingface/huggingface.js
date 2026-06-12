@@ -250,6 +250,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	chexmix: {
+		prettyLabel: "CheXmix",
+		repoName: "CheXmix",
+		repoUrl: "https://github.com/StanfordMIMI/CheXmix",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"chronos-forecasting": {
 		prettyLabel: "Chronos",
 		repoName: "Chronos",
@@ -276,6 +283,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://huggingface.co/OpenPeerAI/Cloud-Agents",
 		filter: false,
 		countDownloads: `path:"setup.py"`,
+	},
+	collectorvision: {
+		prettyLabel: "CollectorVision",
+		repoName: "CollectorVision",
+		repoUrl: "https://github.com/HanClinto/CollectorVision",
+		snippets: snippets.collectorvision,
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
 	},
 	colipri: {
 		prettyLabel: "COLIPRI",
@@ -433,6 +448,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/slicex-ai/elm",
 		filter: false,
 		countDownloads: `path_filename:"slicex_elm_config" AND path_extension:"json"`,
+	},
+	encoderfile: {
+		prettyLabel: "encoderfile",
+		repoName: "encoderfile",
+		repoUrl: "https://github.com/mozilla-ai/encoderfile",
+		filter: false,
+		countDownloads: `path_extension:"encoderfile"`,
 	},
 	espnet: {
 		prettyLabel: "ESPnet",
@@ -768,6 +790,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "LiteRT-LM",
 		repoName: "LiteRT-LM",
 		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
+		snippets: snippets.litert_lm,
 		filter: false,
 		countDownloads: `path_extension:"litertlm" OR path_extension:"task"`,
 	},
@@ -792,6 +815,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/KwaiVGI/LivePortrait",
 		filter: false,
 		countDownloads: `path:"liveportrait/landmark.onnx"`,
+	},
+	"longcat-video-avatar-1.5": {
+		prettyLabel: "LongCat-Video-Avatar 1.5",
+		repoName: "LongCat-Video-Avatar 1.5",
+		repoUrl: "https://github.com/meituan-longcat/LongCat-Video",
+		filter: false,
 	},
 	"llama-cpp-python": {
 		prettyLabel: "llama-cpp-python",
@@ -821,6 +850,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Magenta RT",
 		repoUrl: "https://github.com/magenta/magenta-realtime",
 		countDownloads: `path:"checkpoints/llm_base_x4286_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k/checkpoint"`,
+	},
+	"magenta-realtime-2": {
+		prettyLabel: "Magenta RT 2",
+		repoName: "Magenta RT 2",
+		repoUrl: "https://github.com/magenta/magenta-realtime",
+		countDownloads: `path:"models/mrt2_base/mrt2_base.mlxfn" OR path:"models/mrt2_small/mrt2_small.mlxfn" OR path:"checkpoints/mrt2_base.safetensors" OR path:"checkpoints/mrt2_small.safetensors"`,
 	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
@@ -939,6 +974,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/baaivision/MTVCraft",
 		filter: false,
 		countDownloads: `path:"vae/3d-vae.pt"`,
+	},
+	multimolecule: {
+		prettyLabel: "MultiMolecule",
+		repoName: "MultiMolecule",
+		repoUrl: "https://github.com/MultiMolecule/multimolecule",
+		docsUrl: "https://multimolecule.danling.org",
+		snippets: snippets.multimolecule,
+		filter: false,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
@@ -1280,6 +1323,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:".pth"`,
 	},
+	"stable-audio-3": {
+		prettyLabel: "Stable Audio 3",
+		repoName: "stable-audio-3",
+		repoUrl: "https://github.com/Stability-AI/stable-audio-3",
+		filter: false,
+		countDownloads: `path:"model_config.json"`,
+	},
 	"stable-audio-tools": {
 		prettyLabel: "Stable Audio Tools",
 		repoName: "stable-audio-tools",
@@ -1474,6 +1524,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Trellis",
 		repoName: "Trellis",
 		repoUrl: "https://github.com/microsoft/TRELLIS",
+		countDownloads: `path_extension:"safetensors"`,
+	},
+	trellis2: {
+		prettyLabel: "TRELLIS.2",
+		repoName: "TRELLIS.2",
+		repoUrl: "https://github.com/microsoft/TRELLIS.2",
 		countDownloads: `path_extension:"safetensors"`,
 	},
 	ultralytics: {

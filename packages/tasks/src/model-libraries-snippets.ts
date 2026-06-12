@@ -156,6 +156,20 @@ pred_df = pipeline.predict_df(
 	return [installSnippet, exampleSnippet];
 };
 
+export const collectorvision = (model: ModelData): string[] => [
+	`pip install git+https://github.com/HanClinto/CollectorVision huggingface_hub`,
+	`from huggingface_hub import hf_hub_download
+import collector_vision as cvg
+
+checkpoint = hf_hub_download(repo_id="${model.id}", filename="model.onnx")
+
+# Detector models, such as Cornelius:
+detector = cvg.NeuralCornerDetector(checkpoint)
+
+# Embedder models, such as Milo:
+embedder = cvg.NeuralEmbedder(checkpoint)`,
+];
+
 export const colipri = (model: ModelData): string[] => {
 	const installSnippet = `pip install colipri`;
 
@@ -1052,6 +1066,24 @@ python -m lerobot.record \\
 	return [];
 };
 
+export const litert_lm = (model: ModelData): string[] => [
+	`# LiteRT-LM runs on various platforms (Android, iOS, Windows, Linux, macOS, IoT, Web/WASM)
+# and supports many APIs (C++, Python, Kotlin, Swift, JavaScript, Flutter).
+# For platform-specific integration guides, please refer to the official developer website:
+# https://ai.google.dev/edge/litert-lm
+
+# To try LiteRT-LM, the easiest way is to use our CLI tool.
+# 1. Install the LiteRT-LM CLI tool:
+pip install litert-lm
+
+# 2. Download and run this model locally:
+# See: https://ai.google.dev/edge/litert-lm/cli
+litert-lm run \\
+  --from-huggingface-repo=${model.id} \\
+  model.litertlm \\
+  --prompt="Write me a poem"`,
+];
+
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
 # See https://github.com/keras-team/tf-keras for more details.
@@ -1093,6 +1125,56 @@ from MeshAnything.models.meshanything import MeshAnything
 # and https://github.com/buaacyw/MeshAnything/blob/main/app.py regarding usage
 model = MeshAnything(args)`,
 ];
+
+export const multimolecule = (model: ModelData): string[] => {
+	const widgetExample = model.widgetData?.[0] as WidgetExampleTextInput | undefined;
+	const exampleText = widgetExample?.text;
+	const maskToken = model.mask_token ?? "<mask>";
+	const sequence = exampleText?.replace(maskToken, "A");
+
+	const snippets = [`pip install multimolecule`];
+
+	if (sequence) {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")
+
+inputs = tokenizer("${sequence}", return_tensors="pt")
+outputs = model(**inputs)
+embeddings = outputs.last_hidden_state`,
+		);
+	} else {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")`,
+		);
+	}
+
+	if (model.tags.includes("rna-secondary-structure") && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("rna-secondary-structure", model="${model.id}")
+output = predictor("${exampleText}")
+print(output["secondary_structure"])`,
+		);
+	} else if (model.pipeline_tag === "fill-mask" && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("fill-mask", model="${model.id}")
+output = predictor("${exampleText}")`,
+		);
+	}
+
+	return snippets;
+};
 
 export const open_clip = (model: ModelData): string[] => [
 	`import open_clip
@@ -2243,7 +2325,9 @@ export const nemo = (model: ModelData): string[] => {
 export const outetts = (model: ModelData): string[] => {
 	// Don’t show this block on GGUF / ONNX mirrors
 	const t = model.tags ?? [];
-	if (t.includes("gguf") || t.includes("onnx")) return [];
+	if (t.includes("gguf") || t.includes("onnx")) {
+		return [];
+	}
 
 	// v1.0 HF → minimal runnable snippet
 	return [

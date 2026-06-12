@@ -236,8 +236,12 @@ export class ReplicateAutomaticSpeechRecognitionTask
 		_outputType?: undefined,
 		signal?: AbortSignal,
 	): Promise<AutomaticSpeechRecognitionOutput> {
-		if (typeof response?.output === "string") return { text: response.output };
-		if (Array.isArray(response?.output) && typeof response.output[0] === "string") return { text: response.output[0] };
+		if (typeof response?.output === "string") {
+			return { text: response.output };
+		}
+		if (Array.isArray(response?.output) && typeof response.output[0] === "string") {
+			return { text: response.output[0] };
+		}
 
 		const out = response?.output as
 			| undefined
@@ -247,8 +251,12 @@ export class ReplicateAutomaticSpeechRecognitionTask
 					txt_file?: string;
 			  };
 		if (out && typeof out === "object") {
-			if (typeof out.transcription === "string") return { text: out.transcription };
-			if (typeof out.translation === "string") return { text: out.translation };
+			if (typeof out.transcription === "string") {
+				return { text: out.transcription };
+			}
+			if (typeof out.translation === "string") {
+				return { text: out.translation };
+			}
 			if (typeof out.txt_file === "string") {
 				const r = await fetch(out.txt_file, { signal });
 				return { text: await r.text() };

@@ -12,7 +12,9 @@ export const imageToTextTool: Tool = {
 	],
 	call: async (input, inference) => {
 		const data = await input;
-		if (typeof data === "string") throw "Input must be a blob.";
+		if (typeof data === "string") {
+			throw "Input must be a blob.";
+		}
 
 		return (
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion

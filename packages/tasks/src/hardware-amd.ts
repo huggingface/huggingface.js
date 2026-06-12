@@ -9,6 +9,8 @@ export interface AmdGpuHardwareSpec extends HardwareSpec {
 	gfxVersion: string;
 }
 
+const AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS = [16, 24, 32, 48, 64, 96];
+
 export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 	MI300: {
 		tflops: 383.0,
@@ -234,8 +236,80 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 250,
 		releaseYear: 2020,
 	},
+	"Radeon 610M": {
+		tflops: 0.97,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1037",
+		msrp: 300,
+		power: 15,
+		releaseYear: 2022,
+	},
+	"Radeon 740M": {
+		tflops: 5.12,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1103",
+		msrp: 179,
+		power: 15,
+		releaseYear: 2023,
+	},
+	"Radeon 760M": {
+		tflops: 10.65,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1103",
+		msrp: 229,
+		power: 15,
+		releaseYear: 2023,
+	},
+	"Radeon 780M": {
+		tflops: 16.59,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1103",
+		msrp: 329,
+		power: 15,
+		releaseYear: 2023,
+	},
+	"Radeon 820M": {
+		tflops: 1.434,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1152",
+		msrp: 200,
+		power: 15,
+		releaseYear: 2025,
+	},
+	"Radeon 840M": {
+		tflops: 2.97,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1152",
+		msrp: 250,
+		power: 15,
+		releaseYear: 2025,
+	},
+	"Radeon 860M": {
+		tflops: 6.14,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1152",
+		msrp: 300,
+		power: 15,
+		releaseYear: 2025,
+	},
+	"Radeon 880M": {
+		tflops: 8.91,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1150",
+		msrp: 400,
+		power: 15,
+		releaseYear: 2024,
+	},
+	"Radeon 890M": {
+		tflops: 11.88,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1150",
+		msrp: 450,
+		power: 15,
+		releaseYear: 2024,
+	},
 	"Ryzen AI Max+ 395": {
-		tflops: 59.4,
+		tflops: 29.7,
 		memory: [64, 96, 128],
 		gfxVersion: "gfx1151",
 		msrp: 1_500,

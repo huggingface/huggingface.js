@@ -27,6 +27,7 @@ import type {
 	SummarizationOutput,
 	TableQuestionAnsweringOutput,
 	TextClassificationOutput,
+	TextGenerationInput,
 	TextGenerationOutput,
 	TokenClassificationOutput,
 	TranslationOutput,
@@ -39,7 +40,6 @@ import { HF_ROUTER_URL } from "../config.js";
 import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 import type { TabularClassificationOutput } from "../tasks/tabular/tabularClassification.js";
 import type { BodyParams, OutputType, RequestArgs, UrlParams } from "../types.js";
-import { toArray } from "../utils/toArray.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -210,14 +210,54 @@ export class HFInferenceConversationalTask extends HFInferenceTask implements Co
 	}
 }
 
+interface HFInferenceTextCompletionOutput {
+	choices: Array<{ text: string }>;
+}
+
 export class HFInferenceTextGenerationTask extends HFInferenceTask implements TextGenerationTaskHelper {
-	override async getResponse(response: TextGenerationOutput | TextGenerationOutput[]): Promise<TextGenerationOutput> {
-		const res = toArray(response);
-		if (Array.isArray(res) && res.every((x) => "generated_text" in x && typeof x?.generated_text === "string")) {
-			return (res as TextGenerationOutput[])?.[0];
+	override makeUrl(params: UrlParams): string {
+		let url: string;
+		if (params.model.startsWith("http://") || params.model.startsWith("https://")) {
+			url = params.model.trim();
+		} else {
+			url = `${this.makeBaseUrl(params)}/models/${params.model}`;
+		}
+
+		url = url.replace(/\/+$/, "");
+		if (url.endsWith("/v1")) {
+			url += "/completions";
+		} else if (!url.endsWith("/completions")) {
+			url += "/v1/completions";
+		}
+
+		return url;
+	}
+
+	override preparePayload(params: BodyParams<TextGenerationInput>): Record<string, unknown> {
+		return {
+			model: params.model,
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters
+				? {
+						max_tokens: params.args.parameters.max_new_tokens,
+						...omit(params.args.parameters, "max_new_tokens"),
+					}
+				: undefined),
+			prompt: params.args.inputs,
+		};
+	}
+
+	override async getResponse(response: HFInferenceTextCompletionOutput): Promise<TextGenerationOutput> {
+		if (
+			typeof response === "object" &&
+			"choices" in response &&
+			Array.isArray(response.choices) &&
+			typeof response.choices[0]?.text === "string"
+		) {
+			return { generated_text: response.choices[0].text };
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference text generation API: expected Array<{generated_text: string}>",
+			"Received malformed response from HF-Inference text generation API: expected {choices: [{text: string}]}",
 		);
 	}
 }
@@ -316,7 +356,9 @@ export class HFInferenceDocumentQuestionAnsweringTask
 export class HFInferenceFeatureExtractionTask extends HFInferenceTask implements FeatureExtractionTaskHelper {
 	override async getResponse(response: FeatureExtractionOutput): Promise<FeatureExtractionOutput> {
 		const isNumArrayRec = (arr: unknown[], maxDepth: number, curDepth = 0): boolean => {
-			if (curDepth > maxDepth) return false;
+			if (curDepth > maxDepth) {
+				return false;
+			}
 			if (arr.every((x) => Array.isArray(x))) {
 				return arr.every((x) => isNumArrayRec(x as unknown[], maxDepth, curDepth + 1));
 			} else {

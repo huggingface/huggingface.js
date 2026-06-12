@@ -17,7 +17,9 @@ export const textToImageTool: Tool = {
 	],
 	call: async (input, inference) => {
 		const data = await input;
-		if (typeof data !== "string") throw "Input must be a string.";
+		if (typeof data !== "string") {
+			throw "Input must be a string.";
+		}
 
 		return await inference.textToImage({
 			inputs: data,

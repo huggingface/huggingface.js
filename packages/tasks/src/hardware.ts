@@ -112,6 +112,13 @@ export const SKUS = {
 				power: 200,
 				releaseYear: 2025,
 			},
+			"Arc Pro B70": {
+				tflops: 45.88,
+				memory: [32],
+				msrp: 949,
+				power: 230,
+				releaseYear: 2026,
+			},
 		},
 		QUALCOMM: {
 			"Snapdragon X Elite X1E-00-1DE": {
@@ -187,6 +194,12 @@ export const SKUS = {
 			"Intel Core Ultra 9 275HX": {
 				tflops: 1.89,
 				msrp: 700,
+				power: 160,
+				releaseYear: 2025,
+			},
+			"Intel Core Ultra 7 255HX": {
+				tflops: 1.62,
+				msrp: 583,
 				power: 160,
 				releaseYear: 2025,
 			},
