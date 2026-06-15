@@ -477,7 +477,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		releaseYear: 2025,
 	},
 	"RTX 5050 Mobile": {
-		tflops: 13.17,
+		tflops: 7.7,
 		memory: [8],
 		computeCapability: 12.0,
 		msrp: 250,
