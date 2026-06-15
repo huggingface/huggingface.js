@@ -24,7 +24,16 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	clarifai: {},
 	cohere: {},
 	deepinfra: {},
-	"fal-ai": {},
+	"fal-ai": {
+		// Dev mapping until nvidia/nemotron-3.5-asr-streaming-0.6b is registered for fal-ai on huggingface.co.
+		"nvidia/nemotron-3.5-asr-streaming-0.6b": {
+			provider: "fal-ai",
+			hfModelId: "nvidia/nemotron-3.5-asr-streaming-0.6b",
+			providerId: "nvidia/nemotron-asr-multilingual/asr",
+			status: "live",
+			task: "automatic-speech-recognition",
+		},
+	},
 	"featherless-ai": {},
 	"fireworks-ai": {},
 	groq: {},

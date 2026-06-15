@@ -63,7 +63,13 @@ interface FalAITextToImageOutput {
 }
 
 interface FalAIAutomaticSpeechRecognitionOutput {
-	text: string;
+	// fal whisper returns the transcript under `text`; NVIDIA NeMo / nemotron returns it under `output`.
+	text?: string;
+	output?: string;
+	// fal whisper returns word/segment timestamps under `chunks: [{ timestamp: [start, end], text }]`.
+	chunks?: Array<{ text?: string; timestamp?: number[] }>;
+	// Some ASR models instead return `segments: [{ start, end, text }]`.
+	segments?: Array<{ text?: string; start?: number; end?: number }>;
 }
 
 interface FalAITextToSpeechOutput {
@@ -516,14 +522,31 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 	}
 	override async getResponse(response: unknown): Promise<AutomaticSpeechRecognitionOutput> {
 		const res = response as FalAIAutomaticSpeechRecognitionOutput;
-		if (typeof res?.text !== "string") {
+		// fal exposes the transcript as `text` (whisper) or `output` (nemotron / NeMo models).
+		const text = typeof res?.text === "string" ? res.text : typeof res?.output === "string" ? res.output : undefined;
+		if (typeof text !== "string") {
 			throw new InferenceClientProviderOutputError(
-				`Received malformed response from Fal.ai Automatic Speech Recognition API: expected { text: string } format, got instead: ${JSON.stringify(
+				`Received malformed response from Fal.ai Automatic Speech Recognition API: expected { text: string } or { output: string } format, got instead: ${JSON.stringify(
 					response,
 				)}`,
 			);
 		}
-		return { text: res.text };
+		const output: AutomaticSpeechRecognitionOutput = { text };
+		// Surface timestamps when the model returns them, normalizing both shapes to HF's
+		// `chunks: [{ text, timestamp: [start, end] }]` (see AutomaticSpeechRecognitionOutputChunk).
+		const chunks = Array.isArray(res.chunks)
+			? res.chunks
+					.filter((c) => typeof c?.text === "string" && Array.isArray(c.timestamp))
+					.map((c) => ({ text: c.text as string, timestamp: c.timestamp as number[] }))
+			: Array.isArray(res.segments)
+				? res.segments
+						.filter((s) => typeof s?.text === "string")
+						.map((s) => ({ text: s.text as string, timestamp: [s.start ?? 0, s.end ?? 0] }))
+				: [];
+		if (chunks.length > 0) {
+			output.chunks = chunks;
+		}
+		return output;
 	}
 
 	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
