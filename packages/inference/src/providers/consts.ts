@@ -25,13 +25,24 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	cohere: {},
 	deepinfra: {},
 	"fal-ai": {
-		// Dev mapping until nvidia/nemotron-3.5-asr-streaming-0.6b is registered for fal-ai on huggingface.co.
+		// Dev mappings until these are registered for fal-ai on huggingface.co.
 		"nvidia/nemotron-3.5-asr-streaming-0.6b": {
 			provider: "fal-ai",
 			hfModelId: "nvidia/nemotron-3.5-asr-streaming-0.6b",
 			providerId: "nvidia/nemotron-asr-multilingual/asr",
 			status: "live",
 			task: "automatic-speech-recognition",
+		},
+		// PersonaPlex (pipeline_tag: audio-to-audio). The batch endpoint takes audio in and
+		// returns { audio: { url }, text } — handled by FalAIAudioToAudioTask. Note: this is the
+		// one-shot speech-to-speech turn; the real-time full-duplex mode is WebSocket-only and
+		// not reachable through this HTTP/queue client.
+		"nvidia/personaplex-7b-v1": {
+			provider: "fal-ai",
+			hfModelId: "nvidia/personaplex-7b-v1",
+			providerId: "fal-ai/personaplex",
+			status: "live",
+			task: "audio-to-audio",
 		},
 	},
 	"featherless-ai": {},
