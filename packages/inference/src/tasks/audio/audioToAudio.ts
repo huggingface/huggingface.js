@@ -1,5 +1,6 @@
 import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import { makeRequestOptions } from "../../lib/makeRequestOptions.js";
 import type { BaseArgs, Options } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
 import type { LegacyAudioInput } from "./utils.js";
@@ -45,5 +46,6 @@ export async function audioToAudio(args: AudioToAudioArgs, options?: Options): P
 		...options,
 		task: "audio-to-audio",
 	});
-	return providerHelper.getResponse(res);
+	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "audio-to-audio" });
+	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, undefined, options?.signal);
 }
