@@ -212,6 +212,22 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 132,
 		releaseYear: 2021,
 	},
+	"RX 5700 XT": {
+		tflops: 19.51,
+		memory: [8],
+		gfxVersion: "gfx1010",
+		msrp: 399,
+		power: 225,
+		releaseYear: 2019,
+	},
+	"RX 5700": {
+		tflops: 15.9,
+		memory: [8],
+		gfxVersion: "gfx1010",
+		msrp: 349,
+		power: 180,
+		releaseYear: 2019,
+	},
 	"RX 5500 XT": {
 		tflops: 10.39,
 		memory: [4, 8],
