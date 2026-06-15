@@ -311,6 +311,68 @@ export const SKUS = {
 				power: 65,
 				releaseYear: 2020,
 			},
+			"Intel Core 9th Generation (i9)": {
+			    tflops: 0.42,
+			    msrp: 488,
+			    power: 200,
+			    releaseYear: 2018,
+			},
+			"Intel Core 9th Generation (i7)": {
+			    tflops: 0.38,
+			    msrp: 374,
+			    power: 125,
+			    releaseYear: 2018,
+			},
+			"Intel Core 9th Generation (i5)": {
+			    tflops: 0.32,
+			    msrp: 262,
+			    power: 95,
+			    releaseYear: 2018,
+			},
+			"Intel Core 9th Generation (i3)": {
+			    tflops: 0.27,
+			    msrp: 122,
+			    power: 65,
+			    releaseYear: 2019,
+			},
+			"Intel Core 8th Generation (i7)": {
+			    tflops: 0.35,
+			    msrp: 359,
+			    power: 95,
+			    releaseYear: 2017,
+			},
+			"Intel Core 8th Generation (i5)": {
+			    tflops: 0.30,
+			    msrp: 257,
+			    power: 95,
+			    releaseYear: 2017,
+			},
+			"Intel Core 8th Generation (i3)": {
+			    tflops: 0.24,
+			    msrp: 117,
+			    power: 65,
+			    releaseYear: 2017,
+			},
+			
+			// 7th Generation (Kaby Lake, 2017)
+			"Intel Core 7th Generation (i7)": {
+			    tflops: 0.25,
+			    msrp: 339,
+			    power: 91,
+			    releaseYear: 2017,
+			},
+			"Intel Core 7th Generation (i5)": {
+			    tflops: 0.21,
+			    msrp: 242,
+			    power: 91,
+			    releaseYear: 2017,
+			},
+			"Intel Core 7th Generation (i3)": {
+			    tflops: 0.17,
+			    msrp: 168,
+			    power: 60,
+			    releaseYear: 2017,
+			},
 		},
 		AMD: {
 			"EPYC 5th Generation Zen 5 (Turin)": {
