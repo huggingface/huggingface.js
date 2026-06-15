@@ -1796,7 +1796,9 @@ export class Interpreter {
 	}
 
 	evaluate(statement: Statement | undefined, environment: Environment): AnyRuntimeValue {
-		if (!statement) return new UndefinedValue();
+		if (!statement) {
+			return new UndefinedValue();
+		}
 
 		switch (statement.type) {
 			// Program
