@@ -325,7 +325,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		releaseYear: 2021,
 	},
 	A800: {
-		tflops: 19.49,
+		tflops: 312,
 		memory: [40, 80],
 		computeCapability: 8.0,
 		msrp: 12_000,
