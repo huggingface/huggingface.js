@@ -17,7 +17,9 @@ export const textToSpeechTool: Tool = {
 	],
 	call: async (input, inference) => {
 		const data = await input;
-		if (typeof data !== "string") throw "Input must be a string.";
+		if (typeof data !== "string") {
+			throw "Input must be a string.";
+		}
 
 		return inference.textToSpeech({
 			inputs: data,

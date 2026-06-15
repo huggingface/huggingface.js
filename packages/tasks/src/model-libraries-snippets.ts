@@ -1066,6 +1066,24 @@ python -m lerobot.record \\
 	return [];
 };
 
+export const litert_lm = (model: ModelData): string[] => [
+	`# LiteRT-LM runs on various platforms (Android, iOS, Windows, Linux, macOS, IoT, Web/WASM)
+# and supports many APIs (C++, Python, Kotlin, Swift, JavaScript, Flutter).
+# For platform-specific integration guides, please refer to the official developer website:
+# https://ai.google.dev/edge/litert-lm
+
+# To try LiteRT-LM, the easiest way is to use our CLI tool.
+# 1. Install the LiteRT-LM CLI tool:
+pip install litert-lm
+
+# 2. Download and run this model locally:
+# See: https://ai.google.dev/edge/litert-lm/cli
+litert-lm run \\
+  --from-huggingface-repo=${model.id} \\
+  model.litertlm \\
+  --prompt="Write me a poem"`,
+];
+
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
 # See https://github.com/keras-team/tf-keras for more details.
@@ -2307,7 +2325,9 @@ export const nemo = (model: ModelData): string[] => {
 export const outetts = (model: ModelData): string[] => {
 	// Don’t show this block on GGUF / ONNX mirrors
 	const t = model.tags ?? [];
-	if (t.includes("gguf") || t.includes("onnx")) return [];
+	if (t.includes("gguf") || t.includes("onnx")) {
+		return [];
+	}
 
 	// v1.0 HF → minimal runnable snippet
 	return [
