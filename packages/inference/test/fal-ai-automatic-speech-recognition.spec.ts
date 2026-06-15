@@ -11,7 +11,6 @@ describe("FalAIAutomaticSpeechRecognitionTask.getResponse", () => {
 	});
 
 	it("parses the nemotron `output` shape", async () => {
-		// fal's nemotron endpoint returns { output, partial } instead of { text }.
 		const out = await task.getResponse({ output: "hola mundo", partial: false });
 		expect(out).toEqual({ text: "hola mundo" });
 	});

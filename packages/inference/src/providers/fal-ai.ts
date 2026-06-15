@@ -63,12 +63,10 @@ interface FalAITextToImageOutput {
 }
 
 interface FalAIAutomaticSpeechRecognitionOutput {
-	// fal whisper returns the transcript under `text`; NVIDIA NeMo / nemotron returns it under `output`.
+	// Transcript under `text` (whisper) or `output` (nemotron); optional timestamps as `chunks` or `segments`.
 	text?: string;
 	output?: string;
-	// fal whisper returns word/segment timestamps under `chunks: [{ timestamp: [start, end], text }]`.
 	chunks?: Array<{ text?: string; timestamp?: number[] }>;
-	// Some ASR models instead return `segments: [{ start, end, text }]`.
 	segments?: Array<{ text?: string; start?: number; end?: number }>;
 }
 
@@ -522,7 +520,6 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 	}
 	override async getResponse(response: unknown): Promise<AutomaticSpeechRecognitionOutput> {
 		const res = response as FalAIAutomaticSpeechRecognitionOutput;
-		// fal exposes the transcript as `text` (whisper) or `output` (nemotron / NeMo models).
 		const text = typeof res?.text === "string" ? res.text : typeof res?.output === "string" ? res.output : undefined;
 		if (typeof text !== "string") {
 			throw new InferenceClientProviderOutputError(
@@ -532,8 +529,6 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 			);
 		}
 		const output: AutomaticSpeechRecognitionOutput = { text };
-		// Surface timestamps when the model returns them, normalizing both shapes to HF's
-		// `chunks: [{ text, timestamp: [start, end] }]` (see AutomaticSpeechRecognitionOutputChunk).
 		const chunks = Array.isArray(res.chunks)
 			? res.chunks
 					.filter((c) => typeof c?.text === "string" && Array.isArray(c.timestamp))
@@ -643,7 +638,6 @@ export class FalAITextToAudioTask extends FalAiQueueTask implements TextToAudioT
 		signal?: AbortSignal,
 	): Promise<Blob> {
 		const result = (await this.getResponseFromQueueApi(response, url, headers, signal)) as FalAITextToAudioResult;
-		// fal text-to-audio models return the clip under `audio_file` (e.g. Stable Audio) or `audio`.
 		const audio = result.audio_file ?? result.audio;
 		if (typeof audio !== "object" || !audio || typeof audio.url !== "string" || !isUrl(audio.url)) {
 			throw new InferenceClientProviderOutputError(
