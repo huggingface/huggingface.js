@@ -69,7 +69,22 @@ interface FalAITextToSpeechOutput {
 		content_type: string;
 	};
 }
-export const FAL_AI_SUPPORTED_BLOB_TYPES = ["audio/mpeg", "audio/mp4", "audio/wav", "audio/x-wav"];
+// fal's data-URL decoder maps the declared MIME type to a file extension and rejects
+// anything that doesn't resolve to one — so the label matters, not just the bytes. The
+// browser's MediaRecorder emits "audio/webm" and file uploads are often "audio/wav",
+// neither of which fal accepts; the same bytes are accepted under a label it can map.
+// Verified against fal-ai/whisper: audio/mpeg, audio/x-wav and video/webm decode, while
+// audio/wav, audio/webm, audio/mp4, audio/x-m4a and audio/ogg return "Unsupported data URL".
+const FAL_AI_AUDIO_MIME_MAP: Record<string, string> = {
+	"audio/mpeg": "audio/mpeg",
+	"audio/mp3": "audio/mpeg",
+	"audio/wav": "audio/x-wav",
+	"audio/wave": "audio/x-wav",
+	"audio/x-wav": "audio/x-wav",
+	"audio/webm": "video/webm",
+	"video/webm": "video/webm",
+};
+export const FAL_AI_SUPPORTED_BLOB_TYPES = Object.keys(FAL_AI_AUDIO_MIME_MAP);
 
 abstract class FalAITask extends TaskProviderHelper {
 	constructor(url?: string) {
@@ -491,7 +506,12 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`,
 			);
 		}
-		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
+		// Blob MIME types can carry codec parameters (e.g. MediaRecorder produces
+		// "audio/webm;codecs=opus"); take the base type and remap it to a label fal's
+		// data-URL decoder accepts (see FAL_AI_AUDIO_MIME_MAP).
+		const baseContentType = contentType.split(";")[0].trim().toLowerCase();
+		const falContentType = FAL_AI_AUDIO_MIME_MAP[baseContentType];
+		if (!falContentType) {
 			throw new InferenceClientInputError(
 				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
 					", ",
@@ -501,7 +521,7 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
 		return {
 			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
-			audio_url: `data:${contentType};base64,${base64audio}`,
+			audio_url: `data:${falContentType};base64,${base64audio}`,
 		};
 	}
 }
