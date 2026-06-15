@@ -86,7 +86,28 @@ type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
 // 	content?:  ContentSource;
 // };
 
-export type CommitOperation = CommitDeletedEntry | CommitFile | CommitEditFile /* | CommitRenameFile */;
+/**
+ * Server-side copy of a file from a source repo/bucket to the destination repo.
+ *
+ * Only supported when the destination repo is a bucket. The source file must be xet-backed,
+ * so the caller is responsible for resolving the source path to its {@link sourceXetHash}
+ * (typically via {@link pathsInfo} or {@link listFiles}).
+ *
+ * For higher-level helpers that perform the resolution and handle non-xet source files,
+ * see {@link copyFile}, {@link copyFiles} and {@link copyFolder}.
+ */
+export interface CommitCopyFile {
+	operation: "copy";
+	path: string;
+	sourceXetHash: string;
+	sourceRepo: RepoDesignation;
+}
+
+export type CommitOperation =
+	| CommitDeletedEntry
+	| CommitFile
+	| CommitEditFile
+	| CommitCopyFile /* | CommitRenameFile */;
 type CommitBlobOperation = Exclude<CommitOperation, CommitFile> | CommitBlob;
 
 export type CommitParams = {
@@ -175,6 +196,10 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 	if (repoId.type === "bucket") {
 		return yield* commitIterBucket(params);
+	}
+
+	if (params.operations.some((op) => op.operation === "copy")) {
+		throw new Error("'copy' operations are only supported when the destination repo is a bucket");
 	}
 
 	yield { event: "phase", phase: "preuploading" };
@@ -855,6 +880,55 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 								xetHash,
 							}),
 						)
+						.join("\n"),
+					signal: abortSignal,
+				},
+			);
+
+			if (!resp.ok && resp.status !== 422) {
+				throw await createApiError(resp);
+			}
+
+			const json = (await resp.json()) as ApiBucketBatchResponse;
+
+			for (const failed of json.failed) {
+				yield {
+					event: "fileProgress",
+					path: failed.path,
+					progress: 0,
+					state: "error",
+				};
+			}
+		}
+
+		abortSignal?.throwIfAborted();
+
+		const copyOperations = allOperations.filter(
+			(operation): operation is CommitCopyFile => operation.operation === "copy",
+		);
+
+		for (const copyChunk of chunk(copyOperations, 100)) {
+			abortSignal?.throwIfAborted();
+
+			const resp = await (params.fetch ?? fetch)(
+				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
+				{
+					method: "POST",
+					headers: {
+						...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+						"Content-Type": "application/x-ndjson",
+					},
+					body: copyChunk
+						.map((op) => {
+							const sourceRepoId = toRepoId(op.sourceRepo);
+							return JSON.stringify({
+								type: "copyFile",
+								path: op.path,
+								xetHash: op.sourceXetHash,
+								sourceRepoType: sourceRepoId.type,
+								sourceRepoId: sourceRepoId.name,
+							});
+						})
 						.join("\n"),
 					signal: abortSignal,
 				},

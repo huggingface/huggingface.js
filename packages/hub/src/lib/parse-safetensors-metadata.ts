@@ -49,9 +49,13 @@ export type TensorName = string;
 export type Dtype =
 	| "F64"
 	| "F32"
+	| "C64"
 	| "F16"
 	| "F8_E4M3"
+	| "F8_E4M3FNUZ"
 	| "F8_E5M2"
+	| "F8_E5M2FNUZ"
+	| "F8_E8M0"
 	| "E8M0"
 	| "F6_E3M2"
 	| "F6_E2M3"
@@ -59,7 +63,9 @@ export type Dtype =
 	| "FP4"
 	| "BF16"
 	| "I64"
+	| "U64"
 	| "I32"
+	| "U32"
 	| "I16"
 	| "I8"
 	| "U16"
@@ -240,8 +246,12 @@ async function fetchAllHeaders(
 }
 
 function parseTotalParameters(value: string | number | undefined): number | undefined {
-	if (!value) return undefined;
-	if (typeof value === "number") return value;
+	if (!value) {
+		return undefined;
+	}
+	if (typeof value === "number") {
+		return value;
+	}
 	return parseInt(value);
 }
 
@@ -367,7 +377,7 @@ export interface QuantizationConfig {
 	load_in_8bit?: boolean;
 	// compressed-tensors specific
 	format?: string;
-	config_groups?: Record<string, { weights?: { num_bits?: number } }>;
+	config_groups?: Record<string, { format?: string; targets?: string[]; weights?: { num_bits?: number } }>;
 }
 
 export interface ModelConfig {
@@ -388,16 +398,22 @@ export function globMatch(pattern: string, str: string): boolean {
 		return pattern === str;
 	}
 
-	if (!str.startsWith(parts[0])) return false;
+	if (!str.startsWith(parts[0])) {
+		return false;
+	}
 	let pos = parts[0].length;
 
 	const lastPart = parts[parts.length - 1];
-	if (!str.endsWith(lastPart)) return false;
+	if (!str.endsWith(lastPart)) {
+		return false;
+	}
 	const end = str.length - lastPart.length;
 
 	for (let i = 1; i < parts.length - 1; i++) {
 		const idx = str.indexOf(parts[i], pos);
-		if (idx === -1 || idx + parts[i].length > end) return false;
+		if (idx === -1 || idx + parts[i].length > end) {
+			return false;
+		}
 		pos = idx + parts[i].length;
 	}
 
@@ -412,12 +428,49 @@ export function globMatch(pattern: string, str: string): boolean {
  * pattern contains a `*` we fall back to proper glob matching for flexibility.
  */
 export function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
-	if (!quantConfig) return false;
+	if (!quantConfig) {
+		return false;
+	}
 	const patterns = quantConfig.modules_to_not_convert;
-	if (!patterns?.length) return true;
+	if (!patterns?.length) {
+		return true;
+	}
 	return !patterns.some((pattern) =>
 		pattern.includes("*") ? globMatch(pattern, tensorName) : tensorName.includes(pattern),
 	);
+}
+
+/**
+ * @internal
+ * Matches a module name against a compressed-tensors target.
+ *
+ * Targets are either exact module names, class names (e.g. `"Linear"`, which we
+ * cannot resolve from tensor names and therefore ignore), or Python regexes
+ * prefixed with `re:`. To avoid evaluating attacker-controlled RegExp from
+ * config.json (ReDoS, SyntaxError — see globMatch), we translate the common
+ * regex subset (`.*` wildcard, `^`/`$` anchors, `\.` escapes) to globMatch and
+ * treat targets using any other regex syntax as non-matching.
+ */
+export function matchesCompressedTensorsTarget(target: string, moduleName: string): boolean {
+	if (!target.startsWith("re:")) {
+		return target === moduleName;
+	}
+	let pattern = target.slice(3);
+	// Python's re.match anchors at the start; only `$` anchors the end.
+	if (pattern.startsWith("^")) {
+		pattern = pattern.slice(1);
+	}
+	if (pattern.endsWith("$")) {
+		pattern = pattern.slice(0, -1);
+	} else {
+		pattern += ".*";
+	}
+	const glob = pattern.replaceAll(".*", "*").replaceAll("\\.", ".");
+	if (/[\\+?()[\]{}|^$]/.test(glob)) {
+		// unsupported regex syntax — skip this target rather than risk a wrong match
+		return false;
+	}
+	return globMatch(glob, moduleName);
 }
 
 /**
@@ -452,10 +505,29 @@ function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig
 			return 1;
 
 		case "compressed-tensors":
-			if (quantConfig.format === "pack-quantized" && dtype === "I32") {
-				const numBits =
-					Object.values(quantConfig.config_groups ?? {}).find((g) => g.weights?.num_bits)?.weights?.num_bits ?? 4;
-				return Math.floor(32 / numBits);
+			if (dtype === "I32") {
+				const groups = Object.values(quantConfig.config_groups ?? {});
+				// Mixed-precision models pack different modules at different bit widths
+				// (one config group per width), so resolve the group whose targets
+				// match this tensor's module name (e.g. "model.lm_head.weight_packed"
+				// -> "model.lm_head") instead of assuming a single global num_bits.
+				const suffixIndex = tensorName.lastIndexOf(".weight");
+				const moduleName = suffixIndex === -1 ? tensorName : tensorName.slice(0, suffixIndex);
+				const group = groups.find((g) =>
+					g.targets?.some((target) => matchesCompressedTensorsTarget(target, moduleName)),
+				);
+				if (group) {
+					if ((group.format ?? quantConfig.format) !== "pack-quantized") {
+						return 1;
+					}
+					const numBits = group.weights?.num_bits ?? 4;
+					return Math.max(1, Math.floor(32 / numBits));
+				}
+				// fallback when no group targets match: first group's num_bits
+				if (quantConfig.format === "pack-quantized") {
+					const numBits = groups.find((g) => g.weights?.num_bits)?.weights?.num_bits ?? 4;
+					return Math.max(1, Math.floor(32 / numBits));
+				}
 			}
 			return 1;
 
@@ -520,10 +592,16 @@ function getTensorSuffix(tensorName: string): string {
 }
 
 function shouldSkipTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
-	if (!quantConfig) return false;
+	if (!quantConfig) {
+		return false;
+	}
 	const quantMethod = quantConfig.quant_method?.toLowerCase();
-	if (quantMethod !== "gptq" && quantMethod !== "awq") return false;
-	if (!isQuantizedTensor(tensorName, quantConfig)) return false;
+	if (quantMethod !== "gptq" && quantMethod !== "awq") {
+		return false;
+	}
+	if (!isQuantizedTensor(tensorName, quantConfig)) {
+		return false;
+	}
 	const suffix = getTensorSuffix(tensorName);
 	return suffix !== GPTQ_QWEIGHT_SUFFIX && GPTQ_AWQ_AUXILIARY_SUFFIXES.includes(suffix);
 }

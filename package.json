@@ -18,6 +18,7 @@
 		"@types/node": "^22.14.1",
 		"@typescript-eslint/eslint-plugin": "^7.2.0",
 		"@typescript-eslint/parser": "^7.2.0",
+		"@typescript/native-preview": "7.0.0-dev.20260511.1",
 		"@vitest/browser": "^0.34.6",
 		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.0.0",
@@ -32,8 +33,6 @@
 		"typescript": "^5.8.3",
 		"vite": "^5.0.2",
 		"vitest": "^0.34.6",
-		"rolldown": "1.0.0-rc.15",
-		"rolldown-plugin-dts": "^0.23.0",
 		"webdriverio": "^8.6.7"
 	},
 	"packageManager": "pnpm@10.10.0"
