@@ -691,7 +691,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "IntelliFold",
 		repoUrl: "https://github.com/IntelliGen-AI/IntelliFold",
 		filter: false,
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"zst"`,
 	},
 	"ising-decoding": {
 		prettyLabel: "Ising Decoding",
