@@ -172,8 +172,8 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	};
 	return [
 		{
-			title: "Install from brew",
-			setup: "brew install llama.cpp",
+			title: "Install (macOS, Linux)",
+			setup: "curl -LsSf https://llama.app/install.sh | sh",
 			content: [serverCommand("llama serve"), cliCommand("llama cli")],
 		},
 		{
