@@ -96,19 +96,19 @@ export const AGENT_HARNESSES = {
 		description: "OpenAI's lightweight coding agent that runs in your terminal.",
 		envVars: { CODEX_SANDBOX: "*", CODEX_CI: "*", CODEX_THREAD_ID: "*" },
 	},
-	"cursor-cli": {
-		// must stay before `cursor` so the more specific signal takes priority: when the CLI runs inside
-		// the Cursor editor's terminal, child processes inherit `CURSOR_TRACE_ID` and the CLI sets `CURSOR_AGENT`.
-		prettyLabel: "Cursor CLI",
-		docsUrl: "https://cursor.com/docs/cli/overview",
-		description: "Cursor's coding agent for the command line.",
-		envVars: { CURSOR_AGENT: "*" },
+	crush: {
+		prettyLabel: "Crush",
+		repoUrl: "https://github.com/charmbracelet/crush",
+		docsUrl: "https://github.com/charmbracelet/crush",
+		description: "Charm's open-source AI coding agent for the terminal.",
+		envVars: { CRUSH: "*" },
 	},
-	cursor: {
-		prettyLabel: "Cursor",
-		docsUrl: "https://cursor.com",
-		description: "AI-powered code editor.",
-		envVars: { CURSOR_TRACE_ID: "*" },
+	"gemini-cli": {
+		prettyLabel: "Gemini CLI",
+		repoUrl: "https://github.com/google-gemini/gemini-cli",
+		docsUrl: "https://geminicli.com",
+		description: "Google's open-source terminal AI coding agent powered by Gemini models.",
+		envVars: { GEMINI_CLI: "*" },
 	},
 	"github-copilot": {
 		prettyLabel: "GitHub Copilot",
@@ -122,6 +122,26 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://goose-docs.ai/",
 		description: "Open-source, extensible AI agent, originally from Block and now part of the Agentic AI Foundation.",
 		envVars: { GOOSE_TERMINAL: "*" },
+	},
+	"hermes-agent": {
+		prettyLabel: "Hermes Agent",
+		repoUrl: "https://github.com/NousResearch/hermes-agent",
+		docsUrl: "https://hermes-agent.nousresearch.com/docs",
+		description: "Nous Research's self-improving, multi-provider terminal AI agent.",
+		envVars: { HERMES_SESSION_ID: "*" },
+	},
+	"kilo-code": {
+		prettyLabel: "Kilo Code",
+		repoUrl: "https://github.com/Kilo-Org/kilocode",
+		docsUrl: "https://kilocode.ai/docs",
+		description: "Open-source agentic coding agent for VS Code, JetBrains, and the terminal.",
+		envVars: { KILOCODE_FEATURE: "*" },
+	},
+	kiro: {
+		prettyLabel: "Kiro",
+		docsUrl: "https://kiro.dev",
+		description: "AWS's agentic IDE for spec-driven AI software development.",
+		envVars: { AGENT_CONTEXT_OUT: "*" },
 	},
 	openclaw: {
 		prettyLabel: "OpenClaw",
@@ -155,6 +175,35 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://trae.ai",
 		description: "AI-powered IDE from ByteDance.",
 		envVars: { TRAE_AI_SHELL_ID: "*" },
+	},
+	warp: {
+		prettyLabel: "Warp",
+		repoUrl: "https://github.com/warpdotdev/Warp",
+		docsUrl: "https://docs.warp.dev",
+		description: "AI-powered terminal with an agentic Agent Mode.",
+		envVars: { TERM_PROGRAM: "WarpTerminal" },
+	},
+	zed: {
+		prettyLabel: "Zed",
+		repoUrl: "https://github.com/zed-industries/zed",
+		docsUrl: "https://zed.dev",
+		description: "High-performance code editor with an integrated AI agent panel and terminal.",
+		envVars: { ZED_TERM: "*" },
+	},
+	"cursor-cli": {
+		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
+		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
+		// the agent's own marker. `cursor-cli` is the more specific Cursor signal (`CURSOR_AGENT`), so it comes first.
+		prettyLabel: "Cursor CLI",
+		docsUrl: "https://cursor.com/docs/cli/overview",
+		description: "Cursor's coding agent for the command line.",
+		envVars: { CURSOR_AGENT: "*" },
+	},
+	cursor: {
+		prettyLabel: "Cursor",
+		docsUrl: "https://cursor.com",
+		description: "AI-powered code editor.",
+		envVars: { CURSOR_TRACE_ID: "*" },
 	},
 	devin: {
 		prettyLabel: "Devin",

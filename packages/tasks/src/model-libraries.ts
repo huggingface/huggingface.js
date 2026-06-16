@@ -250,6 +250,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	chexmix: {
+		prettyLabel: "CheXmix",
+		repoName: "CheXmix",
+		repoUrl: "https://github.com/StanfordMIMI/CheXmix",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"chronos-forecasting": {
 		prettyLabel: "Chronos",
 		repoName: "Chronos",
@@ -808,6 +815,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/KwaiVGI/LivePortrait",
 		filter: false,
 		countDownloads: `path:"liveportrait/landmark.onnx"`,
+	},
+	"longcat-video-avatar-1.5": {
+		prettyLabel: "LongCat-Video-Avatar 1.5",
+		repoName: "LongCat-Video-Avatar 1.5",
+		repoUrl: "https://github.com/meituan-longcat/LongCat-Video",
+		filter: false,
 	},
 	"llama-cpp-python": {
 		prettyLabel: "llama-cpp-python",

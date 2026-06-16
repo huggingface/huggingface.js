@@ -756,6 +756,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 250,
 		releaseYear: 2017,
 	},
+	"GTX 1080": {
+		tflops: 8.87, // float32 (GPU does not support native float16)
+		memory: [8],
+		computeCapability: 6.1,
+		msrp: 599,
+		power: 180,
+		releaseYear: 2016,
+	},
 	"GTX 1070 Ti": {
 		tflops: 8.2, // float32 (GPU does not support native float16)
 		memory: [8],
@@ -763,6 +771,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 450,
 		power: 180,
 		releaseYear: 2017,
+	},
+	"GTX 1070": {
+		tflops: 6.46, // float32 (GPU does not support native float16)
+		memory: [8],
+		computeCapability: 6.1,
+		msrp: 379,
+		power: 150,
+		releaseYear: 2016,
 	},
 	"GTX 1060": {
 		tflops: 3.9, // float32 (GPU does not support native float16)
