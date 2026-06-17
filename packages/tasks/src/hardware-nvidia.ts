@@ -29,12 +29,12 @@ export enum NvidiaComputeCapabilities {
 
 export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	B300: {
-	  tflops: 1232,
-	  memory: [288],
-	  computeCapability: 10.0,
-	  msrp: 45_000,
-	  power: 1400,
-	  releaseYear: 2026,
+		tflops: 1232,
+		memory: [288],
+		computeCapability: 10.0,
+		msrp: 45_000,
+		power: 1400,
+		releaseYear: 2026,
 	},
 	B200: {
 		tflops: 496.6,
