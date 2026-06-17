@@ -29,10 +29,10 @@ export enum NvidiaComputeCapabilities {
 
 export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	B300: {
-	  tflops: 496.6,
+	  tflops: 1232,
 	  memory: [288],
 	  computeCapability: 10.0,
-	  msrp: 50_000,
+	  msrp: 45_000,
 	  power: 1400,
 	  releaseYear: 2026,
 	},
@@ -61,7 +61,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		releaseYear: 2024,
 	},
 	H800: {
-		tflops: 197.9,
+		tflops: 237.2,
 		memory: [80],
 		computeCapability: 9.0,
 		msrp: 30_000,
@@ -325,11 +325,11 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		releaseYear: 2021,
 	},
 	A800: {
-		tflops: 312,
+		tflops: 77.97,
 		memory: [40, 80],
 		computeCapability: 8.0,
 		msrp: 12_000,
-		power: 250,
+		power: 400,
 		releaseYear: 2022,
 	},
 	A100: {
