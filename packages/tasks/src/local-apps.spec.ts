@@ -227,6 +227,33 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(deeplink(model).href).toBe("atomic-chat://models/huggingface/bartowski/Llama-3.2-3B-Instruct-GGUF");
 	});
 
+	it("atomic chat deeplink - mlx", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["atomic-chat"];
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe(
+			"atomic-chat://models/huggingface/mlx-community/Llama-3.2-3B-Instruct-4bit",
+		);
+	});
+
+	it("atomic chat not shown for unrelated model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["atomic-chat"];
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			tags: ["conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("unsloth tagged model", async () => {
 		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.unsloth;
 		const model: ModelData = {
