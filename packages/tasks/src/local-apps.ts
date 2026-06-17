@@ -172,14 +172,14 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	};
 	return [
 		{
-			title: "Install from brew",
-			setup: "brew install llama.cpp",
-			content: [serverCommand("llama-server"), cliCommand("llama-cli")],
+			title: "Install (macOS, Linux)",
+			setup: "curl -LsSf https://llama.app/install.sh | sh",
+			content: [serverCommand("llama serve"), cliCommand("llama cli")],
 		},
 		{
 			title: "Install from WinGet (Windows)",
 			setup: "winget install llama.cpp",
-			content: [serverCommand("llama-server"), cliCommand("llama-cli")],
+			content: [serverCommand("llama serve"), cliCommand("llama cli")],
 		},
 		{
 			title: "Use pre-built binary",
@@ -481,7 +481,7 @@ const getLocalServerStep = (model: ModelData, filepath?: string): LocalAppSnippe
 		: {
 				title: "Start the llama.cpp server",
 				setup: "# Install llama.cpp:\nbrew install llama.cpp",
-				content: `# Start a local OpenAI-compatible server:\nllama-server -hf ${model.id}${getQuantTag(filepath)}`,
+				content: `# Start a local OpenAI-compatible server:\nllama serve -hf ${model.id}${getQuantTag(filepath)}`,
 			};
 };
 

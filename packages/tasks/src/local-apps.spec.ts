@@ -14,9 +14,9 @@ describe("local-apps", () => {
 
 		expect(snippet[0].content).toEqual([
 			`# Start a local OpenAI-compatible server with a web UI:
-llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`,
+llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`,
 			`# Run inference directly in the terminal:
-llama-cli -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`,
+llama cli -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`,
 		]);
 	});
 
@@ -31,9 +31,9 @@ llama-cli -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`,
 
 		expect(snippet[0].content).toEqual([
 			`# Start a local OpenAI-compatible server with a web UI:
-llama-server -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`,
+llama serve -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`,
 			`# Run inference directly in the terminal:
-llama-cli -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`,
+llama cli -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`,
 		]);
 	});
 
@@ -132,7 +132,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 		const snippet = snippetFunc(model);
 
-		expect(snippet[0].content).toContain(`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
+		expect(snippet[0].content).toContain(`llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
 		expect(snippet[1].content).toContain(`"id": "bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"`);
 		expect(snippet[2].content).toContain("pi");
@@ -171,7 +171,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 		const snippet = snippetFunc(model);
 
-		expect(snippet[0].content).toContain(`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
+		expect(snippet[0].content).toContain(`llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 		expect(snippet[1].content).toContain("hermes config set model.provider custom");
 		expect(snippet[1].content).toContain("hermes config set model.base_url http://127.0.0.1:8080/v1");
 		expect(snippet[1].content).toContain(
