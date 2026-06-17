@@ -52,13 +52,13 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 700,
 		releaseYear: 2024,
 	},
-	H20: {
-		tflops: 148,
-		memory: [96],
+	H100: {
+		tflops: 267.6,
+		memory: [80],
 		computeCapability: 9.0,
-		msrp: 13_500,
-		power: 400,
-		releaseYear: 2024,
+		msrp: 30_000,
+		power: 700,
+		releaseYear: 2022,
 	},
 	H800: {
 		tflops: 237.2,
@@ -68,13 +68,13 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 700,
 		releaseYear: 2023,
 	},
-	H100: {
-		tflops: 267.6,
-		memory: [80],
+	H20: {
+		tflops: 148,
+		memory: [96],
 		computeCapability: 9.0,
-		msrp: 30_000,
-		power: 700,
-		releaseYear: 2022,
+		msrp: 13_500,
+		power: 400,
+		releaseYear: 2024,
 	},
 	L40s: {
 		tflops: 91.61,
