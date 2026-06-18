@@ -22,6 +22,7 @@
 import type { AutomaticSpeechRecognitionOutput, FeatureExtractionOutput } from "@huggingface/tasks";
 import type { BodyParams, OutputType, RequestArgs } from "../types.js";
 import { omit } from "../utils/omit.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
@@ -130,11 +131,23 @@ export class DeapiTextToImageTask extends TaskProviderHelper implements TextToIm
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown> | undefined),
 			prompt: params.args.inputs,
-			// When the caller wants raw bytes we ask deAPI for base64 to avoid a second
-			// round-trip fetch; for "url" output we keep the hosted URL.
-			response_format: params.outputType === "url" ? "url" : "b64_json",
+			// deAPI's confirmed contract returns a hosted URL (`data[0].url`). Request it
+			// explicitly and fetch the bytes when the caller wants a Blob/dataUrl, rather than
+			// relying on `b64_json` (which is not confirmed for deAPI).
+			response_format: "url",
 			model: params.model,
 		};
+	}
+
+	/** Fetch a generated-image URL, surfacing non-OK HTTP responses instead of returning HTML/errors as a Blob. */
+	protected async fetchImageBlob(imageUrl: string, signal?: AbortSignal): Promise<Blob> {
+		const res = await fetch(imageUrl, { signal });
+		if (!res.ok) {
+			throw new InferenceClientProviderOutputError(
+				`deAPI ${this.imageTaskLabel} API returned HTTP ${res.status} when fetching the generated image.`,
+			);
+		}
+		return await res.blob();
 	}
 
 	async getResponse(
@@ -155,20 +168,18 @@ export class DeapiTextToImageTask extends TaskProviderHelper implements TextToIm
 			if (outputType === "json") {
 				return { ...response };
 			}
-			if ("url" in response.data[0] && typeof response.data[0].url === "string") {
-				const imageUrl = response.data[0].url;
+			const first = response.data[0];
+			if ("url" in first && typeof first.url === "string") {
 				if (outputType === "url") {
-					return imageUrl;
+					return first.url;
 				}
-				const imgResponse = await fetch(imageUrl, { signal });
-				return await imgResponse.blob();
+				const blob = await this.fetchImageBlob(first.url, signal);
+				return outputType === "dataUrl" ? await dataUrlFromBlob(blob) : blob;
 			}
-			if ("b64_json" in response.data[0] && typeof response.data[0].b64_json === "string") {
-				const base64Data = response.data[0].b64_json;
-				if (outputType === "dataUrl") {
-					return `data:image/jpeg;base64,${base64Data}`;
-				}
-				return fetch(`data:image/jpeg;base64,${base64Data}`, { signal }).then((res) => res.blob());
+			// Fallback: tolerate base64 if a deployment ever returns it directly.
+			if ("b64_json" in first && typeof first.b64_json === "string") {
+				const blob = await fetch(`data:image/jpeg;base64,${first.b64_json}`, { signal }).then((res) => res.blob());
+				return outputType === "dataUrl" ? await dataUrlFromBlob(blob) : blob;
 			}
 		}
 		throw new InferenceClientProviderOutputError(`Received malformed response from deAPI ${this.imageTaskLabel} API`);
@@ -202,12 +213,17 @@ export class DeapiImageToImageTask extends DeapiTextToImageTask implements Image
 			...omit(params.args, ["inputs", "parameters", "data"]),
 			...restParameters,
 			prompt: prompt ?? "",
+			response_format: "url",
 			model: params.model,
 		};
 	}
 
 	override makeBody(params: BodyParams): BodyInit {
-		const image = params.args.data;
+		// imageToImage() calls makeRequestOptions twice: once via innerRequest with the prepared
+		// payload (image carried as `data`), and once with the original args (image still in
+		// `inputs`) purely to recover url/headers for getResponse. Accept both so the second,
+		// discarded call does not throw.
+		const image = params.args.data ?? params.args.inputs;
 		if (!(image instanceof Blob)) {
 			throw new InferenceClientInputError("deAPI image-to-image expects a Blob image input.");
 		}
@@ -344,6 +360,9 @@ export class DeapiAutomaticSpeechRecognitionTask
 			...omit(params.args, ["inputs", "parameters", "data"]),
 			...(params.args.parameters as Record<string, unknown> | undefined),
 			model: params.model,
+			// Force JSON so the response is parsed as { text }. With response_format=text deAPI
+			// returns text/plain, which innerRequest turns into a Blob (not the { text } shape).
+			response_format: "json",
 		};
 	}
 
