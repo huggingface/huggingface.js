@@ -55,7 +55,10 @@ function mimeTypeToExtension(mimeType: string | undefined): string {
 	if (!mimeType) {
 		return "wav";
 	}
-	return AUDIO_MIME_TO_EXT[mimeType.toLowerCase()] ?? "wav";
+	// Strip any MIME parameters (e.g. `audio/webm;codecs=opus`) before lookup so
+	// browser-recorded audio still maps to the correct file extension.
+	const baseType = mimeType.split(";")[0].trim().toLowerCase();
+	return AUDIO_MIME_TO_EXT[baseType] ?? "wav";
 }
 
 interface DeepInfraCompletionChoice {
