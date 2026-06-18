@@ -3,6 +3,7 @@ import * as Clarifai from "../providers/clarifai.js";
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
+import * as Deapi from "../providers/deapi.js";
 import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
 import * as FeatherlessAI from "../providers/featherless-ai.js";
@@ -76,6 +77,13 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
+	},
+	deapi: {
+		"text-to-image": new Deapi.DeapiTextToImageTask(),
+		"image-to-image": new Deapi.DeapiImageToImageTask(),
+		"feature-extraction": new Deapi.DeapiFeatureExtractionTask(),
+		"text-to-speech": new Deapi.DeapiTextToSpeechTask(),
+		"automatic-speech-recognition": new Deapi.DeapiAutomaticSpeechRecognitionTask(),
 	},
 	deepinfra: {
 		conversational: new DeepInfra.DeepInfraConversationalTask(),

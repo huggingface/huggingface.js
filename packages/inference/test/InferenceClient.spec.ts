@@ -1412,6 +1412,110 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
+		"deAPI",
+		() => {
+			const client = new InferenceClient(env.HF_DEAPI_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["deapi"] = {
+				"black-forest-labs/FLUX.1-schnell": {
+					provider: "deapi",
+					hfModelId: "black-forest-labs/FLUX.1-schnell",
+					providerId: "Flux1schnell",
+					status: "live",
+					task: "text-to-image",
+				},
+				"BAAI/bge-m3": {
+					provider: "deapi",
+					hfModelId: "BAAI/bge-m3",
+					providerId: "Bge_M3_FP16",
+					status: "live",
+					task: "feature-extraction",
+				},
+				"openai/whisper-large-v3": {
+					provider: "deapi",
+					hfModelId: "openai/whisper-large-v3",
+					providerId: "WhisperLargeV3",
+					status: "live",
+					task: "automatic-speech-recognition",
+				},
+				"black-forest-labs/FLUX.2-klein-4B": {
+					provider: "deapi",
+					hfModelId: "black-forest-labs/FLUX.2-klein-4B",
+					providerId: "Flux_2_Klein_4B_BF16",
+					status: "live",
+					task: "image-to-image",
+				},
+				"hexgrad/Kokoro-82M": {
+					provider: "deapi",
+					hfModelId: "hexgrad/Kokoro-82M",
+					providerId: "Kokoro",
+					status: "live",
+					task: "text-to-speech",
+				},
+			};
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "deapi",
+					inputs: "award winning high resolution photo of a giant tortoise",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("imageToImage", async () => {
+				const res = await client.imageToImage({
+					model: "black-forest-labs/FLUX.2-klein-4B",
+					provider: "deapi",
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					parameters: { prompt: "turn the cheetah into a tiger" },
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("imageToImage rejects inpainting (mask)", async () => {
+				await expect(
+					client.imageToImage({
+						model: "black-forest-labs/FLUX.2-klein-4B",
+						provider: "deapi",
+						inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+						// mask is not part of the HF schema; deAPI must reject inpainting client-side
+						parameters: { prompt: "edit", mask: "x" },
+					}),
+				).rejects.toThrow(/inpainting|mask/i);
+			});
+
+			it("textToSpeech", async () => {
+				const res = await client.textToSpeech({
+					model: "hexgrad/Kokoro-82M",
+					provider: "deapi",
+					inputs: "Hello from deAPI on Hugging Face",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "BAAI/bge-m3",
+					provider: "deapi",
+					inputs: "That is a happy person",
+				});
+				expect(res).toEqual(expect.arrayContaining([expect.any(Number)]));
+			});
+
+			it("automaticSpeechRecognition", async () => {
+				const res = await client.automaticSpeechRecognition({
+					model: "openai/whisper-large-v3",
+					provider: "deapi",
+					data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
+				});
+				expect(res).toMatchObject({ text: expect.stringMatching(/.+/) });
+			});
+		},
+		TIMEOUT,
+	);
+
+	describe.concurrent(
 		"Nebius",
 		() => {
 			const client = new InferenceClient(env.HF_NEBIUS_KEY ?? "dummy");

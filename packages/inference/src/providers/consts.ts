@@ -23,6 +23,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	cerebras: {},
 	clarifai: {},
 	cohere: {},
+	deapi: {},
 	deepinfra: {},
 	"fal-ai": {},
 	"featherless-ai": {},
