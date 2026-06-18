@@ -55,8 +55,7 @@ function mimeTypeToExtension(mimeType: string | undefined): string {
 	if (!mimeType) {
 		return "wav";
 	}
-	// Strip any MIME parameters (e.g. `audio/webm;codecs=opus`) before lookup so
-	// browser-recorded audio still maps to the correct file extension.
+	// Strip MIME parameters (e.g. `audio/webm;codecs=opus`) before lookup.
 	const baseType = mimeType.split(";")[0].trim().toLowerCase();
 	return AUDIO_MIME_TO_EXT[baseType] ?? "wav";
 }
@@ -161,9 +160,7 @@ export class DeepInfraAutomaticSpeechRecognitionTask
 		if (audio instanceof Blob) {
 			formData.append("file", audio, `audio.${mimeTypeToExtension(audio.type)}`);
 		} else {
-			throw new InferenceClientInputError(
-				"DeepInfra automatic-speech-recognition expects a Blob or ArrayBuffer audio input.",
-			);
+			throw new InferenceClientInputError("DeepInfra automatic-speech-recognition expects a Blob audio input.");
 		}
 
 		const fields = this.preparePayload(params);
