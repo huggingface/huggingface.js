@@ -106,6 +106,13 @@ describe("deAPI provider (offline, mocked fetch)", () => {
 				status: "live",
 				task: "automatic-speech-recognition",
 			},
+			"hexgrad/Kokoro-82M": {
+				provider: "deapi",
+				hfModelId: "hexgrad/Kokoro-82M",
+				providerId: "Kokoro",
+				status: "live",
+				task: "text-to-speech",
+			},
 		};
 	});
 
@@ -203,6 +210,34 @@ describe("deAPI provider (offline, mocked fetch)", () => {
 		expect(apiCall.url).toBe("https://oai.deapi.ai/v1/audio/transcriptions");
 		expect(headerValue(apiCall.init, "Content-Type")).toBeUndefined();
 		expect(apiCall.init.body).toBeInstanceOf(FormData);
+	});
+
+	it("text-to-speech: defaults a Kokoro voice when none is provided, and returns a Blob", async () => {
+		const { calls } = installFetchMock();
+		const client = new InferenceClient("dpn-sk-test");
+		const res = await client.textToSpeech({
+			provider: "deapi",
+			model: "hexgrad/Kokoro-82M",
+			inputs: "Hello from deAPI on Hugging Face",
+		});
+		expect(res).toBeInstanceOf(Blob);
+
+		const apiCall = requireCall(calls, "/v1/audio/speech");
+		const body = JSON.parse(apiCall.init.body as string);
+		expect(body).toMatchObject({ model: "Kokoro", input: "Hello from deAPI on Hugging Face", voice: "af_alloy" });
+	});
+
+	it("text-to-speech: respects a caller-provided voice", async () => {
+		const { calls } = installFetchMock();
+		const client = new InferenceClient("dpn-sk-test");
+		await client.textToSpeech({
+			provider: "deapi",
+			model: "hexgrad/Kokoro-82M",
+			inputs: "hi",
+			parameters: { voice: "af_bella" },
+		});
+		const body = JSON.parse(requireCall(calls, "/v1/audio/speech").init.body as string);
+		expect(body.voice).toBe("af_bella");
 	});
 
 	it("automatic-speech-recognition: rejects audio larger than 20 MB before any request", async () => {

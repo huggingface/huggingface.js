@@ -319,9 +319,15 @@ export class DeapiTextToSpeechTask extends TaskProviderHelper implements TextToS
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
 		const userParams = (params.args.parameters as Record<string, unknown> | undefined) ?? {};
+		// deAPI's /v1/audio/speech requires a `voice`, which is model-specific. Default one for
+		// Kokoro (the only TTS model currently registered) when the caller omits it, so a plain
+		// textToSpeech({ inputs }) call doesn't fail provider validation. Same approach as together.ts.
+		const isKokoro = params.model.toLowerCase().includes("kokoro");
+		const voice = userParams.voice ?? (isKokoro ? "af_alloy" : undefined);
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...userParams,
+			...(voice !== undefined ? { voice } : {}),
 			input: params.args.inputs,
 			model: params.model,
 		};
