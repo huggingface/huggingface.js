@@ -58,6 +58,7 @@ Currently, we support the following providers:
 - [NVIDIA](https://build.nvidia.com/)
 - [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
 - [Public AI](https://publicai.co)
+- [Qubrid](https://platform.qubrid.com)
 - [Replicate](https://replicate.com)
 - [Sambanova](https://sambanova.ai)
 - [Scaleway](https://www.scaleway.com/en/generative-apis/)
@@ -110,6 +111,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
 - [Groq supported models](https://console.groq.com/docs/models)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
+- [Qubrid supported models](https://huggingface.co/api/partners/qubrid/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
 - [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
 

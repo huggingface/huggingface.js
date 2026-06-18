@@ -36,6 +36,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	nvidia: {},
 	openai: {},
 	publicai: {},
+	qubrid: {},
 	ovhcloud: {},
 	replicate: {},
 	sambanova: {},
