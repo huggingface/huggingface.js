@@ -139,15 +139,23 @@ export async function getInferenceProviderMapping(
 		return HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId];
 	}
 	const mappings = await fetchInferenceProviderMappingForModel(params.modelId, params.accessToken, options);
-	const providerMapping = mappings.find((mapping) => mapping.provider === params.provider);
-	if (providerMapping) {
+	const providerMappings = mappings.filter((mapping) => mapping.provider === params.provider);
+	if (providerMappings.length > 0) {
 		const equivalentTasks =
 			params.provider === "hf-inference" && typedInclude(EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS, params.task)
 				? EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS
 				: [params.task];
-		if (!typedInclude(equivalentTasks, providerMapping.task)) {
+		// A model can be mapped to the same provider for several tasks (e.g. a single checkpoint
+		// exposed for both text-to-image and image-to-image). Match on the requested task rather
+		// than blindly taking the first mapping for the provider, which would reject valid
+		// requests when the task we want is not the first entry returned by the API.
+		const providerMapping = providerMappings.find((mapping) => typedInclude(equivalentTasks, mapping.task));
+		if (!providerMapping) {
+			const supportedTasks = providerMappings.map((mapping) => mapping.task).join(", ");
 			throw new InferenceClientInputError(
-				`Model ${params.modelId} is not supported for task ${params.task} and provider ${params.provider}. Supported task: ${providerMapping.task}.`,
+				`Model ${params.modelId} is not supported for task ${params.task} and provider ${params.provider}. Supported task${
+					providerMappings.length > 1 ? "s" : ""
+				}: ${supportedTasks}.`,
 			);
 		}
 		if (providerMapping.status === "staging") {
