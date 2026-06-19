@@ -481,6 +481,17 @@ describe("xetchunk-wasm", () => {
 			expect(hashToHex(fileHash(chunks))).toBe("041a50f3639f4a080a89237025d643e2a3e22935ca5d7dbc1a38f5c1e859f859");
 		});
 
+		it("xorbHash: empty (no chunks) is the all-zero hash", () => {
+			expect(hashToHex(xorbHash([]))).toBe("0".repeat(64));
+		});
+
+		it("fileHash: empty (no chunks) is the all-zero hash", () => {
+			// Matches Rust's `file_hash_with_salt`, which short-circuits empty input to
+			// `MerkleHash::default()`. Must not be `hmac(0, zero_key)` (638a6bc3…), which the
+			// CAS shard validation rejects for empty files as a reconstruction hash mismatch.
+			expect(hashToHex(fileHash([]))).toBe("0".repeat(64));
+		});
+
 		it("hmac", () => {
 			const hash = hexToBytes("118bbac5c38b2bca9c2b7ae8307786de066696b91b2b5ccb7dbbd4608c966882");
 			const key = hexToBytes("abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789");

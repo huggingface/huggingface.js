@@ -1,35 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { backtrackDedup, createXorbs, CurrentXorbInfo } from "./createXorbs";
+import { backtrackDedup, CurrentXorbInfo } from "./createXorbs";
 import type { ShardData } from "./shardParser";
 import { ChunkCache } from "./ChunkCache";
 
 describe("createXorb", () => {
-	describe("createXorbs", () => {
-		it("should emit the all-zero file hash for an empty file (no chunks)", async () => {
-			async function* fileSources() {
-				yield { content: new Blob([]), path: "empty.txt" };
-			}
-
-			const events = [];
-			for await (const event of createXorbs(fileSources(), {
-				accessToken: undefined,
-				xetParams: { refreshWriteTokenUrl: "https://example.com/xet-write-token" },
-			})) {
-				events.push(event);
-			}
-
-			// No xorb is produced for an empty file, only a single file event.
-			const fileEvents = events.filter((e) => e.event === "file");
-			expect(fileEvents).toHaveLength(1);
-			// The empty file hash must be the all-zero MerkleHash, matching xet-core's
-			// `file_hash_with_salt([])` and the CAS shard validation. Otherwise the wasm
-			// `fileHash([])` value (638a6bc3…) gets rejected on upload as a hash mismatch.
-			expect(fileEvents[0].event === "file" && fileEvents[0].hash).toBe("0".repeat(64));
-			expect(fileEvents[0].event === "file" && fileEvents[0].representation).toEqual([]);
-			expect(events.some((e) => e.event === "xorb")).toBe(false);
-		});
-	});
-
 	describe("backtrackDedup", () => {
 		it("should update cache info for chunks that go back due to previous chunks being erased", () => {
 			const xorb = new CurrentXorbInfo();

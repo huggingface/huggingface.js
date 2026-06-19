@@ -45,18 +45,7 @@ function computeVerificationHashHex(hashes: string[]): string {
 	return hashToHex(verificationHash(hashes.map(hexToBytes)));
 }
 
-// File hash of an empty file (no chunks). The Xet protocol defines it as the all-zero MerkleHash:
-// xet-core's `file_hash_with_salt` short-circuits on empty input and returns `MerkleHash::default()`.
-const EMPTY_FILE_HASH = "0".repeat(64);
-
 function computeFileHashHex(chunks: { hash: string; length: number }[]): string {
-	// An empty file has no chunks. The wasm `fileHash([])` returns the hash of a single zero-length
-	// chunk (638a6bc3…) rather than the all-zero hash, and the CAS shard validation then rejects the
-	// upload with "file reconstruction for file 638a6bc3… does not produce this hash" (it reconstructs
-	// the zero-entry file to the all-zero hash). Return the all-zero hash to stay consistent.
-	if (chunks.length === 0) {
-		return EMPTY_FILE_HASH;
-	}
 	const chunkObjs: Chunk[] = chunks.map((c) => ({ hash: hexToBytes(c.hash), length: c.length }));
 	return hashToHex(fileHash(chunkObjs));
 }
