@@ -237,9 +237,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 
 		expect(displayOnModelPage(model)).toBe(true);
-		expect(deeplink(model).href).toBe(
-			"atomic-chat://models/huggingface/mlx-community/Llama-3.2-3B-Instruct-4bit",
-		);
+		expect(deeplink(model).href).toBe("atomic-chat://models/huggingface/mlx-community/Llama-3.2-3B-Instruct-4bit");
 	});
 
 	it("atomic chat not shown for unrelated model", async () => {
