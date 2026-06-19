@@ -1536,7 +1536,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "TuneJury",
 		repoName: "TuneJury",
 		repoUrl: "https://github.com/yonghyunk1m/TuneJury",
-		countDownloads: `path:"tunejury.pt"`,
+		countDownloads: `path_extension:"pt"`,
 	},
 
 	ultralytics: {
