@@ -220,6 +220,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 70,
 		releaseYear: 2023,
 	},
+  "RTX 3500 Ada Mobile": {
+    tflops: 15.8,
+    memory: [12],
+    computeCapability: 8.9,
+    msrp: 1_500,
+    power: 150,
+    releaseYear: 2023,
+  },
 	"RTX 2000 Ada": {
 		tflops: 12.0,
 		memory: [16],
