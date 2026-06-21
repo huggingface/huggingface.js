@@ -324,6 +324,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 15,
 		releaseYear: 2024,
 	},
+	// LLVM maps Polaris 10/11 to gfx803; gfx805 is Tonga Pro.
 	"Radeon Pro 580X": {
 		tflops: 5.53,
 		memory: [8],
