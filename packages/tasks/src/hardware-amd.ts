@@ -324,6 +324,28 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 15,
 		releaseYear: 2024,
 	},
+	"Radeon Pro 580X": {
+		tflops: 5.53,
+		memory: [8],
+		releaseYear: 2019,
+	},
+	"Radeon Pro W5700X": {
+		tflops: 9.5,
+		memory: [16],
+	},
+	"Radeon Pro WX 5100": {
+		tflops: 3.89,
+		memory: [8],
+	},
+	"Radeon Pro WX 7100": {
+		tflops: 5.73,
+		memory: [8],
+	},
+	"Radeon Pro Vega II": {
+		tflops: 14.1,
+		memory: [32],
+		releaseYear: 2019,
+	},
 	"Ryzen AI Max+ 395": {
 		tflops: 29.7,
 		memory: [64, 96, 128],
