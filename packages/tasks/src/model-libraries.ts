@@ -1053,7 +1053,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://www.paddleocr.ai/",
 		snippets: snippets.paddleocr,
 		filter: true,
-		countDownloads: `path_extension:"safetensors" OR path:"inference.pdiparams"`,
+		countDownloads: `path_extension:"safetensors" OR path:"inference.pdiparams" OR path:"inference.onnx"`,
 	},
 	peft: {
 		prettyLabel: "PEFT",
@@ -1190,6 +1190,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+	},
+	"scail-2": {
+		prettyLabel: "SCAIL-2",
+		repoName: "SCAIL-2",
+		repoUrl: "https://github.com/zai-org/SCAIL-2",
+		filter: false,
+		countDownloads: `path:"model/1/fsdp2_rank_0000_checkpoint.pt"`,
 	},
 	sam2: {
 		prettyLabel: "sam2",
@@ -1532,6 +1539,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/microsoft/TRELLIS.2",
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	tunejury: {
+		prettyLabel: "TuneJury",
+		repoName: "TuneJury",
+		repoUrl: "https://github.com/yonghyunk1m/TuneJury",
+		countDownloads: `path_extension:"pt"`,
+	},
+
 	ultralytics: {
 		prettyLabel: "ultralytics",
 		repoName: "ultralytics",
