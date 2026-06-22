@@ -1191,6 +1191,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.saelens,
 		filter: false,
 	},
+	"scail-2": {
+		prettyLabel: "SCAIL-2",
+		repoName: "SCAIL-2",
+		repoUrl: "https://github.com/zai-org/SCAIL-2",
+		filter: false,
+		countDownloads: `path:"model/1/fsdp2_rank_0000_checkpoint.pt"`,
+	},
 	sam2: {
 		prettyLabel: "sam2",
 		repoName: "sam2",
