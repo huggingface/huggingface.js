@@ -31,6 +31,7 @@ import type {
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
+	type TextToAudioTaskHelper,
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
 	type ImageToVideoTaskHelper,
@@ -577,6 +578,61 @@ export class FalAITextToSpeechTask extends FalAITask {
 		}
 	}
 }
+
+interface FalAITextToAudioResult {
+	audio_file?: { url: string; content_type?: string };
+	audio?: { url: string; content_type?: string };
+}
+
+export class FalAITextToAudioTask extends FalAiQueueTask implements TextToAudioTaskHelper {
+	task: InferenceTask;
+
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "text-to-audio";
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			prompt: params.args.inputs,
+		};
+	}
+
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob> {
+		const result = (await this.getResponseFromQueueApi(response, url, headers, signal)) as FalAITextToAudioResult;
+		const audio = result.audio_file ?? result.audio;
+		if (typeof audio !== "object" || !audio || typeof audio.url !== "string" || !isUrl(audio.url)) {
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai text-to-audio API: expected { audio_file: { url: string } } or { audio: { url: string } } result format, got instead: ${JSON.stringify(
+					result,
+				)}`,
+			);
+		}
+
+		const audioResponse = await fetch(audio.url, { signal });
+		if (!audioResponse.ok) {
+			throw new InferenceClientProviderApiError(
+				`Failed to fetch audio from ${audio.url}: ${audioResponse.statusText}`,
+				{ url: audio.url, method: "GET" },
+				{
+					requestId: audioResponse.headers.get("x-request-id") ?? "",
+					status: audioResponse.status,
+					body: await audioResponse.text(),
+				},
+			);
+		}
+		return await audioResponse.blob();
+	}
+}
+
 export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageSegmentationTaskHelper {
 	task: InferenceTask;
 	constructor() {
