@@ -1053,7 +1053,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://www.paddleocr.ai/",
 		snippets: snippets.paddleocr,
 		filter: true,
-		countDownloads: `path_extension:"safetensors" OR path:"inference.pdiparams"`,
+		countDownloads: `path_extension:"safetensors" OR path:"inference.pdiparams" OR path:"inference.onnx"`,
 	},
 	peft: {
 		prettyLabel: "PEFT",
