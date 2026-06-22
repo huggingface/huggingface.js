@@ -1532,6 +1532,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/microsoft/TRELLIS.2",
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	tunejury: {
+		prettyLabel: "TuneJury",
+		repoName: "TuneJury",
+		repoUrl: "https://github.com/yonghyunk1m/TuneJury",
+		countDownloads: `path_extension:"pt"`,
+	},
+
 	ultralytics: {
 		prettyLabel: "ultralytics",
 		repoName: "ultralytics",
