@@ -154,4 +154,5 @@ export const EVALUATION_FRAMEWORKS = {
 		description:
 			"ask-my-agent bench v2 is a benchmark for testing AI's usability on simple tasks on simple agent harness, ask-my-agent. Measures common agentic capabilities.",
 		url: "https://huggingface.co/datasets/sapbot/ask-my-agent-bench-2/"
+	}
 } as const;
