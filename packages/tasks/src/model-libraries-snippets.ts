@@ -1736,9 +1736,16 @@ const hasChatTemplate = (model: ModelData): boolean =>
 	model.config?.chat_template_jinja !== undefined;
 
 export const transformers = (model: ModelData): string[] => {
-	const info = model.transformersInfo;
-	if (!info) {
+	if (!model.transformersInfo) {
 		return [`# ⚠️ Type of model unknown`];
+	}
+	const info = { ...model.transformersInfo };
+	if (
+		info.auto_model === "AutoModelForMultimodalLM" &&
+		model.pipeline_tag === "text-generation" &&
+		model.config?.architectures?.some((architecture) => architecture.endsWith("ForCausalLM"))
+	) {
+		info.auto_model = "AutoModelForCausalLM";
 	}
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 

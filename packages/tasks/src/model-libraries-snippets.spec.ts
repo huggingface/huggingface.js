@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ModelData } from "./model-data.js";
-import { llama_cpp_python } from "./model-libraries-snippets.js";
+import { llama_cpp_python, transformers } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
 	it("llama_cpp_python conversational", async () => {
@@ -54,5 +54,26 @@ output = llm(
 	echo=True
 )
 print(output)`);
+	});
+
+	it("transformers prefers AutoModelForCausalLM for text-generation models misclassified as multimodal", async () => {
+		const model: ModelData = {
+			id: "WeiboAI/VibeThinker-3B",
+			pipeline_tag: "text-generation",
+			tags: [],
+			inference: "",
+			config: {
+				architectures: ["Qwen2ForCausalLM"],
+			},
+			transformersInfo: {
+				auto_model: "AutoModelForMultimodalLM",
+				pipeline_tag: "text-generation",
+				processor: "AutoTokenizer",
+			},
+		};
+		const snippet = transformers(model).join("\n");
+
+		expect(snippet).toContain("AutoModelForCausalLM");
+		expect(snippet).not.toContain("AutoModelForMultimodalLM");
 	});
 });
