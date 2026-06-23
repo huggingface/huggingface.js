@@ -1,4 +1,4 @@
-import type { ModelData } from "./model-data.js";
+import type { ModelData, TransformersInfo } from "./model-data.js";
 import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
 import { LIBRARY_TASK_MAPPING, REMOVED_IN_V5_TRANSFORMERS_PIPELINES } from "./library-to-tasks.js";
 import { getModelInputSnippet } from "./snippets/inputs.js";
@@ -1735,9 +1735,14 @@ const hasChatTemplate = (model: ModelData): boolean =>
 	model.config?.processor_config?.chat_template !== undefined ||
 	model.config?.chat_template_jinja !== undefined;
 
-export const transformers = (model: ModelData): string[] => {
+/**
+ * Returns a shallow copy of `model.transformersInfo` with `auto_model` corrected
+ * to `AutoModelForCausalLM` for text-generation causal LM models that were
+ * misclassified as `AutoModelForMultimodalLM`. Does not mutate `model.transformersInfo`.
+ */
+const getTransformersInfoForSnippet = (model: ModelData): TransformersInfo | undefined => {
 	if (!model.transformersInfo) {
-		return [`# ⚠️ Type of model unknown`];
+		return undefined;
 	}
 	const info = { ...model.transformersInfo };
 	if (
@@ -1746,6 +1751,14 @@ export const transformers = (model: ModelData): string[] => {
 		model.config?.architectures?.some((architecture) => architecture.endsWith("ForCausalLM"))
 	) {
 		info.auto_model = "AutoModelForCausalLM";
+	}
+	return info;
+};
+
+export const transformers = (model: ModelData): string[] => {
+	const info = getTransformersInfoForSnippet(model);
+	if (!info) {
+		return [`# ⚠️ Type of model unknown`];
 	}
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
@@ -2288,7 +2301,7 @@ const pruna_diffusers = (model: ModelData): string[] => {
 };
 
 const pruna_transformers = (model: ModelData): string[] => {
-	const info = model.transformersInfo;
+	const info = getTransformersInfoForSnippet(model);
 	const transformersSnippets = transformers(model);
 
 	// Replace pipeline with PrunaModel

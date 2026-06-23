@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ModelData } from "./model-data.js";
-import { llama_cpp_python, transformers } from "./model-libraries-snippets.js";
+import { llama_cpp_python, pruna, transformers } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
 	it("llama_cpp_python conversational", async () => {
@@ -75,5 +75,27 @@ print(output)`);
 
 		expect(snippet).toContain("AutoModelForCausalLM");
 		expect(snippet).not.toContain("AutoModelForMultimodalLM");
+	});
+
+	it("pruna transformers cleanup stays consistent with the corrected auto_model", async () => {
+		const model: ModelData = {
+			id: "WeiboAI/VibeThinker-3B",
+			pipeline_tag: "text-generation",
+			tags: ["transformers"],
+			inference: "",
+			config: {
+				architectures: ["Qwen2ForCausalLM"],
+			},
+			transformersInfo: {
+				auto_model: "AutoModelForMultimodalLM",
+				pipeline_tag: "text-generation",
+				processor: "AutoTokenizer",
+			},
+		};
+		const snippet = pruna(model).join("\n");
+
+		expect(snippet).not.toContain("AutoModelForMultimodalLM");
+		expect(snippet).not.toContain("AutoModelForCausalLM.from_pretrained");
+		expect(snippet).toContain("PrunaModel.from_pretrained");
 	});
 });
