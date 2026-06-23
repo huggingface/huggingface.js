@@ -149,4 +149,9 @@ export const EVALUATION_FRAMEWORKS = {
 			"MMMU is a new benchmark designed to evaluate multimodal models on massive multi-discipline tasks demanding college-level subject knowledge and deliberate reasoning.",
 		url: "https://mmmu-benchmark.github.io/",
 	},
+	askmyagentbench2: {
+		name: "askmyagentbench2",
+		description:
+			"ask-my-agent bench v2 is a benchmark for testing AI's usability on simple tasks on simple agent harness, ask-my-agent. Measures common agentic capabilities.",
+		url: "https://huggingface.co/datasets/sapbot/ask-my-agent-bench-2/"
 } as const;
