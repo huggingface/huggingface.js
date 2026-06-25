@@ -19,6 +19,13 @@ const verificationHasher = Hasher.newKeyed(VERIFICATION_KEY);
  * `file_hash_with_salt(chunks, &[0; 32])`.
  */
 export function fileHash(chunks: Chunk[]): Uint8Array {
+	// Empty input short-circuits to the all-zero MerkleHash, matching Rust's
+	// `file_hash_with_salt` (`if chunks.is_empty() { return MerkleHash::default(); }`).
+	// Without this we'd return `hmac(0, zero_key)`, which the CAS shard validation rejects
+	// for empty files with "file reconstruction does not produce this hash".
+	if (chunks.length === 0) {
+		return new Uint8Array(32);
+	}
 	const xorb = xorbHash(chunks);
 	return fileHasher.reset().update(xorb).finalize(32);
 }

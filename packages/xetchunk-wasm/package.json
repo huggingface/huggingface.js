@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/xetchunk-wasm",
-	"version": "0.0.6",
+	"version": "0.1.0",
 	"description": "Content-defined chunking and hashing for Hugging Face Xet storage",
 	"keywords": [
 		"xet",

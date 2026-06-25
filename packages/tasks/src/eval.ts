@@ -39,6 +39,12 @@ export const EVALUATION_FRAMEWORKS = {
 			"Pier is a Harbor fork built for DeepSWE, with stronger support for CLI agents in no-internet tasks and more faithful, consistent agent trajectories.",
 		url: "https://github.com/datacurve-ai/pier",
 	},
+	"redline-bench": {
+		name: "redline-bench",
+		description:
+			"RedlineBench measures multi-turn contract redlining: agents produce tracked-change .docx edits that are graded against attorney-authored weighted rubrics by an LLM judge panel across five dimensions. Report: https://intelligence.crosby.ai/benchmark/",
+		url: "https://github.com/crosbylegal/redline-bench",
+	},
 	archipelago: {
 		name: "archipelago",
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",

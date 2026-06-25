@@ -28,6 +28,14 @@ export enum NvidiaComputeCapabilities {
 }
 
 export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
+	B300: {
+		tflops: 1232,
+		memory: [288],
+		computeCapability: 10.0,
+		msrp: 45_000,
+		power: 1400,
+		releaseYear: 2026,
+	},
 	B200: {
 		tflops: 496.6,
 		memory: [192],
@@ -51,6 +59,22 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 30_000,
 		power: 700,
 		releaseYear: 2022,
+	},
+	H800: {
+		tflops: 237.2,
+		memory: [80],
+		computeCapability: 9.0,
+		msrp: 30_000,
+		power: 700,
+		releaseYear: 2023,
+	},
+	H20: {
+		tflops: 148,
+		memory: [96],
+		computeCapability: 9.0,
+		msrp: 13_500,
+		power: 400,
+		releaseYear: 2024,
 	},
 	L40s: {
 		tflops: 91.61,
@@ -196,6 +220,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 70,
 		releaseYear: 2023,
 	},
+	"RTX 3500 Ada Mobile": {
+		tflops: 15.8,
+		memory: [12],
+		computeCapability: 8.9,
+		msrp: 1_500,
+		power: 150,
+		releaseYear: 2023,
+	},
 	"RTX 2000 Ada": {
 		tflops: 12.0,
 		memory: [16],
@@ -299,6 +331,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 450,
 		power: 95,
 		releaseYear: 2021,
+	},
+	A800: {
+		tflops: 77.97,
+		memory: [40, 80],
+		computeCapability: 8.0,
+		msrp: 12_000,
+		power: 400,
+		releaseYear: 2022,
 	},
 	A100: {
 		tflops: 77.97,
@@ -433,6 +473,22 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		memory: [8],
 		computeCapability: 12.0,
 		msrp: 300,
+		power: 100,
+		releaseYear: 2025,
+	},
+	"RTX 5050": {
+		tflops: 13.17,
+		memory: [8],
+		computeCapability: 12.0,
+		msrp: 249,
+		power: 130,
+		releaseYear: 2025,
+	},
+	"RTX 5050 Mobile": {
+		tflops: 7.7,
+		memory: [8],
+		computeCapability: 12.0,
+		msrp: 250,
 		power: 100,
 		releaseYear: 2025,
 	},
