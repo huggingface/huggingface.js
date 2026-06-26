@@ -78,6 +78,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Cohere.CohereConversationalTask(),
 	},
 	deepinfra: {
+		"automatic-speech-recognition": new DeepInfra.DeepInfraAutomaticSpeechRecognitionTask(),
 		conversational: new DeepInfra.DeepInfraConversationalTask(),
 		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
 	},
