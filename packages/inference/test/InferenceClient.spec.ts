@@ -1975,6 +1975,9 @@ describe.skip("InferenceClient", () => {
 			const HF_MODEL = "google/gemma-3-4b-it";
 			const PROVIDER_ID = "google/gemma-3-4b-it";
 
+			const ASR_HF_MODEL = "nvidia/nemotron-3.5-asr-streaming-0.6b";
+			const ASR_PROVIDER_ID = "nvidia/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b";
+
 			const setMapping = (task: "conversational" | "text-generation") => {
 				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
 					[HF_MODEL]: {
@@ -1983,6 +1986,18 @@ describe.skip("InferenceClient", () => {
 						providerId: PROVIDER_ID,
 						status: "live",
 						task,
+					},
+				};
+			};
+
+			const setAsrMapping = () => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[ASR_HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: ASR_HF_MODEL,
+						providerId: ASR_PROVIDER_ID,
+						status: "live",
+						task: "automatic-speech-recognition",
 					},
 				};
 			};
@@ -2037,6 +2052,17 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(typeof generation.generated_text).toBe("string");
 				expect(generation.generated_text?.length ?? 0).toBeGreaterThan(0);
+			});
+
+			it("automaticSpeechRecognition", async () => {
+				setAsrMapping();
+				const res = await client.automaticSpeechRecognition({
+					model: ASR_HF_MODEL,
+					provider: "deepinfra",
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+				});
+				expect(typeof res.text).toBe("string");
+				expect(res.text.length).toBeGreaterThan(0);
 			});
 		},
 		TIMEOUT,
