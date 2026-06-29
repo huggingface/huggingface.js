@@ -1626,6 +1626,80 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 
+	describe.concurrent(
+		"Systalyze",
+		() => {
+			const client = new InferenceClient(env.HF_SYSTALYZE_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["systalyze"] = {
+				"meta-llama/Llama-3.1-8B-Instruct": {
+					provider: "systalyze",
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "meta-llama/Llama-3.1-8B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"meta-llama/Llama-3.1-8B-Instruct": {
+					provider: "systalyze",
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "meta-llama/Llama-3.1-8B-Instruct",
+					status: "live",
+					task: "text-generation",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "systalyze",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "systalyze",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "systalyze",
+					inputs: "The capital of France is",
+					parameters: {
+						max_new_tokens: 10,
+					},
+				});
+				expect(res).toBeDefined();
+				expect(typeof res.generated_text).toBe("string");
+				expect(res.generated_text.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
+
 	describe.concurrent("3rd party providers", () => {
 		it("chatCompletion - fails with unsupported model", async () => {
 			expect(
