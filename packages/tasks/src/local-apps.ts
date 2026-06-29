@@ -794,6 +794,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetPi,
 	},
+  localchat: {
+		prettyLabel: "LocalChat.app",
+		docsUrl: "https://www.localchat.app",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) => new URL(`localchat://models/hf/llm/${model.id}`),	
+  },
 	"hermes-agent": {
 		prettyLabel: "Hermes Agent",
 		docsUrl: "https://hermes-agent.nousresearch.com/",
