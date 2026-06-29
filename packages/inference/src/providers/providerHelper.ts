@@ -321,7 +321,13 @@ export interface TextToSpeechTaskHelper {
 }
 
 export interface TextToAudioTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<Record<string, unknown> & BaseArgs>): Record<string, unknown>;
 }
 
