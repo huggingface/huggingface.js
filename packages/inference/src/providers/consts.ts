@@ -34,6 +34,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	novita: {},
 	nscale: {},
 	nvidia: {},
+	oxloai: {},
 	openai: {},
 	publicai: {},
 	ovhcloud: {},
