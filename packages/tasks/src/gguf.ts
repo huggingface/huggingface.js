@@ -209,3 +209,42 @@ export enum GGMLQuantizationType {
 	NVFP4 = 40,
 	Q1_0 = 41,
 }
+
+/**
+ * Filename-level GGUF variants. `LoRA` / `vocab` / `MTP` come from the GGUF
+ * naming spec's `<Type>` slot (see `ggml-org/ggml#1488` for MTP). `imatrix`
+ * is a community marker that the file was quantized with an importance
+ * matrix; it is not part of the spec `<Type>` slot but appears widely in
+ * filenames and is reported here for convenience.
+ */
+export type GGUFFileVariant = "LoRA" | "vocab" | "MTP" | "imatrix";
+
+const GGUF_FILE_VARIANTS: readonly GGUFFileVariant[] = ["LoRA", "vocab", "MTP", "imatrix"];
+
+// Match any variant token as a delimited token (`^`, `-`, or `.` on each side),
+// case-insensitive. Capture group is the matched token in whatever case appeared.
+const GGUF_FILE_VARIANT_RE = new RegExp(`(?<=^|[-.])(?<v>${GGUF_FILE_VARIANTS.join("|")})(?=$|[-.])`, "gi");
+
+/**
+ * Parse the variant tokens out of a GGUF filename, returning them in
+ * first-occurrence order with exact duplicates removed. Returns `[]` for
+ * plain model files.
+ */
+export function parseGGUFFileVariant(fname: string): GGUFFileVariant[] {
+	const base = fname.split("/").pop() ?? fname;
+	const stem = base.replace(/\.gguf$/i, "");
+	const canonical = new Map(GGUF_FILE_VARIANTS.map((v) => [v.toLowerCase(), v] as const));
+	// Re-create the regex per call so we don't share lastIndex across callers.
+	const re = new RegExp(GGUF_FILE_VARIANT_RE.source, "gi");
+	const out: GGUFFileVariant[] = [];
+	const seen = new Set<GGUFFileVariant>();
+	for (const m of stem.matchAll(re)) {
+		const token = m.groups?.v;
+		if (!token) continue;
+		const variant = canonical.get(token.toLowerCase());
+		if (!variant || seen.has(variant)) continue;
+		seen.add(variant);
+		out.push(variant);
+	}
+	return out;
+}
