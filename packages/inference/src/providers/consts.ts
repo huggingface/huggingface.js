@@ -31,6 +31,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	"hf-inference": {},
 	hyperbolic: {},
 	nebius: {},
+	nextbit: {},
 	novita: {},
 	nscale: {},
 	nvidia: {},
