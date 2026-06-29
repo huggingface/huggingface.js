@@ -99,6 +99,12 @@ export type SafetensorsParseFromRepo =
 			header: SafetensorsFileHeader;
 			parameterCount?: Partial<Record<Dtype, number>>;
 			parameterTotal?: number;
+			/**
+			 * For Mixture-of-Experts models: breakdown of routed vs. always-active params,
+			 * computed when `computeParametersCount: true` and the repo's `config.json`
+			 * exposes MoE fields. Undefined for dense models.
+			 */
+			moe?: MoeInfo;
 			filepaths: string[];
 	  }
 	| {
@@ -107,6 +113,12 @@ export type SafetensorsParseFromRepo =
 			headers: SafetensorsShardedHeaders;
 			parameterCount?: Partial<Record<Dtype, number>>;
 			parameterTotal?: number;
+			/**
+			 * For Mixture-of-Experts models: breakdown of routed vs. always-active params,
+			 * computed when `computeParametersCount: true` and the repo's `config.json`
+			 * exposes MoE fields. Undefined for dense models.
+			 */
+			moe?: MoeInfo;
 			filepaths: string[];
 	  };
 
@@ -333,6 +345,7 @@ export async function parseSafetensorsMetadata(
 					parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
 					/// shortcut: get param count directly from metadata
 					parameterTotal: parseTotalParameters(header.__metadata__?.total_parameters),
+					moe: computeMoeInfoFromHeaders([header], modelConfig),
 				}
 			: undefined;
 		return {
@@ -355,6 +368,7 @@ export async function parseSafetensorsMetadata(
 					parameterCount: computeNumOfParamsByDtypeSharded(shardedMap, quantConfig),
 					/// shortcut: get param count directly from metadata
 					parameterTotal: parseTotalParameters(index.metadata?.total_parameters),
+					moe: computeMoeInfoFromHeaders(Object.values(shardedMap), modelConfig),
 				}
 			: undefined;
 		return {
@@ -380,9 +394,45 @@ export interface QuantizationConfig {
 	config_groups?: Record<string, { format?: string; targets?: string[]; weights?: { num_bits?: number } }>;
 }
 
-export interface ModelConfig {
+interface MoeConfigFields {
+	/** Common across Mixtral, Qwen2/3-MoE, Llama4, GPT-OSS, … */
+	num_experts_per_tok?: number;
+	/** Alternative spelling (some checkpoints) */
+	num_experts_per_token?: number;
+	num_local_experts?: number;
+	num_experts?: number;
+	/** DeepSeek family */
+	n_routed_experts?: number;
+	n_shared_experts?: number;
+	/** Multi-modal Ernie 4.5 */
+	moe_num_shared_experts?: number;
+}
+
+export interface ModelConfig extends MoeConfigFields {
 	quantization_config?: QuantizationConfig;
-	text_config?: { quantization_config?: QuantizationConfig };
+	text_config?: { quantization_config?: QuantizationConfig } & MoeConfigFields;
+}
+
+/**
+ * Active-parameter breakdown for Mixture-of-Experts models.
+ *
+ * For MoE models, only `topK` of `numExperts` routed experts run per token, so the
+ * usable ("active") parameter count is much smaller than the total stored on disk.
+ * `active = alwaysActive + topK * perExpert`. Returned by `parseSafetensorsMetadata`
+ * when the model's `config.json` exposes MoE fields and tensor names indicate a
+ * supported expert layout.
+ */
+export interface MoeInfo {
+	numExperts: number;
+	topK: number;
+	/** Average parameter count per routed expert (= sum-of-routed / numExperts). */
+	perExpert: number;
+	/** Everything that runs on every token: embeddings, attention, norms, lm_head, router, shared experts, … */
+	alwaysActive: number;
+	/** alwaysActive + topK * perExpert */
+	active: number;
+	/** True when the model has a dense shared-expert MLP alongside routed experts (Deepseek, Qwen-MoE, Command-A, …). */
+	hasSharedExpert: boolean;
 }
 
 /**
@@ -543,6 +593,76 @@ function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig
 			}
 			return 1;
 	}
+}
+
+function getMoeConfig(config: ModelConfig | null): Pick<MoeInfo, "topK" | "numExperts"> | undefined {
+	if (!config) return undefined;
+	const sources: MoeConfigFields[] = [config, config.text_config ?? {}];
+	let topK: number | undefined;
+	let numExperts: number | undefined;
+	for (const src of sources) {
+		topK = topK ?? src.num_experts_per_tok ?? src.num_experts_per_token;
+		numExperts = numExperts ?? src.num_local_experts ?? src.num_experts ?? src.n_routed_experts;
+	}
+	if (!topK || !numExperts || topK <= 0 || numExperts <= 0 || topK > numExperts) return undefined;
+	return { topK, numExperts };
+}
+
+/**
+ * Decide whether a tensor belongs to a *routed* expert (one that is gated per token).
+ * Shared/dense experts never match.
+ *
+ * Recognized layouts:
+ *   - per-expert legacy: `…experts.{int}.…`             (Mixtral, Phi-MoE, OlMoE, Qwen-MoE, …)
+ *   - per-expert with prefix: `…experts.expert_{int}.…` (Switch Transformers)
+ *   - stacked 3D:        `…experts.<name>` where shape[0] === numExperts
+ *                        (GPT-OSS, modern Mixtral/Qwen/Deepseek in-memory format, GraniteMoE, JetMoE)
+ */
+function isRoutedExpertTensor(name: string, info: TensorInfo, numExperts: number): boolean {
+	if (name.includes("shared_expert")) return false;
+	if (/\.experts\.(?:expert_)?\d+\./.test(name)) return true;
+	if (/\.experts\.[A-Za-z_][\w]*(?:\.(?:weight|bias))?$/.test(name) && info.shape[0] === numExperts) return true;
+	return false;
+}
+
+function computeMoeInfoFromHeaders(
+	headers: Iterable<SafetensorsFileHeader>,
+	config: ModelConfig | null,
+): MoeInfo | undefined {
+	const moeCfg = getMoeConfig(config);
+	if (!moeCfg) return undefined;
+
+	let total = 0;
+	let routedExpert = 0;
+	let hasSharedExpert = false;
+
+	for (const header of headers) {
+		for (const [name, value] of Object.entries(header)) {
+			if (name === "__metadata__") continue;
+			const info = value as TensorInfo;
+			if (info.shape.length === 0) continue;
+			const n = info.shape.reduce((a, b) => a * b, 1);
+			if (!Number.isFinite(n)) continue;
+			total += n;
+			if (isRoutedExpertTensor(name, info, moeCfg.numExperts)) routedExpert += n;
+			else if (name.includes("shared_expert")) hasSharedExpert = true;
+		}
+	}
+
+	if (routedExpert === 0) return undefined; // config says MoE but tensors don't look like one — bail safely
+
+	const perExpert = routedExpert / moeCfg.numExperts;
+	const alwaysActive = total - routedExpert;
+	const active = alwaysActive + moeCfg.topK * perExpert;
+
+	return {
+		numExperts: moeCfg.numExperts,
+		topK: moeCfg.topK,
+		perExpert,
+		alwaysActive,
+		active,
+		hasSharedExpert,
+	};
 }
 
 function computeNumOfParamsByDtypeSingleFile(
