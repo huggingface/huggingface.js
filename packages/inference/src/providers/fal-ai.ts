@@ -23,6 +23,7 @@ import type { BodyParams, HeaderParams, InferenceTask, ModelId, OutputType, Requ
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import type {
+	AudioToAudioTaskHelper,
 	ImageSegmentationTaskHelper,
 	ImageToImageTaskHelper,
 	ImageTextToImageTaskHelper,
@@ -37,6 +38,7 @@ import {
 } from "./providerHelper.js";
 import { HF_HUB_URL } from "../config.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import type { AudioToAudioArgs, AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import {
 	InferenceClientInputError,
 	InferenceClientProviderApiError,
@@ -60,7 +62,11 @@ interface FalAITextToImageOutput {
 }
 
 interface FalAIAutomaticSpeechRecognitionOutput {
-	text: string;
+	// Transcript under `text` (whisper) or `output` (nemotron); optional timestamps as `chunks` or `segments`.
+	text?: string;
+	output?: string;
+	chunks?: Array<{ text?: string; timestamp?: number[] }>;
+	segments?: Array<{ text?: string; start?: number; end?: number }>;
 }
 
 interface FalAITextToSpeechOutput {
@@ -85,6 +91,31 @@ const FAL_AI_AUDIO_MIME_MAP: Record<string, string> = {
 	"video/webm": "video/webm",
 };
 export const FAL_AI_SUPPORTED_BLOB_TYPES = Object.keys(FAL_AI_AUDIO_MIME_MAP);
+
+function getFalAiAudioDataUrlContentType(contentType: string): string {
+	const baseContentType = contentType.split(";")[0].trim().toLowerCase();
+	const falContentType = FAL_AI_AUDIO_MIME_MAP[baseContentType];
+	if (!falContentType) {
+		throw new InferenceClientInputError(
+			`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
+				", ",
+			)}`,
+		);
+	}
+	return falContentType;
+}
+
+async function buildFalAiAudioDataUrl(blob: Blob): Promise<string> {
+	const contentType = blob.type;
+	if (!contentType) {
+		throw new InferenceClientInputError(
+			`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`,
+		);
+	}
+	const falContentType = getFalAiAudioDataUrlContentType(contentType);
+	const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
+	return `data:${falContentType};base64,${base64audio}`;
+}
 
 abstract class FalAITask extends TaskProviderHelper {
 	constructor(url?: string) {
@@ -282,12 +313,11 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 		)}`;
 		return {
 			...omit(args, ["inputs", "parameters"]),
-			image_url: imageDataUrl,
 			...args.parameters,
-			...args,
+			image_url: imageDataUrl,
 			// Some fal endpoints (e.g. FLUX.2-dev) expect `image_urls` (array) instead of `image_url`
 			image_urls: [imageDataUrl],
-		};
+		} as RequestArgs;
 	}
 
 	override async getResponse(
@@ -488,40 +518,40 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 	}
 	override async getResponse(response: unknown): Promise<AutomaticSpeechRecognitionOutput> {
 		const res = response as FalAIAutomaticSpeechRecognitionOutput;
-		if (typeof res?.text !== "string") {
+		const text = typeof res?.text === "string" ? res.text : typeof res?.output === "string" ? res.output : undefined;
+		if (typeof text !== "string") {
 			throw new InferenceClientProviderOutputError(
-				`Received malformed response from Fal.ai Automatic Speech Recognition API: expected { text: string } format, got instead: ${JSON.stringify(
+				`Received malformed response from Fal.ai Automatic Speech Recognition API: expected { text: string } or { output: string } format, got instead: ${JSON.stringify(
 					response,
 				)}`,
 			);
 		}
-		return { text: res.text };
+		const output: AutomaticSpeechRecognitionOutput = { text };
+		const chunks = Array.isArray(res.chunks)
+			? res.chunks
+					.filter((c) => typeof c?.text === "string" && Array.isArray(c.timestamp))
+					.map((c) => ({ text: c.text as string, timestamp: c.timestamp as number[] }))
+			: Array.isArray(res.segments)
+				? res.segments
+						.filter((s) => typeof s?.text === "string")
+						.map((s) => ({ text: s.text as string, timestamp: [s.start ?? 0, s.end ?? 0] }))
+				: [];
+		if (chunks.length > 0) {
+			output.chunks = chunks;
+		}
+		return output;
 	}
 
 	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
 		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
-		const contentType = blob?.type;
-		if (!contentType) {
+		if (!(blob instanceof Blob)) {
 			throw new InferenceClientInputError(
 				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`,
 			);
 		}
-		// Blob MIME types can carry codec parameters (e.g. MediaRecorder produces
-		// "audio/webm;codecs=opus"); take the base type and remap it to a label fal's
-		// data-URL decoder accepts (see FAL_AI_AUDIO_MIME_MAP).
-		const baseContentType = contentType.split(";")[0].trim().toLowerCase();
-		const falContentType = FAL_AI_AUDIO_MIME_MAP[baseContentType];
-		if (!falContentType) {
-			throw new InferenceClientInputError(
-				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
-					", ",
-				)}`,
-			);
-		}
-		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
 		return {
 			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
-			audio_url: `data:${falContentType};base64,${base64audio}`,
+			audio_url: await buildFalAiAudioDataUrl(blob),
 		};
 	}
 }
@@ -577,6 +607,86 @@ export class FalAITextToSpeechTask extends FalAITask {
 		}
 	}
 }
+interface FalAIAudioToAudioResult {
+	audio: { url: string; content_type?: string };
+	text?: string;
+}
+
+export class FalAIAudioToAudioTask extends FalAiQueueTask implements AudioToAudioTaskHelper {
+	task: InferenceTask;
+
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "audio-to-audio";
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters", "data"]),
+			...(params.args.parameters as Record<string, unknown>),
+		};
+	}
+
+	async preparePayloadAsync(args: AudioToAudioArgs): Promise<RequestArgs> {
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+		if (!(blob instanceof Blob)) {
+			throw new InferenceClientInputError(
+				`Expected a Blob input for audio-to-audio with provider fal-ai, got ${typeof blob}.`,
+			);
+		}
+		return {
+			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
+			audio_url: await buildFalAiAudioDataUrl(blob),
+		};
+	}
+
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<AudioToAudioOutput[]> {
+		const result = (await this.getResponseFromQueueApi(response, url, headers, signal)) as FalAIAudioToAudioResult;
+		if (
+			typeof result !== "object" ||
+			!result ||
+			typeof result.audio !== "object" ||
+			!result.audio ||
+			typeof result.audio.url !== "string" ||
+			!isUrl(result.audio.url)
+		) {
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai audio-to-audio API: expected { audio: { url: string } } result format, got instead: ${JSON.stringify(
+					result,
+				)}`,
+			);
+		}
+
+		const audioResponse = await fetch(result.audio.url, { signal });
+		if (!audioResponse.ok) {
+			throw new InferenceClientProviderApiError(
+				`Failed to fetch audio from ${result.audio.url}: ${audioResponse.statusText}`,
+				{ url: result.audio.url, method: "GET" },
+				{
+					requestId: audioResponse.headers.get("x-request-id") ?? "",
+					status: audioResponse.status,
+					body: await audioResponse.text(),
+				},
+			);
+		}
+		const audioBytes = new Uint8Array(await audioResponse.arrayBuffer());
+		const contentType = result.audio.content_type ?? audioResponse.headers.get("content-type") ?? "audio/wav";
+		return [
+			{
+				blob: base64FromBytes(audioBytes),
+				"content-type": contentType,
+				label: typeof result.text === "string" && result.text.length > 0 ? result.text : "speech",
+			},
+		];
+	}
+}
+
 export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageSegmentationTaskHelper {
 	task: InferenceTask;
 	constructor() {
