@@ -223,8 +223,13 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			return (node as Identifier).value;
 		case "IntegerLiteral":
 			return `${(node as IntegerLiteral).value}`;
-		case "FloatLiteral":
-			return `${(node as FloatLiteral).value}`;
+		case "FloatLiteral": {
+			const value = (node as FloatLiteral).value;
+			if (Object.is(value, -0)) {
+				return "-0.0";
+			}
+			return value % 1 === 0 ? value.toFixed(1) : value.toString();
+		}
 		case "StringLiteral":
 			return JSON.stringify((node as StringLiteral).value);
 		case "BinaryExpression": {
