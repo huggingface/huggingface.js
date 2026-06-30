@@ -228,6 +228,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 150,
 		releaseYear: 2023,
 	},
+	"RTX 2000 Ada Laptop": {
+		tflops: 12.9,
+		memory: [8],
+		computeCapability: 8.9,
+		msrp: 650,
+		power: 50,
+		releaseYear: 2023,
+	},
 	"RTX 2000 Ada": {
 		tflops: 12.0,
 		memory: [16],

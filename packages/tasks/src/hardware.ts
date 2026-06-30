@@ -197,6 +197,12 @@ export const SKUS = {
 				power: 160,
 				releaseYear: 2025,
 			},
+			"Intel Core Ultra 7 155H": {
+				tflops: 1.488,
+				msrp: 503,
+				power: 115,
+				releaseYear: 2023,
+			},
 			"Intel Core Ultra 7 255HX": {
 				tflops: 1.62,
 				msrp: 583,
