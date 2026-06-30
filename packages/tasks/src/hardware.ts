@@ -278,13 +278,13 @@ export const SKUS = {
 			"Intel Core 11th Generation (i5)": {
 				tflops: 0.5,
 				msrp: 250,
-				power: 182,
+				power: 251,
 				releaseYear: 2021,
 			},
 			"Intel Core 11th Generation (i3)": {
 				tflops: 0.35,
 				msrp: 150,
-				power: 65,
+				power: 90,
 				releaseYear: 2021,
 			},
 			"Intel Core 10th Generation (i9)": {
@@ -302,13 +302,13 @@ export const SKUS = {
 			"Intel Core 10th Generation (i5)": {
 				tflops: 0.46,
 				msrp: 250,
-				power: 150,
+				power: 182,
 				releaseYear: 2020,
 			},
 			"Intel Core 10th Generation (i3)": {
 				tflops: 0.44,
 				msrp: 150,
-				power: 65,
+				power: 90,
 				releaseYear: 2020,
 			},
 		},
@@ -374,9 +374,9 @@ export const SKUS = {
 				releaseYear: 2017,
 			},
 			"Ryzen 7 3800X (16)": {
-				tflops: 1.73,
+				tflops: 1.15,
 				msrp: 400,
-				power: 105,
+				power: 142,
 				releaseYear: 2019,
 			},
 			"Ryzen Zen 5 9000 (Ryzen 9)": {
@@ -388,13 +388,13 @@ export const SKUS = {
 			"Ryzen Zen 5 9000 (Ryzen 7)": {
 				tflops: 0.56,
 				msrp: 350,
-				power: 105,
+				power: 88,
 				releaseYear: 2024,
 			},
 			"Ryzen Zen 5 9000 (Ryzen 5)": {
 				tflops: 0.56,
 				msrp: 300,
-				power: 105,
+				power: 88,
 				releaseYear: 2024,
 			},
 			"Ryzen Zen 4 7000 (Ryzen 9)": {
