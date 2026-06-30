@@ -76,6 +76,7 @@ import { base64FromBytes } from "../utils/base64FromBytes.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import type { AudioToAudioArgs } from "../tasks/audio/audioToAudio.js";
 import { omit } from "../utils/omit.js";
 import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 import type { ImageToTextArgs } from "../tasks/cv/imageToText.js";
@@ -298,6 +299,15 @@ export class HFInferenceAutomaticSpeechRecognitionTask
 }
 
 export class HFInferenceAudioToAudioTask extends HFInferenceTask implements AudioToAudioTaskHelper {
+	async preparePayloadAsync(args: AudioToAudioArgs): Promise<RequestArgs> {
+		return "data" in args
+			? args
+			: {
+					...omit(args, "inputs"),
+					data: args.inputs,
+				};
+	}
+
 	override async getResponse(response: AudioToAudioOutput[]): Promise<AudioToAudioOutput[]> {
 		if (!Array.isArray(response)) {
 			throw new InferenceClientProviderOutputError(
