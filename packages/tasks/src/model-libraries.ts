@@ -1184,6 +1184,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	rwkv: {
+		prettyLabel: "RWKV",
+		repoName: "RWKV-LM",
+		repoUrl: "https://github.com/BlinkDL/RWKV-LM",
+		docsUrl: "https://rwkv.com/",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
