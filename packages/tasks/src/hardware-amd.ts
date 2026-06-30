@@ -13,7 +13,7 @@ const AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS = [16, 24, 32, 48, 64, 96];
 
 export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 	MI300: {
-		tflops: 383.0,
+		tflops: 1307.4,
 		memory: [192],
 		gfxVersion: "gfx942",
 		msrp: 15_000,
@@ -184,7 +184,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		tflops: 22.58,
 		memory: [10],
 		gfxVersion: "gfx1031",
-		msrp: 500,
+		msrp: 329,
 		power: 175,
 		releaseYear: 2022,
 	},

@@ -88,8 +88,8 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		tflops: 29.71,
 		memory: [128],
 		computeCapability: 12.1,
-		msrp: 3_000,
-		power: 240,
+		msrp: 3_999,
+		power: 140,
 		releaseYear: 2025,
 	},
 	"RTX PRO 6000 WS": {
@@ -746,7 +746,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		computeCapability: 8.6, // Ampere (outlier GPU in the 20xx series)
 		msrp: 250,
 		power: 45,
-		releaseYear: 2022,
+		releaseYear: 2021,
 	},
 	"GTX 1080 Ti": {
 		tflops: 11.34, // float32 (GPU does not support native float16)
@@ -880,7 +880,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		tflops: 6.66,
 		memory: [32],
 		computeCapability: 8.7,
-		msrp: 1_600,
+		msrp: 999,
 		power: 40,
 		releaseYear: 2022,
 	},
