@@ -532,13 +532,13 @@ export class XetBlob extends Blob {
 					const parts = contentType.includes("multipart/byteranges")
 						? parseMultipartByteRanges(contentType, body)
 						: // Single-range response (eg the server merged contiguous ranges): map the whole body to
-						  // the matching descriptor by Content-Range, falling back to the first requested range.
-						  [
+							// the matching descriptor by Content-Range, falling back to the first requested range.
+							[
 								{
 									range: parseSingleContentRange(resp.headers.get("content-range")) ?? group.ranges[0].url_range,
 									data: body,
 								},
-						  ];
+							];
 
 					for (const part of parts) {
 						const descriptor =
@@ -961,7 +961,7 @@ async function getAccessToken(
 				...(initialAccessToken
 					? {
 							Authorization: `Bearer ${initialAccessToken}`,
-					  }
+						}
 					: {}),
 			},
 		});
