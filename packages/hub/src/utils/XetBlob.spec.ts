@@ -413,6 +413,121 @@ describe("XetBlob", () => {
 			expect(await blob.text()).toBe(wholeText);
 			expect(fetchCount).toBe(1);
 		});
+
+		it("throws on a non-multipart response to a multi-range request", async () => {
+			const c0 = makeChunk("hello");
+			const c1 = makeChunk("world");
+			const c2 = makeChunk("foo");
+			const c3 = makeChunk("bar!");
+			const rangeAData = concatBytes(c0, c1);
+			const rangeBData = concatBytes(c2, c3);
+			const lenA = rangeAData.byteLength;
+			const total = lenA + rangeBData.byteLength;
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: "helloworldfoobar!".length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url) {
+					const url = new URL(_url as string);
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://v2cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "v2cas.co":
+							return new Response(
+								JSON.stringify({
+									terms: [
+										{ hash: "xorb1", range: { start: 0, end: 2 }, unpacked_length: 10 },
+										{ hash: "xorb1", range: { start: 2, end: 4 }, unpacked_length: 7 },
+									],
+									xorbs: {
+										xorb1: [
+											{
+												url: "https://v2fetch.co",
+												ranges: [
+													{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: lenA - 1 } },
+													{ chunks: { start: 2, end: 4 }, bytes: { start: lenA, end: total - 1 } },
+												],
+											},
+										],
+									},
+									offset_into_first_range: 0,
+								} satisfies ReconstructionInfoV2),
+							);
+						case "v2fetch.co":
+							// Server ignored the multi-range request and returned the whole xorb.
+							return new Response(concatBytes(rangeAData, rangeBData));
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			await expect(blob.text()).rejects.toThrow(/multipart\/byteranges/);
+		});
+
+		it("throws instead of retrying single-range when a multipart part is missing", async () => {
+			const c0 = makeChunk("hello");
+			const c1 = makeChunk("world");
+			const c2 = makeChunk("foo");
+			const c3 = makeChunk("bar!");
+			const rangeAData = concatBytes(c0, c1);
+			const rangeBData = concatBytes(c2, c3);
+			const lenA = rangeAData.byteLength;
+			const total = lenA + rangeBData.byteLength;
+
+			const rangeHeaders: Array<string | undefined> = [];
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: "helloworldfoobar!".length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url, opts) {
+					const url = new URL(_url as string);
+					const headers = opts?.headers as Record<string, string> | undefined;
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://v2cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "v2cas.co":
+							return new Response(
+								JSON.stringify({
+									terms: [
+										{ hash: "xorb1", range: { start: 0, end: 2 }, unpacked_length: 10 },
+										{ hash: "xorb1", range: { start: 2, end: 4 }, unpacked_length: 7 },
+									],
+									xorbs: {
+										xorb1: [
+											{
+												url: "https://v2fetch.co",
+												ranges: [
+													{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: lenA - 1 } },
+													{ chunks: { start: 2, end: 4 }, bytes: { start: lenA, end: total - 1 } },
+												],
+											},
+										],
+									},
+									offset_into_first_range: 0,
+								} satisfies ReconstructionInfoV2),
+							);
+						case "v2fetch.co":
+							rangeHeaders.push(headers?.["Range"]);
+							// Multipart response missing the second requested part.
+							return makeMultipartResponse("BOUNDARY", [
+								{ range: { start: 0, end: lenA - 1 }, total, data: rangeAData },
+							]);
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			await expect(blob.text()).rejects.toThrow(/did not produce all chunks/);
+			// The multi-range signed URL must never be fetched with a single-range header.
+			const multiRangeHeader = `bytes=0-${lenA - 1},${lenA}-${total - 1}`;
+			expect(rangeHeaders.every((h) => h === multiRangeHeader)).toBe(true);
+		});
 	});
 
 	describe("bg4_regoup_bytes", () => {

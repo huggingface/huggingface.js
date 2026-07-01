@@ -242,11 +242,6 @@ function decompressChunk(chunkHeader: ChunkHeader, compressed: Uint8Array): Uint
 	}
 }
 
-function parseSingleContentRange(value: string | null): { start: number; end: number } | undefined {
-	const match = value?.match(/bytes\s+(\d+)-(\d+)\//i);
-	return match ? { start: parseInt(match[1], 10), end: parseInt(match[2], 10) } : undefined;
-}
-
 /**
  * Decode a fully-buffered xorb chunk stream (one `multipart/byteranges` part) and store the
  * decompressed chunks into the range list, so the term reader can yield them from cache.
@@ -529,16 +524,13 @@ export class XetBlob extends Blob {
 					const body = new Uint8Array(await resp.arrayBuffer());
 					const contentType = resp.headers.get("content-type") ?? "";
 
-					const parts = contentType.includes("multipart/byteranges")
-						? parseMultipartByteRanges(contentType, body)
-						: // Single-range response (eg the server merged contiguous ranges): map the whole body to
-							// the matching descriptor by Content-Range, falling back to the first requested range.
-							[
-								{
-									range: parseSingleContentRange(resp.headers.get("content-range")) ?? group.ranges[0].url_range,
-									data: body,
-								},
-							];
+					if (!contentType.includes("multipart/byteranges")) {
+						// A server that coalesces or ignores the multi-range request cannot be mapped back to
+						// the requested ranges safely, so decoding the body heuristically risks corruption.
+						throw new Error(`Expected multipart/byteranges response for multi-range request, got "${contentType}"`);
+					}
+
+					const parts = parseMultipartByteRanges(contentType, body);
 
 					for (const part of parts) {
 						const descriptor =
@@ -560,6 +552,14 @@ export class XetBlob extends Blob {
 					if (located && located.group.ranges.length > 1) {
 						await fetchMultiRangeGroup(located.group);
 						termRanges = rangeList.getRanges(term.range.start, term.range.end);
+						if (!termRanges.every((range) => range.data)) {
+							// The single-range path below must never run against a multi-range signed URL:
+							// its signature covers the exact multi-range header, and partially-cached ranges
+							// would get streamed chunks appended, corrupting output.
+							throw new Error(
+								`Multi-range fetch did not produce all chunks for term ${term.hash} range ${term.range.start}-${term.range.end}`,
+							);
+						}
 					}
 				}
 
