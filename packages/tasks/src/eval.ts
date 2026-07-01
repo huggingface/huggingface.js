@@ -33,6 +33,12 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Harbor is a framework for evaluating and optimizing agents and language models.",
 		url: "https://github.com/laude-institute/harbor",
 	},
+	ifstruct: {
+		name: "ifstruct",
+		description:
+			"IFStruct is a benchmark for structured-output compliance: whether a model produces valid JSON/YAML that follows a requested schema, scored without constrained decoding.",
+		url: "https://github.com/Liquid4All/ifstruct",
+	},
 	pier: {
 		name: "pier",
 		description:
