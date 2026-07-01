@@ -672,6 +672,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
+	pocketpal: {
+		prettyLabel: "PocketPal",
+		docsUrl: "https://github.com/a-ghorbani/pocketpal-ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model, filepath?) =>
+			new URL(`pocketpal://hub/run?repo_id=${model.id}${filepath ? `&filename=${filepath}` : ""}&source=hf`),
+	},
 	"atomic-chat": {
 		prettyLabel: "Atomic Chat",
 		docsUrl: "https://atomic.chat",
