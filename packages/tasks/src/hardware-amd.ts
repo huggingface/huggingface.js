@@ -184,7 +184,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		tflops: 22.58,
 		memory: [10],
 		gfxVersion: "gfx1031",
-		msrp: 500,
+		msrp: 329,
 		power: 175,
 		releaseYear: 2022,
 	},
