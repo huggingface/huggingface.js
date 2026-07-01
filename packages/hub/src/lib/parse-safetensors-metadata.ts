@@ -280,56 +280,6 @@ const LIBRARY_WEIGHT_CANDIDATES: Record<string, Array<{ single: string; index: s
 };
 
 /**
- * Determines which safetensors file(s) to parse for a repo.
- *
- * Resolution order:
- *  1. An explicit `params.path` (single file or sharded index, detected from the filename).
- *  2. The conventional root-level `model.safetensors` / `model.safetensors.index.json`.
- *  3. Library-specific locations selected by `params.library` (e.g. `"diffusers"` resolves the
- *     main module's weights under `transformer/`, then `unet/`, then the repo root — matching how
- *     a diffusion model's size is conventionally reported: the diffusion transformer / U-Net, not
- *     the sum of VAE + text encoders). Unknown or empty libraries add no extra locations.
- *
- * Returns `undefined` if no safetensors weights are found.
- */
-async function resolveSafetensorsLocation(
-	params: {
-		repo: RepoDesignation;
-		path?: string;
-		library?: string;
-		revision?: string;
-		hubUrl?: string;
-		fetch?: typeof fetch;
-	} & Partial<CredentialsParams>,
-): Promise<SafetensorsLocation | undefined> {
-	if (params.path) {
-		if (RE_SAFETENSORS_FILE.test(params.path)) {
-			return { path: params.path, sharded: false };
-		}
-		if (RE_SAFETENSORS_INDEX_FILE.test(params.path)) {
-			return { path: params.path, sharded: true };
-		}
-		return undefined;
-	}
-
-	const candidates: Array<{ single: string; index: string }> = [
-		{ single: SAFETENSORS_FILE, index: SAFETENSORS_INDEX_FILE },
-		...(params.library ? (LIBRARY_WEIGHT_CANDIDATES[params.library] ?? []) : []),
-	];
-
-	for (const { single, index } of candidates) {
-		if (await fileExists({ ...params, path: single })) {
-			return { path: single, sharded: false };
-		}
-		if (await fileExists({ ...params, path: index })) {
-			return { path: index, sharded: true };
-		}
-	}
-
-	return undefined;
-}
-
-/**
  * Analyze model.safetensors.index.json or model.safetensors from a model hosted
  * on Hugging Face using smart range requests to extract its metadata.
  */
@@ -414,10 +364,36 @@ export async function parseSafetensorsMetadata(
 	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
 	const quantConfig = modelConfig?.quantization_config ?? modelConfig?.text_config?.quantization_config;
 
-	// Resolve which file to parse: an explicit `params.path`, the conventional root-level
-	// `model.safetensors[.index.json]`, or a library-specific location selected by `params.library`
-	// (e.g. `"diffusers"` looks under `transformer/`/`unet/`/root for `diffusion_pytorch_model.safetensors[.index.json]`).
-	const location = await resolveSafetensorsLocation(params);
+	// Resolve which file to parse, in order:
+	//  1. An explicit `params.path` (single file or sharded index, detected from the filename).
+	//  2. The conventional root-level `model.safetensors` / `model.safetensors.index.json`.
+	//  3. Library-specific locations selected by `params.library` (e.g. `"diffusers"` resolves the
+	//     main module's weights under `transformer/`, then `unet/`, then the repo root — matching how
+	//     a diffusion model's size is conventionally reported: the diffusion transformer / U-Net, not
+	//     the sum of VAE + text encoders). Unknown or empty libraries add no extra locations.
+	let location: SafetensorsLocation | undefined;
+	if (params.path) {
+		if (RE_SAFETENSORS_FILE.test(params.path)) {
+			location = { path: params.path, sharded: false };
+		} else if (RE_SAFETENSORS_INDEX_FILE.test(params.path)) {
+			location = { path: params.path, sharded: true };
+		}
+	} else {
+		const candidates: Array<{ single: string; index: string }> = [
+			{ single: SAFETENSORS_FILE, index: SAFETENSORS_INDEX_FILE },
+			...(params.library ? (LIBRARY_WEIGHT_CANDIDATES[params.library] ?? []) : []),
+		];
+		for (const { single, index } of candidates) {
+			if (await fileExists({ ...params, path: single })) {
+				location = { path: single, sharded: false };
+				break;
+			}
+			if (await fileExists({ ...params, path: index })) {
+				location = { path: index, sharded: true };
+				break;
+			}
+		}
+	}
 
 	if (location && !location.sharded) {
 		const header = await parseSingleFile(location.path, params);
