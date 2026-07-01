@@ -21,14 +21,46 @@ import {
 	whoAmI,
 	type SpaceHardwareFlavor,
 } from "./src";
-import { streamBlobToFile } from "./src/utils/streamBlobToFile";
 import { pathToFileURL } from "node:url";
-import { stat } from "node:fs/promises";
+import { createWriteStream } from "node:fs";
+import { stat, unlink } from "node:fs/promises";
+import { Readable } from "node:stream";
+import type { ReadableStream } from "node:stream/web";
+import { pipeline } from "node:stream/promises";
 import { basename, join } from "node:path";
 import { HUB_URL } from "./src/consts";
 import { version } from "./package.json";
 import type { CommitProgressEvent } from "./src/lib/commit";
 import type { MultiBar, SingleBar } from "cli-progress";
+
+/**
+ * Stream a (potentially lazy) Blob to a local file path.
+ *
+ * @param onProgress called after each chunk with the cumulative number of bytes written so far.
+ * On error, the partially written file is removed so no truncated file is left behind.
+ */
+async function streamBlobToFile(
+	blob: Blob,
+	filePath: string,
+	onProgress?: (bytesWritten: number) => void,
+): Promise<void> {
+	let bytesWritten = 0;
+	const source = Readable.fromWeb(blob.stream() as ReadableStream);
+
+	if (onProgress) {
+		source.on("data", (chunk: Buffer) => {
+			bytesWritten += chunk.byteLength;
+			onProgress(bytesWritten);
+		});
+	}
+
+	try {
+		await pipeline(source, createWriteStream(filePath));
+	} catch (error) {
+		await unlink(filePath).catch(() => {});
+		throw error;
+	}
+}
 
 // Progress bar manager for handling multiple file uploads
 class UploadProgressManager {
