@@ -43,7 +43,7 @@ touch my-agent/agent.json
 ```json
 {
 	"model": "Qwen/Qwen2.5-72B-Instruct",
-	"provider": "nebius",
+	"provider": "novita",
 	"servers": [
 		{
 			"type": "stdio",

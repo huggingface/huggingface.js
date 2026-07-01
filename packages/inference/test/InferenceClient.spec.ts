@@ -2,16 +2,7 @@ import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import type { TextToImageArgs } from "../src/index.js";
-import {
-	chatCompletion,
-	chatCompletionStream,
-	HfInference,
-	InferenceClient,
-	textGeneration,
-	textToImage,
-} from "../src/index.js";
-import { isUrl } from "../src/lib/isUrl.js";
+import { chatCompletion, chatCompletionStream, HfInference, InferenceClient, textGeneration } from "../src/index.js";
 import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../src/providers/consts.js";
 import { readTestFile } from "./test-files.js";
 
@@ -1314,49 +1305,6 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 	describe.concurrent(
-		"SambaNova",
-		() => {
-			const client = new InferenceClient(env.HF_SAMBANOVA_KEY ?? "dummy");
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "sambanova",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "sambanova",
-					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-				let out = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						out += chunk.choices[0].delta.content;
-					}
-				}
-				expect(out).toContain("2");
-			});
-			it("featureExtraction", async () => {
-				const res = await client.featureExtraction({
-					model: "intfloat/e5-mistral-7b-instruct",
-					provider: "sambanova",
-					inputs: "Today is a sunny day and I will get some ice cream.",
-				});
-				expect(res).toBeInstanceOf(Array);
-				expect(res[0]).toBeInstanceOf(Array);
-			});
-		},
-		TIMEOUT,
-	);
-
-	describe.concurrent(
 		"Together",
 		() => {
 			const client = new InferenceClient(env.HF_TOGETHER_KEY ?? "dummy");
@@ -1406,111 +1354,6 @@ describe.skip("InferenceClient", () => {
 					max_tokens: 10,
 				});
 				expect(res).toMatchObject({ generated_text: " a city of love, and it’s also" });
-			});
-		},
-		TIMEOUT,
-	);
-
-	describe.concurrent(
-		"Nebius",
-		() => {
-			const client = new InferenceClient(env.HF_NEBIUS_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING.nebius = {
-				"meta-llama/Llama-3.1-8B-Instruct": {
-					provider: "nebius",
-					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
-					providerId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
-					status: "live",
-					task: "conversational",
-				},
-				"meta-llama/Llama-3.1-70B-Instruct": {
-					provider: "nebius",
-					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
-					providerId: "meta-llama/Meta-Llama-3.1-70B-Instruct",
-					status: "live",
-					task: "conversational",
-				},
-				"black-forest-labs/FLUX.1-schnell": {
-					provider: "nebius",
-					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
-					providerId: "black-forest-labs/flux-schnell",
-					status: "live",
-					task: "text-to-image",
-				},
-				"BAAI/bge-multilingual-gemma2": {
-					provider: "nebius",
-					providerId: "BAAI/bge-multilingual-gemma2",
-					hfModelId: "BAAI/bge-multilingual-gemma2",
-					status: "live",
-					task: "feature-extraction",
-				},
-				"mistralai/Devstral-Small-2505": {
-					provider: "nebius",
-					providerId: "mistralai/Devstral-Small-2505",
-					hfModelId: "mistralai/Devstral-Small-2505",
-					status: "live",
-					task: "text-generation",
-				},
-			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "nebius",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toMatch(/(two|2)/i);
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "meta-llama/Llama-3.1-70B-Instruct",
-					provider: "nebius",
-					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-				let out = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						out += chunk.choices[0].delta.content;
-					}
-				}
-				expect(out).toMatch(/(two|2)/i);
-			});
-
-			it("textToImage", async () => {
-				const res = await client.textToImage({
-					model: "black-forest-labs/FLUX.1-schnell",
-					provider: "nebius",
-					inputs: "award winning high resolution photo of a giant tortoise",
-				});
-				expect(res).toBeInstanceOf(Blob);
-			});
-
-			it("featureExtraction", async () => {
-				const res = await client.featureExtraction({
-					model: "BAAI/bge-multilingual-gemma2",
-					inputs: "That is a happy person",
-				});
-
-				expect(res).toBeInstanceOf(Array);
-				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
-			});
-
-			it("textGeneration", async () => {
-				const res = await client.textGeneration({
-					model: "mistralai/Devstral-Small-2505",
-					provider: "nebius",
-					inputs: "Once upon a time,",
-					temperature: 0,
-					max_tokens: 19,
-				});
-				expect(res).toMatchObject({
-					generated_text: " in a land far, far away, there lived a king who was very fond of flowers.",
-				});
 			});
 		},
 		TIMEOUT,
@@ -1695,109 +1538,6 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
-		"Hyperbolic",
-		() => {
-			HARDCODED_MODEL_INFERENCE_MAPPING["hyperbolic"] = {
-				"meta-llama/Llama-3.2-3B-Instruct": {
-					provider: "hyperbolic",
-					hfModelId: "meta-llama/Llama-3.2-3B-Instruct",
-					providerId: "meta-llama/Llama-3.2-3B-Instruct",
-					status: "live",
-					task: "conversational",
-				},
-				"meta-llama/Llama-3.3-70B-Instruct": {
-					provider: "hyperbolic",
-					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
-					providerId: "meta-llama/Llama-3.3-70B-Instruct",
-					status: "live",
-					task: "conversational",
-				},
-				"stabilityai/stable-diffusion-2": {
-					provider: "hyperbolic",
-					hfModelId: "stabilityai/stable-diffusion-2",
-					providerId: "SD2",
-					status: "live",
-					task: "text-to-image",
-				},
-				"meta-llama/Llama-3.1-405B-FP8": {
-					provider: "hyperbolic",
-					hfModelId: "meta-llama/Llama-3.1-405B-FP8",
-					providerId: "meta-llama/Llama-3.1-405B-FP8",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion - hyperbolic", async () => {
-				const res = await chatCompletion({
-					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
-					model: "meta-llama/Llama-3.2-3B-Instruct",
-					provider: "hyperbolic",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					temperature: 0.1,
-				});
-
-				expect(res).toBeDefined();
-				expect(res.choices).toBeDefined();
-				expect(res.choices?.length).toBeGreaterThan(0);
-
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toBeDefined();
-					expect(typeof completion).toBe("string");
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = chatCompletionStream({
-					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
-					model: "meta-llama/Llama-3.3-70B-Instruct",
-					provider: "hyperbolic",
-					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-				let out = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						out += chunk.choices[0].delta.content;
-					}
-				}
-				expect(out).toContain("2");
-			});
-
-			it("textToImage", async () => {
-				const res = await textToImage({
-					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
-					model: "stabilityai/stable-diffusion-2",
-					provider: "hyperbolic",
-					inputs: "award winning high resolution photo of a giant tortoise",
-					parameters: {
-						height: 128,
-						width: 128,
-					},
-				} satisfies TextToImageArgs);
-				expect(res).toBeInstanceOf(Blob);
-			});
-
-			it("textGeneration", async () => {
-				const res = await textGeneration({
-					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
-					model: "meta-llama/Llama-3.1-405B",
-					provider: "hyperbolic",
-					inputs: "Paris is",
-					parameters: {
-						temperature: 0,
-						top_p: 0.01,
-						max_new_tokens: 10,
-					},
-				});
-				expect(res).toMatchObject({ generated_text: "...the capital and most populous city of France," });
-			});
-		},
-		TIMEOUT,
-	);
-
-	describe.concurrent(
 		"Novita",
 		() => {
 			const client = new InferenceClient(env.HF_NOVITA_KEY ?? "dummy");
@@ -1852,58 +1592,6 @@ describe.skip("InferenceClient", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
-			});
-		},
-		TIMEOUT,
-	);
-	describe.concurrent(
-		"Black Forest Labs",
-		() => {
-			HARDCODED_MODEL_INFERENCE_MAPPING["black-forest-labs"] = {
-				"black-forest-labs/FLUX.1-dev": {
-					provider: "black-forest-labs",
-					hfModelId: "black-forest-labs/FLUX.1-dev",
-					providerId: "flux-dev",
-					status: "live",
-					task: "text-to-image",
-				},
-				// "black-forest-labs/FLUX.1-schnell": "flux-pro",
-			};
-
-			it("textToImage", async () => {
-				const res = await textToImage({
-					model: "black-forest-labs/FLUX.1-dev",
-					provider: "black-forest-labs",
-					accessToken: env.HF_BLACK_FOREST_LABS_KEY ?? "dummy",
-					inputs: "A raccoon driving a truck",
-					parameters: {
-						height: 256,
-						width: 256,
-						num_inference_steps: 4,
-						seed: 8817,
-					},
-				});
-				expect(res).toBeInstanceOf(Blob);
-			});
-
-			it("textToImage URL", async () => {
-				const res = await textToImage(
-					{
-						model: "black-forest-labs/FLUX.1-dev",
-						provider: "black-forest-labs",
-						accessToken: env.HF_BLACK_FOREST_LABS_KEY ?? "dummy",
-						inputs: "A raccoon driving a truck",
-						parameters: {
-							height: 256,
-							width: 256,
-							num_inference_steps: 4,
-							seed: 8817,
-						},
-					},
-					{ outputType: "url" },
-				);
-				expect(res).toBeTypeOf("string");
-				expect(isUrl(res)).toBeTruthy();
 			});
 		},
 		TIMEOUT,
@@ -2671,64 +2359,6 @@ describe.skip("InferenceClient", () => {
 				const stream = client.chatCompletionStream({
 					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
 					provider: "baseten",
-					messages: [{ role: "user", content: "Count from 1 to 3" }],
-					stream: true,
-					max_tokens: 20,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-				expect(fullResponse).toMatch(/1.*2.*3/);
-			});
-		},
-		TIMEOUT,
-	);
-
-	describe.concurrent(
-		"clarifai",
-		() => {
-			const client = new InferenceClient(env.HF_CLARIFAI_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["clarifai"] = {
-				"deepseek-ai/DeepSeek-V3.1": {
-					provider: "clarifai",
-					hfModelId: "deepseek-ai/DeepSeek-V3.1",
-					providerId: "deepseek-ai/deepseek-chat/models/DeepSeek-V3_1",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion - DeepSeek-V3_1", async () => {
-				const res = await client.chatCompletion({
-					model: "deepseek-ai/DeepSeek-V3.1",
-					provider: "clarifai",
-					messages: [{ role: "user", content: "What is 5 + 3?" }],
-					max_tokens: 20,
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toBeDefined();
-					expect(typeof completion).toBe("string");
-					expect(completion).toMatch(/(eight|8)/i);
-				}
-			});
-
-			it("chatCompletion stream - DeepSeek-V3_1", async () => {
-				const stream = client.chatCompletionStream({
-					model: "deepseek-ai/DeepSeek-V3.1",
-					provider: "clarifai",
 					messages: [{ role: "user", content: "Count from 1 to 3" }],
 					stream: true,
 					max_tokens: 20,
