@@ -130,6 +130,12 @@ export const AGENT_HARNESSES = {
 		description: "Nous Research's self-improving, multi-provider terminal AI agent.",
 		envVars: { HERMES_SESSION_ID: "*" },
 	},
+	hi: {
+		prettyLabel: "hi",
+		repoUrl: "https://github.com/PipeNetwork/hi",
+		docsUrl: "https://github.com/PipeNetwork/hi#readme",
+		description: "Rust terminal coding agent with verification-in-the-loop.",
+	},
 	"kilo-code": {
 		prettyLabel: "Kilo Code",
 		repoUrl: "https://github.com/Kilo-Org/kilocode",
