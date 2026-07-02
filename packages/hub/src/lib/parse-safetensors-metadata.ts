@@ -9,6 +9,11 @@ import type { SetRequired } from "../vendor/type-fest/set-required";
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
+/// `diffusers` keeps its main module (the diffusion transformer / U-Net) under a subfolder, or at the
+/// repo root for single-component repos (ControlNets, standalone VAEs).
+export const DIFFUSERS_SAFETENSORS_FILE = "diffusion_pytorch_model.safetensors";
+export const DIFFUSERS_SAFETENSORS_INDEX_FILE = "diffusion_pytorch_model.safetensors.index.json";
+export const DIFFUSERS_WEIGHTS_SUBFOLDERS = ["transformer", "unet"];
 /// We advise model/library authors to use the filenames above for convention inside model repos,
 /// but in some situations safetensors weights have different filenames.
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
@@ -255,6 +260,25 @@ function parseTotalParameters(value: string | number | undefined): number | unde
 	return parseInt(value);
 }
 
+interface SafetensorsLocation {
+	path: string;
+	sharded: boolean;
+}
+
+/// Extra weight locations to probe for specific libraries, beyond the root-level
+/// model.safetensors[.index.json]. Add an entry here to support a new library's layout.
+const LIBRARY_WEIGHT_CANDIDATES: Record<string, Array<{ single: string; index: string }>> = {
+	// diffusers keeps the main module (the diffusion transformer / U-Net) under a subfolder,
+	// or at the repo root for single-component repos (ControlNets, standalone VAEs).
+	diffusers: [
+		...DIFFUSERS_WEIGHTS_SUBFOLDERS.map((folder) => ({
+			single: `${folder}/${DIFFUSERS_SAFETENSORS_FILE}`,
+			index: `${folder}/${DIFFUSERS_SAFETENSORS_INDEX_FILE}`,
+		})),
+		{ single: DIFFUSERS_SAFETENSORS_FILE, index: DIFFUSERS_SAFETENSORS_INDEX_FILE },
+	],
+};
+
 /**
  * Analyze model.safetensors.index.json or model.safetensors from a model hosted
  * on Hugging Face using smart range requests to extract its metadata.
@@ -273,6 +297,14 @@ export async function parseSafetensorsMetadata(
 		 * @default false
 		 */
 		computeParametersCount: true;
+		/**
+		 * Library hint (e.g. the repo's `library_name`) selecting where to look for weights.
+		 * `"diffusers"` resolves the main module under `transformer/`/`unet/`/root; unknown or empty
+		 * keeps the default root-level `model.safetensors[.index.json]`. Ignored when `path` is set.
+		 *
+		 * @default undefined
+		 */
+		library?: string;
 		hubUrl?: string;
 		revision?: string;
 		/**
@@ -292,6 +324,14 @@ export async function parseSafetensorsMetadata(
 		 * @default false
 		 */
 		computeParametersCount?: boolean;
+		/**
+		 * Library hint (e.g. the repo's `library_name`) selecting where to look for weights.
+		 * `"diffusers"` resolves the main module under `transformer/`/`unet/`/root; unknown or empty
+		 * keeps the default root-level `model.safetensors[.index.json]`. Ignored when `path` is set.
+		 *
+		 * @default undefined
+		 */
+		library?: string;
 		hubUrl?: string;
 		revision?: string;
 		/**
@@ -305,6 +345,7 @@ export async function parseSafetensorsMetadata(
 		repo: RepoDesignation;
 		path?: string;
 		computeParametersCount?: boolean;
+		library?: string;
 		hubUrl?: string;
 		revision?: string;
 		/**
@@ -323,11 +364,39 @@ export async function parseSafetensorsMetadata(
 	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
 	const quantConfig = modelConfig?.quantization_config ?? modelConfig?.text_config?.quantization_config;
 
-	if (
-		(params.path && RE_SAFETENSORS_FILE.test(params.path)) ||
-		(await fileExists({ ...params, path: SAFETENSORS_FILE }))
-	) {
-		const header = await parseSingleFile(params.path ?? SAFETENSORS_FILE, params);
+	// Resolve which file to parse, in order:
+	//  1. An explicit `params.path` (single file or sharded index, detected from the filename).
+	//  2. The conventional root-level `model.safetensors` / `model.safetensors.index.json`.
+	//  3. Library-specific locations selected by `params.library` (e.g. `"diffusers"` resolves the
+	//     main module's weights under `transformer/`, then `unet/`, then the repo root — matching how
+	//     a diffusion model's size is conventionally reported: the diffusion transformer / U-Net, not
+	//     the sum of VAE + text encoders). Unknown or empty libraries add no extra locations.
+	let location: SafetensorsLocation | undefined;
+	if (params.path) {
+		if (RE_SAFETENSORS_FILE.test(params.path)) {
+			location = { path: params.path, sharded: false };
+		} else if (RE_SAFETENSORS_INDEX_FILE.test(params.path)) {
+			location = { path: params.path, sharded: true };
+		}
+	} else {
+		const candidates: Array<{ single: string; index: string }> = [
+			{ single: SAFETENSORS_FILE, index: SAFETENSORS_INDEX_FILE },
+			...(params.library ? (LIBRARY_WEIGHT_CANDIDATES[params.library] ?? []) : []),
+		];
+		for (const { single, index } of candidates) {
+			if (await fileExists({ ...params, path: single })) {
+				location = { path: single, sharded: false };
+				break;
+			}
+			if (await fileExists({ ...params, path: index })) {
+				location = { path: index, sharded: true };
+				break;
+			}
+		}
+	}
+
+	if (location && !location.sharded) {
+		const header = await parseSingleFile(location.path, params);
 		const paramStats = params.computeParametersCount
 			? {
 					parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
@@ -339,13 +408,10 @@ export async function parseSafetensorsMetadata(
 			sharded: false,
 			header,
 			...paramStats,
-			filepaths: [params.path ?? SAFETENSORS_FILE],
+			filepaths: [location.path],
 		};
-	} else if (
-		(params.path && RE_SAFETENSORS_INDEX_FILE.test(params.path)) ||
-		(await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))
-	) {
-		const path = params.path ?? SAFETENSORS_INDEX_FILE;
+	} else if (location && location.sharded) {
+		const path = location.path;
 		const index = await parseShardedIndex(path, params);
 		const shardedMap = await fetchAllHeaders(path, index, params);
 		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
