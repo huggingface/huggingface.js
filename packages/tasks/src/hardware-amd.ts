@@ -260,12 +260,20 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 15,
 		releaseYear: 2022,
 	},
+	"Radeon 680M": {
+		tflops: 3.379,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1035",
+		msrp: 120,
+		power: 50,
+		releaseYear: 2022,
+	},
 	"Radeon 740M": {
 		tflops: 5.12,
 		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
 		gfxVersion: "gfx1103",
 		msrp: 179,
-		power: 15,
+		power: 30,
 		releaseYear: 2023,
 	},
 	"Radeon 760M": {
