@@ -707,7 +707,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Atomic Chat",
 		docsUrl: "https://atomic.chat",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model) => new URL(`atomic-chat://models/huggingface/${model.id}`),
 	},
 	backyard: {
