@@ -182,6 +182,18 @@ export const AGENT_HARNESSES = {
 		description: "AI-powered IDE from ByteDance.",
 		envVars: { TRAE_AI_SHELL_ID: "*" },
 	},
+	vtcode: {
+		// Before cursor-cli/cursor: VTCode has its own unique env var (VTCODE) and
+		// should not be shadowed by inherited Cursor env vars when running inside
+		// the Cursor editor's terminal.
+		prettyLabel: "VTCode",
+		repoUrl: "https://github.com/vinhnx/VTCode",
+		description:
+			"Rust coding agent with multi-provider LLM support, OS-native sandboxing, and extensible skills",
+		envVars: {
+			VTCODE: "1",
+		},
+	},
 	warp: {
 		prettyLabel: "Warp",
 		repoUrl: "https://github.com/warpdotdev/Warp",
@@ -215,15 +227,6 @@ export const AGENT_HARNESSES = {
 		prettyLabel: "Devin",
 		docsUrl: "https://devin.ai",
 		description: "Autonomous AI software engineer from Cognition.",
-	},
-	vtcode: {
-		prettyLabel: "VTCode",
-		repoUrl: "https://github.com/vinhnx/VTCode",
-		description:
-			"Rust coding agent with multi-provider LLM support, OS-native sandboxing, and extensible skills",
-		envVars: {
-			VTCODE: "1",
-		},
 	},
 } satisfies Record<string, AgentHarness>;
 
