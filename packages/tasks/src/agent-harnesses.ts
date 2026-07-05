@@ -216,6 +216,15 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://devin.ai",
 		description: "Autonomous AI software engineer from Cognition.",
 	},
+	vtcode: {
+		prettyLabel: "VTCode",
+		repoUrl: "https://github.com/vinhnx/VTCode",
+		description:
+			"Rust coding agent with multi-provider LLM support, OS-native sandboxing, and extensible skills",
+		envVars: {
+			VTCODE: "1",
+		},
+	},
 } satisfies Record<string, AgentHarness>;
 
 /// List of the agent harnesses known to the Hub
