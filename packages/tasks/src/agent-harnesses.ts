@@ -183,9 +183,6 @@ export const AGENT_HARNESSES = {
 		envVars: { TRAE_AI_SHELL_ID: "*" },
 	},
 	vtcode: {
-		// Before cursor-cli/cursor: VTCode has its own unique env var (VTCODE) and
-		// should not be shadowed by inherited Cursor env vars when running inside
-		// the Cursor editor's terminal.
 		prettyLabel: "VTCode",
 		repoUrl: "https://github.com/vinhnx/VTCode",
 		description:
