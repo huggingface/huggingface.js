@@ -516,7 +516,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
-	"flextab": {
+	flextab: {
 		prettyLabel: "FlexTab",
 		repoName: "FlexTab",
 		repoUrl: "https://github.com/SAP-samples/flextab",
