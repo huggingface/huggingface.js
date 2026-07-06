@@ -748,6 +748,75 @@ export const flair = (model: ModelData): string[] => [
 tagger = SequenceTagger.load("${model.id}")`,
 ];
 
+export const flextab = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/flextab`;
+
+	const classificationSnippet = `# Run a classification task
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+from flextab import FlexTabClassifier
+
+# Load sample data
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize a classifier, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+clf = FlexTabClassifier(max_context_size=8192, bagging=8)
+
+clf.fit(X_train, y_train)
+
+# Predict probabilities
+prediction_probabilities = clf.predict_proba(X_test)
+# Predict labels
+predictions = clf.predict(X_test)
+print("Accuracy", accuracy_score(y_test, predictions))`;
+
+	const regressionsSnippet = `# Run a regression task
+from sklearn.datasets import fetch_openml
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from flextab import FlexTabRegressor
+
+# Load sample data
+df = fetch_openml(data_id=531, as_frame=True)
+X = df.data
+y = df.target.astype(float)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize the regressor, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+regressor = FlexTabRegressor(max_context_size=8192, bagging=8)
+
+regressor.fit(X_train, y_train)
+
+# Predict on the test set
+predictions = regressor.predict(X_test)
+
+r2 = r2_score(y_test, predictions)
+print("R² Score:", r2)`;
+
+	const matchingSnippet = `# Run a matching task
+from sklearn.metrics import accuracy_score, roc_auc_score
+
+from flextab import FlexTabMatcher
+from flextab.utils.test_utils import load_febrl4
+
+left_train, left_test, right_train, right_test, y_train, y_test = load_febrl4()
+
+matcher = FlexTabMatcher(max_context_size=8192, bagging=1)
+matcher.fit(left_train, right_train, y_train)
+predictions = matcher.predict(left_test, right_test)
+print(f'Accuracy {accuracy_score(y_test, predictions):.2%}')
+# Probabilities (e.g. for thresholding or AUROC):
+# probas = matcher.predict_proba_matching(left_test, right_test)
+# print(f'AUROC {roc_auc_score(y_test, probas[:, 1]):.2%}')`;
+	return [installSnippet, classificationSnippet, regressionsSnippet, matchingSnippet];
+};
+
 export const gliner = (model: ModelData): string[] => [
 	`from gliner import GLiNER
 
