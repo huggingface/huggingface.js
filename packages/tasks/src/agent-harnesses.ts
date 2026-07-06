@@ -185,8 +185,7 @@ export const AGENT_HARNESSES = {
 	vtcode: {
 		prettyLabel: "VTCode",
 		repoUrl: "https://github.com/vinhnx/VTCode",
-		description:
-			"Rust coding agent with multi-provider LLM support, OS-native sandboxing, and extensible skills",
+		description: "Rust coding agent with multi-provider LLM support, OS-native sandboxing, and extensible skills",
 		envVars: {
 			VTCODE: "1",
 		},
