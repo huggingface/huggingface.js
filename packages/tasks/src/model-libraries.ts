@@ -1522,7 +1522,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
     prettyLabel: "TiRex-2",
     repoName: "TiRex-2",
     repoUrl: "https://github.com/NX-AI/tirex-2",
-    countDownloads: `path_extension:"ckpt"`,
+    countDownloads: `path:"model-config.yaml"`,
   },
 	torchgeo: {
 		prettyLabel: "TorchGeo",
