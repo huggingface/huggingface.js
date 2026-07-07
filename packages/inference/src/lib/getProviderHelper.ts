@@ -1,6 +1,4 @@
 import * as Baseten from "../providers/baseten.js";
-import * as Clarifai from "../providers/clarifai.js";
-import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
 import * as DeepInfra from "../providers/deepinfra.js";
@@ -9,11 +7,8 @@ import * as FeatherlessAI from "../providers/featherless-ai.js";
 import * as Fireworks from "../providers/fireworks-ai.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
-import * as Hyperbolic from "../providers/hyperbolic.js";
-import * as Nebius from "../providers/nebius.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
-import * as Nvidia from "../providers/nvidia.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
@@ -53,7 +48,6 @@ import type {
 	ZeroShotImageClassificationTaskHelper,
 } from "../providers/providerHelper.js";
 import * as Replicate from "../providers/replicate.js";
-import * as Sambanova from "../providers/sambanova.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
 import * as Wavespeed from "../providers/wavespeed.js";
@@ -65,14 +59,8 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	baseten: {
 		conversational: new Baseten.BasetenConversationalTask(),
 	},
-	"black-forest-labs": {
-		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
-	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
-	},
-	clarifai: {
-		conversational: new Clarifai.ClarifaiConversationalTask(),
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
@@ -83,12 +71,14 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
 	},
 	"fal-ai": {
+		"audio-to-audio": new FalAI.FalAIAudioToAudioTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
 		"image-text-to-image": new FalAI.FalAIImageTextToImageTask(),
 		"image-text-to-video": new FalAI.FalAIImageTextToVideoTask(),
 		"image-to-image": new FalAI.FalAIImageToImageTask(),
 		"image-segmentation": new FalAI.FalAIImageSegmentationTask(),
 		"image-to-video": new FalAI.FalAIImageToVideoTask(),
+		"text-to-audio": new FalAI.FalAITextToAudioTask(),
 		"text-to-image": new FalAI.FalAITextToImageTask(),
 		"text-to-speech": new FalAI.FalAITextToSpeechTask(),
 		"text-to-video": new FalAI.FalAITextToVideoTask(),
@@ -134,17 +124,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Groq.GroqConversationalTask(),
 		"text-generation": new Groq.GroqTextGenerationTask(),
 	},
-	hyperbolic: {
-		"text-to-image": new Hyperbolic.HyperbolicTextToImageTask(),
-		conversational: new Hyperbolic.HyperbolicConversationalTask(),
-		"text-generation": new Hyperbolic.HyperbolicTextGenerationTask(),
-	},
-	nebius: {
-		"text-to-image": new Nebius.NebiusTextToImageTask(),
-		conversational: new Nebius.NebiusConversationalTask(),
-		"text-generation": new Nebius.NebiusTextGenerationTask(),
-		"feature-extraction": new Nebius.NebiusFeatureExtractionTask(),
-	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
 		"text-generation": new Novita.NovitaTextGenerationTask(),
@@ -153,9 +132,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	nscale: {
 		"text-to-image": new Nscale.NscaleTextToImageTask(),
 		conversational: new Nscale.NscaleConversationalTask(),
-	},
-	nvidia: {
-		conversational: new Nvidia.NvidiaConversationalTask(),
 	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
@@ -173,10 +149,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-video": new Replicate.ReplicateTextToVideoTask(),
 		"image-to-image": new Replicate.ReplicateImageToImageTask(),
 		"automatic-speech-recognition": new Replicate.ReplicateAutomaticSpeechRecognitionTask(),
-	},
-	sambanova: {
-		conversational: new Sambanova.SambanovaConversationalTask(),
-		"feature-extraction": new Sambanova.SambanovaFeatureExtractionTask(),
 	},
 	scaleway: {
 		conversational: new Scaleway.ScalewayConversationalTask(),

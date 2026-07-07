@@ -516,6 +516,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	flextab: {
+		prettyLabel: "FlexTab",
+		repoName: "FlexTab",
+		repoUrl: "https://github.com/SAP-samples/flextab",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.flextab,
+	},
 	fme: {
 		prettyLabel: "Full Model Emulation",
 		repoName: "Full Model Emulation",
@@ -1183,6 +1190,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/HorizonRobotics/RoboOrchardLab",
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	rwkv: {
+		prettyLabel: "RWKV",
+		repoName: "RWKV-LM",
+		repoUrl: "https://github.com/BlinkDL/RWKV-LM",
+		docsUrl: "https://rwkv.com/",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	saelens: {
 		prettyLabel: "SAELens",

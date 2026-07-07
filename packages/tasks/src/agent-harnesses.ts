@@ -130,6 +130,12 @@ export const AGENT_HARNESSES = {
 		description: "Nous Research's self-improving, multi-provider terminal AI agent.",
 		envVars: { HERMES_SESSION_ID: "*" },
 	},
+	hi: {
+		prettyLabel: "hi",
+		repoUrl: "https://github.com/PipeNetwork/hi",
+		docsUrl: "https://github.com/PipeNetwork/hi#readme",
+		description: "Rust terminal coding agent with verification-in-the-loop.",
+	},
 	"kilo-code": {
 		prettyLabel: "Kilo Code",
 		repoUrl: "https://github.com/Kilo-Org/kilocode",
@@ -175,6 +181,14 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://trae.ai",
 		description: "AI-powered IDE from ByteDance.",
 		envVars: { TRAE_AI_SHELL_ID: "*" },
+	},
+	vtcode: {
+		prettyLabel: "VTCode",
+		repoUrl: "https://github.com/vinhnx/VTCode",
+		description: "Rust coding agent with multi-provider LLM support, OS-native sandboxing, and extensible skills",
+		envVars: {
+			VTCODE: "1",
+		},
 	},
 	warp: {
 		prettyLabel: "Warp",
