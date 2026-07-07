@@ -1024,7 +1024,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	openasr: {
 		prettyLabel: "OpenASR",
-		repoName: "openasr",
+		repoName: "OpenASR",
 		repoUrl: "https://github.com/QuintinShaw/openasr",
 		docsUrl: "https://github.com/QuintinShaw/openasr/blob/main/docs/DOCS_INDEX.md",
 		snippets: snippets.openasr,
