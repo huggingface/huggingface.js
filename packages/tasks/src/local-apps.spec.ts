@@ -211,7 +211,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 		const snippet = snippetFunc(model);
 
-		expect(snippet[0].content).toContain(`llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
+		expect(snippet[0].content).toContain(`llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 		expect(snippet[1].setup).toContain("npm install -g openclaw@latest");
 		expect(snippet[1].content).toContain("openclaw onboard --non-interactive --mode local");
 		expect(snippet[1].content).toContain("--auth-choice custom-api-key");
