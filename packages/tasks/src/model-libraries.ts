@@ -516,6 +516,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	flextab: {
+		prettyLabel: "FlexTab",
+		repoName: "FlexTab",
+		repoUrl: "https://github.com/SAP-samples/flextab",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.flextab,
+	},
 	fme: {
 		prettyLabel: "Full Model Emulation",
 		repoName: "Full Model Emulation",
@@ -1015,6 +1022,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			OR path:"open_clip_pytorch_model.bin"
 			OR path:"pytorch_model.bin"`,
 	},
+	openasr: {
+		prettyLabel: "OpenASR",
+		repoName: "OpenASR",
+		repoUrl: "https://github.com/QuintinShaw/openasr",
+		docsUrl: "https://github.com/QuintinShaw/openasr/blob/main/docs/DOCS_INDEX.md",
+		snippets: snippets.openasr,
+		filter: false,
+		countDownloads: `path_extension:"oasr"`,
+	},
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
 		repoName: "OpenPeerLLM",
@@ -1510,6 +1526,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "TiRex",
 		repoUrl: "https://github.com/NX-AI/tirex",
 		countDownloads: `path_extension:"ckpt"`,
+	},
+	"tirex-2": {
+		prettyLabel: "TiRex-2",
+		repoName: "TiRex-2",
+		repoUrl: "https://github.com/NX-AI/tirex-2",
+		countDownloads: `path:"model-config.yaml"`,
 	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",
