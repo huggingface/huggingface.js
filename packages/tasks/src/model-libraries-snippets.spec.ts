@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ModelData } from "./model-data.js";
-import { llama_cpp_python } from "./model-libraries-snippets.js";
+import { litert_lm, llama_cpp_python } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
 	it("llama_cpp_python conversational", async () => {
@@ -54,5 +54,30 @@ output = llm(
 	echo=True
 )
 print(output)`);
+	});
+
+	it("litert_lm", async () => {
+		const model: ModelData = {
+			id: "litert-community/gemma-4-E2B-it-litert-lm",
+			tags: [""],
+			inference: "",
+		};
+		const snippet = litert_lm(model);
+
+		expect(snippet.join("\n"))
+			.toEqual(`# LiteRT-LM runs on various platforms (Android, iOS, Windows, Linux, macOS, IoT, Web/WASM)
+# and supports many APIs (C++, Python, Kotlin, Swift, JavaScript, Flutter).
+# For platform-specific integration guides, please refer to the official developer website:
+# https://ai.google.dev/edge/litert-lm
+
+# To try LiteRT-LM, the easiest way is to use our CLI tool.
+# 1. Install the LiteRT-LM CLI tool (at least 0.14.0):
+pip install "litert-lm>=0.14.0"
+
+# 2. Download and run this model locally:
+# See: https://ai.google.dev/edge/litert-lm/cli
+litert-lm run \\
+  --from-huggingface-repo=litert-community/gemma-4-E2B-it-litert-lm \\
+  --prompt="Write me a poem"`);
 	});
 });

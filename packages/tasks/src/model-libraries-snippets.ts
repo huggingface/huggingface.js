@@ -1142,14 +1142,13 @@ export const litert_lm = (model: ModelData): string[] => [
 # https://ai.google.dev/edge/litert-lm
 
 # To try LiteRT-LM, the easiest way is to use our CLI tool.
-# 1. Install the LiteRT-LM CLI tool:
-pip install litert-lm
+# 1. Install the LiteRT-LM CLI tool (at least 0.14.0):
+pip install "litert-lm>=0.14.0"
 
 # 2. Download and run this model locally:
 # See: https://ai.google.dev/edge/litert-lm/cli
 litert-lm run \\
   --from-huggingface-repo=${model.id} \\
-  model.litertlm \\
   --prompt="Write me a poem"`,
 ];
 
