@@ -1252,6 +1252,18 @@ model, preprocess_train, preprocess_val = open_clip.create_model_and_transforms(
 tokenizer = open_clip.get_tokenizer('hf-hub:${model.id}')`,
 ];
 
+export const openasr = (model: ModelData): string[] => {
+	// OpenASR's local model registry keys packs by their short id (the final path segment
+	// of the Hub repo id, e.g. "xasr-zh-en" for "OpenASR/xasr-zh-en"), not the full
+	// "org/repo" reference, so the CLI commands below use that short id.
+	const modelId = model.id.split("/").pop() ?? model.id;
+	return [
+		`# Install the openasr CLI: https://github.com/QuintinShaw/openasr/releases
+openasr pull ${modelId}
+openasr transcribe audio.wav --model ${modelId}`,
+	];
+};
+
 export const paddlenlp = (model: ModelData): string[] => {
 	if (model.config?.architectures?.[0]) {
 		const architecture = model.config.architectures[0];
