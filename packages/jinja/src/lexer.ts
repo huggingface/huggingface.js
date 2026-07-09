@@ -25,7 +25,7 @@ export const TOKEN_TYPES = Object.freeze({
 
 	CallOperator: "CallOperator", // ()
 	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + - ~
-	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / %
+	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / // %
 	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
 	UnaryOperator: "UnaryOperator", // ! - +
 	Comment: "Comment", // {# ... #}
@@ -92,6 +92,7 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	["-", TOKEN_TYPES.AdditiveBinaryOperator],
 	["~", TOKEN_TYPES.AdditiveBinaryOperator],
 	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	["//", TOKEN_TYPES.MultiplicativeBinaryOperator], // NOTE: must come before "/" so that "//" is matched first
 	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	["%", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	// Assignment operator
