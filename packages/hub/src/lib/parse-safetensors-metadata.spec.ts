@@ -102,6 +102,35 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.filepaths, ["unet/diffusion_pytorch_model.safetensors"]);
 	});
 
+	it("resolves diffusers weights from the unet/ subfolder via the library hint (no path given)", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "CompVis/stable-diffusion-v1-4",
+			computeParametersCount: true,
+			library: "diffusers",
+			revision: "133a221b8aa7292a167afc5127cb63fb5005638b",
+		});
+
+		assert(!parse.sharded);
+		assert.deepStrictEqual(parse.filepaths, ["unet/diffusion_pytorch_model.safetensors"]);
+		assert.deepStrictEqual(parse.parameterCount, { F32: 859_520_964 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 859_520_964);
+	});
+
+	it("resolves sharded diffusers weights from the transformer/ subfolder via the library hint", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "krea/Krea-2-Turbo",
+			computeParametersCount: true,
+			library: "diffusers",
+			revision: "1161245028ef398cd0a951101b2bbf486464f841",
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(parse.filepaths[0], "transformer/diffusion_pytorch_model.safetensors.index.json");
+		assert.ok(parse.filepaths.includes("transformer/diffusion_pytorch_model-00001-of-00003.safetensors"));
+		// Krea-2-Turbo diffusion transformer is ~12.8B params
+		assert.ok(sum(Object.values(parse.parameterCount)) > 11_000_000_000);
+	});
+
 	it("fetch info for sharded with file path", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "Alignment-Lab-AI/ALAI-gemma-7b",
