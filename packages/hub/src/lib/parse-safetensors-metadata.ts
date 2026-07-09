@@ -9,11 +9,11 @@ import type { SetRequired } from "../vendor/type-fest/set-required";
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
-/// `diffusers` keeps its main module (the diffusion transformer / U-Net) under a subfolder, or at the
-/// repo root for single-component repos (ControlNets, standalone VAEs).
+/// Safetensors filenames and weight subfolders used by the `diffusers` library
+/// (see LIBRARY_WEIGHT_CANDIDATES below).
 export const DIFFUSERS_SAFETENSORS_FILE = "diffusion_pytorch_model.safetensors";
 export const DIFFUSERS_SAFETENSORS_INDEX_FILE = "diffusion_pytorch_model.safetensors.index.json";
-export const DIFFUSERS_WEIGHTS_SUBFOLDERS = ["transformer", "unet"];
+export const DIFFUSERS_WEIGHTS_SUBFOLDERS = ["transformer", "unet"] as const;
 /// We advise model/library authors to use the filenames above for convention inside model repos,
 /// but in some situations safetensors weights have different filenames.
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
@@ -269,7 +269,9 @@ interface SafetensorsLocation {
 /// model.safetensors[.index.json]. Add an entry here to support a new library's layout.
 const LIBRARY_WEIGHT_CANDIDATES: Record<string, Array<{ single: string; index: string }>> = {
 	// diffusers keeps the main module (the diffusion transformer / U-Net) under a subfolder,
-	// or at the repo root for single-component repos (ControlNets, standalone VAEs).
+	// or at the repo root for single-component repos (ControlNets, standalone VAEs). This matches
+	// how a diffusion model's size is conventionally reported: the diffusion transformer / U-Net,
+	// not the sum of VAE + text encoders.
 	diffusers: [
 		...DIFFUSERS_WEIGHTS_SUBFOLDERS.map((folder) => ({
 			single: `${folder}/${DIFFUSERS_SAFETENSORS_FILE}`,
@@ -367,10 +369,8 @@ export async function parseSafetensorsMetadata(
 	// Resolve which file to parse, in order:
 	//  1. An explicit `params.path` (single file or sharded index, detected from the filename).
 	//  2. The conventional root-level `model.safetensors` / `model.safetensors.index.json`.
-	//  3. Library-specific locations selected by `params.library` (e.g. `"diffusers"` resolves the
-	//     main module's weights under `transformer/`, then `unet/`, then the repo root — matching how
-	//     a diffusion model's size is conventionally reported: the diffusion transformer / U-Net, not
-	//     the sum of VAE + text encoders). Unknown or empty libraries add no extra locations.
+	//  3. Library-specific locations selected by `params.library` (see LIBRARY_WEIGHT_CANDIDATES).
+	//     Unknown or empty libraries add no extra locations.
 	let location: SafetensorsLocation | undefined;
 	if (params.path) {
 		if (RE_SAFETENSORS_FILE.test(params.path)) {
@@ -410,7 +410,7 @@ export async function parseSafetensorsMetadata(
 			...paramStats,
 			filepaths: [location.path],
 		};
-	} else if (location && location.sharded) {
+	} else if (location) {
 		const path = location.path;
 		const index = await parseShardedIndex(path, params);
 		const shardedMap = await fetchAllHeaders(path, index, params);
