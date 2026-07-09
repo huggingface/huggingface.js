@@ -516,6 +516,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	flextab: {
+		prettyLabel: "FlexTab",
+		repoName: "FlexTab",
+		repoUrl: "https://github.com/SAP-samples/flextab",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.flextab,
+	},
 	fme: {
 		prettyLabel: "Full Model Emulation",
 		repoName: "Full Model Emulation",
@@ -960,6 +967,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.model2vec,
 		filter: false,
 	},
+	mobilint: {
+		prettyLabel: "Mobilint",
+		repoName: "mblt-model-zoo",
+		repoUrl: "https://github.com/mobilint/mblt-model-zoo",
+		docsUrl: "https://docs.mobilint.com",
+		countDownloads: `path:"config.json" OR path_extension:"mxq"`,
+		snippets: snippets.mobilint,
+		filter: false,
+	},
 	moshi: {
 		prettyLabel: "Moshi",
 		repoName: "Moshi",
@@ -1014,6 +1030,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			OR path:"model.safetensors"
 			OR path:"open_clip_pytorch_model.bin"
 			OR path:"pytorch_model.bin"`,
+	},
+	openasr: {
+		prettyLabel: "OpenASR",
+		repoName: "OpenASR",
+		repoUrl: "https://github.com/QuintinShaw/openasr",
+		docsUrl: "https://github.com/QuintinShaw/openasr/blob/main/docs/DOCS_INDEX.md",
+		snippets: snippets.openasr,
+		filter: false,
+		countDownloads: `path_extension:"oasr"`,
 	},
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
@@ -1183,6 +1208,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/HorizonRobotics/RoboOrchardLab",
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	rwkv: {
+		prettyLabel: "RWKV",
+		repoName: "RWKV-LM",
+		repoUrl: "https://github.com/BlinkDL/RWKV-LM",
+		docsUrl: "https://rwkv.com/",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	saelens: {
 		prettyLabel: "SAELens",
@@ -1502,6 +1535,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "TiRex",
 		repoUrl: "https://github.com/NX-AI/tirex",
 		countDownloads: `path_extension:"ckpt"`,
+	},
+	"tirex-2": {
+		prettyLabel: "TiRex-2",
+		repoName: "TiRex-2",
+		repoUrl: "https://github.com/NX-AI/tirex-2",
+		countDownloads: `path:"model-config.yaml"`,
 	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",

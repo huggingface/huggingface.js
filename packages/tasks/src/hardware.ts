@@ -70,6 +70,13 @@ export const SKUS = {
 		NVIDIA: NVIDIA_SKUS,
 		AMD: AMD_GPU_SKUS,
 		INTEL: {
+			"Arc A380": {
+				tflops: 8.4,
+				memory: [6],
+				msrp: 139,
+				power: 75,
+				releaseYear: 2022,
+			},
 			"Arc A750": {
 				tflops: 34.41,
 				memory: [8],

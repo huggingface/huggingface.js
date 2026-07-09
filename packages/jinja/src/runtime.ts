@@ -96,6 +96,9 @@ export class FloatValue extends RuntimeValue<number> {
 	override type = "FloatValue";
 
 	override toString(): string {
+		if (Object.is(this.value, -0)) {
+			return "-0.0";
+		}
 		return this.value % 1 === 0 ? this.value.toFixed(1) : this.value.toString();
 	}
 }
@@ -1430,6 +1433,16 @@ export class Interpreter {
 		switch (node.operator.value) {
 			case "not":
 				return new BooleanValue(!argument.value);
+			case "+":
+			case "-": {
+				const sign = node.operator.value === "-" ? -1 : 1;
+				if (argument instanceof IntegerValue || argument instanceof FloatValue || argument instanceof BooleanValue) {
+					const value = argument instanceof BooleanValue ? (argument.value ? 1 : 0) : argument.value;
+					const result = sign * value;
+					return argument instanceof FloatValue ? new FloatValue(result) : new IntegerValue(result);
+				}
+				throw new SyntaxError(`Unknown operator "${node.operator.value}" for ${argument.type}`);
+			}
 			default:
 				throw new SyntaxError(`Unknown operator: ${node.operator.value}`);
 		}
