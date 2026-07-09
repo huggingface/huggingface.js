@@ -1142,8 +1142,8 @@ export const litert_lm = (model: ModelData): string[] => [
 # https://ai.google.dev/edge/litert-lm
 
 # To try LiteRT-LM, the easiest way is to use our CLI tool.
-# 1. Install the LiteRT-LM CLI tool (at least 0.14.0):
-pip install "litert-lm>=0.14.0"
+# 1. Install the LiteRT-LM CLI tool:
+pip install -U litert-lm
 
 # 2. Download and run this model locally:
 # See: https://ai.google.dev/edge/litert-lm/cli
