@@ -967,6 +967,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.model2vec,
 		filter: false,
 	},
+	mobilint: {
+		prettyLabel: "Mobilint",
+		repoName: "mblt-model-zoo",
+		repoUrl: "https://github.com/mobilint/mblt-model-zoo",
+		docsUrl: "https://docs.mobilint.com",
+		countDownloads: `path:"config.json" OR path_extension:"mxq"`,
+		snippets: snippets.mobilint,
+		filter: false,
+	},
 	moshi: {
 		prettyLabel: "Moshi",
 		repoName: "Moshi",

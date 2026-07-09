@@ -2311,6 +2311,29 @@ export const model2vec = (model: ModelData): string[] => [
 model = StaticModel.from_pretrained("${model.id}")`,
 ];
 
+export const mobilint = (model: ModelData): string[] => {
+	const modelName = nameWithoutNamespace(model.id);
+	return [
+		`# pip install mblt-model-zoo
+from mblt_model_zoo.vision import MBLT_Engine
+
+model = MBLT_Engine(
+    model_cls="${modelName}",
+    model_type="DEFAULT",
+    model_path="",
+    core_mode="global8",
+)
+
+try:
+    image = model.preprocess("path/to/image.jpg")
+    output = model(image)
+    result = model.postprocess(output)
+finally:
+    model.dispose()
+`,
+	];
+};
+
 export const pruna = (model: ModelData): string[] => {
 	let snippets: string[];
 
