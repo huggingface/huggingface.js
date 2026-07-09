@@ -516,6 +516,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	flextab: {
+		prettyLabel: "FlexTab",
+		repoName: "FlexTab",
+		repoUrl: "https://github.com/SAP-samples/flextab",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.flextab,
+	},
 	fme: {
 		prettyLabel: "Full Model Emulation",
 		repoName: "Full Model Emulation",
@@ -691,7 +698,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "IntelliFold",
 		repoUrl: "https://github.com/IntelliGen-AI/IntelliFold",
 		filter: false,
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"zst"`,
 	},
 	"ising-decoding": {
 		prettyLabel: "Ising Decoding",
@@ -1015,6 +1022,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			OR path:"open_clip_pytorch_model.bin"
 			OR path:"pytorch_model.bin"`,
 	},
+	openasr: {
+		prettyLabel: "OpenASR",
+		repoName: "OpenASR",
+		repoUrl: "https://github.com/QuintinShaw/openasr",
+		docsUrl: "https://github.com/QuintinShaw/openasr/blob/main/docs/DOCS_INDEX.md",
+		snippets: snippets.openasr,
+		filter: false,
+		countDownloads: `path_extension:"oasr"`,
+	},
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
 		repoName: "OpenPeerLLM",
@@ -1053,7 +1069,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://www.paddleocr.ai/",
 		snippets: snippets.paddleocr,
 		filter: true,
-		countDownloads: `path_extension:"safetensors" OR path:"inference.pdiparams"`,
+		countDownloads: `path_extension:"safetensors" OR path:"inference.pdiparams" OR path:"inference.onnx"`,
 	},
 	peft: {
 		prettyLabel: "PEFT",
@@ -1184,12 +1200,27 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	rwkv: {
+		prettyLabel: "RWKV",
+		repoName: "RWKV-LM",
+		repoUrl: "https://github.com/BlinkDL/RWKV-LM",
+		docsUrl: "https://rwkv.com/",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+	},
+	"scail-2": {
+		prettyLabel: "SCAIL-2",
+		repoName: "SCAIL-2",
+		repoUrl: "https://github.com/zai-org/SCAIL-2",
+		filter: false,
+		countDownloads: `path:"model/1/fsdp2_rank_0000_checkpoint.pt"`,
 	},
 	sam2: {
 		prettyLabel: "sam2",
@@ -1496,6 +1527,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NX-AI/tirex",
 		countDownloads: `path_extension:"ckpt"`,
 	},
+	"tirex-2": {
+		prettyLabel: "TiRex-2",
+		repoName: "TiRex-2",
+		repoUrl: "https://github.com/NX-AI/tirex-2",
+		countDownloads: `path:"model-config.yaml"`,
+	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",
 		repoName: "TorchGeo",
@@ -1532,6 +1569,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/microsoft/TRELLIS.2",
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	tunejury: {
+		prettyLabel: "TuneJury",
+		repoName: "TuneJury",
+		repoUrl: "https://github.com/yonghyunk1m/TuneJury",
+		countDownloads: `path_extension:"pt"`,
+	},
+
 	ultralytics: {
 		prettyLabel: "ultralytics",
 		repoName: "ultralytics",

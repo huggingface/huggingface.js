@@ -50,7 +50,7 @@ import type {
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
 import { InferenceClientProviderOutputError, InferenceClientRoutingError } from "../errors.js";
-import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
+import type { AudioToAudioArgs, AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import type {
 	BaseArgs,
 	BodyParams,
@@ -321,15 +321,28 @@ export interface TextToSpeechTaskHelper {
 }
 
 export interface TextToAudioTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<Record<string, unknown> & BaseArgs>): Record<string, unknown>;
 }
 
 export interface AudioToAudioTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AudioToAudioOutput[]>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<AudioToAudioOutput[]>;
 	preparePayload(
 		params: BodyParams<BaseArgs & { inputs: Blob } & Record<string, unknown>>,
 	): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: AudioToAudioArgs): Promise<RequestArgs>;
 }
 export interface AutomaticSpeechRecognitionTaskHelper {
 	getResponse(
@@ -403,7 +416,7 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 			typeof response?.created === "number" &&
 			typeof response?.id === "string" &&
 			typeof response?.model === "string" &&
-			/// Together.ai and Nebius do not output a system_fingerprint
+			/// Some providers (e.g. Together.ai) do not output a system_fingerprint
 			(response.system_fingerprint === undefined ||
 				response.system_fingerprint === null ||
 				typeof response.system_fingerprint === "string") &&

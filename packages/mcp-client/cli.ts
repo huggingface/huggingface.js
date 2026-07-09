@@ -12,7 +12,7 @@ import { parseArgs } from "node:util";
 import type { ServerConfig } from "./src/types";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
-const PROVIDER = (process.env.PROVIDER as InferenceProviderOrPolicy) ?? "nebius";
+const PROVIDER = (process.env.PROVIDER as InferenceProviderOrPolicy) ?? "novita";
 const ENDPOINT_URL = process.env.ENDPOINT_URL ?? process.env.BASE_URL;
 
 const SERVERS: (ServerConfig | StdioServerParameters)[] = [
