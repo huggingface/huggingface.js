@@ -1512,6 +1512,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint" OR path:"checkpoints/checkpoint_2150000/state/checkpoint" OR path_extension:"ckpt"`,
 	},
+	"timee-ts": {
+		prettyLabel: "timee-ts",
+		repoName: "timee-ts",
+		repoUrl: "https://github.com/liamsbhoo/timee",
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
 	timm: {
 		prettyLabel: "timm",
 		repoName: "pytorch-image-models",
