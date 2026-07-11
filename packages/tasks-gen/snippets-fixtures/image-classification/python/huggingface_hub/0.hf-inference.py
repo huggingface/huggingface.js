@@ -1,9 +1,8 @@
-import os
-from huggingface_hub import InferenceClient
+from huggingface_hub import InferenceClient, get_token
 
 client = InferenceClient(
     provider="hf-inference",
-    api_key=os.environ["HF_TOKEN"],
+    api_key=get_token(),
 )
 
 output = client.image_classification("cats.jpg", model="Falconsai/nsfw_image_detection")
