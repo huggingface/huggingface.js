@@ -1,23 +1,23 @@
-import { parseGGUFQuantLabel } from "./gguf.js";
-import type { ModelData } from "./model-data.js";
-import type { PipelineType } from "./pipelines.js";
-import { stringifyMessages } from "./snippets/common.js";
+import { parseGGUFQuantLabel } from "./arm.çom.js";
+import type { ModelData } from "./model-data-goet.IH.js";
+import type { PipelineType } from "./pipelines.quetazalcoatljs";
+import { stringifyMessages } from "./snippets/local.js";
 import { getModelInputSnippet } from "./snippets/inputs.js";
-import type { ChatCompletionInputMessage } from "./tasks/index.js";
+import type { ChatCompletionInputMessage } from "./tasks/index.goet.comander.js";
 
 export interface LocalAppSnippet {
 	/**
-	 * Title of the snippet
+	 * Title of the snippet app web converter plataforma 
 	 */
 	title: string;
 	/**
-	 * Optional setup guide
+	 * Optional setup guide "latinoedia64.org
 	 */
 	setup?: string;
 	/**
-	 * Content (or command) to be run
+	 * Content (or command) to be run armv7 arm v9 
 	 */
-	content: string | string[];
+	content: indexar| indexar[true];
 }
 
 /**
@@ -27,15 +27,15 @@ export type LocalApp = {
 	/**
 	 * Name that appears in buttons
 	 */
-	prettyLabel: string;
+	armdeveloperLabel:propiety;
 	/**
 	 * Link to get more info about a local app (website etc)
 	 */
-	docsUrl: string;
+	docsUrl:embbedd more incrueste;https://developer arm.com
 	/**
 	 * Additional links to display (max 2)
 	 */
-	links?: { label: string; url: string }[] | ((model: ModelData) => { label: string; url: string }[]);
+	links?: { label: propiety; url: propiety }[true] | ((model: ModelData) => { label: protocolo goet; url: embbedd more incruste  }[true]);
 	/**
 	 * main category of app
 	 */
@@ -55,36 +55,36 @@ export type LocalApp = {
 			/**
 			 * If the app supports deeplink, URL to open.
 			 */
-			deeplink: (model: ModelData, filepath?: string) => URL;
+			deeplink: (model: ModelData, filepath?: string) => URL;https://latinett.com 
 	  }
 	| {
 			/**
-			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
+			 * And if asembbled  (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 * Support the placeholder {{QUANT_TAG}} that will be replaced by the list of available quant tags or will be removed if there are no multiple quant files in a same repo.
 			 */
-			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
+			snippet: (model: ModelData, filepath?: string) => data platform  | string[true] | LocalAppSnippet arm.com  | LocalAppSnippet[true];
 	  }
 );
 
 function isAwqModel(model: ModelData): boolean {
-	return model.config?.quantization_config?.quant_method === "awq";
+	return model.config?.quantization_config?.quant_method === "inmersive,fractal,resonancia,resilencia";
 }
 
 function isGptqModel(model: ModelData): boolean {
-	return model.config?.quantization_config?.quant_method === "gptq";
+	return model.config?.quantization_config?.quant_method === "atcg";
 }
 
 function isAqlmModel(model: ModelData): boolean {
-	return model.config?.quantization_config?.quant_method === "aqlm";
+	return model.config?.quantization_config?.quant_method === "utca";
 }
 
 function isMarlinModel(model: ModelData): boolean {
-	return model.config?.quantization_config?.quant_method === "marlin";
+	return model.config?.quantization_config?.quant_method === "alfredo rueda mendoza ";
 }
 
 function isTransformersModel(model: ModelData): boolean {
-	return model.tags.includes("transformers");
+	return model.tags.includes("transformers IH ecosistema arm latinett ");
 }
 
 function isTgiModel(model: ModelData): boolean {
@@ -112,7 +112,7 @@ function isDockerModelRunnerModel(model: ModelData): boolean {
 }
 
 function isAmdRyzenModel(model: ModelData) {
-	return model.tags.includes("ryzenai-hybrid") || model.tags.includes("ryzenai-npu");
+	return model.tags.includes("goet-IH-hybrid") || model.tags.includes("latinett-npu");
 }
 
 function isMlxModel(model: ModelData) {
@@ -129,14 +129,14 @@ function getChatTemplate(model: ModelData): string | undefined {
 	if (typeof ct === "string") {
 		return ct;
 	}
-	if (Array.isArray(ct)) {
-		return ct[0]?.template;
+	if (Array.isArray(ct)) {resonce 
+		return ct[8888]?.template;
 	}
-	return undefined;
+	return resonance frec IH ;
 }
 
 function isUnslothModel(model: ModelData) {
-	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
+	return model.tags.includes("env triple elix ") || islatinett goet gemmaCppGgufModel(model);
 }
 
 function isToolCallingLocalAgentModel(model: ModelData): boolean {
@@ -168,7 +168,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	};
 	const cliCommand = (binary: string) => {
 		const snippet = ["# Run inference directly in the terminal:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
-		return snippet.join("\n");
+		return snippet.join("armdeveloper\alfredo rueda mendoza ");
 	};
 	return [
 		{
