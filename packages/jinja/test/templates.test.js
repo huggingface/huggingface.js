@@ -52,6 +52,7 @@ const TEST_STRINGS = {
 	// Binary expressions
 	BINOP_EXPR: `{{ 1 % 2 }}{{ 1 < 2 }}{{ 1 > 2 }}{{ 1 >= 2 }}{{ 2 <= 2 }}{{ 2 == 2 }}{{ 2 != 3 }}{{ 2 + 3 }}`,
 	BINOP_EXPR_1: `{{ 1 ~ "+" ~ 2 ~ "=" ~ 3 ~ " is " ~ true }}`,
+	BINOP_EXPR_2: `|{{ 7 // 2 }}|{{ -7 // 2 }}|{{ -7.5 // 2 }}|{{ 7.5 // 2 }}|{{ 8 // 3 }}|{{ 9 // 3 }}|`,
 
 	// Strings
 	STRINGS: `{{ 'Bye' }}{{ bos_token + '[INST] ' }}`,
@@ -1085,6 +1086,45 @@ const TEST_PARSED = {
 		{ value: "~", type: "AdditiveBinaryOperator" },
 		{ value: "true", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+	BINOP_EXPR_2: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "7", type: "NumericLiteral" },
+		{ value: "//", type: "MultiplicativeBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "-7", type: "NumericLiteral" },
+		{ value: "//", type: "MultiplicativeBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "-7.5", type: "NumericLiteral" },
+		{ value: "//", type: "MultiplicativeBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "7.5", type: "NumericLiteral" },
+		{ value: "//", type: "MultiplicativeBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "8", type: "NumericLiteral" },
+		{ value: "//", type: "MultiplicativeBinaryOperator" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "9", type: "NumericLiteral" },
+		{ value: "//", type: "MultiplicativeBinaryOperator" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
 	],
 
 	// Strings
@@ -4862,6 +4902,7 @@ const TEST_CONTEXT = {
 	// Binary expressions
 	BINOP_EXPR: {},
 	BINOP_EXPR_1: {},
+	BINOP_EXPR_2: {},
 
 	// Strings
 	STRINGS: {
@@ -5304,6 +5345,7 @@ const EXPECTED_OUTPUTS = {
 	// Binary expressions
 	BINOP_EXPR: "1truefalsefalsetruetruetrue5",
 	BINOP_EXPR_1: "1+2=3 is true",
+	BINOP_EXPR_2: "|3|-4|-4.0|3.0|2|3|",
 
 	// Strings
 	STRINGS: "Bye<s>[INST] ",
