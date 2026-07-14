@@ -359,10 +359,7 @@ export async function parseSafetensorsMetadata(
 	const repoId = toRepoId(params.repo);
 
 	// Fetch model config for quantization information
-	const modelConfig =
-		params.computeParametersCount && repoId.type === "model"
-	    ? await fetchModelConfig(params)
-		  : null;
+	const modelConfig = params.computeParametersCount && repoId.type === "model" ? await fetchModelConfig(params) : null;
 	const quantConfig = modelConfig?.quantization_config ?? modelConfig?.text_config?.quantization_config;
 
 	// Resolve which file to parse, in order:
