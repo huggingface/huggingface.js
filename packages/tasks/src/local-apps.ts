@@ -707,7 +707,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Chaty",
 		docsUrl: "https://chaty.ca",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model, filepath) =>
 			new URL(`https://chaty.ca/use.html?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
 	},
