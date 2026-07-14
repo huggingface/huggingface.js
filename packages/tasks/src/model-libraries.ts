@@ -967,6 +967,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.model2vec,
 		filter: false,
 	},
+	modelopt: {
+		prettyLabel: "NVIDIA Model Optimizer",
+		repoName: "Model-Optimizer",
+		repoUrl: "https://github.com/NVIDIA/Model-Optimizer",
+		docsUrl: "https://nvidia.github.io/Model-Optimizer/",
+		countDownloads: `path:"hf_quant_config.json"`,
+		filter: false,
+	},
 	mobilint: {
 		prettyLabel: "Mobilint",
 		repoName: "mblt-model-zoo",
