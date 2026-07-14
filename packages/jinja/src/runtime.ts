@@ -882,6 +882,12 @@ export class Interpreter {
 				}
 				case "/":
 					return new FloatValue(a / b);
+				case "//": {
+					// Floor division (rounds towards negative infinity, matching Python semantics)
+					const res = Math.floor(a / b);
+					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
+					return isFloat ? new FloatValue(res) : new IntegerValue(res);
+				}
 				case "%": {
 					const rem = a % b;
 					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
