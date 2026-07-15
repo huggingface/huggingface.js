@@ -1835,7 +1835,7 @@ export const transformers = (model: ModelData): string[] => {
 			`from transformers import ${info.processor}, ${info.auto_model}`,
 			"",
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
@@ -1872,7 +1872,9 @@ export const transformers = (model: ModelData): string[] => {
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', dtype="auto")',
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` +
+				remote_code_snippet +
+				', dtype="auto", device_map="auto")',
 		);
 	}
 
@@ -1889,7 +1891,7 @@ export const transformers = (model: ModelData): string[] => {
 		pipelineSnippet.push(
 			"from transformers import pipeline",
 			"",
-			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
+			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 
 		if (model.tags.includes("conversational")) {
