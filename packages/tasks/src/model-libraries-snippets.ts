@@ -405,7 +405,7 @@ const diffusers_default = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
@@ -417,7 +417,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
 input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
@@ -431,7 +431,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.to("cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -457,7 +457,7 @@ const diffusers_lora = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
@@ -470,7 +470,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
@@ -485,7 +485,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import export_to_video
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -500,7 +500,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -515,7 +515,7 @@ const diffusers_textual_inversion = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
@@ -528,7 +528,7 @@ image = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-d
 mask = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup_mask.png")
 
 # switch to "mps" for apple devices
-pipe = FluxFillPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+pipe = FluxFillPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
 image = pipe(
     prompt="a white paper cup",
     image=image,
@@ -549,7 +549,7 @@ from diffusers import AutoPipelineForInpainting
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", dtype=torch.float16, variant="fp16", device_map="cuda")
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", torch_dtype=torch.float16, variant="fp16", device_map="cuda")
 
 img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
 mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
