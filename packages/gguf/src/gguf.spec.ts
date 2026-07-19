@@ -8,6 +8,7 @@ import {
 	ggufAllShards,
 	parseGgufShardFilename,
 	parseGGUFQuantLabel,
+	parseGGUFFileVariant,
 	GGUF_QUANT_ORDER,
 	findNearestQuantType,
 	serializeGgufMetadata,
@@ -341,6 +342,47 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-IQ3_XS.gguf")).toEqual("IQ3_XS");
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual("Q4_0"); // TODO: investigate Q4_0_4_4
 		expect(parseGGUFQuantLabel("Qwen3-4B-UD-Q2_K_XL.gguf")).toEqual("UD-Q2_K_XL"); // unsloth UD (Unsloth Dynamic) prefix
+	});
+
+	it("parse file variant", async () => {
+		// Plain model files → empty array
+		expect(parseGGUFFileVariant("Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf")).toEqual([]);
+		expect(parseGGUFFileVariant("Codestral-22B-v0.1.gguf")).toEqual([]);
+
+		// Spec <Type> slot values
+		expect(parseGGUFFileVariant("Model-Q4_K_M-LoRA.gguf")).toEqual(["LoRA"]);
+		expect(parseGGUFFileVariant("Model-Q4_K_M-vocab.gguf")).toEqual(["vocab"]);
+		expect(parseGGUFFileVariant("Qwen3.6-27B-MTP-Q8_0.gguf")).toEqual(["MTP"]); // MTP before encoding (am17an/RDson style)
+
+		// imatrix community marker
+		expect(parseGGUFFileVariant("Model-IQ2_XXS-imatrix.gguf")).toEqual(["imatrix"]);
+		expect(parseGGUFFileVariant("Model-imatrix-Q4_K_M.gguf")).toEqual(["imatrix"]); // prefix position
+
+		// Multiple distinct tokens preserved in first-occurrence order
+		expect(parseGGUFFileVariant("Model-MTP-imatrix-Q4_K_M.gguf")).toEqual(["MTP", "imatrix"]);
+		expect(parseGGUFFileVariant("Model-imatrix-MTP-Q4_K_M.gguf")).toEqual(["imatrix", "MTP"]);
+		expect(parseGGUFFileVariant("Model-LoRA-MTP-Q4_K_M.gguf")).toEqual(["LoRA", "MTP"]);
+
+		// Exact duplicates deduped
+		expect(parseGGUFFileVariant("Model-imatrix-Q4_K_M-imatrix.gguf")).toEqual(["imatrix"]);
+		expect(parseGGUFFileVariant("Model-MTP-MTP-Q4_K_M.gguf")).toEqual(["MTP"]);
+
+		// Case-insensitive match, canonical case returned
+		expect(parseGGUFFileVariant("Model-q4_k_m-lora.gguf")).toEqual(["LoRA"]);
+		expect(parseGGUFFileVariant("Model-LORA-mtp.gguf")).toEqual(["LoRA", "MTP"]);
+
+		// `.` separator works (mradermacher-style stems)
+		expect(parseGGUFFileVariant("Model.imatrix.Q4_K_M.gguf")).toEqual(["imatrix"]);
+
+		// `i1-` prefix is NOT a recognized marker on its own
+		expect(parseGGUFFileVariant("DeepSeek-V3.i1-Q4_K_M.gguf")).toEqual([]);
+
+		// Path prefix is stripped before parsing
+		expect(parseGGUFFileVariant("subdir/Model-Q4_K_M-LoRA.gguf")).toEqual(["LoRA"]);
+
+		// Substrings inside other tokens must NOT match (delimited only)
+		expect(parseGGUFFileVariant("Llama-imatrixed-Q4_K_M.gguf")).toEqual([]);
+		expect(parseGGUFFileVariant("MTPiston-Q4_K_M.gguf")).toEqual([]);
 	});
 
 	it("calculate tensor data offset", async () => {
