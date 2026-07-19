@@ -2382,4 +2382,102 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT,
 	);
+
+	describe.concurrent(
+		"SCX AI",
+		() => {
+			const client = new InferenceClient(env.HF_SCX_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["scx-ai"] = {
+				"MiniMaxAI/MiniMax-M2.7": {
+					provider: "scx-ai",
+					hfModelId: "MiniMaxAI/MiniMax-M2.7",
+					providerId: "MiniMax-M2.7",
+					status: "live",
+					task: "conversational",
+				},
+				"openai/gpt-oss-120b": {
+					provider: "scx-ai",
+					hfModelId: "openai/gpt-oss-120b",
+					providerId: "gpt-oss-120b",
+					status: "live",
+					task: "conversational",
+				},
+				"meta-llama/Llama-4-Maverick-17B-128E-Instruct": {
+					provider: "scx-ai",
+					hfModelId: "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
+					providerId: "Llama-4-Maverick-17B-128E-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"google/gemma-4-31B-it": {
+					provider: "scx-ai",
+					hfModelId: "google/gemma-4-31B-it",
+					providerId: "gemma-4-31B-it",
+					status: "live",
+					task: "conversational",
+				},
+				"Qwen/Qwen3-32B": {
+					provider: "scx-ai",
+					hfModelId: "Qwen/Qwen3-32B",
+					providerId: "Qwen3-32B",
+					status: "live",
+					task: "conversational",
+				},
+				"openai/whisper-large-v3": {
+					provider: "scx-ai",
+					hfModelId: "openai/whisper-large-v3",
+					providerId: "Whisper-Large-v3",
+					status: "live",
+					task: "automatic-speech-recognition",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "openai/gpt-oss-120b",
+					provider: "scx-ai",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "MiniMaxAI/MiniMax-M2.7",
+					provider: "scx-ai",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+
+			it("automaticSpeechRecognition", async () => {
+				const res = await client.automaticSpeechRecognition({
+					model: "openai/whisper-large-v3",
+					provider: "scx-ai",
+					data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
+				});
+				expect(res).toBeDefined();
+				expect(res.text).toBeDefined();
+			});
+		},
+		TIMEOUT,
+	);
 });
