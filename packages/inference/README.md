@@ -50,6 +50,7 @@ Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
 - [Featherless AI](https://featherless.ai)
 - [Fireworks AI](https://fireworks.ai)
+- [GMI Cloud](https://gmicloud.ai)
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
 - [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
