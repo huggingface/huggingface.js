@@ -11,6 +11,7 @@ import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
+import * as Phala from "../providers/phala.js";
 import * as PublicAI from "../providers/publicai.js";
 import type {
 	AudioClassificationTaskHelper,
@@ -139,6 +140,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	ovhcloud: {
 		conversational: new OvhCloud.OvhCloudConversationalTask(),
 		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
+	},
+	phala: {
+		conversational: new Phala.PhalaConversationalTask(),
 	},
 	publicai: {
 		conversational: new PublicAI.PublicAIConversationalTask(),
