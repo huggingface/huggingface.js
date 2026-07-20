@@ -226,7 +226,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "CCPFN",
 		repoUrl: "https://huggingface.co/Layer6/CCPFN",
 		filter: false,
-		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
+		countDownloads: `path_extension:"pt",
 	},
 	champ: {
 		prettyLabel: "Champ",
