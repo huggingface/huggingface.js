@@ -46,9 +46,7 @@ export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
 	"baseten",
-	"black-forest-labs",
 	"cerebras",
-	"clarifai",
 	"cohere",
 	"deepinfra",
 	"fal-ai",
@@ -57,16 +55,12 @@ export const INFERENCE_PROVIDERS = [
 	"gmicloud",
 	"groq",
 	"hf-inference",
-	"hyperbolic",
-	"nebius",
 	"novita",
 	"nscale",
-	"nvidia",
 	"openai",
 	"ovhcloud",
 	"publicai",
 	"replicate",
-	"sambanova",
 	"scaleway",
 	"together",
 	"wavespeed",
@@ -86,9 +80,7 @@ export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
  */
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	baseten: "baseten",
-	"black-forest-labs": "black-forest-labs",
 	cerebras: "cerebras",
-	clarifai: "clarifai",
 	cohere: "CohereLabs",
 	deepinfra: "DeepInfra",
 	"fal-ai": "fal",
@@ -97,16 +89,12 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	gmicloud: "gmicloudinc",
 	groq: "groq",
 	"hf-inference": "hf-inference",
-	hyperbolic: "Hyperbolic",
-	nebius: "nebius",
 	novita: "novita",
 	nscale: "nscale",
-	nvidia: "nvidia",
 	openai: "openai",
 	ovhcloud: "ovhcloud",
 	publicai: "publicai",
 	replicate: "replicate",
-	sambanova: "sambanovasystems",
 	scaleway: "scaleway",
 	together: "togethercomputer",
 	wavespeed: "wavespeed",
@@ -130,7 +118,7 @@ export interface BaseArgs {
 	 *
 	 * Can be created for free in hf.co/settings/token
 	 *
-	 * You can also pass an external Inference provider's key if you intend to call a compatible provider like Sambanova, Together, Replicate...
+	 * You can also pass an external Inference provider's key if you intend to call a compatible provider like Together, Replicate, Cohere...
 	 */
 	accessToken?: string;
 

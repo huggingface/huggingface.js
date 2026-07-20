@@ -96,6 +96,9 @@ export class FloatValue extends RuntimeValue<number> {
 	override type = "FloatValue";
 
 	override toString(): string {
+		if (Object.is(this.value, -0)) {
+			return "-0.0";
+		}
 		return this.value % 1 === 0 ? this.value.toFixed(1) : this.value.toString();
 	}
 }
@@ -879,6 +882,12 @@ export class Interpreter {
 				}
 				case "/":
 					return new FloatValue(a / b);
+				case "//": {
+					// Floor division (rounds towards negative infinity, matching Python semantics)
+					const res = Math.floor(a / b);
+					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
+					return isFloat ? new FloatValue(res) : new IntegerValue(res);
+				}
 				case "%": {
 					const rem = a % b;
 					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
@@ -1430,6 +1439,16 @@ export class Interpreter {
 		switch (node.operator.value) {
 			case "not":
 				return new BooleanValue(!argument.value);
+			case "+":
+			case "-": {
+				const sign = node.operator.value === "-" ? -1 : 1;
+				if (argument instanceof IntegerValue || argument instanceof FloatValue || argument instanceof BooleanValue) {
+					const value = argument instanceof BooleanValue ? (argument.value ? 1 : 0) : argument.value;
+					const result = sign * value;
+					return argument instanceof FloatValue ? new FloatValue(result) : new IntegerValue(result);
+				}
+				throw new SyntaxError(`Unknown operator "${node.operator.value}" for ${argument.type}`);
+			}
 			default:
 				throw new SyntaxError(`Unknown operator: ${node.operator.value}`);
 		}
@@ -1523,6 +1542,8 @@ export class Interpreter {
 			} else {
 				property = this.evaluate(expr.property, environment);
 			}
+		} else if (expr.property.type === "IntegerLiteral") {
+			property = new IntegerValue((expr.property as IntegerLiteral).value);
 		} else {
 			property = new StringValue((expr.property as Identifier).value);
 		}
@@ -1794,7 +1815,9 @@ export class Interpreter {
 	}
 
 	evaluate(statement: Statement | undefined, environment: Environment): AnyRuntimeValue {
-		if (!statement) return new UndefinedValue();
+		if (!statement) {
+			return new UndefinedValue();
+		}
 
 		switch (statement.type) {
 			// Program

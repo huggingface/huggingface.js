@@ -118,7 +118,9 @@ export async function pathsInfo(
 	}
 
 	const json: unknown = await resp.json();
-	if (!Array.isArray(json)) throw new Error("malformed response: expected array");
+	if (!Array.isArray(json)) {
+		throw new Error("malformed response: expected array");
+	}
 
 	return json.map((item: PathInfo) => ({
 		path: item.path,

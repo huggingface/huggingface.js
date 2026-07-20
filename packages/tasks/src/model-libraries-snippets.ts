@@ -156,6 +156,20 @@ pred_df = pipeline.predict_df(
 	return [installSnippet, exampleSnippet];
 };
 
+export const collectorvision = (model: ModelData): string[] => [
+	`pip install git+https://github.com/HanClinto/CollectorVision huggingface_hub`,
+	`from huggingface_hub import hf_hub_download
+import collector_vision as cvg
+
+checkpoint = hf_hub_download(repo_id="${model.id}", filename="model.onnx")
+
+# Detector models, such as Cornelius:
+detector = cvg.NeuralCornerDetector(checkpoint)
+
+# Embedder models, such as Milo:
+embedder = cvg.NeuralEmbedder(checkpoint)`,
+];
+
 export const colipri = (model: ModelData): string[] => {
 	const installSnippet = `pip install colipri`;
 
@@ -391,7 +405,7 @@ const diffusers_default = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
@@ -403,7 +417,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
 input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
@@ -417,7 +431,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.to("cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -443,7 +457,7 @@ const diffusers_lora = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
@@ -456,7 +470,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
@@ -471,7 +485,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import export_to_video
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -486,7 +500,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -501,7 +515,7 @@ const diffusers_textual_inversion = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
@@ -514,7 +528,7 @@ image = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-d
 mask = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup_mask.png")
 
 # switch to "mps" for apple devices
-pipe = FluxFillPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
+pipe = FluxFillPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
 image = pipe(
     prompt="a white paper cup",
     image=image,
@@ -535,7 +549,7 @@ from diffusers import AutoPipelineForInpainting
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", dtype=torch.float16, variant="fp16", device_map="cuda")
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", torch_dtype=torch.float16, variant="fp16", device_map="cuda")
 
 img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
 mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
@@ -733,6 +747,75 @@ export const flair = (model: ModelData): string[] => [
 
 tagger = SequenceTagger.load("${model.id}")`,
 ];
+
+export const flextab = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/flextab`;
+
+	const classificationSnippet = `# Run a classification task
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+from flextab import FlexTabClassifier
+
+# Load sample data
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize a classifier, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+clf = FlexTabClassifier(max_context_size=8192, bagging=8)
+
+clf.fit(X_train, y_train)
+
+# Predict probabilities
+prediction_probabilities = clf.predict_proba(X_test)
+# Predict labels
+predictions = clf.predict(X_test)
+print("Accuracy", accuracy_score(y_test, predictions))`;
+
+	const regressionsSnippet = `# Run a regression task
+from sklearn.datasets import fetch_openml
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from flextab import FlexTabRegressor
+
+# Load sample data
+df = fetch_openml(data_id=531, as_frame=True)
+X = df.data
+y = df.target.astype(float)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize the regressor, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+regressor = FlexTabRegressor(max_context_size=8192, bagging=8)
+
+regressor.fit(X_train, y_train)
+
+# Predict on the test set
+predictions = regressor.predict(X_test)
+
+r2 = r2_score(y_test, predictions)
+print("R² Score:", r2)`;
+
+	const matchingSnippet = `# Run a matching task
+from sklearn.metrics import accuracy_score, roc_auc_score
+
+from flextab import FlexTabMatcher
+from flextab.utils.test_utils import load_febrl4
+
+left_train, left_test, right_train, right_test, y_train, y_test = load_febrl4()
+
+matcher = FlexTabMatcher(max_context_size=8192, bagging=1)
+matcher.fit(left_train, right_train, y_train)
+predictions = matcher.predict(left_test, right_test)
+print(f'Accuracy {accuracy_score(y_test, predictions):.2%}')
+# Probabilities (e.g. for thresholding or AUROC):
+# probas = matcher.predict_proba_matching(left_test, right_test)
+# print(f'AUROC {roc_auc_score(y_test, probas[:, 1]):.2%}')`;
+	return [installSnippet, classificationSnippet, regressionsSnippet, matchingSnippet];
+};
 
 export const gliner = (model: ModelData): string[] => [
 	`from gliner import GLiNER
@@ -1052,6 +1135,23 @@ python -m lerobot.record \\
 	return [];
 };
 
+export const litert_lm = (model: ModelData): string[] => [
+	`# LiteRT-LM runs on various platforms (Android, iOS, Windows, Linux, macOS, IoT, Web/WASM)
+# and supports many APIs (C++, Python, Kotlin, Swift, JavaScript, Flutter).
+# For platform-specific integration guides, please refer to the official developer website:
+# https://ai.google.dev/edge/litert-lm
+
+# To try LiteRT-LM, the easiest way is to use our CLI tool.
+# 1. Install the LiteRT-LM CLI tool:
+pip install -U litert-lm
+
+# 2. Download and run this model locally:
+# See: https://ai.google.dev/edge/litert-lm/cli
+litert-lm run \\
+  --from-huggingface-repo=${model.id} \\
+  --prompt="Write me a poem"`,
+];
+
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
 # See https://github.com/keras-team/tf-keras for more details.
@@ -1094,12 +1194,74 @@ from MeshAnything.models.meshanything import MeshAnything
 model = MeshAnything(args)`,
 ];
 
+export const multimolecule = (model: ModelData): string[] => {
+	const widgetExample = model.widgetData?.[0] as WidgetExampleTextInput | undefined;
+	const exampleText = widgetExample?.text;
+	const maskToken = model.mask_token ?? "<mask>";
+	const sequence = exampleText?.replace(maskToken, "A");
+
+	const snippets = [`pip install multimolecule`];
+
+	if (sequence) {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")
+
+inputs = tokenizer("${sequence}", return_tensors="pt")
+outputs = model(**inputs)
+embeddings = outputs.last_hidden_state`,
+		);
+	} else {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")`,
+		);
+	}
+
+	if (model.tags.includes("rna-secondary-structure") && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("rna-secondary-structure", model="${model.id}")
+output = predictor("${exampleText}")
+print(output["secondary_structure"])`,
+		);
+	} else if (model.pipeline_tag === "fill-mask" && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("fill-mask", model="${model.id}")
+output = predictor("${exampleText}")`,
+		);
+	}
+
+	return snippets;
+};
+
 export const open_clip = (model: ModelData): string[] => [
 	`import open_clip
 
 model, preprocess_train, preprocess_val = open_clip.create_model_and_transforms('hf-hub:${model.id}')
 tokenizer = open_clip.get_tokenizer('hf-hub:${model.id}')`,
 ];
+
+export const openasr = (model: ModelData): string[] => {
+	// OpenASR's local model registry keys packs by their short id (the final path segment
+	// of the Hub repo id, e.g. "xasr-zh-en" for "OpenASR/xasr-zh-en"), not the full
+	// "org/repo" reference, so the CLI commands below use that short id.
+	const modelId = model.id.split("/").pop() ?? model.id;
+	return [
+		`# Install the openasr CLI: https://github.com/QuintinShaw/openasr/releases
+openasr pull ${modelId}
+openasr transcribe audio.wav --model ${modelId}`,
+	];
+};
 
 export const paddlenlp = (model: ModelData): string[] => {
 	if (model.config?.architectures?.[0]) {
@@ -1673,7 +1835,7 @@ export const transformers = (model: ModelData): string[] => {
 			`from transformers import ${info.processor}, ${info.auto_model}`,
 			"",
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
@@ -1710,7 +1872,7 @@ export const transformers = (model: ModelData): string[] => {
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', dtype="auto")',
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 	}
 
@@ -2149,6 +2311,29 @@ export const model2vec = (model: ModelData): string[] => [
 model = StaticModel.from_pretrained("${model.id}")`,
 ];
 
+export const mobilint = (model: ModelData): string[] => {
+	const modelName = nameWithoutNamespace(model.id);
+	return [
+		`# pip install mblt-model-zoo
+from mblt_model_zoo.vision import MBLT_Engine
+
+model = MBLT_Engine(
+    model_cls="${modelName}",
+    model_type="DEFAULT",
+    model_path="",
+    core_mode="global8",
+)
+
+try:
+    image = model.preprocess("path/to/image.jpg")
+    output = model(image)
+    result = model.postprocess(output)
+finally:
+    model.dispose()
+`,
+	];
+};
+
 export const pruna = (model: ModelData): string[] => {
 	let snippets: string[];
 
@@ -2243,7 +2428,9 @@ export const nemo = (model: ModelData): string[] => {
 export const outetts = (model: ModelData): string[] => {
 	// Don’t show this block on GGUF / ONNX mirrors
 	const t = model.tags ?? [];
-	if (t.includes("gguf") || t.includes("onnx")) return [];
+	if (t.includes("gguf") || t.includes("onnx")) {
+		return [];
+	}
 
 	// v1.0 HF → minimal runnable snippet
 	return [

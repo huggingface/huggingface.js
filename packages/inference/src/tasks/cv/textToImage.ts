@@ -43,5 +43,11 @@ export async function textToImage(
 	});
 
 	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "text-to-image" });
-	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, options?.outputType);
+	return providerHelper.getResponse(
+		res,
+		url,
+		info.headers as Record<string, string>,
+		options?.outputType,
+		options?.signal,
+	);
 }

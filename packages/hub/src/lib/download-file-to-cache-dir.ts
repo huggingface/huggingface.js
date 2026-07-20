@@ -79,7 +79,9 @@ export async function downloadFileToCacheDir(
 	if (revision && REGEX_COMMIT_HASH.test(revision)) {
 		commitHash = revision;
 		const pointerPath = getFilePointer(storageFolder, revision, params.path);
-		if (await exists(pointerPath, true)) return pointerPath;
+		if (await exists(pointerPath, true)) {
+			return pointerPath;
+		}
 	}
 
 	const pathsInformation: PathInfo[] = await pathsInfo({
@@ -88,7 +90,9 @@ export async function downloadFileToCacheDir(
 		revision,
 		expand: true,
 	});
-	if (!pathsInformation || pathsInformation.length !== 1) throw new Error(`cannot get path info for ${params.path}`);
+	if (!pathsInformation || pathsInformation.length !== 1) {
+		throw new Error(`cannot get path info for ${params.path}`);
+	}
 
 	const info = pathsInformation[0];
 	let etag: string;

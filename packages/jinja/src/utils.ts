@@ -109,7 +109,9 @@ function escapeRegExp(s: string): string {
  * Function that mimics Python's string.replace() function.
  */
 export function replace(str: string, oldvalue: string, newvalue: string, count?: number | null): string {
-	if (count === 0) return str;
+	if (count === 0) {
+		return str;
+	}
 	let remaining = count == null || count < 0 ? Infinity : count;
 	// NB: Use a Unicode-aware global regex so unpaired surrogates won't match
 	const pattern = oldvalue.length === 0 ? new RegExp("(?=)", "gu") : new RegExp(escapeRegExp(oldvalue), "gu");

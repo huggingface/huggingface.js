@@ -6,6 +6,7 @@ export * from "./custom/streamingRequest.js";
 export * from "./audio/audioClassification.js";
 export * from "./audio/audioToAudio.js";
 export * from "./audio/automaticSpeechRecognition.js";
+export * from "./audio/textToAudio.js";
 export * from "./audio/textToSpeech.js";
 
 // Computer Vision tasks

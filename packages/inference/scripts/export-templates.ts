@@ -15,7 +15,9 @@ function exportTemplatesAsCode(): string {
 	const languages = readdirSync(TEMPLATES_DIR);
 	for (const language of languages) {
 		const languagePath = path.join(TEMPLATES_DIR, language);
-		if (!readdirSync(languagePath).length) continue;
+		if (!readdirSync(languagePath).length) {
+			continue;
+		}
 
 		templates[language] = {};
 
@@ -23,14 +25,18 @@ function exportTemplatesAsCode(): string {
 		const clients = readdirSync(languagePath);
 		for (const client of clients) {
 			const clientPath = path.join(languagePath, client);
-			if (!readdirSync(clientPath).length) continue;
+			if (!readdirSync(clientPath).length) {
+				continue;
+			}
 
 			templates[language][client] = {};
 
 			// Read all template files
 			const files = readdirSync(clientPath);
 			for (const file of files) {
-				if (!file.endsWith(".jinja")) continue;
+				if (!file.endsWith(".jinja")) {
+					continue;
+				}
 
 				const templatePath = path.join(clientPath, file);
 				const templateContent = readFileSync(templatePath, "utf8");

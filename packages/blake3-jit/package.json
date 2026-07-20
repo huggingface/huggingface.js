@@ -10,6 +10,7 @@
 	],
 	"license": "MIT",
 	"author": "Hugging Face",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
 		"access": "public"
 	},

@@ -25,7 +25,7 @@ export const TOKEN_TYPES = Object.freeze({
 
 	CallOperator: "CallOperator", // ()
 	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + - ~
-	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / %
+	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / // %
 	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
 	UnaryOperator: "UnaryOperator", // ! - +
 	Comment: "Comment", // {# ... #}
@@ -92,6 +92,7 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	["-", TOKEN_TYPES.AdditiveBinaryOperator],
 	["~", TOKEN_TYPES.AdditiveBinaryOperator],
 	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	["//", TOKEN_TYPES.MultiplicativeBinaryOperator], // NOTE: must come before "/" so that "//" is matched first
 	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	["%", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	// Assignment operator
@@ -166,7 +167,9 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				// Consume the backslash
 				++cursorPosition;
 				// Check for end of input
-				if (cursorPosition >= src.length) throw new SyntaxError("Unexpected end of input");
+				if (cursorPosition >= src.length) {
+					throw new SyntaxError("Unexpected end of input");
+				}
 
 				// Add the escaped character
 				const escaped = src[cursorPosition++];
@@ -179,7 +182,9 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			}
 
 			str += src[cursorPosition++];
-			if (cursorPosition >= src.length) throw new SyntaxError("Unexpected end of input");
+			if (cursorPosition >= src.length) {
+				throw new SyntaxError("Unexpected end of input");
+			}
 		}
 		return str;
 	};
@@ -333,7 +338,12 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 					++cursorPosition; // consume the unary operator
 
 					// Check for numbers following the unary operator
-					const num = consumeWhile(isInteger);
+					let num = consumeWhile(isInteger);
+					if (num.length > 0 && src[cursorPosition] === "." && isInteger(src[cursorPosition + 1])) {
+						++cursorPosition; // consume '.'
+						const frac = consumeWhile(isInteger);
+						num = `${num}.${frac}`;
+					}
 					tokens.push(
 						new Token(`${char}${num}`, num.length > 0 ? TOKEN_TYPES.NumericLiteral : TOKEN_TYPES.UnaryOperator),
 					);
@@ -377,7 +387,11 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			// Consume integer part
 			let num = consumeWhile(isInteger);
 			// Possibly, consume fractional part
-			if (src[cursorPosition] === "." && isInteger(src[cursorPosition + 1])) {
+			if (
+				tokens.at(-1)?.type !== TOKEN_TYPES.Dot &&
+				src[cursorPosition] === "." &&
+				isInteger(src[cursorPosition + 1])
+			) {
 				++cursorPosition; // consume '.'
 				const frac = consumeWhile(isInteger);
 				num = `${num}.${frac}`;

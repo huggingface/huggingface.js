@@ -38,7 +38,9 @@ class UploadProgressManager {
 	}
 
 	async initialize(): Promise<void> {
-		if (this.isQuiet) return;
+		if (this.isQuiet) {
+			return;
+		}
 
 		try {
 			const cliProgress = await import("cli-progress");
@@ -60,7 +62,9 @@ class UploadProgressManager {
 	}
 
 	handleEvent(event: CommitProgressEvent): void {
-		if (this.isQuiet) return;
+		if (this.isQuiet) {
+			return;
+		}
 
 		if (event.event === "phase") {
 			this.logPhase(event.phase);
@@ -70,7 +74,9 @@ class UploadProgressManager {
 	}
 
 	private logPhase(phase: string): void {
-		if (this.isQuiet) return;
+		if (this.isQuiet) {
+			return;
+		}
 
 		const phaseMessages = {
 			preuploading: "📋 Preparing files for upload...",
@@ -82,7 +88,9 @@ class UploadProgressManager {
 	}
 
 	private updateFileProgress(path: string, progress: number, state: string): void {
-		if (this.isQuiet) return;
+		if (this.isQuiet) {
+			return;
+		}
 
 		if (this.cliProgressAvailable && this.multibar) {
 			// Use progress bars
@@ -124,7 +132,9 @@ class UploadProgressManager {
 	}
 
 	private truncateFilename(filename: string, maxLength: number): string {
-		if (filename.length <= maxLength) return filename;
+		if (filename.length <= maxLength) {
+			return filename;
+		}
 		return "..." + filename.slice(-(maxLength - 3));
 	}
 

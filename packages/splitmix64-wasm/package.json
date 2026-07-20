@@ -1,6 +1,7 @@
 {
 	"name": "@huggingface/splitmix64-wasm",
 	"version": "0.0.1",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"scripts": {
 		"build:debug": "asc assembly/index.ts --target debug",
 		"build:release": "asc assembly/index.ts --target release",

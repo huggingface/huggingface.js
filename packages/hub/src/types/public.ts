@@ -16,6 +16,14 @@ export type RepoFullName =
 
 export type RepoDesignation = RepoId | RepoFullName;
 
+/**
+ * A {@link RepoDesignation} narrowed to bucket repos.
+ *
+ * Used by APIs that only operate on buckets (e.g. {@link copyFile}, {@link copyFiles},
+ * {@link copyFolder}).
+ */
+export type BucketDesignation = { type: "bucket"; name: string } | `buckets/${string}`;
+
 /** Actually `hf_${string}`, but for convenience, using the string type */
 export type AccessToken = string;
 
