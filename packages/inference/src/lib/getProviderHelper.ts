@@ -5,6 +5,7 @@ import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
 import * as FeatherlessAI from "../providers/featherless-ai.js";
 import * as Fireworks from "../providers/fireworks-ai.js";
+import * as GonkaBroker from "../providers/gonkabroker.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
 import * as Novita from "../providers/novita.js";
@@ -119,6 +120,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	"fireworks-ai": {
 		conversational: new Fireworks.FireworksConversationalTask(),
+	},
+	gonkabroker: {
+		conversational: new GonkaBroker.GonkaBrokerConversationalTask(),
+		"text-generation": new GonkaBroker.GonkaBrokerTextGenerationTask(),
 	},
 	groq: {
 		conversational: new Groq.GroqConversationalTask(),
