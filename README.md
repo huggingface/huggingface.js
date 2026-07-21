@@ -91,7 +91,7 @@ import { InferenceClient } from "@huggingface/inference";
 import { McpClient } from "@huggingface/mcp-client";
 import type { RepoId } from "@huggingface/hub";
 ```
-
+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
 ### From CDN or Static hosting
 
 You can run our packages with vanilla JS, without any bundler, by using a CDN or static hosting. Using [ES modules](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/), i.e. `<script type="module">`, you can import the libraries in your code:
