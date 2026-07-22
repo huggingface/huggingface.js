@@ -1889,7 +1889,7 @@ export const transformers = (model: ModelData): string[] => {
 		pipelineSnippet.push(
 			"from transformers import pipeline",
 			"",
-			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
+			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 
 		if (model.tags.includes("conversational")) {
