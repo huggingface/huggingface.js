@@ -348,6 +348,26 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(false);
 	});
 
+	it("MLXHub is shown only for MLX models and opens its App Store listing", () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.mlxhub;
+		const mlxModel: ModelData = {
+			id: "mlx-community/Qwen3-4B-4bit",
+			tags: ["mlx"],
+			inference: "",
+		};
+		const nonMlxModel: ModelData = {
+			id: "Qwen/Qwen3-4B",
+			tags: ["transformers"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(mlxModel)).toBe(true);
+		expect(displayOnModelPage(nonMlxModel)).toBe(false);
+		expect(deeplink(mlxModel).toString()).toBe(
+			"https://apps.apple.com/app/mlxhub-local-ai-llm-server/id6766485144?ct=huggingface",
+		);
+	});
+
 	it("links as a function", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",

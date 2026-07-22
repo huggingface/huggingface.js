@@ -674,6 +674,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
 		snippet: snippetMlxLm,
 	},
+	mlxhub: {
+		prettyLabel: "MLXHub",
+		docsUrl: "https://apps.apple.com/app/mlxhub-local-ai-llm-server/id6766485144?ct=huggingface",
+		mainTask: "text-generation",
+		displayOnModelPage: isMlxModel,
+		deeplink: () => new URL("https://apps.apple.com/app/mlxhub-local-ai-llm-server/id6766485144?ct=huggingface"),
+	},
 	tgi: {
 		prettyLabel: "TGI",
 		docsUrl: "https://huggingface.co/docs/text-generation-inference/",
