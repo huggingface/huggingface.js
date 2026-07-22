@@ -679,7 +679,11 @@ export const LOCAL_APPS = {
 		docsUrl: "https://apps.apple.com/app/mlxhub-local-ai-llm-server/id6766485144?ct=huggingface",
 		mainTask: "text-generation",
 		displayOnModelPage: isMlxModel,
-		deeplink: () => new URL("https://apps.apple.com/app/mlxhub-local-ai-llm-server/id6766485144?ct=huggingface"),
+		deeplink: (model) => {
+			const url = new URL("https://mlxhub.app/open-model");
+			url.searchParams.set("repo", model.id);
+			return url;
+		},
 	},
 	tgi: {
 		prettyLabel: "TGI",
