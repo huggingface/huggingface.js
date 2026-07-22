@@ -677,6 +677,7 @@ export const LOCAL_APPS = {
 	mlxhub: {
 		prettyLabel: "MLXHub",
 		docsUrl: "https://apps.apple.com/app/mlxhub-local-ai-llm-server/id6766485144?ct=huggingface",
+		links: [{ label: "DreamFoundries on Hugging Face", url: "https://huggingface.co/DreamFoundries" }],
 		mainTask: "text-generation",
 		displayOnModelPage: isMlxModel,
 		deeplink: (model) => {
