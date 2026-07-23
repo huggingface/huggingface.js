@@ -15,10 +15,19 @@
  * Thanks!
  */
 
+import type { BodyParams } from "../types.js";
+import { omit } from "../utils/omit.js";
 import { BaseConversationalTask } from "./providerHelper.js";
 
 export class CerebrasConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("cerebras", "https://api.cerebras.ai");
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		// Cerebras strictly validates request bodies and rejects the OpenAI-proprietary `store`
+		// param with a 400 (`{"code":"wrong_api_format"}`). It has no meaning outside of OpenAI's
+		// own API, so drop it before forwarding rather than surfacing a spurious error to callers.
+		return omit(super.preparePayload(params), "store");
 	}
 }
