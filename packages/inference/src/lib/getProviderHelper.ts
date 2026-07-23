@@ -49,6 +49,7 @@ import type {
 } from "../providers/providerHelper.js";
 import * as Replicate from "../providers/replicate.js";
 import * as Scaleway from "../providers/scaleway.js";
+import * as TCF from "../providers/thecomputefactory.js";
 import * as Together from "../providers/together.js";
 import * as Wavespeed from "../providers/wavespeed.js";
 import * as Zai from "../providers/zai-org.js";
@@ -154,6 +155,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Scaleway.ScalewayConversationalTask(),
 		"text-generation": new Scaleway.ScalewayTextGenerationTask(),
 		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
+	},
+	thecomputefactory: {
+		conversational: new TCF.TCFConversationalTask(),
+		"text-to-video": new TCF.TCFTextToVideoTask(),
 	},
 	together: {
 		"text-to-image": new Together.TogetherTextToImageTask(),
