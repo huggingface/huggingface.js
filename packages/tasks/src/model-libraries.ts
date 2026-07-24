@@ -1014,6 +1014,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
 	},
+	ninfer: {
+		prettyLabel: "NInfer",
+		repoName: "NInfer",
+		repoUrl: "https://github.com/Neroued/ninfer",
+		filter: false,
+		countDownloads: `path_extension:"ninfer"`,
+	},
 	"nv-medtech": {
 		prettyLabel: "NV-MedTech",
 		repoName: "NV-MedTech",
