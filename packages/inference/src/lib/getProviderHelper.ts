@@ -69,6 +69,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"automatic-speech-recognition": new DeepInfra.DeepInfraAutomaticSpeechRecognitionTask(),
 		conversational: new DeepInfra.DeepInfraConversationalTask(),
 		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
+		"text-to-speech": new DeepInfra.DeepInfraTextToSpeechTask(),
 	},
 	"fal-ai": {
 		"audio-to-audio": new FalAI.FalAIAudioToAudioTask(),

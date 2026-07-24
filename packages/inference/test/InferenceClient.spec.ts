@@ -1666,6 +1666,9 @@ describe.skip("InferenceClient", () => {
 			const ASR_HF_MODEL = "nvidia/nemotron-3.5-asr-streaming-0.6b";
 			const ASR_PROVIDER_ID = "nvidia/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b";
 
+			const TTS_HF_MODEL = "hexgrad/Kokoro-82M";
+			const TTS_PROVIDER_ID = "hexgrad/Kokoro-82M";
+
 			const setMapping = (task: "conversational" | "text-generation") => {
 				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
 					[HF_MODEL]: {
@@ -1686,6 +1689,18 @@ describe.skip("InferenceClient", () => {
 						providerId: ASR_PROVIDER_ID,
 						status: "live",
 						task: "automatic-speech-recognition",
+					},
+				};
+			};
+
+			const setTtsMapping = () => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[TTS_HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: TTS_HF_MODEL,
+						providerId: TTS_PROVIDER_ID,
+						status: "live",
+						task: "text-to-speech",
 					},
 				};
 			};
@@ -1751,6 +1766,17 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(typeof res.text).toBe("string");
 				expect(res.text.length).toBeGreaterThan(0);
+			});
+
+			it("textToSpeech", async () => {
+				setTtsMapping();
+				const res = await client.textToSpeech({
+					model: TTS_HF_MODEL,
+					provider: "deepinfra",
+					inputs: "Hello from DeepInfra text to speech.",
+					parameters: { voice: "af_bella" },
+				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT,
