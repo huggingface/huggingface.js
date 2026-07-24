@@ -282,12 +282,12 @@ const LIBRARY_WEIGHT_CANDIDATES: Record<string, Array<{ single: string; index: s
 };
 
 /**
- * Analyze model.safetensors.index.json or model.safetensors from a model hosted
- * on Hugging Face using smart range requests to extract its metadata.
+ * Analyze a safetensors file or index hosted in a Hugging Face repository
+ * using range requests to extract its metadata.
  */
 export async function parseSafetensorsMetadata(
 	params: {
-		/** Only models are supported */
+		/** Repository containing the safetensors file. */
 		repo: RepoDesignation;
 		/**
 		 * Relative file path to safetensors file inside `repo`. Defaults to `SAFETENSORS_FILE` or `SAFETENSORS_INDEX_FILE` (whichever one exists).
@@ -317,7 +317,7 @@ export async function parseSafetensorsMetadata(
 ): Promise<SetRequired<SafetensorsParseFromRepo, "parameterCount">>;
 export async function parseSafetensorsMetadata(
 	params: {
-		/** Only models are supported */
+		/** Repository containing the safetensors file. */
 		repo: RepoDesignation;
 		path?: string;
 		/**
@@ -358,12 +358,8 @@ export async function parseSafetensorsMetadata(
 ): Promise<SafetensorsParseFromRepo> {
 	const repoId = toRepoId(params.repo);
 
-	if (repoId.type !== "model") {
-		throw new TypeError("Only model repos should contain safetensors files.");
-	}
-
 	// Fetch model config for quantization information
-	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
+	const modelConfig = params.computeParametersCount && repoId.type === "model" ? await fetchModelConfig(params) : null;
 	const quantConfig = modelConfig?.quantization_config ?? modelConfig?.text_config?.quantization_config;
 
 	// Resolve which file to parse, in order:
@@ -431,7 +427,7 @@ export async function parseSafetensorsMetadata(
 			filepaths: [path, ...Object.keys(shardedMap).map((filename) => pathPrefix + filename)],
 		};
 	} else {
-		throw new Error("model id does not seem to contain safetensors weights");
+		throw new Error("repo id does not seem to contain safetensors weights");
 	}
 }
 
