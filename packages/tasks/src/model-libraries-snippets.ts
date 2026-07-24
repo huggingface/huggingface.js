@@ -2207,6 +2207,26 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
+export const swift_litert_lm = (model: ModelData): string[] => {
+	const repoBasename = model.id.split("/").pop() ?? "model";
+	const litertlmFile = `${repoBasename.replace(/-litert-lm$/, "")}.litertlm`;
+	return [
+		`// Run this model on iPhone / iPad / Mac, fully on-device (Metal GPU, multimodal),
+// or as an Apple Foundation Models backend.
+// Add the Swift package: https://github.com/john-rocky/swift-litert-lm
+import LiteRTFoundation
+
+// Downloads the .litertlm from this repo on first launch, then reuses it.
+let chat = try await LiteRTChat(
+    huggingFaceRepo: "${model.id}",
+    fileName: "${litertlmFile}")
+
+for try await token in chat.stream("Explain quantum computing in one sentence.") {
+    print(token, terminator: "")
+}`,
+	];
+};
+
 export const univa = (model: ModelData): string[] => [
 	`# Follow installation instructions at https://github.com/PKU-YuanGroup/UniWorld-V1
 

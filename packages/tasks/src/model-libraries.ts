@@ -1467,6 +1467,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.swarmformer,
 		filter: false,
 	},
+	"swift-litert-lm": {
+		prettyLabel: "swift-litert-lm",
+		repoName: "swift-litert-lm",
+		repoUrl: "https://github.com/john-rocky/swift-litert-lm",
+		snippets: snippets.swift_litert_lm,
+		filter: false,
+	},
 	"synthefy-migas": {
 		prettyLabel: "Migas",
 		repoName: "Migas",
