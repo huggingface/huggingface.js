@@ -12,6 +12,7 @@ import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
+import * as PublicAITee from "../providers/publicai-tee.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -142,6 +143,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	publicai: {
 		conversational: new PublicAI.PublicAIConversationalTask(),
+	},
+	"publicai-tee": {
+		conversational: new PublicAITee.PublicAITeeConversationalTask(),
 	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
