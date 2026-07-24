@@ -1871,6 +1871,58 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 	describe.concurrent(
+		"GMI Cloud",
+		() => {
+			const client = new InferenceClient(env.HF_GMICLOUD_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["gmicloud"] = {
+				"deepseek-ai/DeepSeek-V4-Pro": {
+					provider: "gmicloud",
+					hfModelId: "deepseek-ai/DeepSeek-V4-Pro",
+					providerId: "deepseek-ai/DeepSeek-V4-Pro",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-V4-Pro",
+					provider: "gmicloud",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-V4-Pro",
+					provider: "gmicloud",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
+	describe.concurrent(
 		"Groq",
 		() => {
 			const client = new InferenceClient(env.HF_GROQ_KEY ?? "dummy");
