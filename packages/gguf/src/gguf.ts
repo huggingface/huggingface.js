@@ -17,12 +17,15 @@ export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
 export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
 export {
 	parseGGUFQuantLabel,
+	parseGGUFQuantMix,
 	GGUF_QUANT_RE,
 	GGUF_QUANT_RE_GLOBAL,
+	GGUF_QUANT_MIX_COMPONENT_RE,
 	GGUF_QUANT_ORDER,
 	findNearestQuantType,
 	GGMLFileQuantizationType,
 } from "@huggingface/tasks";
+export type { GGUFQuantMix, GGUFQuantMixComponent } from "@huggingface/tasks";
 
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
