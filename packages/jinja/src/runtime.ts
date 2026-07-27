@@ -577,7 +577,10 @@ export class Environment {
 				if (args.length !== 1 || !(args[0] instanceof ObjectValue)) {
 					throw new Error("`namespace` expects either zero arguments or a single object argument");
 				}
-				return args[0];
+				// Copy the entries into a fresh, plain ObjectValue: the argument may be a
+				// KeywordArgumentsValue (e.g., `namespace(a=1)`), which must not retain its
+				// type tag, and mutating the namespace must not mutate the source object.
+				return new ObjectValue(new Map(args[0].value));
 			}),
 		],
 	]);
