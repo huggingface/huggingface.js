@@ -41,6 +41,10 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 
 const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000; // 25MB
+// Sharded index (model.safetensors.index.json) can be much larger than a single-file header:
+// large MoE models have hundreds of thousands of tensors (one weight_map entry each), producing
+// index files of tens of MB. Give it its own, larger cap so those models still parse.
+const MAX_INDEX_LENGTH = 100_000_000; // 100MB
 const MAX_CONFIG_LENGTH = 10_000_000; // 10MB — config.json is typically small; cap to avoid large memory use
 const MAX_SHARD_COUNT = 10_000; // well above any real sharded model; blocks crafted index with millions of entries
 const GPTQ_QWEIGHT_SUFFIX = "qweight";
@@ -206,7 +210,7 @@ async function parseShardedIndex(
 
 	try {
 		// no validation for now, we assume it's a valid IndexJson.
-		const index = JSON.parse(await indexBlob.slice(0, MAX_HEADER_LENGTH).text());
+		const index = JSON.parse(await indexBlob.slice(0, MAX_INDEX_LENGTH).text());
 		return index;
 	} catch (error) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
