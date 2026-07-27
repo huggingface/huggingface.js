@@ -66,14 +66,27 @@ const MAX_TOKEN_LENGTH = 100_000;
 const MAX_DEPTH = 64;
 
 /**
- * Total budget for everything we *retain* (shard filenames + metadata + `weightMap`).
+ * Hard budget for the data we actually need: shard filenames + `metadata`.
  *
  * Streaming bounds transient memory, but a crafted index could still make us retain a lot by
- * holding many distinct long filenames. ~48M chars (~96 MB UTF-16) sits above the largest
- * legitimate `weightMap` we'd materialize (200k entries x ~90 chars ~= 18M) while keeping a hard
- * ceiling. Realistic large-MoE parses retain well under 1 MB.
+ * holding many distinct long filenames. This is deliberately tight — the real numbers are tiny
+ * (Kimi-K3, the largest index in the wild at ~60 MB / 497k tensors, needs **3,186 chars**), so 4M
+ * chars (~8 MB UTF-16) leaves ~1250x headroom while still failing fast on anything abusive. It also
+ * stays clear of the theoretical worst legitimate case, MAX_SHARD_COUNT (10k) filenames at a
+ * generous ~200 chars each = 2M.
  */
-const MAX_RETAINED_CHARS = 48_000_000;
+const MAX_RETAINED_CHARS = 4_000_000;
+
+/**
+ * Separate, looser budget for the optional `weightMap`.
+ *
+ * The map is a convenience for callers, not something we need, so blowing this budget *drops* it
+ * exactly like `maxWeightMapEntries` does rather than failing the parse. It has to be much larger
+ * than the hard budget above because a legitimate 200k-entry map genuinely costs ~21M chars
+ * (~108 chars/entry as measured on Kimi-K3), which must not be conflated with the limit that
+ * guards the data we can't do without.
+ */
+const MAX_WEIGHT_MAP_CHARS = 24_000_000;
 
 /**
  * Wraps a byte stream to abort past `maxBytes`.
@@ -135,7 +148,7 @@ export async function parseSafetensorsIndexStream(
 	let entryKey: string | undefined;
 	let sawRootObject = false;
 
-	/** Running total of characters we've decided to hold on to, against MAX_RETAINED_CHARS. */
+	/** Characters retained for data we need (filenames + metadata); overrunning is fatal. */
 	let retainedChars = 0;
 	const retain = (chars: number): void => {
 		retainedChars += chars;
@@ -212,14 +225,11 @@ export async function parseSafetensorsIndexStream(
 					}
 					// past the cap, stop materializing the map but keep collecting shard names
 					if (weightMap !== undefined) {
-						if (weightMapEntryCount > maxWeightMapEntries) {
-							// drop it wholesale, and stop counting it against the retention budget
-							retainedChars -= retainedInWeightMap;
+						retainedInWeightMap += entryKey.length + event.value.length;
+						// the map is optional, so overrunning either of its limits just drops it
+						if (weightMapEntryCount > maxWeightMapEntries || retainedInWeightMap > MAX_WEIGHT_MAP_CHARS) {
 							weightMap = undefined;
 						} else {
-							const cost = entryKey.length + event.value.length;
-							retainedInWeightMap += cost;
-							retain(cost);
 							weightMap[entryKey] = event.value;
 						}
 					}

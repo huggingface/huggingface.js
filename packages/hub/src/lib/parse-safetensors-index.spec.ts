@@ -173,6 +173,33 @@ describe("parseSafetensorsIndexStream", () => {
 			).rejects.toThrow(/retains more than/);
 		});
 
+		it("tolerates the worst legitimate shard set well within the budget", async () => {
+			// 10k shards (MAX_SHARD_COUNT) with long subfolder-qualified names
+			const entries: string[] = [];
+			for (let i = 0; i < 10_000; i++) {
+				entries.push(`"t${i}":"${"nested/".repeat(4)}diffusion_pytorch_model-${i}-of-10000.safetensors"`);
+			}
+			const result = await parseSafetensorsIndexStream(toStream(`{"weight_map":{${entries.join(",")}}}`), {
+				maxShardCount: 10_000,
+			});
+			expect(result.shardFilenames).toHaveLength(10_000);
+		});
+
+		it("drops (not rejects) a weight_map that is under the entry cap but too many chars", async () => {
+			// 150k entries (< 200k cap) with long names, blowing MAX_WEIGHT_MAP_CHARS instead
+			const entries: string[] = [];
+			for (let i = 0; i < 150_000; i++) {
+				entries.push(`"${"layer.".repeat(30)}${i}.weight":"s${i % 4}.safetensors"`);
+			}
+			const result = await parseSafetensorsIndexStream(toStream(`{"weight_map":{${entries.join(",")}}}`), {
+				maxBytes: Infinity,
+			});
+			// degrades gracefully: the map goes, the data we need survives
+			expect(result.weightMap).toBeUndefined();
+			expect(result.weightMapEntryCount).toBe(150_000);
+			expect(result.shardFilenames).toHaveLength(4);
+		});
+
 		it("rejects a huge metadata blob", async () => {
 			const entries: string[] = [];
 			for (let i = 0; i < 1_000; i++) {
