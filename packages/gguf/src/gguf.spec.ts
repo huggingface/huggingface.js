@@ -948,6 +948,106 @@ describe("gguf", () => {
 		}, 30000);
 	});
 
+	describe("malformed tensor shapes", () => {
+		/**
+		 * Builds a minimal GGUF v3 file with the given tensor shapes. Hermetic on purpose: the
+		 * real-world instances of this live in third-party PoC repos we don't want tests to depend on.
+		 */
+		function buildGgufWithShapes(shapes: bigint[][], trailingDataBytes = 0): Uint8Array {
+			const nameBytes = shapes.map((_, i) => new TextEncoder().encode(`t${i}`));
+			let size = 4 + 4 + 8 + 8; // magic + version + tensor_count + kv_count
+			for (let i = 0; i < shapes.length; i++) {
+				size += 8 + nameBytes[i].length + 4 + shapes[i].length * 8 + 4 + 8;
+			}
+			const buf = new Uint8Array(size + trailingDataBytes);
+			const view = new DataView(buf.buffer);
+			buf.set(new TextEncoder().encode("GGUF"), 0);
+			let off = 4;
+			view.setUint32(off, 3, true); // version
+			off += 4;
+			view.setBigUint64(off, BigInt(shapes.length), true); // tensor_count
+			off += 8;
+			view.setBigUint64(off, 0n, true); // kv_count
+			off += 8;
+			for (let i = 0; i < shapes.length; i++) {
+				view.setBigUint64(off, BigInt(nameBytes[i].length), true);
+				off += 8;
+				buf.set(nameBytes[i], off);
+				off += nameBytes[i].length;
+				view.setUint32(off, shapes[i].length, true); // n_dims
+				off += 4;
+				for (const dim of shapes[i]) {
+					view.setBigUint64(off, dim, true);
+					off += 8;
+				}
+				view.setUint32(off, GGMLQuantizationType.F32, true); // dtype
+				off += 4;
+				view.setBigUint64(off, 0n, true); // offset
+				off += 8;
+			}
+			return buf;
+		}
+
+		async function parseBytes(bytes: Uint8Array) {
+			const path = join(tmpdir(), `gguf-shape-guard-${Date.now()}-${Math.random().toString(36).slice(2)}.gguf`);
+			fs.writeFileSync(path, bytes);
+			try {
+				return await gguf(path, { computeParametersCount: true, allowLocalFile: true });
+			} finally {
+				fs.unlinkSync(path);
+			}
+		}
+
+		const U64_MAX = 18446744073709551615n;
+
+		it("rejects uint64-max dimensions instead of reporting 3.4e38 parameters", async () => {
+			// shape of the real PoC: a ~70 byte file declaring one tensor with two 2^64-1 dims.
+			// (2^64-1)^2 === 3.402824e38, which is finite, so a Number.isFinite check does not help.
+			await expect(parseBytes(buildGgufWithShapes([[U64_MAX, U64_MAX]]))).rejects.toThrow(
+				/dimension 0 is 18446744073709551615, which exceeds the maximum allowed/,
+			);
+		});
+
+		it("rejects int64-max dimensions", async () => {
+			await expect(parseBytes(buildGgufWithShapes([[9223372036854775807n, 9223372036854775807n]]))).rejects.toThrow(
+				/exceeds the maximum allowed/,
+			);
+		});
+
+		it("rejects many tensors each at the n_dims cap (the '7e159 params' shape)", async () => {
+			// n_dims 8 is exactly MAX_TENSOR_NDIMS and the tensor count is well under MAX_TENSOR_COUNT,
+			// so every pre-existing limit is satisfied — only the dimension values are out of range.
+			const shapes = Array.from({ length: 50 }, () => Array.from({ length: 8 }, () => U64_MAX));
+			await expect(parseBytes(buildGgufWithShapes(shapes))).rejects.toThrow(/exceeds the maximum allowed/);
+		});
+
+		it("rejects shapes that are individually plausible but cannot fit in the file", async () => {
+			// each dim is far below MAX_TENSOR_DIM, but 10^12 parameters cannot live in a ~100 byte file
+			await expect(parseBytes(buildGgufWithShapes([[1_000_000n, 1_000_000n]]))).rejects.toThrow(
+				/cannot fit in a \d+-byte file/,
+			);
+		});
+
+		it("accepts a well-formed small file", async () => {
+			// 4x4 tensor = 16 params, needs 64 bytes of F32 data — pad the file so it genuinely fits
+			const { parameterCount } = await parseBytes(buildGgufWithShapes([[4n, 4n]], 64));
+			expect(parameterCount).toBe(16);
+		});
+
+		it("accepts several well-formed tensors", async () => {
+			const { parameterCount } = await parseBytes(
+				buildGgufWithShapes(
+					[
+						[8n, 8n],
+						[8n, 4n],
+					],
+					512,
+				),
+			);
+			expect(parameterCount).toBe(64 + 32);
+		});
+	});
+
 	describe("buildGgufHeader", () => {
 		it("should rebuild GGUF header with updated metadata using regular blob", async () => {
 			// Parse a smaller GGUF file to get original metadata and structure
