@@ -747,7 +747,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://imvision12.github.io/KerasFormers/",
 		snippets: snippets.kerasformers,
 		countDownloads: `path:"model.weights.h5" OR path:"model.weights.json"`,
-		filter: true,
+		filter: false,
 	},
 	kernels: {
 		prettyLabel: "Kernels",
