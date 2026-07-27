@@ -118,17 +118,19 @@ describe("parseSafetensorsMetadata", () => {
 
 	it("resolves sharded diffusers weights from the transformer/ subfolder via the library hint", async () => {
 		const parse = await parseSafetensorsMetadata({
-			repo: "krea/Krea-2-Turbo",
+			repo: "Qwen/Qwen-Image",
 			computeParametersCount: true,
 			library: "diffusers",
-			revision: "1161245028ef398cd0a951101b2bbf486464f841",
+			revision: "75e0b4be04f60ec59a75f475837eced720f823b6",
 		});
 
 		assert(parse.sharded);
 		assert.strictEqual(parse.filepaths[0], "transformer/diffusion_pytorch_model.safetensors.index.json");
-		assert.ok(parse.filepaths.includes("transformer/diffusion_pytorch_model-00001-of-00003.safetensors"));
-		// Krea-2-Turbo diffusion transformer is ~12.8B params
-		assert.ok(sum(Object.values(parse.parameterCount)) > 11_000_000_000);
+		assert.ok(parse.filepaths.includes("transformer/diffusion_pytorch_model-00001-of-00009.safetensors"));
+		assert.strictEqual(parse.filepaths.length, 10); // 1 index + 9 shards
+		// Qwen-Image's diffusion transformer is ~20.4B params
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 20_430_401_088 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 20_430_401_088);
 	});
 
 	it("fetch info for sharded with file path", async () => {
@@ -442,6 +444,17 @@ describe("parseSafetensorsMetadata", () => {
 			assert.strictEqual(isQuantizedTensor("model.embed_tokens.weight", config), true);
 		});
 
+		it("honours the compressed-tensors `ignore` list", () => {
+			const quantConfig = {
+				quant_method: "compressed-tensors",
+				format: "mxfp4-pack-quantized",
+				ignore: ["re:.*self_attn.*", "re:.*lm_head.*"],
+			};
+			assert.strictEqual(isQuantizedTensor("model.layers.0.self_attn.q_proj.weight", quantConfig), false);
+			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", quantConfig), false);
+			assert.strictEqual(isQuantizedTensor("model.layers.0.mlp.experts.0.weight", quantConfig), true);
+		});
+
 		it("multiple exclusion patterns", () => {
 			const config = makeConfig(["lm_head", "embed_tokens"]);
 			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", config), false);
@@ -500,7 +513,53 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert(parse.sharded);
 		assert.strictEqual(Object.keys(parse.headers).length, 64);
-		assert.deepStrictEqual(parse.parameterCount, { F32: 23_040, I32: 1_014_687_129_600, BF16: 43_902_267_888 });
-		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 1_058_589_420_528);
+		// `weight_scale` (BF16, group_size 32 -> ~31.7B of them) and `weight_shape` (I32 bookkeeping)
+		// are quantization metadata, not parameters, so they are excluded — as GPTQ/AWQ `scales`
+		// already were. This lowers the previously reported total by ~3%.
+		assert.deepStrictEqual(parse.parameterCount, { F32: 23_040, I32: 1_014_686_023_680, BF16: 12_193_329_648 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 1_026_879_376_368);
+	});
+
+	it("counts mxfp4-pack-quantized compressed-tensors weights packed in U8 (moonshotai/Kimi-K3)", async () => {
+		// compressed-tensors + `format: "mxfp4-pack-quantized"`, 4-bit weights two-per-byte in U8.
+		// Previously the U8 weights got multiplier 1 and the U8 `weight_scale` tensors were counted,
+		// reporting 1.50T instead of 2.78T.
+		const parse = await parseSafetensorsMetadata({
+			repo: "moonshotai/Kimi-K3",
+			revision: "9f62e4e9fffbd0a83ddd60e1c209d828994b3569",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 96);
+		assert.deepStrictEqual(parse.parameterCount, {
+			F32: 11_122_432,
+			BF16: 57_179_884_544,
+			U8: 2_722_740_830_208, // 1_361_370_415_104 packed bytes x 2
+		});
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 2_779_931_837_184);
+	});
+
+	it("counts fp4 experts declared via expert_dtype outside quantization_config (deepseek-ai/DeepSeek-V4-Pro)", async () => {
+		// `quant_method: "fp8"` for attention, but `expert_dtype: "fp4"` for the experts, which are
+		// packed two-per-byte in I8 and dominate the count. Previously reported 0.86T instead of 1.60T,
+		// because the I8 experts got multiplier 1 and the F8_E8M0 block scales were counted as params.
+		const parse = await parseSafetensorsMetadata({
+			repo: "deepseek-ai/DeepSeek-V4-Pro",
+			revision: "b5968e9190ef611bbf34a7229255be88a0e937c1",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 2_816_899_328,
+			I64: 2_327_040,
+			F32: 87_776_414,
+			F8_E4M3: 23_169_335_296, // fp8 weights: one value per byte, no packing
+			I8: 1_572_763_336_704, // 786_381_668_352 packed bytes x 2
+		});
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 1_598_839_674_782);
+		// the F8_E8M0 block scales (49_150_268_416) must not appear at all
+		assert.strictEqual(parse.parameterCount["F8_E8M0"], undefined);
 	});
 });
