@@ -118,17 +118,19 @@ describe("parseSafetensorsMetadata", () => {
 
 	it("resolves sharded diffusers weights from the transformer/ subfolder via the library hint", async () => {
 		const parse = await parseSafetensorsMetadata({
-			repo: "krea/Krea-2-Turbo",
+			repo: "Qwen/Qwen-Image",
 			computeParametersCount: true,
 			library: "diffusers",
-			revision: "1161245028ef398cd0a951101b2bbf486464f841",
+			revision: "75e0b4be04f60ec59a75f475837eced720f823b6",
 		});
 
 		assert(parse.sharded);
 		assert.strictEqual(parse.filepaths[0], "transformer/diffusion_pytorch_model.safetensors.index.json");
-		assert.ok(parse.filepaths.includes("transformer/diffusion_pytorch_model-00001-of-00003.safetensors"));
-		// Krea-2-Turbo diffusion transformer is ~12.8B params
-		assert.ok(sum(Object.values(parse.parameterCount)) > 11_000_000_000);
+		assert.ok(parse.filepaths.includes("transformer/diffusion_pytorch_model-00001-of-00009.safetensors"));
+		assert.strictEqual(parse.filepaths.length, 10); // 1 index + 9 shards
+		// Qwen-Image's diffusion transformer is ~20.4B params
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 20_430_401_088 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 20_430_401_088);
 	});
 
 	it("fetch info for sharded with file path", async () => {

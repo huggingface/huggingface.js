@@ -6,6 +6,7 @@ import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
 import type { SetRequired } from "../vendor/type-fest/set-required";
+import { parseSafetensorsIndexStream } from "./parse-safetensors-index";
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
@@ -93,7 +94,17 @@ export interface SafetensorsIndexJson {
 	/// ^there's sometimes a dtype but it looks inconsistent.
 	metadata?: { total_parameters?: string | number } & Record<string, string>;
 	/// ^ why the naming inconsistency?
-	weight_map: Record<TensorName, FileName>;
+	/**
+	 * Mapping of tensor name -> shard filename.
+	 *
+	 * Omitted when the index holds more than `MAX_WEIGHT_MAP_ENTRIES` tensors: such indexes are
+	 * consumed in streaming mode and the map is never materialized, so that memory stays bounded
+	 * (see `parse-safetensors-index.ts`). Every model below that threshold — i.e. all of them bar a
+	 * couple of huge MoEs, which previously failed to parse outright — is unaffected.
+	 *
+	 * If you only need the shard list, use `filepaths` on the parse result instead.
+	 */
+	weight_map?: Record<TensorName, FileName>;
 }
 
 export type SafetensorsShardedHeaders = Record<FileName, SafetensorsFileHeader>;
@@ -194,7 +205,7 @@ async function parseShardedIndex(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
-): Promise<SafetensorsIndexJson> {
+): Promise<{ index: SafetensorsIndexJson; shardFilenames: string[] }> {
 	const indexBlob = await downloadFile({
 		...params,
 		path,
@@ -205,17 +216,27 @@ async function parseShardedIndex(
 	}
 
 	try {
-		// no validation for now, we assume it's a valid IndexJson.
-		const index = JSON.parse(await indexBlob.slice(0, MAX_HEADER_LENGTH).text());
-		return index;
+		// Parsed as a stream rather than with JSON.parse: index files for large MoEs reach tens of MB
+		// (Kimi-K3: ~60MB / 497k tensors) and used to be truncated to MAX_HEADER_LENGTH and fail. We
+		// only need `metadata` plus the distinct shard filenames, so memory stays proportional to the
+		// shard count instead of the tensor count.
+		const { dtype, metadata, shardFilenames, weightMap } = await parseSafetensorsIndexStream(indexBlob.stream(), {
+			maxShardCount: MAX_SHARD_COUNT,
+		});
+		return {
+			index: { dtype, metadata, weight_map: weightMap },
+			shardFilenames,
+		};
 	} catch (error) {
-		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
+		throw new SafetensorParseError(
+			`Failed to parse file ${path}: ${error instanceof Error ? error.message : "not a valid JSON."}`,
+		);
 	}
 }
 
 async function fetchAllHeaders(
 	path: string,
-	index: SafetensorsIndexJson,
+	filenames: string[],
 	params: {
 		repo: RepoDesignation;
 		revision?: string;
@@ -227,7 +248,6 @@ async function fetchAllHeaders(
 	} & Partial<CredentialsParams>,
 ): Promise<SafetensorsShardedHeaders> {
 	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
-	const filenames = [...new Set(Object.values(index.weight_map))];
 	if (filenames.length > MAX_SHARD_COUNT) {
 		throw new SafetensorParseError(
 			`Too many shard files (${filenames.length}). Maximum supported is ${MAX_SHARD_COUNT}.`,
@@ -412,8 +432,8 @@ export async function parseSafetensorsMetadata(
 		};
 	} else if (location) {
 		const path = location.path;
-		const index = await parseShardedIndex(path, params);
-		const shardedMap = await fetchAllHeaders(path, index, params);
+		const { index, shardFilenames } = await parseShardedIndex(path, params);
+		const shardedMap = await fetchAllHeaders(path, shardFilenames, params);
 		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 
 		const paramStats = params.computeParametersCount
