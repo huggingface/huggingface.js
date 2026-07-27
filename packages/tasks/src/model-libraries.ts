@@ -740,6 +740,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras_hub,
 		filter: true,
 	},
+	kerasformers: {
+		prettyLabel: "KerasFormers",
+		repoName: "KerasFormers",
+		repoUrl: "https://github.com/IMvision12/KerasFormers",
+		docsUrl: "https://imvision12.github.io/KerasFormers/",
+		snippets: snippets.kerasformers,
+		countDownloads: `path:"model.weights.h5" OR path:"model.weights.json"`,
+		filter: true,
+	},
 	kernels: {
 		prettyLabel: "Kernels",
 		repoName: "Kernels",

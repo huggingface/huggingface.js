@@ -881,6 +881,19 @@ model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
+export const kerasformers = (model: ModelData): string[] => [
+	`# Available backend options are: "jax", "torch", "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "torch"
+
+# Use the kerasformers class for this model's architecture (e.g. a Qwen3 LLM).
+from kerasformers.models.qwen3 import Qwen3Generate, Qwen3Tokenizer
+
+model = Qwen3Generate.from_weights("${model.id}")
+tokenizer = Qwen3Tokenizer.from_weights("${model.id}")
+`,
+];
+
 const _keras_hub_causal_lm = (modelId: string): string => `
 import keras_hub
 
