@@ -135,6 +135,110 @@ describe("parseSafetensorsIndexStream", () => {
 		await expect(parseSafetensorsIndexStream(toStream("truncated"))).rejects.toThrow();
 	});
 
+	describe("hostile input", () => {
+		// index.json is attacker-controlled: anyone can push one to a repo they own.
+
+		it("rejects one enormous string instead of buffering it", async () => {
+			// a tiny index whose single filename is 100MB
+			const huge = "a".repeat(100_000_000);
+			await expect(parseSafetensorsIndexStream(toStream(`{"weight_map":{"t":"${huge}"}}`))).rejects.toThrow(
+				/maximum length/,
+			);
+		});
+
+		it("rejects an enormous tensor name", async () => {
+			const huge = "k".repeat(50_000_000);
+			await expect(parseSafetensorsIndexStream(toStream(`{"weight_map":{"${huge}":"s.safetensors"}}`))).rejects.toThrow(
+				/maximum length/,
+			);
+		});
+
+		it("rejects deeply nested input", async () => {
+			const text = `{"weight_map":${"[".repeat(50_000)}`;
+			await expect(parseSafetensorsIndexStream(toStream(text))).rejects.toThrow(/nesting is deeper/);
+		});
+
+		it("rejects many distinct long filenames (retention budget)", async () => {
+			// 1k distinct filenames x 60k chars each = ~60M retained chars, over the 48M budget.
+			// Each filename is individually under MAX_TOKEN_LENGTH, so only the budget catches this.
+			const entries: string[] = [];
+			for (let i = 0; i < 1_000; i++) {
+				entries.push(`"t${i}":"${"x".repeat(60_000)}${i}.safetensors"`);
+			}
+			await expect(
+				parseSafetensorsIndexStream(toStream(`{"weight_map":{${entries.join(",")}}}`), {
+					maxBytes: Infinity,
+					maxShardCount: 1_000_000,
+				}),
+			).rejects.toThrow(/retains more than/);
+		});
+
+		it("rejects a huge metadata blob", async () => {
+			const entries: string[] = [];
+			for (let i = 0; i < 1_000; i++) {
+				entries.push(`"k${i}":"${"v".repeat(99_000)}"`);
+			}
+			await expect(
+				parseSafetensorsIndexStream(toStream(`{"metadata":{${entries.join(",")}}}`), { maxBytes: Infinity }),
+			).rejects.toThrow(/retains more than/);
+		});
+
+		it("caps the number of metadata entries it keeps", async () => {
+			const entries: string[] = [];
+			for (let i = 0; i < 50_000; i++) {
+				entries.push(`"k${i}":"v"`);
+			}
+			const result = await parseSafetensorsIndexStream(
+				toStream(`{"metadata":{${entries.join(",")}},"weight_map":{"a":"s.safetensors"}}`),
+			);
+			expect(Object.keys(result.metadata ?? {})).toHaveLength(1_000);
+			expect(result.shardFilenames).toEqual(["s.safetensors"]);
+		});
+
+		it("does not blow up on a weight_map of millions of entries pointing at few shards", async () => {
+			// the legitimate-but-extreme case: bounded because we only keep distinct values
+			const parts = ['{"weight_map":{'];
+			for (let i = 0; i < 2_000_000; i++) {
+				parts.push(`${i > 0 ? "," : ""}"t${i}":"s${i % 8}.safetensors"`);
+			}
+			parts.push("}}");
+			const result = await parseSafetensorsIndexStream(toStream(parts.join("")), { maxBytes: Infinity });
+			expect(result.weightMapEntryCount).toBe(2_000_000);
+			expect(result.shardFilenames).toHaveLength(8);
+			expect(result.weightMap).toBeUndefined();
+		});
+
+		it("stops downloading as soon as a limit trips", async () => {
+			// the reader must be cancelled rather than drained: an endless body should not be pulled
+			let chunksPulled = 0;
+			const opener = new TextEncoder().encode('{"weight_map":');
+			const chunk = new TextEncoder().encode("[".repeat(1024));
+			const stream = new ReadableStream<Uint8Array>({
+				pull(controller) {
+					controller.enqueue(chunksPulled++ === 0 ? opener : chunk);
+				},
+			});
+
+			await expect(parseSafetensorsIndexStream(stream)).rejects.toThrow(/nesting is deeper/);
+			// the 64-deep limit trips within the first couple of chunks, not after millions
+			expect(chunksPulled).toBeLessThan(10);
+		});
+
+		it("rejects an array at the root immediately", async () => {
+			let chunksPulled = 0;
+			const chunk = new TextEncoder().encode("[".repeat(1024));
+			const stream = new ReadableStream<Uint8Array>({
+				pull(controller) {
+					chunksPulled++;
+					controller.enqueue(chunk);
+				},
+			});
+
+			await expect(parseSafetensorsIndexStream(stream)).rejects.toThrow(/must be a JSON object/);
+			expect(chunksPulled).toBeLessThan(10);
+		});
+	});
+
 	it("is chunk-boundary agnostic", async () => {
 		const text = makeIndex(200, 7, { total_parameters: "42" });
 		const reference = await parseSafetensorsIndexStream(toStream(text));

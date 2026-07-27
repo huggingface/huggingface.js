@@ -51,6 +51,31 @@ export const MAX_WEIGHT_MAP_ENTRIES = 200_000;
 const MAX_METADATA_ENTRIES = 1_000;
 
 /**
+ * Index files are attacker-controlled (anyone can push one), so every unbounded dimension needs a
+ * ceiling. Streaming removes "size of the document" as one; these cover the rest.
+ */
+
+/**
+ * Longest single string we accept. Tensor names, shard filenames and metadata values are all far
+ * below this; anything longer is malformed or hostile. Without it, one 200 MB string inside an
+ * otherwise tiny index would be buffered in full just to be emitted.
+ */
+const MAX_TOKEN_LENGTH = 100_000;
+
+/** JSON nesting depth. Real indexes are 2 deep. */
+const MAX_DEPTH = 64;
+
+/**
+ * Total budget for everything we *retain* (shard filenames + metadata + `weightMap`).
+ *
+ * Streaming bounds transient memory, but a crafted index could still make us retain a lot by
+ * holding many distinct long filenames. ~48M chars (~96 MB UTF-16) sits above the largest
+ * legitimate `weightMap` we'd materialize (200k entries x ~90 chars ~= 18M) while keeping a hard
+ * ceiling. Realistic large-MoE parses retain well under 1 MB.
+ */
+const MAX_RETAINED_CHARS = 48_000_000;
+
+/**
  * Wraps a byte stream to abort past `maxBytes`.
  *
  * Also the place where early termination pays off: throwing here propagates into `streamJson`'s
@@ -97,6 +122,8 @@ export async function parseSafetensorsIndexStream(
 	const shardSet = new Set<string>();
 	let weightMap: Record<string, string> | undefined = {};
 	let weightMapEntryCount = 0;
+	/** Chars charged to the budget by `weightMap`, refunded if we end up dropping it. */
+	let retainedInWeightMap = 0;
 	let metadata: SafetensorsIndexHeader["metadata"];
 	let dtype: string | undefined;
 
@@ -108,7 +135,21 @@ export async function parseSafetensorsIndexStream(
 	let entryKey: string | undefined;
 	let sawRootObject = false;
 
-	for await (const event of streamJson(limitBytes(stream, maxBytes))) {
+	/** Running total of characters we've decided to hold on to, against MAX_RETAINED_CHARS. */
+	let retainedChars = 0;
+	const retain = (chars: number): void => {
+		retainedChars += chars;
+		if (retainedChars > MAX_RETAINED_CHARS) {
+			throw new SafetensorsIndexParseError(
+				`safetensors index retains more than ${MAX_RETAINED_CHARS} characters of metadata/filenames`,
+			);
+		}
+	};
+
+	for await (const event of streamJson(limitBytes(stream, maxBytes), {
+		maxTokenLength: MAX_TOKEN_LENGTH,
+		maxDepth: MAX_DEPTH,
+	})) {
 		switch (event.type) {
 			case "startObject":
 			case "startArray":
@@ -160,6 +201,7 @@ export async function parseSafetensorsIndexStream(
 					}
 					weightMapEntryCount++;
 					if (!shardSet.has(event.value)) {
+						retain(event.value.length);
 						shardSet.add(event.value);
 						shardFilenames.push(event.value);
 						if (shardSet.size > maxShardCount) {
@@ -171,14 +213,20 @@ export async function parseSafetensorsIndexStream(
 					// past the cap, stop materializing the map but keep collecting shard names
 					if (weightMap !== undefined) {
 						if (weightMapEntryCount > maxWeightMapEntries) {
+							// drop it wholesale, and stop counting it against the retention budget
+							retainedChars -= retainedInWeightMap;
 							weightMap = undefined;
 						} else {
+							const cost = entryKey.length + event.value.length;
+							retainedInWeightMap += cost;
+							retain(cost);
 							weightMap[entryKey] = event.value;
 						}
 					}
 				} else if (rootKey === "metadata") {
 					metadata ??= {};
 					if (Object.keys(metadata).length < MAX_METADATA_ENTRIES) {
+						retain(entryKey.length + (typeof event.value === "string" ? event.value.length : 8));
 						// values are typed as strings upstream but are sometimes numbers in the wild
 						metadata[entryKey] = event.value as string;
 					}

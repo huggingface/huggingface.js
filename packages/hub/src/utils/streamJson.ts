@@ -45,6 +45,12 @@ export class JsonStreamParseError extends Error {
  */
 const DEFAULT_MAX_TOKEN_LENGTH = 16_000_000; // 16M chars
 
+/**
+ * Bounds the container stack — the other piece of state that grows with the input rather than with
+ * what the consumer decides to keep. Without it, `"[".repeat(n)` allocates an n-deep array.
+ */
+const DEFAULT_MAX_DEPTH = 1_000;
+
 // Scanner states.
 const S_VALUE = 0; // expecting a value
 const S_VALUE_OR_ARRAY_END = 1; // right after `[`: a value, or `]` for an empty array
@@ -123,9 +129,16 @@ export async function* streamJson(
 		 * @default 16_000_000
 		 */
 		maxTokenLength?: number;
+		/**
+		 * Maximum object/array nesting depth.
+		 *
+		 * @default 1_000
+		 */
+		maxDepth?: number;
 	},
 ): AsyncGenerator<JsonStreamEvent, void, undefined> {
 	const maxTokenLength = options?.maxTokenLength ?? DEFAULT_MAX_TOKEN_LENGTH;
+	const maxDepth = options?.maxDepth ?? DEFAULT_MAX_DEPTH;
 
 	let state = S_VALUE;
 	/** Container stack; `true` = array, `false` = object. Its depth is the nesting depth. */
@@ -176,6 +189,13 @@ export async function* streamJson(
 
 	function unexpected(c: string): never {
 		throw new JsonStreamParseError(`Unexpected character ${JSON.stringify(c)} in JSON`);
+	}
+
+	function pushContainer(isArray: boolean): void {
+		if (stack.length >= maxDepth) {
+			throw new JsonStreamParseError(`JSON nesting is deeper than the maximum of ${maxDepth} levels`);
+		}
+		stack.push(isArray);
 	}
 
 	/**
@@ -304,14 +324,14 @@ export async function* streamJson(
 						break;
 					}
 					if (c === "{") {
-						stack.push(false);
+						pushContainer(false);
 						state = S_KEY_OR_OBJECT_END;
 						i++;
 						yield { type: "startObject" };
 						break;
 					}
 					if (c === "[") {
-						stack.push(true);
+						pushContainer(true);
 						state = S_VALUE_OR_ARRAY_END;
 						i++;
 						yield { type: "startArray" };

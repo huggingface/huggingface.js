@@ -166,6 +166,27 @@ describe("streamJson", () => {
 		expect(produced).toBe(1);
 	});
 
+	it("enforces maxDepth instead of growing the container stack", async () => {
+		// a document of nothing but "[" would otherwise allocate one stack slot per byte
+		const text = "[".repeat(100_000);
+		await expect(async () => {
+			for await (const _event of streamJson(byteStream(text, 1024), { maxDepth: 64 })) {
+				void _event;
+			}
+		}).rejects.toThrow(/nesting is deeper/);
+	});
+
+	it("accepts nesting right up to maxDepth", async () => {
+		const text = "[".repeat(64) + "]".repeat(64);
+		let depth = 0;
+		for await (const event of streamJson(byteStream(text), { maxDepth: 64 })) {
+			if (event.type === "startArray") {
+				depth++;
+			}
+		}
+		expect(depth).toBe(64);
+	});
+
 	it("enforces maxTokenLength", async () => {
 		const text = `{"a":"${"x".repeat(5000)}"}`;
 		await expect(async () => {
