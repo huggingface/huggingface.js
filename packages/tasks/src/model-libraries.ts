@@ -1021,6 +1021,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"ninfer"`,
 	},
+	nobg: {
+		prettyLabel: "nobg",
+		repoName: "nobg",
+		repoUrl: "https://github.com/feyninc/nobg",
+		snippets: snippets.nobg,
+		filter: false,
+	},
 	"nv-medtech": {
 		prettyLabel: "NV-MedTech",
 		repoName: "NV-MedTech",
