@@ -938,6 +938,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 	},
+	mflux: {
+		prettyLabel: "mflux",
+		repoName: "mflux",
+		repoUrl: "https://github.com/filipstrand/mflux",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
