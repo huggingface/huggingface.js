@@ -1031,6 +1031,85 @@ import soundfile as sf
 sf.write('output.wav', audio, 24000)`,
 ];
 
+export const ltx = (model: ModelData): string[] => {
+	const localDir = `models/${nameWithoutNamespace(model.id)}`;
+	const install = `# Install the LTX-2 pipelines
+git clone https://github.com/Lightricks/LTX-2.git
+cd LTX-2
+uv sync --frozen`;
+
+	// Every pipeline needs the Gemma text encoder, which lives in a separate repo.
+	const download = `# Download the weights from this repo, plus the Gemma text encoder
+hf download ${model.id} --local-dir ${localDir}
+hf download google/gemma-3-12b-it-qat-q4_0-unquantized --local-dir models/gemma-3-12b`;
+
+	// Add "--image <path> <frame_idx> <strength>" to any command below to condition on
+	// an image (e.g. "--image image.jpg 0 0.8"), turning text-to-video into image-to-video.
+	const imageToVideoHint = `# For image-to-video, add: --image path/to/image.jpg 0 0.8`;
+
+	const tags = model.tags ?? [];
+
+	// IC-LoRA: video-to-video / image-to-video with a control (reference) signal.
+	// Checked before "lora" because an IC-LoRA repo may carry both tags.
+	if (tags.includes("ic-lora")) {
+		return [
+			install,
+			download,
+			`# Video-to-video with the IC-LoRA (runs on the distilled base model)
+uv run python -m ltx_pipelines.ic_lora \\
+    --distilled-checkpoint-path path/to/distilled_checkpoint.safetensors \\
+    --spatial-upsampler-path path/to/spatial_upsampler.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --lora ${localDir}/<weights>.safetensors 1.0 \\
+    --video-conditioning reference.mp4 1.0 \\
+    --prompt "your prompt here" \\
+    --output-path output.mp4`,
+		];
+	}
+
+	// Standard LoRA applied on top of the base pipeline.
+	if (tags.includes("lora")) {
+		return [
+			install,
+			download,
+			`# Text/image-to-video with the LoRA on the HQ two-stage base pipeline
+uv run python -m ltx_pipelines.ti2vid_two_stages_hq \\
+    --checkpoint-path path/to/checkpoint.safetensors \\
+    --distilled-lora path/to/distilled_lora.safetensors 0.8 \\
+    --spatial-upsampler-path path/to/spatial_upsampler.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --lora ${localDir}/<weights>.safetensors 1.0 \\
+    --prompt "your prompt here" \\
+    --output-path output.mp4
+${imageToVideoHint}`,
+		];
+	}
+
+	// Base model: the fast (distilled) and HQ (two-stage) pipelines. Substitute the
+	// .safetensors filenames with the ones listed under this repo's "Files and versions".
+	return [
+		install,
+		download,
+		`# Fast pipeline (distilled model, no distilled LoRA needed)
+uv run python -m ltx_pipelines.distilled \\
+    --distilled-checkpoint-path ${localDir}/<distilled-checkpoint>.safetensors \\
+    --spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --prompt "A beautiful sunset over the ocean" \\
+    --output-path output.mp4
+${imageToVideoHint}`,
+		`# HQ pipeline (two-stage, higher quality)
+uv run python -m ltx_pipelines.ti2vid_two_stages_hq \\
+    --checkpoint-path ${localDir}/<checkpoint>.safetensors \\
+    --distilled-lora ${localDir}/<distilled-lora>.safetensors 0.8 \\
+    --spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --prompt "A beautiful sunset over the ocean" \\
+    --output-path output.mp4
+${imageToVideoHint}`,
+	];
+};
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [

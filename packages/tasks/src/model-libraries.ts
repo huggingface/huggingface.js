@@ -795,6 +795,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	ltx: {
+		prettyLabel: "LTX.io",
+		repoName: "LTX-2",
+		repoUrl: "https://github.com/Lightricks/LTX-2",
+		docsUrl: "https://github.com/Lightricks/LTX-2",
+		snippets: snippets.ltx,
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"lightning-ir": {
 		prettyLabel: "Lightning IR",
 		repoName: "Lightning IR",
