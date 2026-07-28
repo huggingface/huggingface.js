@@ -306,11 +306,74 @@ describe("parseSafetensorsMetadata", () => {
 
 		const totalParams = parse.parameterTotal || sum(Object.values(parse.parameterCount));
 
-		assert.strictEqual(totalParams, 21_511_953_984); // 21.5B
-
-		assert.ok(parse.parameterCount.BF16 && parse.parameterCount.U8);
+		// 20.9B, matching OpenAI's published figure. Previously 21_511_953_984, which counted the
+		// 597_196_800 `..._scales` UE8M0 block exponents as parameters (+2.86%).
+		assert.strictEqual(totalParams, 20_914_757_184);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 1_804_459_584, U8: 19_110_297_600 });
 
 		assert.strictEqual(Object.keys(parse.headers).length, 3);
+	});
+
+	it("excludes mxfp4 block scales stored as `..._scales` (openai/gpt-oss-120b)", async () => {
+		// gpt-oss joins the scales suffix with an underscore rather than a dot, so it slips past the
+		// dotted auxiliary-suffix list. Counting the 3_583_180_800 U8 scales reported 120_412_337_472
+		// (120.4B) for a model OpenAI documents as 116.8B / "117B".
+		const parse = await parseSafetensorsMetadata({
+			repo: "openai/gpt-oss-120b",
+			revision: "b5c939de8f754692c1647ca79fbf85e8c1e70f8a",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 15);
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 2_167_371_072,
+			U8: 114_661_785_600, // 57_330_892_800 packed bytes x 2, scales excluded
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 116_829_156_672);
+	});
+
+	it("excludes bitsandbytes double-quantization state (unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit)", async () => {
+		// `absmax` shares the weights' U8 container, so it was counted *and* doubled by the 4-bit
+		// packing factor — the same double error `weight_shape` had. Reported 8_248_929_342 for a
+		// model whose true size is Llama-3.1-8B's 8_030_261_248 (+2.72%).
+		const parse = await parseSafetensorsMetadata({
+			repo: "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
+			revision: "f15c379fb32bb402fa06a7ae9aecb1febf4b79ec",
+			computeParametersCount: true,
+		});
+
+		assert(!parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 1_050_939_392,
+			U8: 6_979_321_856, // 3_489_660_928 packed bytes x 2
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 8_030_261_248);
+		// the nested quant state (`nested_absmax` / `nested_quant_map` / `quant_map`) was the whole
+		// of the previously reported F32 count, so the dtype drops out entirely
+		assert.strictEqual(parse.parameterCount.F32, undefined);
+	});
+
+	it("excludes compressed-tensors `weight_g_idx` actorder indices (RedHatAI/Llama-3.3-70B-Instruct-quantized.w4a16)", async () => {
+		// `actorder: "group"` makes the pack-quantized compressor emit one I32 permutation index per
+		// input column. Being an integer container it was counted *and* multiplied by the packing
+		// factor: 6_225_920 indices x 8 = 49_807_360 phantom parameters.
+		const parse = await parseSafetensorsMetadata({
+			repo: "RedHatAI/Llama-3.3-70B-Instruct-quantized.w4a16",
+			revision: "7177921dd02c6436cc78d40861f497df2f575201",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 8);
+		assert.deepStrictEqual(parse.parameterCount, {
+			I32: 68_451_041_280,
+			BF16: 2_102_665_216,
+		});
+		// exactly the unquantized meta-llama/Llama-3.3-70B-Instruct parameter count
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 70_553_706_496);
+		// `weight_shape` is `torch.tensor(shape)`, i.e. I64 here rather than I32 — also excluded
+		assert.strictEqual(parse.parameterCount.I64, undefined);
 	});
 
 	it("should support FP4 and UE8 data types in type system", () => {

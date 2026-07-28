@@ -64,12 +64,36 @@ const QUANTIZATION_AUXILIARY_SUFFIXES = [
 	"weight_global_scale",
 	"weight_zero_point",
 	"input_scale",
+	"input_global_scale",
 	"input_zero_point",
 	"zero_point",
 	// compressed-tensors records each packed tensor's logical shape alongside it; it's a 2-element
 	// I32 tensor, so it was not only counted but multiplied by the packing factor.
 	"weight_shape",
+	// Activation-ordering permutation indices, emitted by the pack-quantized compressor whenever
+	// `actorder: "group"`. One I32 index per input column, so — like `weight_shape` — it was both
+	// counted and scaled by the packing factor.
+	"weight_g_idx",
 ];
+
+/**
+ * MXFP4 block scales as gpt-oss names them: `..._blocks` holds the packed weights, `..._scales` the
+ * per-32-element UE8M0 exponents. The separator is an underscore rather than a dot, so
+ * `QUANTIZATION_AUXILIARY_SUFFIXES` cannot see them and they were counted as parameters — 3% of the
+ * reported total for both gpt-oss sizes.
+ */
+const MXFP4_SCALES_SUFFIX = "_scales";
+
+/**
+ * bitsandbytes keeps its double-quantization state beside each 4-bit weight: `absmax` (one value
+ * per 64-weight block), the nested quantization of those absmax values, and the NF4/FP4 lookup
+ * table. All bookkeeping — and because they share the weight's U8 container they were also
+ * multiplied by the 4-bit packing factor, the same double error `weight_shape` had.
+ */
+const BITSANDBYTES_AUXILIARY_SUFFIXES = ["absmax", "quant_map", "nested_absmax", "nested_quant_map"];
+
+/** Serialized quant state, e.g. `weight.quant_state.bitsandbytes__nf4` / `...__fp4`. */
+const BITSANDBYTES_QUANT_STATE_PREFIX = "bitsandbytes__";
 
 /**
  * Exponent-only float formats. These exist solely to hold MX-style block scales (`scale_fmt`
@@ -808,6 +832,19 @@ function shouldSkipTensor(tensorName: string, dtype: Dtype, quantConfig?: Quanti
 		return true;
 	}
 	const quantMethod = quantConfig.quant_method?.toLowerCase();
+
+	// gpt-oss-style mxfp4 keeps the UE8M0 block exponents in `..._scales` next to `..._blocks`.
+	// Gated on the U8 container the scales actually use, so a learnable `*_scales` parameter in some
+	// other architecture is left alone.
+	if (quantMethod === "mxfp4") {
+		return dtype === "U8" && getTensorSuffix(tensorName).endsWith(MXFP4_SCALES_SUFFIX);
+	}
+
+	if (quantMethod === "bitsandbytes") {
+		const bnbSuffix = getTensorSuffix(tensorName);
+		return BITSANDBYTES_AUXILIARY_SUFFIXES.includes(bnbSuffix) || bnbSuffix.startsWith(BITSANDBYTES_QUANT_STATE_PREFIX);
+	}
+
 	if (quantMethod !== "gptq" && quantMethod !== "awq") {
 		return false;
 	}
