@@ -35,6 +35,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 45_000,
 		power: 1400,
 		releaseYear: 2026,
+		aliases: ["Blackwell"],
 	},
 	B200: {
 		tflops: 496.6,
@@ -43,6 +44,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 40_000,
 		power: 1000,
 		releaseYear: 2024,
+		aliases: ["Blackwell"],
 	},
 	H200: {
 		tflops: 241.3,
@@ -115,7 +117,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 3_999,
 		power: 140,
 		releaseYear: 2025,
-		aliases: ["DGX Spark"],
+		aliases: ["DGX Spark", "Blackwell"],
 	},
 	"RTX PRO 6000 WS": {
 		tflops: 126,
@@ -124,6 +126,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 8_600,
 		power: 600,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX PRO 6000 Max-Q": {
 		tflops: 116,
@@ -132,6 +135,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 8_600,
 		power: 300,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX PRO 5000": {
 		tflops: 66.94,
@@ -140,6 +144,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 4_500,
 		power: 300,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX PRO 4500 WS": {
 		tflops: 50.53,
@@ -148,6 +153,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 2_800,
 		power: 200,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX PRO 4000": {
 		tflops: 36.83,
@@ -156,6 +162,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 1_500,
 		power: 140,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX PRO 4000 SFF": {
 		tflops: 24.05,
@@ -164,6 +171,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 1_500,
 		power: 70,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX PRO 2000": {
 		tflops: 17.03,
@@ -172,6 +180,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 700,
 		power: 70,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 6000 Ada": {
 		tflops: 91.1,
@@ -388,6 +397,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 2_000,
 		power: 575,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5090 D": {
 		tflops: 104.8,
@@ -396,6 +406,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 2_000,
 		power: 575,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5090 Mobile": {
 		tflops: 31.8,
@@ -404,6 +415,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 1_500,
 		power: 175,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5080": {
 		tflops: 56.28,
@@ -412,6 +424,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 1_000,
 		power: 360,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5080 Mobile": {
 		tflops: 23.04,
@@ -420,6 +433,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 1_000,
 		power: 175,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5070": {
 		tflops: 30.84,
@@ -428,6 +442,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 550,
 		power: 250,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5070 Mobile": {
 		tflops: 13.13,
@@ -436,6 +451,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 500,
 		power: 100,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5070 Ti": {
 		tflops: 43.94,
@@ -444,6 +460,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 750,
 		power: 300,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5070 Ti Mobile": {
 		tflops: 17.04,
@@ -452,6 +469,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 700,
 		power: 140,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5060 Ti": {
 		tflops: 23.7,
@@ -460,6 +478,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 450,
 		power: 180,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5060": {
 		tflops: 19.18,
@@ -468,6 +487,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 300,
 		power: 150,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5060 Mobile": {
 		tflops: 9.684,
@@ -476,6 +496,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 300,
 		power: 100,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5050": {
 		tflops: 13.17,
@@ -484,6 +505,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 249,
 		power: 130,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 5050 Mobile": {
 		tflops: 7.7,
@@ -492,6 +514,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 250,
 		power: 100,
 		releaseYear: 2025,
+		aliases: ["Blackwell"],
 	},
 	"RTX 4090": {
 		tflops: 82.58,
