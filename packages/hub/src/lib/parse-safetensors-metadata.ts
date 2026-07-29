@@ -117,7 +117,13 @@ const INTEGER_CONTAINER_BITS: Partial<Record<Dtype, number>> = {
 	I32: 32,
 };
 
-/** Sub-byte weight formats that may appear in `expert_dtype` / a compressed-tensors format string. */
+/**
+ * Sub-byte weight formats that may appear in `expert_dtype` / a compressed-tensors format string.
+ *
+ * NB: no `fp6` entry — MXFP6 weights are stored in the native `F6_E2M3` / `F6_E3M2` safetensors
+ * dtypes rather than packed into an integer container, so a 6-bit width here could only ever
+ * produce a wrong multiplier.
+ */
 const SUB_BYTE_FORMAT_BITS: Array<[pattern: string, bits: number]> = [
 	["nvfp4", 4],
 	["mxfp4", 4],
@@ -125,9 +131,19 @@ const SUB_BYTE_FORMAT_BITS: Array<[pattern: string, bits: number]> = [
 	["int4", 4],
 	["uint4", 4],
 	["nf4", 4],
-	["fp6", 6],
 	["int2", 2],
 ];
+
+/**
+ * Whether a tensor belongs to a *routed* expert, which is what `expert_dtype` describes.
+ *
+ * MoEs place them under an `experts` container — `…ffn.experts.0.w1.weight`,
+ * `…block_sparse_moe.experts.3.w2.weight_packed`. `shared_experts` are always-on dense layers
+ * quantized like the rest of the model, so they're excluded.
+ */
+function isRoutedExpertTensor(tensorName: string): boolean {
+	return tensorName.includes(".experts.") && !tensorName.includes("shared_experts");
+}
 
 /** Reads a bit width out of a free-form format/dtype string, e.g. `"mxfp4-pack-quantized"` -> 4. */
 function bitsFromFormatString(format: string | undefined): number | undefined {
@@ -141,13 +157,22 @@ function bitsFromFormatString(format: string | undefined): number | undefined {
 /**
  * Packing factor for `numBits` values inside `dtype`, or 1 when `dtype` isn't an integer container
  * (already-unpacked weights, e.g. an `F8_E4M3` fp8 tensor holds exactly one value per byte).
+ *
+ * The packing is dense across elements: the reference compressor stores
+ * `ceil(cols * num_bits / containerBits)` containers per row, so a container holds exactly
+ * `containerBits / num_bits` values — deliberately *not* floored, because that ratio isn't a whole
+ * number for widths which don't divide the container. Flooring 3-bit-in-`I32` to 10 values instead
+ * of 10.67 undercounts by 6%.
+ *
+ * Because of that `ceil`, the final column may be partly padding, so the result is an upper bound —
+ * off by at most `containerBits / num_bits - 1` values per row.
  */
 function packingFactor(dtype: Dtype, numBits: number | undefined): number {
 	const containerBits = INTEGER_CONTAINER_BITS[dtype];
 	if (!containerBits || !numBits || numBits <= 0 || numBits >= containerBits) {
 		return 1;
 	}
-	return Math.max(1, Math.floor(containerBits / numBits));
+	return containerBits / numBits;
 }
 
 class SafetensorParseError extends Error {}
@@ -683,9 +708,12 @@ export function matchesCompressedTensorsTarget(target: string, moduleName: strin
 }
 
 /**
- * Gets the parameter multiplier for a quantized tensor based on quantization method
+ * @internal
+ * Gets the parameter multiplier for a quantized tensor based on quantization method.
+ *
+ * May be fractional — see `packingFactor`.
  */
-function getQuantizationMultiplier(
+export function getQuantizationMultiplier(
 	tensorName: string,
 	dtype: Dtype,
 	quantConfig?: QuantizationConfig,
@@ -753,6 +781,13 @@ function getQuantizationMultiplier(
 			// But some fp8 MoEs keep their *experts* narrower still and declare it out-of-band in
 			// `expert_dtype` (DeepSeek-V4-Pro: "fp4"), storing them packed in an I8 container.
 			// Those experts dominate the parameter count, so missing this halves the total.
+			//
+			// `expert_dtype` describes the experts and nothing else, so it must not be applied to
+			// every integer tensor in the model: a routing table or other integer bookkeeping would
+			// otherwise be inflated by the packing factor — 8x for an I32 one.
+			if (!isRoutedExpertTensor(tensorName)) {
+				return 1;
+			}
 			return packingFactor(dtype, bitsFromFormatString(expertDtype));
 		}
 
@@ -799,7 +834,9 @@ export function computeNumOfParamsByDtypeSingleFile(
 		if (multiplier === 0) {
 			continue;
 		}
-		counter[v.dtype] = (counter[v.dtype] ?? 0) + elements * multiplier;
+		// Rounded because the packing factor is a ratio, not necessarily a whole number (see
+		// `packingFactor`); a parameter count is always an integer.
+		counter[v.dtype] = (counter[v.dtype] ?? 0) + Math.round(elements * multiplier);
 	}
 	return counter;
 }

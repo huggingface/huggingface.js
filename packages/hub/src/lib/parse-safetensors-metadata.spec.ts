@@ -6,6 +6,7 @@ import {
 	isQuantizedTensor,
 	matchesCompressedTensorsTarget,
 	computeNumOfParamsByDtypeSingleFile,
+	getQuantizationMultiplier,
 } from "./parse-safetensors-metadata";
 import type { Dtype, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
@@ -363,6 +364,76 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(sum(Object.values(parse.parameterCount)), 70_553_706_496);
 		// `weight_shape` is `torch.tensor(shape)`, i.e. I64 here rather than I32 — also excluded
 		assert.strictEqual(parse.parameterCount.I64, undefined);
+	});
+
+	describe("getQuantizationMultiplier", () => {
+		const EXPERT = "model.layers.0.ffn.experts.3.w1.weight";
+
+		describe("fp8 with expert_dtype", () => {
+			const fp8 = { quant_method: "fp8" };
+
+			it("packs routed experts at the declared expert width", () => {
+				// DeepSeek-V4-Pro: fp8 attention, fp4 experts packed two-per-byte in I8
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, "fp4"), 2);
+			});
+
+			it("leaves shared experts alone — they're dense, not routed", () => {
+				const shared = "model.layers.0.ffn.shared_experts.w1.weight";
+				assert.strictEqual(getQuantizationMultiplier(shared, "I8", fp8, "fp4"), 1);
+			});
+
+			it("does not apply the expert width to non-expert integer tensors", () => {
+				// The bug this guards: `expert_dtype` used to apply to every integer container, so a
+				// routing table or other bookkeeping was inflated by the packing factor — 8x for I32.
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.ffn.gate.tid2eid", "I32", fp8, "fp4"), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.attn.wkv.weight", "I8", fp8, "fp4"), 1);
+			});
+
+			it("leaves fp8 experts unpacked — one value per byte", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "F8_E4M3", fp8, "fp4"), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, "fp8"), 1);
+			});
+
+			it("is a no-op without expert_dtype", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, undefined), 1);
+			});
+		});
+
+		describe("compressed-tensors packing factor", () => {
+			const packed = (numBits: number) => ({
+				quant_method: "compressed-tensors",
+				format: "pack-quantized",
+				config_groups: { group_0: { weights: { num_bits: numBits } } },
+			});
+			const name = "model.layers.0.mlp.down_proj.weight_packed";
+
+			it("packs 4-bit eight-per-I32 and two-per-U8", () => {
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(4)), 8);
+				assert.strictEqual(getQuantizationMultiplier(name, "U8", packed(4)), 2);
+			});
+
+			it("packs 2-bit sixteen-per-I32", () => {
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(2)), 16);
+			});
+
+			it("uses the exact ratio for widths that don't divide the container", () => {
+				// Dense cross-element packing: 32 values occupy exactly num_bits I32 words, so an I32
+				// holds 32/3 values. Flooring to 10 undercounts a 3-bit model by 6%.
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(3)), 32 / 3);
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(5)), 32 / 5);
+			});
+
+			it("does not pack when the width fills the container", () => {
+				assert.strictEqual(getQuantizationMultiplier(name, "I8", packed(8)), 1);
+			});
+		});
+
+		it("ignores fp6, which is stored in native F6_* dtypes rather than packed", () => {
+			// A 6-bit width in an 8-bit container has no reference implementation, so claiming any
+			// packing for it would be a guess.
+			assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { quant_method: "fp8" }, "fp6"), 1);
+			assert.strictEqual(getQuantizationMultiplier(EXPERT, "F6_E2M3", { quant_method: "fp8" }, "fp6"), 1);
+		});
 	});
 
 	describe("globMatch", () => {
