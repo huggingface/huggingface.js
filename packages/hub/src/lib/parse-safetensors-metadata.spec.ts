@@ -5,7 +5,9 @@ import {
 	globMatch,
 	isQuantizedTensor,
 	matchesCompressedTensorsTarget,
+	computeNumOfParamsByDtypeSingleFile,
 } from "./parse-safetensors-metadata";
+import type { Dtype, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -203,68 +205,55 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(safetensorsShardFileInfo?.total, "000163");
 	});
 
-	it("should support sub-byte data types", async () => {
-		const newDataTypes: Array<"F4" | "F6_E2M3" | "F6_E3M2" | "E8M0"> = ["F4", "F6_E2M3", "F6_E3M2", "E8M0"];
-
-		for (const dtype of newDataTypes) {
-			const tensorInfo = {
-				dtype,
-				shape: [1, 2],
-				data_offsets: [0, 1] as [number, number],
-			};
-
-			assert.ok(typeof tensorInfo.dtype === "string");
-			assert.ok(["F4", "F6_E2M3", "F6_E3M2", "E8M0"].includes(tensorInfo.dtype));
-		}
-	});
-
-	it("should handle parameter counting with sub-byte data types", () => {
-		const mockHeader = {
-			tensor_f4: {
-				dtype: "F4" as const,
-				shape: [10, 20],
-				data_offsets: [0, 100] as [number, number],
-			},
-			tensor_f6_e2m3: {
-				dtype: "F6_E2M3" as const,
-				shape: [5, 10],
-				data_offsets: [100, 150] as [number, number],
-			},
-			tensor_f6_e3m2: {
-				dtype: "F6_E3M2" as const,
-				shape: [8, 12],
-				data_offsets: [150, 246] as [number, number],
-			},
-			tensor_e8m0: {
-				dtype: "E8M0" as const,
-				shape: [4, 6],
-				data_offsets: [246, 270] as [number, number],
-			},
-			__metadata__: { format: "pt" },
+	describe("sub-byte data types", () => {
+		const tensor = (dtype: Dtype, shape: number[]): TensorInfo => ({ dtype, shape, data_offsets: [0, 0] });
+		/// `__metadata__` is always present in a real header and must never be counted as a tensor.
+		const header = (tensors: Record<string, TensorInfo>): SafetensorsFileHeader => {
+			const built: SafetensorsFileHeader = { ...tensors };
+			built.__metadata__ = { format: "pt" };
+			return built;
 		};
 
-		const computeNumOfParamsByDtypeSingleFile = (header: typeof mockHeader) => {
-			const counter: Partial<Record<string, number>> = {};
-			const tensors = Object.fromEntries(Object.entries(header).filter(([key]) => key !== "__metadata__"));
+		it("counts sub-byte weight dtypes at face value", () => {
+			// These hold weights directly rather than being packed into an integer container, so one
+			// element is one parameter.
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				header({
+					tensor_f4: tensor("F4", [10, 20]),
+					tensor_fp4: tensor("FP4", [100, 200]),
+					tensor_f6_e2m3: tensor("F6_E2M3", [5, 10]),
+					tensor_f6_e3m2: tensor("F6_E3M2", [8, 12]),
+				}),
+			);
 
-			for (const [, v] of Object.entries(tensors) as [
-				string,
-				{ dtype: string; shape: number[]; data_offsets: [number, number] },
-			][]) {
-				if (v.shape.length === 0) {
-					continue;
-				}
-				counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a: number, b: number) => a * b);
-			}
-			return counter;
-		};
+			assert.deepStrictEqual(parameterCount, { F4: 200, FP4: 20_000, F6_E2M3: 50, F6_E3M2: 96 });
+		});
 
-		const parameterCount = computeNumOfParamsByDtypeSingleFile(mockHeader);
+		it("never counts exponent-only dtypes, even with no quantization_config", () => {
+			// E8M0 / UE8 / F8_E8M0 exist solely to hold MX-style block scales, so they are never
+			// parameters — and a model can ship them without declaring a quantization_config at all.
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				header({
+					weights: tensor("F4", [10, 20]),
+					scales_e8m0: tensor("E8M0", [4, 6]),
+					scales_ue8: tensor("UE8", [50, 100]),
+					scales_f8_e8m0: tensor("F8_E8M0", [7, 8]),
+				}),
+			);
 
-		assert.strictEqual(parameterCount.F4, 200);
-		assert.strictEqual(parameterCount.F6_E2M3, 50);
-		assert.strictEqual(parameterCount.F6_E3M2, 96);
-		assert.strictEqual(parameterCount.E8M0, 24);
+			assert.deepStrictEqual(parameterCount, { F4: 200 });
+		});
+
+		it("skips scalar tensors", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				header({
+					scalar: tensor("F32", []),
+					real: tensor("F32", [3, 4]),
+				}),
+			);
+
+			assert.deepStrictEqual(parameterCount, { F32: 12 });
+		});
 	});
 
 	it("fetch info for GPTQ quantized 8B model", async () => {
@@ -374,56 +363,6 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(sum(Object.values(parse.parameterCount)), 70_553_706_496);
 		// `weight_shape` is `torch.tensor(shape)`, i.e. I64 here rather than I32 — also excluded
 		assert.strictEqual(parse.parameterCount.I64, undefined);
-	});
-
-	it("should support FP4 and UE8 data types in type system", () => {
-		const newDataTypes: Array<"FP4" | "UE8"> = ["FP4", "UE8"];
-
-		for (const dtype of newDataTypes) {
-			const tensorInfo = {
-				dtype,
-				shape: [1, 2],
-				data_offsets: [0, 1] as [number, number],
-			};
-
-			assert.ok(typeof tensorInfo.dtype === "string");
-			assert.ok(["FP4", "UE8"].includes(tensorInfo.dtype));
-		}
-
-		const mockHeader = {
-			tensor_fp4: {
-				dtype: "FP4" as const,
-				shape: [100, 200],
-				data_offsets: [0, 5000] as [number, number],
-			},
-			tensor_ue8: {
-				dtype: "UE8" as const,
-				shape: [50, 100],
-				data_offsets: [5000, 10000] as [number, number],
-			},
-			__metadata__: { format: "pt" },
-		};
-
-		const computeNumOfParamsByDtypeSingleFile = (header: typeof mockHeader) => {
-			const counter: Partial<Record<string, number>> = {};
-			const tensors = Object.fromEntries(Object.entries(header).filter(([key]) => key !== "__metadata__"));
-
-			for (const [, v] of Object.entries(tensors) as [
-				string,
-				{ dtype: string; shape: number[]; data_offsets: [number, number] },
-			][]) {
-				if (v.shape.length === 0) {
-					continue;
-				}
-				counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a: number, b: number) => a * b);
-			}
-			return counter;
-		};
-
-		const parameterCount = computeNumOfParamsByDtypeSingleFile(mockHeader);
-
-		assert.strictEqual(parameterCount.FP4, 20000);
-		assert.strictEqual(parameterCount.UE8, 5000);
 	});
 
 	describe("globMatch", () => {
