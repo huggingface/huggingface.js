@@ -740,6 +740,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras_hub,
 		filter: true,
 	},
+	kerasformers: {
+		prettyLabel: "KerasFormers",
+		repoName: "KerasFormers",
+		repoUrl: "https://github.com/IMvision12/KerasFormers",
+		docsUrl: "https://imvision12.github.io/KerasFormers/",
+		countDownloads: `path:"model.weights.h5" OR path:"model.weights.json"`,
+		filter: false,
+	},
 	kernels: {
 		prettyLabel: "Kernels",
 		repoName: "Kernels",
@@ -786,6 +794,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/lagernvs",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	ltx: {
+		prettyLabel: "LTX.io",
+		repoName: "LTX-2",
+		repoUrl: "https://github.com/Lightricks/LTX-2",
+		docsUrl: "https://github.com/Lightricks/LTX-2",
+		snippets: snippets.ltx,
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"lightning-ir": {
 		prettyLabel: "Lightning IR",
@@ -920,6 +937,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/StanfordMIMI/MedVAE",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
+	},
+	mflux: {
+		prettyLabel: "mflux",
+		repoName: "mflux",
+		repoUrl: "https://github.com/filipstrand/mflux",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
