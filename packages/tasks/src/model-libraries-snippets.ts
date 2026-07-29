@@ -2266,6 +2266,28 @@ from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
+export const nobg = (model: ModelData): string[] => {
+	const installSnippet = `pip install nobg`;
+
+	const exampleSnippet = `import torch
+from loadimg import load_img
+from nobg import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("${model.id}").eval()
+processor = AutoProcessor.from_pretrained("${model.id}")
+
+image = load_img("input.jpg").convert("RGB")
+inputs = processor(image, return_tensors="pt")
+
+with torch.no_grad():
+    outputs = model(pixel_values=inputs["pixel_values"])
+
+alpha = processor.post_process_alpha_matting(outputs, target_sizes=[(image.height, image.width)])[0]
+processor.cutout(image, alpha).save("output.png")`;
+
+	return [installSnippet, exampleSnippet];
+};
+
 export const supertonic = (): string[] => [
 	`from supertonic import TTS
 
