@@ -770,7 +770,12 @@ function getQuantizationMultiplier(
 	}
 }
 
-function computeNumOfParamsByDtypeSingleFile(
+/**
+ * @internal
+ * Sums parameters per dtype for one file's header, applying the quantization packing factors and
+ * skipping bookkeeping tensors.
+ */
+export function computeNumOfParamsByDtypeSingleFile(
 	header: SafetensorsFileHeader,
 	quantConfig?: QuantizationConfig,
 	expertDtype?: string,
