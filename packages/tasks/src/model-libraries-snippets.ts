@@ -1533,6 +1533,28 @@ from renderformer import RenderFormerRenderingPipeline
 pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
 ];
 
+export const routee_powertrain = (model: ModelData): string[] => [
+	`# pip install routee.powertrain
+import pandas as pd
+import routee.powertrain as pt
+from routee.powertrain.registry import HFRegistry
+
+registry = HFRegistry(repo_id="${model.id}")
+
+# find a vehicle: filter by make, model, year, powertrain type, features, ...
+pt.query_available_models(make="tesla", model="model 3", registry=registry)
+
+# load one by its id: "<make>/<vehicle_slug>/<year>/<config_slug>"
+model = pt.load_model("tesla/model_3_bev/2022/rf_c3326385", registry=registry)
+
+links = pd.DataFrame({
+    "distance": [0.1, 0.2],  # miles
+    "speed_mph": [30, 55],
+    "grade_percent": [-2.0, 1.0],
+})
+model.predict(links)`,
+];
+
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
 	`from tensorflow_tts.inference import AutoProcessor, TFAutoModel
 
