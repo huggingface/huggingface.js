@@ -5,7 +5,10 @@ import {
 	globMatch,
 	isQuantizedTensor,
 	matchesCompressedTensorsTarget,
+	computeNumOfParamsByDtypeSingleFile,
+	getQuantizationMultiplier,
 } from "./parse-safetensors-metadata";
+import type { Dtype, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -203,68 +206,55 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(safetensorsShardFileInfo?.total, "000163");
 	});
 
-	it("should support sub-byte data types", async () => {
-		const newDataTypes: Array<"F4" | "F6_E2M3" | "F6_E3M2" | "E8M0"> = ["F4", "F6_E2M3", "F6_E3M2", "E8M0"];
-
-		for (const dtype of newDataTypes) {
-			const tensorInfo = {
-				dtype,
-				shape: [1, 2],
-				data_offsets: [0, 1] as [number, number],
-			};
-
-			assert.ok(typeof tensorInfo.dtype === "string");
-			assert.ok(["F4", "F6_E2M3", "F6_E3M2", "E8M0"].includes(tensorInfo.dtype));
-		}
-	});
-
-	it("should handle parameter counting with sub-byte data types", () => {
-		const mockHeader = {
-			tensor_f4: {
-				dtype: "F4" as const,
-				shape: [10, 20],
-				data_offsets: [0, 100] as [number, number],
-			},
-			tensor_f6_e2m3: {
-				dtype: "F6_E2M3" as const,
-				shape: [5, 10],
-				data_offsets: [100, 150] as [number, number],
-			},
-			tensor_f6_e3m2: {
-				dtype: "F6_E3M2" as const,
-				shape: [8, 12],
-				data_offsets: [150, 246] as [number, number],
-			},
-			tensor_e8m0: {
-				dtype: "E8M0" as const,
-				shape: [4, 6],
-				data_offsets: [246, 270] as [number, number],
-			},
-			__metadata__: { format: "pt" },
+	describe("sub-byte data types", () => {
+		const tensor = (dtype: Dtype, shape: number[]): TensorInfo => ({ dtype, shape, data_offsets: [0, 0] });
+		/// `__metadata__` is always present in a real header and must never be counted as a tensor.
+		const header = (tensors: Record<string, TensorInfo>): SafetensorsFileHeader => {
+			const built: SafetensorsFileHeader = { ...tensors };
+			built.__metadata__ = { format: "pt" };
+			return built;
 		};
 
-		const computeNumOfParamsByDtypeSingleFile = (header: typeof mockHeader) => {
-			const counter: Partial<Record<string, number>> = {};
-			const tensors = Object.fromEntries(Object.entries(header).filter(([key]) => key !== "__metadata__"));
+		it("counts sub-byte weight dtypes at face value", () => {
+			// These hold weights directly rather than being packed into an integer container, so one
+			// element is one parameter.
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				header({
+					tensor_f4: tensor("F4", [10, 20]),
+					tensor_fp4: tensor("FP4", [100, 200]),
+					tensor_f6_e2m3: tensor("F6_E2M3", [5, 10]),
+					tensor_f6_e3m2: tensor("F6_E3M2", [8, 12]),
+				}),
+			);
 
-			for (const [, v] of Object.entries(tensors) as [
-				string,
-				{ dtype: string; shape: number[]; data_offsets: [number, number] },
-			][]) {
-				if (v.shape.length === 0) {
-					continue;
-				}
-				counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a: number, b: number) => a * b);
-			}
-			return counter;
-		};
+			assert.deepStrictEqual(parameterCount, { F4: 200, FP4: 20_000, F6_E2M3: 50, F6_E3M2: 96 });
+		});
 
-		const parameterCount = computeNumOfParamsByDtypeSingleFile(mockHeader);
+		it("never counts exponent-only dtypes, even with no quantization_config", () => {
+			// E8M0 / UE8 / F8_E8M0 exist solely to hold MX-style block scales, so they are never
+			// parameters — and a model can ship them without declaring a quantization_config at all.
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				header({
+					weights: tensor("F4", [10, 20]),
+					scales_e8m0: tensor("E8M0", [4, 6]),
+					scales_ue8: tensor("UE8", [50, 100]),
+					scales_f8_e8m0: tensor("F8_E8M0", [7, 8]),
+				}),
+			);
 
-		assert.strictEqual(parameterCount.F4, 200);
-		assert.strictEqual(parameterCount.F6_E2M3, 50);
-		assert.strictEqual(parameterCount.F6_E3M2, 96);
-		assert.strictEqual(parameterCount.E8M0, 24);
+			assert.deepStrictEqual(parameterCount, { F4: 200 });
+		});
+
+		it("skips scalar tensors", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				header({
+					scalar: tensor("F32", []),
+					real: tensor("F32", [3, 4]),
+				}),
+			);
+
+			assert.deepStrictEqual(parameterCount, { F32: 12 });
+		});
 	});
 
 	it("fetch info for GPTQ quantized 8B model", async () => {
@@ -376,54 +366,74 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(parse.parameterCount.I64, undefined);
 	});
 
-	it("should support FP4 and UE8 data types in type system", () => {
-		const newDataTypes: Array<"FP4" | "UE8"> = ["FP4", "UE8"];
+	describe("getQuantizationMultiplier", () => {
+		const EXPERT = "model.layers.0.ffn.experts.3.w1.weight";
 
-		for (const dtype of newDataTypes) {
-			const tensorInfo = {
-				dtype,
-				shape: [1, 2],
-				data_offsets: [0, 1] as [number, number],
-			};
+		describe("fp8 with expert_dtype", () => {
+			const fp8 = { quant_method: "fp8" };
 
-			assert.ok(typeof tensorInfo.dtype === "string");
-			assert.ok(["FP4", "UE8"].includes(tensorInfo.dtype));
-		}
+			it("packs routed experts at the declared expert width", () => {
+				// DeepSeek-V4-Pro: fp8 attention, fp4 experts packed two-per-byte in I8
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, "fp4"), 2);
+			});
 
-		const mockHeader = {
-			tensor_fp4: {
-				dtype: "FP4" as const,
-				shape: [100, 200],
-				data_offsets: [0, 5000] as [number, number],
-			},
-			tensor_ue8: {
-				dtype: "UE8" as const,
-				shape: [50, 100],
-				data_offsets: [5000, 10000] as [number, number],
-			},
-			__metadata__: { format: "pt" },
-		};
+			it("leaves shared experts alone — they're dense, not routed", () => {
+				const shared = "model.layers.0.ffn.shared_experts.w1.weight";
+				assert.strictEqual(getQuantizationMultiplier(shared, "I8", fp8, "fp4"), 1);
+			});
 
-		const computeNumOfParamsByDtypeSingleFile = (header: typeof mockHeader) => {
-			const counter: Partial<Record<string, number>> = {};
-			const tensors = Object.fromEntries(Object.entries(header).filter(([key]) => key !== "__metadata__"));
+			it("does not apply the expert width to non-expert integer tensors", () => {
+				// The bug this guards: `expert_dtype` used to apply to every integer container, so a
+				// routing table or other bookkeeping was inflated by the packing factor — 8x for I32.
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.ffn.gate.tid2eid", "I32", fp8, "fp4"), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.attn.wkv.weight", "I8", fp8, "fp4"), 1);
+			});
 
-			for (const [, v] of Object.entries(tensors) as [
-				string,
-				{ dtype: string; shape: number[]; data_offsets: [number, number] },
-			][]) {
-				if (v.shape.length === 0) {
-					continue;
-				}
-				counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a: number, b: number) => a * b);
-			}
-			return counter;
-		};
+			it("leaves fp8 experts unpacked — one value per byte", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "F8_E4M3", fp8, "fp4"), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, "fp8"), 1);
+			});
 
-		const parameterCount = computeNumOfParamsByDtypeSingleFile(mockHeader);
+			it("is a no-op without expert_dtype", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, undefined), 1);
+			});
+		});
 
-		assert.strictEqual(parameterCount.FP4, 20000);
-		assert.strictEqual(parameterCount.UE8, 5000);
+		describe("compressed-tensors packing factor", () => {
+			const packed = (numBits: number) => ({
+				quant_method: "compressed-tensors",
+				format: "pack-quantized",
+				config_groups: { group_0: { weights: { num_bits: numBits } } },
+			});
+			const name = "model.layers.0.mlp.down_proj.weight_packed";
+
+			it("packs 4-bit eight-per-I32 and two-per-U8", () => {
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(4)), 8);
+				assert.strictEqual(getQuantizationMultiplier(name, "U8", packed(4)), 2);
+			});
+
+			it("packs 2-bit sixteen-per-I32", () => {
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(2)), 16);
+			});
+
+			it("uses the exact ratio for widths that don't divide the container", () => {
+				// Dense cross-element packing: 32 values occupy exactly num_bits I32 words, so an I32
+				// holds 32/3 values. Flooring to 10 undercounts a 3-bit model by 6%.
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(3)), 32 / 3);
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(5)), 32 / 5);
+			});
+
+			it("does not pack when the width fills the container", () => {
+				assert.strictEqual(getQuantizationMultiplier(name, "I8", packed(8)), 1);
+			});
+		});
+
+		it("ignores fp6, which is stored in native F6_* dtypes rather than packed", () => {
+			// A 6-bit width in an 8-bit container has no reference implementation, so claiming any
+			// packing for it would be a guess.
+			assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { quant_method: "fp8" }, "fp6"), 1);
+			assert.strictEqual(getQuantizationMultiplier(EXPERT, "F6_E2M3", { quant_method: "fp8" }, "fp6"), 1);
+		});
 	});
 
 	describe("globMatch", () => {
