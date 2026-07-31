@@ -61,6 +61,7 @@ import type {
 	UrlParams,
 } from "../types.js";
 import { toArray } from "../utils/toArray.js";
+import { omit } from "../utils/omit.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
@@ -403,9 +404,14 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
+		/// `model` is serialized first so that a router/proxy can resolve the target provider from a
+		/// small prefix of the request body instead of buffering the whole payload — `messages` can
+		/// hold megabytes of base64-encoded images.
+		/// `params.args` also carries the caller-supplied `model` (possibly with a `:provider` routing
+		/// suffix), which must not take precedence over the resolved provider model id: omit it.
 		return {
-			...params.args,
 			model: params.model,
+			...omit(params.args, "model"),
 		};
 	}
 
