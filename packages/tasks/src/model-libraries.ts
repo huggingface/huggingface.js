@@ -605,7 +605,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Hallo",
 		repoName: "Hallo",
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
-		countDownloads: `path:"hallo/net.pth"`,
+		countDownloads: `path:"hallo/net.pth" OR path:"hallo2/net.pth" OR path:"hallo3/1/mp_rank_00_model_states.pt" OR path:"hallo4/model_weight.ckpt"`,
 	},
 	hermes: {
 		prettyLabel: "HERMES",
