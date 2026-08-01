@@ -318,270 +318,289 @@ export class XetBlob extends Blob {
 
 			pump();
 
-			for (const term of terms) {
-				if (totalBytesRead >= maxBytes) {
-					break;
-				}
+			// The reader for the term currently being consumed, tracked so the
+			// `finally` below can release it (and the prefetched responses) if the
+			// loop exits early via a thrown error or a cancelled stream.
+			let activeReader: ReadableStreamDefaultReader<Uint8Array> | undefined;
 
-				const rangeList = rangeLists.get(term.hash);
-				if (!rangeList) {
-					throw new Error(`Failed to find range list for term ${term.hash}`);
-				}
+			try {
+				for (const term of terms) {
+					if (totalBytesRead >= maxBytes) {
+						break;
+					}
 
-				{
-					const termRanges = rangeList.getRanges(term.range.start, term.range.end);
+					const rangeList = rangeLists.get(term.hash);
+					if (!rangeList) {
+						throw new Error(`Failed to find range list for term ${term.hash}`);
+					}
 
-					if (termRanges.every((range) => range.data)) {
-						log("all data available for term", term.hash, readBytesToSkip);
-						rangeLoop: for (const range of termRanges) {
-							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-							for (let chunk of range.data!) {
-								if (readBytesToSkip) {
-									const skipped = Math.min(readBytesToSkip, chunk.byteLength);
-									chunk = chunk.slice(skipped);
-									readBytesToSkip -= skipped;
-									if (!chunk.byteLength) {
-										continue;
+					{
+						const termRanges = rangeList.getRanges(term.range.start, term.range.end);
+
+						if (termRanges.every((range) => range.data)) {
+							log("all data available for term", term.hash, readBytesToSkip);
+							rangeLoop: for (const range of termRanges) {
+								// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+								for (let chunk of range.data!) {
+									if (readBytesToSkip) {
+										const skipped = Math.min(readBytesToSkip, chunk.byteLength);
+										chunk = chunk.slice(skipped);
+										readBytesToSkip -= skipped;
+										if (!chunk.byteLength) {
+											continue;
+										}
+									}
+									if (chunk.byteLength > maxBytes - totalBytesRead) {
+										chunk = chunk.slice(0, maxBytes - totalBytesRead);
+									}
+									totalBytesRead += chunk.byteLength;
+									// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
+									// if there's more than one range for the same term
+									yield range.refCount > 1 ? chunk.slice() : chunk;
+									listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
+
+									if (totalBytesRead >= maxBytes) {
+										break rangeLoop;
 									}
 								}
-								if (chunk.byteLength > maxBytes - totalBytesRead) {
-									chunk = chunk.slice(0, maxBytes - totalBytesRead);
-								}
-								totalBytesRead += chunk.byteLength;
-								// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
-								// if there's more than one range for the same term
-								yield range.refCount > 1 ? chunk.slice() : chunk;
-								listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
-
-								if (totalBytesRead >= maxBytes) {
-									break rangeLoop;
-								}
 							}
+							rangeList.remove(term.range.start, term.range.end);
+							continue;
 						}
-						rangeList.remove(term.range.start, term.range.end);
-						continue;
 					}
-				}
 
-				let fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
-					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
-				);
-
-				if (!fetchInfo) {
-					throw new Error(
-						`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
-					);
-				}
-
-				log("term", term);
-				log("fetchinfo", fetchInfo);
-				log("readBytesToSkip", readBytesToSkip);
-
-				// Take the prefetched response for this range if one is in flight,
-				// otherwise fetch it now (concurrency == 1, window edge, or a range
-				// that was re-requested after a refresh).
-				const termKey = rangeKey(term.hash, fetchInfo);
-				let resp: Response;
-				const prefetched = inflight.get(termKey);
-				if (prefetched) {
-					inflight.delete(termKey);
-					resp = await prefetched;
-				} else {
-					resp = await customFetch(fetchInfo.url, {
-						headers: {
-							Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
-						},
-					});
-				}
-				// Refill the look-ahead window now that a slot may have freed up.
-				pump();
-
-				if (resp.status === 403) {
-					// In case it's expired. The prefetched responses were signed with
-					// the now-stale URLs, so drop them; upcoming terms will re-fetch
-					// against the refreshed reconstruction info.
-					cancelInflight();
-					reconstructionInfo = await reloadReconstructionInfo();
-					fetchInfo = reconstructionInfo.fetch_info[term.hash]?.find(
+					let fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
 						(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
 					);
+
 					if (!fetchInfo) {
 						throw new Error(
-							`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end} after refresh`,
+							`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
 						);
 					}
-					resp = await customFetch(fetchInfo.url, {
-						headers: {
-							Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
-						},
-					});
-				}
 
-				if (!resp.ok) {
-					throw await createApiError(resp);
-				}
+					log("term", term);
+					log("fetchinfo", fetchInfo);
+					log("readBytesToSkip", readBytesToSkip);
 
-				log(
-					"expected content length",
-					resp.headers.get("content-length"),
-					"range",
-					fetchInfo.url_range,
-					resp.headers.get("content-range"),
-				);
-
-				const reader = resp.body?.getReader();
-				if (!reader) {
-					throw new Error("Failed to get reader from response body");
-				}
-
-				let done = false;
-				let chunkIndex = fetchInfo.range.start;
-				const ranges = rangeList.getRanges(fetchInfo.range.start, fetchInfo.range.end);
-
-				let leftoverBytes: Uint8Array | undefined = undefined;
-				let totalFetchBytes = 0;
-
-				fetchData: while (!done && totalBytesRead < maxBytes) {
-					const result = await reader.read();
-					listener?.({ event: "read" });
-
-					done = result.done;
-
-					log("read", result.value?.byteLength, "bytes", "total read", totalBytesRead, "toSkip", readBytesToSkip);
-
-					if (!result.value) {
-						log("no data in result, cancelled", result);
-						continue;
+					// Take the prefetched response for this range if one is in flight,
+					// otherwise fetch it now (concurrency == 1, window edge, or a range
+					// that was re-requested after a refresh).
+					const termKey = rangeKey(term.hash, fetchInfo);
+					let resp: Response;
+					const prefetched = inflight.get(termKey);
+					if (prefetched) {
+						inflight.delete(termKey);
+						resp = await prefetched;
+					} else {
+						resp = await customFetch(fetchInfo.url, {
+							headers: {
+								Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
+							},
+						});
 					}
 
-					totalFetchBytes += result.value.byteLength;
-
-					if (leftoverBytes) {
-						result.value = combineUint8Arrays(leftoverBytes, result.value);
-						leftoverBytes = undefined;
-					}
-
-					while (totalBytesRead < maxBytes && result.value?.byteLength) {
-						if (result.value.byteLength < 8) {
-							// We need 8 bytes to parse the chunk header
-							leftoverBytes = result.value;
-							continue fetchData;
-						}
-
-						const header = new DataView(result.value.buffer, result.value.byteOffset, XET_CHUNK_HEADER_BYTES);
-						const chunkHeader: ChunkHeader = {
-							version: header.getUint8(0),
-							compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
-							compression_scheme: header.getUint8(4),
-							uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
-						};
-
-						log("chunk header", chunkHeader, "to skip", readBytesToSkip);
-
-						if (chunkHeader.version !== 0) {
-							throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
-						}
-
-						if (
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
-						) {
+					if (resp.status === 403) {
+						// In case it's expired. The prefetched responses were signed with
+						// the now-stale URLs, so drop them; upcoming terms will re-fetch
+						// against the refreshed reconstruction info.
+						cancelInflight();
+						reconstructionInfo = await reloadReconstructionInfo();
+						fetchInfo = reconstructionInfo.fetch_info[term.hash]?.find(
+							(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
+						);
+						if (!fetchInfo) {
 							throw new Error(
-								`Unsupported compression scheme ${
-									compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
-								}`,
+								`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end} after refresh`,
 							);
 						}
-
-						if (result.value.byteLength < chunkHeader.compressed_length + XET_CHUNK_HEADER_BYTES) {
-							// We need more data to read the full chunk
-							leftoverBytes = result.value;
-							continue fetchData;
-						}
-
-						result.value = result.value.slice(XET_CHUNK_HEADER_BYTES);
-
-						let uncompressed =
-							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
-								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
-								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
-									? bg4_regroup_bytes(
-											lz4_decompress(
-												result.value.slice(0, chunkHeader.compressed_length),
-												chunkHeader.uncompressed_length,
-											),
-										)
-									: result.value.slice(0, chunkHeader.compressed_length);
-
-						const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
-						const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
-						const minRefCountToStore = shouldYield ? 2 : 1;
-						let stored = false;
-
-						// Assuming non-overlapping fetch_info ranges for the same hash
-						if (range && range.refCount >= minRefCountToStore) {
-							range.data ??= [];
-							range.data.push(uncompressed);
-							stored = true;
-						}
-
-						if (shouldYield) {
-							if (readBytesToSkip) {
-								const skipped = Math.min(readBytesToSkip, uncompressed.byteLength);
-								uncompressed = uncompressed.slice(readBytesToSkip);
-								readBytesToSkip -= skipped;
-							}
-
-							if (uncompressed.byteLength > maxBytes - totalBytesRead) {
-								uncompressed = uncompressed.slice(0, maxBytes - totalBytesRead);
-							}
-
-							if (uncompressed.byteLength) {
-								log(
-									"yield",
-									uncompressed.byteLength,
-									"bytes",
-									result.value.byteLength,
-									"total read",
-									totalBytesRead,
-									stored,
-								);
-								totalBytesRead += uncompressed.byteLength;
-								yield stored ? uncompressed.slice() : uncompressed;
-								listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
-							}
-						}
-
-						chunkIndex++;
-						result.value = result.value.slice(chunkHeader.compressed_length);
+						resp = await customFetch(fetchInfo.url, {
+							headers: {
+								Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
+							},
+						});
 					}
-				}
 
-				if (
-					done &&
-					totalBytesRead < maxBytes &&
-					totalFetchBytes < fetchInfo.url_range.end - fetchInfo.url_range.start + 1
-				) {
-					log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
-					log("failed to fetch all data for term", term.hash);
-					throw new Error(
-						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
-							fetchInfo.url_range.end - fetchInfo.url_range.start + 1
-						}`,
+					if (!resp.ok) {
+						throw await createApiError(resp);
+					}
+
+					// The current response is healthy, so it's safe to refill the
+					// look-ahead window now that a slot has freed up.
+					pump();
+
+					log(
+						"expected content length",
+						resp.headers.get("content-length"),
+						"range",
+						fetchInfo.url_range,
+						resp.headers.get("content-range"),
 					);
+
+					const reader = resp.body?.getReader();
+					if (!reader) {
+						throw new Error("Failed to get reader from response body");
+					}
+					activeReader = reader;
+
+					let done = false;
+					let chunkIndex = fetchInfo.range.start;
+					const ranges = rangeList.getRanges(fetchInfo.range.start, fetchInfo.range.end);
+
+					let leftoverBytes: Uint8Array | undefined = undefined;
+					let totalFetchBytes = 0;
+
+					fetchData: while (!done && totalBytesRead < maxBytes) {
+						const result = await reader.read();
+						listener?.({ event: "read" });
+
+						done = result.done;
+
+						log("read", result.value?.byteLength, "bytes", "total read", totalBytesRead, "toSkip", readBytesToSkip);
+
+						if (!result.value) {
+							log("no data in result, cancelled", result);
+							continue;
+						}
+
+						totalFetchBytes += result.value.byteLength;
+
+						if (leftoverBytes) {
+							result.value = combineUint8Arrays(leftoverBytes, result.value);
+							leftoverBytes = undefined;
+						}
+
+						while (totalBytesRead < maxBytes && result.value?.byteLength) {
+							if (result.value.byteLength < 8) {
+								// We need 8 bytes to parse the chunk header
+								leftoverBytes = result.value;
+								continue fetchData;
+							}
+
+							const header = new DataView(result.value.buffer, result.value.byteOffset, XET_CHUNK_HEADER_BYTES);
+							const chunkHeader: ChunkHeader = {
+								version: header.getUint8(0),
+								compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
+								compression_scheme: header.getUint8(4),
+								uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
+							};
+
+							log("chunk header", chunkHeader, "to skip", readBytesToSkip);
+
+							if (chunkHeader.version !== 0) {
+								throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
+							}
+
+							if (
+								chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
+								chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
+								chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
+							) {
+								throw new Error(
+									`Unsupported compression scheme ${
+										compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
+									}`,
+								);
+							}
+
+							if (result.value.byteLength < chunkHeader.compressed_length + XET_CHUNK_HEADER_BYTES) {
+								// We need more data to read the full chunk
+								leftoverBytes = result.value;
+								continue fetchData;
+							}
+
+							result.value = result.value.slice(XET_CHUNK_HEADER_BYTES);
+
+							let uncompressed =
+								chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
+									? lz4_decompress(
+											result.value.slice(0, chunkHeader.compressed_length),
+											chunkHeader.uncompressed_length,
+										)
+									: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
+										? bg4_regroup_bytes(
+												lz4_decompress(
+													result.value.slice(0, chunkHeader.compressed_length),
+													chunkHeader.uncompressed_length,
+												),
+											)
+										: result.value.slice(0, chunkHeader.compressed_length);
+
+							const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
+							const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
+							const minRefCountToStore = shouldYield ? 2 : 1;
+							let stored = false;
+
+							// Assuming non-overlapping fetch_info ranges for the same hash
+							if (range && range.refCount >= minRefCountToStore) {
+								range.data ??= [];
+								range.data.push(uncompressed);
+								stored = true;
+							}
+
+							if (shouldYield) {
+								if (readBytesToSkip) {
+									const skipped = Math.min(readBytesToSkip, uncompressed.byteLength);
+									uncompressed = uncompressed.slice(readBytesToSkip);
+									readBytesToSkip -= skipped;
+								}
+
+								if (uncompressed.byteLength > maxBytes - totalBytesRead) {
+									uncompressed = uncompressed.slice(0, maxBytes - totalBytesRead);
+								}
+
+								if (uncompressed.byteLength) {
+									log(
+										"yield",
+										uncompressed.byteLength,
+										"bytes",
+										result.value.byteLength,
+										"total read",
+										totalBytesRead,
+										stored,
+									);
+									totalBytesRead += uncompressed.byteLength;
+									yield stored ? uncompressed.slice() : uncompressed;
+									listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
+								}
+							}
+
+							chunkIndex++;
+							result.value = result.value.slice(chunkHeader.compressed_length);
+						}
+					}
+
+					if (
+						done &&
+						totalBytesRead < maxBytes &&
+						totalFetchBytes < fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+					) {
+						log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
+						log("failed to fetch all data for term", term.hash);
+						throw new Error(
+							`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
+								fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+							}`,
+						);
+					}
+
+					log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
+
+					// Release the reader
+					log("cancel reader");
+					await reader.cancel();
+					activeReader = undefined;
 				}
-
-				log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
-
-				// Release the reader
-				log("cancel reader");
-				await reader.cancel();
+			} finally {
+				// Runs on normal completion, an early-exit `break`, a thrown error
+				// (e.g. a non-ok response or a decompression failure), and when the
+				// consuming stream is cancelled. Cancel the in-progress reader (if any)
+				// and every prefetched-but-unused response so their bodies don't linger.
+				if (activeReader) {
+					await activeReader.cancel().catch(() => {});
+				}
+				cancelInflight();
 			}
-
-			// Early-exit / slice case: cancel any prefetched-but-unused responses so
-			// their bodies don't linger.
-			cancelInflight();
 		}
 
 		const iterator = readData(
@@ -606,6 +625,11 @@ export class XetBlob extends Blob {
 					if (result.done) {
 						controller.close();
 					}
+				},
+				async cancel() {
+					// Consumer cancelled the stream: return the generator so its
+					// `finally` runs and any in-flight prefetch requests are cancelled.
+					await iterator.return?.();
 				},
 				type: "bytes",
 				// todo: when Safari supports it, add autoAllocateChunkSize param

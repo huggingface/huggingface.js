@@ -933,6 +933,90 @@ describe("XetBlob", () => {
 				expect(bytes).toEqual(expected);
 				expect(getMaxInFlight()).toBe(1);
 			});
+
+			it("cancels prefetched range requests when a download fails", async () => {
+				const termCount = 3;
+				const contents = Array(termCount)
+					.fill(0)
+					.map((_, i) => `chunk-${i}-`);
+				const chunks = contents.map((content) => makeChunk(content));
+				const totalSize = sum(contents.map((c) => c.length));
+
+				// Track which prefetched range bodies get cancelled.
+				const cancelled = new Set<number>();
+
+				const blob = new XetBlob({
+					hash: "test",
+					size: totalSize,
+					refreshUrl: "https://huggingface.co",
+					downloadConcurrency: 4,
+					fetch: async function (_url) {
+						const url = new URL(_url as string);
+
+						switch (url.hostname) {
+							case "huggingface.co": {
+								return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+							}
+							case "cas.co": {
+								return new Response(
+									JSON.stringify({
+										terms: Array(termCount)
+											.fill(0)
+											.map((_, i) => ({
+												hash: `xorb${i}`,
+												range: { start: 0, end: 1 },
+												unpacked_length: contents[i].length,
+											})),
+										fetch_info: Object.fromEntries(
+											Array(termCount)
+												.fill(0)
+												.map((_, i) => [
+													`xorb${i}`,
+													[
+														{
+															url: `https://fetch.co/${i}`,
+															range: { start: 0, end: 1 },
+															url_range: { start: 0, end: chunks[i].byteLength - 1 },
+														},
+													],
+												]),
+										),
+										offset_into_first_range: 0,
+									} satisfies ReconstructionInfo),
+								);
+							}
+							case "fetch.co": {
+								const i = Number(url.pathname.slice(1));
+								if (i === 0) {
+									// The first (consumed) term fails, aborting the whole download.
+									return new Response("boom", { status: 500 });
+								}
+								// Prefetched terms: their bodies must be cancelled on failure.
+								return new Response(
+									new ReadableStream({
+										pull(controller) {
+											controller.enqueue(chunks[i]);
+											controller.close();
+										},
+										cancel() {
+											cancelled.add(i);
+										},
+									}),
+								);
+							}
+							default:
+								throw new Error("Unhandled URL");
+						}
+					},
+				});
+
+				await expect(blob.arrayBuffer()).rejects.toBeDefined();
+				// Let the fire-and-forget body cancellations settle.
+				await new Promise((r) => setTimeout(r, 20));
+
+				expect(cancelled.has(1)).toBe(true);
+				expect(cancelled.has(2)).toBe(true);
+			});
 		});
 
 		describe("loading one byte at a time", () => {
