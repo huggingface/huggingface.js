@@ -811,6 +811,130 @@ describe("XetBlob", () => {
 			});
 		});
 
+		describe("downloadConcurrency", () => {
+			// Build a reconstruction spread over `termCount` distinct XORBs (one chunk
+			// each), so the per-term CAS range requests are genuinely independent and
+			// can overlap. The returned fetch counts how many range requests are in
+			// flight at once, gated on a shared promise released by the test.
+			function makeConcurrencyBlob(termCount: number, downloadConcurrency: number) {
+				const contents = Array(termCount)
+					.fill(0)
+					.map((_, i) => `chunk-${i}-`);
+				const chunks = contents.map((content) => makeChunk(content));
+				const expected: number[] = [];
+				for (const content of contents) {
+					for (const byte of new TextEncoder().encode(content)) {
+						expected.push(byte);
+					}
+				}
+				const totalSize = sum(contents.map((c) => c.length));
+
+				let inFlight = 0;
+				let maxInFlight = 0;
+				let release!: () => void;
+				const released = new Promise<void>((r) => {
+					release = r;
+				});
+
+				const blob = new XetBlob({
+					hash: "test",
+					size: totalSize,
+					refreshUrl: "https://huggingface.co",
+					downloadConcurrency,
+					fetch: async function (_url) {
+						const url = new URL(_url as string);
+
+						switch (url.hostname) {
+							case "huggingface.co": {
+								return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+							}
+							case "cas.co": {
+								return new Response(
+									JSON.stringify({
+										terms: Array(termCount)
+											.fill(0)
+											.map((_, i) => ({
+												hash: `xorb${i}`,
+												range: { start: 0, end: 1 },
+												unpacked_length: contents[i].length,
+											})),
+										fetch_info: Object.fromEntries(
+											Array(termCount)
+												.fill(0)
+												.map((_, i) => [
+													`xorb${i}`,
+													[
+														{
+															url: `https://fetch.co/${i}`,
+															range: { start: 0, end: 1 },
+															url_range: { start: 0, end: chunks[i].byteLength - 1 },
+														},
+													],
+												]),
+										),
+										offset_into_first_range: 0,
+									} satisfies ReconstructionInfo),
+								);
+							}
+							case "fetch.co": {
+								// Range request for a single XORB: track concurrency, then wait
+								// for the test to release before returning the body.
+								inFlight++;
+								maxInFlight = Math.max(maxInFlight, inFlight);
+								await released;
+								inFlight--;
+
+								const i = Number(url.pathname.slice(1));
+								const chunk = chunks[i];
+								return new Response(
+									new ReadableStream({
+										pull(controller) {
+											controller.enqueue(chunk);
+											controller.close();
+										},
+									}),
+								);
+							}
+							default:
+								throw new Error("Unhandled URL");
+						}
+					},
+				});
+
+				return { blob, expected: new Uint8Array(expected), release, getMaxInFlight: () => maxInFlight };
+			}
+
+			it("fetches reconstruction ranges in parallel when downloadConcurrency > 1", async () => {
+				const { blob, expected, release, getMaxInFlight } = makeConcurrencyBlob(6, 4);
+
+				const read = blob.arrayBuffer();
+				// Let the scheduler launch its look-ahead window, then release the gated
+				// range requests.
+				await new Promise((r) => setTimeout(r, 20));
+				release();
+
+				const bytes = new Uint8Array(await read);
+
+				expect(bytes).toEqual(expected);
+				// With downloadConcurrency 4, the term being processed plus 3 look-ahead
+				// requests can be in flight at once.
+				expect(getMaxInFlight()).toBeGreaterThan(1);
+			});
+
+			it("keeps a single request in flight when downloadConcurrency is 1", async () => {
+				const { blob, expected, release, getMaxInFlight } = makeConcurrencyBlob(6, 1);
+
+				const read = blob.arrayBuffer();
+				await new Promise((r) => setTimeout(r, 20));
+				release();
+
+				const bytes = new Uint8Array(await read);
+
+				expect(bytes).toEqual(expected);
+				expect(getMaxInFlight()).toBe(1);
+			});
+		});
+
 		describe("loading one byte at a time", () => {
 			it("should load different slices", async () => {
 				const chunk1Content = "hello";

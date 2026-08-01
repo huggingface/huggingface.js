@@ -28,6 +28,13 @@ type XetBlobCreateOptions = {
 	 * Pre-fetched read token to avoid the refresh URL roundtrip.
 	 */
 	readToken?: XetReadToken;
+	/**
+	 * Number of CAS range requests to keep in flight while reconstructing the
+	 * file. The default (1) preserves the current fully-serial behavior; higher
+	 * values overlap the per-range requests to saturate faster links.
+	 * @default 1
+	 */
+	downloadConcurrency?: number;
 } & ({ hash: string; reconstructionUrl?: string } | { hash?: string; reconstructionUrl: string }) &
 	Partial<CredentialsParams>;
 
@@ -102,6 +109,7 @@ export class XetBlob extends Blob {
 	internalLogging = false;
 	reconstructionInfo: ReconstructionInfo | undefined;
 	listener: XetBlobCreateOptions["listener"];
+	downloadConcurrency = 1;
 
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
@@ -114,6 +122,7 @@ export class XetBlob extends Blob {
 		this.hash = params.hash;
 		this.listener = params.listener;
 		this.internalLogging = params.internalLogging ?? false;
+		this.downloadConcurrency = Math.max(1, Math.floor(params.downloadConcurrency ?? 1));
 
 		if (params.readToken) {
 			const key = cacheKey({ refreshUrl: this.refreshUrl, initialAccessToken: this.accessToken });
@@ -145,6 +154,7 @@ export class XetBlob extends Blob {
 		blob.reconstructionInfo = this.reconstructionInfo;
 		blob.listener = this.listener;
 		blob.internalLogging = this.internalLogging;
+		blob.downloadConcurrency = this.downloadConcurrency;
 
 		return blob;
 	}
@@ -235,11 +245,80 @@ export class XetBlob extends Blob {
 			customFetch: typeof fetch,
 			maxBytes: number,
 			reloadReconstructionInfo: () => Promise<ReconstructionInfo>,
+			downloadConcurrency: number,
 		) {
 			let totalBytesRead = 0;
 			let readBytesToSkip = reconstructionInfo.offset_into_first_range;
 
-			for (const term of reconstructionInfo.terms) {
+			// --- bounded look-ahead prefetch of the per-term CAS range requests ---
+			//
+			// The reconstruction loop below consumes terms strictly in order and only
+			// the network fetch (step 2) is safe to start early: decompression and
+			// in-order yielding are untouched. We keep up to `downloadConcurrency`
+			// range requests in flight (the term being processed counts as one of
+			// them, so `downloadConcurrency === 1` stays fully serial). Requests are
+			// deduplicated by CAS range so we never issue more unique requests than
+			// the serial path — the RangeList cache below still serves already
+			// decompressed ranges without any network fetch.
+			const terms = reconstructionInfo.terms;
+
+			// Resolve the fetch_info entry (presigned URL + byte range) for a term,
+			// using the exact same predicate as the serial path below. Returns
+			// undefined when missing so the scheduler can skip it and let the consume
+			// path throw the detailed error.
+			const fetchInfoFor = (term: (typeof terms)[number]) =>
+				reconstructionInfo.fetch_info[term.hash]?.find(
+					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
+				);
+
+			// Stable key for a CAS range so identical ranges share a single request.
+			const rangeKey = (hash: string, fetchInfo: { url_range: { start: number; end: number } }) =>
+				`${hash}:${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`;
+
+			// key -> in-flight Response promise, plus the set of keys we've ever
+			// launched, so a range is never prefetched twice (the RangeList cache
+			// handles reuse of already-decompressed ranges).
+			const inflight = new Map<string, Promise<Response>>();
+			const launchedKeys = new Set<string>();
+			let prefetchIndex = 0;
+
+			const launch = (term: (typeof terms)[number]) => {
+				const fetchInfo = fetchInfoFor(term);
+				if (!fetchInfo) {
+					return;
+				}
+				const key = rangeKey(term.hash, fetchInfo);
+				if (launchedKeys.has(key)) {
+					return;
+				}
+				launchedKeys.add(key);
+				const p = customFetch(fetchInfo.url, {
+					headers: { Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}` },
+				});
+				// Avoid unhandled-rejection noise for prefetched-but-not-yet-awaited
+				// requests; the rejection is re-observed when the term is consumed.
+				p.catch(() => {});
+				inflight.set(key, p);
+			};
+
+			// The currently-processing term counts against the window, so only keep
+			// `downloadConcurrency - 1` requests queued ahead of it.
+			const pump = () => {
+				while (prefetchIndex < terms.length && inflight.size < downloadConcurrency - 1) {
+					launch(terms[prefetchIndex++]);
+				}
+			};
+
+			const cancelInflight = () => {
+				for (const p of inflight.values()) {
+					p.then((r) => r.body?.cancel()).catch(() => {});
+				}
+				inflight.clear();
+			};
+
+			pump();
+
+			for (const term of terms) {
 				if (totalBytesRead >= maxBytes) {
 					break;
 				}
@@ -298,14 +377,30 @@ export class XetBlob extends Blob {
 				log("fetchinfo", fetchInfo);
 				log("readBytesToSkip", readBytesToSkip);
 
-				let resp = await customFetch(fetchInfo.url, {
-					headers: {
-						Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
-					},
-				});
+				// Take the prefetched response for this range if one is in flight,
+				// otherwise fetch it now (concurrency == 1, window edge, or a range
+				// that was re-requested after a refresh).
+				const termKey = rangeKey(term.hash, fetchInfo);
+				let resp: Response;
+				const prefetched = inflight.get(termKey);
+				if (prefetched) {
+					inflight.delete(termKey);
+					resp = await prefetched;
+				} else {
+					resp = await customFetch(fetchInfo.url, {
+						headers: {
+							Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
+						},
+					});
+				}
+				// Refill the look-ahead window now that a slot may have freed up.
+				pump();
 
 				if (resp.status === 403) {
-					// In case it's expired
+					// In case it's expired. The prefetched responses were signed with
+					// the now-stale URLs, so drop them; upcoming terms will re-fetch
+					// against the refreshed reconstruction info.
+					cancelInflight();
 					reconstructionInfo = await reloadReconstructionInfo();
 					fetchInfo = reconstructionInfo.fetch_info[term.hash]?.find(
 						(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
@@ -483,6 +578,10 @@ export class XetBlob extends Blob {
 				log("cancel reader");
 				await reader.cancel();
 			}
+
+			// Early-exit / slice case: cancel any prefetched-but-unused responses so
+			// their bodies don't linger.
+			cancelInflight();
 		}
 
 		const iterator = readData(
@@ -490,6 +589,7 @@ export class XetBlob extends Blob {
 			this.fetch,
 			this.end - this.start,
 			this.#loadReconstructionInfo.bind(this),
+			this.downloadConcurrency,
 		);
 
 		// todo: when Chrome/Safari support it, use ReadableStream.from(readData)

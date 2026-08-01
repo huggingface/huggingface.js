@@ -43,6 +43,14 @@ export async function downloadFile(
 		 * Can save an http request if provided
 		 */
 		downloadInfo?: FileDownloadInfoOutput;
+		/**
+		 * Number of CAS range requests to keep in flight when downloading via the
+		 * xet protocol. Higher values parallelize the transfer; ~8–10 is usually
+		 * enough to saturate a fast link. Defaults to `1` (serial). Ignored for
+		 * non-xet downloads.
+		 * @default 1
+		 */
+		downloadConcurrency?: number;
 	} & Partial<CredentialsParams>,
 ): Promise<Blob | null> {
 	const accessToken = checkCredentials(params);
@@ -71,6 +79,7 @@ export async function downloadFile(
 			accessToken,
 			size: info.size,
 			readToken: typeof params.xet === "object" ? params.xet.readToken : undefined,
+			downloadConcurrency: params.downloadConcurrency,
 		});
 	}
 
