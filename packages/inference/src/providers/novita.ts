@@ -14,6 +14,7 @@
  *
  * Thanks!
  */
+import type { TextGenerationOutput } from "@huggingface/tasks";
 import { isUrl } from "../lib/isUrl.js";
 import type { TextToVideoArgs } from "../tasks/index.js";
 import type { BodyParams, UrlParams } from "../types.js";
@@ -37,6 +38,10 @@ export interface NovitaAsyncAPIOutput {
 	task_id: string;
 }
 
+interface NovitaChatCompletionResponse {
+	choices: Array<{ message?: { content?: string | null } }>;
+}
+
 export class NovitaTextGenerationTask extends BaseTextGenerationTask {
 	constructor() {
 		super("novita", NOVITA_API_BASE_URL);
@@ -44,6 +49,37 @@ export class NovitaTextGenerationTask extends BaseTextGenerationTask {
 
 	override makeRoute(): string {
 		return "/v3/openai/chat/completions";
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const parameters = params.args.parameters as Record<string, unknown> | undefined;
+		return {
+			model: params.model,
+			messages: [{ role: "user", content: params.args.inputs }],
+			...omit(params.args, ["inputs", "parameters"]),
+			...(parameters
+				? {
+						max_tokens: parameters.max_new_tokens,
+						...omit(parameters, ["max_new_tokens"]),
+					}
+				: undefined),
+		};
+	}
+
+	override async getResponse(response: NovitaChatCompletionResponse): Promise<TextGenerationOutput> {
+		if (
+			typeof response === "object" &&
+			response !== null &&
+			Array.isArray(response.choices) &&
+			response.choices.length > 0 &&
+			typeof response.choices[0].message?.content === "string"
+		) {
+			return { generated_text: response.choices[0].message.content };
+		}
+
+		throw new InferenceClientProviderOutputError(
+			"Received malformed response from Novita text-generation API: expected OpenAI chat completion payload",
+		);
 	}
 }
 
