@@ -7,6 +7,7 @@ import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
 import type { SetRequired } from "../vendor/type-fest/set-required";
 import { parseSafetensorsIndexStream } from "./parse-safetensors-index";
+import { sum } from "../utils/sum";
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
@@ -44,6 +45,15 @@ const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000; // 25MB
 const MAX_CONFIG_LENGTH = 10_000_000; // 10MB — config.json is typically small; cap to avoid large memory use
 const MAX_SHARD_COUNT = 10_000; // well above any real sharded model; blocks crafted index with millions of entries
+/**
+ * Upper bound on a single tensor dimension (CWE-1284), mirroring `MAX_TENSOR_DIM` in the gguf
+ * package. Declared dims are multiplied together to produce the parameter count, and were
+ * previously trusted unchecked: a 528-byte header full of `2^62` dims reports ~1.8e308
+ * "parameters" and tops the most-params listing (e.g. yethdev/The-Quettamind).
+ *
+ * 2^32 is absurdly generous — the largest dimension in a real model is a vocab size, O(10^5).
+ */
+const MAX_TENSOR_DIM = 2 ** 32;
 const GPTQ_QWEIGHT_SUFFIX = "qweight";
 const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
 
@@ -177,6 +187,57 @@ function packingFactor(dtype: Dtype, numBits: number | undefined): number {
 
 class SafetensorParseError extends Error {}
 
+/**
+ * Validates one tensor entry from a header: rank, per-dimension magnitude, `data_offsets`
+ * sanity, and — when the file size is known — that the tensor's byte span actually fits in the
+ * file.
+ *
+ * Every field is attacker-controlled, and the parameter count is computed from `shape` alone,
+ * so a tiny file can claim an arbitrary ranking on the most-params listing. The recent wave of
+ * PoCs splits into two families, each caught here:
+ *
+ *  - absurd dims (e.g. seventeen `2^62` dims in a 528-byte file claiming 1.8e308 params), caught
+ *    by `MAX_TENSOR_DIM` — the same cap the gguf package added for its own variant of this abuse;
+ *  - individually-plausible dims with lying `data_offsets` (e.g. a 673-byte file whose header
+ *    declares 10 tensors of `[65536, 65536]` F4 spanning 2GB each), caught by checking the
+ *    declared byte span against the file size. Shards that are internally consistent only because
+ *    they were padded with gigabytes of zeros get past both, so summing across shards additionally
+ *    needs the repo-level `totalFileSize` backstop on the Hub side.
+ *
+ * The offsets check is done on `data_offsets` rather than `shape * dtype size` because the two
+ * are allowed to disagree (the byte buffer may be padded), so `data_offsets` is the only
+ * ground truth the format gives us — and it must fit in the file regardless.
+ */
+export function validateTensorEntry(path: string, tensorName: string, info: TensorInfo, fileSizeBytes: number | undefined): void {
+	if (!Array.isArray(info.shape) || !Array.isArray(info.data_offsets) || info.data_offsets.length !== 2) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: tensor "${tensorName}" is malformed.`);
+	}
+	for (const dim of info.shape) {
+		if (!Number.isFinite(dim) || !Number.isInteger(dim) || dim < 0) {
+			throw new SafetensorParseError(
+				`Failed to parse file ${path}: tensor "${tensorName}" has an invalid dimension (${dim}).`,
+			);
+		}
+		if (dim > MAX_TENSOR_DIM) {
+			throw new SafetensorParseError(
+				`Failed to parse file ${path}: tensor "${tensorName}" dimension is ${dim}, which exceeds the maximum allowed (${MAX_TENSOR_DIM}).`,
+			);
+		}
+	}
+	const [begin, end] = info.data_offsets;
+	if (!Number.isFinite(begin) || !Number.isFinite(end) || !Number.isInteger(begin) || !Number.isInteger(end) || begin < 0 || end < begin) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: tensor "${tensorName}" has invalid data_offsets.`);
+	}
+	// Skipped when the size is unknown (e.g. a custom fetch whose returned blob doesn't report
+	// it) rather than blocking the parse on a guess.
+	if (fileSizeBytes !== undefined && end > fileSizeBytes) {
+		throw new SafetensorParseError(
+			`Failed to parse file ${path}: tensor "${tensorName}" declares data_offsets ending at ${end}, ` +
+				`which exceeds the file size (${fileSizeBytes} bytes). The file is malformed.`,
+		);
+	}
+}
+
 type FileName = string;
 
 export type TensorName = string;
@@ -294,32 +355,42 @@ async function parseSingleFile(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
-): Promise<SafetensorsFileHeader> {
-	const blob = await downloadFile({ ...params, path });
+): Promise<{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined }> {
+const blob = await downloadFile({ ...params, path });
 
-	if (!blob) {
-		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
-	}
+if (!blob) {
+	throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
+}
 
-	const bufLengthOfHeaderLE = await blob.slice(0, 8).arrayBuffer();
-	const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
-	// ^little-endian
-	if (lengthOfHeader <= 0) {
-		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
-	}
-	if (lengthOfHeader > MAX_HEADER_LENGTH) {
-		throw new SafetensorParseError(
-			`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`,
-		);
-	}
+const bufLengthOfHeaderLE = await blob.slice(0, 8).arrayBuffer();
+const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
+// ^little-endian
+if (lengthOfHeader <= 0) {
+	throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
+}
+if (lengthOfHeader > MAX_HEADER_LENGTH) {
+	throw new SafetensorParseError(
+		`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`,
+	);
+}
 
-	try {
-		// no validation for now, we assume it's a valid FileHeader.
-		const header: SafetensorsFileHeader = JSON.parse(await blob.slice(8, 8 + Number(lengthOfHeader)).text());
-		return header;
-	} catch (err) {
-		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
-	}
+let header: SafetensorsFileHeader;
+try {
+	header = JSON.parse(await blob.slice(8, 8 + Number(lengthOfHeader)).text());
+} catch (err) {
+	throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
+}
+
+// The blob's size is the file's true size: `WebBlob.create` learns it from the `Content-Range`
+// of the probe range request, and a fully-buffered blob knows it exactly. Only a custom fetch
+// whose returned blob doesn't report a size leaves it unknown.
+const fileSizeBytes = Number.isFinite(blob.size) && blob.size >= 0 ? blob.size : undefined;
+
+for (const [tensorName, info] of typedEntries(omit(header, "__metadata__"))) {
+	validateTensorEntry(path, tensorName, info, fileSizeBytes);
+}
+
+return { header, fileSizeBytes };
 }
 
 async function parseShardedIndex(
@@ -374,38 +445,61 @@ async function fetchAllHeaders(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
-): Promise<SafetensorsShardedHeaders> {
-	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
-	if (filenames.length > MAX_SHARD_COUNT) {
-		throw new SafetensorParseError(
-			`Too many shard files (${filenames.length}). Maximum supported is ${MAX_SHARD_COUNT}.`,
-		);
-	}
-	for (const filename of filenames) {
-		if (filename.includes("..") || filename.startsWith("/") || filename.includes("://")) {
-			throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}"`);
-		}
-	}
-	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
-		await promisesQueue(
-			filenames.map(
-				(filename) => async () =>
-					[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader],
-			),
-			PARALLEL_DOWNLOADS,
-		),
+): Promise<{ headers: SafetensorsShardedHeaders; totalFileSizeBytes: number | undefined }> {
+const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
+if (filenames.length > MAX_SHARD_COUNT) {
+	throw new SafetensorParseError(
+		`Too many shard files (${filenames.length}). Maximum supported is ${MAX_SHARD_COUNT}.`,
 	);
-	return shardedMap;
+}
+for (const filename of filenames) {
+	if (filename.includes("..") || filename.startsWith("/") || filename.includes("://")) {
+		throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}"`);
+	}
+}
+const entries = await promisesQueue(
+	filenames.map(
+		(filename) => async () =>
+			[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [
+				string,
+				{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined },
+			],
+	),
+	PARALLEL_DOWNLOADS,
+);
+const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
+	entries.map(([filename, { header }]) => [filename, header]),
+);
+// undefined as soon as one shard's size is unknown — summing with a hole would make the
+// downstream plausibility check stricter than the data justifies.
+const sizes = entries.map(([, { fileSizeBytes }]) => fileSizeBytes);
+const totalFileSizeBytes = sizes.every((size): size is number => size !== undefined)
+	? sum(sizes)
+	: undefined;
+return { headers: shardedMap, totalFileSizeBytes };
 }
 
-function parseTotalParameters(value: string | number | undefined): number | undefined {
-	if (!value) {
-		return undefined;
-	}
-	if (typeof value === "number") {
-		return value;
-	}
-	return parseInt(value);
+/**
+ * Reads the `total_parameters` shortcut from the header/index metadata.
+ *
+ * It's self-reported, so it can be inflated at will to rig the most-params listing — and the
+ * Hub displays it verbatim (`total: parameterTotal ?? sum(parameterCount)`), bypassing every
+ * header validation above. Cap it at the computed count when we have one: for a well-formed
+ * file the two agree, so the cap is a no-op except for crafted metadata. When the computed
+ * count is unavailable the value is returned as-is rather than guessed at.
+ */
+export function parseTotalParameters(value: string | number | undefined, computedTotal?: number): number | undefined {
+if (!value) {
+	return undefined;
+}
+const parsed = typeof value === "number" ? value : parseInt(value);
+if (!Number.isFinite(parsed) || parsed < 0) {
+	return undefined;
+}
+if (computedTotal !== undefined && parsed > computedTotal) {
+	return computedTotal;
+}
+return parsed;
 }
 
 interface SafetensorsLocation {
@@ -545,13 +639,20 @@ export async function parseSafetensorsMetadata(
 	}
 
 	if (location && !location.sharded) {
-		const header = await parseSingleFile(location.path, params);
+		const { header, fileSizeBytes } = await parseSingleFile(location.path, params);
 		const paramStats = params.computeParametersCount
-			? {
-					parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig, expertDtype),
-					/// shortcut: get param count directly from metadata
-					parameterTotal: parseTotalParameters(header.__metadata__?.total_parameters),
-				}
+			? (() => {
+					const parameterCount = computeNumOfParamsByDtypeSingleFile(header, quantConfig, expertDtype);
+					validateParameterCountFits(parameterCount, fileSizeBytes, location.path);
+					return {
+						parameterCount,
+						/// shortcut: get param count directly from metadata
+						parameterTotal: parseTotalParameters(
+							header.__metadata__?.total_parameters,
+							sum(Object.values(parameterCount)),
+						),
+					};
+				})()
 			: undefined;
 		return {
 			sharded: false,
@@ -562,15 +663,22 @@ export async function parseSafetensorsMetadata(
 	} else if (location) {
 		const path = location.path;
 		const { index, shardFilenames } = await parseShardedIndex(path, params);
-		const shardedMap = await fetchAllHeaders(path, shardFilenames, params);
+		const { headers: shardedMap, totalFileSizeBytes } = await fetchAllHeaders(path, shardFilenames, params);
 		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 
 		const paramStats = params.computeParametersCount
-			? {
-					parameterCount: computeNumOfParamsByDtypeSharded(shardedMap, quantConfig, expertDtype),
-					/// shortcut: get param count directly from metadata
-					parameterTotal: parseTotalParameters(index.metadata?.total_parameters),
-				}
+			? (() => {
+					const parameterCount = computeNumOfParamsByDtypeSharded(shardedMap, quantConfig, expertDtype);
+					validateParameterCountFits(parameterCount, totalFileSizeBytes, path);
+					return {
+						parameterCount,
+						/// shortcut: get param count directly from metadata
+						parameterTotal: parseTotalParameters(
+							index.metadata?.total_parameters,
+							sum(Object.values(parameterCount)),
+						),
+					};
+				})()
 			: undefined;
 		return {
 			sharded: true,
@@ -581,6 +689,30 @@ export async function parseSafetensorsMetadata(
 		};
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
+	}
+}
+
+/**
+ * Joint plausibility check for the computed parameter count, mirroring the gguf package: even
+ * at 1 bit per parameter (below the tightest real quantization, ~2.2 bits), an N-byte set of
+ * weight files cannot hold more than `N * 8` parameters. Per-tensor validation already compares
+ * `data_offsets` against each file's size, so this is defense in depth for padded buffers and
+ * unknown-size paths. Skipped when the size is unknown rather than guessed.
+ */
+function validateParameterCountFits(
+	parameterCount: Partial<Record<Dtype, number>>,
+	fileSizeBytes: number | undefined,
+	path: string,
+): void {
+	if (fileSizeBytes === undefined) {
+		return;
+	}
+	const total = sum(Object.values(parameterCount));
+	if (total > fileSizeBytes * 8) {
+		throw new SafetensorParseError(
+			`Failed to parse file ${path}: declared tensor shapes imply ${total} parameters, which cannot fit ` +
+				`in ${fileSizeBytes} bytes of weights (at most ${fileSizeBytes * 8} at 1 bit per parameter). The file is malformed.`,
+		);
 	}
 }
 
