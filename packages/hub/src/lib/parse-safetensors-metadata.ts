@@ -208,7 +208,12 @@ class SafetensorParseError extends Error {}
  * are allowed to disagree (the byte buffer may be padded), so `data_offsets` is the only
  * ground truth the format gives us — and it must fit in the file regardless.
  */
-export function validateTensorEntry(path: string, tensorName: string, info: TensorInfo, fileSizeBytes: number | undefined): void {
+export function validateTensorEntry(
+	path: string,
+	tensorName: string,
+	info: TensorInfo,
+	fileSizeBytes: number | undefined,
+): void {
 	if (!Array.isArray(info.shape) || !Array.isArray(info.data_offsets) || info.data_offsets.length !== 2) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: tensor "${tensorName}" is malformed.`);
 	}
@@ -225,7 +230,14 @@ export function validateTensorEntry(path: string, tensorName: string, info: Tens
 		}
 	}
 	const [begin, end] = info.data_offsets;
-	if (!Number.isFinite(begin) || !Number.isFinite(end) || !Number.isInteger(begin) || !Number.isInteger(end) || begin < 0 || end < begin) {
+	if (
+		!Number.isFinite(begin) ||
+		!Number.isFinite(end) ||
+		!Number.isInteger(begin) ||
+		!Number.isInteger(end) ||
+		begin < 0 ||
+		end < begin
+	) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: tensor "${tensorName}" has invalid data_offsets.`);
 	}
 	// Skipped when the size is unknown (e.g. a custom fetch whose returned blob doesn't report
@@ -356,41 +368,41 @@ async function parseSingleFile(
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
 ): Promise<{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined }> {
-const blob = await downloadFile({ ...params, path });
+	const blob = await downloadFile({ ...params, path });
 
-if (!blob) {
-	throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
-}
+	if (!blob) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
+	}
 
-const bufLengthOfHeaderLE = await blob.slice(0, 8).arrayBuffer();
-const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
-// ^little-endian
-if (lengthOfHeader <= 0) {
-	throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
-}
-if (lengthOfHeader > MAX_HEADER_LENGTH) {
-	throw new SafetensorParseError(
-		`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`,
-	);
-}
+	const bufLengthOfHeaderLE = await blob.slice(0, 8).arrayBuffer();
+	const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
+	// ^little-endian
+	if (lengthOfHeader <= 0) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
+	}
+	if (lengthOfHeader > MAX_HEADER_LENGTH) {
+		throw new SafetensorParseError(
+			`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`,
+		);
+	}
 
-let header: SafetensorsFileHeader;
-try {
-	header = JSON.parse(await blob.slice(8, 8 + Number(lengthOfHeader)).text());
-} catch (err) {
-	throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
-}
+	let header: SafetensorsFileHeader;
+	try {
+		header = JSON.parse(await blob.slice(8, 8 + Number(lengthOfHeader)).text());
+	} catch (err) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
+	}
 
-// The blob's size is the file's true size: `WebBlob.create` learns it from the `Content-Range`
-// of the probe range request, and a fully-buffered blob knows it exactly. Only a custom fetch
-// whose returned blob doesn't report a size leaves it unknown.
-const fileSizeBytes = Number.isFinite(blob.size) && blob.size >= 0 ? blob.size : undefined;
+	// The blob's size is the file's true size: `WebBlob.create` learns it from the `Content-Range`
+	// of the probe range request, and a fully-buffered blob knows it exactly. Only a custom fetch
+	// whose returned blob doesn't report a size leaves it unknown.
+	const fileSizeBytes = Number.isFinite(blob.size) && blob.size >= 0 ? blob.size : undefined;
 
-for (const [tensorName, info] of typedEntries(omit(header, "__metadata__"))) {
-	validateTensorEntry(path, tensorName, info, fileSizeBytes);
-}
+	for (const [tensorName, info] of typedEntries(omit(header, "__metadata__"))) {
+		validateTensorEntry(path, tensorName, info, fileSizeBytes);
+	}
 
-return { header, fileSizeBytes };
+	return { header, fileSizeBytes };
 }
 
 async function parseShardedIndex(
@@ -446,37 +458,35 @@ async function fetchAllHeaders(
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
 ): Promise<{ headers: SafetensorsShardedHeaders; totalFileSizeBytes: number | undefined }> {
-const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
-if (filenames.length > MAX_SHARD_COUNT) {
-	throw new SafetensorParseError(
-		`Too many shard files (${filenames.length}). Maximum supported is ${MAX_SHARD_COUNT}.`,
-	);
-}
-for (const filename of filenames) {
-	if (filename.includes("..") || filename.startsWith("/") || filename.includes("://")) {
-		throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}"`);
+	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
+	if (filenames.length > MAX_SHARD_COUNT) {
+		throw new SafetensorParseError(
+			`Too many shard files (${filenames.length}). Maximum supported is ${MAX_SHARD_COUNT}.`,
+		);
 	}
-}
-const entries = await promisesQueue(
-	filenames.map(
-		(filename) => async () =>
-			[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [
-				string,
-				{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined },
-			],
-	),
-	PARALLEL_DOWNLOADS,
-);
-const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
-	entries.map(([filename, { header }]) => [filename, header]),
-);
-// undefined as soon as one shard's size is unknown — summing with a hole would make the
-// downstream plausibility check stricter than the data justifies.
-const sizes = entries.map(([, { fileSizeBytes }]) => fileSizeBytes);
-const totalFileSizeBytes = sizes.every((size): size is number => size !== undefined)
-	? sum(sizes)
-	: undefined;
-return { headers: shardedMap, totalFileSizeBytes };
+	for (const filename of filenames) {
+		if (filename.includes("..") || filename.startsWith("/") || filename.includes("://")) {
+			throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}"`);
+		}
+	}
+	const entries = await promisesQueue(
+		filenames.map(
+			(filename) => async () =>
+				[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [
+					string,
+					{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined },
+				],
+		),
+		PARALLEL_DOWNLOADS,
+	);
+	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
+		entries.map(([filename, { header }]) => [filename, header]),
+	);
+	// undefined as soon as one shard's size is unknown — summing with a hole would make the
+	// downstream plausibility check stricter than the data justifies.
+	const sizes = entries.map(([, { fileSizeBytes }]) => fileSizeBytes);
+	const totalFileSizeBytes = sizes.every((size): size is number => size !== undefined) ? sum(sizes) : undefined;
+	return { headers: shardedMap, totalFileSizeBytes };
 }
 
 /**
@@ -489,17 +499,17 @@ return { headers: shardedMap, totalFileSizeBytes };
  * count is unavailable the value is returned as-is rather than guessed at.
  */
 export function parseTotalParameters(value: string | number | undefined, computedTotal?: number): number | undefined {
-if (!value) {
-	return undefined;
-}
-const parsed = typeof value === "number" ? value : parseInt(value);
-if (!Number.isFinite(parsed) || parsed < 0) {
-	return undefined;
-}
-if (computedTotal !== undefined && parsed > computedTotal) {
-	return computedTotal;
-}
-return parsed;
+	if (!value) {
+		return undefined;
+	}
+	const parsed = typeof value === "number" ? value : parseInt(value);
+	if (!Number.isFinite(parsed) || parsed < 0) {
+		return undefined;
+	}
+	if (computedTotal !== undefined && parsed > computedTotal) {
+		return computedTotal;
+	}
+	return parsed;
 }
 
 interface SafetensorsLocation {
@@ -673,10 +683,7 @@ export async function parseSafetensorsMetadata(
 					return {
 						parameterCount,
 						/// shortcut: get param count directly from metadata
-						parameterTotal: parseTotalParameters(
-							index.metadata?.total_parameters,
-							sum(Object.values(parameterCount)),
-						),
+						parameterTotal: parseTotalParameters(index.metadata?.total_parameters, sum(Object.values(parameterCount))),
 					};
 				})()
 			: undefined;
