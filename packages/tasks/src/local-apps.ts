@@ -621,6 +621,41 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetQvac = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	// QVAC is the inference engine itself, so there is no separate server step: the CLI
+	// serves the weights directly. `serve.models` only takes SDK model constants under the
+	// `model` shorthand, so non-registry weights (this GGUF) go through the explicit
+	// `{ type, src }` form, where `src` is handed to the SDK as `modelSrc` verbatim.
+	const alias = model.id.split("/").pop() ?? model.id;
+	const config = JSON.stringify(
+		{
+			serve: {
+				models: {
+					[alias]: {
+						type: "llamacpp-completion",
+						src: `https://huggingface.co/${model.id}/resolve/main/${filepath ?? "{{GGUF_FILE}}"}`,
+						default: true,
+					},
+				},
+			},
+		},
+		null,
+		2,
+	);
+
+	return [
+		{
+			title: "Configure the model in QVAC",
+			setup: "# Install the QVAC CLI (requires Node 22.17+):\nnpm install -g @qvac/cli",
+			content: `# Add to qvac.config.json in your project directory:\n${config}`,
+		},
+		{
+			title: "Start the QVAC server",
+			content: `# OpenAI-compatible server on http://127.0.0.1:11434/v1:\nqvac serve openai --model ${alias}`,
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -838,6 +873,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	qvac: {
+		prettyLabel: "QVAC",
+		docsUrl: "https://docs.qvac.tether.io",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetQvac,
 	},
 } satisfies Record<string, LocalApp>;
 

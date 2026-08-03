@@ -363,4 +363,37 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			{ label: "Releases", url: "https://github.com/bartowski/Llama-3.2-3B-Instruct-GGUF/releases" },
 		]);
 	});
+	it("qvac", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.qvac;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].setup).toContain("npm install -g @qvac/cli");
+		expect(snippet[0].content).toContain('"type": "llamacpp-completion"');
+		expect(snippet[0].content).toContain(
+			'"src": "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/{{GGUF_FILE}}"',
+		);
+		expect(snippet[1].content).toContain("qvac serve openai --model Llama-3.2-3B-Instruct-GGUF");
+	});
+
+	it("qvac - resolved gguf file", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.qvac;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf");
+
+		expect(snippet[0].content).toContain(
+			'"src": "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf"',
+		);
+		expect(snippet[0].content).not.toContain("{{GGUF_FILE}}");
+	});
 });
