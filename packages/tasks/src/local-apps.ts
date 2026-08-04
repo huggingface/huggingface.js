@@ -703,6 +703,17 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
+	"llama-app": {
+		prettyLabel: "Llama",
+		docsUrl: "https://github.com/ggml-org/Llama-macOS",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model, filepath?: string) => {
+			const quantLabel = filepath ? parseGGUFQuantLabel(filepath) : undefined;
+			return new URL(`llama://install?repo=${model.id}${quantLabel ? `&quant=${quantLabel}` : ""}`);
+		},
+	},
 	"atomic-chat": {
 		prettyLabel: "Atomic Chat",
 		docsUrl: "https://atomic.chat",

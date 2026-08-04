@@ -275,6 +275,22 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(deeplink(model).href).toBe("atomic-chat://models/huggingface/bartowski/Llama-3.2-3B-Instruct-GGUF");
 	});
 
+	it("llama deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["llama-app"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe("llama://install?repo=bartowski/Llama-3.2-3B-Instruct-GGUF");
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf").href).toBe(
+			"llama://install?repo=bartowski/Llama-3.2-3B-Instruct-GGUF&quant=Q4_K_M",
+		);
+	});
+
 	it("unsloth tagged model", async () => {
 		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.unsloth;
 		const model: ModelData = {
