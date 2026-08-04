@@ -366,7 +366,7 @@ describe("XetBlob", () => {
 				},
 			});
 
-			await expect(blob.text()).rejects.toThrow(/Missing multipart part/);
+			await expect(blob.text()).rejects.toThrow(/produced 1 parts but expected 2/);
 		});
 
 		it("handles a single-range fetch entry without multipart", async () => {

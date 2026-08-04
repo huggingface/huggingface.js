@@ -4,7 +4,7 @@ import { checkCredentials } from "./checkCredentials";
 import { combineUint8Arrays } from "./combineUint8Arrays";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
-import { parseMultipartByteRanges } from "./multipart";
+import { StreamingMultipartParser } from "./multipart";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -144,16 +144,20 @@ function decompressChunk(chunkHeader: ChunkHeader, compressed: Uint8Array): Uint
 	}
 }
 
+type StagedChunks = Map<{ data: Uint8Array[] | null }, Uint8Array[]>;
+
 /**
- * Decode a fully-buffered xorb chunk stream (one `multipart/byteranges` part) and store the
- * decompressed chunks into the range list, so the term reader can yield them from cache.
- *
- * Data is only committed when the whole part decodes cleanly and produces exactly the chunks the
- * descriptor covers, so a truncated/corrupt part never leaves partial data in the cache.
+ * Decode one complete xorb chunk stream (a single `multipart/byteranges` part) into per-range
+ * staged chunk arrays. Throws if it doesn't decode to exactly the chunks the descriptor covers,
+ * so a truncated/corrupt part never leaves partial data to be committed to the cache.
  */
-function storeChunks(data: Uint8Array, descriptor: XorbRangeDescriptor, rangeList: RangeList<Uint8Array[]>): void {
+function decodePartChunks(
+	data: Uint8Array,
+	descriptor: XorbRangeDescriptor,
+	rangeList: RangeList<Uint8Array[]>,
+): StagedChunks {
 	const ranges = rangeList.getRanges(descriptor.chunks.start, descriptor.chunks.end);
-	const staged = new Map<(typeof ranges)[number], Uint8Array[]>();
+	const staged: StagedChunks = new Map();
 	let chunkIndex = descriptor.chunks.start;
 	let offset = 0;
 
@@ -197,6 +201,10 @@ function storeChunks(data: Uint8Array, descriptor: XorbRangeDescriptor, rangeLis
 		);
 	}
 
+	return staged;
+}
+
+function commitChunks(staged: StagedChunks): void {
 	for (const [range, chunks] of staged) {
 		range.data = chunks;
 	}
@@ -414,20 +422,54 @@ export class XetBlob extends Blob {
 						throw new Error(`Expected multipart/byteranges response for multi-range request, got "${contentType}"`);
 					}
 
-					listener?.({ event: "read" });
-					const body = new Uint8Array(await resp.arrayBuffer());
-					const parts = parseMultipartByteRanges(contentType, body);
+					const reader = resp.body?.getReader();
+					if (!reader) {
+						throw new Error("Failed to get reader from response body");
+					}
 
-					for (const descriptor of entry.ranges) {
-						const part = parts.find(
-							(p) => p.range.start === descriptor.bytes.start && p.range.end === descriptor.bytes.end,
-						);
-						if (!part) {
-							throw new Error(
-								`Missing multipart part for bytes ${descriptor.bytes.start}-${descriptor.bytes.end} of term ${term.hash}`,
-							);
+					// Stream the body: decode each part as it completes and stage its chunks, so memory
+					// stays bounded by the largest part instead of the whole xorb. Parts arrive in the
+					// same ascending order as the entry's ranges.
+					const parser = new StreamingMultipartParser(contentType);
+					const stagedParts: StagedChunks[] = [];
+					let partIndex = 0;
+
+					const consumeParts = (parts: Uint8Array[]) => {
+						for (const part of parts) {
+							const descriptor = entry.ranges[partIndex];
+							if (!descriptor) {
+								throw new Error(`Received more multipart parts than the ${entry.ranges.length} signed ranges`);
+							}
+							stagedParts.push(decodePartChunks(part, descriptor, rangeList));
+							partIndex++;
 						}
-						storeChunks(part.data, descriptor, rangeList);
+					};
+
+					try {
+						for (;;) {
+							const result = await reader.read();
+							listener?.({ event: "read" });
+							if (result.done) {
+								break;
+							}
+							if (result.value) {
+								consumeParts(parser.push(result.value));
+							}
+						}
+						consumeParts(parser.push());
+					} finally {
+						await reader.cancel().catch(() => {});
+					}
+
+					if (partIndex !== entry.ranges.length) {
+						throw new Error(
+							`Multi-range fetch produced ${partIndex} parts but expected ${entry.ranges.length} for term ${term.hash}`,
+						);
+					}
+
+					// All parts decoded cleanly and cover every signed range: commit to the cache.
+					for (const staged of stagedParts) {
+						commitChunks(staged);
 					}
 				};
 

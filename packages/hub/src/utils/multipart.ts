@@ -1,16 +1,104 @@
-/**
- * A single part from a `multipart/byteranges` HTTP response.
- */
-export interface MultipartPart {
-	/** Byte range covered by this part, inclusive end (as in the `Content-Range` header). */
-	range: { start: number; end: number };
-	data: Uint8Array;
-}
-
+import { combineUint8Arrays } from "./combineUint8Arrays";
 import { indexOfSubsequence } from "./indexOfSubsequence";
 
 const textEncoder = new TextEncoder();
-const textDecoder = new TextDecoder();
+const CRLF = textEncoder.encode("\r\n");
+const DASH_DASH = textEncoder.encode("--");
+const HEADER_SEPARATOR = textEncoder.encode("\r\n\r\n");
+
+/**
+ * Incrementally parses a `multipart/byteranges` body, yielding each part's raw bytes as it
+ * completes, without buffering the whole body.
+ *
+ * Feed network chunks to `push()` as they arrive; returned values are the raw bytes of each
+ * completed part (in body order, which for Xet signed URLs is ascending byte order). A part is
+ * only emitted once its terminating boundary has been seen, so memory stays bounded by the
+ * largest part rather than the whole body.
+ */
+export class StreamingMultipartParser {
+	#delimiter: Uint8Array;
+	#buffer = new Uint8Array(0);
+	/** 0 = scanning for first boundary, 1 = consuming CRLF/`--` after a boundary, 2 = inside a part */
+	#state: 0 | 1 | 2 = 0;
+	#done = false;
+
+	constructor(contentType: string) {
+		const boundary = extractBoundary(contentType);
+		if (!boundary) {
+			throw new Error(`No boundary found in Content-Type: ${contentType}`);
+		}
+		// Include the preceding CRLF in the delimiter so it's not left attached to the part body.
+		// (The first delimiter's CRLF is body preamble and is discarded in state 0.)
+		this.#delimiter = textEncoder.encode(`\r\n--${boundary}`);
+	}
+
+	/**
+	 * Push a chunk of body bytes (call with no argument to flush at end of stream).
+	 * Returns the raw bytes of any parts that completed as a result.
+	 */
+	push(chunk?: Uint8Array): Uint8Array[] {
+		if (this.#done) {
+			// Closing delimiter already seen; ignore any epilogue bytes.
+			return [];
+		}
+		if (chunk && chunk.byteLength) {
+			this.#buffer = combineUint8Arrays(this.#buffer, chunk);
+		}
+
+		const parts: Uint8Array[] = [];
+
+		for (;;) {
+			if (this.#state === 0 || this.#state === 2) {
+				const delimIndex = indexOfSubsequence(this.#buffer, this.#delimiter, 0);
+
+				if (delimIndex === -1) {
+					if (this.#state === 0) {
+						// Discard preamble, keeping only a possible trailing partial delimiter.
+						const keep = this.#delimiter.byteLength - 1;
+						if (this.#buffer.byteLength > keep) {
+							this.#buffer = this.#buffer.slice(this.#buffer.byteLength - keep);
+						}
+					}
+					// In state 2 the buffer holds in-progress part data; wait for more bytes.
+					break;
+				}
+
+				if (this.#state === 2) {
+					// Everything before the delimiter is the part body (headers + data).
+					const partBody = this.#buffer.slice(0, delimIndex);
+					const headerEnd = indexOfSubsequence(partBody, HEADER_SEPARATOR, 0);
+					if (headerEnd === -1) {
+						throw new Error("Malformed multipart part: missing header/data separator");
+					}
+					parts.push(partBody.slice(headerEnd + HEADER_SEPARATOR.byteLength));
+				}
+				// Consume the delimiter; move to post-boundary state.
+				this.#buffer = this.#buffer.slice(delimIndex + this.#delimiter.byteLength);
+				this.#state = 1;
+				continue;
+			}
+
+			// state === 1: just after a boundary marker. Expect CRLF (a part follows) or `--` (end).
+			// A leading `\r\n` may precede the first delimiter in the body, so also tolerate CRLF here.
+			if (this.#buffer.byteLength < 2) {
+				break; // need more bytes to decide
+			}
+			if (this.#buffer[0] === DASH_DASH[0] && this.#buffer[1] === DASH_DASH[1]) {
+				this.#done = true;
+				this.#buffer = new Uint8Array(0);
+				return parts;
+			}
+			if (this.#buffer[0] === CRLF[0] && this.#buffer[1] === CRLF[1]) {
+				this.#buffer = this.#buffer.slice(2);
+				this.#state = 2;
+				continue;
+			}
+			throw new Error("Malformed multipart body: expected CRLF or closing delimiter after boundary");
+		}
+
+		return parts;
+	}
+}
 
 export function extractBoundary(contentType: string): string | null {
 	for (const part of contentType.split(";")) {
@@ -20,83 +108,4 @@ export function extractBoundary(contentType: string): string | null {
 		}
 	}
 	return null;
-}
-
-function parseContentRange(headers: string): { start: number; end: number } | null {
-	for (const line of headers.split("\r\n")) {
-		const lower = line.toLowerCase();
-		if (lower.startsWith("content-range:")) {
-			// Content-Range: bytes <start>-<end>/<total>
-			const value = line.slice("content-range:".length).trim();
-			const match = value.match(/^bytes\s+(\d+)-(\d+)\//i);
-			if (match) {
-				// RFC 7233 Content-Range uses an inclusive end.
-				return { start: parseInt(match[1], 10), end: parseInt(match[2], 10) };
-			}
-		}
-	}
-	return null;
-}
-
-/**
- * Parse a `multipart/byteranges` HTTP response body (RFC 7233 §4.1).
- *
- * Extracts the boundary from `contentType`, splits the body by boundary markers,
- * parses the `Content-Range` header from each part, and returns the parts in body order.
- */
-export function parseMultipartByteRanges(contentType: string, body: Uint8Array): MultipartPart[] {
-	const boundary = extractBoundary(contentType);
-	if (!boundary) {
-		throw new Error(`No boundary found in Content-Type: ${contentType}`);
-	}
-
-	const firstDelim = textEncoder.encode(`--${boundary}`);
-	const delimiter = textEncoder.encode(`\r\n--${boundary}`);
-	const crlf = textEncoder.encode("\r\n");
-	const headerSeparator = textEncoder.encode("\r\n\r\n");
-
-	const start = indexOfSubsequence(body, firstDelim);
-	if (start === -1) {
-		throw new Error("No boundary found in multipart body");
-	}
-
-	const parts: MultipartPart[] = [];
-	let pos = start + firstDelim.length;
-
-	for (;;) {
-		// Each part starts with CRLF after the boundary marker. Anything else (eg `--` for the
-		// closing delimiter) ends the message.
-		if (body[pos] === crlf[0] && body[pos + 1] === crlf[1]) {
-			pos += 2;
-		} else {
-			break;
-		}
-
-		const nextBoundary = indexOfSubsequence(body, delimiter, pos);
-		const partEnd = nextBoundary === -1 ? body.length : nextBoundary;
-		const partData = body.subarray(pos, partEnd);
-
-		const headerEnd = indexOfSubsequence(partData, headerSeparator);
-		if (headerEnd === -1) {
-			throw new Error("Malformed multipart part: missing header/data separator");
-		}
-
-		const headers = textDecoder.decode(partData.subarray(0, headerEnd));
-		const range = parseContentRange(headers);
-		if (!range) {
-			throw new Error("No Content-Range header found in multipart part");
-		}
-
-		parts.push({
-			range,
-			data: partData.subarray(headerEnd + headerSeparator.length),
-		});
-
-		if (nextBoundary === -1) {
-			break;
-		}
-		pos = nextBoundary + delimiter.length;
-	}
-
-	return parts;
 }
