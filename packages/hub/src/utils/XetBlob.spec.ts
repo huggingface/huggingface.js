@@ -1,9 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { ReconstructionInfo } from "./XetBlob";
-import { bg4_regroup_bytes, bg4_split_bytes, XetBlob } from "./XetBlob";
+import { bg4_regroup_bytes, bg4_split_bytes, clearMultiRangeSupportCache, XetBlob } from "./XetBlob";
 import { sum } from "./sum";
 
 describe("XetBlob", () => {
+	beforeEach(() => {
+		// Multi-range support detection is cached per host at module scope;
+		// reset it so tests don't leak state into each other.
+		clearMultiRangeSupportCache();
+	});
+
 	it("should handle empty files (size 0) without making network requests", async () => {
 		let fetchCount = 0;
 
@@ -176,14 +182,13 @@ describe("XetBlob", () => {
 		// 				"range": { "start": 0, "end": 5 },
 		// 			},
 		// 		],
-		// 	"fetch_info":
+		// 	"xorbs":
 		// 		{
 		// 			"be748f77930d5929cabd510a15f2c30f2f460b639804ef79dea46affa04fd8b2":
 		// 				[
 		// 					{
-		// 						"range": { "start": 0, "end": 5 },
 		// 						"url": "...",
-		// 						"url_range": { "start": 0, "end": 2839 },
+		// 						"ranges": [{ "chunks": { "start": 0, "end": 5 }, "bytes": { "start": 0, "end": 2839 } }],
 		// 					},
 		// 				],
 		// 		},
@@ -198,6 +203,335 @@ describe("XetBlob", () => {
 
 		console.log("xet", text.length, "bridge", bridgeDownload.length);
 		expect(text.length).toBe(bridgeDownload.length);
+	});
+
+	describe("multi-range fetch entries", () => {
+		function concatBytes(...arrays: Uint8Array[]): Uint8Array {
+			const total = arrays.reduce((s, a) => s + a.byteLength, 0);
+			const out = new Uint8Array(total);
+			let offset = 0;
+			for (const a of arrays) {
+				out.set(a, offset);
+				offset += a.byteLength;
+			}
+			return out;
+		}
+
+		function makeMultipartResponse(
+			boundary: string,
+			parts: Array<{ range: { start: number; end: number }; total: number; data: Uint8Array }>,
+		): Response {
+			const enc = new TextEncoder();
+			const segments: Uint8Array[] = [];
+			for (const part of parts) {
+				segments.push(
+					enc.encode(
+						`\r\n--${boundary}\r\nContent-Type: application/octet-stream\r\n` +
+							`Content-Range: bytes ${part.range.start}-${part.range.end}/${part.total}\r\n\r\n`,
+					),
+					part.data,
+				);
+			}
+			segments.push(enc.encode(`\r\n--${boundary}--\r\n`));
+
+			return new Response(concatBytes(...segments), {
+				headers: { "Content-Type": `multipart/byteranges; boundary=${boundary}` },
+			});
+		}
+
+		interface XorbFixture {
+			wholeText: string;
+			total: number;
+			lenA: number;
+			rangeAData: Uint8Array;
+			rangeBData: Uint8Array;
+			reconstructionInfo: ReconstructionInfo;
+		}
+
+		/** A xorb with two signed ranges: chunks [0,2) = "helloworld" and chunks [4,6) = "foobar!" */
+		function makeFixture(): XorbFixture {
+			const rangeAData = concatBytes(makeChunk("hello"), makeChunk("world"));
+			const rangeBData = concatBytes(makeChunk("foo"), makeChunk("bar!"));
+			const lenA = rangeAData.byteLength;
+			const total = lenA + rangeBData.byteLength;
+
+			return {
+				wholeText: "helloworldfoobar!",
+				total,
+				lenA,
+				rangeAData,
+				rangeBData,
+				reconstructionInfo: {
+					terms: [
+						{ hash: "xorb1", range: { start: 0, end: 2 }, unpacked_length: 10 },
+						{ hash: "xorb1", range: { start: 4, end: 6 }, unpacked_length: 7 },
+					],
+					xorbs: {
+						xorb1: [
+							{
+								url: "https://xorb.co",
+								ranges: [
+									{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: lenA - 1 } },
+									{ chunks: { start: 4, end: 6 }, bytes: { start: lenA, end: total - 1 } },
+								],
+							},
+						],
+					},
+					offset_into_first_range: 0,
+				},
+			};
+		}
+
+		it("fetches a multi-range xorb in one multipart/byteranges request", async () => {
+			const fixture = makeFixture();
+
+			let fetchCount = 0;
+			let multiRangeHeader: string | undefined;
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url, opts) {
+					const url = new URL(_url as string);
+					const headers = opts?.headers as Record<string, string> | undefined;
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "cas.co": {
+							expect(url.pathname).toContain("/v2/reconstructions/");
+							return new Response(JSON.stringify(fixture.reconstructionInfo));
+						}
+						case "xorb.co": {
+							fetchCount++;
+							multiRangeHeader = headers?.["Range"];
+							return makeMultipartResponse("BOUNDARY", [
+								{ range: { start: 0, end: fixture.lenA - 1 }, total: fixture.total, data: fixture.rangeAData },
+								{
+									range: { start: fixture.lenA, end: fixture.total - 1 },
+									total: fixture.total,
+									data: fixture.rangeBData,
+								},
+							]);
+						}
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			expect(await blob.text()).toBe(fixture.wholeText);
+			// Both ranges of the xorb are fetched together in a single multi-range request.
+			expect(fetchCount).toBe(1);
+			expect(multiRangeHeader).toBe(`bytes=0-${fixture.lenA - 1},${fixture.lenA}-${fixture.total - 1}`);
+		});
+
+		it("falls back to one request per range when the server ignores the multi-range request", async () => {
+			const fixture = makeFixture();
+
+			const rangeHeaders: Array<string | undefined> = [];
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url, opts) {
+					const url = new URL(_url as string);
+					const headers = opts?.headers as Record<string, string> | undefined;
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "cas.co":
+							return new Response(JSON.stringify(fixture.reconstructionInfo));
+						case "xorb.co": {
+							const range = headers?.["Range"];
+							rangeHeaders.push(range);
+							if (range?.includes(",")) {
+								// Like S3, ignore the multi-range request and return the whole object with a 200.
+								return new Response(concatBytes(fixture.rangeAData, fixture.rangeBData));
+							}
+							if (range === `bytes=0-${fixture.lenA - 1}`) {
+								return new Response(fixture.rangeAData);
+							}
+							if (range === `bytes=${fixture.lenA}-${fixture.total - 1}`) {
+								return new Response(fixture.rangeBData);
+							}
+							throw new Error(`Unexpected Range header ${range}`);
+						}
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			expect(await blob.text()).toBe(fixture.wholeText);
+			// 1 multi-range attempt + 1 fetch per range
+			expect(rangeHeaders).toEqual([
+				`bytes=0-${fixture.lenA - 1},${fixture.lenA}-${fixture.total - 1}`,
+				`bytes=0-${fixture.lenA - 1}`,
+				`bytes=${fixture.lenA}-${fixture.total - 1}`,
+			]);
+		});
+
+		it("remembers hosts that don't support multi-range requests", async () => {
+			const fixture = makeFixture();
+
+			const multiRangeAttempts: string[] = [];
+
+			const makeBlob = () =>
+				new XetBlob({
+					hash: "test",
+					size: fixture.wholeText.length,
+					refreshUrl: "https://huggingface.co",
+					fetch: async function (_url, opts) {
+						const url = new URL(_url as string);
+						const headers = opts?.headers as Record<string, string> | undefined;
+
+						switch (url.hostname) {
+							case "huggingface.co":
+								return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+							case "cas.co":
+								return new Response(JSON.stringify(fixture.reconstructionInfo));
+							case "xorb.co": {
+								const range = headers?.["Range"];
+								if (range?.includes(",")) {
+									multiRangeAttempts.push(range);
+									return new Response(concatBytes(fixture.rangeAData, fixture.rangeBData));
+								}
+								if (range === `bytes=0-${fixture.lenA - 1}`) {
+									return new Response(fixture.rangeAData);
+								}
+								if (range === `bytes=${fixture.lenA}-${fixture.total - 1}`) {
+									return new Response(fixture.rangeBData);
+								}
+								throw new Error(`Unexpected Range header ${range}`);
+							}
+							default:
+								throw new Error(`Unhandled URL ${url.hostname}`);
+						}
+					},
+				});
+
+			expect(await makeBlob().text()).toBe(fixture.wholeText);
+			expect(await makeBlob().text()).toBe(fixture.wholeText);
+			// Only the first download attempts a multi-range request.
+			expect(multiRangeAttempts).toHaveLength(1);
+		});
+
+		it("handles a single-range fetch entry without multipart", async () => {
+			const xorbData = concatBytes(makeChunk("hello"), makeChunk("world"));
+			const wholeText = "helloworld";
+
+			let fetchCount = 0;
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url) {
+					const url = new URL(_url as string);
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "cas.co":
+							return new Response(
+								JSON.stringify({
+									terms: [{ hash: "xorb1", range: { start: 0, end: 2 }, unpacked_length: 10 }],
+									xorbs: {
+										xorb1: [
+											{
+												url: "https://xorb.co",
+												ranges: [{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: xorbData.byteLength - 1 } }],
+											},
+										],
+									},
+									offset_into_first_range: 0,
+								} satisfies ReconstructionInfo),
+							);
+						case "xorb.co":
+							fetchCount++;
+							return new Response(xorbData);
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			expect(await blob.text()).toBe(wholeText);
+			expect(fetchCount).toBe(1);
+		});
+
+		it("throws when a multipart part decodes to fewer chunks than expected", async () => {
+			const fixture = makeFixture();
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url) {
+					const url = new URL(_url as string);
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "cas.co":
+							return new Response(JSON.stringify(fixture.reconstructionInfo));
+						case "xorb.co":
+							// Second part is truncated: only one of its two chunks.
+							return makeMultipartResponse("BOUNDARY", [
+								{ range: { start: 0, end: fixture.lenA - 1 }, total: fixture.total, data: fixture.rangeAData },
+								{
+									range: { start: fixture.lenA, end: fixture.total - 1 },
+									total: fixture.total,
+									data: makeChunk("foo"),
+								},
+							]);
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			await expect(blob.text()).rejects.toThrow(/expected/);
+		});
+
+		it("throws when the decoded term data doesn't match unpacked_length", async () => {
+			const fixture = makeFixture();
+			// Corrupt the expected length of the second term
+			fixture.reconstructionInfo.terms[1].unpacked_length = 9999;
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url) {
+					const url = new URL(_url as string);
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "cas.co":
+							return new Response(JSON.stringify(fixture.reconstructionInfo));
+						case "xorb.co":
+							return makeMultipartResponse("BOUNDARY", [
+								{ range: { start: 0, end: fixture.lenA - 1 }, total: fixture.total, data: fixture.rangeAData },
+								{
+									range: { start: fixture.lenA, end: fixture.total - 1 },
+									total: fixture.total,
+									data: fixture.rangeBData,
+								},
+							]);
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			await expect(blob.text()).rejects.toThrow(/expected 9999/);
+		});
 	});
 
 	describe("bg4_regoup_bytes", () => {
@@ -324,15 +658,16 @@ describe("XetBlob", () => {
 												},
 												unpacked_length: chunk1Content.length + chunk2Content.length,
 											})),
-										fetch_info: {
+										xorbs: {
 											test: [
 												{
 													url: "https://fetch.co",
-													range: { start: 0, end: 2 },
-													url_range: {
-														start: 0,
-														end: mergedChunks.byteLength / 1000 - 1,
-													},
+													ranges: [
+														{
+															chunks: { start: 0, end: 2 },
+															bytes: { start: 0, end: mergedChunks.byteLength / 1000 - 1 },
+														},
+													],
 												},
 											],
 										},
@@ -427,25 +762,27 @@ describe("XetBlob", () => {
 												},
 												unpacked_length: chunk1Content.length + chunk2Content.length,
 											})),
-										fetch_info: {
+										xorbs: {
 											test0: [
 												{
 													url: "https://fetch.co",
-													range: { start: 0, end: 2 },
-													url_range: {
-														start: 0,
-														end: mergedChunks.byteLength - 1,
-													},
+													ranges: [
+														{
+															chunks: { start: 0, end: 2 },
+															bytes: { start: 0, end: mergedChunks.byteLength - 1 },
+														},
+													],
 												},
 											],
 											test1: [
 												{
 													url: "https://fetch.co",
-													range: { start: 0, end: 2 },
-													url_range: {
-														start: 0,
-														end: mergedChunks.byteLength - 1,
-													},
+													ranges: [
+														{
+															chunks: { start: 0, end: 2 },
+															bytes: { start: 0, end: mergedChunks.byteLength - 1 },
+														},
+													],
 												},
 											],
 										},
@@ -542,15 +879,16 @@ describe("XetBlob", () => {
 												unpacked_length: chunk1Content.length + chunk2Content.length,
 											},
 										],
-										fetch_info: {
+										xorbs: {
 											test: [
 												{
 													url: "https://fetch.co",
-													range: { start: 0, end: 2000 },
-													url_range: {
-														start: 0,
-														end: totalChunkLength - 1,
-													},
+													ranges: [
+														{
+															chunks: { start: 0, end: 2000 },
+															bytes: { start: 0, end: totalChunkLength - 1 },
+														},
+													],
 												},
 											],
 										},
@@ -652,15 +990,16 @@ describe("XetBlob", () => {
 												},
 												unpacked_length: chunk1Content.length + chunk2Content.length,
 											})),
-										fetch_info: {
+										xorbs: {
 											test: [
 												{
 													url: "https://fetch.co",
-													range: { start: 0, end: 2 },
-													url_range: {
-														start: 0,
-														end: totalChunkLength - 1,
-													},
+													ranges: [
+														{
+															chunks: { start: 0, end: 2 },
+															bytes: { start: 0, end: totalChunkLength - 1 },
+														},
+													],
 												},
 											],
 										},
@@ -760,15 +1099,16 @@ describe("XetBlob", () => {
 												},
 												unpacked_length: chunk1Content.length + chunk2Content.length,
 											})),
-										fetch_info: {
+										xorbs: {
 											test: [
 												{
 													url: "https://fetch.co",
-													range: { start: 0, end: 2 },
-													url_range: {
-														start: 0,
-														end: totalChunkLength - 1,
-													},
+													ranges: [
+														{
+															chunks: { start: 0, end: 2 },
+															bytes: { start: 0, end: totalChunkLength - 1 },
+														},
+													],
 												},
 											],
 										},
@@ -867,15 +1207,16 @@ describe("XetBlob", () => {
 												},
 												unpacked_length: chunk1Content.length + chunk2Content.length,
 											})),
-										fetch_info: {
+										xorbs: {
 											test: [
 												{
 													url: "https://fetch.co",
-													range: { start: 0, end: 2 },
-													url_range: {
-														start: 0,
-														end: totalChunkLength - 1,
-													},
+													ranges: [
+														{
+															chunks: { start: 0, end: 2 },
+															bytes: { start: 0, end: totalChunkLength - 1 },
+														},
+													],
 												},
 											],
 										},
