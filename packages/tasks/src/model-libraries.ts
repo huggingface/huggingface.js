@@ -1152,7 +1152,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	piper: {
 		prettyLabel: "Piper",
 		repoName: "Piper",
-		repoUrl: "https://github.com/rhasspy/piper",
+		repoUrl: "https://github.com/OHF-Voice/piper1-gpl",
 		filter: false,
 		countDownloads: `path_extension:"onnx"`,
 	},
