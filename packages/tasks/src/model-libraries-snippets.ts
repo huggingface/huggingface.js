@@ -2032,6 +2032,14 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 	}
 }
 
+export const aneforge = (model: ModelData): string[] => [
+	`# Run this model's encoder on the Apple Neural Engine, without CoreML.
+from aneforge.sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("${model.id}")
+embeddings = model.encode(["Hello from the Neural Engine"], normalize_embeddings=True)`,
+];
+
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
