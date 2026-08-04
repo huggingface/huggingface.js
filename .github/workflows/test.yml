@@ -51,7 +51,15 @@ jobs:
       - name: Exchange OIDC token for a short-lived HF token (trusted publisher)
         env:
           HF_OIDC_RESOURCE: coyotte508 # HF username whose user-publisher is configured under https://huggingface.co/settings/authentication#ci-cd-access
-        run: echo "HF_TOKEN=$(hf auth token)" >> "$GITHUB_ENV"
+        run: |
+          # Validate the token shape before writing it to GITHUB_ENV: a single-line "hf_..." value
+          # cannot smuggle extra KEY=VALUE lines into the env file, whatever the CLI outputs.
+          token="$(hf auth token)" || { echo "::warning::OIDC token exchange failed, tests will run unauthenticated"; exit 0; }
+          if ! [[ "$token" =~ ^hf_[A-Za-z0-9._-]+$ ]]; then
+            echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
+            exit 0
+          fi
+          echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
@@ -102,7 +110,15 @@ jobs:
       - name: Exchange OIDC token for a short-lived HF token (trusted publisher)
         env:
           HF_OIDC_RESOURCE: coyotte508 # HF username whose user-publisher is configured under https://huggingface.co/settings/authentication#ci-cd-access
-        run: echo "HF_TOKEN=$(hf auth token)" >> "$GITHUB_ENV"
+        run: |
+          # Validate the token shape before writing it to GITHUB_ENV: a single-line "hf_..." value
+          # cannot smuggle extra KEY=VALUE lines into the env file, whatever the CLI outputs.
+          token="$(hf auth token)" || { echo "::warning::OIDC token exchange failed, tests will run unauthenticated"; exit 0; }
+          if ! [[ "$token" =~ ^hf_[A-Za-z0-9._-]+$ ]]; then
+            echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
+            exit 0
+          fi
+          echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test in browser
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
@@ -133,7 +149,15 @@ jobs:
       - name: Exchange OIDC token for a short-lived HF token (trusted publisher)
         env:
           HF_OIDC_RESOURCE: coyotte508 # HF username whose user-publisher is configured under https://huggingface.co/settings/authentication#ci-cd-access
-        run: echo "HF_TOKEN=$(hf auth token)" >> "$GITHUB_ENV"
+        run: |
+          # Validate the token shape before writing it to GITHUB_ENV: a single-line "hf_..." value
+          # cannot smuggle extra KEY=VALUE lines into the env file, whatever the CLI outputs.
+          token="$(hf auth token)" || { echo "::warning::OIDC token exchange failed, tests will run unauthenticated"; exit 0; }
+          if ! [[ "$token" =~ ^hf_[A-Za-z0-9._-]+$ ]]; then
+            echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
+            exit 0
+          fi
+          echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: E2E - start mock npm registry
         run: |
