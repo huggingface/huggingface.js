@@ -1149,6 +1149,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	piper: {
+		prettyLabel: "Piper",
+		repoName: "Piper",
+		repoUrl: "https://github.com/rhasspy/piper",
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	"pocket-tts": {
 		prettyLabel: "Pocket-TTS",
 		repoName: "PocketTTS",
