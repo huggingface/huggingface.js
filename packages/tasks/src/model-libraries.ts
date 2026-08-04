@@ -1154,7 +1154,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Piper",
 		repoUrl: "https://github.com/OHF-Voice/piper1-gpl",
 		filter: false,
-		countDownloads: `path_extension:"onnx"`,
+		countDownloads: `path_extension:"onnx" OR path_extension:"ckpt"`,
 	},
 	"pocket-tts": {
 		prettyLabel: "Pocket-TTS",
