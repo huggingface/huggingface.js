@@ -7,6 +7,8 @@ export interface MultipartPart {
 	data: Uint8Array;
 }
 
+import { indexOfSubsequence } from "./indexOfSubsequence";
+
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
@@ -18,18 +20,6 @@ export function extractBoundary(contentType: string): string | null {
 		}
 	}
 	return null;
-}
-
-function indexOfSubsequence(haystack: Uint8Array, needle: Uint8Array, from = 0): number {
-	outer: for (let i = from; i <= haystack.length - needle.length; i++) {
-		for (let j = 0; j < needle.length; j++) {
-			if (haystack[i + j] !== needle[j]) {
-				continue outer;
-			}
-		}
-		return i;
-	}
-	return -1;
 }
 
 function parseContentRange(headers: string): { start: number; end: number } | null {
