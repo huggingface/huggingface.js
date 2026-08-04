@@ -66,7 +66,11 @@ const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionI
 	return `"Can you please let us know more details about your "`;
 };
 
-const inputsFillMask = (model: ModelDataMinimal) => `"The answer to the universe is ${model.mask_token}."`;
+// `mask_token` is author-controlled (tokenizer/config.json); build the string then
+// JSON.stringify it so quotes/backslashes are escaped into a valid string literal
+// and cannot break out of the generated snippet.
+const inputsFillMask = (model: ModelDataMinimal) =>
+	JSON.stringify(`The answer to the universe is ${model.mask_token}.`);
 
 const inputsSentenceSimilarity = () =>
 	`{

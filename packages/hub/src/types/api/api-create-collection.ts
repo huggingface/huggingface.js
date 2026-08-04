@@ -16,4 +16,9 @@ export interface ApiCreateCollectionPayload {
 	 * @default false
 	 */
 	private?: boolean;
+	/**
+	 * Assign the collection to a resource group of the owning organization.
+	 * Only valid for organization-owned collections. 24-character hexadecimal string.
+	 */
+	resourceGroupId?: string;
 }

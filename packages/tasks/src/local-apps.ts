@@ -546,6 +546,37 @@ const snippetHermesAgent = (model: ModelData, filepath?: string): LocalAppSnippe
 	];
 };
 
+const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const isMLX = isMlxModel(model);
+	const providerId = isMLX ? "mlx-lm" : "llama-cpp";
+	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
+	const serverStep = getLocalServerStep(model, filepath);
+
+	return [
+		serverStep,
+		{
+			title: "Configure OpenClaw",
+			setup: "# Install OpenClaw:\nnpm install -g openclaw@latest",
+			content: [
+				"# Register the local server and set it as the default model:",
+				"openclaw onboard --non-interactive --mode local \\",
+				"  --auth-choice custom-api-key \\",
+				"  --custom-base-url http://127.0.0.1:8080/v1 \\",
+				`  --custom-model-id "${modelId}" \\`,
+				`  --custom-provider-id ${providerId} \\`,
+				"  --custom-compatibility openai \\",
+				"  --custom-text-input \\",
+				"  --accept-risk \\",
+				"  --skip-health",
+			].join("\n"),
+		},
+		{
+			title: "Run OpenClaw",
+			content: `openclaw agent --local --agent main --message "Hello from Hugging Face"`,
+		},
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	// Only add quant tag for GGUF models, not safetensors
 	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
@@ -800,6 +831,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetHermesAgent,
+	},
+	openclaw: {
+		prettyLabel: "OpenClaw",
+		docsUrl: "https://github.com/openclaw/openclaw",
+		mainTask: "text-generation",
+		displayOnModelPage: isToolCallingLocalAgentModel,
+		snippet: snippetOpenClaw,
 	},
 } satisfies Record<string, LocalApp>;
 

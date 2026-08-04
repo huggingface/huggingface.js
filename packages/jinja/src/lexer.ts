@@ -25,7 +25,7 @@ export const TOKEN_TYPES = Object.freeze({
 
 	CallOperator: "CallOperator", // ()
 	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + - ~
-	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / %
+	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / // %
 	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
 	UnaryOperator: "UnaryOperator", // ! - +
 	Comment: "Comment", // {# ... #}
@@ -92,6 +92,7 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	["-", TOKEN_TYPES.AdditiveBinaryOperator],
 	["~", TOKEN_TYPES.AdditiveBinaryOperator],
 	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	["//", TOKEN_TYPES.MultiplicativeBinaryOperator], // NOTE: must come before "/" so that "//" is matched first
 	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	["%", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	// Assignment operator
@@ -337,7 +338,12 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 					++cursorPosition; // consume the unary operator
 
 					// Check for numbers following the unary operator
-					const num = consumeWhile(isInteger);
+					let num = consumeWhile(isInteger);
+					if (num.length > 0 && src[cursorPosition] === "." && isInteger(src[cursorPosition + 1])) {
+						++cursorPosition; // consume '.'
+						const frac = consumeWhile(isInteger);
+						num = `${num}.${frac}`;
+					}
 					tokens.push(
 						new Token(`${char}${num}`, num.length > 0 ? TOKEN_TYPES.NumericLiteral : TOKEN_TYPES.UnaryOperator),
 					);
