@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ReconstructionInfo } from "./XetBlob";
 import { bg4_regroup_bytes, bg4_split_bytes, clearMultiRangeSupportCache, XetBlob } from "./XetBlob";
+import { combineUint8Arrays } from "./combineUint8Arrays";
 import { sum } from "./sum";
 
 describe("XetBlob", () => {
@@ -206,17 +207,6 @@ describe("XetBlob", () => {
 	});
 
 	describe("multi-range fetch entries", () => {
-		function concatBytes(...arrays: Uint8Array[]): Uint8Array {
-			const total = arrays.reduce((s, a) => s + a.byteLength, 0);
-			const out = new Uint8Array(total);
-			let offset = 0;
-			for (const a of arrays) {
-				out.set(a, offset);
-				offset += a.byteLength;
-			}
-			return out;
-		}
-
 		function makeMultipartResponse(
 			boundary: string,
 			parts: Array<{ range: { start: number; end: number }; total: number; data: Uint8Array }>,
@@ -234,7 +224,7 @@ describe("XetBlob", () => {
 			}
 			segments.push(enc.encode(`\r\n--${boundary}--\r\n`));
 
-			return new Response(concatBytes(...segments), {
+			return new Response(combineUint8Arrays(...segments), {
 				headers: { "Content-Type": `multipart/byteranges; boundary=${boundary}` },
 			});
 		}
@@ -250,8 +240,8 @@ describe("XetBlob", () => {
 
 		/** A xorb with two signed ranges: chunks [0,2) = "helloworld" and chunks [4,6) = "foobar!" */
 		function makeFixture(): XorbFixture {
-			const rangeAData = concatBytes(makeChunk("hello"), makeChunk("world"));
-			const rangeBData = concatBytes(makeChunk("foo"), makeChunk("bar!"));
+			const rangeAData = combineUint8Arrays(makeChunk("hello"), makeChunk("world"));
+			const rangeBData = combineUint8Arrays(makeChunk("foo"), makeChunk("bar!"));
 			const lenA = rangeAData.byteLength;
 			const total = lenA + rangeBData.byteLength;
 
@@ -350,7 +340,7 @@ describe("XetBlob", () => {
 							rangeHeaders.push(range);
 							if (range?.includes(",")) {
 								// Like S3, ignore the multi-range request and return the whole object with a 200.
-								return new Response(concatBytes(fixture.rangeAData, fixture.rangeBData));
+								return new Response(combineUint8Arrays(fixture.rangeAData, fixture.rangeBData));
 							}
 							if (range === `bytes=0-${fixture.lenA - 1}`) {
 								return new Response(fixture.rangeAData);
@@ -398,7 +388,7 @@ describe("XetBlob", () => {
 								const range = headers?.["Range"];
 								if (range?.includes(",")) {
 									multiRangeAttempts.push(range);
-									return new Response(concatBytes(fixture.rangeAData, fixture.rangeBData));
+									return new Response(combineUint8Arrays(fixture.rangeAData, fixture.rangeBData));
 								}
 								if (range === `bytes=0-${fixture.lenA - 1}`) {
 									return new Response(fixture.rangeAData);
@@ -421,7 +411,7 @@ describe("XetBlob", () => {
 		});
 
 		it("handles a single-range fetch entry without multipart", async () => {
-			const xorbData = concatBytes(makeChunk("hello"), makeChunk("world"));
+			const xorbData = combineUint8Arrays(makeChunk("hello"), makeChunk("world"));
 			const wholeText = "helloworld";
 
 			let fetchCount = 0;
