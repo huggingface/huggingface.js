@@ -180,7 +180,17 @@ function packingFactor(dtype: Dtype, numBits: number | undefined): number {
 	return containerBits / numBits;
 }
 
-class SafetensorParseError extends Error {}
+/**
+ * Thrown when a safetensors file or sharded index is malformed (bad header, invalid tensor
+ * entry, unsafe shard filename, …) rather than when fetching it fails, so callers can treat
+ * the failure as permanent — e.g. drop a cached parse result instead of keeping it for retry.
+ */
+export class SafetensorParseError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "SafetensorParseError";
+	}
+}
 
 /**
  * Validates one tensor entry from a header: dims are finite integers under `MAX_TENSOR_DIM`,

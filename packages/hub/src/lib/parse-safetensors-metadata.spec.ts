@@ -9,6 +9,7 @@ import {
 	getQuantizationMultiplier,
 	validateTensorEntry,
 	parseTotalParameters,
+	SafetensorParseError,
 } from "./parse-safetensors-metadata";
 import type { Dtype, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
@@ -237,13 +238,15 @@ describe("parseSafetensorsMetadata", () => {
 				8,
 			);
 
-			await expect(
-				parseSafetensorsMetadata({
-					repo: "some-user/fake-huge-model",
-					computeParametersCount: true,
-					fetch,
-				}),
-			).rejects.toThrow(/exceeds the maximum allowed/);
+			const err = await parseSafetensorsMetadata({
+				repo: "some-user/fake-huge-model",
+				computeParametersCount: true,
+				fetch,
+			}).catch((err: unknown) => err);
+
+			assert(err instanceof SafetensorParseError);
+			assert.strictEqual(err.name, "SafetensorParseError");
+			assert.match(err.message, /exceeds the maximum allowed/);
 		});
 
 		it("rejects plausible dims whose data_offsets exceed the file size (the fake 16T shard shape)", async () => {
