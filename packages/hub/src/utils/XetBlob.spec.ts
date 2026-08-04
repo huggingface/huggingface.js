@@ -1,16 +1,10 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { ReconstructionInfo } from "./XetBlob";
-import { bg4_regroup_bytes, bg4_split_bytes, clearMultiRangeSupportCache, XetBlob } from "./XetBlob";
+import { bg4_regroup_bytes, bg4_split_bytes, XetBlob } from "./XetBlob";
 import { combineUint8Arrays } from "./combineUint8Arrays";
 import { sum } from "./sum";
 
 describe("XetBlob", () => {
-	beforeEach(() => {
-		// Multi-range support detection is cached per host at module scope;
-		// reset it so tests don't leak state into each other.
-		clearMultiRangeSupportCache();
-	});
-
 	it("should handle empty files (size 0) without making network requests", async () => {
 		let fetchCount = 0;
 
@@ -317,10 +311,8 @@ describe("XetBlob", () => {
 			expect(multiRangeHeader).toBe(`bytes=0-${fixture.lenA - 1},${fixture.lenA}-${fixture.total - 1}`);
 		});
 
-		it("falls back to one request per range when the server ignores the multi-range request", async () => {
+		it("throws when the server doesn't answer a multi-range request with multipart/byteranges", async () => {
 			const fixture = makeFixture();
-
-			const rangeHeaders: Array<string | undefined> = [];
 
 			const blob = new XetBlob({
 				hash: "test",
@@ -335,79 +327,46 @@ describe("XetBlob", () => {
 							return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
 						case "cas.co":
 							return new Response(JSON.stringify(fixture.reconstructionInfo));
-						case "xorb.co": {
-							const range = headers?.["Range"];
-							rangeHeaders.push(range);
-							if (range?.includes(",")) {
-								// Like S3, ignore the multi-range request and return the whole object with a 200.
-								return new Response(combineUint8Arrays(fixture.rangeAData, fixture.rangeBData));
-							}
-							if (range === `bytes=0-${fixture.lenA - 1}`) {
-								return new Response(fixture.rangeAData);
-							}
-							if (range === `bytes=${fixture.lenA}-${fixture.total - 1}`) {
-								return new Response(fixture.rangeBData);
-							}
-							throw new Error(`Unexpected Range header ${range}`);
-						}
+						case "xorb.co":
+							// The server ignored the multi-range request and returned the whole xorb.
+							expect(headers?.["Range"]).toBe(`bytes=0-${fixture.lenA - 1},${fixture.lenA}-${fixture.total - 1}`);
+							return new Response(combineUint8Arrays(fixture.rangeAData, fixture.rangeBData));
 						default:
 							throw new Error(`Unhandled URL ${url.hostname}`);
 					}
 				},
 			});
 
-			expect(await blob.text()).toBe(fixture.wholeText);
-			// 1 multi-range attempt + 1 fetch per range
-			expect(rangeHeaders).toEqual([
-				`bytes=0-${fixture.lenA - 1},${fixture.lenA}-${fixture.total - 1}`,
-				`bytes=0-${fixture.lenA - 1}`,
-				`bytes=${fixture.lenA}-${fixture.total - 1}`,
-			]);
+			await expect(blob.text()).rejects.toThrow(/multipart\/byteranges/);
 		});
 
-		it("remembers hosts that don't support multi-range requests", async () => {
+		it("throws when a multipart part is missing", async () => {
 			const fixture = makeFixture();
 
-			const multiRangeAttempts: string[] = [];
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url) {
+					const url = new URL(_url as string);
 
-			const makeBlob = () =>
-				new XetBlob({
-					hash: "test",
-					size: fixture.wholeText.length,
-					refreshUrl: "https://huggingface.co",
-					fetch: async function (_url, opts) {
-						const url = new URL(_url as string);
-						const headers = opts?.headers as Record<string, string> | undefined;
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "cas.co":
+							return new Response(JSON.stringify(fixture.reconstructionInfo));
+						case "xorb.co":
+							// Multipart response missing the second requested part.
+							return makeMultipartResponse("BOUNDARY", [
+								{ range: { start: 0, end: fixture.lenA - 1 }, total: fixture.total, data: fixture.rangeAData },
+							]);
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
 
-						switch (url.hostname) {
-							case "huggingface.co":
-								return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
-							case "cas.co":
-								return new Response(JSON.stringify(fixture.reconstructionInfo));
-							case "xorb.co": {
-								const range = headers?.["Range"];
-								if (range?.includes(",")) {
-									multiRangeAttempts.push(range);
-									return new Response(combineUint8Arrays(fixture.rangeAData, fixture.rangeBData));
-								}
-								if (range === `bytes=0-${fixture.lenA - 1}`) {
-									return new Response(fixture.rangeAData);
-								}
-								if (range === `bytes=${fixture.lenA}-${fixture.total - 1}`) {
-									return new Response(fixture.rangeBData);
-								}
-								throw new Error(`Unexpected Range header ${range}`);
-							}
-							default:
-								throw new Error(`Unhandled URL ${url.hostname}`);
-						}
-					},
-				});
-
-			expect(await makeBlob().text()).toBe(fixture.wholeText);
-			expect(await makeBlob().text()).toBe(fixture.wholeText);
-			// Only the first download attempts a multi-range request.
-			expect(multiRangeAttempts).toHaveLength(1);
+			await expect(blob.text()).rejects.toThrow(/Missing multipart part/);
 		});
 
 		it("handles a single-range fetch entry without multipart", async () => {

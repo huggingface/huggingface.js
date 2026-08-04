@@ -203,18 +203,6 @@ function storeChunks(data: Uint8Array, descriptor: XorbRangeDescriptor, rangeLis
 }
 
 /**
- * Hosts of signed URLs known to not support multi-range `Range` headers (eg raw S3 presigned URLs,
- * which reply with the whole object). For those, each range is fetched with its own request — every
- * individual range is part of the URL's signed range set, so single-range requests stay authorized.
- */
-const multiRangeUnsupportedHosts = new Set<string>();
-
-// Exported for testing purposes: reset the per-host multi-range support cache.
-export function clearMultiRangeSupportCache(): void {
-	multiRangeUnsupportedHosts.clear();
-}
-
-/**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
  */
 export class XetBlob extends Blob {
@@ -396,9 +384,10 @@ export class XetBlob extends Blob {
 					`bytes=${entry.ranges.map((r) => `${r.bytes.start}-${r.bytes.end}`).join(",")}`;
 
 				// Fetch all signed ranges of a multi-range entry in a single request, and store the
-				// decoded chunks into the cache. Returns false when the server ignored the multi-range
-				// request (eg S3 presigned URLs), in which case ranges are fetched individually instead.
-				const fetchMultiRangeEntry = async (entry: XorbFetchEntry): Promise<boolean> => {
+				// decoded chunks into the cache. The reconstruction server is expected to only emit
+				// multi-range URLs when its CDN supports them; servers without multi-range support get
+				// one fetch entry per range instead (single-range streaming path below).
+				const fetchMultiRangeEntry = async (entry: XorbFetchEntry): Promise<void> => {
 					let resp = await customFetch(entry.url, { headers: { Range: buildMultiRangeHeader(entry) } });
 
 					if (resp.status === 403) {
@@ -420,12 +409,9 @@ export class XetBlob extends Blob {
 
 					const contentType = resp.headers.get("content-type") ?? "";
 					if (!contentType.includes("multipart/byteranges")) {
-						// The server ignored (or coalesced) the multi-range request. Cancel the body and
-						// remember to fetch each range individually for this host.
-						log("multi-range request not honored, content-type", contentType);
-						multiRangeUnsupportedHosts.add(new URL(entry.url).host);
-						await resp.body?.cancel();
-						return false;
+						// The server ignored (or coalesced) the multi-range request, so the body can't be
+						// mapped back to the signed ranges; decoding it heuristically would risk corruption.
+						throw new Error(`Expected multipart/byteranges response for multi-range request, got "${contentType}"`);
 					}
 
 					listener?.({ event: "read" });
@@ -437,13 +423,12 @@ export class XetBlob extends Blob {
 							(p) => p.range.start === descriptor.bytes.start && p.range.end === descriptor.bytes.end,
 						);
 						if (!part) {
-							// Missing part: the ranges it covers will be fetched individually when needed
-							log("missing multipart part for bytes", descriptor.bytes.start, "-", descriptor.bytes.end);
-							continue;
+							throw new Error(
+								`Missing multipart part for bytes ${descriptor.bytes.start}-${descriptor.bytes.end} of term ${term.hash}`,
+							);
 						}
 						storeChunks(part.data, descriptor, rangeList);
 					}
-					return true;
 				};
 
 				let termRanges = rangeList.getRanges(term.range.start, term.range.end);
@@ -455,7 +440,7 @@ export class XetBlob extends Blob {
 							`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
 						);
 					}
-					if (located.entry.ranges.length > 1 && !multiRangeUnsupportedHosts.has(new URL(located.entry.url).host)) {
+					if (located.entry.ranges.length > 1) {
 						await fetchMultiRangeEntry(located.entry);
 						termRanges = rangeList.getRanges(term.range.start, term.range.end);
 					}
