@@ -200,6 +200,180 @@ describe("XetBlob", () => {
 		expect(text.length).toBe(bridgeDownload.length);
 	});
 
+	describe("parallelDownloads", () => {
+		// Build a file spread over `xorbCount` distinct xorbs (2 chunks each), served by one URL per
+		// xorb so the entry fetches are independent and can overlap.
+		function makeParallelFixture(xorbCount: number) {
+			const contents = Array(xorbCount)
+				.fill(0)
+				.map((_, i) => [`chunk-${i}-a-`, `chunk-${i}-b!`] as const);
+			const xorbData = contents.map(([a, b]) => combineUint8Arrays(makeChunk(a), makeChunk(b)));
+			const wholeText = contents.map(([a, b]) => a + b).join("");
+
+			const reconstructionInfo: ReconstructionInfo = {
+				terms: contents.map(([a, b], i) => ({
+					hash: `xorb${i}`,
+					range: { start: 0, end: 2 },
+					unpacked_length: a.length + b.length,
+				})),
+				xorbs: Object.fromEntries(
+					contents.map(([, ,], i) => [
+						`xorb${i}`,
+						[
+							{
+								url: `https://xorb.co/${i}`,
+								ranges: [{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: xorbData[i].byteLength - 1 } }],
+							},
+						],
+					]),
+				),
+				offset_into_first_range: 0,
+			};
+
+			return { wholeText, xorbData, reconstructionInfo };
+		}
+
+		function makeFetch(
+			fixture: ReturnType<typeof makeParallelFixture>,
+			opts?: { gate?: Promise<void>; onXorbRequest?: (i: number) => void; failIndex?: number },
+		): typeof fetch {
+			return async function (_url) {
+				const url = new URL(_url as string);
+				switch (url.hostname) {
+					case "huggingface.co":
+						return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+					case "cas.co":
+						return new Response(JSON.stringify(fixture.reconstructionInfo));
+					case "xorb.co": {
+						const i = Number(url.pathname.slice(1));
+						opts?.onXorbRequest?.(i);
+						if (opts?.failIndex === i) {
+							return new Response("boom", { status: 500 });
+						}
+						await opts?.gate;
+						return new Response(fixture.xorbData[i]);
+					}
+					default:
+						throw new Error(`Unhandled URL ${url.hostname}`);
+				}
+			};
+		}
+
+		it("downloads a multi-xorb file in parallel and in order", async () => {
+			const fixture = makeParallelFixture(6);
+
+			let inFlight = 0;
+			let maxInFlight = 0;
+			let release!: () => void;
+			const released = new Promise<void>((resolve) => (release = resolve));
+
+			let stat: Record<string, unknown> | undefined;
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				parallelDownloads: { maxConcurrency: 4, onStat: (s) => (stat = s) },
+				fetch: makeFetch(fixture, {
+					gate: released,
+					onXorbRequest: () => {
+						inFlight++;
+						maxInFlight = Math.max(maxInFlight, inFlight);
+					},
+				}),
+			});
+
+			const read = blob.text();
+			// Let the scheduler ramp its look-ahead, then release the gated responses.
+			await new Promise((resolve) => setTimeout(resolve, 20));
+			release();
+
+			expect(await read).toBe(fixture.wholeText);
+			expect(maxInFlight).toBeGreaterThan(1);
+			expect(stat?.entries).toBe(6);
+		});
+
+		it("keeps a single request in flight when the budget only fits one entry", async () => {
+			const fixture = makeParallelFixture(4);
+
+			let stat: Record<string, unknown> | undefined;
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				// Budget smaller than a single entry: only the currently-needed entry may proceed.
+				parallelDownloads: { maxConcurrency: 4, maxInFlightBytes: 1, onStat: (s) => (stat = s) },
+				fetch: makeFetch(fixture),
+			});
+
+			expect(await blob.text()).toBe(fixture.wholeText);
+			expect(stat?.maxActive).toBe(1);
+		});
+
+		it("propagates fetch errors", async () => {
+			const fixture = makeParallelFixture(3);
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				parallelDownloads: true,
+				fetch: makeFetch(fixture, { failIndex: 1 }),
+			});
+
+			await expect(blob.text()).rejects.toThrow();
+		});
+
+		it("handles slices with an offset into the first term", async () => {
+			const fixture = makeParallelFixture(4);
+
+			const serialBlob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: makeFetch(fixture),
+			});
+			const parallelBlob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				parallelDownloads: true,
+				fetch: makeFetch(fixture),
+			});
+
+			for (const [start, end] of [
+				[0, fixture.wholeText.length],
+				[5, 30],
+				[13, fixture.wholeText.length - 3],
+			]) {
+				expect(await parallelBlob.slice(start, end).text(), `slice ${start}-${end}`).toBe(
+					await serialBlob.slice(start, end).text(),
+				);
+			}
+		});
+
+		it("refreshes the reconstruction info when a signed URL expired", async () => {
+			const fixture = makeParallelFixture(3);
+			let expired = true;
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				parallelDownloads: true,
+				fetch: async function (_url, opts) {
+					const url = new URL(_url as string);
+					if (url.hostname === "xorb.co" && expired) {
+						expired = false;
+						return new Response(null, { status: 403 });
+					}
+					return makeFetch(fixture)(_url as string, opts);
+				},
+			});
+
+			expect(await blob.text()).toBe(fixture.wholeText);
+		});
+	});
+
 	describe("multi-range fetch entries", () => {
 		function makeMultipartResponse(
 			boundary: string,
