@@ -50,6 +50,23 @@ describe("StreamingMultipartParser", () => {
 		}
 	});
 
+	it("coalesces tiny pushes on a part spanning multiple staging blocks", () => {
+		// ~200KB part (> 3 staging blocks of 64KB) with a recognizable pattern.
+		const partData = new Uint8Array(200_000).map((_, i) => i % 251);
+		const body = buildMultipart(boundary, [partData]);
+
+		for (const feedSize of [1, 3, 7, 1024]) {
+			const parser = new StreamingMultipartParser(contentType);
+			const out: Uint8Array[] = [];
+			for (let off = 0; off < body.byteLength; off += feedSize) {
+				out.push(...parser.push(body.subarray(off, Math.min(off + feedSize, body.byteLength))));
+			}
+			expect(out.length, `feed size ${feedSize}`).toBe(1);
+			expect(out[0].byteLength, `feed size ${feedSize}`).toBe(partData.byteLength);
+			expect(Buffer.from(out[0]).equals(Buffer.from(partData)), `feed size ${feedSize}`).toBe(true);
+		}
+	});
+
 	it("parses a body whose first boundary has no leading CRLF", () => {
 		// RFC 2046 §5.1.1: the CRLF preceding the first delimiter is "considered part of the
 		// preamble" — a body may start directly with `--boundary` (as in the RFC 9110 example).
