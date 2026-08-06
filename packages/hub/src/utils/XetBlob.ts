@@ -6,6 +6,7 @@ import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
 import { StreamingMultipartParser } from "./multipart";
 import { sum } from "./sum";
+import { concatUint8Arrays } from "./concatUint8Arrays";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -1231,15 +1232,23 @@ export class XetBlob extends Blob {
 	}
 
 	override async arrayBuffer(): Promise<ArrayBuffer> {
-		const result = await this.#fetch();
-
-		return new Response(result).arrayBuffer();
+		// Consume the stream manually instead of via `new Response(stream).arrayBuffer()`:
+		// browsers replace stream errors with a generic "Failed to fetch" TypeError, losing
+		// the original error message.
+		const reader = (await this.#fetch()).getReader();
+		const chunks: Uint8Array[] = [];
+		for (;;) {
+			const { done, value } = await reader.read();
+			if (done) {
+				break;
+			}
+			chunks.push(value);
+		}
+		return concatUint8Arrays(chunks).buffer;
 	}
 
 	override async text(): Promise<string> {
-		const result = await this.#fetch();
-
-		return new Response(result).text();
+		return new TextDecoder().decode(await this.arrayBuffer());
 	}
 
 	async response(): Promise<Response> {
