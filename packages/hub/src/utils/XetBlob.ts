@@ -1154,9 +1154,10 @@ export class XetBlob extends Blob {
 					state.target = Math.max(1, state.target - 1);
 					settleTicks = 1;
 					holdTicks = PARALLEL_PLATEAU_HOLD_TICKS;
-				} else if (rate === 0) {
+				} else if (rate === 0 && state.nextEntry < plan.length) {
 					// Nothing decoded during the tick: latency-bound (TTFB) or stalled, so an
-					// extra connection cannot reduce aggregate throughput.
+					// extra connection cannot reduce aggregate throughput. (Pointless once no
+					// unclaimed entries remain — an extra worker would have nothing to fetch.)
 					state.target = Math.min(maxConcurrency, state.target + 1);
 					settleTicks = 1;
 				} else if (settleTicks > 0) {
