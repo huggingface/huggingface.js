@@ -39,7 +39,7 @@ type XetBlobCreateOptions = {
 	 * increasing while aggregate throughput improves and backing off on rate-limits or when
 	 * extra connections stop helping. Memory is bounded: at most `maxInFlightBytes` of
 	 * downloaded-but-not-yet-consumed data is held (by default derived from the file's
-	 * reconstruction: 64-256MB in Node, 64MB in browsers).
+	 * reconstruction, between 64MB and 256MB).
 	 *
 	 * Pass `false` to download serially, or an object to tune the ceiling/budget.
 	 *
@@ -64,11 +64,15 @@ export interface ParallelDownloadOptions {
 	onStat?: (stat: Record<string, unknown>) => void;
 }
 
-// Browsers get a lower ceiling and a fixed budget: connections may share an HTTP/2 session,
-// and tab/worker memory is scarcer than in Node.
+// Browsers get a lower concurrency ceiling: connections may share an HTTP/2 session, and
+// tab/worker memory is scarcer than in Node. The byte budget derivation is identical
+// everywhere — a cap below ~3x the entry size degrades below serial performance (entries
+// reserve their estimated size before fetching), and since entries max out at one xorb
+// (~64MB compressed) the derivation self-limits at ~192MB; actual browser memory is further
+// bounded by the lower ceiling.
 const PARALLEL_DEFAULT_MAX_CONCURRENCY = isFrontend ? 4 : 8;
 const PARALLEL_MIN_IN_FLIGHT_BYTES = 64 * 1024 * 1024;
-const PARALLEL_MAX_IN_FLIGHT_BYTES = isFrontend ? 64 * 1024 * 1024 : 256 * 1024 * 1024;
+const PARALLEL_MAX_IN_FLIGHT_BYTES = 256 * 1024 * 1024;
 
 /** Simple broadcast notifier: `wait()` resolves at the next `notifyAll()`. */
 class Notifier {
