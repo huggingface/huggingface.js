@@ -4,6 +4,7 @@ import { checkCredentials } from "./checkCredentials";
 import { combineUint8Arrays } from "./combineUint8Arrays";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
+import { StreamingMultipartParser } from "./multipart";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -31,6 +32,13 @@ type XetBlobCreateOptions = {
 } & ({ hash: string; reconstructionUrl?: string } | { hash?: string; reconstructionUrl: string }) &
 	Partial<CredentialsParams>;
 
+/**
+ * Response shape of `GET /v2/reconstructions/{hash}`, see https://huggingface.co/docs/xet/en/download-protocol
+ *
+ * Unlike the (deprecated) V1 endpoint, a signed URL carries all the byte ranges needed from a xorb,
+ * signed together in the URL's `X-Xet-Signed-Range` query param. Requesting bytes outside that set
+ * fails authorization, which prevents a leaked URL from exposing arbitrary parts of the xorb.
+ */
 export interface ReconstructionInfo {
 	/**
 	 * List of CAS blocks
@@ -45,20 +53,26 @@ export interface ReconstructionInfo {
 	}>;
 
 	/**
-	 * Dictionnary of CAS block hash => list of ranges in the block + url to fetch it
+	 * Dictionnary of CAS block hash => list of fetch entries for the block.
+	 *
+	 * Typically one entry per xorb; multiple entries only when the signed URL would exceed the URL
+	 * length limit.
 	 */
-	fetch_info: Record<
+	xorbs: Record<
 		string,
 		Array<{
-			url: string;
-			/** Chunk range */
-			range: { start: number; end: number };
 			/**
-			 * Byte range, when making the call to the URL.
-			 *
-			 * We assume that we're given non-overlapping ranges for each hash
+			 * Signed URL covering all of `ranges`. The `Range` header sent to it must be built from
+			 * the `bytes` ranges below; requesting other bytes fails authorization.
 			 */
-			url_range: { start: number; end: number };
+			url: string;
+			/** Fragmented ranges, ordered by ascending `chunks.start` */
+			ranges: Array<{
+				/** Chunk index range within the xorb, end-exclusive: [start, end) */
+				chunks: { start: number; end: number };
+				/** Physical byte range for the HTTP Range header, end-inclusive: [start, end] */
+				bytes: { start: number; end: number };
+			}>;
 		}>
 	>;
 	/**
@@ -66,6 +80,9 @@ export interface ReconstructionInfo {
 	 */
 	offset_into_first_range: number;
 }
+
+type XorbFetchEntry = ReconstructionInfo["xorbs"][string][number];
+type XorbRangeDescriptor = XorbFetchEntry["ranges"][number];
 
 export enum XetChunkCompressionScheme {
 	None = 0,
@@ -87,6 +104,111 @@ interface ChunkHeader {
 }
 
 export const XET_CHUNK_HEADER_BYTES = 8;
+
+function parseChunkHeader(view: DataView): ChunkHeader {
+	const chunkHeader: ChunkHeader = {
+		version: view.getUint8(0),
+		compressed_length: view.getUint8(1) | (view.getUint8(2) << 8) | (view.getUint8(3) << 16),
+		compression_scheme: view.getUint8(4),
+		uncompressed_length: view.getUint8(5) | (view.getUint8(6) << 8) | (view.getUint8(7) << 16),
+	};
+
+	if (chunkHeader.version !== 0) {
+		throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
+	}
+
+	if (
+		chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
+		chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
+		chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
+	) {
+		throw new Error(
+			`Unsupported compression scheme ${
+				compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
+			}`,
+		);
+	}
+
+	return chunkHeader;
+}
+
+function decompressChunk(chunkHeader: ChunkHeader, compressed: Uint8Array): Uint8Array {
+	switch (chunkHeader.compression_scheme) {
+		case XetChunkCompressionScheme.LZ4:
+			return lz4_decompress(compressed, chunkHeader.uncompressed_length);
+		case XetChunkCompressionScheme.ByteGroupingLZ4:
+			return bg4_regroup_bytes(lz4_decompress(compressed, chunkHeader.uncompressed_length));
+		default:
+			// Copy so we don't retain the (possibly much larger) source buffer
+			return compressed.slice();
+	}
+}
+
+type StagedChunks = Map<{ data: Uint8Array[] | null }, Uint8Array[]>;
+
+/**
+ * Decode one complete xorb chunk stream (a single `multipart/byteranges` part) into per-range
+ * staged chunk arrays. Throws if it doesn't decode to exactly the chunks the descriptor covers,
+ * so a truncated/corrupt part never leaves partial data to be committed to the cache.
+ */
+function decodePartChunks(
+	data: Uint8Array,
+	descriptor: XorbRangeDescriptor,
+	rangeList: RangeList<Uint8Array[]>,
+): StagedChunks {
+	const ranges = rangeList.getRanges(descriptor.chunks.start, descriptor.chunks.end);
+	const staged: StagedChunks = new Map();
+	let chunkIndex = descriptor.chunks.start;
+	let offset = 0;
+
+	while (offset < data.byteLength) {
+		if (chunkIndex >= descriptor.chunks.end) {
+			throw new Error(
+				`Multipart part for chunks ${descriptor.chunks.start}-${descriptor.chunks.end} contains more chunks than expected`,
+			);
+		}
+		if (data.byteLength - offset < XET_CHUNK_HEADER_BYTES) {
+			throw new Error("Truncated chunk header in multipart part");
+		}
+
+		const chunkHeader = parseChunkHeader(new DataView(data.buffer, data.byteOffset + offset, XET_CHUNK_HEADER_BYTES));
+		const compressedStart = offset + XET_CHUNK_HEADER_BYTES;
+		const compressedEnd = compressedStart + chunkHeader.compressed_length;
+
+		if (compressedEnd > data.byteLength) {
+			throw new Error("Truncated chunk data in multipart part");
+		}
+
+		const uncompressed = decompressChunk(chunkHeader, data.subarray(compressedStart, compressedEnd));
+
+		const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
+		if (range) {
+			let chunks = staged.get(range);
+			if (!chunks) {
+				chunks = [];
+				staged.set(range, chunks);
+			}
+			chunks.push(uncompressed);
+		}
+
+		chunkIndex++;
+		offset = compressedEnd;
+	}
+
+	if (chunkIndex !== descriptor.chunks.end) {
+		throw new Error(
+			`Multipart part decoded chunks ${descriptor.chunks.start}-${chunkIndex} but expected ${descriptor.chunks.start}-${descriptor.chunks.end}`,
+		);
+	}
+
+	return staged;
+}
+
+function commitChunks(staged: StagedChunks): void {
+	for (const [range, chunks] of staged) {
+		range.data = chunks;
+	}
+}
 
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
@@ -176,11 +298,15 @@ export class XetBlob extends Blob {
 		this.#reconstructionInfoPromise = (async () => {
 			const connParams = await getAccessToken(this.accessToken, this.fetch, this.refreshUrl);
 
-			// debug(
-			// 	`curl '${connParams.casUrl}/v1/reconstructions/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
-			// );
+			// The `xet-reconstruction-info` Link header from the Hub points to the deprecated V1
+			// endpoint; derive the V2 URL from it.
+			const url = this.reconstructionUrl
+				? this.reconstructionUrl.replace("/v1/reconstructions/", "/v2/reconstructions/")
+				: `${connParams.casUrl}/v2/reconstructions/${this.hash}`;
 
-			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/v1/reconstructions/${this.hash}`, {
+			// debug(`curl '${url}' -H 'Authorization: Bearer ${connParams.accessToken}'`);
+
+			const resp = await this.fetch(url, {
 				headers: {
 					Authorization: `Bearer ${connParams.accessToken}`,
 					Range: `bytes=${this.start}-${this.end - 1}`,
@@ -249,11 +375,134 @@ export class XetBlob extends Blob {
 					throw new Error(`Failed to find range list for term ${term.hash}`);
 				}
 
-				{
-					const termRanges = rangeList.getRanges(term.range.start, term.range.end);
+				// Locate the fetch entry + range descriptor whose chunk range covers this term
+				const locate = (info: ReconstructionInfo) => {
+					for (const entry of info.xorbs[term.hash] ?? []) {
+						const descriptor = entry.ranges.find(
+							(r) => r.chunks.start <= term.range.start && r.chunks.end >= term.range.end,
+						);
+						if (descriptor) {
+							return { entry, descriptor };
+						}
+					}
+					return undefined;
+				};
 
+				const buildMultiRangeHeader = (entry: XorbFetchEntry) =>
+					`bytes=${entry.ranges.map((r) => `${r.bytes.start}-${r.bytes.end}`).join(",")}`;
+
+				// Fetch all signed ranges of a multi-range entry in a single request, and store the
+				// decoded chunks into the cache. The reconstruction server is expected to only emit
+				// multi-range URLs when its CDN supports them; servers without multi-range support get
+				// one fetch entry per range instead (single-range streaming path below).
+				const fetchMultiRangeEntry = async (entry: XorbFetchEntry): Promise<void> => {
+					let resp = await customFetch(entry.url, { headers: { Range: buildMultiRangeHeader(entry) } });
+
+					if (resp.status === 403) {
+						// In case it's expired
+						reconstructionInfo = await reloadReconstructionInfo();
+						const relocated = locate(reconstructionInfo);
+						if (!relocated) {
+							throw new Error(
+								`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end} after refresh`,
+							);
+						}
+						entry = relocated.entry;
+						resp = await customFetch(entry.url, { headers: { Range: buildMultiRangeHeader(entry) } });
+					}
+
+					if (!resp.ok) {
+						throw await createApiError(resp);
+					}
+
+					const contentType = resp.headers.get("content-type") ?? "";
+					if (!contentType.includes("multipart/byteranges")) {
+						// The server ignored (or coalesced) the multi-range request, so the body can't be
+						// mapped back to the signed ranges; decoding it heuristically would risk corruption.
+						throw new Error(`Expected multipart/byteranges response for multi-range request, got "${contentType}"`);
+					}
+
+					const reader = resp.body?.getReader();
+					if (!reader) {
+						throw new Error("Failed to get reader from response body");
+					}
+
+					// Stream the body: decode each part as it completes and stage its chunks, so memory
+					// stays bounded by the largest part instead of the whole xorb. Parts arrive in the
+					// same ascending order as the entry's ranges.
+					const parser = new StreamingMultipartParser(contentType);
+					const stagedParts: StagedChunks[] = [];
+					let partIndex = 0;
+
+					const consumeParts = (parts: Uint8Array[]) => {
+						for (const part of parts) {
+							const descriptor = entry.ranges[partIndex];
+							if (!descriptor) {
+								throw new Error(`Received more multipart parts than the ${entry.ranges.length} signed ranges`);
+							}
+							stagedParts.push(decodePartChunks(part, descriptor, rangeList));
+							partIndex++;
+						}
+					};
+
+					try {
+						for (;;) {
+							const result = await reader.read();
+							listener?.({ event: "read" });
+							if (result.done) {
+								break;
+							}
+							if (result.value) {
+								consumeParts(parser.push(result.value));
+							}
+						}
+						consumeParts(parser.push());
+					} finally {
+						await reader.cancel().catch(() => {});
+					}
+
+					if (partIndex !== entry.ranges.length) {
+						throw new Error(
+							`Multi-range fetch produced ${partIndex} parts but expected ${entry.ranges.length} for term ${term.hash}`,
+						);
+					}
+
+					// All parts decoded cleanly and cover every signed range: commit to the cache.
+					for (const staged of stagedParts) {
+						commitChunks(staged);
+					}
+				};
+
+				let termRanges = rangeList.getRanges(term.range.start, term.range.end);
+
+				if (!termRanges.every((range) => range.data)) {
+					const located = locate(reconstructionInfo);
+					if (!located) {
+						throw new Error(
+							`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
+						);
+					}
+					if (located.entry.ranges.length > 1) {
+						await fetchMultiRangeEntry(located.entry);
+						termRanges = rangeList.getRanges(term.range.start, term.range.end);
+					}
+				}
+
+				{
 					if (termRanges.every((range) => range.data)) {
 						log("all data available for term", term.hash, readBytesToSkip);
+
+						const cachedLength = termRanges.reduce(
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							(sum, range) => sum + range.data!.reduce((acc, chunk) => acc + chunk.byteLength, 0),
+							0,
+						);
+						if (cachedLength !== term.unpacked_length) {
+							throw new Error(
+								`Term ${term.hash} range ${term.range.start}-${term.range.end} decoded to ${cachedLength} bytes, expected ${term.unpacked_length}`,
+							);
+						}
+
 						rangeLoop: for (const range of termRanges) {
 							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							for (let chunk of range.data!) {
@@ -284,40 +533,41 @@ export class XetBlob extends Blob {
 					}
 				}
 
-				let fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
-					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
-				);
+				// Stream a single range: fetch the descriptor covering this term with a single-range
+				// header. Each individual range is part of the URL's signed range set, so this stays
+				// authorized even when the multi-range request isn't supported by the server.
+				let located = locate(reconstructionInfo);
 
-				if (!fetchInfo) {
+				if (!located) {
 					throw new Error(
 						`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
 					);
 				}
+				let descriptor = located.descriptor;
 
 				log("term", term);
-				log("fetchinfo", fetchInfo);
+				log("descriptor", descriptor);
 				log("readBytesToSkip", readBytesToSkip);
 
-				let resp = await customFetch(fetchInfo.url, {
+				let resp = await customFetch(located.entry.url, {
 					headers: {
-						Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
+						Range: `bytes=${descriptor.bytes.start}-${descriptor.bytes.end}`,
 					},
 				});
 
 				if (resp.status === 403) {
 					// In case it's expired
 					reconstructionInfo = await reloadReconstructionInfo();
-					fetchInfo = reconstructionInfo.fetch_info[term.hash]?.find(
-						(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
-					);
-					if (!fetchInfo) {
+					located = locate(reconstructionInfo);
+					if (!located) {
 						throw new Error(
 							`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end} after refresh`,
 						);
 					}
-					resp = await customFetch(fetchInfo.url, {
+					descriptor = located.descriptor;
+					resp = await customFetch(located.entry.url, {
 						headers: {
-							Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
+							Range: `bytes=${descriptor.bytes.start}-${descriptor.bytes.end}`,
 						},
 					});
 				}
@@ -330,7 +580,7 @@ export class XetBlob extends Blob {
 					"expected content length",
 					resp.headers.get("content-length"),
 					"range",
-					fetchInfo.url_range,
+					descriptor.bytes,
 					resp.headers.get("content-range"),
 				);
 
@@ -340,8 +590,8 @@ export class XetBlob extends Blob {
 				}
 
 				let done = false;
-				let chunkIndex = fetchInfo.range.start;
-				const ranges = rangeList.getRanges(fetchInfo.range.start, fetchInfo.range.end);
+				let chunkIndex = descriptor.chunks.start;
+				const ranges = rangeList.getRanges(descriptor.chunks.start, descriptor.chunks.end);
 
 				let leftoverBytes: Uint8Array | undefined = undefined;
 				let totalFetchBytes = 0;
@@ -374,30 +624,9 @@ export class XetBlob extends Blob {
 						}
 
 						const header = new DataView(result.value.buffer, result.value.byteOffset, XET_CHUNK_HEADER_BYTES);
-						const chunkHeader: ChunkHeader = {
-							version: header.getUint8(0),
-							compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
-							compression_scheme: header.getUint8(4),
-							uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
-						};
+						const chunkHeader = parseChunkHeader(header);
 
 						log("chunk header", chunkHeader, "to skip", readBytesToSkip);
-
-						if (chunkHeader.version !== 0) {
-							throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
-						}
-
-						if (
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
-						) {
-							throw new Error(
-								`Unsupported compression scheme ${
-									compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
-								}`,
-							);
-						}
 
 						if (result.value.byteLength < chunkHeader.compressed_length + XET_CHUNK_HEADER_BYTES) {
 							// We need more data to read the full chunk
@@ -407,24 +636,14 @@ export class XetBlob extends Blob {
 
 						result.value = result.value.slice(XET_CHUNK_HEADER_BYTES);
 
-						let uncompressed =
-							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
-								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
-								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
-									? bg4_regroup_bytes(
-											lz4_decompress(
-												result.value.slice(0, chunkHeader.compressed_length),
-												chunkHeader.uncompressed_length,
-											),
-										)
-									: result.value.slice(0, chunkHeader.compressed_length);
+						let uncompressed = decompressChunk(chunkHeader, result.value.subarray(0, chunkHeader.compressed_length));
 
 						const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
 						const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
 						const minRefCountToStore = shouldYield ? 2 : 1;
 						let stored = false;
 
-						// Assuming non-overlapping fetch_info ranges for the same hash
+						// Assuming non-overlapping fetch ranges for the same hash
 						if (range && range.refCount >= minRefCountToStore) {
 							range.data ??= [];
 							range.data.push(uncompressed);
@@ -463,16 +682,12 @@ export class XetBlob extends Blob {
 					}
 				}
 
-				if (
-					done &&
-					totalBytesRead < maxBytes &&
-					totalFetchBytes < fetchInfo.url_range.end - fetchInfo.url_range.start + 1
-				) {
+				if (done && totalBytesRead < maxBytes && totalFetchBytes < descriptor.bytes.end - descriptor.bytes.start + 1) {
 					log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
 					log("failed to fetch all data for term", term.hash);
 					throw new Error(
 						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
-							fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+							descriptor.bytes.end - descriptor.bytes.start + 1
 						}`,
 					);
 				}
