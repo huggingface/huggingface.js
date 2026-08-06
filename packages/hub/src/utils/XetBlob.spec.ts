@@ -1,9 +1,15 @@
-import { describe, expect, it } from "vitest";
-import type { ReconstructionInfo } from "./XetBlob";
-import { bg4_regroup_bytes, bg4_split_bytes, XetBlob } from "./XetBlob";
+import { beforeEach, describe, expect, it } from "vitest";
+import type { ReconstructionInfo, ReconstructionInfoV2 } from "./XetBlob";
+import { bg4_regroup_bytes, bg4_split_bytes, clearReconstructionApiVersionCache, XetBlob } from "./XetBlob";
 import { sum } from "./sum";
 
 describe("XetBlob", () => {
+	beforeEach(() => {
+		// The detected reconstruction API version is cached per CAS endpoint at module scope;
+		// reset it so tests don't leak state into each other.
+		clearReconstructionApiVersionCache();
+	});
+
 	it("should handle empty files (size 0) without making network requests", async () => {
 		let fetchCount = 0;
 
@@ -200,6 +206,330 @@ describe("XetBlob", () => {
 		expect(text.length).toBe(bridgeDownload.length);
 	});
 
+	describe("v2 reconstruction", () => {
+		function concatBytes(...arrays: Uint8Array[]): Uint8Array {
+			const total = arrays.reduce((s, a) => s + a.byteLength, 0);
+			const out = new Uint8Array(total);
+			let offset = 0;
+			for (const a of arrays) {
+				out.set(a, offset);
+				offset += a.byteLength;
+			}
+			return out;
+		}
+
+		function makeMultipartResponse(
+			boundary: string,
+			parts: Array<{ range: { start: number; end: number }; total: number; data: Uint8Array }>,
+		): Response {
+			const enc = new TextEncoder();
+			const segments: Uint8Array[] = [];
+			for (const part of parts) {
+				segments.push(
+					enc.encode(
+						`\r\n--${boundary}\r\nContent-Type: application/octet-stream\r\n` +
+							`Content-Range: bytes ${part.range.start}-${part.range.end}/${part.total}\r\n\r\n`,
+					),
+					part.data,
+				);
+			}
+			segments.push(enc.encode(`\r\n--${boundary}--\r\n`));
+
+			return new Response(concatBytes(...segments), {
+				headers: { "Content-Type": `multipart/byteranges; boundary=${boundary}` },
+			});
+		}
+
+		it("fetches a multi-range xorb in one multipart/byteranges request", async () => {
+			const c0 = makeChunk("hello");
+			const c1 = makeChunk("world");
+			const c2 = makeChunk("foo");
+			const c3 = makeChunk("bar!");
+			const rangeAData = concatBytes(c0, c1);
+			const rangeBData = concatBytes(c2, c3);
+			const lenA = rangeAData.byteLength;
+			const lenB = rangeBData.byteLength;
+			const total = lenA + lenB;
+
+			const wholeText = "helloworldfoobar!";
+
+			let fetchCount = 0;
+			let multiRangeHeader: string | undefined;
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url, opts) {
+					const url = new URL(_url as string);
+					const headers = opts?.headers as Record<string, string> | undefined;
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://v2cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "v2cas.co": {
+							expect(url.pathname).toContain("/v2/reconstructions/");
+							return new Response(
+								JSON.stringify({
+									terms: [
+										{ hash: "xorb1", range: { start: 0, end: 2 }, unpacked_length: 10 },
+										{ hash: "xorb1", range: { start: 2, end: 4 }, unpacked_length: 7 },
+									],
+									xorbs: {
+										xorb1: [
+											{
+												url: "https://v2fetch.co",
+												ranges: [
+													{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: lenA - 1 } },
+													{ chunks: { start: 2, end: 4 }, bytes: { start: lenA, end: total - 1 } },
+												],
+											},
+										],
+									},
+									offset_into_first_range: 0,
+								} satisfies ReconstructionInfoV2),
+							);
+						}
+						case "v2fetch.co": {
+							fetchCount++;
+							multiRangeHeader = headers?.["Range"];
+							return makeMultipartResponse("BOUNDARY", [
+								{ range: { start: 0, end: lenA - 1 }, total, data: rangeAData },
+								{ range: { start: lenA, end: total - 1 }, total, data: rangeBData },
+							]);
+						}
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			expect(await blob.text()).toBe(wholeText);
+			// Both ranges of the xorb are fetched together in a single multi-range request.
+			expect(fetchCount).toBe(1);
+			expect(multiRangeHeader).toBe(`bytes=0-${lenA - 1},${lenA}-${total - 1}`);
+		});
+
+		it("falls back to v1 when v2 returns 404", async () => {
+			const c0 = makeChunk("hello");
+			const c1 = makeChunk("world");
+			const xorbData = concatBytes(c0, c1);
+			const wholeText = "helloworld";
+
+			const versionsRequested: string[] = [];
+			let fetchCount = 0;
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url, opts) {
+					const url = new URL(_url as string);
+					const headers = opts?.headers as Record<string, string> | undefined;
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "cas.co": {
+							versionsRequested.push(url.pathname.includes("/v2/") ? "v2" : "v1");
+							if (url.pathname.includes("/v2/")) {
+								return new Response(null, { status: 404 });
+							}
+							return new Response(
+								JSON.stringify({
+									terms: [{ hash: "xorb1", range: { start: 0, end: 2 }, unpacked_length: 10 }],
+									fetch_info: {
+										xorb1: [
+											{
+												url: "https://fetch.co",
+												range: { start: 0, end: 2 },
+												url_range: { start: 0, end: xorbData.byteLength - 1 },
+											},
+										],
+									},
+									offset_into_first_range: headers?.["Range"]
+										? Number(headers["Range"].slice("bytes=".length).split("-")[0])
+										: 0,
+								} satisfies ReconstructionInfo),
+							);
+						}
+						case "fetch.co": {
+							fetchCount++;
+							return new Response(xorbData);
+						}
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			expect(await blob.text()).toBe(wholeText);
+			expect(versionsRequested).toEqual(["v2", "v1"]);
+			expect(fetchCount).toBe(1);
+		});
+
+		it("handles a single-range v2 xorb without multipart", async () => {
+			const c0 = makeChunk("hello");
+			const c1 = makeChunk("world");
+			const xorbData = concatBytes(c0, c1);
+			const wholeText = "helloworld";
+
+			let fetchCount = 0;
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url) {
+					const url = new URL(_url as string);
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://v2cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "v2cas.co":
+							return new Response(
+								JSON.stringify({
+									terms: [{ hash: "xorb1", range: { start: 0, end: 2 }, unpacked_length: 10 }],
+									xorbs: {
+										xorb1: [
+											{
+												url: "https://v2fetch.co",
+												ranges: [{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: xorbData.byteLength - 1 } }],
+											},
+										],
+									},
+									offset_into_first_range: 0,
+								} satisfies ReconstructionInfoV2),
+							);
+						case "v2fetch.co":
+							fetchCount++;
+							return new Response(xorbData);
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			expect(await blob.text()).toBe(wholeText);
+			expect(fetchCount).toBe(1);
+		});
+
+		it("throws on a non-multipart response to a multi-range request", async () => {
+			const c0 = makeChunk("hello");
+			const c1 = makeChunk("world");
+			const c2 = makeChunk("foo");
+			const c3 = makeChunk("bar!");
+			const rangeAData = concatBytes(c0, c1);
+			const rangeBData = concatBytes(c2, c3);
+			const lenA = rangeAData.byteLength;
+			const total = lenA + rangeBData.byteLength;
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: "helloworldfoobar!".length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url) {
+					const url = new URL(_url as string);
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://v2cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "v2cas.co":
+							return new Response(
+								JSON.stringify({
+									terms: [
+										{ hash: "xorb1", range: { start: 0, end: 2 }, unpacked_length: 10 },
+										{ hash: "xorb1", range: { start: 2, end: 4 }, unpacked_length: 7 },
+									],
+									xorbs: {
+										xorb1: [
+											{
+												url: "https://v2fetch.co",
+												ranges: [
+													{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: lenA - 1 } },
+													{ chunks: { start: 2, end: 4 }, bytes: { start: lenA, end: total - 1 } },
+												],
+											},
+										],
+									},
+									offset_into_first_range: 0,
+								} satisfies ReconstructionInfoV2),
+							);
+						case "v2fetch.co":
+							// Server ignored the multi-range request and returned the whole xorb.
+							return new Response(concatBytes(rangeAData, rangeBData));
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			await expect(blob.text()).rejects.toThrow(/multipart\/byteranges/);
+		});
+
+		it("throws instead of retrying single-range when a multipart part is missing", async () => {
+			const c0 = makeChunk("hello");
+			const c1 = makeChunk("world");
+			const c2 = makeChunk("foo");
+			const c3 = makeChunk("bar!");
+			const rangeAData = concatBytes(c0, c1);
+			const rangeBData = concatBytes(c2, c3);
+			const lenA = rangeAData.byteLength;
+			const total = lenA + rangeBData.byteLength;
+
+			const rangeHeaders: Array<string | undefined> = [];
+
+			const blob = new XetBlob({
+				hash: "test",
+				size: "helloworldfoobar!".length,
+				refreshUrl: "https://huggingface.co",
+				fetch: async function (_url, opts) {
+					const url = new URL(_url as string);
+					const headers = opts?.headers as Record<string, string> | undefined;
+
+					switch (url.hostname) {
+						case "huggingface.co":
+							return new Response(JSON.stringify({ casUrl: "https://v2cas.co", accessToken: "boo", exp: 1_000_000 }));
+						case "v2cas.co":
+							return new Response(
+								JSON.stringify({
+									terms: [
+										{ hash: "xorb1", range: { start: 0, end: 2 }, unpacked_length: 10 },
+										{ hash: "xorb1", range: { start: 2, end: 4 }, unpacked_length: 7 },
+									],
+									xorbs: {
+										xorb1: [
+											{
+												url: "https://v2fetch.co",
+												ranges: [
+													{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: lenA - 1 } },
+													{ chunks: { start: 2, end: 4 }, bytes: { start: lenA, end: total - 1 } },
+												],
+											},
+										],
+									},
+									offset_into_first_range: 0,
+								} satisfies ReconstructionInfoV2),
+							);
+						case "v2fetch.co":
+							rangeHeaders.push(headers?.["Range"]);
+							// Multipart response missing the second requested part.
+							return makeMultipartResponse("BOUNDARY", [
+								{ range: { start: 0, end: lenA - 1 }, total, data: rangeAData },
+							]);
+						default:
+							throw new Error(`Unhandled URL ${url.hostname}`);
+					}
+				},
+			});
+
+			await expect(blob.text()).rejects.toThrow(/did not produce all chunks/);
+			// The multi-range signed URL must never be fetched with a single-range header.
+			const multiRangeHeader = `bytes=0-${lenA - 1},${lenA}-${total - 1}`;
+			expect(rangeHeaders.every((h) => h === multiRangeHeader)).toBe(true);
+		});
+	});
+
 	describe("bg4_regoup_bytes", () => {
 		it("should regroup bytes when the array is %4 length", () => {
 			expect(bg4_regroup_bytes(new Uint8Array([1, 5, 2, 6, 3, 7, 4, 8]))).toEqual(
@@ -306,6 +636,10 @@ describe("XetBlob", () => {
 								);
 							}
 							case "cas.co": {
+								if (url.pathname.includes("/v2/")) {
+									// Simulate a V1-only CAS endpoint: V2 reconstruction is unavailable.
+									return new Response(null, { status: 404 });
+								}
 								// This is the reconstruction info
 								const range = headers?.["Range"]?.slice("bytes=".length).split("-").map(Number);
 
@@ -409,6 +743,10 @@ describe("XetBlob", () => {
 								);
 							}
 							case "cas.co": {
+								if (url.pathname.includes("/v2/")) {
+									// Simulate a V1-only CAS endpoint: V2 reconstruction is unavailable.
+									return new Response(null, { status: 404 });
+								}
 								// This is the reconstruction info
 								const range = headers?.["Range"]?.slice("bytes=".length).split("-").map(Number);
 
@@ -524,6 +862,10 @@ describe("XetBlob", () => {
 								);
 							}
 							case "cas.co": {
+								if (url.pathname.includes("/v2/")) {
+									// Simulate a V1-only CAS endpoint: V2 reconstruction is unavailable.
+									return new Response(null, { status: 404 });
+								}
 								// This is the reconstruction info
 								const range = headers?.["Range"]?.slice("bytes=".length).split("-").map(Number);
 
@@ -634,6 +976,10 @@ describe("XetBlob", () => {
 								);
 							}
 							case "cas.co": {
+								if (url.pathname.includes("/v2/")) {
+									// Simulate a V1-only CAS endpoint: V2 reconstruction is unavailable.
+									return new Response(null, { status: 404 });
+								}
 								// This is the reconstruction info
 								const range = headers?.["Range"]?.slice("bytes=".length).split("-").map(Number);
 
@@ -742,6 +1088,10 @@ describe("XetBlob", () => {
 								);
 							}
 							case "cas.co": {
+								if (url.pathname.includes("/v2/")) {
+									// Simulate a V1-only CAS endpoint: V2 reconstruction is unavailable.
+									return new Response(null, { status: 404 });
+								}
 								// This is the reconstruction info
 								const range = headers?.["Range"]?.slice("bytes=".length).split("-").map(Number);
 
@@ -849,6 +1199,10 @@ describe("XetBlob", () => {
 								);
 							}
 							case "cas.co": {
+								if (url.pathname.includes("/v2/")) {
+									// Simulate a V1-only CAS endpoint: V2 reconstruction is unavailable.
+									return new Response(null, { status: 404 });
+								}
 								// This is the reconstruction info
 								const range = headers?.["Range"]?.slice("bytes=".length).split("-").map(Number);
 

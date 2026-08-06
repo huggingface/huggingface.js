@@ -4,6 +4,7 @@ import { checkCredentials } from "./checkCredentials";
 import { combineUint8Arrays } from "./combineUint8Arrays";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
+import { parseMultipartByteRanges } from "./multipart";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -67,6 +68,121 @@ export interface ReconstructionInfo {
 	offset_into_first_range: number;
 }
 
+/**
+ * Response shape for `GET /v2/reconstructions/{hash}`.
+ *
+ * Unlike V1, a single signed URL can carry multiple byte ranges for a xorb. When more than one
+ * range is requested from a URL, the server replies with a `multipart/byteranges` body.
+ */
+export interface ReconstructionInfoV2 {
+	/**
+	 * List of CAS blocks (same as V1).
+	 */
+	terms: Array<{
+		hash: string;
+		unpacked_length: number;
+		range: { start: number; end: number };
+	}>;
+
+	/**
+	 * Map from CAS block hash => list of multi-range fetch entries. Typically one entry per xorb;
+	 * multiple entries when a URL length limit forces a split.
+	 */
+	xorbs: Record<
+		string,
+		Array<{
+			/** Signed URL covering all of the ranges below. The exact multi-range Range header must be sent. */
+			url: string;
+			ranges: Array<{
+				/** Chunk index range [start, end) within the xorb. */
+				chunks: { start: number; end: number };
+				/** Physical byte range [start, end] (inclusive end) for the HTTP Range header. */
+				bytes: { start: number; end: number };
+			}>;
+		}>
+	>;
+
+	offset_into_first_range: number;
+}
+
+/**
+ * A signed URL plus the chunk/byte ranges it covers. V1 and V2 reconstruction responses are both
+ * normalized into this shape: V1 yields one single-range group per fetch entry, V2 keeps the
+ * server's multi-range grouping.
+ */
+interface FetchGroup {
+	url: string;
+	ranges: Array<{
+		/** Chunk index range [start, end). */
+		range: { start: number; end: number };
+		/** Byte range [start, end] (inclusive end) for the Range header. */
+		url_range: { start: number; end: number };
+	}>;
+}
+
+interface NormalizedReconstructionInfo {
+	terms: ReconstructionInfo["terms"];
+	/** Map from CAS block hash => fetch groups. */
+	fetch_info: Record<string, FetchGroup[]>;
+	offset_into_first_range: number;
+}
+
+function normalizeV1(info: ReconstructionInfo): NormalizedReconstructionInfo {
+	const fetch_info: Record<string, FetchGroup[]> = {};
+	for (const [hash, infos] of Object.entries(info.fetch_info)) {
+		fetch_info[hash] = infos.map((info) => ({
+			url: info.url,
+			ranges: [{ range: info.range, url_range: info.url_range }],
+		}));
+	}
+	return { terms: info.terms, fetch_info, offset_into_first_range: info.offset_into_first_range };
+}
+
+function normalizeV2(info: ReconstructionInfoV2): NormalizedReconstructionInfo {
+	const fetch_info: Record<string, FetchGroup[]> = {};
+	for (const [hash, fetches] of Object.entries(info.xorbs)) {
+		fetch_info[hash] = fetches.map((fetch) => ({
+			url: fetch.url,
+			ranges: fetch.ranges.map((r) => ({ range: r.chunks, url_range: r.bytes })),
+		}));
+	}
+	return { terms: info.terms, fetch_info, offset_into_first_range: info.offset_into_first_range };
+}
+
+/**
+ * Cache of the detected reconstruction API version per CAS endpoint, to avoid re-probing V2 on
+ * every request once we've learned an endpoint only supports V1.
+ */
+const reconstructionApiVersions = new Map<string, 1 | 2>();
+
+// Exported for testing purposes: reset the per-endpoint reconstruction API version cache.
+export function clearReconstructionApiVersionCache(): void {
+	reconstructionApiVersions.clear();
+}
+
+/**
+ * Build the reconstruction URL for a given API version, or undefined when it can't be built.
+ *
+ * When an explicit `reconstructionUrl` is provided (from the `xet-reconstruction-info` Link header,
+ * which points at V1), other versions are derived by swapping the path segment.
+ */
+function reconstructionUrlForVersion(
+	params: { reconstructionUrl?: string; casUrl: string; hash?: string },
+	version: 1 | 2,
+): string | undefined {
+	if (params.reconstructionUrl) {
+		if (version === 1) {
+			return params.reconstructionUrl;
+		}
+		const derived = params.reconstructionUrl.replace("/v1/reconstructions/", `/v${version}/reconstructions/`);
+		return derived === params.reconstructionUrl ? undefined : derived;
+	}
+	if (params.hash) {
+		return `${params.casUrl}/v${version}/reconstructions/${params.hash}`;
+	}
+	return undefined;
+}
+
 export enum XetChunkCompressionScheme {
 	None = 0,
 	LZ4 = 1,
@@ -88,6 +204,83 @@ interface ChunkHeader {
 
 export const XET_CHUNK_HEADER_BYTES = 8;
 
+function parseChunkHeader(view: DataView): ChunkHeader {
+	const chunkHeader: ChunkHeader = {
+		version: view.getUint8(0),
+		compressed_length: view.getUint8(1) | (view.getUint8(2) << 8) | (view.getUint8(3) << 16),
+		compression_scheme: view.getUint8(4),
+		uncompressed_length: view.getUint8(5) | (view.getUint8(6) << 8) | (view.getUint8(7) << 16),
+	};
+
+	if (chunkHeader.version !== 0) {
+		throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
+	}
+
+	if (
+		chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
+		chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
+		chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
+	) {
+		throw new Error(
+			`Unsupported compression scheme ${
+				compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
+			}`,
+		);
+	}
+
+	return chunkHeader;
+}
+
+function decompressChunk(chunkHeader: ChunkHeader, compressed: Uint8Array): Uint8Array {
+	switch (chunkHeader.compression_scheme) {
+		case XetChunkCompressionScheme.LZ4:
+			return lz4_decompress(compressed, chunkHeader.uncompressed_length);
+		case XetChunkCompressionScheme.ByteGroupingLZ4:
+			return bg4_regroup_bytes(lz4_decompress(compressed, chunkHeader.uncompressed_length));
+		default:
+			return compressed.slice();
+	}
+}
+
+/**
+ * Decode a fully-buffered xorb chunk stream (one `multipart/byteranges` part) and store the
+ * decompressed chunks into the range list, so the term reader can yield them from cache.
+ */
+function storeChunks(
+	data: Uint8Array,
+	descriptor: FetchGroup["ranges"][number],
+	rangeList: RangeList<Uint8Array[]>,
+): void {
+	const ranges = rangeList.getRanges(descriptor.range.start, descriptor.range.end);
+	let chunkIndex = descriptor.range.start;
+	let offset = 0;
+
+	while (offset < data.byteLength) {
+		if (data.byteLength - offset < XET_CHUNK_HEADER_BYTES) {
+			throw new Error("Truncated chunk header in multipart part");
+		}
+
+		const chunkHeader = parseChunkHeader(new DataView(data.buffer, data.byteOffset + offset, XET_CHUNK_HEADER_BYTES));
+		const compressedStart = offset + XET_CHUNK_HEADER_BYTES;
+		const compressedEnd = compressedStart + chunkHeader.compressed_length;
+
+		if (compressedEnd > data.byteLength) {
+			throw new Error("Truncated chunk data in multipart part");
+		}
+
+		const uncompressed = decompressChunk(chunkHeader, data.subarray(compressedStart, compressedEnd));
+
+		const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
+		if (range) {
+			range.data ??= [];
+			range.data.push(uncompressed);
+		}
+
+		chunkIndex++;
+		offset = compressedEnd;
+	}
+}
+
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
  */
@@ -100,7 +293,7 @@ export class XetBlob extends Blob {
 	start = 0;
 	end = 0;
 	internalLogging = false;
-	reconstructionInfo: ReconstructionInfo | undefined;
+	reconstructionInfo: NormalizedReconstructionInfo | undefined;
 	listener: XetBlobCreateOptions["listener"];
 
 	constructor(params: XetBlobCreateOptions) {
@@ -166,7 +359,7 @@ export class XetBlob extends Blob {
 		return slice;
 	}
 
-	#reconstructionInfoPromise?: Promise<ReconstructionInfo>;
+	#reconstructionInfoPromise?: Promise<NormalizedReconstructionInfo>;
 
 	#loadReconstructionInfo() {
 		if (this.#reconstructionInfoPromise) {
@@ -176,24 +369,59 @@ export class XetBlob extends Blob {
 		this.#reconstructionInfoPromise = (async () => {
 			const connParams = await getAccessToken(this.accessToken, this.fetch, this.refreshUrl);
 
-			// debug(
-			// 	`curl '${connParams.casUrl}/v1/reconstructions/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
-			// );
+			const rangeHeader = `bytes=${this.start}-${this.end - 1}`;
+			const urlParams = { reconstructionUrl: this.reconstructionUrl, casUrl: connParams.casUrl, hash: this.hash };
 
-			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/v1/reconstructions/${this.hash}`, {
-				headers: {
-					Authorization: `Bearer ${connParams.accessToken}`,
-					Range: `bytes=${this.start}-${this.end - 1}`,
-				},
-			});
+			const fetchVersion = (version: 1 | 2): Promise<Response> | undefined => {
+				const url = reconstructionUrlForVersion(urlParams, version);
+				if (!url) {
+					return undefined;
+				}
 
-			if (!resp.ok) {
-				throw await createApiError(resp);
+				// debug(`curl '${url}' -H 'Authorization: Bearer ${connParams.accessToken}'`);
+
+				return this.fetch(url, {
+					headers: {
+						Authorization: `Bearer ${connParams.accessToken}`,
+						Range: rangeHeader,
+					},
+				});
+			};
+
+			// Prefer V2, falling back to V1 on 404/501, and remember the detected version per endpoint
+			// to avoid re-probing. Mirrors xet-core's RemoteClient behavior.
+			let version = reconstructionApiVersions.get(connParams.casUrl) ?? 2;
+
+			let normalized: NormalizedReconstructionInfo | undefined;
+
+			if (version === 2) {
+				const resp = await fetchVersion(2);
+				if (resp?.ok) {
+					normalized = normalizeV2((await resp.json()) as ReconstructionInfoV2);
+					reconstructionApiVersions.set(connParams.casUrl, 2);
+				} else if (!resp || resp.status === 404 || resp.status === 501) {
+					// V2 unavailable (or no V2 URL could be built): fall back to V1.
+					version = 1;
+				} else {
+					throw await createApiError(resp);
+				}
 			}
 
-			this.reconstructionInfo = (await resp.json()) as ReconstructionInfo;
+			if (!normalized) {
+				const resp = await fetchVersion(1);
+				if (!resp) {
+					throw new Error("Failed to build reconstruction URL");
+				}
+				if (!resp.ok) {
+					throw await createApiError(resp);
+				}
+				normalized = normalizeV1((await resp.json()) as ReconstructionInfo);
+				reconstructionApiVersions.set(connParams.casUrl, 1);
+			}
 
-			return this.reconstructionInfo;
+			this.reconstructionInfo = normalized;
+
+			return normalized;
 		})().finally(() => (this.#reconstructionInfoPromise = undefined));
 
 		return this.#reconstructionInfoPromise;
@@ -231,10 +459,10 @@ export class XetBlob extends Blob {
 		const log = this.internalLogging ? (...args: unknown[]) => console.log(...args) : () => {};
 
 		async function* readData(
-			reconstructionInfo: ReconstructionInfo,
+			reconstructionInfo: NormalizedReconstructionInfo,
 			customFetch: typeof fetch,
 			maxBytes: number,
-			reloadReconstructionInfo: () => Promise<ReconstructionInfo>,
+			reloadReconstructionInfo: () => Promise<NormalizedReconstructionInfo>,
 		) {
 			let totalBytesRead = 0;
 			let readBytesToSkip = reconstructionInfo.offset_into_first_range;
@@ -249,56 +477,137 @@ export class XetBlob extends Blob {
 					throw new Error(`Failed to find range list for term ${term.hash}`);
 				}
 
-				{
-					const termRanges = rangeList.getRanges(term.range.start, term.range.end);
-
-					if (termRanges.every((range) => range.data)) {
-						log("all data available for term", term.hash, readBytesToSkip);
-						rangeLoop: for (const range of termRanges) {
-							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-							for (let chunk of range.data!) {
-								if (readBytesToSkip) {
-									const skipped = Math.min(readBytesToSkip, chunk.byteLength);
-									chunk = chunk.slice(skipped);
-									readBytesToSkip -= skipped;
-									if (!chunk.byteLength) {
-										continue;
-									}
-								}
-								if (chunk.byteLength > maxBytes - totalBytesRead) {
-									chunk = chunk.slice(0, maxBytes - totalBytesRead);
-								}
-								totalBytesRead += chunk.byteLength;
-								// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
-								// if there's more than one range for the same term
-								yield range.refCount > 1 ? chunk.slice() : chunk;
-								listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
-
-								if (totalBytesRead >= maxBytes) {
-									break rangeLoop;
-								}
+				// Locate the fetch group + descriptor whose chunk range covers this term.
+				const locate = (info: NormalizedReconstructionInfo) => {
+					const groups = info.fetch_info[term.hash];
+					if (groups) {
+						for (const group of groups) {
+							const descriptor = group.ranges.find(
+								(r) => r.range.start <= term.range.start && r.range.end >= term.range.end,
+							);
+							if (descriptor) {
+								return { group, descriptor };
 							}
 						}
-						rangeList.remove(term.range.start, term.range.end);
-						continue;
+					}
+					return undefined;
+				};
+
+				// Fetch a multi-range group (V2) in one request, parse the multipart/byteranges response,
+				// and populate the range list cache. The signed URL covers the exact set of ranges, so we
+				// must request all of them together rather than one at a time.
+				const fetchMultiRangeGroup = async (group: FetchGroup): Promise<void> => {
+					const rangeHeaderFor = (g: FetchGroup) =>
+						`bytes=${g.ranges.map((r) => `${r.url_range.start}-${r.url_range.end}`).join(",")}`;
+
+					let resp = await customFetch(group.url, { headers: { Range: rangeHeaderFor(group) } });
+
+					if (resp.status === 403) {
+						// Signed URL expired: reload reconstruction info and relocate the covering group.
+						reconstructionInfo = await reloadReconstructionInfo();
+						const relocated = locate(reconstructionInfo);
+						if (!relocated) {
+							throw new Error(
+								`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end} after refresh`,
+							);
+						}
+						group = relocated.group;
+						resp = await customFetch(group.url, { headers: { Range: rangeHeaderFor(group) } });
+					}
+
+					if (!resp.ok) {
+						throw await createApiError(resp);
+					}
+
+					listener?.({ event: "read" });
+
+					const body = new Uint8Array(await resp.arrayBuffer());
+					const contentType = resp.headers.get("content-type") ?? "";
+
+					if (!contentType.includes("multipart/byteranges")) {
+						// A server that coalesces or ignores the multi-range request cannot be mapped back to
+						// the requested ranges safely, so decoding the body heuristically risks corruption.
+						throw new Error(`Expected multipart/byteranges response for multi-range request, got "${contentType}"`);
+					}
+
+					const parts = parseMultipartByteRanges(contentType, body);
+
+					for (const part of parts) {
+						const descriptor =
+							group.ranges.find((r) => r.url_range.start === part.range.start && r.url_range.end === part.range.end) ??
+							group.ranges.find((r) => r.url_range.start === part.range.start);
+						if (!descriptor) {
+							throw new Error(
+								`Multipart part bytes=${part.range.start}-${part.range.end} did not match any requested range for term ${term.hash}`,
+							);
+						}
+						storeChunks(part.data, descriptor, rangeList);
+					}
+				};
+
+				let termRanges = rangeList.getRanges(term.range.start, term.range.end);
+
+				if (!termRanges.every((range) => range.data)) {
+					const located = locate(reconstructionInfo);
+					if (located && located.group.ranges.length > 1) {
+						await fetchMultiRangeGroup(located.group);
+						termRanges = rangeList.getRanges(term.range.start, term.range.end);
+						if (!termRanges.every((range) => range.data)) {
+							// The single-range path below must never run against a multi-range signed URL:
+							// its signature covers the exact multi-range header, and partially-cached ranges
+							// would get streamed chunks appended, corrupting output.
+							throw new Error(
+								`Multi-range fetch did not produce all chunks for term ${term.hash} range ${term.range.start}-${term.range.end}`,
+							);
+						}
 					}
 				}
 
-				let fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
-					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
-				);
+				if (termRanges.every((range) => range.data)) {
+					log("all data available for term", term.hash, readBytesToSkip);
+					rangeLoop: for (const range of termRanges) {
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						for (let chunk of range.data!) {
+							if (readBytesToSkip) {
+								const skipped = Math.min(readBytesToSkip, chunk.byteLength);
+								chunk = chunk.slice(skipped);
+								readBytesToSkip -= skipped;
+								if (!chunk.byteLength) {
+									continue;
+								}
+							}
+							if (chunk.byteLength > maxBytes - totalBytesRead) {
+								chunk = chunk.slice(0, maxBytes - totalBytesRead);
+							}
+							totalBytesRead += chunk.byteLength;
+							// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
+							// if there's more than one range for the same term
+							yield range.refCount > 1 ? chunk.slice() : chunk;
+							listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
 
-				if (!fetchInfo) {
+							if (totalBytesRead >= maxBytes) {
+								break rangeLoop;
+							}
+						}
+					}
+					rangeList.remove(term.range.start, term.range.end);
+					continue;
+				}
+
+				// Single-range group (all V1, and V2 xorbs with a single range): stream and parse inline.
+				let located = locate(reconstructionInfo);
+				if (!located) {
 					throw new Error(
 						`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
 					);
 				}
+				let fetchInfo = located.descriptor;
 
 				log("term", term);
 				log("fetchinfo", fetchInfo);
 				log("readBytesToSkip", readBytesToSkip);
 
-				let resp = await customFetch(fetchInfo.url, {
+				let resp = await customFetch(located.group.url, {
 					headers: {
 						Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
 					},
@@ -307,15 +616,14 @@ export class XetBlob extends Blob {
 				if (resp.status === 403) {
 					// In case it's expired
 					reconstructionInfo = await reloadReconstructionInfo();
-					fetchInfo = reconstructionInfo.fetch_info[term.hash]?.find(
-						(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
-					);
-					if (!fetchInfo) {
+					located = locate(reconstructionInfo);
+					if (!located) {
 						throw new Error(
 							`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end} after refresh`,
 						);
 					}
-					resp = await customFetch(fetchInfo.url, {
+					fetchInfo = located.descriptor;
+					resp = await customFetch(located.group.url, {
 						headers: {
 							Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
 						},
@@ -374,30 +682,9 @@ export class XetBlob extends Blob {
 						}
 
 						const header = new DataView(result.value.buffer, result.value.byteOffset, XET_CHUNK_HEADER_BYTES);
-						const chunkHeader: ChunkHeader = {
-							version: header.getUint8(0),
-							compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
-							compression_scheme: header.getUint8(4),
-							uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
-						};
+						const chunkHeader = parseChunkHeader(header);
 
 						log("chunk header", chunkHeader, "to skip", readBytesToSkip);
-
-						if (chunkHeader.version !== 0) {
-							throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
-						}
-
-						if (
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
-						) {
-							throw new Error(
-								`Unsupported compression scheme ${
-									compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
-								}`,
-							);
-						}
 
 						if (result.value.byteLength < chunkHeader.compressed_length + XET_CHUNK_HEADER_BYTES) {
 							// We need more data to read the full chunk
@@ -407,17 +694,7 @@ export class XetBlob extends Blob {
 
 						result.value = result.value.slice(XET_CHUNK_HEADER_BYTES);
 
-						let uncompressed =
-							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
-								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
-								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
-									? bg4_regroup_bytes(
-											lz4_decompress(
-												result.value.slice(0, chunkHeader.compressed_length),
-												chunkHeader.uncompressed_length,
-											),
-										)
-									: result.value.slice(0, chunkHeader.compressed_length);
+						let uncompressed = decompressChunk(chunkHeader, result.value.subarray(0, chunkHeader.compressed_length));
 
 						const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
 						const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
