@@ -5,6 +5,7 @@ import { combineUint8Arrays } from "./combineUint8Arrays";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
 import { StreamingMultipartParser } from "./multipart";
+import { sum } from "./sum";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -545,11 +546,8 @@ export class XetBlob extends Blob {
 					if (termRanges.every((range) => range.data)) {
 						log("all data available for term", term.hash, readBytesToSkip);
 
-						const cachedLength = termRanges.reduce(
-							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-							(sum, range) => sum + range.data!.reduce((acc, chunk) => acc + chunk.byteLength, 0),
-							0,
-						);
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						const cachedLength = sum(termRanges.map((range) => sum(range.data!.map((chunk) => chunk.byteLength))));
 						if (cachedLength !== term.unpacked_length) {
 							throw new Error(
 								`Term ${term.hash} range ${term.range.start}-${term.range.end} decoded to ${cachedLength} bytes, expected ${term.unpacked_length}`,
@@ -809,16 +807,10 @@ export class XetBlob extends Blob {
 			}
 
 			const maxConcurrency = Math.max(1, opts.maxConcurrency ?? PARALLEL_DEFAULT_MAX_CONCURRENCY);
+			const estimateEntryBytes = (item: PlanItem) => sum(item.ranges.map((r) => r.bytes.end - r.bytes.start + 1));
 			// Budget for downloaded-but-not-yet-consumed bytes. Derived from the reconstruction so a
 			// file with large xorb fetches still gets real parallelism, without an unbounded worst case.
-			const largestEntryBytes = plan.reduce(
-				(max, item) =>
-					Math.max(
-						max,
-						item.ranges.reduce((sum, r) => sum + (r.bytes.end - r.bytes.start + 1), 0),
-					),
-				0,
-			);
+			const largestEntryBytes = plan.length ? Math.max(...plan.map(estimateEntryBytes)) : 0;
 			const maxInFlightBytes =
 				opts.maxInFlightBytes ??
 				Math.min(PARALLEL_MAX_IN_FLIGHT_BYTES, Math.max(PARALLEL_MIN_IN_FLIGHT_BYTES, 3 * largestEntryBytes));
@@ -857,8 +849,6 @@ export class XetBlob extends Blob {
 				state.inFlightBytes -= n;
 				notifier.notifyAll();
 			};
-			const estimateEntryBytes = (item: PlanItem) =>
-				item.ranges.reduce((sum, r) => sum + (r.bytes.end - r.bytes.start + 1), 0);
 
 			// Signed URLs rotate on auth refresh: re-resolve plan URLs by chunk-range identity.
 			const refreshPlanUrls = (info: ReconstructionInfo) => {
@@ -1143,11 +1133,8 @@ export class XetBlob extends Blob {
 
 					log("all data available for term", term.hash, readBytesToSkip);
 
-					const cachedLength = termRanges.reduce(
-						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-						(sum, range) => sum + range.data!.reduce((acc, chunk) => acc + chunk.byteLength, 0),
-						0,
-					);
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					const cachedLength = sum(termRanges.map((range) => sum(range.data!.map((chunk) => chunk.byteLength))));
 					if (cachedLength !== term.unpacked_length) {
 						throw new Error(
 							`Term ${term.hash} range ${term.range.start}-${term.range.end} decoded to ${cachedLength} bytes, expected ${term.unpacked_length}`,
@@ -1181,7 +1168,7 @@ export class XetBlob extends Blob {
 					let freed = 0;
 					for (const range of termRanges) {
 						if (range.refCount === 1 && range.data) {
-							freed += range.data.reduce((acc, chunk) => acc + chunk.byteLength, 0);
+							freed += sum(range.data.map((chunk) => chunk.byteLength));
 						}
 					}
 					rangeList.remove(term.range.start, term.range.end);
