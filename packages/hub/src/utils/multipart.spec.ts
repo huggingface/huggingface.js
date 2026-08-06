@@ -50,6 +50,24 @@ describe("StreamingMultipartParser", () => {
 		}
 	});
 
+	it("parses a body whose first boundary has no leading CRLF", () => {
+		// RFC 2046 §5.1.1: the CRLF preceding the first delimiter is "considered part of the
+		// preamble" — a body may start directly with `--boundary` (as in the RFC 9110 example).
+		const parts = [enc.encode("hello"), enc.encode("world")];
+		const body = buildMultipart(boundary, parts).slice(2); // strip the leading \r\n
+		expect(Array.from(body.slice(0, 2))).toEqual(Array.from(enc.encode("--")));
+
+		// Whole-body and every-split-point feeds
+		for (let split = 0; split <= body.byteLength; split++) {
+			const parser = new StreamingMultipartParser(contentType);
+			const out = [...parser.push(body.slice(0, split)), ...parser.push(body.slice(split))];
+			expect(
+				out.map((p) => Array.from(p)),
+				`split at ${split}`,
+			).toEqual(parts.map((p) => Array.from(p)));
+		}
+	});
+
 	it("handles binary data containing CR/LF and dash bytes", () => {
 		const parts = [new Uint8Array([0x0d, 0x0a, 0x2d, 0x2d, 0xff, 0x0d, 0x0a])];
 		const body = buildMultipart(boundary, parts);
