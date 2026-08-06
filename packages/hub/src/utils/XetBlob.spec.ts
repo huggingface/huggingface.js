@@ -365,6 +365,52 @@ describe("XetBlob", () => {
 			expect(Math.max(...history)).toBeLessThan(4);
 		});
 
+		it("walks back down after a zero-rate climb (stalled start)", async () => {
+			// Responses stall long enough for the zero-rate heuristic to climb several levels
+			// without measuring them, then stream on a bandwidth-capped link. The controller
+			// must re-measure the skipped levels on the way down instead of being stuck at the
+			// stall peak forever.
+			const fixture = makeParallelFixture(16, 1024, 32);
+			let pacer = Promise.resolve();
+			const takeSlot = () => (pacer = pacer.then(() => new Promise<void>((resolve) => setTimeout(resolve, 1))));
+			const PIECE = 512;
+			const released = new Promise<void>((resolve) => setTimeout(resolve, 150));
+
+			let stat: Record<string, unknown> | undefined;
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				parallelDownloads: { maxConcurrency: 4, controllerTickMs: 30, onStat: (s) => (stat = s) },
+				fetch: async function (_url) {
+					const url = new URL(_url as string);
+					if (url.hostname !== "xorb.co") {
+						return makeFetch(fixture)(_url as string);
+					}
+					await released;
+					const data = fixture.xorbData[Number(url.pathname.slice(1))];
+					let offset = 0;
+					return new Response(
+						new ReadableStream({
+							async pull(controller) {
+								await takeSlot();
+								controller.enqueue(data.subarray(offset, offset + PIECE));
+								offset += PIECE;
+								if (offset >= data.byteLength) {
+									controller.close();
+								}
+							},
+						}),
+					);
+				},
+			});
+
+			expect(await blob.text()).toBe(fixture.wholeText);
+			const history = (stat?.targetHistory ?? []) as number[];
+			expect(Math.max(...history)).toBeGreaterThanOrEqual(3); // the stall climbed
+			expect(history[history.length - 1]).toBeLessThan(Math.max(...history)); // …and came back down
+		});
+
 		it("propagates fetch errors", async () => {
 			const fixture = makeParallelFixture(3);
 

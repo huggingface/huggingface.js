@@ -1159,7 +1159,14 @@ export class XetBlob extends Blob {
 					const ewma = ((levelRate.get(state.target) ?? rate) + rate) / 2;
 					levelRate.set(state.target, ewma);
 					const below = levelRate.get(state.target - 1);
-					if (below !== undefined && ewma < below * PARALLEL_PROBE_KEEP_MARGIN) {
+					if (state.target > 1 && below === undefined) {
+						// The level below was never measured (skipped by a zero-rate climb): step
+						// down to establish its baseline, keeping this level's average for the way
+						// back up. Repeats until a measured level (or 1) is reached, so stall-climbs
+						// always have a path back down.
+						state.target--;
+						settleTicks = 1;
+					} else if (below !== undefined && ewma < below * PARALLEL_PROBE_KEEP_MARGIN) {
 						// The extra connection doesn't pay for itself: back off and hold.
 						levelRate.delete(state.target);
 						state.target--;
