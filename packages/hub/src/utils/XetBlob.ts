@@ -858,6 +858,7 @@ export class XetBlob extends Blob {
 				active: 0,
 				claimed: 0,
 				maxActive: 0,
+				activeHighWater: 0,
 				count429: 0,
 				targetHistory: [] as number[],
 			};
@@ -1086,6 +1087,7 @@ export class XetBlob extends Blob {
 						}
 						state.active++;
 						state.maxActive = Math.max(state.maxActive, state.active);
+						state.activeHighWater = Math.max(state.activeHighWater, state.active);
 						let lastError: unknown;
 						// One tally across attempts: commits skip already-populated ranges, so bytes
 						// committed by a failed attempt (possibly consumed and freed by the reader in
@@ -1140,6 +1142,12 @@ export class XetBlob extends Blob {
 			const controller = setInterval(() => {
 				const rate = state.decodedBytes - lastBytes;
 				lastBytes = state.decodedBytes;
+				// Highest number of simultaneously active connections during the tick: after a
+				// down-step, the retired worker keeps draining its entry for a while, and those
+				// ticks must not be credited to the lower level (an inflated baseline would
+				// suppress legitimate climbs later).
+				const tickHighWater = state.activeHighWater;
+				state.activeHighWater = state.active;
 				holdTicks = Math.max(0, holdTicks - 1);
 				if (state.count429 > last429) {
 					last429 = state.count429;
@@ -1153,9 +1161,10 @@ export class XetBlob extends Blob {
 					settleTicks = 1;
 				} else if (settleTicks > 0) {
 					settleTicks--;
-				} else if (state.claimed >= state.target) {
+				} else if (state.claimed >= state.target && tickHighWater <= state.target) {
 					// Enough work for every connection during the tick (workers hold their claim
-					// between entries): a valid throughput sample for the current level.
+					// between entries) and no extra connections still draining: a valid
+					// throughput sample for the current level.
 					const ewma = ((levelRate.get(state.target) ?? rate) + rate) / 2;
 					levelRate.set(state.target, ewma);
 					const below = levelRate.get(state.target - 1);

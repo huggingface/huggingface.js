@@ -374,7 +374,7 @@ describe("XetBlob", () => {
 			let pacer = Promise.resolve();
 			const takeSlot = () => (pacer = pacer.then(() => new Promise<void>((resolve) => setTimeout(resolve, 1))));
 			const PIECE = 512;
-			const released = new Promise<void>((resolve) => setTimeout(resolve, 150));
+			const released = new Promise<void>((resolve) => setTimeout(resolve, 250));
 
 			let stat: Record<string, unknown> | undefined;
 			const blob = new XetBlob({
