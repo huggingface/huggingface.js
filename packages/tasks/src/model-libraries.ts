@@ -740,6 +740,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras_hub,
 		filter: true,
 	},
+	kerasformers: {
+		prettyLabel: "KerasFormers",
+		repoName: "KerasFormers",
+		repoUrl: "https://github.com/IMvision12/KerasFormers",
+		docsUrl: "https://imvision12.github.io/KerasFormers/",
+		countDownloads: `path:"model.weights.h5" OR path:"model.weights.json"`,
+		filter: false,
+	},
 	kernels: {
 		prettyLabel: "Kernels",
 		repoName: "Kernels",
@@ -786,6 +794,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/lagernvs",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	ltx: {
+		prettyLabel: "LTX.io",
+		repoName: "LTX-2",
+		repoUrl: "https://github.com/Lightricks/LTX-2",
+		docsUrl: "https://github.com/Lightricks/LTX-2",
+		snippets: snippets.ltx,
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"lightning-ir": {
 		prettyLabel: "Lightning IR",
@@ -921,6 +938,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 	},
+	mflux: {
+		prettyLabel: "mflux",
+		repoName: "mflux",
+		repoUrl: "https://github.com/filipstrand/mflux",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
@@ -1013,6 +1037,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.nemo,
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
+	},
+	ninfer: {
+		prettyLabel: "NInfer",
+		repoName: "NInfer",
+		repoUrl: "https://github.com/Neroued/ninfer",
+		filter: false,
+		countDownloads: `path_extension:"ninfer"`,
+	},
+	nobg: {
+		prettyLabel: "nobg",
+		repoName: "nobg",
+		repoUrl: "https://github.com/feyninc/nobg",
+		snippets: snippets.nobg,
+		filter: false,
 	},
 	"nv-medtech": {
 		prettyLabel: "NV-MedTech",

@@ -29,6 +29,7 @@ import {
 	BaseConversationalTask,
 	BaseTextGenerationTask,
 	TaskProviderHelper,
+	type TextToSpeechTaskHelper,
 } from "./providerHelper.js";
 
 /**
@@ -212,6 +213,37 @@ export class DeepInfraAutomaticSpeechRecognitionTask
 		}
 		throw new InferenceClientProviderOutputError(
 			`Received malformed response from DeepInfra automatic-speech-recognition API: ${JSON.stringify(response)}`,
+		);
+	}
+}
+
+export class DeepInfraTextToSpeechTask extends TaskProviderHelper implements TextToSpeechTaskHelper {
+	constructor() {
+		super("deepinfra", DEEPINFRA_API_BASE_URL);
+	}
+
+	makeRoute(): string {
+		return "v1/openai/audio/speech";
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		// `model` is applied last so caller parameters cannot override the mapped provider model.
+		// `voice` is model-specific and optional; we pass it through untouched and let the API
+		// surface a clear error when a model requires one.
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown> | undefined),
+			input: params.args.inputs,
+			model: params.model,
+		};
+	}
+
+	async getResponse(response: Blob): Promise<Blob> {
+		if (response instanceof Blob) {
+			return response;
+		}
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from DeepInfra text-to-speech API: ${JSON.stringify(response)}`,
 		);
 	}
 }

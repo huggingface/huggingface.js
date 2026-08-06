@@ -405,7 +405,7 @@ const diffusers_default = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
@@ -417,7 +417,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
 input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
@@ -431,7 +431,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
 pipe.to("cuda")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -457,7 +457,7 @@ const diffusers_lora = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
@@ -470,7 +470,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
@@ -485,7 +485,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import export_to_video
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -500,7 +500,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_lora_weights("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
@@ -515,7 +515,7 @@ const diffusers_textual_inversion = (model: ModelData) => [
 from diffusers import DiffusionPipeline
 
 # switch to "mps" for apple devices
-pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", torch_dtype=torch.bfloat16, device_map="cuda")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}", dtype=torch.bfloat16, device_map="cuda")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
@@ -528,7 +528,7 @@ image = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-d
 mask = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup_mask.png")
 
 # switch to "mps" for apple devices
-pipe = FluxFillPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16, device_map="cuda")
+pipe = FluxFillPipeline.from_pretrained("${model.id}", dtype=torch.bfloat16, device_map="cuda")
 image = pipe(
     prompt="a white paper cup",
     image=image,
@@ -549,7 +549,7 @@ from diffusers import AutoPipelineForInpainting
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", torch_dtype=torch.float16, variant="fp16", device_map="cuda")
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", dtype=torch.float16, variant="fp16", device_map="cuda")
 
 img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
 mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
@@ -1030,6 +1030,85 @@ audio = m.generate("This high quality TTS model works without a GPU")
 import soundfile as sf
 sf.write('output.wav', audio, 24000)`,
 ];
+
+export const ltx = (model: ModelData): string[] => {
+	const localDir = `models/${nameWithoutNamespace(model.id)}`;
+	const install = `# Install the LTX-2 pipelines
+git clone https://github.com/Lightricks/LTX-2.git
+cd LTX-2
+uv sync --frozen`;
+
+	// Every pipeline needs the Gemma text encoder, which lives in a separate repo.
+	const download = `# Download the weights from this repo, plus the Gemma text encoder
+hf download ${model.id} --local-dir ${localDir}
+hf download google/gemma-3-12b-it-qat-q4_0-unquantized --local-dir models/gemma-3-12b`;
+
+	// Add "--image <path> <frame_idx> <strength>" to any command below to condition on
+	// an image (e.g. "--image image.jpg 0 0.8"), turning text-to-video into image-to-video.
+	const imageToVideoHint = `# For image-to-video, add: --image path/to/image.jpg 0 0.8`;
+
+	const tags = model.tags ?? [];
+
+	// IC-LoRA: video-to-video / image-to-video with a control (reference) signal.
+	// Checked before "lora" because an IC-LoRA repo may carry both tags.
+	if (tags.includes("ic-lora")) {
+		return [
+			install,
+			download,
+			`# Video-to-video with the IC-LoRA (runs on the distilled base model)
+uv run python -m ltx_pipelines.ic_lora \\
+    --distilled-checkpoint-path path/to/distilled_checkpoint.safetensors \\
+    --spatial-upsampler-path path/to/spatial_upsampler.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --lora ${localDir}/<weights>.safetensors 1.0 \\
+    --video-conditioning reference.mp4 1.0 \\
+    --prompt "your prompt here" \\
+    --output-path output.mp4`,
+		];
+	}
+
+	// Standard LoRA applied on top of the base pipeline.
+	if (tags.includes("lora")) {
+		return [
+			install,
+			download,
+			`# Text/image-to-video with the LoRA on the HQ two-stage base pipeline
+uv run python -m ltx_pipelines.ti2vid_two_stages_hq \\
+    --checkpoint-path path/to/checkpoint.safetensors \\
+    --distilled-lora path/to/distilled_lora.safetensors 0.8 \\
+    --spatial-upsampler-path path/to/spatial_upsampler.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --lora ${localDir}/<weights>.safetensors 1.0 \\
+    --prompt "your prompt here" \\
+    --output-path output.mp4
+${imageToVideoHint}`,
+		];
+	}
+
+	// Base model: the fast (distilled) and HQ (two-stage) pipelines. Substitute the
+	// .safetensors filenames with the ones listed under this repo's "Files and versions".
+	return [
+		install,
+		download,
+		`# Fast pipeline (distilled model, no distilled LoRA needed)
+uv run python -m ltx_pipelines.distilled \\
+    --distilled-checkpoint-path ${localDir}/<distilled-checkpoint>.safetensors \\
+    --spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --prompt "A beautiful sunset over the ocean" \\
+    --output-path output.mp4
+${imageToVideoHint}`,
+		`# HQ pipeline (two-stage, higher quality)
+uv run python -m ltx_pipelines.ti2vid_two_stages_hq \\
+    --checkpoint-path ${localDir}/<checkpoint>.safetensors \\
+    --distilled-lora ${localDir}/<distilled-lora>.safetensors 0.8 \\
+    --spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --prompt "A beautiful sunset over the ocean" \\
+    --output-path output.mp4
+${imageToVideoHint}`,
+	];
+};
 
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
@@ -2186,6 +2265,28 @@ birefnet = AutoModelForImageSegmentation.from_pretrained("${model.id}", trust_re
 from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
+
+export const nobg = (model: ModelData): string[] => {
+	const installSnippet = `pip install nobg`;
+
+	const exampleSnippet = `import torch
+from loadimg import load_img
+from nobg import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("${model.id}").eval()
+processor = AutoProcessor.from_pretrained("${model.id}")
+
+image = load_img("input.jpg").convert("RGB")
+inputs = processor(image, return_tensors="pt")
+
+with torch.no_grad():
+    outputs = model(pixel_values=inputs["pixel_values"])
+
+alpha = processor.post_process_alpha_matting(outputs, target_sizes=[(image.height, image.width)])[0]
+processor.cutout(image, alpha).save("output.png")`;
+
+	return [installSnippet, exampleSnippet];
+};
 
 export const supertonic = (): string[] => [
 	`from supertonic import TTS

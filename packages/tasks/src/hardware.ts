@@ -59,6 +59,13 @@ export interface HardwareSpec {
 	 * the year the family debuted.
 	 */
 	releaseYear: number;
+	/**
+	 * Alternative names this SKU is known by, e.g. the name of a device
+	 * it powers ("DGX Spark" for the GB10) or a chip codename
+	 * ("Strix Halo" for the Ryzen AI Max+ 395). Used for search/filtering.
+	 * An alias doesn't need to be unique: multiple SKUs can share the same one.
+	 */
+	aliases?: string[];
 }
 
 export const DEFAULT_MEMORY_OPTIONS = [
