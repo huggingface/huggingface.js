@@ -12,4 +12,12 @@ describe("combineUint8Arrays", () => {
 		const result = combineUint8Arrays(new Uint8Array(a), new Uint8Array(b));
 		expect(result).toEqual(new Uint8Array(expected));
 	});
+
+	it("combines any number of arrays", () => {
+		expect(combineUint8Arrays()).toEqual(new Uint8Array([]));
+		expect(combineUint8Arrays(new Uint8Array([1, 2]))).toEqual(new Uint8Array([1, 2]));
+		expect(combineUint8Arrays(new Uint8Array([1]), new Uint8Array([]), new Uint8Array([2, 3]))).toEqual(
+			new Uint8Array([1, 2, 3]),
+		);
+	});
 });

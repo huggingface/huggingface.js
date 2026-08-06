@@ -339,5 +339,6 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		msrp: 1_500,
 		power: 120,
 		releaseYear: 2025,
+		aliases: ["Strix Halo"],
 	},
 };
