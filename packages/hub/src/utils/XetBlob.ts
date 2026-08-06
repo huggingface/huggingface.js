@@ -256,10 +256,22 @@ function decodePartChunks(
 	return staged;
 }
 
-function commitChunks(staged: StagedChunks): void {
+/**
+ * Commit staged chunks to their ranges and return the number of bytes committed.
+ *
+ * Ranges that already have data (eg from a previous attempt of a retried fetch) are skipped, so
+ * re-decoding an entry never commits — or counts — the same range twice.
+ */
+function commitChunks(staged: StagedChunks): number {
+	let committed = 0;
 	for (const [range, chunks] of staged) {
+		if (range.data) {
+			continue;
+		}
 		range.data = chunks;
+		committed += sum(chunks.map((chunk) => chunk.byteLength));
 	}
+	return committed;
 }
 
 /**
@@ -873,7 +885,13 @@ export class XetBlob extends Blob {
 
 			// Fetch + decode one entry into the rangeList cache (per-range atomic commits).
 			// `tally.committed` counts decoded bytes committed to the cache (for budget accounting).
+			// The tally is shared across retry attempts: commits skip already-populated ranges, so
+			// each range is counted at most once no matter how often the entry is re-fetched.
 			const decodeEntry = async (item: PlanItem, entryIdx: number, tally: { committed: number }): Promise<void> => {
+				if (state.error || state.finished) {
+					// Cancelled or failed while waiting for budget: don't open a new connection.
+					return;
+				}
 				const rangeList = rangeLists.get(item.hash);
 				if (!rangeList) {
 					throw new Error(`Failed to find range list for entry ${item.hash}`);
@@ -919,15 +937,9 @@ export class XetBlob extends Blob {
 									throw new Error(`Received more multipart parts than the ${item.ranges.length} signed ranges`);
 								}
 								const staged = decodePartChunks(part, descriptor, rangeList);
-								let stagedBytes = 0;
-								for (const chunks of staged.values()) {
-									for (const chunk of chunks) {
-										stagedBytes += chunk.byteLength;
-									}
-								}
-								commitChunks(staged);
-								tally.committed += stagedBytes;
-								state.decodedBytes += stagedBytes;
+								tally.committed += commitChunks(staged);
+								// Throughput signal counts decode work even for skipped (re-fetched) ranges
+								state.decodedBytes += part.byteLength;
 								partIndex++;
 								notifier.notifyAll();
 							}
@@ -998,9 +1010,11 @@ export class XetBlob extends Blob {
 										staged.set(range, chunks);
 									}
 									chunks.push(uncompressed);
-									tally.committed += uncompressed.byteLength;
-									if (chunkIndex === range.end - 1) {
+									// Commit (and count) only when the range completes, and only if it wasn't
+									// already committed by a previous attempt of this entry.
+									if (chunkIndex === range.end - 1 && !range.data) {
 										range.data = chunks;
+										tally.committed += sum(chunks.map((chunk) => chunk.byteLength));
 										notifier.notifyAll();
 									}
 								}
@@ -1046,11 +1060,19 @@ export class XetBlob extends Blob {
 					try {
 						// Reserve budget BEFORE opening the connection, so streams are never stalled.
 						await budgetAcquire(est, idx);
+						if (state.error || state.finished) {
+							// Cancelled or failed while waiting for budget: don't start the fetch.
+							budgetRelease(est);
+							return;
+						}
 						state.active++;
 						state.maxActive = Math.max(state.maxActive, state.active);
 						let lastError: unknown;
+						// One tally across attempts: commits skip already-populated ranges, so bytes
+						// committed by a failed attempt (possibly consumed and freed by the reader in
+						// the meantime) are never double-counted, keeping the budget accounting exact.
+						const tally = { committed: 0 };
 						for (let attempt = 0; attempt < 2; attempt++) {
-							const tally = { committed: 0 };
 							try {
 								await decodeEntry(plan[idx], idx, tally);
 								// Swap the reservation for the actual committed bytes (released as consumed).
@@ -1067,6 +1089,8 @@ export class XetBlob extends Blob {
 							}
 						}
 						if (lastError) {
+							// The download is failing: release the whole reservation. Bytes committed by a
+							// partial attempt are not re-released by the consumer since it stops on error.
 							budgetRelease(est);
 							state.error ??= lastError;
 						}
