@@ -63,7 +63,7 @@ describe("StreamingMultipartParser", () => {
 			}
 			expect(out.length, `feed size ${feedSize}`).toBe(1);
 			expect(out[0].byteLength, `feed size ${feedSize}`).toBe(partData.byteLength);
-			expect(Buffer.from(out[0]).equals(Buffer.from(partData)), `feed size ${feedSize}`).toBe(true);
+			expect(out[0], `feed size ${feedSize}`).toEqual(partData);
 		}
 	});
 
