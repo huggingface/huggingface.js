@@ -747,6 +747,8 @@ describe("XetBlob", () => {
 					size: totalSize,
 					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
+					// These tests cover the serial streaming decoder, now that parallel is the default
+					parallelDownloads: false,
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;
@@ -851,6 +853,8 @@ describe("XetBlob", () => {
 					size: totalSize,
 					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
+					// These tests cover the serial streaming decoder, now that parallel is the default
+					parallelDownloads: false,
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;
@@ -968,6 +972,8 @@ describe("XetBlob", () => {
 					size: totalSize,
 					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
+					// These tests cover the serial streaming decoder, now that parallel is the default
+					parallelDownloads: false,
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;
@@ -1079,6 +1085,8 @@ describe("XetBlob", () => {
 					size: totalSize,
 					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
+					// These tests cover the serial streaming decoder, now that parallel is the default
+					parallelDownloads: false,
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;
@@ -1188,6 +1196,8 @@ describe("XetBlob", () => {
 					size: totalSize,
 					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
+					// These tests cover the serial streaming decoder, now that parallel is the default
+					parallelDownloads: false,
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;
@@ -1296,6 +1306,8 @@ describe("XetBlob", () => {
 					size: totalSize,
 					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
+					// These tests cover the serial streaming decoder, now that parallel is the default
+					parallelDownloads: false,
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;

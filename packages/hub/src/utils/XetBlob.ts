@@ -6,6 +6,7 @@ import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
 import { StreamingMultipartParser } from "./multipart";
 import { sum } from "./sum";
+import { isFrontend } from "./isFrontend";
 import { concatUint8Arrays } from "./concatUint8Arrays";
 
 const JWT_SAFETY_PERIOD = 60_000;
@@ -38,9 +39,11 @@ type XetBlobCreateOptions = {
 	 * increasing while aggregate throughput improves and backing off on rate-limits or when
 	 * extra connections stop helping. Memory is bounded: at most `maxInFlightBytes` of
 	 * downloaded-but-not-yet-consumed data is held (by default derived from the file's
-	 * reconstruction, between 64MB and 256MB).
+	 * reconstruction: 64-256MB in Node, 64MB in browsers).
 	 *
-	 * @default false
+	 * Pass `false` to download serially, or an object to tune the ceiling/budget.
+	 *
+	 * @default true
 	 */
 	parallelDownloads?: boolean | ParallelDownloadOptions;
 } & ({ hash: string; reconstructionUrl?: string } | { hash?: string; reconstructionUrl: string }) &
@@ -61,9 +64,11 @@ export interface ParallelDownloadOptions {
 	onStat?: (stat: Record<string, unknown>) => void;
 }
 
-const PARALLEL_DEFAULT_MAX_CONCURRENCY = 8;
+// Browsers get a lower ceiling and a fixed budget: connections may share an HTTP/2 session,
+// and tab/worker memory is scarcer than in Node.
+const PARALLEL_DEFAULT_MAX_CONCURRENCY = isFrontend ? 4 : 8;
 const PARALLEL_MIN_IN_FLIGHT_BYTES = 64 * 1024 * 1024;
-const PARALLEL_MAX_IN_FLIGHT_BYTES = 256 * 1024 * 1024;
+const PARALLEL_MAX_IN_FLIGHT_BYTES = isFrontend ? 64 * 1024 * 1024 : 256 * 1024 * 1024;
 
 /** Simple broadcast notifier: `wait()` resolves at the next `notifyAll()`. */
 class Notifier {
@@ -767,10 +772,10 @@ export class XetBlob extends Blob {
 		// EXPERIMENT: parallel scheduler. Fetches xorb entries with N workers, decodes into the
 		// rangeList cache under a decoded-bytes budget, and yields terms in order from the cache.
 		const parallelOptions =
-			this.parallelDownloads === true
-				? {}
-				: this.parallelDownloads === false || this.parallelDownloads === undefined
-					? undefined
+			this.parallelDownloads === false
+				? undefined
+				: this.parallelDownloads === true || this.parallelDownloads === undefined
+					? {}
 					: this.parallelDownloads;
 		async function* readDataParallel(
 			reconstructionInfo: ReconstructionInfo,

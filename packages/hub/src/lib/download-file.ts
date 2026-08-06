@@ -48,7 +48,9 @@ export async function downloadFile(
 		 * For xet files, fetch data with multiple parallel requests, with adaptive
 		 * concurrency and a bounded memory budget. Ignored for non-xet downloads.
 		 *
-		 * @default false
+		 * Pass `false` to download serially, or an object to tune the ceiling/budget.
+		 *
+		 * @default true
 		 */
 		parallelDownloads?: boolean | ParallelDownloadOptions;
 	} & Partial<CredentialsParams>,
