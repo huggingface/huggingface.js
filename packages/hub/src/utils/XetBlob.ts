@@ -35,9 +35,10 @@ type XetBlobCreateOptions = {
 	/**
 	 * Fetch xorb data with multiple parallel requests, instead of one at a time.
 	 *
-	 * Concurrency is tuned automatically (starting at 2, between 1 and `maxConcurrency`),
-	 * increasing while aggregate throughput improves and backing off on rate-limits or when
-	 * extra connections stop helping. Memory is bounded: at most `maxInFlightBytes` of
+	 * Concurrency is tuned automatically (starting serially, between 1 and `maxConcurrency`):
+	 * extra connections are added one at a time and only kept while they improve aggregate
+	 * throughput, so an already-saturated link stays at (or near) serial speed. Rate-limits
+	 * always back off. Memory is bounded: at most `maxInFlightBytes` of
 	 * downloaded-but-not-yet-consumed data is held (by default derived from the file's
 	 * reconstruction, between 64MB and 256MB).
 	 *
@@ -62,6 +63,10 @@ export interface ParallelDownloadOptions {
 	 * @internal Instrumentation callback for tests and benchmarks, called once per download.
 	 */
 	onStat?: (stat: Record<string, unknown>) => void;
+	/**
+	 * @internal Concurrency controller tick interval, for tests and benchmarks.
+	 */
+	controllerTickMs?: number;
 }
 
 // Browsers get a lower concurrency ceiling: connections may share an HTTP/2 session, and
@@ -73,6 +78,11 @@ export interface ParallelDownloadOptions {
 const PARALLEL_DEFAULT_MAX_CONCURRENCY = isFrontend ? 4 : 8;
 const PARALLEL_MIN_IN_FLIGHT_BYTES = 64 * 1024 * 1024;
 const PARALLEL_MAX_IN_FLIGHT_BYTES = 256 * 1024 * 1024;
+const PARALLEL_CONTROLLER_TICK_MS = 500;
+/** An extra connection is kept only if aggregate throughput improves by at least this factor. */
+const PARALLEL_PROBE_KEEP_MARGIN = 1.05;
+/** Ticks between upward re-probes once a concurrency plateau has been found (~5s). */
+const PARALLEL_PLATEAU_HOLD_TICKS = 10;
 
 /** Simple broadcast notifier: `wait()` resolves at the next `notifyAll()`. */
 class Notifier {
@@ -840,7 +850,7 @@ export class XetBlob extends Blob {
 			const state = {
 				nextEntry: 0,
 				neededEntry: 0,
-				target: Math.min(2, maxConcurrency),
+				target: 1,
 				error: undefined as unknown,
 				finished: false,
 				inFlightBytes: 0,
@@ -1112,30 +1122,57 @@ export class XetBlob extends Blob {
 			};
 			const workersDone = Promise.allSettled(Array.from({ length: maxConcurrency }, (_, i) => runWorker(i)));
 
-			// ---- Adaptive concurrency controller (AIMD-style, throughput-driven)
+			// ---- Adaptive concurrency controller (plateau-seeking, throughput-driven)
 			//
-			// Every 500ms, compare aggregate decode throughput with the (decaying) best observed:
-			// grow while extra connections keep improving it, back off on rate-limits or when
-			// throughput regresses. This detects bandwidth saturation even when every request
-			// succeeds, so capped links settle at low concurrency instead of adding contention.
+			// Starts serial and probes one extra connection at a time, keeping a per-level
+			// average of aggregate decode throughput. A probe is kept only when the new level
+			// actually improves aggregate throughput; otherwise back off to the plateau and
+			// hold there, re-probing only occasionally in case conditions changed. On an
+			// already-saturated link this settles back to serial — the worst case is a brief
+			// probe — while unsaturated paths keep ramping. Ticks where nothing flowed probe
+			// up regardless: the bottleneck is latency, which extra connections hide. Rate
+			// limits (429s) always step down.
+			const levelRate = new Map<number, number>();
 			let lastBytes = 0;
-			let lastRate = 0;
 			let last429 = 0;
+			let settleTicks = 1; // measurements skipped while the latest target change takes effect
+			let holdTicks = 0; // plateau hold: no upward probes while positive
 			const controller = setInterval(() => {
 				const rate = state.decodedBytes - lastBytes;
 				lastBytes = state.decodedBytes;
+				holdTicks = Math.max(0, holdTicks - 1);
 				if (state.count429 > last429) {
 					last429 = state.count429;
 					state.target = Math.max(1, state.target - 1);
-				} else if (rate > lastRate * 1.05) {
+					settleTicks = 1;
+					holdTicks = PARALLEL_PLATEAU_HOLD_TICKS;
+				} else if (rate === 0) {
+					// Nothing decoded during the tick: latency-bound (TTFB) or stalled, so an
+					// extra connection cannot reduce aggregate throughput.
 					state.target = Math.min(maxConcurrency, state.target + 1);
-				} else if (rate > 0 && rate < lastRate * 0.7) {
-					state.target = Math.max(1, state.target - 1);
+					settleTicks = 1;
+				} else if (settleTicks > 0) {
+					settleTicks--;
+				} else if (state.claimed >= state.target) {
+					// Enough work for every connection during the tick (workers hold their claim
+					// between entries): a valid throughput sample for the current level.
+					const ewma = ((levelRate.get(state.target) ?? rate) + rate) / 2;
+					levelRate.set(state.target, ewma);
+					const below = levelRate.get(state.target - 1);
+					if (below !== undefined && ewma < below * PARALLEL_PROBE_KEEP_MARGIN) {
+						// The extra connection doesn't pay for itself: back off and hold.
+						levelRate.delete(state.target);
+						state.target--;
+						settleTicks = 1;
+						holdTicks = PARALLEL_PLATEAU_HOLD_TICKS;
+					} else if (holdTicks === 0 && state.target < maxConcurrency) {
+						state.target++;
+						settleTicks = 1;
+					}
 				}
-				lastRate = Math.max(rate, lastRate * 0.9);
 				state.targetHistory.push(state.target);
 				notifier.notifyAll();
-			}, 500);
+			}, opts.controllerTickMs ?? PARALLEL_CONTROLLER_TICK_MS);
 
 			// ---- In-order consumer
 			try {

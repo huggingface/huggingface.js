@@ -203,26 +203,32 @@ describe("XetBlob", () => {
 	describe("parallelDownloads", () => {
 		// Build a file spread over `xorbCount` distinct xorbs (2 chunks each), served by one URL per
 		// xorb so the entry fetches are independent and can overlap.
-		function makeParallelFixture(xorbCount: number) {
+		function makeParallelFixture(xorbCount: number, chunkLength = 12, chunksPerXorb = 2) {
 			const contents = Array(xorbCount)
 				.fill(0)
-				.map((_, i) => [`chunk-${i}-a-`, `chunk-${i}-b!`] as const);
-			const xorbData = contents.map(([a, b]) => combineUint8Arrays(makeChunk(a), makeChunk(b)));
-			const wholeText = contents.map(([a, b]) => a + b).join("");
+				.map((_, i) =>
+					Array(chunksPerXorb)
+						.fill(0)
+						.map((_, j) => `chunk-${i}-${j}-`.padEnd(chunkLength, "x")),
+				);
+			const xorbData = contents.map((chunks) => combineUint8Arrays(...chunks.map((chunk) => makeChunk(chunk))));
+			const wholeText = contents.map((chunks) => chunks.join("")).join("");
 
 			const reconstructionInfo: ReconstructionInfo = {
-				terms: contents.map(([a, b], i) => ({
+				terms: contents.map((chunks, i) => ({
 					hash: `xorb${i}`,
-					range: { start: 0, end: 2 },
-					unpacked_length: a.length + b.length,
+					range: { start: 0, end: chunksPerXorb },
+					unpacked_length: sum(chunks.map((chunk) => chunk.length)),
 				})),
 				xorbs: Object.fromEntries(
-					contents.map(([, ,], i) => [
+					contents.map((_, i) => [
 						`xorb${i}`,
 						[
 							{
 								url: `https://xorb.co/${i}`,
-								ranges: [{ chunks: { start: 0, end: 2 }, bytes: { start: 0, end: xorbData[i].byteLength - 1 } }],
+								ranges: [
+									{ chunks: { start: 0, end: chunksPerXorb }, bytes: { start: 0, end: xorbData[i].byteLength - 1 } },
+								],
 							},
 						],
 					]),
@@ -272,7 +278,9 @@ describe("XetBlob", () => {
 				hash: "test",
 				size: fixture.wholeText.length,
 				refreshUrl: "https://huggingface.co",
-				parallelDownloads: { maxConcurrency: 4, onStat: (s) => (stat = s) },
+				// Fast controller ticks: with the responses gated, no bytes flow, so each tick
+				// probes one connection up (latency-bound heuristic) until the ceiling.
+				parallelDownloads: { maxConcurrency: 4, controllerTickMs: 5, onStat: (s) => (stat = s) },
 				fetch: makeFetch(fixture, {
 					gate: released,
 					onXorbRequest: () => {
@@ -307,6 +315,54 @@ describe("XetBlob", () => {
 
 			expect(await blob.text()).toBe(fixture.wholeText);
 			expect(stat?.maxActive).toBe(1);
+		});
+
+		it("settles back to serial on a bandwidth-capped link", async () => {
+			// Simulate a saturated link: a shared pacer caps aggregate throughput no matter how
+			// many streams are open, so extra connections never improve the byte rate and the
+			// controller should spend most of the download at concurrency 1.
+			const fixture = makeParallelFixture(16, 1024, 32);
+			let pacer = Promise.resolve();
+			const takeSlot = () => (pacer = pacer.then(() => new Promise<void>((resolve) => setTimeout(resolve, 1))));
+			const PIECE = 512;
+
+			let stat: Record<string, unknown> | undefined;
+			const blob = new XetBlob({
+				hash: "test",
+				size: fixture.wholeText.length,
+				refreshUrl: "https://huggingface.co",
+				parallelDownloads: { maxConcurrency: 4, controllerTickMs: 30, onStat: (s) => (stat = s) },
+				fetch: async function (_url) {
+					const url = new URL(_url as string);
+					if (url.hostname !== "xorb.co") {
+						return makeFetch(fixture)(_url as string);
+					}
+					const data = fixture.xorbData[Number(url.pathname.slice(1))];
+					let offset = 0;
+					return new Response(
+						new ReadableStream({
+							async pull(controller) {
+								await takeSlot();
+								controller.enqueue(data.subarray(offset, offset + PIECE));
+								offset += PIECE;
+								if (offset >= data.byteLength) {
+									controller.close();
+								}
+							},
+						}),
+					);
+				},
+			});
+
+			expect(await blob.text()).toBe(fixture.wholeText);
+			const history = (stat?.targetHistory ?? []) as number[];
+			expect(history.length).toBeGreaterThan(10);
+			// Probes are allowed (that's how the plateau is found), but the controller must
+			// settle near serial rather than ratchet up: most ticks at 1-2 (under event-loop
+			// contention the mock's entry-transition gaps let 2 genuinely beat 1), and the
+			// ceiling is never reached.
+			expect(history.filter((t) => t <= 2).length).toBeGreaterThan(history.length * 0.6);
+			expect(Math.max(...history)).toBeLessThan(4);
 		});
 
 		it("propagates fetch errors", async () => {
