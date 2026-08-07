@@ -531,6 +531,18 @@ function replaceAccessTokenPlaceholder(
 			`'Authorization: Bearer ${placeholder}'`,
 			`"Authorization: Bearer $${accessTokenEnvVar}"`, // e.g. "Authorization: Bearer $HF_TOKEN"
 		);
+	} else if (language === "python" && useHfToken && snippet.includes("from huggingface_hub import InferenceClient")) {
+		// For the huggingface_hub client with an HF token, use `get_token()` which resolves the token
+		// from the HF_TOKEN environment variable *or* the locally saved token (e.g. from `hf auth login`),
+		// rather than requiring the env variable to be set.
+		snippet = snippet.replace(
+			`from huggingface_hub import InferenceClient`,
+			`from huggingface_hub import InferenceClient, get_token`,
+		);
+		snippet = snippet.replace(
+			`"${placeholder}"`,
+			`get_token()`, // resolves HF_TOKEN env var or the locally saved token
+		);
 	} else if (language === "python") {
 		snippet = "import os\n" + snippet;
 		snippet = snippet.replace(
