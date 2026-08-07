@@ -334,6 +334,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
 	},
+	cortiq: {
+		prettyLabel: "cortiq",
+		repoName: "cmf",
+		repoUrl: "https://github.com/infosave2007/cmf",
+		docsUrl: "https://github.com/infosave2007/cmf/blob/master/docs/CMF_V2_SPEC.md",
+		snippets: snippets.cortiq,
+		countDownloads: `path_extension:"cmf"`,
+	},
 	cosmos: {
 		prettyLabel: "Cosmos",
 		repoName: "Cosmos",

@@ -243,6 +243,25 @@ print("R² Score:", r2)`;
 	return [installSnippet, classificationSnippet, regressionsSnippet];
 };
 
+export const cortiq = (model: ModelData): string[] => {
+	const setup = `# one Rust binary: no torch, no ONNX, no CUDA install, no Python
+cargo install cortiq-cli   # or a prebuilt binary from github.com/infosave2007/cmf/releases
+hf download ${model.id} --include "*.cmf" --local-dir .
+ls *.cmf                   # some repos ship more than one quantization`;
+	if (model.pipeline_tag === "text-to-image") {
+		return [`${setup}\n\ncortiq imagine FILE.cmf --prompt "a red fox in a snowy forest" --out fox.ppm`];
+	}
+	if (model.pipeline_tag === "text-to-video") {
+		return [
+			`${setup}\n\ncortiq animate FILE.cmf --prompt "a corgi in a chef hat flipping a pancake" --out clip.avi`,
+		];
+	}
+	return [
+		`${setup}\n\ncortiq run FILE.cmf --prompt "What is the capital of France?"`,
+		`${setup}\n\ncortiq serve FILE.cmf --port 8080   # OpenAI-compatible server`,
+	];
+};
+
 export const cxr_foundation = (): string[] => [
 	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
 
