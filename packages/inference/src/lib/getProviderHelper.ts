@@ -127,7 +127,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-generation": new Groq.GroqTextGenerationTask(),
 	},
 	infersia: {
+		"automatic-speech-recognition": new Infersia.InfersiaAutomaticSpeechRecognitionTask(),
 		conversational: new Infersia.InfersiaConversationalTask(),
+		"text-to-speech": new Infersia.InfersiaTextToSpeechTask(),
 	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),

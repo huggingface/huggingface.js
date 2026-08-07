@@ -2428,6 +2428,20 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "conversational",
 				},
+				"openai/whisper-large-v3-turbo": {
+					provider: "infersia",
+					hfModelId: "openai/whisper-large-v3-turbo",
+					providerId: "openai/whisper-large-v3-turbo",
+					status: "live",
+					task: "automatic-speech-recognition",
+				},
+				"hexgrad/Kokoro-82M": {
+					provider: "infersia",
+					hfModelId: "hexgrad/Kokoro-82M",
+					providerId: "hexgrad/kokoro-82m",
+					status: "live",
+					task: "text-to-speech",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -2458,6 +2472,26 @@ describe.skip("InferenceClient", () => {
 					}
 				}
 				expect(out).toMatch(/(two|2)/i);
+			});
+
+			it("automaticSpeechRecognition", async () => {
+				const res = await client.automaticSpeechRecognition({
+					model: "openai/whisper-large-v3-turbo",
+					provider: "infersia",
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+				});
+				expect(typeof res.text).toBe("string");
+				expect(res.text.length).toBeGreaterThan(0);
+			});
+
+			it("textToSpeech", async () => {
+				const res = await client.textToSpeech({
+					model: "hexgrad/Kokoro-82M",
+					provider: "infersia",
+					inputs: "Hello from Infersia text to speech.",
+					parameters: { voice: "af_heart" },
+				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT,
