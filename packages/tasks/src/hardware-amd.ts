@@ -261,7 +261,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		releaseYear: 2022,
 	},
 	"Radeon 680M": {
-		tflops: 3.379,
+		tflops: 6.76,
 		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
 		gfxVersion: "gfx1035",
 		msrp: 120,
