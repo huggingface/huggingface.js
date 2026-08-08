@@ -273,7 +273,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
 		gfxVersion: "gfx1103",
 		msrp: 179,
-		power: 30,
+		power: 15,
 		releaseYear: 2023,
 	},
 	"Radeon 760M": {
