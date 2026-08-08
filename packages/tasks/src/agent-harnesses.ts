@@ -176,6 +176,12 @@ export const AGENT_HARNESSES = {
 		description: "Cloud development environment with an AI coding agent.",
 		envVars: { REPL_ID: "*" },
 	},
+	seek: {
+		prettyLabel: "Seek",
+		docsUrl: "https://talk-about.ai",
+		description:
+			"Long-running autonomous research agent that hops the open web, archives its sources, and mechanically verifies its own citations.",
+	},
 	trae: {
 		prettyLabel: "Trae",
 		docsUrl: "https://trae.ai",
