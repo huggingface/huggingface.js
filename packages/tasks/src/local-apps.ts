@@ -674,6 +674,18 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
 		snippet: snippetMlxLm,
 	},
+	mlxhub: {
+		prettyLabel: "MLXHub",
+		docsUrl: "https://apps.apple.com/app/mlxhub-local-ai-llm-server/id6766485144?ct=huggingface",
+		links: [{ label: "DreamFoundries on Hugging Face", url: "https://huggingface.co/DreamFoundries" }],
+		mainTask: "text-generation",
+		displayOnModelPage: isMlxModel,
+		deeplink: (model) => {
+			const url = new URL("https://mlxhub.app/open-model");
+			url.searchParams.set("repo", model.id);
+			return url;
+		},
+	},
 	tgi: {
 		prettyLabel: "TGI",
 		docsUrl: "https://huggingface.co/docs/text-generation-inference/",
