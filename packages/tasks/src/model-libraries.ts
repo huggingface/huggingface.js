@@ -202,6 +202,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"boltzgen1_diverse.ckpt"`,
 	},
+	"cactus-needle": {
+      prettyLabel: "Needle",
+      repoName: "needle",
+      repoUrl: "https://github.com/cactus-compute/needle",
+      countDownloads: `path:"macos-arm64/needle" OR path:"linux-x86_64/needle" OR path:"linux-arm64/needle" OR path:"linux-armv7/needle" OR path:"linux-riscv64/needle" OR path:"linux-mipsel/needle" OR path:"android-arm64/needle" OR path:"android-armv7/needle" OR path:"android-riscv64/needle" OR path_extension:"exe" OR (path_filename:"libneedle" AND path_extension:"a") OR path_extension:"whl" OR path_extension:"wasm" OR path_extension:"cact"`,
+	},
 	cancertathomev2: {
 		prettyLabel: "Cancer@HomeV2",
 		repoName: "Cancer@HomeV2",
