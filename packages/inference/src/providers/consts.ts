@@ -25,6 +25,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	"fal-ai": {},
 	"featherless-ai": {},
 	"fireworks-ai": {},
+	gmicloud: {},
 	groq: {},
 	"hf-inference": {},
 	novita: {},
