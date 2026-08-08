@@ -178,7 +178,6 @@ export const AGENT_HARNESSES = {
 	},
 	seek: {
 		prettyLabel: "Seek",
-		repoUrl: "https://github.com/calikafka/BabyASI",
 		docsUrl: "https://talk-about.ai",
 		description:
 			"Long-running autonomous research agent that hops the open web, archives its sources, and mechanically verifies its own citations.",
