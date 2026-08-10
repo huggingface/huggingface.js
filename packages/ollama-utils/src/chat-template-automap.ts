@@ -5,42 +5,11 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/deepseek-r1:1.5b
- * - library/llama3.2:1b
- * - library/llama3.2:latest
- * - library/phi4:14b
- * - library/gemma:latest
- * - library/qwen2.5:0.5b
- * - library/olmo2:latest
- * - library/mistral-small:22b
- * - library/qwen:latest
- * - library/gemma3:latest
- * - library/llava-llama3:8b
- * - library/granite3.1-moe:latest
- * - library/all-minilm:22m
- * - library/falcon3:latest
- * - library/gemma3n:latest
- * - library/qwen2:latest
- * - library/qwen2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:24b
- * - library/cogito:latest
- * - library/phi4-mini:3.8b
- * - library/openthinker:latest
- * - library/openthinker:latest
- * - library/qwq:latest
- * - library/granite-code:3b
- * - library/neural-chat:latest
- * - library/paraphrase-multilingual:latest
- * - library/llama3-groq-tool-use:latest
- * - library/aya-expanse:latest
- * - library/reader-lm:latest
- * - library/shieldgemma:latest
- * - library/command-a:latest
- * - library/sailor2:latest
- * - library/yarn-mistral:7b
- * - library/qwen3-next:latest
+ * - library/dolphin-llama3:latest
+ * - library/meditron:latest
+ * - library/tinydolphin:latest
+ * - library/functiongemma:latest
+ * - library/laguna-xs-2.1:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
@@ -731,6 +700,42 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 			params: {
 				stop: ["<|im_start|>", "<|im_end|>"],
 			},
+		},
+	},
+	{
+		model: "library/laguna-s-2.1:latest",
+		gguf: '{#- Iteration on laguna_glm_thinking_v8/chat_template.jinja -#}\n{#- No formatting instructions -#}\n{{- "〈|EOS|〉" -}}\n{%- set enable_thinking = enable_thinking | default(true) -%}\n{%- set add_generation_prompt = add_generation_prompt | default(false) -%}\n{%- set preserve_thinking = preserve_thinking | default(false) -%}\n\n{#- ───── header (system message) ───── -#}\n{#- A caller-supplied system message with empty content opts out of the default below, producing no <system> block — used to train without a system message. -#}\n{%- set system_message = "You are a helpful, conversationally-fluent assistant made by Poolside. You are here to be helpful to users through natural language conversations." -%}\n{%- if messages and messages[0].role == "system" -%}\n  {%- set system_message = messages[0].content -%}\n  {%- set messages = messages[1:] -%}\n{%- endif -%}\n\n{%- set has_sys = system_message and system_message.strip() -%}\n{%- if has_sys or tools or enable_thinking -%}\n  {{- "<system>" -}}\n\n  {%- if has_sys -%}\n    {{- system_message.rstrip() -}}\n    {%- if tools -%}{{- "\\n\\n" -}}{%- endif -%}\n  {%- endif -%}\n\n  {%- if tools -%}\n    {{- "### Tools\\n\\n" -}}\n    {{- "You may call functions to assist with the user query.\\n" -}}\n    {{- "All available function signatures are listed below:\\n" -}}\n    {{- "<available_tools>\\n" -}}\n    {%- for tool in tools -%}\n      {{- (tool | tojson) ~ "\\n" -}}\n    {%- endfor -%}\n    {{- "</available_tools>" -}}\n  {%- endif -%}\n\n  {{- "</system>\\n" -}}\n{%- endif -%}\n\n{#- ───── main loop ───── -#}\n{%- for message in messages -%}\n  {%- set content = message.content if message.content is string else "" -%}\n  {%- if message.role == "user" -%}\n    {{- "<user>" + content + "</user>\\n" -}}\n  {%- elif message.role == "assistant" -%}\n    {%- generation -%}\n      {{- "<assistant>" -}}\n      {#- Extract reasoning content from message.reasoning (vLLM field name) or message.reasoning_content -#}\n      {%- set reasoning_content = \'\' -%}\n      {%- if message.reasoning is string -%}\n        {%- set reasoning_content = message.reasoning -%}\n      {%- elif message.reasoning_content is string -%}\n        {%- set reasoning_content = message.reasoning_content -%}\n      {%- endif -%}\n      {#- Display reasoning content for all messages if enable_thinking -#}\n      {%- if enable_thinking or preserve_thinking -%}\n        {{- \'<think>\' + reasoning_content + \'</think>\' -}}\n      {%- else -%}\n        {{- \'</think>\' -}}\n      {%- endif -%}\n      {#- Display main content (trailing newline only when no tool_calls follow) -#}\n      {%- if content -%}\n        {{- content -}}\n      {%- endif -%}\n      {%- if message.tool_calls -%}\n        {%- for tool_call in message.tool_calls -%}\n          {%- set function_data = tool_call.function -%}\n          {{- \'<tool_call>\' + function_data.name -}}\n          {%- set _args = function_data.arguments -%}\n          {%- for k, v in _args.items() -%}\n            {{- "<arg_key>" ~ k ~ "</arg_key>" -}}\n            {{- "<arg_value>" -}}{{- v | tojson(ensure_ascii=False) if v is not string else v -}}{{- "</arg_value>" -}}\n          {%- endfor -%}\n          {{- "</tool_call>" -}}\n        {%- endfor -%}\n      {%- endif -%}\n      {{- "</assistant>\\n" -}}\n    {%- endgeneration -%}\n  {%- elif message.role == "tool" -%}\n    {{- "<tool_response>" + content + "</tool_response>\\n" -}}\n  {%- elif message.role == "system" -%}\n    {#- Render additional system messages (the first one, if any, is handled separately in the header and was sliced off above) -#}\n    {{- "<system>" + content + "</system>\\n" -}}\n  {%- endif -%}\n{%- endfor -%}\n{#- ───── generation prompt ───── -#}\n{%- if add_generation_prompt -%}\n  {{- "<assistant>" -}}\n  {#- ───── Include reasoning mode directive ───── -#}\n  {%- if enable_thinking -%}\n    {{- \'<think>\' -}}\n  {%- else -%}\n    {{- \'</think>\' -}}\n  {%- endif -%}\n{%- endif -%}',
+		ollama: {
+			template: "{{ .Prompt }}",
+			tokens: [
+				"<system>",
+				"<available_tools>",
+				"<user>",
+				"<assistant>",
+				"<think>",
+				"<tool_call>",
+				"<arg_key>",
+				"<arg_value>",
+				"<tool_response>",
+			],
+		},
+	},
+	{
+		model: "library/laguna-xs-2.1:latest",
+		gguf: '{#- Iteration on laguna_glm_thinking_v8/chat_template.jinja -#}\n{#- No formatting instructions -#}\n{{- "〈|EOS|〉" -}}\n{%- set enable_thinking = enable_thinking | default(false) -%}\n{%- set add_generation_prompt = add_generation_prompt | default(false) -%}\n\n{#- ───── header (system message) ───── -#}\n{#- A caller-supplied system message with empty content opts out of the default below, producing no <system> block — used to train without a system message. -#}\n{%- set system_message = "You are a helpful, conversationally-fluent assistant made by Poolside. You are here to be helpful to users through natural language conversations." -%}\n{%- if messages and messages[0].role == "system" -%}\n  {%- set system_message = messages[0].content -%}\n  {%- set messages = messages[1:] -%}\n{%- endif -%}\n\n{%- set has_sys = system_message and system_message.strip() -%}\n{%- if has_sys or tools or enable_thinking -%}\n  {{- "<system>" -}}\n\n  {%- if has_sys -%}\n    {{- system_message.rstrip() -}}\n    {%- if tools -%}{{- "\\n\\n" -}}{%- endif -%}\n  {%- endif -%}\n\n  {%- if tools -%}\n    {{- "### Tools\\n\\n" -}}\n    {{- "You may call functions to assist with the user query.\\n" -}}\n    {{- "All available function signatures are listed below:\\n" -}}\n    {{- "<available_tools>\\n" -}}\n    {%- for tool in tools -%}\n      {{- (tool | tojson) ~ "\\n" -}}\n    {%- endfor -%}\n    {{- "</available_tools>" -}}\n  {%- endif -%}\n\n  {{- "</system>\\n" -}}\n{%- endif -%}\n\n{#- ───── main loop ───── -#}\n{%- for message in messages -%}\n  {%- set content = message.content if message.content is string else "" -%}\n  {%- if message.role == "user" -%}\n    {{- "<user>" + content + "</user>\\n" -}}\n  {%- elif message.role == "assistant" -%}\n    {%- generation -%}\n      {{- "<assistant>" -}}\n      {#- Extract reasoning content from message.reasoning (vLLM field name) or message.reasoning_content -#}\n      {%- set reasoning_content = \'\' -%}\n      {%- if message.reasoning is string -%}\n        {%- set reasoning_content = message.reasoning -%}\n      {%- elif message.reasoning_content is string -%}\n        {%- set reasoning_content = message.reasoning_content -%}\n      {%- endif -%}\n      {#- Display reasoning content for all messages if enable_thinking -#}\n      {%- if enable_thinking -%}\n        {{- \'<think>\' + reasoning_content + \'</think>\' -}}\n      {%- else -%}\n        {{- \'</think>\' -}}\n      {%- endif -%}\n      {#- Display main content (trailing newline only when no tool_calls follow) -#}\n      {%- if content -%}\n        {{- content -}}\n      {%- endif -%}\n      {%- if message.tool_calls -%}\n        {%- for tool_call in message.tool_calls -%}\n          {%- set function_data = tool_call.function -%}\n          {{- \'<tool_call>\' + function_data.name -}}\n          {%- set _args = function_data.arguments -%}\n          {%- for k, v in _args.items() -%}\n            {{- "<arg_key>" ~ k ~ "</arg_key>" -}}\n            {{- "<arg_value>" -}}{{- v | tojson(ensure_ascii=False) if v is not string else v -}}{{- "</arg_value>" -}}\n          {%- endfor -%}\n          {{- "</tool_call>" -}}\n        {%- endfor -%}\n      {%- endif -%}\n      {{- "</assistant>\\n" -}}\n    {%- endgeneration -%}\n  {%- elif message.role == "tool" -%}\n    {{- "<tool_response>" + content + "</tool_response>\\n" -}}\n  {%- elif message.role == "system" -%}\n    {#- Render additional system messages (the first one, if any, is handled separately in the header and was sliced off above) -#}\n    {{- "<system>" + content + "</system>\\n" -}}\n  {%- endif -%}\n{%- endfor -%}\n{#- ───── generation prompt ───── -#}\n{%- if add_generation_prompt -%}\n  {{- "<assistant>" -}}\n  {#- ───── Include reasoning mode directive ───── -#}\n  {%- if enable_thinking -%}\n    {{- \'<think>\' -}}\n  {%- else -%}\n    {{- \'</think>\' -}}\n  {%- endif -%}\n{%- endif -%}',
+		ollama: {
+			template: "{{ .Prompt }}",
+			tokens: [
+				"<system>",
+				"<available_tools>",
+				"<user>",
+				"<assistant>",
+				"<think>",
+				"<tool_call>",
+				"<arg_key>",
+				"<arg_value>",
+				"<tool_response>",
+			],
 		},
 	},
 	{
