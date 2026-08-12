@@ -97,6 +97,7 @@ describe("collectionInfo", () => {
 					colorFrom: "green",
 					colorTo: "green",
 					createdAt: "2023-03-17T21:33:16.000Z",
+					disabled: expect.any(Boolean),
 					emoji: "🌎",
 					featured: false,
 					id: "huggingfacejs/push-model-from-web",

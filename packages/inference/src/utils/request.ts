@@ -180,7 +180,7 @@ export async function* innerStreamingRequest<T>(
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
 				);
 			}
-			// Sambanova errors
+			// Some providers return a top-level `message` on error
 			if (typeof output.message === "string") {
 				throw new InferenceClientProviderApiError(
 					`Failed to perform inference: ${output.message}`,

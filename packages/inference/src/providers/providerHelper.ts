@@ -50,7 +50,7 @@ import type {
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
 import { InferenceClientProviderOutputError, InferenceClientRoutingError } from "../errors.js";
-import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
+import type { AudioToAudioArgs, AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import type {
 	BaseArgs,
 	BodyParams,
@@ -61,6 +61,7 @@ import type {
 	UrlParams,
 } from "../types.js";
 import { toArray } from "../utils/toArray.js";
+import { omit } from "../utils/omit.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
@@ -321,15 +322,28 @@ export interface TextToSpeechTaskHelper {
 }
 
 export interface TextToAudioTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<Record<string, unknown> & BaseArgs>): Record<string, unknown>;
 }
 
 export interface AudioToAudioTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AudioToAudioOutput[]>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<AudioToAudioOutput[]>;
 	preparePayload(
 		params: BodyParams<BaseArgs & { inputs: Blob } & Record<string, unknown>>,
 	): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: AudioToAudioArgs): Promise<RequestArgs>;
 }
 export interface AutomaticSpeechRecognitionTaskHelper {
 	getResponse(
@@ -390,9 +404,14 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
+		/// `model` is serialized first so that a router/proxy can resolve the target provider from a
+		/// small prefix of the request body instead of buffering the whole payload — `messages` can
+		/// hold megabytes of base64-encoded images.
+		/// `params.args` also carries the caller-supplied `model` (possibly with a `:provider` routing
+		/// suffix), which must not take precedence over the resolved provider model id: omit it.
 		return {
-			...params.args,
 			model: params.model,
+			...omit(params.args, "model"),
 		};
 	}
 
@@ -403,7 +422,7 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 			typeof response?.created === "number" &&
 			typeof response?.id === "string" &&
 			typeof response?.model === "string" &&
-			/// Together.ai and Nebius do not output a system_fingerprint
+			/// Some providers (e.g. Together.ai) do not output a system_fingerprint
 			(response.system_fingerprint === undefined ||
 				response.system_fingerprint === null ||
 				typeof response.system_fingerprint === "string") &&

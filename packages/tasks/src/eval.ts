@@ -33,6 +33,12 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Harbor is a framework for evaluating and optimizing agents and language models.",
 		url: "https://github.com/laude-institute/harbor",
 	},
+	ifstruct: {
+		name: "ifstruct",
+		description:
+			"IFStruct is a benchmark for structured-output compliance: whether a model produces valid JSON/YAML that follows a requested schema, scored without constrained decoding.",
+		url: "https://github.com/Liquid4All/ifstruct",
+	},
 	pier: {
 		name: "pier",
 		description:
@@ -49,6 +55,12 @@ export const EVALUATION_FRAMEWORKS = {
 		name: "archipelago",
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
 		url: "https://github.com/Mercor-Intelligence/archipelago",
+	},
+	benchflow: {
+		name: "benchflow",
+		description:
+			"BenchFlow is an evaluation framework for AI agents on professional, skill-aware workflows. It powers SkillsBench and runs containerized agent trials with paired with-skills / without-skills configurations.",
+		url: "https://github.com/benchflow-ai/benchflow",
 	},
 	"apex-evals": {
 		name: "apex-evals",
@@ -94,6 +106,12 @@ export const EVALUATION_FRAMEWORKS = {
 		description:
 			"MDPBench is a benchmark for evaluating multilingual document parsing across digital, photographed, Latin, and non-Latin document subsets.",
 		url: "https://github.com/Yuliang-Liu/MultimodalOCR",
+	},
+	"real5-omnidocbench": {
+		name: "real5-omnidocbench",
+		description:
+			"Real5-OmniDocBench is a benchmark for evaluating document parsing robustness under five real-world acquisition scenarios: scanning, warping, screen-photography, illumination, and skew.",
+		url: "https://huggingface.co/datasets/PaddlePaddle/Real5-OmniDocBench",
 	},
 	parsebench: {
 		name: "parsebench",

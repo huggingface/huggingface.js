@@ -95,6 +95,7 @@ export type * from "./table-question-answering/inference.js";
 export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference.js";
 export type { TextToVideoParameters, TextToVideoOutput, TextToVideoInput } from "./text-to-video/inference.js";
 export type { TextToSpeechParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference.js";
+export type { TextToAudioInput, TextToAudioOutput, TextToAudioParameters } from "./text-to-audio/inference.js";
 export type * from "./token-classification/inference.js";
 export type { TranslationInput, TranslationOutput } from "./translation/inference.js";
 export type {

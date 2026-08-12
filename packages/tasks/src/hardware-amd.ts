@@ -192,7 +192,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		tflops: 22.58,
 		memory: [10],
 		gfxVersion: "gfx1031",
-		msrp: 500,
+		msrp: 329,
 		power: 175,
 		releaseYear: 2022,
 	},
@@ -268,6 +268,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 15,
 		releaseYear: 2022,
 	},
+	"Radeon 680M": {
+		tflops: 6.76,
+		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
+		gfxVersion: "gfx1035",
+		msrp: 120,
+		power: 50,
+		releaseYear: 2022,
+	},
 	"Radeon 740M": {
 		tflops: 5.12,
 		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,
@@ -339,5 +347,6 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		msrp: 1_500,
 		power: 120,
 		releaseYear: 2025,
+		aliases: ["Strix Halo"],
 	},
 };
