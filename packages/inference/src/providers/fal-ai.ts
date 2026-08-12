@@ -447,12 +447,23 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 
 	/** Synchronous case – caller already gave us base64 or a URL */
 	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
+		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			// args.inputs is expected to be a base64 data URI or an URL
 			image_url: params.args.image_url,
 		};
+
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			payload.loras = [
+				{
+					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
+					scale: 1,
+				},
+			];
+		}
+
+		return payload;
 	}
 
 	/** Asynchronous helper – caller gave us a Blob */
