@@ -19,17 +19,52 @@ interface WebBlobCreateOptions {
 export class WebBlob extends Blob {
 	static async create(url: URL, opts?: WebBlobCreateOptions): Promise<Blob> {
 		const customFetch = opts?.fetch ?? fetch;
-		const response = await customFetch(url, { method: "HEAD" });
 
-		const size = Number(response.headers.get("content-length"));
-		const contentType = response.headers.get("content-type") || "";
-		const supportRange = response.headers.get("accept-ranges") === "bytes";
+		// Probe with `Range: bytes=0-0` rather than `HEAD` to learn the file size
+		// and confirm range support in a single round trip.
+		//
+		// In browsers, when CloudFront gzips a response on the fly (typical for
+		// small text/JSON files behind `/api/resolve-cache/...`), the cached
+		// response loses both `Content-Length` and `Accept-Ranges`. Subsequent
+		// HEAD requests served from that cache inherit the missing headers, so
+		// the lib could not tell either the file size or whether ranges were
+		// supported, and silently fell back to buffering the whole blob in RAM.
+		//
+		// Range responses are never content-encoded, so `Content-Range`
+		// (carrying the total size) always survives, regardless of the cached
+		// encoding state.
+		const probe = await customFetch(url, {
+			headers: {
+				Range: "bytes=0-0",
+			},
+		});
 
-		if (!supportRange || size < (opts?.cacheBelow ?? 1_000_000)) {
-			return await (await customFetch(url)).blob();
+		if (!probe.ok) {
+			throw new Error(`Failed to fetch ${url}: ${probe.status} ${probe.statusText}`);
 		}
 
-		return new WebBlob(url, 0, size, contentType, true, customFetch);
+		const contentType = probe.headers.get("content-type") || "";
+
+		// 206 → server honored the range request; total size is in `Content-Range`.
+		if (probe.status === 206) {
+			const totalSize = Number(probe.headers.get("content-range")?.split("/").pop());
+			await probe.body?.cancel();
+
+			if (Number.isFinite(totalSize) && totalSize >= (opts?.cacheBelow ?? 1_000_000)) {
+				return new WebBlob(url, 0, totalSize, contentType, true, customFetch);
+			}
+
+			// Small file (or unknown total) → buffer it in RAM.
+			const full = await customFetch(url);
+			if (!full.ok) {
+				throw new Error(`Failed to fetch ${url}: ${full.status} ${full.statusText}`);
+			}
+			return full.blob();
+		}
+
+		// 200 → server ignored `Range`; we've already started downloading the
+		// full body, so just consume it.
+		return probe.blob();
 	}
 
 	private url: URL;

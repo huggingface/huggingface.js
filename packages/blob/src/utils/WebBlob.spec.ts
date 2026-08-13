@@ -8,10 +8,14 @@ describe("WebBlob", () => {
 	let contentType: string;
 
 	beforeAll(async () => {
-		const response = await fetch(resourceUrl, { method: "HEAD" });
-		size = Number(response.headers.get("content-length"));
+		// Compute the reference size from the response body itself; in browsers
+		// `Content-Length` is not reliably exposed when the response is gzipped
+		// on the fly by CloudFront.
+		const response = await fetch(resourceUrl);
+		const blob = await response.blob();
+		size = blob.size;
+		fullText = await blob.text();
 		contentType = response.headers.get("content-type") || "";
-		fullText = await (await fetch(resourceUrl)).text();
 	});
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {
@@ -79,6 +83,39 @@ describe("WebBlob", () => {
 
 		const streamText = await new Response(slice.stream()).text();
 		expect(streamText).toBe(expectedText);
+	});
+
+	it("should get the size from the range probe when Content-Length is missing", async () => {
+		const totalSize = 1_500_000;
+		const requests: Array<{ method: string; range: string | null }> = [];
+		// A response that lost `Content-Length`/`Accept-Ranges` to on-the-fly gzip,
+		// as served from a CloudFront cache in the browser.
+		const customFetch: typeof fetch = (_input, init) => {
+			requests.push({ method: init?.method ?? "GET", range: new Headers(init?.headers).get("Range") });
+
+			return Promise.resolve(
+				new Response(new Uint8Array(1), {
+					status: 206,
+					headers: { "content-type": "text/plain", "content-range": `bytes 0-0/${totalSize}` },
+				}),
+			);
+		};
+
+		const webBlob = await WebBlob.create(resourceUrl, { fetch: customFetch });
+
+		expect(webBlob).toBeInstanceOf(WebBlob);
+		expect(webBlob.size).toBe(totalSize);
+		expect(requests).toEqual([{ method: "GET", range: "bytes=0-0" }]);
+	});
+
+	it("should buffer the whole body when the server ignores the range probe", async () => {
+		const customFetch: typeof fetch = () =>
+			Promise.resolve(new Response("hello", { status: 200, headers: { "content-type": "text/plain" } }));
+
+		const webBlob = await WebBlob.create(resourceUrl, { fetch: customFetch, cacheBelow: 0 });
+
+		expect(webBlob).not.toBeInstanceOf(WebBlob);
+		expect(await webBlob.text()).toBe("hello");
 	});
 
 	it("should throw a TypeError on negative start/end", () => {
