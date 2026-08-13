@@ -359,7 +359,7 @@ export class XetBlob extends Blob {
 
 	override slice(start = 0, end = this.size): XetBlob {
 		if (start < 0 || end < 0) {
-			new TypeError("Unsupported negative start/end on XetBlob.slice");
+			throw new TypeError("Unsupported negative start/end on XetBlob.slice");
 		}
 
 		const slice = this.#clone();
