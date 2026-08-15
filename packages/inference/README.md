@@ -51,6 +51,7 @@ Currently, we support the following providers:
 - [Featherless AI](https://featherless.ai)
 - [Fireworks AI](https://fireworks.ai)
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
+- [Kosmik Compute](https://koscompute.com)
 - [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
 - [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
