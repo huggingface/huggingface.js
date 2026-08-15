@@ -607,6 +607,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+	"minimax-h3": {
+		prettyLabel: "MiniMax H3",
+		repoName: "MiniMax-H3",
+		repoUrl: "https://github.com/MiniMax-AI/MiniMax-H3",
+		docsUrl: "https://huggingface.co/MiniMaxAI/MiniMax-H3",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_filename:"model_index" OR path_filename:"config" OR path:"modular_model_index.json"`,
+	},
 	hermes: {
 		prettyLabel: "HERMES",
 		repoName: "HERMES",

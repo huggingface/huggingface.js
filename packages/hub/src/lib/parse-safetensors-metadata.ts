@@ -182,7 +182,7 @@ function packingFactor(dtype: Dtype, numBits: number | undefined): number {
 
 /**
  * Thrown when a safetensors file or sharded index is malformed (bad header, invalid tensor
- * entry, unsafe shard filename, …) rather than when fetching it fails, so callers can treat
+ * entry, unsafe shard filename, …) rather than a failure when fetching, so callers can treat
  * the failure as permanent — e.g. drop a cached parse result instead of keeping it for retry.
  */
 export class SafetensorParseError extends Error {
