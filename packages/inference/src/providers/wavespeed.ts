@@ -1,5 +1,6 @@
 import type { TextToImageArgs } from "../tasks/cv/textToImage.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { VideoToVideoArgs } from "../tasks/cv/videoToVideo.js";
 import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
@@ -17,6 +18,7 @@ import type {
 	ImageToVideoTaskHelper,
 	ImageTextToImageTaskHelper,
 	ImageTextToVideoTaskHelper,
+	VideoToVideoTaskHelper,
 } from "./providerHelper.js";
 import { TaskProviderHelper } from "./providerHelper.js";
 import {
@@ -269,6 +271,32 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
 		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
+	}
+
+	override async getResponse(
+		response: WaveSpeedAISubmitTaskResponse,
+		url?: string,
+		headers?: Record<string, string>,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob> {
+		return super.getResponse(response, url, headers, undefined, signal) as Promise<Blob>;
+	}
+}
+
+export class WavespeedAIVideoToVideoTask extends WavespeedAITask implements VideoToVideoTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+
+	async preparePayloadAsync(args: VideoToVideoArgs): Promise<RequestArgs> {
+		const inputs = args.inputs;
+		const bytes = new Uint8Array(
+			inputs instanceof ArrayBuffer ? inputs : await (inputs as Blob).arrayBuffer(),
+		);
+		const contentType = inputs instanceof Blob && inputs.type ? inputs.type : "video/mp4";
+		const video = `data:${contentType};base64,${base64FromBytes(bytes)}`;
+		return { ...args, inputs: args.parameters?.prompt, video };
 	}
 
 	override async getResponse(

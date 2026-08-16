@@ -2190,6 +2190,13 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "image-to-video",
 				},
+				"ByteDance-Seed/SeedVR2-3B": {
+					provider: "wavespeed",
+					hfModelId: "ByteDance-Seed/SeedVR2-3B",
+					providerId: "wavespeed-ai/seedvr2/video",
+					status: "live",
+					task: "video-to-video",
+				},
 			};
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
@@ -2291,6 +2298,14 @@ describe.skip("InferenceClient", () => {
 							new Blob([readTestFile("bird_canny.png")], { type: "image/png" }),
 						],
 					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+			it(`videoToVideo - ByteDance-Seed/SeedVR2-3B`, async () => {
+				const res = await client.videoToVideo({
+					model: "ByteDance-Seed/SeedVR2-3B",
+					provider: "wavespeed",
+					inputs: new Blob([readTestFile("sample_video.mp4")], { type: "video/mp4" }),
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
