@@ -290,10 +290,13 @@ export class WavespeedAIVideoToVideoTask extends WavespeedAITask implements Vide
 	}
 
 	async preparePayloadAsync(args: VideoToVideoArgs): Promise<RequestArgs> {
-		const inputs = args.inputs;
-		const bytes = new Uint8Array(
-			inputs instanceof ArrayBuffer ? inputs : await (inputs as Blob).arrayBuffer(),
-		);
+		const inputs = args.inputs as Blob | ArrayBuffer | ArrayBufferView;
+		const bytes =
+			inputs instanceof ArrayBuffer
+				? new Uint8Array(inputs)
+				: ArrayBuffer.isView(inputs)
+					? new Uint8Array(inputs.buffer, inputs.byteOffset, inputs.byteLength)
+					: new Uint8Array(await inputs.arrayBuffer());
 		const contentType = inputs instanceof Blob && inputs.type ? inputs.type : "video/mp4";
 		const video = `data:${contentType};base64,${base64FromBytes(bytes)}`;
 		return { ...args, inputs: args.parameters?.prompt, video };
