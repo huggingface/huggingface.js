@@ -89,6 +89,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Featherless AI supported models](https://huggingface.co/api/partners/featherless-ai/models)
 - [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
 - [HF Inference supported models](https://huggingface.co/api/partners/hf-inference/models)
+- [Kosmik Compute supported models](https://huggingface.co/api/partners/kosmik/models)
 - [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
 - [OVHcloud supported models](https://huggingface.co/api/partners/ovhcloud/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)

@@ -7,9 +7,9 @@ import * as FeatherlessAI from "../providers/featherless-ai.js";
 import * as Fireworks from "../providers/fireworks-ai.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
+import * as Kosmik from "../providers/kosmik.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
-import * as Kosmik from "../providers/kosmik.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
@@ -126,13 +126,13 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Groq.GroqConversationalTask(),
 		"text-generation": new Groq.GroqTextGenerationTask(),
 	},
+	kosmik: {
+		conversational: new Kosmik.KosmikConversationalTask(),
+	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
 		"text-generation": new Novita.NovitaTextGenerationTask(),
 		"text-to-video": new Novita.NovitaTextToVideoTask(),
-	},
-	kosmik: {
-		conversational: new Kosmik.KosmikConversationalTask(),
 	},
 	nscale: {
 		"text-to-image": new Nscale.NscaleTextToImageTask(),

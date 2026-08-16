@@ -1,14 +1,4 @@
-import {
-	BaseConversationalTask,
-	TaskProviderHelper,
-} from "./providerHelper.js";
-import type {
-	BodyParams,
-	UrlParams,
-	HeaderParams,
-	RequestArgs,
-} from "../types.js";
-import type { ChatCompletionInput, ChatCompletionOutput } from "@huggingface/tasks";
+import { BaseConversationalTask } from "./providerHelper.js";
 
 /**
  * Kosmik Compute provider helper.
@@ -21,5 +11,3 @@ export class KosmikConversationalTask extends BaseConversationalTask {
 		super("kosmik", "https://api.koscompute.com", false);
 	}
 }
-
-export const kosmik = new KosmikConversationalTask();
