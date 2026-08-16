@@ -76,12 +76,17 @@ interface WaveSpeedAISubmitTaskResponse {
 }
 
 async function buildImagesField(
-	inputs: Blob | ArrayBuffer,
+	inputs: Blob | ArrayBuffer | ArrayBufferView,
 	hasImages: unknown,
 ): Promise<{ base: string; images: string[] }> {
-	const base = base64FromBytes(
-		new Uint8Array(inputs instanceof ArrayBuffer ? inputs : await (inputs as Blob).arrayBuffer()),
-	);
+	// Accept Blob, ArrayBuffer and ArrayBufferView (e.g. a Node Buffer from fs.readFileSync)
+	const bytes =
+		inputs instanceof ArrayBuffer
+			? new Uint8Array(inputs)
+			: ArrayBuffer.isView(inputs)
+				? new Uint8Array(inputs.buffer, inputs.byteOffset, inputs.byteLength)
+				: new Uint8Array(await inputs.arrayBuffer());
+	const base = base64FromBytes(bytes);
 	const images =
 		Array.isArray(hasImages) && hasImages.every((value): value is string => typeof value === "string")
 			? hasImages
@@ -244,7 +249,7 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
 		const hasImages =
 			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
-		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
+		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer | ArrayBufferView, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
 	}
 
@@ -267,7 +272,7 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
 		const hasImages =
 			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
-		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
+		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer | ArrayBufferView, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
 	}
 
