@@ -2190,6 +2190,20 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "image-to-video",
 				},
+				"microsoft/VibeVoice-1.5B": {
+					provider: "wavespeed",
+					hfModelId: "microsoft/VibeVoice-1.5B",
+					providerId: "wavespeed-ai/vibevoice",
+					status: "live",
+					task: "text-to-speech",
+				},
+				"ACE-Step/ACE-Step-v1-3.5B": {
+					provider: "wavespeed",
+					hfModelId: "ACE-Step/ACE-Step-v1-3.5B",
+					providerId: "wavespeed-ai/ace-step/prompt-to-audio",
+					status: "live",
+					task: "text-to-audio",
+				},
 			};
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
@@ -2291,6 +2305,22 @@ describe.skip("InferenceClient", () => {
 							new Blob([readTestFile("bird_canny.png")], { type: "image/png" }),
 						],
 					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+			it(`textToSpeech - microsoft/VibeVoice-1.5B`, async () => {
+				const res = await client.textToSpeech({
+					model: "microsoft/VibeVoice-1.5B",
+					provider: "wavespeed",
+					inputs: "Hello, this is a test of the WaveSpeed text to speech integration.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+			it(`textToAudio - ACE-Step/ACE-Step-v1-3.5B`, async () => {
+				const res = await client.textToAudio({
+					model: "ACE-Step/ACE-Step-v1-3.5B",
+					provider: "wavespeed",
+					inputs: "An upbeat lo-fi hip hop track with a relaxed piano melody.",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
