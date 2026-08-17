@@ -15,13 +15,13 @@ async function query(data) {
 }
 
 query({ 
+    model: "<together alias for meta-llama/Llama-3.1-8B-Instruct>",
     messages: [
         {
             role: "user",
             content: "What is the capital of France?",
         },
     ],
-    model: "<together alias for meta-llama/Llama-3.1-8B-Instruct>",
 }).then((response) => {
     console.log(JSON.stringify(response));
 });
