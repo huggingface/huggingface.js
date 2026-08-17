@@ -1496,6 +1496,17 @@ describe("XetBlob", () => {
 			});
 		});
 	});
+
+	it("should throw a TypeError on negative start/end", () => {
+		const blob = new XetBlob({
+			hash: "test",
+			size: 100,
+			refreshUrl: "https://huggingface.co",
+		});
+
+		expect(() => blob.slice(-5)).toThrow(TypeError);
+		expect(() => blob.slice(0, -1)).toThrow(TypeError);
+	});
 });
 
 function makeChunk(content: string) {
