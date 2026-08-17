@@ -1,4 +1,4 @@
-import { assert, it, describe } from "vitest";
+import { assert, expect, it, describe } from "vitest";
 import {
 	parseSafetensorsMetadata,
 	parseSafetensorsShardFilename,
@@ -7,6 +7,9 @@ import {
 	matchesCompressedTensorsTarget,
 	computeNumOfParamsByDtypeSingleFile,
 	getQuantizationMultiplier,
+	validateTensorEntry,
+	parseTotalParameters,
+	SafetensorParseError,
 } from "./parse-safetensors-metadata";
 import type { Dtype, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
@@ -184,6 +187,152 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert(!parse.sharded);
 		assert.deepStrictEqual(parse.parameterTotal, 109_482_240);
+	});
+
+	describe("malformed headers (crafted parameter counts)", () => {
+		/**
+		 * Builds the bytes of a minimal safetensors file from a JSON header plus a data buffer,
+		 * and a fetch that serves it (including the `Range: bytes=0-0` probe `WebBlob.create`
+		 * uses to learn the file size).
+		 */
+		const fetchForFile = (header: Record<string, unknown>, dataBytes = 0): typeof fetch => {
+			const headerBytes = new TextEncoder().encode(JSON.stringify(header));
+			const file = new Uint8Array(8 + headerBytes.length + dataBytes);
+			new DataView(file.buffer).setBigUint64(0, BigInt(headerBytes.length), true);
+			file.set(headerBytes, 8);
+			return (async (input: RequestInfo | URL, init?: RequestInit) => {
+				const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+				if (!url.endsWith(".safetensors")) {
+					// config.json, the sharded index, existence probes... — `downloadFile` treats a
+					// 404 as "not found" only when the Hub's X-Error-Code says so.
+					return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
+				}
+				const range = new Headers(init?.headers).get("range");
+				if (range?.startsWith("bytes=")) {
+					const [start, endRaw] = range.slice("bytes=".length).split("-");
+					const startByte = Number(start);
+					const endByte = endRaw === "" ? file.length - 1 : Number(endRaw);
+					return new Response(file.slice(startByte, endByte + 1), {
+						status: 206,
+						headers: {
+							"content-range": `bytes ${startByte}-${endByte}/${file.length}`,
+							etag: '"hermetic-test-file"',
+						},
+					});
+				}
+				return new Response(file, { status: 200, headers: { etag: '"hermetic-test-file"' } });
+			}) as typeof fetch;
+		};
+
+		it("rejects absurd tensor dims (the 1.8e308-param single-file PoC shape)", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt" },
+					"model.qmoe.experts": {
+						dtype: "F4",
+						shape: [4611686018427387904, 4611686018427387904, 4294967296],
+						data_offsets: [0, 4],
+					},
+					"model.qmoe.router": { dtype: "F4", shape: [24, 1024, 962], data_offsets: [4, 8] },
+				},
+				8,
+			);
+
+			const err = await parseSafetensorsMetadata({
+				repo: "some-user/fake-huge-model",
+				computeParametersCount: true,
+				fetch,
+			}).catch((err: unknown) => err);
+
+			assert(err instanceof SafetensorParseError);
+			assert.strictEqual(err.name, "SafetensorParseError");
+			assert.match(err.message, /exceeds the maximum allowed/);
+		});
+
+		it("rejects plausible dims whose data_offsets exceed the file size (the fake 16T shard shape)", async () => {
+			// 673-byte shard claiming 10 tensors of [65536, 65536] F4 spanning 2GB each.
+			const fetch = fetchForFile(
+				Object.fromEntries([
+					["__metadata__", { format: "pt" }],
+					...Array.from({ length: 10 }, (_, i) => [
+						`model.experts.${i}.w`,
+						{ dtype: "F4", shape: [65536, 65536], data_offsets: [i * 2147483648, (i + 1) * 2147483648] },
+					]),
+				]),
+				0,
+			);
+
+			await expect(
+				parseSafetensorsMetadata({
+					repo: "some-user/fake-16t-model",
+					computeParametersCount: true,
+					fetch,
+				}),
+			).rejects.toThrow(/exceeds the file size/);
+		});
+
+		it("caps a self-reported total_parameters above the computed count", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", total_parameters: "999000000000" },
+					weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] },
+				},
+				800,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/inflated-metadata-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { F32: 200 });
+			assert.strictEqual(parse.parameterTotal, 200);
+		});
+
+		it("keeps trusting a well-formed file and its metadata shortcut", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", total_parameters: "200" },
+					weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] },
+				},
+				800,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/well-formed-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { F32: 200 });
+			assert.strictEqual(parse.parameterTotal, 200);
+		});
+
+		it("skips the offsets check (rather than guessing) when the file size is unknown", () => {
+			// A custom fetch whose returned blob doesn't report a size leaves the total unknown;
+			// validation must not block the parse on a guess in that case.
+			expect(() =>
+				validateTensorEntry(
+					"model.safetensors",
+					"model.experts.0.w",
+					{ dtype: "F4", shape: [65536, 65536], data_offsets: [0, 2147483648] },
+					undefined,
+				),
+			).not.toThrow();
+		});
+
+		it("parseTotalParameters only caps at the computed count", () => {
+			// inflated -> capped; honest -> untouched; missing computed count -> taken as-is
+			assert.strictEqual(parseTotalParameters("999000000000", 200), 200);
+			assert.strictEqual(parseTotalParameters("200", 200), 200);
+			assert.strictEqual(parseTotalParameters(150, 200), 150);
+			assert.strictEqual(parseTotalParameters("999000000000", undefined), 999000000000);
+			assert.strictEqual(parseTotalParameters("not-a-number", 200), undefined);
+			assert.strictEqual(parseTotalParameters(undefined, 200), undefined);
+		});
 	});
 
 	it("should detect sharded safetensors filename", async () => {

@@ -8,6 +8,7 @@ import {
 	ggufAllShards,
 	parseGgufShardFilename,
 	parseGGUFQuantLabel,
+	GGUF_QUANT_RE,
 	GGUF_QUANT_ORDER,
 	findNearestQuantType,
 	serializeGgufMetadata,
@@ -341,6 +342,27 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-IQ3_XS.gguf")).toEqual("IQ3_XS");
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual("Q4_0"); // TODO: investigate Q4_0_4_4
 		expect(parseGGUFQuantLabel("Qwen3-4B-UD-Q2_K_XL.gguf")).toEqual("UD-Q2_K_XL"); // unsloth UD (Unsloth Dynamic) prefix
+		// llama.cpp names gpt-oss files after the tensor type (MXFP4) even though general.file_type is MXFP4_MOE
+		expect(parseGGUFQuantLabel("gpt-oss-20b-MXFP4.gguf")).toEqual("MXFP4");
+		expect(parseGGUFQuantLabel("gpt-oss-120b-MXFP4.gguf")).toEqual("MXFP4");
+		expect(parseGGUFQuantLabel("Qwable-v1-35B-A3B-MXFP4_MOE.gguf")).toEqual("MXFP4_MOE");
+	});
+
+	it("parse quant label groups", async () => {
+		const groups = (fname: string) => {
+			const { prefix, quant, sizeVariation } = parseGGUFQuantLabel(fname)?.match(GGUF_QUANT_RE)?.groups ?? {};
+			return { prefix, quant, sizeVariation };
+		};
+		expect(groups("gemma-2-9b-it-Q6_K_L.gguf")).toEqual({ prefix: undefined, quant: "Q6_K", sizeVariation: "L" });
+		expect(groups("Qwen3-4B-UD-Q2_K_XL.gguf")).toEqual({ prefix: "UD-", quant: "Q2_K", sizeVariation: "XL" });
+		// MXFP4_MOE must keep winning the alternation over the MXFP4 alias: parsing it as quant MXFP4 with
+		// sizeVariation MOE would make it sort as an unknown size among the other 4-bit quants
+		expect(groups("Qwable-v1-35B-A3B-MXFP4_MOE.gguf")).toEqual({
+			prefix: undefined,
+			quant: "MXFP4_MOE",
+			sizeVariation: undefined,
+		});
+		expect(groups("gpt-oss-20b-MXFP4.gguf")).toEqual({ prefix: undefined, quant: "MXFP4", sizeVariation: undefined });
 	});
 
 	it("calculate tensor data offset", async () => {
