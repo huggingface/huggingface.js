@@ -1263,6 +1263,20 @@ from matanyone import InferenceCore
 processor = InferenceCore("${model.id}")`,
 ];
 
+export const memra = (model: ModelData): string[] => [
+	`# memra serves NVIDIA Blackwell workstation and consumer cards (sm_120a), with a
+# compile-gated Hopper lane. Prebuilt binaries need Linux x86_64 and driver 580+,
+# and no CUDA toolkit.
+curl -fsSL https://raw.githubusercontent.com/avifenesh/memra/main/tools/install.sh | sh`,
+
+	`# One chat-templated generation. In a repo with several GGUF files, append
+# :<substring> to choose one, for example hf:${model.id}:Q4_K_M
+MEMRA_CHAT=1 run-gen hf:${model.id} --prompt "Explain KV caches in one sentence."`,
+
+	`# Or an OpenAI-compatible server on 127.0.0.1:8080.
+MEMRA_MODELS="model=hf:${model.id}" memra-server`,
+];
+
 export const mesh_anything = (): string[] => [
 	`# Install from https://github.com/buaacyw/MeshAnything.git
 
