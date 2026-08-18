@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ModelData } from "./model-data.js";
-import { llama_cpp_python } from "./model-libraries-snippets.js";
+import { llama_cpp_python, peft } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
 	it("llama_cpp_python conversational", async () => {
@@ -54,5 +54,42 @@ output = llm(
 	echo=True
 )
 print(output)`);
+	});
+
+	it("peft text seq2seq adapter", async () => {
+		const model: ModelData = {
+			id: "smangrul/twitter_complaints_bigscience_T0_3B_LORA_SEQ_2_SEQ_LM",
+			tags: ["peft"],
+			inference: "",
+			config: {
+				peft: { base_model_name_or_path: "bigscience/T0_3B", task_type: "SEQ_2_SEQ_LM" },
+			},
+		};
+		const snippet = peft(model);
+
+		expect(snippet.join("\n")).toEqual(`from peft import PeftModel
+from transformers import AutoModelForSeq2SeqLM
+
+base_model = AutoModelForSeq2SeqLM.from_pretrained("bigscience/T0_3B")
+model = PeftModel.from_pretrained(base_model, "smangrul/twitter_complaints_bigscience_T0_3B_LORA_SEQ_2_SEQ_LM")`);
+	});
+
+	it("peft speech seq2seq adapter (whisper)", async () => {
+		const model: ModelData = {
+			id: "nazarkozak/whisper-small-disfluent-verbatim-lora",
+			pipeline_tag: "automatic-speech-recognition",
+			tags: ["peft"],
+			inference: "",
+			config: {
+				peft: { base_model_name_or_path: "openai/whisper-small", task_type: "SEQ_2_SEQ_LM" },
+			},
+		};
+		const snippet = peft(model);
+
+		expect(snippet.join("\n")).toEqual(`from peft import PeftModel
+from transformers import AutoModelForSpeechSeq2Seq
+
+base_model = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-small")
+model = PeftModel.from_pretrained(base_model, "nazarkozak/whisper-small-disfluent-verbatim-lora")`);
 	});
 });

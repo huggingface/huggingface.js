@@ -2025,12 +2025,13 @@ const pipe = await pipeline('${model.pipeline_tag}', '${model.id}');`,
 	];
 };
 
-const peftTask = (peftTaskType?: string) => {
+const peftTask = (peftTaskType?: string, pipelineTag?: ModelData["pipeline_tag"]) => {
 	switch (peftTaskType) {
 		case "CAUSAL_LM":
 			return "CausalLM";
 		case "SEQ_2_SEQ_LM":
-			return "Seq2SeqLM";
+			// Speech seq2seq base models (e.g. Whisper) cannot be loaded with AutoModelForSeq2SeqLM
+			return pipelineTag === "automatic-speech-recognition" ? "SpeechSeq2Seq" : "Seq2SeqLM";
 		case "TOKEN_CLS":
 			return "TokenClassification";
 		case "SEQ_CLS":
@@ -2042,7 +2043,7 @@ const peftTask = (peftTaskType?: string) => {
 
 export const peft = (model: ModelData): string[] => {
 	const { base_model_name_or_path: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
-	const pefttask = peftTask(peftTaskType);
+	const pefttask = peftTask(peftTaskType, model.pipeline_tag);
 	if (!pefttask) {
 		return [`Task type is invalid.`];
 	}
