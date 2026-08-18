@@ -1438,7 +1438,8 @@ export class Interpreter {
 
 		switch (node.operator.value) {
 			case "not":
-				return new BooleanValue(!argument.value);
+				// Use Python-like truthiness (e.g., empty arrays/objects are falsy, unlike in JavaScript)
+				return new BooleanValue(!argument.__bool__().value);
 			case "+":
 			case "-": {
 				const sign = node.operator.value === "-" ? -1 : 1;
