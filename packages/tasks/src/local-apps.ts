@@ -586,24 +586,26 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 const snippetKronk = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const modelId = `${model.id}${getQuantTag(filepath)}`;
 	const content = [
+		"# Install the native inference libraries:",
+		"kronk libs --local",
 		"# Download the model from Hugging Face:",
 		`kronk model pull ${modelId} --local`,
-		"# Chat with the model directly in the terminal:",
-		`kronk run ${modelId}`,
-		"# ...or start a local OpenAI-compatible server (http://localhost:11435/v1):",
-		"kronk server start",
-		"# List served model ids to use in API calls:",
-		"curl http://localhost:11435/v1/kronk/models",
+		"# Start a local OpenAI-compatible server in the background:",
+		"kronk server start --detach",
+		"# List the model IDs available from the server:",
+		"kronk model list",
+		"# Launch OpenCode with a model ID from the list:",
+		"kronk launch opencode <MODEL_ID>",
 	].join("\n");
 
 	return [
 		{
 			title: "Install (macOS, Linux) with Homebrew",
-			setup: ["brew tap ardanlabs/kronk", "brew install kronk"].join("\n"),
+			setup: "brew install ardanlabs/kronk/kronk",
 			content,
 		},
 		{
-			title: "Install with Go (any platform)",
+			title: "Install with Go",
 			setup: "go install github.com/ardanlabs/kronk/cmd/kronk@latest",
 			content,
 		},
