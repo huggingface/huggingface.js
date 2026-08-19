@@ -107,6 +107,12 @@ export const EVALUATION_FRAMEWORKS = {
 			"MDPBench is a benchmark for evaluating multilingual document parsing across digital, photographed, Latin, and non-Latin document subsets.",
 		url: "https://github.com/Yuliang-Liu/MultimodalOCR",
 	},
+	"real5-omnidocbench": {
+		name: "real5-omnidocbench",
+		description:
+			"Real5-OmniDocBench is a benchmark for evaluating document parsing robustness under five real-world acquisition scenarios: scanning, warping, screen-photography, illumination, and skew.",
+		url: "https://huggingface.co/datasets/PaddlePaddle/Real5-OmniDocBench",
+	},
 	parsebench: {
 		name: "parsebench",
 		description:
@@ -160,5 +166,11 @@ export const EVALUATION_FRAMEWORKS = {
 		description:
 			"MMMU is a new benchmark designed to evaluate multimodal models on massive multi-discipline tasks demanding college-level subject knowledge and deliberate reasoning.",
 		url: "https://mmmu-benchmark.github.io/",
+	},
+	extractbench: {
+		name: "extractbench",
+		description:
+			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
+		url: "https://github.com/run-llama/ExtractBench",
 	},
 } as const;
