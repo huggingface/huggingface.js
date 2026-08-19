@@ -1669,6 +1669,9 @@ describe.skip("InferenceClient", () => {
 			const TTS_HF_MODEL = "hexgrad/Kokoro-82M";
 			const TTS_PROVIDER_ID = "hexgrad/Kokoro-82M";
 
+			const FE_HF_MODEL = "Qwen/Qwen3-Embedding-0.6B";
+			const FE_PROVIDER_ID = "Qwen/Qwen3-Embedding-0.6B";
+
 			const setMapping = (task: "conversational" | "text-generation") => {
 				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
 					[HF_MODEL]: {
@@ -1701,6 +1704,18 @@ describe.skip("InferenceClient", () => {
 						providerId: TTS_PROVIDER_ID,
 						status: "live",
 						task: "text-to-speech",
+					},
+				};
+			};
+
+			const setFeatureExtractionMapping = () => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[FE_HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: FE_HF_MODEL,
+						providerId: FE_PROVIDER_ID,
+						status: "live",
+						task: "feature-extraction",
 					},
 				};
 			};
@@ -1777,6 +1792,17 @@ describe.skip("InferenceClient", () => {
 					parameters: { voice: "af_bella" },
 				});
 				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("featureExtraction", async () => {
+				setFeatureExtractionMapping();
+				const res = await client.featureExtraction({
+					model: FE_HF_MODEL,
+					provider: "deepinfra",
+					inputs: "Hello from DeepInfra feature extraction.",
+				});
+				expect(Array.isArray(res)).toBe(true);
+				expect(res.length).toBeGreaterThan(0);
 			});
 		},
 		TIMEOUT,
