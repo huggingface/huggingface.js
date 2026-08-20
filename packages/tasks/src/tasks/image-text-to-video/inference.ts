@@ -48,6 +48,21 @@ export interface ImageTextToVideoParameters {
 	 */
 	prompt?: string;
 	/**
+	 * Reference audio clips guiding the generation, each given as a URL or a base64 data URL.
+	 * Referred to from the prompt by position, as "Audio 1", "Audio 2" and so on.
+	 */
+	reference_audio?: string[];
+	/**
+	 * Reference images guiding the generation, each given as a URL or a base64 data URL.
+	 * Referred to from the prompt by position, as "Image 1", "Image 2" and so on.
+	 */
+	reference_images?: string[];
+	/**
+	 * Reference video clips guiding the generation, each given as a URL or a base64 data URL.
+	 * Referred to from the prompt by position, as "Video 1", "Video 2" and so on.
+	 */
+	reference_videos?: string[];
+	/**
 	 * Seed for the random number generator.
 	 */
 	seed?: number;

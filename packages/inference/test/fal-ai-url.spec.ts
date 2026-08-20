@@ -1,7 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { FalAIImageTextToImageTask, FalAIImageTextToVideoTask } from "../src/providers/fal-ai.js";
-import { setLogger } from "../src/lib/logger.js";
-import { FAL_AI_MAX_REFERENCE_FILES, FAL_AI_REFERENCE_INPUTS, supportsFalAiReferenceInputs } from "../src/index.js";
 import type { AuthMethod, BodyParams, InferenceProviderMappingEntry } from "../src/types.js";
 
 function mappingFor(providerId: string, adapter?: "lora"): InferenceProviderMappingEntry {
@@ -89,16 +87,14 @@ describe("fal-ai image-text-to-video payloads", () => {
 		// Verified live: the app rejects a reference-less call even though the schema only marks
 		// `prompt` required, so fail with something actionable rather than a 422.
 		it("rejects a call carrying no reference at all", async () => {
-			await expect(bodyFor(REFERENCE_TO_VIDEO, PROMPT_ONLY)).rejects.toThrow(
-				"requires at least one reference image, video or audio",
-			);
+			await expect(bodyFor(REFERENCE_TO_VIDEO, PROMPT_ONLY)).rejects.toThrow("requires at least one reference");
 		});
 
 		it("leads the subject references with the task's own image input", async () => {
 			expect(
 				await bodyFor(REFERENCE_TO_VIDEO, {
 					inputs: IMAGE(),
-					parameters: { prompt: "Image 1 next to Image 2", reference_image_urls: ["https://example.com/2.png"] },
+					parameters: { prompt: "Image 1 next to Image 2", reference_images: ["https://example.com/2.png"] },
 				}),
 			).toStrictEqual({
 				prompt: "Image 1 next to Image 2",
@@ -111,9 +107,9 @@ describe("fal-ai image-text-to-video payloads", () => {
 				await bodyFor(REFERENCE_TO_VIDEO, {
 					parameters: {
 						prompt: "Image 1 moves like Video 1 to Audio 1",
-						reference_image_urls: ["https://example.com/subject.png"],
-						reference_video_urls: [new Blob([new Uint8Array([4])], { type: "video/mp4" })],
-						reference_audio_urls: [new Blob([new Uint8Array([5])], { type: "audio/mpeg" })],
+						reference_images: ["https://example.com/subject.png"],
+						reference_videos: [new Blob([new Uint8Array([4])], { type: "video/mp4" })],
+						reference_audio: [new Blob([new Uint8Array([5])], { type: "audio/mpeg" })],
 						aspect_ratio: "9:16",
 						resolution: "768P",
 						duration: 10,
@@ -164,20 +160,13 @@ describe("fal-ai image-text-to-video payloads", () => {
 			expect(await bodyFor(IMAGE_TO_VIDEO, PROMPT_ONLY)).toStrictEqual({ prompt: "a bee on a sunflower" });
 		});
 
-		it("warns about references it cannot carry", async () => {
-			const warn = vi.fn();
-			setLogger({ ...console, warn });
-			try {
-				expect(
-					await bodyFor(IMAGE_TO_VIDEO, {
-						inputs: IMAGE(),
-						parameters: { prompt: "p", reference_video_urls: ["https://example.com/v.mp4"] },
-					}),
-				).toStrictEqual({ prompt: "p", image_url: "data:image/png;base64,AQID" });
-			} finally {
-				setLogger(console);
-			}
-			expect(warn).toHaveBeenCalledWith(expect.stringContaining("ignoring 1 extra reference(s)"));
+		it("refuses references it cannot carry", async () => {
+			await expect(
+				bodyFor(IMAGE_TO_VIDEO, {
+					inputs: IMAGE(),
+					parameters: { prompt: "p", reference_videos: ["https://example.com/v.mp4"] },
+				}),
+			).rejects.toThrow("accepts a single reference image and no reference video or audio");
 		});
 	});
 
@@ -186,47 +175,18 @@ describe("fal-ai image-text-to-video payloads", () => {
 		const list = (n: number) => Array.from({ length: n }, (_, i) => url(i));
 
 		it.each([
-			[{ reference_image_urls: list(10) }, "at most 9 entries in reference_image_urls"],
-			[{ reference_video_urls: list(4) }, "at most 3 entries in reference_video_urls"],
-			[{ reference_audio_urls: list(4) }, "at most 3 entries in reference_audio_urls"],
+			[{ reference_images: list(10) }, "at most 9 entries in reference_image_urls"],
+			[{ reference_videos: list(4) }, "at most 3 entries in reference_video_urls"],
+			[{ reference_audio: list(4) }, "at most 3 entries in reference_audio_urls"],
 			[
-				{ reference_image_urls: list(9), reference_video_urls: list(3), reference_audio_urls: list(1) },
+				{ reference_images: list(9), reference_videos: list(3), reference_audio: list(1) },
 				"at most 12 reference files in total",
 			],
-			[{ reference_audio_urls: list(1) }, "does not accept reference audio on its own"],
+			[{ reference_audio: list(1) }, "does not accept reference audio on its own"],
 		])("rejects %o", async (parameters, message) => {
 			await expect(bodyFor(REFERENCE_TO_VIDEO, { parameters: { prompt: "p", ...parameters } })).rejects.toThrow(
 				message,
 			);
 		});
-	});
-});
-
-// The exported spec is what a UI builds its file pickers from, so it has to stay in step with what
-// preparePayloadAsync actually enforces.
-describe("fal-ai reference input spec", () => {
-	it.each(FAL_AI_REFERENCE_INPUTS)("$field rejects one entry past its advertised maxItems", async (spec) => {
-		const overflow = Array.from({ length: spec.maxItems + 1 }, (_, i) => `https://example.com/${i}`);
-		const parameters = {
-			prompt: "p",
-			// audio can never stand alone, so give it a companion the limit check will not trip on
-			...(spec.requiresCompanion ? { reference_image_urls: ["https://example.com/companion.png"] } : undefined),
-			[spec.field]: overflow,
-		};
-		await expect(bodyFor(REFERENCE_TO_VIDEO, { parameters })).rejects.toThrow(
-			`at most ${spec.maxItems} entries in ${spec.field}`,
-		);
-	});
-
-	it("advertises per-list caps that can exceed the combined cap", () => {
-		const sum = FAL_AI_REFERENCE_INPUTS.reduce((total, spec) => total + spec.maxItems, 0);
-		expect(sum).toBeGreaterThan(FAL_AI_MAX_REFERENCE_FILES);
-	});
-
-	it("offers reference inputs only for reference-to-video endpoints", () => {
-		expect(supportsFalAiReferenceInputs(REFERENCE_TO_VIDEO)).toBe(true);
-		expect(supportsFalAiReferenceInputs(`${REFERENCE_TO_VIDEO}/lora`)).toBe(true);
-		expect(supportsFalAiReferenceInputs(IMAGE_TO_VIDEO)).toBe(false);
-		expect(supportsFalAiReferenceInputs(undefined)).toBe(false);
 	});
 });

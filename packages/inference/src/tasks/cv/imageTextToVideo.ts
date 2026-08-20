@@ -1,10 +1,20 @@
-import type { ImageTextToVideoInput } from "@huggingface/tasks";
+import type { ImageTextToVideoInput, ImageTextToVideoParameters } from "@huggingface/tasks";
 import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../../lib/getProviderHelper.js";
 import type { BaseArgs, Options } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
 
-export type ImageTextToVideoArgs = BaseArgs & ImageTextToVideoInput;
+/**
+ * The task schema types the reference lists as URLs (plain or data URLs), which is what reaches the
+ * provider. Callers holding the bytes - a browser `File` picked in a widget, say - can hand them
+ * over directly instead, and the provider helper inlines them.
+ */
+type ReferenceInputs = Partial<Record<"reference_images" | "reference_videos" | "reference_audio", (string | Blob)[]>>;
+
+export type ImageTextToVideoArgs = BaseArgs &
+	Omit<ImageTextToVideoInput, "parameters"> & {
+		parameters?: Omit<ImageTextToVideoParameters, keyof ReferenceInputs> & ReferenceInputs;
+	};
 
 /**
  * This task takes an image and text input and outputs a generated video.
