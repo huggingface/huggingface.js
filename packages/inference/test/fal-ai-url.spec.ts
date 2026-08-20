@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { FalAIImageTextToImageTask, FalAIImageTextToVideoTask } from "../src/providers/fal-ai.js";
-import type { AuthMethod } from "../src/types.js";
+import type { AuthMethod, BodyParams, InferenceProviderMappingEntry } from "../src/types.js";
+
+function mappingFor(providerId: string, adapter?: "lora"): InferenceProviderMappingEntry {
+	return {
+		provider: "fal-ai",
+		providerId,
+		hfModelId: "MiniMaxAI/MiniMax-H3",
+		status: "live",
+		task: "image-text-to-video",
+		...(adapter ? { adapter, adapterWeightsPath: "pytorch_lora_weights.safetensors" } : undefined),
+	};
+}
 
 async function urlFor(
 	helper: FalAIImageTextToImageTask | FalAIImageTextToVideoTask,
@@ -17,34 +28,40 @@ async function urlFor(
 	});
 }
 
+async function bodyFor(
+	providerId: string,
+	args: Record<string, unknown>,
+	adapter?: "lora",
+): Promise<Record<string, unknown>> {
+	const helper = new FalAIImageTextToVideoTask();
+	const prepared = await helper.preparePayloadAsync(args as never);
+	return helper.preparePayload({
+		args: prepared as Record<string, unknown>,
+		model: providerId,
+		task: "image-text-to-video",
+		mapping: mappingFor(providerId, adapter),
+	} as BodyParams);
+}
+
 const PROMPT_ONLY = { parameters: { prompt: "a bee on a sunflower" } };
-const WITH_IMAGE = { inputs: new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" }), ...PROMPT_ONLY };
+const IMAGE = () => new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" });
+const WITH_IMAGE = { inputs: IMAGE(), ...PROMPT_ONLY };
+
+const REFERENCE_TO_VIDEO = "minimax/h3/reference-to-video";
+const IMAGE_TO_VIDEO = "minimax/h3/image-to-video";
 
 describe("fal-ai request URLs", () => {
 	describe("image-text-to-video", () => {
-		const providerId = "minimax/h3/image-to-video";
-
-		it("keeps the provider model id intact when routed through huggingface.co", async () => {
-			// The router resolves the mapping from the URL path, so dropping a segment makes the model
-			// unresolvable ("Model not supported by provider fal-ai").
-			expect(await urlFor(new FalAIImageTextToVideoTask(), providerId, "hf-token", PROMPT_ONLY)).toBe(
-				"https://router.huggingface.co/fal-ai/minimax/h3/image-to-video?_subdomain=queue",
-			);
-		});
-
-		it("drops the endpoint segment when calling fal directly", async () => {
-			expect(await urlFor(new FalAIImageTextToVideoTask(), providerId, "provider-key", PROMPT_ONLY)).toBe(
-				"https://queue.fal.run/minimax/h3",
-			);
-		});
-
-		it("never rewrites the URL when an image is provided", async () => {
-			expect(await urlFor(new FalAIImageTextToVideoTask(), providerId, "hf-token", WITH_IMAGE)).toBe(
-				"https://router.huggingface.co/fal-ai/minimax/h3/image-to-video?_subdomain=queue",
-			);
-			expect(await urlFor(new FalAIImageTextToVideoTask(), providerId, "provider-key", WITH_IMAGE)).toBe(
-				"https://queue.fal.run/minimax/h3/image-to-video",
-			);
+		// Unlike `fal-ai/flux-2/edit`, MiniMax-H3 has no text-only variant at the parent path:
+		// `minimax/h3` is not an endpoint at all, and both mapped endpoints already accept a
+		// prompt-only call. So the URL is never rewritten, for direct calls or routed ones.
+		it.each([
+			["hf-token", "https://router.huggingface.co/fal-ai/minimax/h3/reference-to-video?_subdomain=queue"],
+			["provider-key", "https://queue.fal.run/minimax/h3/reference-to-video"],
+		] as const)("keeps the provider model id intact (%s)", async (authMethod, expected) => {
+			for (const args of [PROMPT_ONLY, WITH_IMAGE]) {
+				expect(await urlFor(new FalAIImageTextToVideoTask(), REFERENCE_TO_VIDEO, authMethod, args)).toBe(expected);
+			}
 		});
 	});
 
@@ -60,6 +77,103 @@ describe("fal-ai request URLs", () => {
 		it("drops the /edit segment when calling fal directly", async () => {
 			expect(await urlFor(new FalAIImageTextToImageTask(), providerId, "provider-key", PROMPT_ONLY)).toBe(
 				"https://queue.fal.run/fal-ai/flux-2",
+			);
+		});
+	});
+});
+
+describe("fal-ai image-text-to-video payloads", () => {
+	describe("reference-to-video endpoints", () => {
+		it("sends a prompt-only call unchanged", async () => {
+			expect(await bodyFor(REFERENCE_TO_VIDEO, PROMPT_ONLY)).toStrictEqual({ prompt: "a bee on a sunflower" });
+		});
+
+		it("leads the subject references with the task's own image input", async () => {
+			expect(
+				await bodyFor(REFERENCE_TO_VIDEO, {
+					inputs: IMAGE(),
+					parameters: { prompt: "Image 1 next to Image 2", reference_image_urls: ["https://example.com/2.png"] },
+				}),
+			).toStrictEqual({
+				prompt: "Image 1 next to Image 2",
+				reference_image_urls: ["data:image/png;base64,AQID", "https://example.com/2.png"],
+			});
+		});
+
+		it("carries images, videos, audio and generation options in a single call", async () => {
+			expect(
+				await bodyFor(REFERENCE_TO_VIDEO, {
+					parameters: {
+						prompt: "Image 1 moves like Video 1 to Audio 1",
+						reference_image_urls: ["https://example.com/subject.png"],
+						reference_video_urls: [new Blob([new Uint8Array([4])], { type: "video/mp4" })],
+						reference_audio_urls: [new Blob([new Uint8Array([5])], { type: "audio/mpeg" })],
+						aspect_ratio: "9:16",
+						resolution: "768P",
+						duration: 10,
+					},
+				}),
+			).toStrictEqual({
+				prompt: "Image 1 moves like Video 1 to Audio 1",
+				reference_image_urls: ["https://example.com/subject.png"],
+				reference_video_urls: ["data:video/mp4;base64,BA=="],
+				reference_audio_urls: ["data:audio/mpeg;base64,BQ=="],
+				aspect_ratio: "9:16",
+				resolution: "768P",
+				duration: 10,
+			});
+		});
+
+		it("builds loras from a tag-filter adapter mapping", async () => {
+			expect(await bodyFor(REFERENCE_TO_VIDEO, PROMPT_ONLY, "lora")).toStrictEqual({
+				prompt: "a bee on a sunflower",
+				loras: [
+					{
+						path: "https://huggingface.co/MiniMaxAI/MiniMax-H3/resolve/main/pytorch_lora_weights.safetensors",
+						scale: 1,
+					},
+				],
+			});
+		});
+	});
+
+	// The mapped endpoint decides the payload shape, so a model still pointing at the plain
+	// image-to-video endpoint keeps its single first-frame `image_url`.
+	describe("image-to-video endpoints", () => {
+		it("sends the image input as a single first frame", async () => {
+			expect(
+				await bodyFor(IMAGE_TO_VIDEO, {
+					inputs: IMAGE(),
+					parameters: { prompt: "zoom out", end_image_url: "https://example.com/last.png" },
+				}),
+			).toStrictEqual({
+				prompt: "zoom out",
+				image_url: "data:image/png;base64,AQID",
+				end_image_url: "https://example.com/last.png",
+			});
+		});
+
+		it("sends a prompt-only call unchanged", async () => {
+			expect(await bodyFor(IMAGE_TO_VIDEO, PROMPT_ONLY)).toStrictEqual({ prompt: "a bee on a sunflower" });
+		});
+	});
+
+	describe("reference limits", () => {
+		const url = (n: number) => `https://example.com/${n}`;
+		const list = (n: number) => Array.from({ length: n }, (_, i) => url(i));
+
+		it.each([
+			[{ reference_image_urls: list(10) }, "at most 9 entries in reference_image_urls"],
+			[{ reference_video_urls: list(4) }, "at most 3 entries in reference_video_urls"],
+			[{ reference_audio_urls: list(4) }, "at most 3 entries in reference_audio_urls"],
+			[
+				{ reference_image_urls: list(9), reference_video_urls: list(3), reference_audio_urls: list(1) },
+				"at most 12 reference files in total",
+			],
+			[{ reference_audio_urls: list(1) }, "does not accept reference audio on its own"],
+		])("rejects %o", async (parameters, message) => {
+			await expect(bodyFor(REFERENCE_TO_VIDEO, { parameters: { prompt: "p", ...parameters } })).rejects.toThrow(
+				message,
 			);
 		});
 	});
