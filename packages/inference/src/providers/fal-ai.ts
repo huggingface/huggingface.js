@@ -256,22 +256,76 @@ function applyLoraWeights(payload: Record<string, unknown>, mapping: BodyParams[
  */
 const FAL_AI_REFERENCE_ENDPOINT = /\/reference-to-video(\/|$)/;
 
-/** Per-list caps fal enforces server-side, plus the combined cap across all three lists. */
-const FAL_AI_MAX_REFERENCES = {
-	reference_image_urls: 9,
-	reference_video_urls: 3,
-	reference_audio_urls: 3,
-} as const;
-const FAL_AI_MAX_REFERENCE_FILES = 12;
+/** Field a reference list is sent as, inside `parameters`. */
+export type FalAiReferenceField = "reference_image_urls" | "reference_video_urls" | "reference_audio_urls";
 
-type ReferenceKind = keyof typeof FAL_AI_MAX_REFERENCES;
+/** One reference modality, and everything a caller needs to collect files for it. */
+export interface FalAiReferenceInputSpec {
+	field: FalAiReferenceField;
+	/** Most entries fal accepts in this list. */
+	maxItems: number;
+	/** Ready for a file picker's `accept` attribute. */
+	accept: string;
+	/** Duration fal requires of each clip, and of the list as a whole. Absent for stills. */
+	durationSeconds?: { minPerFile: number; maxPerFile: number; maxCombined: number };
+	/** fal rejects a call whose only references are of this modality. */
+	requiresCompanion?: boolean;
+	/** Assumed content type when a Blob arrives without one. */
+	fallbackMimeType: string;
+}
+
+/**
+ * The reference inputs a fal reference-to-video endpoint accepts. Exported so callers building an
+ * input UI can drive it from here — which pickers to show, how many files each takes, what to put
+ * in `accept` — instead of hardcoding fal's limits.
+ */
+export const FAL_AI_REFERENCE_INPUTS: readonly FalAiReferenceInputSpec[] = [
+	{
+		field: "reference_image_urls",
+		maxItems: 9,
+		accept: "image/*",
+		fallbackMimeType: "image/png",
+	},
+	{
+		field: "reference_video_urls",
+		maxItems: 3,
+		accept: "video/*",
+		durationSeconds: { minPerFile: 2, maxPerFile: 15, maxCombined: 15 },
+		fallbackMimeType: "video/mp4",
+	},
+	{
+		field: "reference_audio_urls",
+		maxItems: 3,
+		// Narrower than `audio/*`: fal's data-URL decoder only maps these to a file extension.
+		accept: FAL_AI_SUPPORTED_BLOB_TYPES.join(","),
+		durationSeconds: { minPerFile: 2, maxPerFile: 15, maxCombined: 15 },
+		requiresCompanion: true,
+		fallbackMimeType: "audio/mpeg",
+	},
+];
+
+/** Combined cap across all three reference lists. */
+export const FAL_AI_MAX_REFERENCE_FILES = 12;
+
+/**
+ * Whether a mapped fal provider id points at an endpoint taking reference images, videos and audio.
+ * A UI can use this to decide whether to offer those inputs for a given model at all — the plain
+ * image-to-video endpoints ignore everything past a single first frame.
+ */
+export function supportsFalAiReferenceInputs(providerId: string | undefined): boolean {
+	return FAL_AI_REFERENCE_ENDPOINT.test(providerId ?? "");
+}
+
+/** Reference lists accepted in `parameters`, alongside the task's own single-image `inputs`. */
+export type FalAiReferenceParameters = Partial<Record<FalAiReferenceField, ReferenceInput[]>>;
+
+type ReferenceKind = FalAiReferenceField;
 type ReferenceInput = string | Blob | ArrayBuffer;
 
-const FAL_AI_REFERENCE_FALLBACK_MIME: Record<ReferenceKind, string> = {
-	reference_image_urls: "image/png",
-	reference_video_urls: "video/mp4",
-	reference_audio_urls: "audio/mpeg",
-};
+const FAL_AI_REFERENCE_SPECS = Object.fromEntries(FAL_AI_REFERENCE_INPUTS.map((spec) => [spec.field, spec])) as Record<
+	ReferenceKind,
+	FalAiReferenceInputSpec
+>;
 
 function asReferenceList(value: unknown): ReferenceInput[] {
 	if (value === undefined || value === null) {
@@ -285,19 +339,22 @@ async function toFalAiReferenceUrl(value: ReferenceInput, kind: ReferenceKind): 
 	if (typeof value === "string") {
 		return value;
 	}
-	const blob = value instanceof Blob ? value : new Blob([value], { type: FAL_AI_REFERENCE_FALLBACK_MIME[kind] });
+	const { fallbackMimeType } = FAL_AI_REFERENCE_SPECS[kind];
+	const blob = value instanceof Blob ? value : new Blob([value], { type: fallbackMimeType });
 	// Audio goes through the MIME remapping fal's data-URL decoder requires.
 	return kind === "reference_audio_urls"
 		? buildFalAiAudioDataUrl(blob)
-		: dataUrlFromBlob(blob, blob.type || FAL_AI_REFERENCE_FALLBACK_MIME[kind]);
+		: dataUrlFromBlob(blob, blob.type || fallbackMimeType);
 }
 
 function assertWithinFalAiReferenceLimits(references: Record<ReferenceKind, ReferenceInput[]>): void {
 	let total = 0;
-	for (const [kind, max] of Object.entries(FAL_AI_MAX_REFERENCES) as [ReferenceKind, number][]) {
-		const count = references[kind].length;
-		if (count > max) {
-			throw new InferenceClientInputError(`Provider fal-ai accepts at most ${max} entries in ${kind}, got ${count}.`);
+	for (const { field, maxItems } of FAL_AI_REFERENCE_INPUTS) {
+		const count = references[field].length;
+		if (count > maxItems) {
+			throw new InferenceClientInputError(
+				`Provider fal-ai accepts at most ${maxItems} entries in ${field}, got ${count}.`,
+			);
 		}
 		total += count;
 	}
@@ -638,11 +695,11 @@ export class FalAIImageTextToVideoTask extends FalAIImageToVideoTask implements 
 			string[] | undefined
 		>;
 		const payload: Record<string, unknown> = {
-			...omit(params.args, ["inputs", "parameters", ...(Object.keys(FAL_AI_MAX_REFERENCES) as ReferenceKind[])]),
+			...omit(params.args, ["inputs", "parameters", ...FAL_AI_REFERENCE_INPUTS.map((spec) => spec.field)]),
 			...(params.args.parameters as Record<string, unknown>),
 		};
 
-		if (FAL_AI_REFERENCE_ENDPOINT.test(params.mapping?.providerId ?? "")) {
+		if (supportsFalAiReferenceInputs(params.mapping?.providerId)) {
 			if (!reference_image_urls?.length && !reference_video_urls?.length && !reference_audio_urls?.length) {
 				// Verified against minimax/h3/reference-to-video: `prompt` is the only field the schema
 				// marks required, but the app rejects a call carrying no reference at all.

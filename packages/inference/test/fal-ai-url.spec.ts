@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { FalAIImageTextToImageTask, FalAIImageTextToVideoTask } from "../src/providers/fal-ai.js";
 import { setLogger } from "../src/lib/logger.js";
+import { FAL_AI_MAX_REFERENCE_FILES, FAL_AI_REFERENCE_INPUTS, supportsFalAiReferenceInputs } from "../src/index.js";
 import type { AuthMethod, BodyParams, InferenceProviderMappingEntry } from "../src/types.js";
 
 function mappingFor(providerId: string, adapter?: "lora"): InferenceProviderMappingEntry {
@@ -198,5 +199,34 @@ describe("fal-ai image-text-to-video payloads", () => {
 				message,
 			);
 		});
+	});
+});
+
+// The exported spec is what a UI builds its file pickers from, so it has to stay in step with what
+// preparePayloadAsync actually enforces.
+describe("fal-ai reference input spec", () => {
+	it.each(FAL_AI_REFERENCE_INPUTS)("$field rejects one entry past its advertised maxItems", async (spec) => {
+		const overflow = Array.from({ length: spec.maxItems + 1 }, (_, i) => `https://example.com/${i}`);
+		const parameters = {
+			prompt: "p",
+			// audio can never stand alone, so give it a companion the limit check will not trip on
+			...(spec.requiresCompanion ? { reference_image_urls: ["https://example.com/companion.png"] } : undefined),
+			[spec.field]: overflow,
+		};
+		await expect(bodyFor(REFERENCE_TO_VIDEO, { parameters })).rejects.toThrow(
+			`at most ${spec.maxItems} entries in ${spec.field}`,
+		);
+	});
+
+	it("advertises per-list caps that can exceed the combined cap", () => {
+		const sum = FAL_AI_REFERENCE_INPUTS.reduce((total, spec) => total + spec.maxItems, 0);
+		expect(sum).toBeGreaterThan(FAL_AI_MAX_REFERENCE_FILES);
+	});
+
+	it("offers reference inputs only for reference-to-video endpoints", () => {
+		expect(supportsFalAiReferenceInputs(REFERENCE_TO_VIDEO)).toBe(true);
+		expect(supportsFalAiReferenceInputs(`${REFERENCE_TO_VIDEO}/lora`)).toBe(true);
+		expect(supportsFalAiReferenceInputs(IMAGE_TO_VIDEO)).toBe(false);
+		expect(supportsFalAiReferenceInputs(undefined)).toBe(false);
 	});
 });
