@@ -205,6 +205,19 @@ abstract class FalAiQueueTask extends FalAITask {
 		}
 
 		const resultResponse = await fetch(resultUrl, { headers, signal });
+		if (!resultResponse.ok) {
+			// The queue reports COMPLETED even for a request fal rejected, so the failure only shows
+			// up here - without this the caller sees a confusing "malformed response" instead.
+			throw new InferenceClientProviderApiError(
+				"Failed to fetch response from fal-ai API",
+				{ url: resultUrl, method: "GET" },
+				{
+					requestId: resultResponse.headers.get("x-request-id") ?? "",
+					status: resultResponse.status,
+					body: await resultResponse.text(),
+				},
+			);
+		}
 		let result: unknown;
 		try {
 			result = await resultResponse.json();
@@ -629,6 +642,13 @@ export class FalAIImageTextToVideoTask extends FalAIImageToVideoTask implements 
 		};
 
 		if (FAL_AI_REFERENCE_ENDPOINT.test(params.mapping?.providerId ?? "")) {
+			if (!reference_image_urls?.length && !reference_video_urls?.length && !reference_audio_urls?.length) {
+				// Verified against minimax/h3/reference-to-video: `prompt` is the only field the schema
+				// marks required, but the app rejects a call carrying no reference at all.
+				throw new InferenceClientInputError(
+					`Provider fal-ai requires at least one reference image, video or audio for ${params.mapping?.providerId}. Pass an image in \`inputs\`, or one of reference_image_urls / reference_video_urls / reference_audio_urls in \`parameters\`.`,
+				);
+			}
 			Object.assign(payload, {
 				...(reference_image_urls?.length ? { reference_image_urls } : undefined),
 				...(reference_video_urls?.length ? { reference_video_urls } : undefined),

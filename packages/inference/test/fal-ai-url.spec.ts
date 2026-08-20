@@ -84,8 +84,12 @@ describe("fal-ai request URLs", () => {
 
 describe("fal-ai image-text-to-video payloads", () => {
 	describe("reference-to-video endpoints", () => {
-		it("sends a prompt-only call unchanged", async () => {
-			expect(await bodyFor(REFERENCE_TO_VIDEO, PROMPT_ONLY)).toStrictEqual({ prompt: "a bee on a sunflower" });
+		// Verified live: the app rejects a reference-less call even though the schema only marks
+		// `prompt` required, so fail with something actionable rather than a 422.
+		it("rejects a call carrying no reference at all", async () => {
+			await expect(bodyFor(REFERENCE_TO_VIDEO, PROMPT_ONLY)).rejects.toThrow(
+				"requires at least one reference image, video or audio",
+			);
 		});
 
 		it("leads the subject references with the task's own image input", async () => {
@@ -125,8 +129,9 @@ describe("fal-ai image-text-to-video payloads", () => {
 		});
 
 		it("builds loras from a tag-filter adapter mapping", async () => {
-			expect(await bodyFor(REFERENCE_TO_VIDEO, PROMPT_ONLY, "lora")).toStrictEqual({
+			expect(await bodyFor(REFERENCE_TO_VIDEO, { inputs: IMAGE(), ...PROMPT_ONLY }, "lora")).toStrictEqual({
 				prompt: "a bee on a sunflower",
+				reference_image_urls: ["data:image/png;base64,AQID"],
 				loras: [
 					{
 						path: "https://huggingface.co/MiniMaxAI/MiniMax-H3/resolve/main/pytorch_lora_weights.safetensors",
