@@ -221,6 +221,88 @@ function buildLoraPath(modelId: ModelId, adapterWeightsPath: string): string {
 	return `${HF_HUB_URL}/${modelId}/resolve/main/${adapterWeightsPath}`;
 }
 
+function applyLoraWeights(payload: Record<string, unknown>, mapping: BodyParams["mapping"]): void {
+	if (mapping?.adapter === "lora" && mapping.adapterWeightsPath) {
+		payload.loras = [
+			{
+				path: buildLoraPath(mapping.hfModelId, mapping.adapterWeightsPath),
+				scale: 1,
+			},
+		];
+	}
+}
+
+/**
+ * fal's reference-to-video endpoints (e.g. `minimax/h3/reference-to-video`) take every reference
+ * modality in a single call — subject/style images, motion video clips and audio clips — each
+ * addressed from the prompt by its position in its list ("Image 1", "Video 1", "Audio 1").
+ *
+ * The plain `.../image-to-video` endpoints take a single `image_url` first frame instead, so the
+ * payload shape depends on which endpoint the model is mapped to.
+ */
+const FAL_AI_REFERENCE_ENDPOINT = /\/reference-to-video(\/|$)/;
+
+/** Per-list caps fal enforces server-side, plus the combined cap across all three lists. */
+const FAL_AI_MAX_REFERENCES = {
+	reference_image_urls: 9,
+	reference_video_urls: 3,
+	reference_audio_urls: 3,
+} as const;
+const FAL_AI_MAX_REFERENCE_FILES = 12;
+
+type ReferenceKind = keyof typeof FAL_AI_MAX_REFERENCES;
+type ReferenceInput = string | Blob | ArrayBuffer;
+
+const FAL_AI_REFERENCE_FALLBACK_MIME: Record<ReferenceKind, string> = {
+	reference_image_urls: "image/png",
+	reference_video_urls: "video/mp4",
+	reference_audio_urls: "audio/mpeg",
+};
+
+function asReferenceList(value: unknown): ReferenceInput[] {
+	if (value === undefined || value === null) {
+		return [];
+	}
+	return Array.isArray(value) ? (value as ReferenceInput[]) : [value as ReferenceInput];
+}
+
+/** URLs (and data URLs) are passed through; binary inputs are inlined as data URLs. */
+async function toFalAiReferenceUrl(value: ReferenceInput, kind: ReferenceKind): Promise<string> {
+	if (typeof value === "string") {
+		return value;
+	}
+	const blob = value instanceof Blob ? value : new Blob([value], { type: FAL_AI_REFERENCE_FALLBACK_MIME[kind] });
+	// Audio goes through the MIME remapping fal's data-URL decoder requires.
+	return kind === "reference_audio_urls"
+		? buildFalAiAudioDataUrl(blob)
+		: dataUrlFromBlob(blob, blob.type || FAL_AI_REFERENCE_FALLBACK_MIME[kind]);
+}
+
+function assertWithinFalAiReferenceLimits(references: Record<ReferenceKind, ReferenceInput[]>): void {
+	let total = 0;
+	for (const [kind, max] of Object.entries(FAL_AI_MAX_REFERENCES) as [ReferenceKind, number][]) {
+		const count = references[kind].length;
+		if (count > max) {
+			throw new InferenceClientInputError(`Provider fal-ai accepts at most ${max} entries in ${kind}, got ${count}.`);
+		}
+		total += count;
+	}
+	if (total > FAL_AI_MAX_REFERENCE_FILES) {
+		throw new InferenceClientInputError(
+			`Provider fal-ai accepts at most ${FAL_AI_MAX_REFERENCE_FILES} reference files in total, got ${total}.`,
+		);
+	}
+	if (
+		references.reference_audio_urls.length > 0 &&
+		references.reference_image_urls.length === 0 &&
+		references.reference_video_urls.length === 0
+	) {
+		throw new InferenceClientInputError(
+			`Provider fal-ai does not accept reference audio on its own — pass at least one reference image or video with it.`,
+		);
+	}
+}
+
 /**
  * Some fal apps expose the image+text variant one path segment deeper than the text-only one
  * (e.g. `fal-ai/flux-2` and `fal-ai/flux-2/edit`). When the mapping points at the deeper endpoint,
@@ -254,16 +336,9 @@ export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageT
 			prompt: params.args.inputs,
 		};
 
-		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
-			payload.loras = [
-				{
-					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
-					scale: 1,
-				},
-			];
-			if (params.mapping.providerId === "fal-ai/lora") {
-				payload.model_name = "stabilityai/stable-diffusion-xl-base-1.0";
-			}
+		applyLoraWeights(payload, params.mapping);
+		if (payload.loras && params.mapping?.providerId === "fal-ai/lora") {
+			payload.model_name = "stabilityai/stable-diffusion-xl-base-1.0";
 		}
 
 		return payload;
@@ -314,14 +389,7 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		const payload = params.args;
-		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
-			payload.loras = [
-				{
-					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
-					scale: 1,
-				},
-			];
-		}
+		applyLoraWeights(payload, params.mapping);
 		return payload;
 	}
 
@@ -399,11 +467,13 @@ export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoT
 	}
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
+		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			prompt: params.args.inputs,
 		};
+		applyLoraWeights(payload, params.mapping);
+		return payload;
 	}
 
 	override async getResponse(
@@ -453,14 +523,7 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 			// args.inputs is expected to be a base64 data URI or an URL
 			image_url: params.args.image_url,
 		};
-		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
-			payload.loras = [
-				{
-					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
-					scale: 1,
-				},
-			];
-		}
+		applyLoraWeights(payload, params.mapping);
 		return payload;
 	}
 
@@ -516,16 +579,68 @@ export class FalAIImageTextToVideoTask extends FalAIImageToVideoTask implements 
 		this.task = "image-text-to-video";
 	}
 
+	/**
+	 * Normalizes every input — the task's own `inputs` image plus any `reference_*_urls` passed
+	 * through `parameters` — into the three reference lists, inlining binary inputs as data URLs.
+	 * Which of those lists actually reach fal is decided in `preparePayload`, once the mapped
+	 * provider id tells us whether this is a reference-to-video or an image-to-video endpoint.
+	 */
 	override async preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs> {
-		if (args.inputs) {
-			return super.preparePayloadAsync(args as ImageToVideoArgs);
-		}
+		const { prompt, reference_image_urls, reference_video_urls, reference_audio_urls, ...parameters } =
+			args.parameters ?? {};
+
+		// `inputs` is the task's single image input; it leads the subject references so a prompt can
+		// address it as "Image 1".
+		const references: Record<ReferenceKind, ReferenceInput[]> = {
+			reference_image_urls: [
+				...(args.inputs ? [args.inputs as ReferenceInput] : []),
+				...asReferenceList(reference_image_urls),
+			],
+			reference_video_urls: asReferenceList(reference_video_urls),
+			reference_audio_urls: asReferenceList(reference_audio_urls),
+		};
+		assertWithinFalAiReferenceLimits(references);
+
+		const encoded = Object.fromEntries(
+			await Promise.all(
+				(Object.entries(references) as [ReferenceKind, ReferenceInput[]][]).map(
+					async ([kind, values]) =>
+						[kind, await Promise.all(values.map((value) => toFalAiReferenceUrl(value, kind)))] as const,
+				),
+			),
+		) as Record<ReferenceKind, string[]>;
+
 		return {
 			...omit(args, ["inputs", "parameters"]),
-			...(args.parameters as Record<string, unknown>),
-			prompt: args.parameters?.prompt,
-			urlTransform: dropEndpointSegmentOnDirectCalls,
+			...parameters,
+			prompt,
+			...encoded,
 		} as RequestArgs;
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const { reference_image_urls, reference_video_urls, reference_audio_urls } = params.args as Record<
+			ReferenceKind,
+			string[] | undefined
+		>;
+		const payload: Record<string, unknown> = {
+			...omit(params.args, ["inputs", "parameters", ...(Object.keys(FAL_AI_MAX_REFERENCES) as ReferenceKind[])]),
+			...(params.args.parameters as Record<string, unknown>),
+		};
+
+		if (FAL_AI_REFERENCE_ENDPOINT.test(params.mapping?.providerId ?? "")) {
+			Object.assign(payload, {
+				...(reference_image_urls?.length ? { reference_image_urls } : undefined),
+				...(reference_video_urls?.length ? { reference_video_urls } : undefined),
+				...(reference_audio_urls?.length ? { reference_audio_urls } : undefined),
+			});
+		} else if (reference_image_urls?.length) {
+			// Plain image-to-video endpoints only take a single first frame.
+			payload.image_url = reference_image_urls[0];
+		}
+
+		applyLoraWeights(payload, params.mapping);
+		return payload;
 	}
 }
 
