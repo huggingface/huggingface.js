@@ -6,18 +6,22 @@ import { innerRequest } from "../../utils/request.js";
 
 /**
  * Optional reference inputs, addressed from the prompt by position ("Image 1", "Video 1",
- * "Audio 1"). Each entry is a URL, a data URL, or the bytes themselves — a browser `File` picked in
- * a widget can be handed over directly, and the provider helper inlines it.
+ * "Audio 1"). Each entry is a URL, a data URL, or a `Blob` — a browser `File` picked in a widget can
+ * be handed over directly, and the provider helper inlines it.
  *
  * Not part of the task schema: only some providers serve them (today, fal on its reference-to-video
  * endpoints), and the ones that cannot say so rather than ignoring them. Callers use these names
  * regardless of provider, so nothing consuming the task has to know who serves the model.
  */
-type ReferenceInputs = Partial<Record<"reference_images" | "reference_videos" | "reference_audio", (string | Blob)[]>>;
+export type ReferenceInputs = Partial<
+	Record<"reference_images" | "reference_videos" | "reference_audio", (string | Blob)[]>
+>;
 
+// No `Omit` of the reference keys: both task types carry an index signature, so `keyof` them is
+// `string | number` and an Omit would launder every named parameter back into that signature.
 export type ImageTextToVideoArgs = BaseArgs &
-	Omit<ImageTextToVideoInput, "parameters"> & {
-		parameters?: Omit<ImageTextToVideoParameters, keyof ReferenceInputs> & ReferenceInputs;
+	ImageTextToVideoInput & {
+		parameters?: ImageTextToVideoParameters & ReferenceInputs;
 	};
 
 /**

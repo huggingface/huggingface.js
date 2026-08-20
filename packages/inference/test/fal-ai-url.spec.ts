@@ -1,17 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FalAIImageTextToImageTask, FalAIImageTextToVideoTask } from "../src/providers/fal-ai.js";
+import { FalAIImageTextToImageTask, FalAIImageTextToVideoTask, FalAITextToVideoTask } from "../src/providers/fal-ai.js";
 import type { AuthMethod, BodyParams, InferenceProviderMappingEntry } from "../src/types.js";
-
-function mappingFor(providerId: string, adapter?: "lora"): InferenceProviderMappingEntry {
-	return {
-		provider: "fal-ai",
-		providerId,
-		hfModelId: "MiniMaxAI/MiniMax-H3",
-		status: "live",
-		task: "image-text-to-video",
-		...(adapter ? { adapter, adapterWeightsPath: "pytorch_lora_weights.safetensors" } : undefined),
-	};
-}
 
 async function urlFor(
 	helper: FalAIImageTextToImageTask | FalAIImageTextToVideoTask,
@@ -39,13 +28,20 @@ async function bodyFor(
 		args: prepared as Record<string, unknown>,
 		model: providerId,
 		task: "image-text-to-video",
-		mapping: mappingFor(providerId, adapter),
+		mapping: {
+			provider: "fal-ai",
+			providerId,
+			hfModelId: "MiniMaxAI/MiniMax-H3",
+			status: "live",
+			task: "image-text-to-video",
+			...(adapter ? { adapter, adapterWeightsPath: "pytorch_lora_weights.safetensors" } : undefined),
+		},
 	} as BodyParams);
 }
 
 const PROMPT_ONLY = { parameters: { prompt: "a bee on a sunflower" } };
-const IMAGE = () => new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" });
-const WITH_IMAGE = { inputs: IMAGE(), ...PROMPT_ONLY };
+const IMAGE = new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" });
+const WITH_IMAGE = { inputs: IMAGE, ...PROMPT_ONLY };
 
 const REFERENCE_TO_VIDEO = "minimax/h3/reference-to-video";
 const IMAGE_TO_VIDEO = "minimax/h3/image-to-video";
@@ -56,12 +52,12 @@ describe("fal-ai request URLs", () => {
 		// `minimax/h3` is not an endpoint at all, and both mapped endpoints already accept a
 		// prompt-only call. So the URL is never rewritten, for direct calls or routed ones.
 		it.each([
-			["hf-token", "https://router.huggingface.co/fal-ai/minimax/h3/reference-to-video?_subdomain=queue"],
-			["provider-key", "https://queue.fal.run/minimax/h3/reference-to-video"],
-		] as const)("keeps the provider model id intact (%s)", async (authMethod, expected) => {
-			for (const args of [PROMPT_ONLY, WITH_IMAGE]) {
-				expect(await urlFor(new FalAIImageTextToVideoTask(), REFERENCE_TO_VIDEO, authMethod, args)).toBe(expected);
-			}
+			["hf-token", PROMPT_ONLY, "https://router.huggingface.co/fal-ai/minimax/h3/reference-to-video?_subdomain=queue"],
+			["hf-token", WITH_IMAGE, "https://router.huggingface.co/fal-ai/minimax/h3/reference-to-video?_subdomain=queue"],
+			["provider-key", PROMPT_ONLY, "https://queue.fal.run/minimax/h3/reference-to-video"],
+			["provider-key", WITH_IMAGE, "https://queue.fal.run/minimax/h3/reference-to-video"],
+		] as const)("keeps the provider model id intact (%s, %o)", async (authMethod, args, expected) => {
+			expect(await urlFor(new FalAIImageTextToVideoTask(), REFERENCE_TO_VIDEO, authMethod, args)).toBe(expected);
 		});
 	});
 
@@ -93,7 +89,7 @@ describe("fal-ai image-text-to-video payloads", () => {
 		it("leads the subject references with the task's own image input", async () => {
 			expect(
 				await bodyFor(REFERENCE_TO_VIDEO, {
-					inputs: IMAGE(),
+					inputs: IMAGE,
 					parameters: { prompt: "Image 1 next to Image 2", reference_images: ["https://example.com/2.png"] },
 				}),
 			).toStrictEqual({
@@ -127,7 +123,7 @@ describe("fal-ai image-text-to-video payloads", () => {
 		});
 
 		it("builds loras from a tag-filter adapter mapping", async () => {
-			expect(await bodyFor(REFERENCE_TO_VIDEO, { inputs: IMAGE(), ...PROMPT_ONLY }, "lora")).toStrictEqual({
+			expect(await bodyFor(REFERENCE_TO_VIDEO, WITH_IMAGE, "lora")).toStrictEqual({
 				prompt: "a bee on a sunflower",
 				reference_image_urls: ["data:image/png;base64,AQID"],
 				loras: [
@@ -146,7 +142,7 @@ describe("fal-ai image-text-to-video payloads", () => {
 		it("sends the image input as a single first frame", async () => {
 			expect(
 				await bodyFor(IMAGE_TO_VIDEO, {
-					inputs: IMAGE(),
+					inputs: IMAGE,
 					parameters: { prompt: "zoom out", end_image_url: "https://example.com/last.png" },
 				}),
 			).toStrictEqual({
@@ -163,16 +159,15 @@ describe("fal-ai image-text-to-video payloads", () => {
 		it("refuses references it cannot carry", async () => {
 			await expect(
 				bodyFor(IMAGE_TO_VIDEO, {
-					inputs: IMAGE(),
+					inputs: IMAGE,
 					parameters: { prompt: "p", reference_videos: ["https://example.com/v.mp4"] },
 				}),
 			).rejects.toThrow("accepts a single reference image and no reference video or audio");
 		});
 	});
 
-	describe("reference limits", () => {
-		const url = (n: number) => `https://example.com/${n}`;
-		const list = (n: number) => Array.from({ length: n }, (_, i) => url(i));
+	describe("reference validation", () => {
+		const list = (n: number) => Array.from({ length: n }, (_, i) => `https://example.com/${i}`);
 
 		it.each([
 			[{ reference_images: list(10) }, "at most 9 entries in reference_image_urls"],
@@ -188,5 +183,40 @@ describe("fal-ai image-text-to-video payloads", () => {
 				message,
 			);
 		});
+	});
+});
+
+// fal exposes `.../lora` variants of its video endpoints, and they require a `loras` entry. Only the
+// image tasks built one before, so a tag-filter adapter mapping never reached the video ones.
+describe("fal-ai text-to-video loras", () => {
+	const preparePayload = (mapping?: Partial<InferenceProviderMappingEntry>) =>
+		new FalAITextToVideoTask().preparePayload({
+			args: { inputs: "a bee on a sunflower" },
+			model: "minimax/h3/text-to-video",
+			task: "text-to-video",
+			mapping: mapping && {
+				provider: "fal-ai",
+				providerId: "minimax/h3/text-to-video/lora",
+				hfModelId: "MiniMaxAI/MiniMax-H3",
+				status: "live",
+				task: "text-to-video",
+				...mapping,
+			},
+		} as BodyParams);
+
+	it("builds loras from a tag-filter adapter mapping", () => {
+		expect(preparePayload({ adapter: "lora", adapterWeightsPath: "pytorch_lora_weights.safetensors" })).toStrictEqual({
+			prompt: "a bee on a sunflower",
+			loras: [
+				{
+					path: "https://huggingface.co/MiniMaxAI/MiniMax-H3/resolve/main/pytorch_lora_weights.safetensors",
+					scale: 1,
+				},
+			],
+		});
+	});
+
+	it("leaves the payload alone without an adapter", () => {
+		expect(preparePayload()).toStrictEqual({ prompt: "a bee on a sunflower" });
 	});
 });
