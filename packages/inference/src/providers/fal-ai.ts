@@ -38,6 +38,7 @@ import {
 	type ImageToVideoTaskHelper,
 } from "./providerHelper.js";
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config.js";
+import { getLogger } from "../lib/logger.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { AudioToAudioArgs, AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import {
@@ -655,7 +656,18 @@ export class FalAIImageTextToVideoTask extends FalAIImageToVideoTask implements 
 				...(reference_audio_urls?.length ? { reference_audio_urls } : undefined),
 			});
 		} else if (reference_image_urls?.length) {
-			// Plain image-to-video endpoints only take a single first frame.
+			// Plain image-to-video endpoints only take a single first frame, so anything past it would
+			// be dropped on the floor - say so rather than silently returning a video that ignored it.
+			const dropped = [
+				...reference_image_urls.slice(1),
+				...(reference_video_urls ?? []),
+				...(reference_audio_urls ?? []),
+			];
+			if (dropped.length) {
+				getLogger().warn(
+					`Provider fal-ai: ${params.mapping?.providerId} only accepts a single first-frame image, ignoring ${dropped.length} extra reference(s). Map the model to a reference-to-video endpoint to use them.`,
+				);
+			}
 			payload.image_url = reference_image_urls[0];
 		}
 

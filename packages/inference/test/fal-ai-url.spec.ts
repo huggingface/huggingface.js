@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { FalAIImageTextToImageTask, FalAIImageTextToVideoTask } from "../src/providers/fal-ai.js";
+import { setLogger } from "../src/lib/logger.js";
 import type { AuthMethod, BodyParams, InferenceProviderMappingEntry } from "../src/types.js";
 
 function mappingFor(providerId: string, adapter?: "lora"): InferenceProviderMappingEntry {
@@ -160,6 +161,22 @@ describe("fal-ai image-text-to-video payloads", () => {
 
 		it("sends a prompt-only call unchanged", async () => {
 			expect(await bodyFor(IMAGE_TO_VIDEO, PROMPT_ONLY)).toStrictEqual({ prompt: "a bee on a sunflower" });
+		});
+
+		it("warns about references it cannot carry", async () => {
+			const warn = vi.fn();
+			setLogger({ ...console, warn });
+			try {
+				expect(
+					await bodyFor(IMAGE_TO_VIDEO, {
+						inputs: IMAGE(),
+						parameters: { prompt: "p", reference_video_urls: ["https://example.com/v.mp4"] },
+					}),
+				).toStrictEqual({ prompt: "p", image_url: "data:image/png;base64,AQID" });
+			} finally {
+				setLogger(console);
+			}
+			expect(warn).toHaveBeenCalledWith(expect.stringContaining("ignoring 1 extra reference(s)"));
 		});
 	});
 
