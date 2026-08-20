@@ -68,6 +68,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	deepinfra: {
 		"automatic-speech-recognition": new DeepInfra.DeepInfraAutomaticSpeechRecognitionTask(),
 		conversational: new DeepInfra.DeepInfraConversationalTask(),
+		"feature-extraction": new DeepInfra.DeepInfraFeatureExtractionTask(),
 		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
 		"text-to-speech": new DeepInfra.DeepInfraTextToSpeechTask(),
 	},
