@@ -8,7 +8,6 @@ import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import { buildReferenceInputs, REFERENCE_PARAMETERS, type ReferenceInputsSpec } from "../lib/referenceInputs.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 import type {
 	TextToImageTaskHelper,
@@ -18,7 +17,12 @@ import type {
 	ImageTextToImageTaskHelper,
 	ImageTextToVideoTaskHelper,
 } from "./providerHelper.js";
-import { TaskProviderHelper } from "./providerHelper.js";
+import {
+	buildReferenceInputs,
+	REFERENCE_PARAMETERS,
+	type ReferenceInputsSpec,
+	TaskProviderHelper,
+} from "./providerHelper.js";
 import {
 	InferenceClientInputError,
 	InferenceClientProviderApiError,

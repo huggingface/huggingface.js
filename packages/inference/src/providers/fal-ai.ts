@@ -22,12 +22,6 @@ import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, InferenceTask, ModelId, OutputType, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import {
-	buildReferenceInputs,
-	REFERENCE_MODALITIES,
-	REFERENCE_PARAMETERS,
-	type ReferenceInputsSpec,
-} from "../lib/referenceInputs.js";
 import type {
 	AudioToAudioTaskHelper,
 	ImageSegmentationTaskHelper,
@@ -37,11 +31,15 @@ import type {
 } from "./providerHelper.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
+	buildReferenceInputs,
+	type ImageToVideoTaskHelper,
+	REFERENCE_MODALITIES,
+	REFERENCE_PARAMETERS,
+	type ReferenceInputsSpec,
 	TaskProviderHelper,
 	type TextToAudioTaskHelper,
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
-	type ImageToVideoTaskHelper,
 } from "./providerHelper.js";
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
