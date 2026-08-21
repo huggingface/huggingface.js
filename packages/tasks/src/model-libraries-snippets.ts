@@ -244,7 +244,7 @@ print("R² Score:", r2)`;
 };
 
 export const cortiq = (model: ModelData): string[] => {
-	const setup = `# one Rust binary: no torch, no ONNX, no CUDA install, no Python
+	const setup = `# one Rust binary, no additional dependencies
 cargo install cortiq-cli   # or a prebuilt binary from github.com/infosave2007/cmf/releases
 hf download ${model.id} --include "*.cmf" --local-dir .
 ls *.cmf                   # some repos ship more than one quantization`;
