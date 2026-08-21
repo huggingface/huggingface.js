@@ -254,6 +254,13 @@ ls *.cmf                   # some repos ship more than one quantization`;
 	if (model.pipeline_tag === "text-to-video") {
 		return [setup, `cortiq animate FILE.cmf --prompt "a corgi in a chef hat flipping a pancake" --out clip.avi`];
 	}
+	if (model.pipeline_tag === "text-to-audio") {
+		return [
+			setup,
+			`cortiq music FILE.cmf --prompt "dream pop, warm analog synths, brushed drums" \\
+  --lyrics "[verse] the tide came in and took the map" --seconds 20 --out song.wav`,
+		];
+	}
 	return [
 		setup,
 		`cortiq run FILE.cmf --prompt "What is the capital of France?"`,
