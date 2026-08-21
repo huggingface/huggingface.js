@@ -583,6 +583,35 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 	return `docker model run hf.co/${model.id}${quantTag}`;
 };
 
+const snippetKronk = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const modelId = `${model.id}${getQuantTag(filepath)}`;
+	const content = [
+		"# Install the native inference libraries:",
+		"kronk libs --local",
+		"# Download the model from Hugging Face:",
+		`kronk model pull ${modelId} --local`,
+		"# Start a local OpenAI-compatible server in the background:",
+		"kronk server start --detach",
+		"# List the model IDs available from the server:",
+		"kronk model list",
+		"# Launch OpenCode with a model ID from the list:",
+		"kronk launch opencode <MODEL_ID>",
+	].join("\n");
+
+	return [
+		{
+			title: "Install (macOS, Linux) with Homebrew",
+			setup: "brew install ardanlabs/kronk/kronk",
+			content,
+		},
+		{
+			title: "Install with Go",
+			setup: "go install github.com/ardanlabs/kronk/cmd/kronk@latest",
+			content,
+		},
+	];
+};
+
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
 	const isRyzenAI = model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag));
@@ -796,6 +825,14 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
+	},
+	kronk: {
+		prettyLabel: "Kronk",
+		docsUrl: "https://kronkai.com",
+		links: [{ label: "GitHub", url: "https://github.com/ardanlabs/kronk" }],
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetKronk,
 	},
 	unsloth: {
 		prettyLabel: "Unsloth Studio",
