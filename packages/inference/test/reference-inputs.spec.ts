@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { FalAIImageTextToVideoTask } from "../src/providers/fal-ai.js";
-import { ReplicateImageTextToVideoTask } from "../src/providers/replicate.js";
 import { WavespeedAIImageTextToVideoTask } from "../src/providers/wavespeed.js";
 import type { BodyParams, InferenceTask, RequestArgs } from "../src/types.js";
 
@@ -73,22 +72,6 @@ describe("image-text-to-video reference inputs", () => {
 		expect(body).not.toHaveProperty("images");
 	});
 
-	it("replicate keeps the first frame beside the references, in one schema", async () => {
-		const { input } = (await bodyFor(
-			new ReplicateImageTextToVideoTask(),
-			"replicate",
-			"minimax/h3",
-			EVERY_MODALITY,
-		)) as { input: Record<string, unknown> };
-		expect(input).toMatchObject({
-			prompt: EVERY_MODALITY.parameters.prompt,
-			first_frame_image: "data:image/png;base64,AQ==",
-			reference_image_urls: ["https://example.com/style.png"],
-			reference_video_urls: ["data:video/mp4;base64,Ag=="],
-			reference_audio_urls: ["data:audio/wav;base64,Aw=="],
-		});
-	});
-
 	// Offered on every image-text-to-video model, so an endpoint that cannot use them has to say so
 	// rather than ship a body full of keys it will ignore.
 	it.each([
@@ -124,10 +107,15 @@ describe("image-text-to-video reference inputs", () => {
 		});
 
 		it("applies no combined cap where the provider declares none", async () => {
-			const body = await bodyFor(new ReplicateImageTextToVideoTask(), "replicate", "minimax/h3", {
-				parameters: { prompt: "p", reference_images: list(9), reference_videos: list(3), reference_audio: list(3) },
-			});
-			expect((body as { input: Record<string, string[]> }).input.reference_image_urls).toHaveLength(9);
+			// wavespeed bounds each list but publishes no total, so 9 + 3 + 3 is fine there and over
+			// fal's cap of 12.
+			const body = await bodyFor(
+				new WavespeedAIImageTextToVideoTask(),
+				"wavespeed",
+				"wavespeed-ai/minimax-h3/reference-to-video",
+				{ parameters: { prompt: "p", reference_images: list(9), reference_videos: list(3), reference_audio: list(3) } },
+			);
+			expect(body.reference_images).toHaveLength(9);
 		});
 	});
 });

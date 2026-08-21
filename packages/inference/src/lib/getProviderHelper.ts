@@ -146,7 +146,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new PublicAI.PublicAIConversationalTask(),
 	},
 	replicate: {
-		"image-text-to-video": new Replicate.ReplicateImageTextToVideoTask(),
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
 		"text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
 		"text-to-video": new Replicate.ReplicateTextToVideoTask(),
