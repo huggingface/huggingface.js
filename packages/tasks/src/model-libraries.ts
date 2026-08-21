@@ -1015,6 +1015,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mobilint,
 		filter: false,
 	},
+	"montreal-forced-aligner": {
+		prettyLabel: "Montreal Forced Aligner",
+		repoName: "Montreal Forced Aligner",
+		repoUrl: "https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner",
+		docsUrl: "https://montreal-forced-aligner.readthedocs.io",
+		filter: false,
+		countDownloads: `path:"acoustic/final.mdl" OR path_extension:"zip"`,
+	},
 	moshi: {
 		prettyLabel: "Moshi",
 		repoName: "Moshi",
