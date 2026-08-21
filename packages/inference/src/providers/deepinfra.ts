@@ -24,9 +24,15 @@ import type {
 	FeatureExtractionOutput,
 	TextGenerationOutput,
 } from "@huggingface/tasks";
-import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
+import {
+	InferenceClientInputError,
+	InferenceClientProviderApiError,
+	InferenceClientProviderOutputError,
+} from "../errors.js";
+import { isUrl } from "../lib/isUrl.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { BodyParams, RequestArgs } from "../types.js";
+import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
@@ -35,6 +41,7 @@ import {
 	type FeatureExtractionTaskHelper,
 	TaskProviderHelper,
 	type TextToSpeechTaskHelper,
+	type TextToVideoTaskHelper,
 } from "./providerHelper.js";
 
 /**
@@ -94,6 +101,13 @@ interface DeepInfraEmbeddingsResponse {
 	}>;
 	model: string;
 	object: string;
+}
+
+interface DeepInfraVideoResponse {
+	id?: string;
+	status?: string;
+	data?: Array<{ url?: string }>;
+	error?: string;
 }
 
 export class DeepInfraConversationalTask extends BaseConversationalTask {
@@ -297,6 +311,97 @@ export class DeepInfraFeatureExtractionTask extends TaskProviderHelper implement
 		}
 		throw new InferenceClientProviderOutputError(
 			`Received malformed response from DeepInfra feature-extraction (embeddings) API: ${JSON.stringify(response)}`,
+		);
+	}
+}
+
+export class DeepInfraTextToVideoTask extends TaskProviderHelper implements TextToVideoTaskHelper {
+	constructor() {
+		super("deepinfra", DEEPINFRA_API_BASE_URL);
+	}
+
+	makeRoute(): string {
+		return "v1/openai/videos";
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		// DeepInfra video generation is asynchronous: this POST submits the job and getResponse
+		// polls it. `prompt`/`model` are applied after caller parameters so neither can be overridden.
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown> | undefined),
+			prompt: params.args.inputs,
+			model: params.model,
+		};
+	}
+
+	override async getResponse(
+		response: DeepInfraVideoResponse,
+		url?: string,
+		headers?: Record<string, string>,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob> {
+		if (!url || !headers) {
+			throw new InferenceClientInputError("URL and headers are required for text-to-video task");
+		}
+		const jobId = response.id;
+		if (!jobId) {
+			throw new InferenceClientProviderOutputError(
+				"Received malformed response from DeepInfra text-to-video API: no job id found in the response",
+			);
+		}
+
+		const parsedUrl = new URL(url);
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
+			parsedUrl.host === "router.huggingface.co" ? "/deepinfra" : ""
+		}`;
+		const statusUrl = `${baseUrl}/v1/openai/videos/${jobId}`;
+
+		let status = response.status ?? "";
+		let job: DeepInfraVideoResponse = response;
+		while (status !== "succeeded" && status !== "failed") {
+			await delay(500, signal);
+			const statusResponse = await fetch(statusUrl, { headers, signal });
+			if (!statusResponse.ok) {
+				throw new InferenceClientProviderApiError(
+					"Failed to fetch text-to-video job status",
+					{ url: statusUrl, method: "GET", headers },
+					{
+						requestId: statusResponse.headers.get("x-request-id") ?? "",
+						status: statusResponse.status,
+						body: await statusResponse.text(),
+					},
+				);
+			}
+			job = (await statusResponse.json()) as DeepInfraVideoResponse;
+			if (typeof job !== "object" || !job || typeof job.status !== "string") {
+				throw new InferenceClientProviderOutputError(
+					"Received malformed response from DeepInfra text-to-video API: failed to read job status",
+				);
+			}
+			status = job.status;
+		}
+
+		if (status === "failed") {
+			throw new InferenceClientProviderOutputError(
+				`DeepInfra text-to-video job failed: ${job.error ?? "unknown error"}`,
+			);
+		}
+
+		if (
+			Array.isArray(job.data) &&
+			job.data.length > 0 &&
+			typeof job.data[0].url === "string" &&
+			isUrl(job.data[0].url)
+		) {
+			const videoResponse = await fetch(job.data[0].url, { signal });
+			return await videoResponse.blob();
+		}
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from DeepInfra text-to-video API: expected { data: [{ url: string }] }, got instead: ${JSON.stringify(
+				job,
+			)}`,
 		);
 	}
 }
