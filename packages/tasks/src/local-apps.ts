@@ -621,6 +621,27 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetBodegaOneCode = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const command = [
+		"# Pull the model, then chat with it in the terminal UI:",
+		`bodega models pull hf.co/${model.id}${getQuantTag(filepath)}`,
+		"bodega",
+	].join("\n");
+	return [
+		{
+			title: "Install (macOS, Linux)",
+			setup:
+				"curl -fsSL https://github.com/BodegaoneAI/bodegaone-cli-releases/releases/latest/download/install.sh | sh",
+			content: command,
+		},
+		{
+			title: "Install (Windows, PowerShell)",
+			setup: "irm https://github.com/BodegaoneAI/bodegaone-cli-releases/releases/latest/download/install.ps1 | iex",
+			content: command,
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -838,6 +859,21 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	"bodega-one": {
+		prettyLabel: "Bodega One",
+		docsUrl: "https://bodegaone.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model, filepath) =>
+			new URL(`bodega://models/huggingface/${model.id}${filepath ? `?file=${filepath}` : ""}`),
+	},
+	"bodega-one-code": {
+		prettyLabel: "Bodega One Code",
+		docsUrl: "https://bodegaone.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetBodegaOneCode,
 	},
 } satisfies Record<string, LocalApp>;
 
