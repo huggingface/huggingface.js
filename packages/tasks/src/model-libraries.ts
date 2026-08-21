@@ -336,7 +336,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	cortiq: {
 		prettyLabel: "cortiq",
-		repoName: "cmf",
+		repoName: "cortiq",
 		repoUrl: "https://github.com/infosave2007/cmf",
 		docsUrl: "https://github.com/infosave2007/cmf/blob/master/docs/CMF_V2_SPEC.md",
 		snippets: snippets.cortiq,
