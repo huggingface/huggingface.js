@@ -19,6 +19,7 @@ import type {
 	ImageToTextInput,
 	ImageToTextOutput,
 	ImageToVideoInput,
+	VideoToVideoInput,
 	ImageTextToImageInput,
 	ImageTextToVideoInput,
 	ObjectDetectionInput,
@@ -65,6 +66,7 @@ import { omit } from "../utils/omit.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
+import type { VideoToVideoArgs } from "../tasks/cv/videoToVideo.js";
 import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
@@ -194,6 +196,18 @@ export interface ImageToVideoTaskHelper {
 	): Promise<Blob>;
 	preparePayload(params: BodyParams<ImageToVideoInput & BaseArgs>): Record<string, unknown>;
 	preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs>;
+}
+
+export interface VideoToVideoTaskHelper {
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
+	preparePayload(params: BodyParams<VideoToVideoInput & BaseArgs>): Record<string, unknown>;
+	preparePayloadAsync(args: VideoToVideoArgs): Promise<RequestArgs>;
 }
 
 export interface ImageTextToImageTaskHelper {
