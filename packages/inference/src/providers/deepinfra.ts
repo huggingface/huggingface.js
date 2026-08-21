@@ -22,6 +22,7 @@ model to DeepInfra, please open an issue on the present repo
 import type {
 	AutomaticSpeechRecognitionOutput,
 	FeatureExtractionOutput,
+	SentenceSimilarityOutput,
 	TextGenerationOutput,
 } from "@huggingface/tasks";
 import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
@@ -33,6 +34,7 @@ import {
 	BaseConversationalTask,
 	BaseTextGenerationTask,
 	type FeatureExtractionTaskHelper,
+	type SentenceSimilarityTaskHelper,
 	TaskProviderHelper,
 	type TextToSpeechTaskHelper,
 } from "./providerHelper.js";
@@ -94,6 +96,19 @@ interface DeepInfraEmbeddingsResponse {
 	}>;
 	model: string;
 	object: string;
+}
+
+function cosineSimilarity(a: number[], b: number[]): number {
+	let dot = 0;
+	let normA = 0;
+	let normB = 0;
+	for (let i = 0; i < a.length; i++) {
+		dot += a[i] * b[i];
+		normA += a[i] * a[i];
+		normB += b[i] * b[i];
+	}
+	const denom = Math.sqrt(normA) * Math.sqrt(normB);
+	return denom === 0 ? 0 : dot / denom;
 }
 
 export class DeepInfraConversationalTask extends BaseConversationalTask {
@@ -297,6 +312,54 @@ export class DeepInfraFeatureExtractionTask extends TaskProviderHelper implement
 		}
 		throw new InferenceClientProviderOutputError(
 			`Received malformed response from DeepInfra feature-extraction (embeddings) API: ${JSON.stringify(response)}`,
+		);
+	}
+}
+
+export class DeepInfraSentenceSimilarityTask extends TaskProviderHelper implements SentenceSimilarityTaskHelper {
+	constructor() {
+		super("deepinfra", DEEPINFRA_API_BASE_URL);
+	}
+
+	makeRoute(): string {
+		return "v1/openai/embeddings";
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		// DeepInfra has no native sentence-similarity endpoint, so we embed the source
+		// sentence (first) and the comparison sentences in one embeddings request and derive
+		// the similarities from the returned vectors. `input` and `model` are applied after
+		// the caller parameters so neither can be overridden.
+		const { source_sentence, sentences } = params.args.inputs as { source_sentence: string; sentences: string[] };
+		return {
+			...(params.args.parameters as Record<string, unknown> | undefined),
+			input: [source_sentence, ...sentences],
+			model: params.model,
+		};
+	}
+
+	async getResponse(response: DeepInfraEmbeddingsResponse): Promise<SentenceSimilarityOutput> {
+		if (
+			typeof response === "object" &&
+			response !== null &&
+			"data" in response &&
+			Array.isArray(response.data) &&
+			response.data.every(
+				(item): item is DeepInfraEmbeddingsResponse["data"][number] =>
+					typeof item === "object" && !!item && typeof item.index === "number" && Array.isArray(item.embedding),
+			)
+		) {
+			// `index` preserves request order: item 0 is the source sentence, items 1.. are
+			// the comparison sentences.
+			const embeddings = [...response.data].sort((a, b) => a.index - b.index).map((item) => item.embedding);
+			const [source, ...rest] = embeddings;
+			if (source === undefined) {
+				return [];
+			}
+			return rest.map((embedding) => cosineSimilarity(source, embedding));
+		}
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from DeepInfra sentence-similarity (embeddings) API: ${JSON.stringify(response)}`,
 		);
 	}
 }
