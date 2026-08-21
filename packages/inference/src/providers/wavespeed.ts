@@ -359,6 +359,11 @@ export class WavespeedAIImageTextToVideoTask extends WavespeedAIImageToVideoTask
 			...params,
 			args: omit(params.args, fields) as typeof params.args,
 		});
-		return { ...payload, ...Object.fromEntries(supplied.map((field) => [field, params.args[field]])) };
+		const references = Object.fromEntries(supplied.map((field) => [field, params.args[field]]));
+		// A reference endpoint has no first frame, so the placeholder image the other endpoints need
+		// would arrive as a field it does not have.
+		return targetsReferenceEndpoint(params.mapping?.providerId)
+			? { ...omit(payload, ["image", "images"]), ...references }
+			: { ...payload, ...references };
 	}
 }
