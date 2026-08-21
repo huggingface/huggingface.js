@@ -1,6 +1,7 @@
 import * as Baseten from "../providers/baseten.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
+import * as ConsensusProtocol from "../providers/consensus-protocol.js";
 import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
 import * as FeatherlessAI from "../providers/featherless-ai.js";
@@ -64,6 +65,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
+	},
+	"consensus-protocol": {
+		conversational: new ConsensusProtocol.ConsensusProtocolConversationalTask(),
 	},
 	deepinfra: {
 		"automatic-speech-recognition": new DeepInfra.DeepInfraAutomaticSpeechRecognitionTask(),
