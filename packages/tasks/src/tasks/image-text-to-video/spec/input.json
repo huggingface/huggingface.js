@@ -24,6 +24,27 @@
 					"type": "string",
 					"description": "The text prompt to guide the video generation. Either this or inputs (image) must be provided."
 				},
+				"reference_images": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"description": "Reference images guiding the generation, each given as a URL or a base64 data URL. Referred to from the prompt by position, as \"Image 1\", \"Image 2\" and so on. Support varies by provider."
+				},
+				"reference_videos": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"description": "Reference video clips guiding the generation, each given as a URL or a base64 data URL. Referred to from the prompt by position, as \"Video 1\", \"Video 2\" and so on. Support varies by provider."
+				},
+				"reference_audio": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"description": "Reference audio clips guiding the generation, each given as a URL or a base64 data URL. Referred to from the prompt by position, as \"Audio 1\", \"Audio 2\" and so on. Support varies by provider."
+				},
 				"guidance_scale": {
 					"type": "number",
 					"description": "For diffusion models. A higher guidance scale value encourages the model to generate videos closely linked to the text prompt at the expense of lower image quality."

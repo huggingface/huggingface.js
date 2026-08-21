@@ -19,14 +19,17 @@ import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, OutputType, RequestArgs, UrlParams } from "../types.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { omit } from "../utils/omit.js";
+import { buildReferenceInputs, REFERENCE_PARAMETERS, type ReferenceInputsSpec } from "../lib/referenceInputs.js";
 import {
 	TaskProviderHelper,
 	type AutomaticSpeechRecognitionTaskHelper,
 	type ImageToImageTaskHelper,
 	type TextToImageTaskHelper,
+	type ImageTextToVideoTaskHelper,
 	type TextToVideoTaskHelper,
 } from "./providerHelper.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
@@ -193,6 +196,39 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 		}
 
 		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-video API");
+	}
+}
+
+/**
+ * Unlike fal and wavespeed, replicate exposes one model per family rather than one endpoint per
+ * modality, so the first frame and the reference lists live in the same schema and no endpoint
+ * switch is needed.
+ */
+const REPLICATE_REFERENCES: ReferenceInputsSpec = {
+	fields: {
+		images: "reference_image_urls",
+		videos: "reference_video_urls",
+		audio: "reference_audio_urls",
+	},
+};
+
+export class ReplicateImageTextToVideoTask extends ReplicateTextToVideoTask implements ImageTextToVideoTaskHelper {
+	async preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs> {
+		const { payload: references } = await buildReferenceInputs({
+			provider: this.provider,
+			parameters: args.parameters,
+			spec: REPLICATE_REFERENCES,
+		});
+		return {
+			...omit(args, ["inputs", "parameters"]),
+			...omit((args.parameters ?? {}) as Record<string, unknown>, REFERENCE_PARAMETERS),
+			...references,
+			...(args.inputs
+				? { first_frame_image: await dataUrlFromBlob(args.inputs, args.inputs.type || "image/png") }
+				: undefined),
+			// The base helper reads the prompt from `inputs`.
+			inputs: args.parameters?.prompt,
+		} as RequestArgs;
 	}
 }
 

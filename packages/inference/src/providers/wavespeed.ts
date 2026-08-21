@@ -8,6 +8,7 @@ import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
+import { buildReferenceInputs, REFERENCE_PARAMETERS, type ReferenceInputsSpec } from "../lib/referenceInputs.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 import type {
 	TextToImageTaskHelper,
@@ -297,13 +298,63 @@ export class WavespeedAIImageTextToImageTask extends WavespeedAIImageToImageTask
 	}
 }
 
+/**
+ * wavespeed serves the task's reference inputs on its reference-to-video endpoints (e.g.
+ * `wavespeed-ai/minimax-h3/reference-to-video`), which take the references in place of a first
+ * frame. Its other video endpoints take the image and ignore the rest, so the mapped provider id
+ * decides whether the references can be honoured.
+ */
+function targetsReferenceEndpoint(providerId: string | undefined): boolean {
+	return /\/reference-to-video(\/|$)/.test(providerId ?? "");
+}
+
+const WAVESPEED_REFERENCES: ReferenceInputsSpec = {
+	fields: { images: "reference_images", videos: "reference_videos", audio: "reference_audios" },
+	maxItems: { images: 9, videos: 3, audio: 3 },
+	rejectAudioAlone: true,
+};
+
 export class WavespeedAIImageTextToVideoTask extends WavespeedAIImageToVideoTask implements ImageTextToVideoTaskHelper {
 	constructor() {
 		super();
 	}
 
 	override async preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs> {
+		const parameters = (args.parameters ?? {}) as Record<string, unknown>;
+		// A reference endpoint has no first-frame field: the primary image is simply the first subject
+		// reference, and there is no placeholder image to stand in for a missing one.
+		const usesReferences = REFERENCE_PARAMETERS.some((field) => parameters[field] !== undefined);
+		if (usesReferences) {
+			const { payload: references } = await buildReferenceInputs({
+				provider: this.provider,
+				parameters,
+				spec: WAVESPEED_REFERENCES,
+				leadingImage: args.inputs,
+			});
+			return {
+				...omit(args, ["inputs", "parameters"]),
+				...omit(parameters, REFERENCE_PARAMETERS),
+				...references,
+				inputs: args.parameters?.prompt,
+			} as RequestArgs;
+		}
 		const inputs = args.inputs ?? getTransparentPngBlob();
 		return super.preparePayloadAsync({ ...args, inputs } as ImageToVideoArgs);
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const fields = Object.values(WAVESPEED_REFERENCES.fields);
+		const supplied = fields.filter((field) => (params.args as Record<string, unknown[]>)[field]?.length);
+		if (supplied.length && !targetsReferenceEndpoint(params.mapping?.providerId)) {
+			// Forwarding them would put unusable keys - and unserialisable Blobs - in the request body.
+			throw new InferenceClientInputError(
+				`Provider wavespeed: ${params.mapping?.providerId} does not accept reference inputs. Map the model to a reference-to-video endpoint to use them.`,
+			);
+		}
+		const payload = super.preparePayload({
+			...params,
+			args: omit(params.args, fields) as typeof params.args,
+		});
+		return { ...payload, ...Object.fromEntries(supplied.map((field) => [field, params.args[field]])) };
 	}
 }

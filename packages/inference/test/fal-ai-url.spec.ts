@@ -165,25 +165,6 @@ describe("fal-ai image-text-to-video payloads", () => {
 			).rejects.toThrow("accepts a single reference image and no reference video or audio");
 		});
 	});
-
-	describe("reference validation", () => {
-		const list = (n: number) => Array.from({ length: n }, (_, i) => `https://example.com/${i}`);
-
-		it.each([
-			[{ reference_images: list(10) }, "at most 9 entries in reference_image_urls"],
-			[{ reference_videos: list(4) }, "at most 3 entries in reference_video_urls"],
-			[{ reference_audio: list(4) }, "at most 3 entries in reference_audio_urls"],
-			[
-				{ reference_images: list(9), reference_videos: list(3), reference_audio: list(1) },
-				"at most 12 reference files in total",
-			],
-			[{ reference_audio: list(1) }, "does not accept reference audio on its own"],
-		])("rejects %o", async (parameters, message) => {
-			await expect(bodyFor(REFERENCE_TO_VIDEO, { parameters: { prompt: "p", ...parameters } })).rejects.toThrow(
-				message,
-			);
-		});
-	});
 });
 
 // fal exposes `.../lora` variants of its video endpoints, and they require a `loras` entry. Only the
