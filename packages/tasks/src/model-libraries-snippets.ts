@@ -1753,6 +1753,47 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 	}
 }
 
+export const aneforge = (model: ModelData): string[] => {
+	const header = "# Run this model on the Apple Neural Engine, without CoreML.";
+	if (model.pipeline_tag === "text-generation") {
+		return [
+			`${header}
+import aneforge as af
+from transformers import AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained("${model.id}")
+model = af.load_llm("${model.id}")            # prefill + resident-KV-cache decode on the ANE
+ids = tok.encode("The Neural Engine is")
+print(tok.decode(model.generate(ids, max_new_tokens=20)))`,
+		];
+	}
+	if (model.pipeline_tag === "image-classification") {
+		return [
+			`${header}
+import aneforge as af
+
+vit = af.load_vit("${model.id}")
+labels = vit.classify(image)                  # image: a PIL.Image; returns top-k (label, logit)`,
+		];
+	}
+	if (model.pipeline_tag === "automatic-speech-recognition") {
+		return [
+			`${header}
+import aneforge as af
+
+asr = af.load_whisper("${model.id}")
+text = asr.transcribe(audio)                  # audio: a 16 kHz mono float32 waveform`,
+		];
+	}
+	return [
+		`# Run this model's encoder on the Apple Neural Engine, without CoreML.
+from aneforge.sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("${model.id}")
+embeddings = model.encode(["Hello from the Neural Engine"], normalize_embeddings=True)`,
+	];
+};
+
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
