@@ -225,6 +225,15 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
+const snippetDulus = (model: ModelData, filepath?: string): string => {
+	return [
+		"# Install Dulus:",
+		"pip install dulus",
+		"# Chat with this model in Dulus (runs GGUF models via Ollama):",
+		`dulus --model ollama/hf.co/${model.id}${getQuantTag(filepath)}`,
+	].join("\n");
+};
+
 const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
 	const isGguf = isLlamaCppGgufModel(model);
 
@@ -838,6 +847,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	dulus: {
+		prettyLabel: "Dulus",
+		docsUrl: "https://dulus.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetDulus,
 	},
 } satisfies Record<string, LocalApp>;
 
