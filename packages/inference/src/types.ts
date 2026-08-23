@@ -54,6 +54,7 @@ export const INFERENCE_PROVIDERS = [
 	"fireworks-ai",
 	"groq",
 	"hf-inference",
+	"llmtech",
 	"novita",
 	"nscale",
 	"openai",
