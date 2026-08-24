@@ -243,6 +243,7 @@ const TEST_STRINGS = {
 	MACROS_8: `{% macro f(a) %}{{ a }}{{ kwargs.get('b') }}{% endmacro %}{{ f(1, b=2) }}`,
 	MACROS_9: `{% macro f(a) %}{{ a }}|{{ varargs | length }}|{{ varargs[1] }}{% endmacro %}{{ f(1, 2, 3) }}`,
 	MACROS_10: `{% macro f() %}{{ {'x': kwargs.x} }}{% endmacro %}{{ f(x=1) }}|{% macro g() %}{{ {kwargs.k: 1} }}{% endmacro %}{{ g(k='a') }}`,
+	MACROS_11: `{% macro f(x) %}{{ x }}|{{ kwargs.get('x') }}{% endmacro %}{{ f(1, x=2) }}`,
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: `{% if if in in %}a{% endif %}{% set if = "a" %}{% set in = "abc" %}{% if if in in %}b{% endif %}`,
@@ -5225,6 +5226,40 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	MACROS_11: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "x", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "kwargs", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "get", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "x", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: [
@@ -5991,6 +6026,7 @@ const TEST_CONTEXT = {
 	MACROS_8: {},
 	MACROS_9: {},
 	MACROS_10: {},
+	MACROS_11: {},
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: {},
@@ -6250,6 +6286,7 @@ const EXPECTED_OUTPUTS = {
 	MACROS_8: `12`,
 	MACROS_9: `1|2|3`,
 	MACROS_10: `{"x": 1}|{"a": 1}`,
+	MACROS_11: `1|2`,
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: `b`,
