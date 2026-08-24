@@ -33,7 +33,7 @@ import type {
 const NEWLINE = "\n";
 const OPEN_STATEMENT = "{%- ";
 const CLOSE_STATEMENT = " -%}";
-const SELECT_EXPRESSION_PRECEDENCE = -1;
+const CONDITIONAL_EXPRESSION_PRECEDENCE = -1;
 const TEST_EXPRESSION_PRECEDENCE = 6;
 
 function getBinaryOperatorPrecedence(expr: BinaryExpression): number {
@@ -70,6 +70,10 @@ function createStatement(...text: string[]): string {
 
 function formatStatements(stmts: Statement[], depth: number, indentStr: string): string {
 	return stmts.map((stmt) => formatStatement(stmt, depth, indentStr)).join(NEWLINE);
+}
+
+function formatExpressionList(expressions: Expression[]): string {
+	return expressions.map((expression) => formatExpression(expression)).join(", ");
 }
 
 function formatStatement(node: Statement, depth: number, indentStr: string): string {
@@ -183,7 +187,7 @@ function formatSet(node: SetStatement, depth: number, indentStr: string): string
 
 function formatMacro(node: Macro, depth: number, indentStr: string): string {
 	const pad = indentStr.repeat(depth);
-	const args = node.args.map((arg) => formatExpression(arg)).join(", ");
+	const args = formatExpressionList(node.args);
 	return (
 		pad +
 		createStatement("macro", `${node.name.value}(${args})`) +
@@ -197,10 +201,7 @@ function formatMacro(node: Macro, depth: number, indentStr: string): string {
 
 function formatCallStatement(node: CallStatement, depth: number, indentStr: string): string {
 	const pad = indentStr.repeat(depth);
-	const params =
-		node.callerArgs && node.callerArgs.length > 0
-			? `(${node.callerArgs.map((arg) => formatExpression(arg)).join(", ")})`
-			: "";
+	const params = node.callerArgs && node.callerArgs.length > 0 ? `(${formatExpressionList(node.callerArgs)})` : "";
 	const callExpr = formatExpression(node.call);
 	let out = pad + createStatement(`call${params}`, callExpr) + NEWLINE;
 	out += formatStatements(node.body, depth + 1, indentStr) + NEWLINE;
@@ -258,7 +259,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "CallExpression": {
 			const n = node as CallExpression;
-			const args = n.args.map((arg) => formatExpression(arg)).join(", ");
+			const args = formatExpressionList(n.args);
 			return `${formatExpression(n.callee)}(${args})`;
 		}
 		case "MemberExpression": {
@@ -296,11 +297,11 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "SelectExpression": {
 			const n = node as SelectExpression;
-			const expr = `${formatExpression(n.lhs, SELECT_EXPRESSION_PRECEDENCE + 1)} if ${formatExpression(
+			const expr = `${formatExpression(n.lhs, CONDITIONAL_EXPRESSION_PRECEDENCE + 1)} if ${formatExpression(
 				n.test,
-				SELECT_EXPRESSION_PRECEDENCE + 1,
+				CONDITIONAL_EXPRESSION_PRECEDENCE + 1,
 			)}`;
-			return SELECT_EXPRESSION_PRECEDENCE < parentPrec ? `(${expr})` : expr;
+			return CONDITIONAL_EXPRESSION_PRECEDENCE < parentPrec ? `(${expr})` : expr;
 		}
 		case "TestExpression": {
 			const n = node as TestExpression;
@@ -311,9 +312,9 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "ArrayLiteral":
 		case "TupleLiteral": {
-			const elems = ((node as ArrayLiteral | TupleLiteral).value as Expression[]).map((elem) => formatExpression(elem));
+			const elems = formatExpressionList((node as ArrayLiteral | TupleLiteral).value as Expression[]);
 			const brackets = node.type === "ArrayLiteral" ? "[]" : "()";
-			return `${brackets[0]}${elems.join(", ")}${brackets[1]}`;
+			return `${brackets[0]}${elems}${brackets[1]}`;
 		}
 		case "ObjectLiteral": {
 			const entries = Array.from((node as ObjectLiteral).value.entries()).map(
@@ -334,10 +335,11 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "Ternary": {
 			const n = node as Ternary;
-			const expr = `${formatExpression(n.trueExpr)} if ${formatExpression(n.condition, 0)} else ${formatExpression(
-				n.falseExpr,
-			)}`;
-			return parentPrec > -1 ? `(${expr})` : expr;
+			const expr = `${formatExpression(n.trueExpr, CONDITIONAL_EXPRESSION_PRECEDENCE + 1)} if ${formatExpression(
+				n.condition,
+				CONDITIONAL_EXPRESSION_PRECEDENCE + 1,
+			)} else ${formatExpression(n.falseExpr)}`;
+			return CONDITIONAL_EXPRESSION_PRECEDENCE < parentPrec ? `(${expr})` : expr;
 		}
 		default:
 			throw new Error(`Unknown expression type: ${node.type}`);

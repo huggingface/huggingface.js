@@ -6375,6 +6375,12 @@ describe("Templates", () => {
 	});
 });
 
+function expectTemplateToRender(source, expected) {
+	const template = new Template(source);
+	expect(template.render()).toBe(expected);
+	expect(new Template(template.format()).render()).toBe(expected);
+}
+
 describe("Feature regressions", () => {
 	describe("Namespaces", () => {
 		it("supports namespace attributes in collection filters", () => {
@@ -6395,63 +6401,132 @@ describe("Feature regressions", () => {
 			expect(template.render()).toBe("b|x");
 		});
 
-		it.each([`{{ namespace(["a"]) }}`, `{{ namespace(["abc"]) }}`, `{{ namespace("ab") }}`])(
-			"rejects invalid namespace pair sources in %s",
-			(source) => {
-				expect(() => new Template(source).render()).toThrowError();
+		it.each([
+			{ name: "one-character pair", source: `{{ namespace(["a"]) }}` },
+			{ name: "three-character pair", source: `{{ namespace(["abc"]) }}` },
+			{ name: "top-level string source", source: `{{ namespace("ab") }}` },
+		])("rejects $name", ({ source }) => {
+			expect(() => new Template(source).render()).toThrowError();
+		});
+	});
+
+	describe("Macros and call statements", () => {
+		it.each([
+			{
+				name: "allows positional unpacking after a keyword argument",
+				source: `{% macro f(a, b) %}{{ a }}{{ b }}{% endmacro %}{{ f(b=2, *[1]) }}`,
+				expected: "12",
 			},
-		);
+			{
+				name: "allows keyword unpacking in a call-statement callee",
+				source: `{% macro wrap(x) %}{{ caller() }}{{ x }}{% endmacro %}{% call wrap(**{"x": 2}) %}1{% endcall %}`,
+				expected: "12",
+			},
+			{
+				name: "applies caller parameter defaults",
+				source: `{% macro invoke() %}{{ caller() }}{% endmacro %}{% call(value=1) invoke() %}{{ value }}{% endcall %}`,
+				expected: "1",
+			},
+			{
+				name: "binds caller parameters by keyword",
+				source: `{% macro invoke() %}{{ caller(value=2) }}{% endmacro %}{% call(value=1) invoke() %}{{ value }}{% endcall %}`,
+				expected: "2",
+			},
+			{
+				name: "binds every caller parameter before evaluating defaults",
+				source: `{% set a = 9 %}{% macro invoke() %}{{ caller() }}{% endmacro %}{% call(b=a, a=1) invoke() %}{{ a }}|{{ b }}{% endcall %}`,
+				expected: "1|",
+			},
+		])("$name", ({ source, expected }) => {
+			expectTemplateToRender(source, expected);
+		});
 	});
 
 	describe("Macro special arguments", () => {
 		it.each([
-			["kwargs", `{% macro f(kwargs) %}{{ kwargs }}{% endmacro %}{{ f("ARG") }}`],
-			["varargs", `{% macro f(varargs) %}{{ varargs }}{% endmacro %}{{ f("ARG") }}`],
-		])("does not overwrite an explicit %s parameter", (_, source) => {
+			{
+				name: "explicit kwargs parameter",
+				source: `{% macro f(kwargs) %}{{ kwargs }}{% endmacro %}{{ f("ARG") }}`,
+			},
+			{
+				name: "explicit varargs parameter",
+				source: `{% macro f(varargs) %}{{ varargs }}{% endmacro %}{{ f("ARG") }}`,
+			},
+		])("does not overwrite an $name", ({ source }) => {
 			expect(new Template(source).render()).toBe("ARG");
 		});
 
-		it("does not treat a local kwargs assignment as a collector reference", () => {
-			const template = new Template(`{% macro f() %}{% set kwargs = {} %}ok{% endmacro %}{{ f(extra=1) }}`);
-			expect(() => template.render()).toThrowError("macro 'f' takes no keyword argument 'extra'");
-		});
-
-		it("does not treat a local varargs assignment as a collector reference", () => {
-			const template = new Template(`{% macro f() %}{% set varargs = [] %}ok{% endmacro %}{{ f(1) }}`);
-			expect(() => template.render()).toThrowError("macro 'f' takes not more than 0 argument(s)");
+		it.each([
+			{
+				name: "local kwargs assignment",
+				source: `{% macro f() %}{% set kwargs = {} %}ok{% endmacro %}{{ f(extra=1) }}`,
+				error: "macro 'f' takes no keyword argument 'extra'",
+			},
+			{
+				name: "local varargs assignment",
+				source: `{% macro f() %}{% set varargs = [] %}ok{% endmacro %}{{ f(1) }}`,
+				error: "macro 'f' takes not more than 0 argument(s)",
+			},
+			{
+				name: "kwargs loop target",
+				source: `{% macro f() %}{% for kwargs in [] %}{{ kwargs }}{% endfor %}ok{% endmacro %}{{ f(extra=1) }}`,
+				error: "macro 'f' takes no keyword argument 'extra'",
+			},
+			{
+				name: "nested macro parameter",
+				source: `{% macro f() %}{% macro g(kwargs) %}{{ kwargs }}{% endmacro %}ok{% endmacro %}{{ f(extra=1) }}`,
+				error: "macro 'f' takes no keyword argument 'extra'",
+			},
+			{
+				name: "noncomputed member property",
+				source: `{% macro f() %}{{ obj.kwargs }}{% endmacro %}{{ f(extra=1) }}`,
+				error: "macro 'f' takes no keyword argument 'extra'",
+			},
+			{
+				name: "keyword argument name",
+				source: `{% macro f() %}{{ g(kwargs=1) }}{% endmacro %}{{ f(extra=1) }}`,
+				error: "macro 'f' takes no keyword argument 'extra'",
+			},
+		])("does not treat a $name as a collector reference", ({ source, error }) => {
+			expect(() => new Template(source).render()).toThrowError(error);
 		});
 
 		it("keeps undeclared-name detection order-sensitive", () => {
-			const template = new Template(`{% macro f() %}{{ kwargs.x }}{% set kwargs = {} %}{% endmacro %}{{ f(x=1) }}`);
-			expect(template.render()).toBe("1");
-		});
-
-		it.each([
-			`{% macro f() %}{% for kwargs in [] %}{{ kwargs }}{% endfor %}ok{% endmacro %}{{ f(extra=1) }}`,
-			`{% macro f() %}{% macro g(kwargs) %}{{ kwargs }}{% endmacro %}ok{% endmacro %}{{ f(extra=1) }}`,
-		])("does not treat a declaration as a collector reference in %s", (source) => {
-			expect(() => new Template(source).render()).toThrowError("macro 'f' takes no keyword argument 'extra'");
+			expectTemplateToRender(`{% macro f() %}{{ kwargs.x }}{% set kwargs = {} %}{% endmacro %}{{ f(x=1) }}`, "1");
 		});
 	});
 
 	describe("Macro parameter defaults", () => {
 		it.each([
-			[`{% macro f(x=kwargs) %}{{ x.a }}|{{ kwargs.a }}{% endmacro %}{{ f(a=1) }}`, "1|1"],
-			[`{% macro f(x=varargs) %}{{ x | length }}|{{ varargs | length }}{% endmacro %}{{ f() }}`, "0|0"],
-		])("binds special variables before evaluating defaults in %s", (source, expected) => {
-			expect(new Template(source).render()).toBe(expected);
+			{
+				name: "makes collected kwargs visible",
+				source: `{% macro f(x=kwargs) %}{{ x.a }}|{{ kwargs.a }}{% endmacro %}{{ f(a=1) }}`,
+				expected: "1|1",
+			},
+			{
+				name: "makes collected varargs visible",
+				source: `{% macro f(x=varargs) %}{{ x | length }}|{{ varargs | length }}{% endmacro %}{{ f() }}`,
+				expected: "0|0",
+			},
+			{
+				name: "prevents later parameters from leaking from outer scope",
+				source: `{% set a = 9 %}{% macro f(b=a, a=1) %}{{ b }}|{{ a }}{% endmacro %}{{ f() }}`,
+				expected: "|1",
+			},
+			{
+				name: "makes explicitly passed later parameters visible",
+				source: `{% macro f(a=b, b=5) %}{{ a }}|{{ b }}{% endmacro %}{{ f(b=7) }}`,
+				expected: "7|7",
+			},
+		])("$name", ({ source, expected }) => {
+			expectTemplateToRender(source, expected);
 		});
 
 		it("rejects unexpected keyword arguments before evaluating defaults", () => {
-			const template = new Template(`{% macro f(x=0 ** -1) %}ok{% endmacro %}{{ f(a=1) }}`);
+			const template = new Template(
+				`{% macro f(x=raise_exception("default evaluated")) %}ok{% endmacro %}{{ f(a=1) }}`,
+			);
 			expect(() => template.render()).toThrowError("macro 'f' takes no keyword argument 'a'");
-		});
-
-		it.each([
-			[`{% set a = 9 %}{% macro f(b=a, a=1) %}{{ b }}|{{ a }}{% endmacro %}{{ f() }}`, "|1"],
-			[`{% macro f(a=b, b=5) %}{{ a }}|{{ b }}{% endmacro %}{{ f(b=7) }}`, "7|7"],
-		])("evaluates defaults with all parameters bound in %s", (source, expected) => {
-			expect(new Template(source).render()).toBe(expected);
 		});
 	});
 
@@ -6463,12 +6538,13 @@ describe("Feature regressions", () => {
 			expect(template.render()).toBe("|2|1|0|1.0|1.0|");
 		});
 
-		it.each(["{{ 0 ** -1 }}", "{{ (-1) ** 0.5 }}", "{{ 10.0 ** 10000 }}"])(
-			"rejects unsupported exponentiation results in %s",
-			(source) => {
-				expect(() => new Template(source).render()).toThrowError();
-			},
-		);
+		it.each([
+			{ name: "zero to a negative power", source: "{{ 0 ** -1 }}" },
+			{ name: "a negative base to a fractional power", source: "{{ (-1) ** 0.5 }}" },
+			{ name: "overflow", source: "{{ 10.0 ** 10000 }}" },
+		])("rejects $name", ({ source }) => {
+			expect(() => new Template(source).render()).toThrowError();
+		});
 	});
 });
 
@@ -6502,16 +6578,73 @@ describe("Error checking", () => {
 		});
 
 		it.each([
-			[`{{ f(y=1, 2) }}`, "Positional arguments must come before keyword arguments"],
-			[`{{ f(*a, 2) }}`, "Positional arguments must not follow `*` argument unpacking"],
-			[`{{ f(*a, *b) }}`, "Only one `*` argument unpacking is allowed"],
-			[`{% macro f(b=1, a) %}x{% endmacro %}`, "Non-default argument follows default argument"],
-			[
-				`{% macro p() %}{{ caller() }}{% endmacro %}{% call(b=1, a) p() %}x{% endcall %}`,
-				"Non-default argument follows default argument",
-			],
-		])("Invalid argument order in %s", (text, error) => {
-			expect(() => parse(tokenize(text))).toThrowError(error);
+			{
+				name: "positional argument after keyword argument",
+				source: `{{ f(y=1, 2) }}`,
+				error: "Positional arguments must come before keyword arguments",
+			},
+			{
+				name: "positional argument after positional unpacking",
+				source: `{{ f(*a, 2) }}`,
+				error: "Positional arguments must not follow `*` argument unpacking",
+			},
+			{
+				name: "second positional unpacking",
+				source: `{{ f(*a, *b) }}`,
+				error: "Only one `*` argument unpacking is allowed",
+			},
+			{
+				name: "required macro parameter after a default",
+				source: `{% macro f(b=1, a) %}x{% endmacro %}`,
+				error: "Non-default argument follows default argument",
+			},
+			{
+				name: "required caller parameter after a default",
+				source: `{% macro p() %}{{ caller() }}{% endmacro %}{% call(b=1, a) p() %}x{% endcall %}`,
+				error: "Non-default argument follows default argument",
+			},
+			{
+				name: "keyword argument after keyword unpacking",
+				source: `{{ f(**d, y=2) }}`,
+				error: "`**` must be applied to the final argument",
+			},
+			{
+				name: "second keyword unpacking",
+				source: `{{ f(**a, **b) }}`,
+				error: "`**` must be applied to the final argument",
+			},
+			{
+				name: "positional argument after keyword unpacking",
+				source: `{{ f(**d, 1) }}`,
+				error: "`**` must be applied to the final argument",
+			},
+		])("rejects a $name", ({ source, error }) => {
+			expect(() => parse(tokenize(source))).toThrowError(error);
+		});
+
+		it.each([
+			{ name: "macro positional unpacking", source: `{% macro f(*args) %}x{% endmacro %}` },
+			{ name: "macro keyword unpacking", source: `{% macro f(**kwargs) %}x{% endmacro %}` },
+			{ name: "caller positional unpacking", source: `{% call(*args) f() %}x{% endcall %}` },
+			{ name: "caller keyword unpacking", source: `{% call(**kwargs) f() %}x{% endcall %}` },
+		])("rejects $name in a parameter declaration", ({ source }) => {
+			expect(() => parse(tokenize(source))).toThrowError("Argument unpacking is not allowed in parameter declarations");
+		});
+
+		it.each([
+			{ name: "numeric macro parameter", source: `{% macro f(1) %}x{% endmacro %}` },
+			{ name: "expression macro parameter", source: `{% macro f(a + b) %}x{% endmacro %}` },
+			{ name: "numeric caller parameter", source: `{% call(1) f() %}x{% endcall %}` },
+			{ name: "expression caller parameter", source: `{% call(a + b) f() %}x{% endcall %}` },
+		])("rejects a $name", ({ source }) => {
+			expect(() => parse(tokenize(source))).toThrowError("Expected identifier for parameter declaration");
+		});
+
+		it.each([
+			{ name: "macro parameter", source: `{% macro f(a, a) %}x{% endmacro %}` },
+			{ name: "caller parameter", source: `{% call(a, a) f() %}x{% endcall %}` },
+		])("rejects a duplicate $name", ({ source }) => {
+			expect(() => parse(tokenize(source))).toThrowError("Duplicate parameter name: a");
 		});
 
 		it("Unclosed expression", () => {
@@ -6549,13 +6682,6 @@ describe("Error checking", () => {
 			const tokens = tokenize(text);
 			expect(() => parse(tokens)).toThrowError();
 		});
-
-		it("Keyword argument unpacking must be the final argument", () => {
-			for (const text of ["{{ f(**d, y=2) }}", "{{ f(**a, **b) }}", "{{ f(**d, 1) }}"]) {
-				const tokens = tokenize(text);
-				expect(() => parse(tokens)).toThrowError("`**` must be applied to the final argument");
-			}
-		});
 	});
 
 	describe("Runtime errors", () => {
@@ -6567,76 +6693,59 @@ describe("Error checking", () => {
 			expect(() => interpreter.run(ast)).toThrowError();
 		});
 
-		it("Macro keyword argument for parameter already given positionally", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{% macro f(x) %}{{ x }}{% endmacro %}{{ f(1, x=2) }}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError("macro 'f' takes no keyword argument 'x'");
-		});
-
-		it("Macro unknown keyword argument", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{% macro f(x) %}{{ x }}{% endmacro %}{{ f(1, bogus=2) }}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError("macro 'f' takes no keyword argument 'bogus'");
-		});
-
-		it("Macro too many positional arguments", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{% macro f(a) %}{{ a }}{% endmacro %}{{ f(1, 2, 3) }}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError("macro 'f' takes not more than 1 argument(s)");
-		});
-
-		it("Namespace with multiple positional arguments", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{% set ns = namespace({'a': 1}, {'b': 2}) %}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError("namespace expected at most 1 argument");
-		});
-
-		it("Namespace with non-mapping positional argument", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{% set ns = namespace(42) %}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError("is not iterable");
-		});
-
-		it("Duplicate keyword argument via unpacking", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{% macro f(x) %}{{ x }}{% endmacro %}{{ f(x=1, **{'x': 2}) }}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError("multiple values for keyword argument 'x'");
-		});
-
-		it("Keyword unpacking of a non-mapping", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{% macro f(x) %}{{ x }}{% endmacro %}{{ f(**[1]) }}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError("must be a mapping");
-		});
-
-		it("Assigning an attribute on a non-namespace object", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{% set d = {'a': 1} %}{% set d.b = 2 %}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError("cannot assign attribute on non-namespace object");
-		});
-
-		it("Namespace of a namespace", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{% set a = namespace(x=1) %}{% set b = namespace(a) %}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError("is not iterable");
+		it.each([
+			{
+				name: "macro parameter already given positionally",
+				source: `{% macro f(x) %}{{ x }}{% endmacro %}{{ f(1, x=2) }}`,
+				error: "macro 'f' takes no keyword argument 'x'",
+			},
+			{
+				name: "unknown macro keyword argument",
+				source: `{% macro f(x) %}{{ x }}{% endmacro %}{{ f(1, bogus=2) }}`,
+				error: "macro 'f' takes no keyword argument 'bogus'",
+			},
+			{
+				name: "too many positional macro arguments",
+				source: `{% macro f(a) %}{{ a }}{% endmacro %}{{ f(1, 2, 3) }}`,
+				error: "macro 'f' takes not more than 1 argument(s)",
+			},
+			{
+				name: "multiple namespace positional arguments",
+				source: `{% set ns = namespace({'a': 1}, {'b': 2}) %}`,
+				error: "namespace expected at most 1 argument",
+			},
+			{
+				name: "non-mapping namespace positional argument",
+				source: `{% set ns = namespace(42) %}`,
+				error: "is not iterable",
+			},
+			{
+				name: "duplicate explicit keyword argument",
+				source: `{% macro f(x) %}{{ x }}{% endmacro %}{{ f(x=1, x=2) }}`,
+				error: "multiple values for keyword argument 'x'",
+			},
+			{
+				name: "duplicate keyword argument via unpacking",
+				source: `{% macro f(x) %}{{ x }}{% endmacro %}{{ f(x=1, **{'x': 2}) }}`,
+				error: "multiple values for keyword argument 'x'",
+			},
+			{
+				name: "keyword unpacking of a non-mapping",
+				source: `{% macro f(x) %}{{ x }}{% endmacro %}{{ f(**[1]) }}`,
+				error: "must be a mapping",
+			},
+			{
+				name: "attribute assignment on a non-namespace object",
+				source: `{% set d = {'a': 1} %}{% set d.b = 2 %}`,
+				error: "cannot assign attribute on non-namespace object",
+			},
+			{
+				name: "namespace constructed from a namespace",
+				source: `{% set a = namespace(x=1) %}{% set b = namespace(a) %}`,
+				error: "is not iterable",
+			},
+		])("rejects $name", ({ source, error }) => {
+			expect(() => new Template(source).render()).toThrowError(error);
 		});
 
 		it("Incorrect function call", () => {

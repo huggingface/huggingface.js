@@ -40,10 +40,15 @@ const FORMATTING_TESTS = Object.freeze({
 	},
 	CHAINED_TERNARY: {
 		template: `{{('a' if (true if 1==2 else false) else 'b') if 3==4 else ('c' if 4==5 else 'd')}}`,
-		formatted: `{{- "a" if (true if 1 == 2 else false) else "b" if 3 == 4 else "c" if 4 == 5 else "d" -}}`,
+		formatted: `{{- ("a" if (true if 1 == 2 else false) else "b") if 3 == 4 else "c" if 4 == 5 else "d" -}}`,
 		rendered: `d`,
 	},
-	EXPONENTIATION: {
+	TERNARY_IN_TRUE_BRANCH: {
+		template: `{{ ("A" if true else "B") if false else "C" }}`,
+		formatted: `{{- ("A" if true else "B") if false else "C" -}}`,
+		rendered: `C`,
+	},
+	EXPONENTIATION_PRECEDENCE_AND_ASSOCIATIVITY: {
 		template: `{{ (2*3)**2*2**3**2 }}`,
 		formatted: `{{- (2 * 3) ** 2 * 2 ** 3 ** 2 -}}`,
 		rendered: `2304`,
@@ -63,10 +68,10 @@ const FORMATTING_TESTS = Object.freeze({
 		formatted: `{{- namespace(*[{"a": 1}], **{"b": 2}).b -}}`,
 		rendered: `2`,
 	},
-	SELECT_EXPRESSION_AS_ARGUMENT: {
-		template: `{{ range(1 if 2, 5 or 6) | join(",") }}{{ [1 if 2, 3 if 4] | join(",") }}`,
-		formatted: `{{- range(1 if 2, 5 or 6) | join(",") -}}\n{{- [1 if 2, 3 if 4] | join(",") -}}`,
-		rendered: `1,2,3,41,3`,
+	SELECT_EXPRESSIONS_IN_CALL_AND_ARRAY_ARGUMENTS: {
+		template: `{{ range(1 if 2, 5 or 6) | join(",") }}|{{ [1 if 2, 3 if 4] | join(",") }}`,
+		formatted: `{{- range(1 if 2, 5 or 6) | join(",") -}}\n{{- "|" -}}\n{{- [1 if 2, 3 if 4] | join(",") -}}`,
+		rendered: `1,2,3,4|1,3`,
 	},
 });
 
@@ -88,15 +93,4 @@ describe("format", () => {
 			}
 		});
 	}
-});
-
-describe("parameter declarations", () => {
-	it.each([
-		`{% macro f(*args) %}x{% endmacro %}`,
-		`{% macro f(**kwargs) %}x{% endmacro %}`,
-		`{% call(*args) f() %}x{% endcall %}`,
-		`{% call(**kwargs) f() %}x{% endcall %}`,
-	])("should reject argument unpacking in %s", (template) => {
-		expect(() => new Template(template)).toThrowError("Argument unpacking is not allowed in parameter declarations");
-	});
 });

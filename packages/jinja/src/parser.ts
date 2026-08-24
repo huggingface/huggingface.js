@@ -1,6 +1,6 @@
 import { Token, TOKEN_TYPES } from "./lexer";
 import type { TokenType } from "./lexer";
-import type { Statement } from "./ast";
+import type { Expression, Parameter, Statement } from "./ast";
 import {
 	Program,
 	If,
@@ -32,6 +32,8 @@ import {
 	Ternary,
 	Comment,
 } from "./ast";
+
+type ArgumentListMode = "call" | "parameters";
 
 /**
  * Generate the Abstract Syntax Tree (AST) from a list of tokens.
@@ -141,16 +143,16 @@ export function parse(tokens: Token[]): Program {
 				break;
 			case "call": {
 				++current; // consume 'call'
-				let callerArgs: Statement[] | null = null;
+				let callerArgs: Parameter[] | null = null;
 				if (is(TOKEN_TYPES.OpenParen)) {
 					// Optional caller arguments, e.g. {% call(user) dump_users(...) %}
-					callerArgs = parseArgs(false);
+					callerArgs = parseArgs("parameters");
 				}
 				const callee = parsePrimaryExpression();
 				if (callee.type !== "Identifier") {
 					throw new SyntaxError(`Expected identifier following call statement`);
 				}
-				const callArgs = parseArgs();
+				const callArgs = parseArgs("call");
 				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 				const body: Statement[] = [];
 				while (!isStatement("endcall")) {
@@ -268,7 +270,7 @@ export function parse(tokens: Token[]): Program {
 		if (name.type !== "Identifier") {
 			throw new SyntaxError(`Expected identifier following macro statement`);
 		}
-		const args = parseArgs(false);
+		const args = parseArgs("parameters");
 		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 
 		// Body of macro
@@ -442,7 +444,7 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseCallExpression(callee: Statement): Statement {
-		let expression: Statement = new CallExpression(callee, parseArgs());
+		let expression: Statement = new CallExpression(callee, parseArgs("call"));
 
 		expression = parseMemberExpression(expression); // foo.x().y
 
@@ -454,27 +456,34 @@ export function parse(tokens: Token[]): Program {
 		return expression;
 	}
 
-	function parseArgs(allowUnpacking = true): Statement[] {
+	function parseArgs(mode: "parameters"): Parameter[];
+	function parseArgs(mode: "call"): Expression[];
+	function parseArgs(mode: ArgumentListMode): Expression[] {
 		// add (x + 5, foo())
 		expect(TOKEN_TYPES.OpenParen, "Expected opening parenthesis for arguments list");
 
-		const args = parseArgumentsList(allowUnpacking);
+		const args = parseArgumentsList(mode);
 
 		expect(TOKEN_TYPES.CloseParen, "Expected closing parenthesis for arguments list");
 		return args;
 	}
-	function parseArgumentsList(allowUnpacking: boolean): Statement[] {
+	function parseArgumentsList(mode: ArgumentListMode): Expression[] {
 		// comma-separated arguments list
 
-		const args = [];
-		let sawKeywordArgument = false;
+		const args: Expression[] = [];
+		const parameterNames = new Set<string>();
+		let sawKeywordOrDefault = false;
 		let sawSpreadArgument = false;
 		while (!is(TOKEN_TYPES.CloseParen)) {
+			const isKeywordSpread = is(TOKEN_TYPES.ExponentiationBinaryOperator);
+			const isPositionalSpread = is(TOKEN_TYPES.MultiplicativeBinaryOperator) && tokens[current].value === "*";
+
+			if (mode === "parameters" && (isKeywordSpread || isPositionalSpread)) {
+				throw new SyntaxError("Argument unpacking is not allowed in parameter declarations");
+			}
+
 			// keyword unpacking: **expr, which Jinja2 requires to be the final argument
-			if (is(TOKEN_TYPES.ExponentiationBinaryOperator)) {
-				if (!allowUnpacking) {
-					throw new SyntaxError("Argument unpacking is not allowed in parameter declarations");
-				}
+			if (isKeywordSpread) {
 				++current;
 				args.push(new KeywordSpreadExpression(parseExpression()));
 				if (is(TOKEN_TYPES.Comma)) {
@@ -486,13 +495,10 @@ export function parse(tokens: Token[]): Program {
 				break;
 			}
 
-			let argument: Statement;
+			let argument: Expression;
 
 			// unpacking: *expr
-			if (is(TOKEN_TYPES.MultiplicativeBinaryOperator) && tokens[current].value === "*") {
-				if (!allowUnpacking) {
-					throw new SyntaxError("Argument unpacking is not allowed in parameter declarations");
-				}
+			if (isPositionalSpread) {
 				if (sawSpreadArgument) {
 					throw new SyntaxError("Only one `*` argument unpacking is allowed");
 				}
@@ -507,15 +513,33 @@ export function parse(tokens: Token[]): Program {
 					// e.g., func(x = 5, y = a or b)
 					++current; // consume equals
 					if (!(argument instanceof Identifier)) {
-						throw new SyntaxError(`Expected identifier for keyword argument`);
+						throw new SyntaxError(
+							mode === "parameters"
+								? "Expected identifier for parameter declaration"
+								: "Expected identifier for keyword argument",
+						);
 					}
 					const value = parseExpression();
-					argument = new KeywordArgumentExpression(argument as Identifier, value);
-					sawKeywordArgument = true;
-				} else if (sawKeywordArgument) {
+					argument = new KeywordArgumentExpression(argument, value);
+				}
+
+				if (mode === "parameters") {
+					if (!(argument instanceof Identifier || argument instanceof KeywordArgumentExpression)) {
+						throw new SyntaxError("Expected identifier for parameter declaration");
+					}
+					const parameterName = argument instanceof Identifier ? argument.value : argument.key.value;
+					if (parameterNames.has(parameterName)) {
+						throw new SyntaxError(`Duplicate parameter name: ${parameterName}`);
+					}
+					parameterNames.add(parameterName);
+				}
+
+				if (argument instanceof KeywordArgumentExpression) {
+					sawKeywordOrDefault = true;
+				} else if (sawKeywordOrDefault) {
 					// Mirroring Python Jinja2, which rejects both of these at parse time
 					throw new SyntaxError(
-						allowUnpacking
+						mode === "call"
 							? "Positional arguments must come before keyword arguments"
 							: "Non-default argument follows default argument",
 					);
@@ -592,7 +616,7 @@ export function parse(tokens: Token[]): Program {
 	function parseMultiplicativeExpression(): Statement {
 		let left = parsePowerExpression();
 
-		// Multiplicative operators have higher precedence than test expressions
+		// Test expressions have higher precedence than multiplicative operators
 		// e.g., (4 * 4 is divisibleby(2)) evaluates as (4 * (4 is divisibleby(2)))
 
 		while (is(TOKEN_TYPES.MultiplicativeBinaryOperator)) {

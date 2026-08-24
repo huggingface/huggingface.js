@@ -54,6 +54,8 @@ export class Continue extends Statement {
 	override type = "Continue";
 }
 
+export type Parameter = Identifier | KeywordArgumentExpression;
+
 export class SetStatement extends Statement {
 	override type = "Set";
 	constructor(
@@ -70,7 +72,7 @@ export class Macro extends Statement {
 
 	constructor(
 		public name: Identifier,
-		public args: Expression[],
+		public args: Parameter[],
 		public body: Statement[],
 	) {
 		super();
@@ -309,7 +311,7 @@ export class CallStatement extends Statement {
 
 	constructor(
 		public call: CallExpression,
-		public callerArgs: Expression[] | null,
+		public callerArgs: Parameter[] | null,
 		public body: Statement[],
 	) {
 		super();
