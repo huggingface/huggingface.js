@@ -1236,9 +1236,7 @@ export class Interpreter {
 				const kwarg = argument as KeywordArgumentExpression;
 				keywordArguments.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
 			} else {
-				if (keywordArguments.size > 0) {
-					throw new Error("Positional arguments must come before keyword arguments");
-				}
+				// The parser rejects positional arguments after keyword arguments
 				positionalArguments.push(this.evaluate(argument, environment));
 			}
 		}
@@ -2033,8 +2031,11 @@ export class Interpreter {
 				}
 
 				// Bind each declared parameter: positional value first, then passed keyword
-				// value, then the declared default, and finally undefined (Python Jinja2
-				// does not raise for parameters missing at call time).
+				// value, then undefined. Like Python Jinja2, which passes every parameter
+				// into the compiled macro function up front, parameters missing at call time
+				// are bound to undefined for now and their defaults are evaluated later,
+				// once all parameters and special variables are in scope.
+				const missing: [string, Expression][] = [];
 				for (let i = 0; i < node.args.length; ++i) {
 					const nodeArg = node.args[i];
 					let name: string;
@@ -2054,13 +2055,14 @@ export class Interpreter {
 						kwargs.delete(name);
 					}
 					if (value === undefined && defaultValue !== undefined) {
-						value = this.evaluate(defaultValue, macroScope);
+						missing.push([name, defaultValue]);
 					}
 					macroScope.setVariable(name, value ?? new UndefinedValue());
 				}
 
 				// Python Jinja2 raises for arguments the macro cannot accept, unless the
-				// body catches them via the special variables.
+				// body catches them via the special variables. This happens before any
+				// parameter default is evaluated.
 				if (catchKwargs) {
 					macroScope.setVariable("kwargs", new ObjectValue(kwargs));
 				} else if (kwargs.size > 0) {
@@ -2070,6 +2072,14 @@ export class Interpreter {
 					macroScope.setVariable("varargs", new ArrayValue(args.slice(node.args.length)));
 				} else if (args.length > node.args.length) {
 					throw new Error(`macro '${node.name.value}' takes not more than ${node.args.length} argument(s)`);
+				}
+
+				// Defaults are evaluated in declaration order, in the macro scope: they see
+				// passed parameters, the special variables, and earlier defaults, while
+				// parameter names not yet bound read as undefined rather than leaking in
+				// from the outer scope.
+				for (const [name, defaultValue] of missing) {
+					macroScope.setVariable(name, this.evaluate(defaultValue, macroScope));
 				}
 
 				return this.evaluateBlock(node.body, macroScope);

@@ -467,6 +467,8 @@ export function parse(tokens: Token[]): Program {
 		// comma-separated arguments list
 
 		const args = [];
+		let sawKeywordArgument = false;
+		let sawSpreadArgument = false;
 		while (!is(TOKEN_TYPES.CloseParen)) {
 			// keyword unpacking: **expr, which Jinja2 requires to be the final argument
 			if (is(TOKEN_TYPES.ExponentiationBinaryOperator)) {
@@ -491,13 +493,17 @@ export function parse(tokens: Token[]): Program {
 				if (!allowUnpacking) {
 					throw new SyntaxError("Argument unpacking is not allowed in parameter declarations");
 				}
+				if (sawSpreadArgument) {
+					throw new SyntaxError("Only one `*` argument unpacking is allowed");
+				}
+				sawSpreadArgument = true;
 				++current;
 				const expr = parseExpression();
 				argument = new SpreadExpression(expr);
 			} else {
 				argument = parseExpression();
 				if (is(TOKEN_TYPES.Equals)) {
-					// keyword argument
+					// keyword argument (in calls) or parameter default (in declarations)
 					// e.g., func(x = 5, y = a or b)
 					++current; // consume equals
 					if (!(argument instanceof Identifier)) {
@@ -505,6 +511,16 @@ export function parse(tokens: Token[]): Program {
 					}
 					const value = parseExpression();
 					argument = new KeywordArgumentExpression(argument as Identifier, value);
+					sawKeywordArgument = true;
+				} else if (sawKeywordArgument) {
+					// Mirroring Python Jinja2, which rejects both of these at parse time
+					throw new SyntaxError(
+						allowUnpacking
+							? "Positional arguments must come before keyword arguments"
+							: "Non-default argument follows default argument",
+					);
+				} else if (sawSpreadArgument) {
+					throw new SyntaxError("Positional arguments must not follow `*` argument unpacking");
 				}
 			}
 			args.push(argument);

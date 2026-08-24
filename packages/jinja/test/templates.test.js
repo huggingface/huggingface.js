@@ -6434,6 +6434,27 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("Macro parameter defaults", () => {
+		it.each([
+			[`{% macro f(x=kwargs) %}{{ x.a }}|{{ kwargs.a }}{% endmacro %}{{ f(a=1) }}`, "1|1"],
+			[`{% macro f(x=varargs) %}{{ x | length }}|{{ varargs | length }}{% endmacro %}{{ f() }}`, "0|0"],
+		])("binds special variables before evaluating defaults in %s", (source, expected) => {
+			expect(new Template(source).render()).toBe(expected);
+		});
+
+		it("rejects unexpected keyword arguments before evaluating defaults", () => {
+			const template = new Template(`{% macro f(x=0 ** -1) %}ok{% endmacro %}{{ f(a=1) }}`);
+			expect(() => template.render()).toThrowError("macro 'f' takes no keyword argument 'a'");
+		});
+
+		it.each([
+			[`{% set a = 9 %}{% macro f(b=a, a=1) %}{{ b }}|{{ a }}{% endmacro %}{{ f() }}`, "|1"],
+			[`{% macro f(a=b, b=5) %}{{ a }}|{{ b }}{% endmacro %}{{ f(b=7) }}`, "7|7"],
+		])("evaluates defaults with all parameters bound in %s", (source, expected) => {
+			expect(new Template(source).render()).toBe(expected);
+		});
+	});
+
 	describe("Exponentiation", () => {
 		it("supports boolean operands", () => {
 			const template = new Template(
@@ -6478,6 +6499,19 @@ describe("Error checking", () => {
 			const text = "{{ variable }}{{";
 			const tokens = tokenize(text);
 			expect(() => parse(tokens)).toThrowError();
+		});
+
+		it.each([
+			[`{{ f(y=1, 2) }}`, "Positional arguments must come before keyword arguments"],
+			[`{{ f(*a, 2) }}`, "Positional arguments must not follow `*` argument unpacking"],
+			[`{{ f(*a, *b) }}`, "Only one `*` argument unpacking is allowed"],
+			[`{% macro f(b=1, a) %}x{% endmacro %}`, "Non-default argument follows default argument"],
+			[
+				`{% macro p() %}{{ caller() }}{% endmacro %}{% call(b=1, a) p() %}x{% endcall %}`,
+				"Non-default argument follows default argument",
+			],
+		])("Invalid argument order in %s", (text, error) => {
+			expect(() => parse(tokenize(text))).toThrowError(error);
 		});
 
 		it("Unclosed expression", () => {
