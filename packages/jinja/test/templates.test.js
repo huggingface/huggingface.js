@@ -6375,6 +6375,82 @@ describe("Templates", () => {
 	});
 });
 
+describe("Feature regressions", () => {
+	describe("Namespaces", () => {
+		it("supports namespace attributes in collection filters", () => {
+			const template = new Template(`{%- set a = namespace(x=2, active=true, inner=namespace(value=2)) -%}
+				{%- set b = namespace(x=1, active=false, inner=namespace(value=1)) -%}
+				{{- [a, b] | map(attribute="x") | join(",") -}}|
+				{{- [a, b] | selectattr("active") | map(attribute="x") | join(",") -}}|
+				{{- [a, b] | rejectattr("active") | map(attribute="x") | join(",") -}}|
+				{{- [a, b] | sort(attribute="inner.value") | map(attribute="x") | join(",") -}}|
+				{{- [a] | map(attribute="missing", default="fallback") | join(",") -}}
+			`);
+
+			expect(template.render()).toBe("2,1|2|1|1,2|fallback");
+		});
+
+		it("constructs namespaces from two-character string pairs", () => {
+			const template = new Template(`{% set ns = namespace(["ab", "🐍x"]) %}{{ ns.a }}|{{ ns["🐍"] }}`);
+			expect(template.render()).toBe("b|x");
+		});
+
+		it.each([`{{ namespace(["a"]) }}`, `{{ namespace(["abc"]) }}`, `{{ namespace("ab") }}`])(
+			"rejects invalid namespace pair sources in %s",
+			(source) => {
+				expect(() => new Template(source).render()).toThrowError();
+			},
+		);
+	});
+
+	describe("Macro special arguments", () => {
+		it.each([
+			["kwargs", `{% macro f(kwargs) %}{{ kwargs }}{% endmacro %}{{ f("ARG") }}`],
+			["varargs", `{% macro f(varargs) %}{{ varargs }}{% endmacro %}{{ f("ARG") }}`],
+		])("does not overwrite an explicit %s parameter", (_, source) => {
+			expect(new Template(source).render()).toBe("ARG");
+		});
+
+		it("does not treat a local kwargs assignment as a collector reference", () => {
+			const template = new Template(`{% macro f() %}{% set kwargs = {} %}ok{% endmacro %}{{ f(extra=1) }}`);
+			expect(() => template.render()).toThrowError("macro 'f' takes no keyword argument 'extra'");
+		});
+
+		it("does not treat a local varargs assignment as a collector reference", () => {
+			const template = new Template(`{% macro f() %}{% set varargs = [] %}ok{% endmacro %}{{ f(1) }}`);
+			expect(() => template.render()).toThrowError("macro 'f' takes not more than 0 argument(s)");
+		});
+
+		it("keeps undeclared-name detection order-sensitive", () => {
+			const template = new Template(`{% macro f() %}{{ kwargs.x }}{% set kwargs = {} %}{% endmacro %}{{ f(x=1) }}`);
+			expect(template.render()).toBe("1");
+		});
+
+		it.each([
+			`{% macro f() %}{% for kwargs in [] %}{{ kwargs }}{% endfor %}ok{% endmacro %}{{ f(extra=1) }}`,
+			`{% macro f() %}{% macro g(kwargs) %}{{ kwargs }}{% endmacro %}ok{% endmacro %}{{ f(extra=1) }}`,
+		])("does not treat a declaration as a collector reference in %s", (source) => {
+			expect(() => new Template(source).render()).toThrowError("macro 'f' takes no keyword argument 'extra'");
+		});
+	});
+
+	describe("Exponentiation", () => {
+		it("supports boolean operands", () => {
+			const template = new Template(
+				`|{{ 2 ** true }}|{{ true ** 2 }}|{{ false ** 3 }}|{{ 4.0 ** false }}|{{ true ** -1 }}|`,
+			);
+			expect(template.render()).toBe("|2|1|0|1.0|1.0|");
+		});
+
+		it.each(["{{ 0 ** -1 }}", "{{ (-1) ** 0.5 }}", "{{ 10.0 ** 10000 }}"])(
+			"rejects unsupported exponentiation results in %s",
+			(source) => {
+				expect(() => new Template(source).render()).toThrowError();
+			},
+		);
+	});
+});
+
 describe("Error checking", () => {
 	describe("Lexing errors", () => {
 		it("Missing closing curly brace", () => {

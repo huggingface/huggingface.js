@@ -33,6 +33,8 @@ import type {
 const NEWLINE = "\n";
 const OPEN_STATEMENT = "{%- ";
 const CLOSE_STATEMENT = " -%}";
+const SELECT_EXPRESSION_PRECEDENCE = -1;
+const TEST_EXPRESSION_PRECEDENCE = 6;
 
 function getBinaryOperatorPrecedence(expr: BinaryExpression): number {
 	switch (expr.operator.type) {
@@ -292,11 +294,18 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "SelectExpression": {
 			const n = node as SelectExpression;
-			return `${formatExpression(n.lhs)} if ${formatExpression(n.test)}`;
+			const expr = `${formatExpression(n.lhs, SELECT_EXPRESSION_PRECEDENCE + 1)} if ${formatExpression(
+				n.test,
+				SELECT_EXPRESSION_PRECEDENCE + 1,
+			)}`;
+			return SELECT_EXPRESSION_PRECEDENCE < parentPrec ? `(${expr})` : expr;
 		}
 		case "TestExpression": {
 			const n = node as TestExpression;
-			return `${formatExpression(n.operand)} is${n.negate ? " not" : ""} ${n.test.value}`;
+			const expr = `${formatExpression(n.operand, TEST_EXPRESSION_PRECEDENCE)} is${n.negate ? " not" : ""} ${
+				n.test.value
+			}`;
+			return TEST_EXPRESSION_PRECEDENCE < parentPrec ? `(${expr})` : expr;
 		}
 		case "ArrayLiteral":
 		case "TupleLiteral": {

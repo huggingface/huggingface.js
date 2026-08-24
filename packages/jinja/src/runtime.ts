@@ -607,10 +607,27 @@ export class Environment {
 						}
 					} else if (source instanceof ArrayValue) {
 						for (const pair of source.value) {
-							if (!(pair instanceof ArrayValue) || pair.value.length !== 2 || !(pair.value[0] instanceof StringValue)) {
+							let key: AnyRuntimeValue;
+							let value: AnyRuntimeValue;
+							if (pair instanceof ArrayValue) {
+								if (pair.value.length !== 2) {
+									throw new Error("namespace expected an object or an iterable of [key, value] pairs");
+								}
+								[key, value] = pair.value;
+							} else if (pair instanceof StringValue) {
+								const chars = Array.from(pair.value);
+								if (chars.length !== 2) {
+									throw new Error("namespace expected an object or an iterable of [key, value] pairs");
+								}
+								key = new StringValue(chars[0]);
+								value = new StringValue(chars[1]);
+							} else {
 								throw new Error("namespace expected an object or an iterable of [key, value] pairs");
 							}
-							entries.set(pair.value[0].value, pair.value[1]);
+							if (!(key instanceof StringValue)) {
+								throw new Error("namespace keys must be strings");
+							}
+							entries.set(key.value, value);
 						}
 					} else {
 						throw new Error(`'${source.type}' object is not iterable`);
@@ -776,7 +793,7 @@ function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRun
 	let value: AnyRuntimeValue = item;
 
 	for (const part of parts) {
-		if (value instanceof ObjectValue) {
+		if (value instanceof ObjectValue || value instanceof NamespaceValue) {
 			value = value.value.get(part) ?? new UndefinedValue();
 		} else if (value instanceof ArrayValue) {
 			const index = parseInt(part, 10);
@@ -859,36 +876,174 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 	}
 }
 
+function getParameterName(argument: Expression): string | undefined {
+	if (argument.type === "Identifier") {
+		return (argument as Identifier).value;
+	}
+	if (argument.type === "KeywordArgumentExpression") {
+		return (argument as KeywordArgumentExpression).key.value;
+	}
+	return undefined;
+}
+
 /**
- * Determines whether an AST subtree references the given identifier, mirroring
- * Jinja2's compile-time detection of the special `varargs`/`kwargs` variables
- * inside macro bodies. Non-computed member properties and keyword-argument
- * names are not identifier references.
+ * Determines whether an AST subtree loads an identifier before declaring it.
+ * This mirrors Jinja2's ordered undeclared-name analysis for the special macro
+ * variables `varargs` and `kwargs`: a load enables collection, while a prior
+ * parameter/store declaration disables it.
  */
-function referencesIdentifier(node: unknown, name: string): boolean {
-	if (Array.isArray(node)) {
-		return node.some((item) => referencesIdentifier(item, name));
-	}
-	if (node instanceof Map) {
-		// ObjectLiteral entries; both keys and values are expressions
-		return [...node].some((entry) => referencesIdentifier(entry, name));
-	}
-	if (!(node instanceof Statement)) {
+function referencesUndeclaredIdentifier(nodes: unknown, name: string): boolean {
+	let declared = false;
+
+	const declareTarget = (target: Expression): void => {
+		if (target.type === "Identifier") {
+			if ((target as Identifier).value === name) {
+				declared = true;
+			}
+		} else if (target.type === "TupleLiteral") {
+			for (const item of (target as TupleLiteral).value) {
+				declareTarget(item);
+			}
+		}
+	};
+
+	const declareArgument = (argument: Expression): void => {
+		const parameterName = getParameterName(argument);
+		if (parameterName === name) {
+			declared = true;
+		}
+	};
+
+	const visitArgumentDefaults = (args: Expression[]): boolean => {
+		for (const argument of args) {
+			if (argument.type === "KeywordArgumentExpression" && visit((argument as KeywordArgumentExpression).value)) {
+				return true;
+			}
+		}
 		return false;
-	}
-	if (node.type === "Identifier") {
-		return (node as Identifier).value === name;
-	}
-	if (node.type === "MemberExpression") {
-		const member = node as MemberExpression;
-		return (
-			referencesIdentifier(member.object, name) || (member.computed && referencesIdentifier(member.property, name))
-		);
-	}
-	if (node.type === "KeywordArgumentExpression") {
-		return referencesIdentifier((node as KeywordArgumentExpression).value, name);
-	}
-	return Object.values(node).some((child) => referencesIdentifier(child, name));
+	};
+
+	const visitFilter = (filter: Identifier | CallExpression): boolean => {
+		// Filter names are identifiers syntactically, but they are not variable loads.
+		return filter.type === "CallExpression" && visit((filter as CallExpression).args);
+	};
+
+	const visit = (node: unknown): boolean => {
+		if (Array.isArray(node)) {
+			for (const item of node) {
+				if (visit(item)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		if (node instanceof Map) {
+			for (const [key, value] of node) {
+				if (visit(key) || visit(value)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		if (!(node instanceof Statement)) {
+			return false;
+		}
+
+		switch (node.type) {
+			case "Program":
+				return visit((node as Program).body);
+			case "If": {
+				const statement = node as If;
+				return visit(statement.test) || visit(statement.body) || visit(statement.alternate);
+			}
+			case "For": {
+				const statement = node as For;
+				declareTarget(statement.loopvar);
+				if (statement.iterable.type === "SelectExpression") {
+					const iterable = statement.iterable as SelectExpression;
+					// Jinja's For node visits its filter after the body/default block.
+					return visit(iterable.lhs) || visit(statement.body) || visit(statement.defaultBlock) || visit(iterable.test);
+				}
+				return visit(statement.iterable) || visit(statement.body) || visit(statement.defaultBlock);
+			}
+			case "Set": {
+				const statement = node as SetStatement;
+				declareTarget(statement.assignee);
+				return visit(statement.value) || visit(statement.body);
+			}
+			case "Macro": {
+				const statement = node as Macro;
+				for (const argument of statement.args) {
+					declareArgument(argument);
+				}
+				return visitArgumentDefaults(statement.args) || visit(statement.body);
+			}
+			case "CallStatement": {
+				const statement = node as CallStatement;
+				if (visit(statement.call)) {
+					return true;
+				}
+				for (const argument of statement.callerArgs ?? []) {
+					declareArgument(argument);
+				}
+				return visitArgumentDefaults(statement.callerArgs ?? []) || visit(statement.body);
+			}
+			case "FilterStatement": {
+				const statement = node as FilterStatement;
+				return visit(statement.body) || visitFilter(statement.filter);
+			}
+			case "Identifier":
+				return !declared && (node as Identifier).value === name;
+			case "MemberExpression": {
+				const expression = node as MemberExpression;
+				return visit(expression.object) || (expression.computed && visit(expression.property));
+			}
+			case "CallExpression": {
+				const expression = node as CallExpression;
+				return visit(expression.callee) || visit(expression.args);
+			}
+			case "BinaryExpression": {
+				const expression = node as BinaryExpression;
+				return visit(expression.left) || visit(expression.right);
+			}
+			case "FilterExpression": {
+				const expression = node as FilterExpression;
+				return visit(expression.operand) || visitFilter(expression.filter);
+			}
+			case "TestExpression":
+				return visit((node as TestExpression).operand);
+			case "UnaryExpression":
+				return visit((node as UnaryExpression).argument);
+			case "SelectExpression": {
+				const expression = node as SelectExpression;
+				return visit(expression.test) || visit(expression.lhs);
+			}
+			case "SliceExpression": {
+				const expression = node as SliceExpression;
+				return visit(expression.start) || visit(expression.stop) || visit(expression.step);
+			}
+			case "KeywordArgumentExpression":
+				return visit((node as KeywordArgumentExpression).value);
+			case "SpreadExpression":
+				return visit((node as SpreadExpression).argument);
+			case "KeywordSpreadExpression":
+				return visit((node as KeywordSpreadExpression).argument);
+			case "ArrayLiteral":
+				return visit((node as ArrayLiteral).value);
+			case "TupleLiteral":
+				return visit((node as TupleLiteral).value);
+			case "ObjectLiteral":
+				return visit((node as ObjectLiteral).value);
+			case "Ternary": {
+				const expression = node as Ternary;
+				return visit(expression.condition) || visit(expression.trueExpr) || visit(expression.falseExpr);
+			}
+			default:
+				return false;
+		}
+	};
+
+	return visit(nodes);
 }
 
 export class Interpreter {
@@ -941,6 +1096,28 @@ export class Interpreter {
 			// toString and concatenation
 			return new StringValue(left.value.toString() + right.value.toString());
 		} else if (
+			node.operator.value === "**" &&
+			(left instanceof IntegerValue || left instanceof FloatValue || left instanceof BooleanValue) &&
+			(right instanceof IntegerValue || right instanceof FloatValue || right instanceof BooleanValue)
+		) {
+			// Python booleans are integers for arithmetic purposes.
+			const a = left instanceof BooleanValue ? Number(left.value) : left.value;
+			const b = right instanceof BooleanValue ? Number(right.value) : right.value;
+			if (a === 0 && b < 0) {
+				throw new Error("0.0 cannot be raised to a negative power");
+			}
+
+			const result = a ** b;
+			if (!Number.isFinite(result)) {
+				// Complex numbers and arbitrary-precision integers are not represented by
+				// this runtime, so fail explicitly instead of rendering NaN/Infinity.
+				throw new Error("Exponentiation result is not a finite real number");
+			}
+
+			// Like Python, a negative exponent produces a float (e.g., 2 ** -1 == 0.5).
+			const isFloat = left instanceof FloatValue || right instanceof FloatValue || b < 0;
+			return isFloat ? new FloatValue(result) : new IntegerValue(result);
+		} else if (
 			(left instanceof IntegerValue || left instanceof FloatValue) &&
 			(right instanceof IntegerValue || right instanceof FloatValue)
 		) {
@@ -968,12 +1145,6 @@ export class Interpreter {
 					const rem = a % b;
 					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
 					return isFloat ? new FloatValue(rem) : new IntegerValue(rem);
-				}
-				case "**": {
-					const res = a ** b;
-					// Like Python, a negative exponent produces a float (e.g., 2 ** -1 == 0.5)
-					const isFloat = left instanceof FloatValue || right instanceof FloatValue || b < 0;
-					return isFloat ? new FloatValue(res) : new IntegerValue(res);
 				}
 				// Comparison operators
 				case "<":
@@ -1375,7 +1546,7 @@ export class Interpreter {
 					case "rejectattr": {
 						const select = filterName === "selectattr";
 
-						if (operand.value.some((x) => !(x instanceof ObjectValue))) {
+						if (operand.value.some((x) => !(x instanceof ObjectValue || x instanceof NamespaceValue))) {
 							throw new Error(`\`${filterName}\` can only be applied to array of objects`);
 						}
 						if (filter.args.some((x) => x.type !== "StringLiteral")) {
@@ -1398,7 +1569,7 @@ export class Interpreter {
 						}
 
 						// Filter the array using the test function
-						const filtered = (operand.value as ObjectValue[]).filter((item) => {
+						const filtered = (operand.value as (ObjectValue | NamespaceValue)[]).filter((item) => {
 							const a = item.value.get(attr.value);
 							const result = a ? testFunction(a, value) : false;
 							return select ? result : !result;
@@ -1418,7 +1589,7 @@ export class Interpreter {
 							}
 							const defaultValue = kwargs.get("default");
 							const mapped = operand.value.map((item) => {
-								if (!(item instanceof ObjectValue)) {
+								if (!(item instanceof ObjectValue || item instanceof NamespaceValue)) {
 									throw new Error("items in map must be an object");
 								}
 
@@ -1845,8 +2016,9 @@ export class Interpreter {
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
 		// Like Python Jinja2, detect at definition time whether the body references the
 		// special `varargs`/`kwargs` variables; only then do they collect extra arguments.
-		const catchVarargs = referencesIdentifier(node.body, "varargs");
-		const catchKwargs = referencesIdentifier(node.body, "kwargs");
+		const parameterNames = new Set(node.args.map(getParameterName).filter((name) => name !== undefined));
+		const catchVarargs = !parameterNames.has("varargs") && referencesUndeclaredIdentifier(node.body, "varargs");
+		const catchKwargs = !parameterNames.has("kwargs") && referencesUndeclaredIdentifier(node.body, "kwargs");
 		environment.setVariable(
 			node.name.value,
 			new FunctionValue((args, scope) => {

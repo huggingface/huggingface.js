@@ -144,7 +144,7 @@ export function parse(tokens: Token[]): Program {
 				let callerArgs: Statement[] | null = null;
 				if (is(TOKEN_TYPES.OpenParen)) {
 					// Optional caller arguments, e.g. {% call(user) dump_users(...) %}
-					callerArgs = parseArgs();
+					callerArgs = parseArgs(false);
 				}
 				const callee = parsePrimaryExpression();
 				if (callee.type !== "Identifier") {
@@ -268,7 +268,7 @@ export function parse(tokens: Token[]): Program {
 		if (name.type !== "Identifier") {
 			throw new SyntaxError(`Expected identifier following macro statement`);
 		}
-		const args = parseArgs();
+		const args = parseArgs(false);
 		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 
 		// Body of macro
@@ -454,22 +454,25 @@ export function parse(tokens: Token[]): Program {
 		return expression;
 	}
 
-	function parseArgs(): Statement[] {
+	function parseArgs(allowUnpacking = true): Statement[] {
 		// add (x + 5, foo())
 		expect(TOKEN_TYPES.OpenParen, "Expected opening parenthesis for arguments list");
 
-		const args = parseArgumentsList();
+		const args = parseArgumentsList(allowUnpacking);
 
 		expect(TOKEN_TYPES.CloseParen, "Expected closing parenthesis for arguments list");
 		return args;
 	}
-	function parseArgumentsList(): Statement[] {
+	function parseArgumentsList(allowUnpacking: boolean): Statement[] {
 		// comma-separated arguments list
 
 		const args = [];
 		while (!is(TOKEN_TYPES.CloseParen)) {
 			// keyword unpacking: **expr, which Jinja2 requires to be the final argument
 			if (is(TOKEN_TYPES.ExponentiationBinaryOperator)) {
+				if (!allowUnpacking) {
+					throw new SyntaxError("Argument unpacking is not allowed in parameter declarations");
+				}
 				++current;
 				args.push(new KeywordSpreadExpression(parseExpression()));
 				if (is(TOKEN_TYPES.Comma)) {
@@ -485,6 +488,9 @@ export function parse(tokens: Token[]): Program {
 
 			// unpacking: *expr
 			if (is(TOKEN_TYPES.MultiplicativeBinaryOperator) && tokens[current].value === "*") {
+				if (!allowUnpacking) {
+					throw new SyntaxError("Argument unpacking is not allowed in parameter declarations");
+				}
 				++current;
 				const expr = parseExpression();
 				argument = new SpreadExpression(expr);

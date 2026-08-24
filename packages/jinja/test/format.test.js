@@ -48,6 +48,16 @@ const FORMATTING_TESTS = Object.freeze({
 		formatted: `{{- (2 * 3) ** 2 * 2 ** 3 ** 2 -}}`,
 		rendered: `2304`,
 	},
+	EXPONENTIATION_AS_TEST_OPERAND: {
+		template: `{{ (2 ** 3) is odd }}`,
+		formatted: `{{- (2 ** 3) is odd -}}`,
+		rendered: `false`,
+	},
+	SELECT_EXPRESSION_AS_EXPONENTIATION_OPERAND: {
+		template: `{{ (2 if 2) ** 3 }}`,
+		formatted: `{{- (2 if 2) ** 3 -}}`,
+		rendered: `8`,
+	},
 	ARGUMENT_UNPACKING: {
 		template: `{{ namespace(*[{'a': 1}], **{'b': 2}).b }}`,
 		formatted: `{{- namespace(*[{"a": 1}], **{"b": 2}).b -}}`,
@@ -73,4 +83,15 @@ describe("format", () => {
 			}
 		});
 	}
+});
+
+describe("parameter declarations", () => {
+	it.each([
+		`{% macro f(*args) %}x{% endmacro %}`,
+		`{% macro f(**kwargs) %}x{% endmacro %}`,
+		`{% call(*args) f() %}x{% endcall %}`,
+		`{% call(**kwargs) f() %}x{% endcall %}`,
+	])("should reject argument unpacking in %s", (template) => {
+		expect(() => new Template(template)).toThrowError("Argument unpacking is not allowed in parameter declarations");
+	});
 });
