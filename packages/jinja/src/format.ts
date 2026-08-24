@@ -26,6 +26,7 @@ import type {
 	CallStatement,
 	FilterStatement,
 	SpreadExpression,
+	KeywordSpreadExpression,
 	Ternary,
 } from "./ast";
 
@@ -35,6 +36,8 @@ const CLOSE_STATEMENT = " -%}";
 
 function getBinaryOperatorPrecedence(expr: BinaryExpression): number {
 	switch (expr.operator.type) {
+		case "ExponentiationBinaryOperator":
+			return 5;
 		case "MultiplicativeBinaryOperator":
 			return 4;
 		case "AdditiveBinaryOperator":
@@ -218,6 +221,10 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		case "SpreadExpression": {
 			const n = node as SpreadExpression;
 			return `*${formatExpression(n.argument)}`;
+		}
+		case "KeywordSpreadExpression": {
+			const n = node as KeywordSpreadExpression;
+			return `**${formatExpression(n.argument)}`;
 		}
 		case "Identifier":
 			return (node as Identifier).value;

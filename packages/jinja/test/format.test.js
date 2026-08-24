@@ -43,6 +43,16 @@ const FORMATTING_TESTS = Object.freeze({
 		formatted: `{{- "a" if (true if 1 == 2 else false) else "b" if 3 == 4 else "c" if 4 == 5 else "d" -}}`,
 		rendered: `d`,
 	},
+	EXPONENTIATION: {
+		template: `{{ (2*3)**2*2**3**2 }}`,
+		formatted: `{{- (2 * 3) ** 2 * 2 ** 3 ** 2 -}}`,
+		rendered: `2304`,
+	},
+	ARGUMENT_UNPACKING: {
+		template: `{{ namespace(*[{'a': 1}], **{'b': 2}).b }}`,
+		formatted: `{{- namespace(*[{"a": 1}], **{"b": 2}).b -}}`,
+		rendered: `2`,
+	},
 });
 
 describe("format", () => {

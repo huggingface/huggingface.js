@@ -26,6 +26,7 @@ import {
 	CallStatement,
 	FilterStatement,
 	SpreadExpression,
+	KeywordSpreadExpression,
 	IntegerLiteral,
 	FloatLiteral,
 	Ternary,
@@ -467,6 +468,19 @@ export function parse(tokens: Token[]): Program {
 
 		const args = [];
 		while (!is(TOKEN_TYPES.CloseParen)) {
+			// keyword unpacking: **expr, which Jinja2 requires to be the final argument
+			if (is(TOKEN_TYPES.ExponentiationBinaryOperator)) {
+				++current;
+				args.push(new KeywordSpreadExpression(parseExpression()));
+				if (is(TOKEN_TYPES.Comma)) {
+					++current; // consume comma
+				}
+				if (!is(TOKEN_TYPES.CloseParen)) {
+					throw new SyntaxError("Expected closing parenthesis: `**` must be applied to the final argument");
+				}
+				break;
+			}
+
 			let argument: Statement;
 
 			// unpacking: *expr
@@ -554,12 +568,25 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseMultiplicativeExpression(): Statement {
-		let left = parseTestExpression();
+		let left = parsePowerExpression();
 
 		// Multiplicative operators have higher precedence than test expressions
 		// e.g., (4 * 4 is divisibleby(2)) evaluates as (4 * (4 is divisibleby(2)))
 
 		while (is(TOKEN_TYPES.MultiplicativeBinaryOperator)) {
+			const operator = tokens[current++];
+			const right = parsePowerExpression();
+			left = new BinaryExpression(operator, left, right);
+		}
+		return left;
+	}
+
+	function parsePowerExpression(): Statement {
+		// Exponentiation has higher precedence than other multiplicative operators
+		// NOTE: unlike Python, Jinja2's `**` is left-associative: 2 ** 3 ** 2 == (2 ** 3) ** 2
+		let left = parseTestExpression();
+
+		while (is(TOKEN_TYPES.ExponentiationBinaryOperator)) {
 			const operator = tokens[current++];
 			const right = parseTestExpression();
 			left = new BinaryExpression(operator, left, right);

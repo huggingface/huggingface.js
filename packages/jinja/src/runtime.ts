@@ -3,7 +3,6 @@ import type {
 	FloatLiteral,
 	IntegerLiteral,
 	ArrayLiteral,
-	Statement,
 	Program,
 	If,
 	For,
@@ -26,7 +25,9 @@ import type {
 	FilterStatement,
 	Ternary,
 	SpreadExpression,
+	KeywordSpreadExpression,
 } from "./ast";
+import { Statement } from "./ast";
 import { range, replace, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
@@ -35,6 +36,7 @@ export type AnyRuntimeValue =
 	| StringValue
 	| BooleanValue
 	| ObjectValue
+	| NamespaceValue
 	| ArrayValue
 	| FunctionValue
 	| NullValue
@@ -359,6 +361,7 @@ function toJSON(
 			return result;
 		}
 		case "ArrayValue":
+		case "NamespaceValue":
 		case "ObjectValue": {
 			const indentValue = indent ? " ".repeat(indent) : "";
 			const basePadding = "\n" + indentValue.repeat(depth);
@@ -505,6 +508,19 @@ export class KeywordArgumentsValue extends ObjectValue {
 }
 
 /**
+ * Represents a Namespace value at runtime. Mirroring Python Jinja2's Namespace,
+ * this is a plain object rather than a mapping: it is always truthy, is not a
+ * `mapping`, exposes no dict methods, and only supports attribute access.
+ */
+export class NamespaceValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
+	override type = "NamespaceValue";
+
+	override toString(): string {
+		return toJSON(this, {}, 0, false);
+	}
+}
+
+/**
  * Represents an Array value at runtime.
  */
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
@@ -571,16 +587,41 @@ export class Environment {
 		[
 			"namespace",
 			new FunctionValue((args) => {
-				if (args.length === 0) {
-					return new ObjectValue(new Map());
+				// Python Jinja2's Namespace mirrors `dict(*args, **kwargs)`: at most one
+				// positional mapping (or iterable of key/value pairs) merged with keyword
+				// arguments, copied so mutating the namespace never mutates the source.
+				const positional = args.slice();
+				let kwargs: KeywordArgumentsValue | undefined;
+				if (positional.at(-1) instanceof KeywordArgumentsValue) {
+					kwargs = positional.pop() as KeywordArgumentsValue;
 				}
-				if (args.length !== 1 || !(args[0] instanceof ObjectValue)) {
-					throw new Error("`namespace` expects either zero arguments or a single object argument");
+				if (positional.length > 1) {
+					throw new Error(`namespace expected at most 1 argument, got ${positional.length}`);
 				}
-				// Copy the entries into a fresh, plain ObjectValue: the argument may be a
-				// KeywordArgumentsValue (e.g., `namespace(a=1)`), which must not retain its
-				// type tag, and mutating the namespace must not mutate the source object.
-				return new ObjectValue(new Map(args[0].value));
+				const entries = new Map<string, AnyRuntimeValue>();
+				if (positional.length === 1) {
+					const source = positional[0];
+					if (source instanceof ObjectValue) {
+						for (const [key, value] of source.value) {
+							entries.set(key, value);
+						}
+					} else if (source instanceof ArrayValue) {
+						for (const pair of source.value) {
+							if (!(pair instanceof ArrayValue) || pair.value.length !== 2 || !(pair.value[0] instanceof StringValue)) {
+								throw new Error("namespace expected an object or an iterable of [key, value] pairs");
+							}
+							entries.set(pair.value[0].value, pair.value[1]);
+						}
+					} else {
+						throw new Error(`'${source.type}' object is not iterable`);
+					}
+				}
+				if (kwargs) {
+					for (const [key, value] of kwargs.value) {
+						entries.set(key, value);
+					}
+				}
+				return new NamespaceValue(entries);
 			}),
 		],
 	]);
@@ -818,6 +859,34 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 	}
 }
 
+/**
+ * Determines whether an AST subtree references the given identifier, mirroring
+ * Jinja2's compile-time detection of the special `varargs`/`kwargs` variables
+ * inside macro bodies. Non-computed member properties and keyword-argument
+ * names are not identifier references.
+ */
+function referencesIdentifier(node: unknown, name: string): boolean {
+	if (Array.isArray(node)) {
+		return node.some((item) => referencesIdentifier(item, name));
+	}
+	if (!(node instanceof Statement)) {
+		return false;
+	}
+	if (node.type === "Identifier") {
+		return (node as Identifier).value === name;
+	}
+	if (node.type === "MemberExpression") {
+		const member = node as MemberExpression;
+		return (
+			referencesIdentifier(member.object, name) || (member.computed && referencesIdentifier(member.property, name))
+		);
+	}
+	if (node.type === "KeywordArgumentExpression") {
+		return referencesIdentifier((node as KeywordArgumentExpression).value, name);
+	}
+	return Object.values(node).some((child) => referencesIdentifier(child, name));
+}
+
 export class Interpreter {
 	global: Environment;
 
@@ -896,6 +965,12 @@ export class Interpreter {
 					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
 					return isFloat ? new FloatValue(rem) : new IntegerValue(rem);
 				}
+				case "**": {
+					const res = a ** b;
+					// Like Python, a negative exponent produces a float (e.g., 2 ** -1 == 0.5)
+					const isFloat = left instanceof FloatValue || right instanceof FloatValue || b < 0;
+					return isFloat ? new FloatValue(res) : new IntegerValue(res);
+				}
 				// Comparison operators
 				case "<":
 					return new BooleanValue(a < b);
@@ -969,6 +1044,18 @@ export class Interpreter {
 				}
 				for (const item of val.value) {
 					positionalArguments.push(item);
+				}
+			} else if (argument.type === "KeywordSpreadExpression") {
+				const spreadNode = argument as KeywordSpreadExpression;
+				const val = this.evaluate(spreadNode.argument, environment);
+				if (!(val instanceof ObjectValue)) {
+					throw new Error(`Argument after ** must be a mapping, not ${val.type}`);
+				}
+				for (const [key, value] of val.value) {
+					if (keywordArguments.has(key)) {
+						throw new Error(`Got multiple values for keyword argument '${key}'`);
+					}
+					keywordArguments.set(key, value);
 				}
 			} else if (argument.type === "KeywordArgumentExpression") {
 				const kwarg = argument as KeywordArgumentExpression;
@@ -1557,6 +1644,13 @@ export class Interpreter {
 				throw new Error(`Cannot access property with non-string: got ${property.type}`);
 			}
 			value = object.value.get(property.value) ?? object.builtins.get(property.value);
+		} else if (object instanceof NamespaceValue) {
+			// Mirroring Python Jinja2, both attribute and subscript access read namespace
+			// attributes, and namespaces expose no other members.
+			if (!(property instanceof StringValue)) {
+				throw new Error(`Cannot access property with non-string: got ${property.type}`);
+			}
+			value = object.value.get(property.value);
 		} else if (object instanceof ArrayValue || object instanceof StringValue) {
 			if (property instanceof IntegerValue) {
 				value = object.value.at(property.value);
@@ -1603,8 +1697,9 @@ export class Interpreter {
 			const member = node.assignee as MemberExpression;
 
 			const object = this.evaluate(member.object, environment);
-			if (!(object instanceof ObjectValue)) {
-				throw new Error("Cannot assign to member of non-object");
+			if (!(object instanceof NamespaceValue)) {
+				// Python Jinja2 only permits attribute assignment on namespace objects
+				throw new Error("cannot assign attribute on non-namespace object");
 			}
 			if (member.property.type !== "Identifier") {
 				throw new Error("Cannot assign to member with non-identifier property");
@@ -1744,6 +1839,10 @@ export class Interpreter {
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
+		// Like Python Jinja2, detect at definition time whether the body references the
+		// special `varargs`/`kwargs` variables; only then do they collect extra arguments.
+		const catchVarargs = referencesIdentifier(node.body, "varargs");
+		const catchKwargs = referencesIdentifier(node.body, "kwargs");
 		environment.setVariable(
 			node.name.value,
 			new FunctionValue((args, scope) => {
@@ -1752,32 +1851,51 @@ export class Interpreter {
 				args = args.slice(); // Make a copy of the arguments
 
 				// Separate positional and keyword arguments
-				let kwargs;
-				if (args.at(-1)?.type === "KeywordArgumentsValue") {
-					kwargs = args.pop() as KeywordArgumentsValue;
+				let kwargs = new Map<string, AnyRuntimeValue>();
+				if (args.at(-1) instanceof KeywordArgumentsValue) {
+					kwargs = new Map((args.pop() as KeywordArgumentsValue).value);
 				}
 
-				// Assign values to all arguments defined by the node
+				// Bind each declared parameter: positional value first, then passed keyword
+				// value, then the declared default, and finally undefined (Python Jinja2
+				// does not raise for parameters missing at call time).
 				for (let i = 0; i < node.args.length; ++i) {
 					const nodeArg = node.args[i];
-					const passedArg = args[i];
+					let name: string;
+					let defaultValue: Expression | undefined;
 					if (nodeArg.type === "Identifier") {
-						const identifier = nodeArg as Identifier;
-						if (!passedArg) {
-							throw new Error(`Missing positional argument: ${identifier.value}`);
-						}
-						macroScope.setVariable(identifier.value, passedArg);
+						name = (nodeArg as Identifier).value;
 					} else if (nodeArg.type === "KeywordArgumentExpression") {
 						const kwarg = nodeArg as KeywordArgumentExpression;
-						const value =
-							passedArg ?? // Try positional arguments first
-							kwargs?.value.get(kwarg.key.value) ?? // Look in user-passed kwargs
-							this.evaluate(kwarg.value, macroScope); // Use the default defined by the node
-						macroScope.setVariable(kwarg.key.value, value);
+						name = kwarg.key.value;
+						defaultValue = kwarg.value;
 					} else {
 						throw new Error(`Unknown argument type: ${nodeArg.type}`);
 					}
+					let value = args[i] as AnyRuntimeValue | undefined;
+					if (value === undefined && kwargs.has(name)) {
+						value = kwargs.get(name);
+						kwargs.delete(name);
+					}
+					if (value === undefined && defaultValue !== undefined) {
+						value = this.evaluate(defaultValue, macroScope);
+					}
+					macroScope.setVariable(name, value ?? new UndefinedValue());
 				}
+
+				// Python Jinja2 raises for arguments the macro cannot accept, unless the
+				// body catches them via the special variables.
+				if (catchKwargs) {
+					macroScope.setVariable("kwargs", new ObjectValue(kwargs));
+				} else if (kwargs.size > 0) {
+					throw new Error(`macro '${node.name.value}' takes no keyword argument '${kwargs.keys().next().value}'`);
+				}
+				if (catchVarargs) {
+					macroScope.setVariable("varargs", new ArrayValue(args.slice(node.args.length)));
+				} else if (args.length > node.args.length) {
+					throw new Error(`macro '${node.name.value}' takes not more than ${node.args.length} argument(s)`);
+				}
+
 				return this.evaluateBlock(node.body, macroScope);
 			}),
 		);

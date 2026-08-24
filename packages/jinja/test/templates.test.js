@@ -53,6 +53,7 @@ const TEST_STRINGS = {
 	BINOP_EXPR: `{{ 1 % 2 }}{{ 1 < 2 }}{{ 1 > 2 }}{{ 1 >= 2 }}{{ 2 <= 2 }}{{ 2 == 2 }}{{ 2 != 3 }}{{ 2 + 3 }}`,
 	BINOP_EXPR_1: `{{ 1 ~ "+" ~ 2 ~ "=" ~ 3 ~ " is " ~ true }}`,
 	BINOP_EXPR_2: `|{{ 7 // 2 }}|{{ -7 // 2 }}|{{ -7.5 // 2 }}|{{ 7.5 // 2 }}|{{ 8 // 3 }}|{{ 9 // 3 }}|`,
+	BINOP_EXPR_3: `|{{ 2 ** 3 }}|{{ 2 ** 3 ** 2 }}|{{ -2 ** 2 }}|{{ 2 ** -1 }}|{{ 2 * 3 ** 2 }}|{{ 2.0 ** 2 }}|{{ 2 ** [1, 2] | length }}|`,
 
 	// Strings
 	STRINGS: `{{ 'Bye' }}{{ bos_token + '[INST] ' }}`,
@@ -185,6 +186,14 @@ const TEST_STRINGS = {
 	NAMESPACE_2: `{% set ns = namespace(default=false, number=1+1) %}|{{ ns.default }}|{{ ns.number }}|`,
 	NAMESPACE_3: `{% macro f(x, y='!') %}{{ x.value }}{{ y }}{% endmacro %}{% set ns = namespace(value=0) %}{{ f(ns) }}|{{ f(ns, y='?') }}`,
 	NAMESPACE_4: `{% set data = {'a': 1} %}{% set ns = namespace(data) %}{% set ns.a = 2 %}{{ data.a }}|{{ ns.a }}`,
+	NAMESPACE_5: `{% set ns = namespace({'a': 1}, a=2, b=3) %}{{ ns.a }}|{{ ns.b }}`,
+	NAMESPACE_6: `{% set ns = namespace([['a', 1], ['b', 2]]) %}{{ ns.a }}|{{ ns.b }}`,
+	NAMESPACE_7: `{% set d = {'a': 1} %}{% set ns = namespace(**d) %}{{ ns.a }}`,
+	NAMESPACE_8: `{% set ns = namespace() %}{% if ns %}T{% else %}F{% endif %}`,
+	NAMESPACE_9: `{% set ns = namespace(a=1) %}{% if ns is mapping %}M{% else %}O{% endif %}|{% if {} is mapping %}M{% else %}O{% endif %}`,
+	NAMESPACE_10: `{% set ns = namespace() %}[{{ ns.items }}]`,
+	NAMESPACE_11: `{% set ns = namespace(a=1) %}{{ ns['a'] }}|{{ ns.a }}`,
+	NAMESPACE_12: `{% set ns = namespace(a=1) %}{{ ns }}`,
 
 	// Object operators
 	OBJECT_OPERATORS: `|{{ 'known' in obj }}|{{ 'known' not in obj }}|{{ 'unknown' in obj }}|{{ 'unknown' not in obj }}|`,
@@ -228,6 +237,11 @@ const TEST_STRINGS = {
 	MACROS_2: `{% macro fn(x, y=2, z=3) %}{{ x + ',' + y + ',' + z }}{% endmacro %}|{{ fn(1) }}|{{ fn(1, 0) }}|{{ fn(1, 0, -1) }}|{{ fn(1, y=0, z=-1) }}|{{ fn(1, z=0) }}|`,
 	MACROS_3: `{%- macro dummy(a, b='!') -%}{{ a }} {{ caller() }}{{ b }}{%- endmacro %}{%- call dummy('hello') -%}name{%- endcall -%}`,
 	MACROS_4: `{%- macro print_users(users) -%}{%- for user in users -%}{{ caller(user) }}{%- endfor -%}{%- endmacro -%}{% call(user) print_users(users) %}  - {{ user.firstname }} {{ user.lastname }}\n{% endcall %}`,
+	MACROS_5: `{% macro f(x) %}{{ x }}{% endmacro %}{{ f(x=7) }}`,
+	MACROS_6: `{% macro f(a, b) %}{{ a }}{{ b }}{% endmacro %}{{ f(1, b=2) }}`,
+	MACROS_7: `{% macro f(x, y=9) %}{% if x is defined %}D{% else %}U{% endif %}|{{ x }}|{{ y }}{% endmacro %}{{ f(y=2) }}`,
+	MACROS_8: `{% macro f(a) %}{{ a }}{{ kwargs.get('b') }}{% endmacro %}{{ f(1, b=2) }}`,
+	MACROS_9: `{% macro f(a) %}{{ a }}|{{ varargs | length }}|{{ varargs[1] }}{% endmacro %}{{ f(1, 2, 3) }}`,
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: `{% if if in in %}a{% endif %}{% set if = "a" %}{% set in = "abc" %}{% if if in in %}b{% endif %}`,
@@ -235,6 +249,8 @@ const TEST_STRINGS = {
 
 	// Unpacking
 	UNPACKING: `{% macro mul(a, b, c) %}{{ a * b * c }}{% endmacro %}|{{ mul(1, 2, 3) }}|{{ mul(*[1, 2, 3]) }}|`,
+	UNPACKING_1: `{% macro f(x, y) %}{{ x }}{{ y }}{% endmacro %}{% set d = {'x': 1, 'y': 2} %}{{ f(**d) }}`,
+	UNPACKING_2: `{% macro f(a, b, c=0) %}{{ a }}{{ b }}{{ c }}{% endmacro %}{{ f(*[1, 2], **{'c': 3}) }}`,
 
 	// Whitespace control
 	WHITESPACE_CONTROL_1: `{
@@ -1125,6 +1141,61 @@ const TEST_PARSED = {
 		{ value: "9", type: "NumericLiteral" },
 		{ value: "//", type: "MultiplicativeBinaryOperator" },
 		{ value: "3", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	BINOP_EXPR_3: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "-2", type: "NumericLiteral" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "-1", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "*", type: "MultiplicativeBinaryOperator" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "2.0", type: "NumericLiteral" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
@@ -3986,6 +4057,224 @@ const TEST_PARSED = {
 		{ value: "a", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	NAMESPACE_5: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: ",", type: "Comma" },
+		{ value: "a", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "a", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "b", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	NAMESPACE_6: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: ",", type: "Comma" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "a", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "b", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	NAMESPACE_7: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "d", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "d", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "a", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	NAMESPACE_8: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "T", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "F", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+	],
+	NAMESPACE_9: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "is", type: "Identifier" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "M", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "O", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "Identifier" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: "is", type: "Identifier" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "M", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "O", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+	],
+	NAMESPACE_10: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "[", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "items", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "]", type: "Text" },
+	],
+	NAMESPACE_11: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "a", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	NAMESPACE_12: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Object operators
 	OBJECT_OPERATORS: [
@@ -4710,6 +4999,176 @@ const TEST_PARSED = {
 		{ value: "endcall", type: "Identifier" },
 		{ value: "%}", type: "CloseStatement" },
 	],
+	MACROS_5: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "x", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "7", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	MACROS_6: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "b", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	MACROS_7: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "x", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "y", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "9", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "Identifier" },
+		{ value: "x", type: "Identifier" },
+		{ value: "is", type: "Identifier" },
+		{ value: "defined", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "D", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "U", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "y", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	MACROS_8: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "kwargs", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "get", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	MACROS_9: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "varargs", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "varargs", type: "Identifier" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: [
@@ -4822,6 +5281,92 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
+	],
+	UNPACKING_1: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "x", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "y", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "d", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "x", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "y", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "d", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	UNPACKING_2: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "c", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "b", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "c", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "f", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "*", type: "MultiplicativeBinaryOperator" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: ",", type: "Comma" },
+		{ value: "**", type: "ExponentiationBinaryOperator" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "c", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
 	],
 
 	// Whitespace control
@@ -4997,6 +5542,7 @@ const TEST_CONTEXT = {
 	BINOP_EXPR: {},
 	BINOP_EXPR_1: {},
 	BINOP_EXPR_2: {},
+	BINOP_EXPR_3: {},
 
 	// Strings
 	STRINGS: {
@@ -5313,6 +5859,14 @@ const TEST_CONTEXT = {
 	NAMESPACE_2: {},
 	NAMESPACE_3: {},
 	NAMESPACE_4: {},
+	NAMESPACE_5: {},
+	NAMESPACE_6: {},
+	NAMESPACE_7: {},
+	NAMESPACE_8: {},
+	NAMESPACE_9: {},
+	NAMESPACE_10: {},
+	NAMESPACE_11: {},
+	NAMESPACE_12: {},
 
 	// Object operators
 	OBJECT_OPERATORS: {
@@ -5375,6 +5929,11 @@ const TEST_CONTEXT = {
 			{ firstname: "Jane", lastname: "Smith" },
 		],
 	},
+	MACROS_5: {},
+	MACROS_6: {},
+	MACROS_7: {},
+	MACROS_8: {},
+	MACROS_9: {},
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: {},
@@ -5382,6 +5941,8 @@ const TEST_CONTEXT = {
 
 	// Unpacking
 	UNPACKING: {},
+	UNPACKING_1: {},
+	UNPACKING_2: {},
 
 	// Whitespace control
 	WHITESPACE_CONTROL_1: {},
@@ -5442,6 +6003,7 @@ const EXPECTED_OUTPUTS = {
 	BINOP_EXPR: "1truefalsefalsetruetruetrue5",
 	BINOP_EXPR_1: "1+2=3 is true",
 	BINOP_EXPR_2: "|3|-4|-4.0|3.0|2|3|",
+	BINOP_EXPR_3: "|8|64|4|0.5|18|4.0|4|",
 
 	// Strings
 	STRINGS: "Bye<s>[INST] ",
@@ -5574,6 +6136,14 @@ const EXPECTED_OUTPUTS = {
 	NAMESPACE_2: `|false|2|`,
 	NAMESPACE_3: `0!|0?`,
 	NAMESPACE_4: `1|2`,
+	NAMESPACE_5: `2|3`,
+	NAMESPACE_6: `1|2`,
+	NAMESPACE_7: `1`,
+	NAMESPACE_8: `T`,
+	NAMESPACE_9: `O|M`,
+	NAMESPACE_10: `[]`,
+	NAMESPACE_11: `1|1`,
+	NAMESPACE_12: `{"a": 1}`,
 
 	// Object operators
 	OBJECT_OPERATORS: `|true|false|false|true|`,
@@ -5617,6 +6187,11 @@ const EXPECTED_OUTPUTS = {
 	MACROS_2: `|1,2,3|1,0,3|1,0,-1|1,0,-1|1,2,0|`,
 	MACROS_3: `hello name!`,
 	MACROS_4: "  - John Doe\n  - Jane Smith\n",
+	MACROS_5: `7`,
+	MACROS_6: `12`,
+	MACROS_7: `U||2`,
+	MACROS_8: `12`,
+	MACROS_9: `1|2|3`,
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: `b`,
@@ -5624,6 +6199,8 @@ const EXPECTED_OUTPUTS = {
 
 	// Unpacking
 	UNPACKING: `|6|6|`,
+	UNPACKING_1: `12`,
+	UNPACKING_2: `123`,
 
 	// Whitespace control
 	WHITESPACE_CONTROL_1: `{123}`,
@@ -5767,6 +6344,13 @@ describe("Error checking", () => {
 			const tokens = tokenize(text);
 			expect(() => parse(tokens)).toThrowError();
 		});
+
+		it("Keyword argument unpacking must be the final argument", () => {
+			for (const text of ["{{ f(**d, y=2) }}", "{{ f(**a, **b) }}", "{{ f(**d, 1) }}"]) {
+				const tokens = tokenize(text);
+				expect(() => parse(tokens)).toThrowError("`**` must be applied to the final argument");
+			}
+		});
 	});
 
 	describe("Runtime errors", () => {
@@ -5776,6 +6360,78 @@ describe("Error checking", () => {
 			const tokens = tokenize("{{ undefined_function() }}");
 			const ast = parse(tokens);
 			expect(() => interpreter.run(ast)).toThrowError();
+		});
+
+		it("Macro keyword argument for parameter already given positionally", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{% macro f(x) %}{{ x }}{% endmacro %}{{ f(1, x=2) }}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError("macro 'f' takes no keyword argument 'x'");
+		});
+
+		it("Macro unknown keyword argument", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{% macro f(x) %}{{ x }}{% endmacro %}{{ f(1, bogus=2) }}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError("macro 'f' takes no keyword argument 'bogus'");
+		});
+
+		it("Macro too many positional arguments", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{% macro f(a) %}{{ a }}{% endmacro %}{{ f(1, 2, 3) }}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError("macro 'f' takes not more than 1 argument(s)");
+		});
+
+		it("Namespace with multiple positional arguments", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{% set ns = namespace({'a': 1}, {'b': 2}) %}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError("namespace expected at most 1 argument");
+		});
+
+		it("Namespace with non-mapping positional argument", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{% set ns = namespace(42) %}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError("is not iterable");
+		});
+
+		it("Duplicate keyword argument via unpacking", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{% macro f(x) %}{{ x }}{% endmacro %}{{ f(x=1, **{'x': 2}) }}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError("multiple values for keyword argument 'x'");
+		});
+
+		it("Keyword unpacking of a non-mapping", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{% macro f(x) %}{{ x }}{% endmacro %}{{ f(**[1]) }}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError("must be a mapping");
+		});
+
+		it("Assigning an attribute on a non-namespace object", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{% set d = {'a': 1} %}{% set d.b = 2 %}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError("cannot assign attribute on non-namespace object");
+		});
+
+		it("Namespace of a namespace", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{% set a = namespace(x=1) %}{% set b = namespace(a) %}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError("is not iterable");
 		});
 
 		it("Incorrect function call", () => {
