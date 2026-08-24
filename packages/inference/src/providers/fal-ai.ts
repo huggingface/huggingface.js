@@ -399,11 +399,22 @@ export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoT
 	}
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
+		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			prompt: params.args.inputs,
 		};
+
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			payload.loras = [
+				{
+					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
+					scale: 1,
+				},
+			];
+		}
+
+		return payload;
 	}
 
 	override async getResponse(
