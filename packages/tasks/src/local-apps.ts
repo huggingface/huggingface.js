@@ -509,7 +509,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 		serverStep,
 		{
 			title: "Configure the model in Pi",
-			setup: "# Install Pi:\nnpm install -g @mariozechner/pi-coding-agent",
+			setup: "# Install Pi:\nnpm install -g @earendil-works/pi-coding-agent",
 			content: `# Add to ~/.pi/agent/models.json:\n${modelsJson}`,
 		},
 		{
@@ -707,7 +707,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Atomic Chat",
 		docsUrl: "https://atomic.chat",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model) => new URL(`atomic-chat://models/huggingface/${model.id}`),
 	},
 	backyard: {
@@ -820,7 +820,7 @@ export const LOCAL_APPS = {
 	},
 	pi: {
 		prettyLabel: "Pi",
-		docsUrl: "https://github.com/badlogic/pi-mono",
+		docsUrl: "https://github.com/earendil-works/pi",
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetPi,
