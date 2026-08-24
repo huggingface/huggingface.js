@@ -19,7 +19,11 @@ model to DeepInfra, please open an issue on the present repo
 * Thanks!
 */
 
-import type { AutomaticSpeechRecognitionOutput, TextGenerationOutput } from "@huggingface/tasks";
+import type {
+	AutomaticSpeechRecognitionOutput,
+	FeatureExtractionOutput,
+	TextGenerationOutput,
+} from "@huggingface/tasks";
 import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { BodyParams, RequestArgs } from "../types.js";
@@ -28,7 +32,9 @@ import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	BaseConversationalTask,
 	BaseTextGenerationTask,
+	type FeatureExtractionTaskHelper,
 	TaskProviderHelper,
+	type TextToSpeechTaskHelper,
 } from "./providerHelper.js";
 
 /**
@@ -78,6 +84,16 @@ interface DeepInfraAudioTranscriptionSegment {
 interface DeepInfraAudioTranscriptionResponse {
 	text: string;
 	segments?: DeepInfraAudioTranscriptionSegment[];
+}
+
+interface DeepInfraEmbeddingsResponse {
+	data: Array<{
+		embedding: number[];
+		index: number;
+		object: string;
+	}>;
+	model: string;
+	object: string;
 }
 
 export class DeepInfraConversationalTask extends BaseConversationalTask {
@@ -212,6 +228,75 @@ export class DeepInfraAutomaticSpeechRecognitionTask
 		}
 		throw new InferenceClientProviderOutputError(
 			`Received malformed response from DeepInfra automatic-speech-recognition API: ${JSON.stringify(response)}`,
+		);
+	}
+}
+
+export class DeepInfraTextToSpeechTask extends TaskProviderHelper implements TextToSpeechTaskHelper {
+	constructor() {
+		super("deepinfra", DEEPINFRA_API_BASE_URL);
+	}
+
+	makeRoute(): string {
+		return "v1/openai/audio/speech";
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		// `model` is applied last so caller parameters cannot override the mapped provider model.
+		// `voice` is model-specific and optional; we pass it through untouched and let the API
+		// surface a clear error when a model requires one.
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown> | undefined),
+			input: params.args.inputs,
+			model: params.model,
+		};
+	}
+
+	async getResponse(response: Blob): Promise<Blob> {
+		if (response instanceof Blob) {
+			return response;
+		}
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from DeepInfra text-to-speech API: ${JSON.stringify(response)}`,
+		);
+	}
+}
+
+export class DeepInfraFeatureExtractionTask extends TaskProviderHelper implements FeatureExtractionTaskHelper {
+	constructor() {
+		super("deepinfra", DEEPINFRA_API_BASE_URL);
+	}
+
+	makeRoute(): string {
+		return "v1/openai/embeddings";
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		// `model` is applied last so caller parameters cannot override the mapped provider model.
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown> | undefined),
+			input: params.args.inputs,
+			model: params.model,
+		};
+	}
+
+	async getResponse(response: DeepInfraEmbeddingsResponse): Promise<FeatureExtractionOutput> {
+		if (
+			typeof response === "object" &&
+			response !== null &&
+			"data" in response &&
+			Array.isArray(response.data) &&
+			response.data.every(
+				(item): item is DeepInfraEmbeddingsResponse["data"][number] =>
+					typeof item === "object" && !!item && Array.isArray(item.embedding),
+			)
+		) {
+			return response.data.map((item) => item.embedding);
+		}
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from DeepInfra feature-extraction (embeddings) API: ${JSON.stringify(response)}`,
 		);
 	}
 }
