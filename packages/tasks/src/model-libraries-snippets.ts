@@ -2282,7 +2282,18 @@ model = BiRefNet.from_pretrained("${model.id}")`,
 export const nobg = (model: ModelData): string[] => {
 	const installSnippet = `pip install nobg`;
 
-	const exampleSnippet = `import torch
+	const predictSnippet = `# Option 1: use via the predict method
+
+from nobg import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("${model.id}").eval()
+processor = AutoProcessor.from_pretrained("${model.id}")
+
+cutout = model.predict(processor, "input.jpg")`;
+
+	const manualSnippet = `# Option 2: use the model and processor directly
+
+import torch
 from loadimg import load_img
 from nobg import AutoModel, AutoProcessor
 
@@ -2298,7 +2309,7 @@ with torch.no_grad():
 alpha = processor.post_process_alpha_matting(outputs, target_sizes=[(image.height, image.width)])[0]
 processor.cutout(image, alpha).save("output.png")`;
 
-	return [installSnippet, exampleSnippet];
+	return [installSnippet, predictSnippet, manualSnippet];
 };
 
 export const supertonic = (): string[] => [
