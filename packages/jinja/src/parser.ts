@@ -484,7 +484,7 @@ export function parse(tokens: Token[]): Program {
 			let argument: Statement;
 
 			// unpacking: *expr
-			if (tokens[current].type === TOKEN_TYPES.MultiplicativeBinaryOperator && tokens[current].value === "*") {
+			if (is(TOKEN_TYPES.MultiplicativeBinaryOperator) && tokens[current].value === "*") {
 				++current;
 				const expr = parseExpression();
 				argument = new SpreadExpression(expr);

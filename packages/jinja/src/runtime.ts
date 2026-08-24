@@ -869,6 +869,10 @@ function referencesIdentifier(node: unknown, name: string): boolean {
 	if (Array.isArray(node)) {
 		return node.some((item) => referencesIdentifier(item, name));
 	}
+	if (node instanceof Map) {
+		// ObjectLiteral entries; both keys and values are expressions
+		return [...node].some((entry) => referencesIdentifier(entry, name));
+	}
 	if (!(node instanceof Statement)) {
 		return false;
 	}
