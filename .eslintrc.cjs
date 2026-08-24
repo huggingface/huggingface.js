@@ -24,6 +24,7 @@ module.exports = {
 		"@typescript-eslint/no-empty-interfaces": "off",
 		// For doc purposes, prefer interfaces
 		"@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+		curly: ["error", "all"],
 	},
 	overrides: [
 		{

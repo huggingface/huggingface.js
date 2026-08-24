@@ -42,8 +42,12 @@ function getBinaryOperatorPrecedence(expr: BinaryExpression): number {
 		case "ComparisonBinaryOperator":
 			return 2;
 		case "Identifier":
-			if (expr.operator.value === "and") return 1;
-			if (expr.operator.value === "in" || expr.operator.value === "not in") return 2;
+			if (expr.operator.value === "and") {
+				return 1;
+			}
+			if (expr.operator.value === "in" || expr.operator.value === "not in") {
+				return 2;
+			}
 			return 0;
 	}
 	return 0;
@@ -219,8 +223,13 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			return (node as Identifier).value;
 		case "IntegerLiteral":
 			return `${(node as IntegerLiteral).value}`;
-		case "FloatLiteral":
-			return `${(node as FloatLiteral).value}`;
+		case "FloatLiteral": {
+			const value = (node as FloatLiteral).value;
+			if (Object.is(value, -0)) {
+				return "-0.0";
+			}
+			return value % 1 === 0 ? value.toFixed(1) : value.toString();
+		}
 		case "StringLiteral":
 			return JSON.stringify((node as StringLiteral).value);
 		case "BinaryExpression": {
@@ -261,7 +270,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 				obj = `(${obj})`;
 			}
 			let prop = formatExpression(n.property);
-			if (!n.computed && n.property.type !== "Identifier") {
+			if (!n.computed && n.property.type !== "Identifier" && n.property.type !== "IntegerLiteral") {
 				prop = `(${prop})`;
 			}
 			return n.computed ? `${obj}[${prop}]` : `${obj}.${prop}`;

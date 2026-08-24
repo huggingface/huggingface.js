@@ -36,6 +36,27 @@ const GGUF_DEFAULT_ALIGNMENT = 32; // defined in ggml.h
 const MAX_METADATA_ARRAY_LENGTH = 1_000_000;
 const MAX_KV_COUNT = 100_000;
 const MAX_TENSOR_COUNT = 10_000_000;
+const MAX_STRING_LENGTH = 10_000_000; // 10MB per string (CWE-770)
+const MAX_TENSOR_NDIMS = 8; // GGML supports up to 4, be generous (CWE-770)
+/**
+ * Upper bound on a single tensor dimension (CWE-1284).
+ *
+ * Dimensions are `uint64` on the wire and were previously multiplied together unchecked, so a
+ * handful of `0xFFFFFFFFFFFFFFFF` dims in a 70-byte file produced a parameter count of 3.4e38.
+ * Every other limit here bounds a *count* (how many tensors / keys / dims); none bounded a dim's
+ * *value*, which is what made the "largest model on the Hub" listings possible.
+ *
+ * 2^32 is absurdly generous — the largest dimension in a real model is a vocab size, O(10^5).
+ */
+const MAX_TENSOR_DIM = 2 ** 32;
+/**
+ * Smallest number of bits per weight any GGML quantization achieves (IQ1_S is ~1.56 bpw, TQ1_0
+ * ~1.69). Used as the floor when checking a declared parameter count against the file size: at
+ * 1 bit per parameter the count can never exceed `fileSize * 8`, whatever the quantization.
+ */
+const MIN_BITS_PER_PARAMETER = 1;
+const MAX_ARRAY_RECURSION_DEPTH = 4; // nested ARRAY-of-ARRAY depth limit (CWE-674)
+const MAX_CHUNK_FETCHES_PER_VALUE = 30; // prevent infinite fetch loop (CWE-835)
 const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); // defined in ggml.h
 const PARALLEL_DOWNLOADS = 20;
 
@@ -80,9 +101,19 @@ class RangeView {
 	protected chunk: number;
 	private buffer: ArrayBuffer;
 	private dataView: DataView;
+	/**
+	 * Total size of the underlying file, once known. Comes for free from the `Content-Range` of the
+	 * first range request; `undefined` when the server doesn't report it (in which case size-based
+	 * validation is skipped rather than guessed).
+	 */
+	protected totalFileSize?: number;
 
 	get view(): DataView {
 		return this.dataView;
+	}
+
+	get fileSize(): number | undefined {
+		return this.totalFileSize;
 	}
 
 	constructor(
@@ -107,16 +138,22 @@ class RangeView {
 	 */
 	async fetchChunk() {
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
-		const buf = new Uint8Array(
-			await (
-				await (this.params?.fetch ?? fetch)(this.uri, {
-					headers: {
-						...(this.params?.additionalFetchHeaders ?? {}),
-						Range: `bytes=${range[0]}-${range[1]}`,
-					},
-				})
-			).arrayBuffer(),
-		);
+		const response = await (this.params?.fetch ?? fetch)(this.uri, {
+			headers: {
+				...(this.params?.additionalFetchHeaders ?? {}),
+				Range: `bytes=${range[0]}-${range[1]}`,
+			},
+		});
+		// "bytes 0-999/49501056" — the total is the only part we want, and it costs no extra request
+		const contentRange = response.headers.get("content-range");
+		const total = contentRange?.match(/\/\s*(\d+)\s*$/)?.[1];
+		if (total !== undefined) {
+			const parsed = Number(total);
+			if (Number.isSafeInteger(parsed) && parsed >= 0) {
+				this.totalFileSize = parsed;
+			}
+		}
+		const buf = new Uint8Array(await response.arrayBuffer());
 		this.appendBuffer(buf);
 		this.chunk += 1;
 	}
@@ -167,6 +204,7 @@ class RangeViewLocalFile extends RangeView {
 	override async fetchChunk(): Promise<void> {
 		const { FileBlob } = await import("./utils/FileBlob");
 		const blob = await FileBlob.create(this.uri);
+		this.totalFileSize = blob.size;
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE];
 		const buffer = await blob.slice(range[0], range[1]).arrayBuffer();
 		this.appendBuffer(new Uint8Array(buffer));
@@ -177,6 +215,42 @@ class RangeViewLocalFile extends RangeView {
 interface Slice<T> {
 	value: T;
 	length: number;
+}
+
+/**
+ * Sums the declared tensor shapes, and sanity-checks the result against the file size.
+ *
+ * Shapes are attacker-controlled, so the arithmetic alone can't be trusted: `MAX_TENSOR_DIM` bounds
+ * each dimension, but a file can still declare many tensors whose dims are individually plausible
+ * and jointly impossible. The physical invariant is that the weights have to actually be *in* the
+ * file — even at 1 bit per parameter a file of N bytes cannot hold more than `N * 8` parameters —
+ * so anything above that is malformed rather than merely large.
+ *
+ * `Number.isFinite` is deliberately not the check here: the counts these files produce (3.4e38,
+ * 7.0e159) are all perfectly finite.
+ */
+function computeParameterCount(tensorInfos: GGUFTensorInfo[], fileSize: number | undefined): number {
+	const parameterCount = tensorInfos
+		.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
+		.reduce((acc, val) => acc + val, 0);
+
+	if (!Number.isFinite(parameterCount) || parameterCount < 0) {
+		throw new Error(`Computed parameter count is not a valid number (${parameterCount})`);
+	}
+
+	// skipped when the size is unknown (e.g. a custom fetch that strips Content-Range) rather than
+	// blocking the parse on a guess
+	if (fileSize !== undefined) {
+		const maxParameters = (fileSize * 8) / MIN_BITS_PER_PARAMETER;
+		if (parameterCount > maxParameters) {
+			throw new Error(
+				`Declared tensor shapes imply ${parameterCount} parameters, which cannot fit in a ${fileSize}-byte file ` +
+					`(at most ${maxParameters} at ${MIN_BITS_PER_PARAMETER} bit per parameter). The file is malformed.`,
+			);
+		}
+	}
+
+	return parameterCount;
 }
 
 /**
@@ -198,6 +272,9 @@ function readVersionedSize(view: DataView, byteOffset: number, version: Version,
 
 function readString(view: DataView, offset: number, version: Version, littleEndian: boolean): Slice<string> {
 	const length = readVersionedSize(view, offset, version, littleEndian);
+	if (length.value > MAX_STRING_LENGTH) {
+		throw new Error(`String length ${length.value} exceeds maximum allowed (${MAX_STRING_LENGTH})`);
+	}
 	const off = length.length;
 	const value = new TextDecoder().decode(view.buffer.slice(offset + off, offset + off + Number(length.value)));
 	return { value, length: off + Number(length.value) };
@@ -209,6 +286,7 @@ function readMetadataValue(
 	offset: number,
 	version: Version,
 	littleEndian: boolean,
+	depth = 0,
 ): Slice<MetadataValue> {
 	switch (type) {
 		case GGUFValueType.UINT8:
@@ -230,7 +308,13 @@ function readMetadataValue(
 		case GGUFValueType.STRING:
 			return readString(view, offset, version, littleEndian);
 		case GGUFValueType.ARRAY: {
+			if (depth >= MAX_ARRAY_RECURSION_DEPTH) {
+				throw new Error(`Nested ARRAY depth ${depth} exceeds maximum allowed (${MAX_ARRAY_RECURSION_DEPTH})`);
+			}
 			const arrayType = view.getUint32(offset, littleEndian);
+			if (!isGGUFValueType(arrayType)) {
+				throw new Error(`Unsupported array element type: ${arrayType}`);
+			}
 			const arrayLength = readVersionedSize(view, offset + 4, version, littleEndian);
 			if (arrayLength.value > MAX_METADATA_ARRAY_LENGTH) {
 				throw new Error(
@@ -240,7 +324,7 @@ function readMetadataValue(
 			let length = 4 + arrayLength.length;
 			const arrayValues: MetadataValue[] = [];
 			for (let i = 0; i < arrayLength.value; i++) {
-				const metadataValue = readMetadataValue(view, arrayType, offset + length, version, littleEndian);
+				const metadataValue = readMetadataValue(view, arrayType, offset + length, version, littleEndian, depth + 1);
 				arrayValues.push(metadataValue.value);
 				length += metadataValue.length;
 			}
@@ -400,12 +484,18 @@ export async function gguf(
 		}
 
 		let valueResult: ReturnType<typeof readMetadataValue> | undefined;
+		let fetchCount = 0;
 		while (!valueResult) {
 			try {
 				// read value
 				valueResult = readMetadataValue(r.view, valueType, offset, version, littleEndian);
 			} catch (err) {
 				if (err instanceof RangeError) {
+					if (++fetchCount > MAX_CHUNK_FETCHES_PER_VALUE) {
+						throw new Error(
+							`Exceeded maximum chunk fetches (${MAX_CHUNK_FETCHES_PER_VALUE}) while reading metadata value`,
+						);
+					}
 					await r.fetchChunk();
 				} else {
 					throw err;
@@ -450,11 +540,19 @@ export async function gguf(
 		offset += keyResult.length;
 
 		const nDims = r.view.getUint32(offset, littleEndian);
+		if (nDims > MAX_TENSOR_NDIMS) {
+			throw new Error(`Tensor n_dims ${nDims} exceeds maximum allowed (${MAX_TENSOR_NDIMS})`);
+		}
 		offset += 4;
 
 		const shape: bigint[] = [];
 		for (let dim = 0; dim < nDims; dim++) {
 			const shapeDim = readVersionedSize(r.view, offset, version, littleEndian);
+			if (shapeDim.value > BigInt(MAX_TENSOR_DIM)) {
+				throw new Error(
+					`Tensor "${keyResult.value}" dimension ${dim} is ${shapeDim.value}, which exceeds the maximum allowed (${MAX_TENSOR_DIM})`,
+				);
+			}
 			shape.push(shapeDim.value);
 			offset += shapeDim.length;
 		}
@@ -474,7 +572,14 @@ export async function gguf(
 	}
 
 	// calculate absolute offset of tensor data
-	const alignment: number = Number(metadata["general.alignment"] ?? GGUF_DEFAULT_ALIGNMENT);
+	const rawAlignment = metadata["general.alignment"] ?? GGUF_DEFAULT_ALIGNMENT;
+	if (typeof rawAlignment === "bigint" && rawAlignment > BigInt(Number.MAX_SAFE_INTEGER)) {
+		throw new Error(`general.alignment value ${rawAlignment} exceeds safe integer range`);
+	}
+	const alignment = Number(rawAlignment);
+	if (alignment <= 0 || !Number.isInteger(alignment)) {
+		throw new Error(`general.alignment must be a positive integer, got ${rawAlignment}`);
+	}
 	const tensorInfoEndBeforePadOffset = offset;
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
@@ -486,18 +591,19 @@ export async function gguf(
 		tensorInfoByteRange: [tensorInfoStartOffset, tensorInfoEndBeforePadOffset] as [number, number],
 	};
 
-	if (params?.computeParametersCount && params?.typedMetadata) {
-		const parameterCount = tensorInfos
-			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
-			.reduce((acc, val) => acc + val, 0);
-		return { ...baseResult, parameterCount, typedMetadata: typedMetadata as GGUFTypedMetadata } as GGUFParseOutput & {
-			parameterCount: number;
-			typedMetadata: GGUFTypedMetadata;
-		};
-	} else if (params?.computeParametersCount) {
-		const parameterCount = tensorInfos
-			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
-			.reduce((acc, val) => acc + val, 0);
+	if (params?.computeParametersCount) {
+		const parameterCount = computeParameterCount(tensorInfos, r.fileSize);
+
+		if (params?.typedMetadata) {
+			return {
+				...baseResult,
+				parameterCount,
+				typedMetadata: typedMetadata as GGUFTypedMetadata,
+			} as GGUFParseOutput & {
+				parameterCount: number;
+				typedMetadata: GGUFTypedMetadata;
+			};
+		}
 		return { ...baseResult, parameterCount } as GGUFParseOutput & { parameterCount: number };
 	} else if (params?.typedMetadata) {
 		return { ...baseResult, typedMetadata: typedMetadata as GGUFTypedMetadata } as GGUFParseOutput & {
@@ -788,7 +894,11 @@ export async function ggufAllShards(
 		parallelDownloads?: number;
 		allowLocalFile?: boolean;
 	},
-): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
+): Promise<{
+	shards: GGUFParseOutput[];
+	parameterCount: number;
+	urls: string[];
+}> {
 	const parallelDownloads = params?.parallelDownloads ?? PARALLEL_DOWNLOADS;
 	if (parallelDownloads < 1) {
 		throw new TypeError("parallelDownloads must be greater than 0");
@@ -810,6 +920,7 @@ export async function ggufAllShards(
 		return {
 			shards,
 			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
+			urls,
 		};
 	} else {
 		const { metadata, tensorInfos, tensorDataOffset, littleEndian, parameterCount, tensorInfoByteRange } = await gguf(
@@ -819,6 +930,10 @@ export async function ggufAllShards(
 				computeParametersCount: true,
 			},
 		);
-		return { shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }], parameterCount };
+		return {
+			shards: [{ metadata, tensorInfos, tensorDataOffset, littleEndian, tensorInfoByteRange }],
+			parameterCount,
+			urls: [url],
+		};
 	}
 }

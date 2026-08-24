@@ -37,6 +37,7 @@ export interface ApiModelInfo {
 		parameters: Record<string, number>;
 		total: number;
 	};
+	siblings: Array<{ rfilename: string }>;
 	transformersInfo?: TransformersInfo;
 }
 

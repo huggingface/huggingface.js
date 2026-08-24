@@ -2,7 +2,9 @@ import { HUB_URL } from "../../consts";
 import { createApiError } from "../../error";
 import type { CredentialsParams } from "../../types/public";
 import { checkCredentials } from "../../utils/checkCredentials";
+import { toRepoId } from "../../utils/toRepoId";
 import type { ApiJob, CreateJobOptions } from "../../types/api/api-jobs";
+export type { JobVolume } from "../../types/api/api-jobs";
 
 /**
  * Run a new job.
@@ -62,6 +64,12 @@ export async function runJob(
 	}
 	if (params.labels) {
 		body.labels = params.labels;
+	}
+	if (params.volumes?.length) {
+		body.volumes = params.volumes.map(({ source, ...rest }) => {
+			const repoId = toRepoId(source);
+			return { type: repoId.type, source: repoId.name, ...rest };
+		});
 	}
 
 	const response = await (params.fetch || fetch)(`${params.hubUrl || HUB_URL}/api/jobs/${params.namespace}`, {

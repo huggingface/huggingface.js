@@ -19,5 +19,5 @@ export async function textToSpeech(args: TextToSpeechArgs, options?: Options): P
 		...options,
 		task: "text-to-speech",
 	});
-	return providerHelper.getResponse(res);
+	return providerHelper.getResponse(res, undefined, undefined, undefined, options?.signal);
 }

@@ -38,7 +38,9 @@ class UploadProgressManager {
 	}
 
 	async initialize(): Promise<void> {
-		if (this.isQuiet) return;
+		if (this.isQuiet) {
+			return;
+		}
 
 		try {
 			const cliProgress = await import("cli-progress");
@@ -60,7 +62,9 @@ class UploadProgressManager {
 	}
 
 	handleEvent(event: CommitProgressEvent): void {
-		if (this.isQuiet) return;
+		if (this.isQuiet) {
+			return;
+		}
 
 		if (event.event === "phase") {
 			this.logPhase(event.phase);
@@ -70,7 +74,9 @@ class UploadProgressManager {
 	}
 
 	private logPhase(phase: string): void {
-		if (this.isQuiet) return;
+		if (this.isQuiet) {
+			return;
+		}
 
 		const phaseMessages = {
 			preuploading: "📋 Preparing files for upload...",
@@ -82,7 +88,9 @@ class UploadProgressManager {
 	}
 
 	private updateFileProgress(path: string, progress: number, state: string): void {
-		if (this.isQuiet) return;
+		if (this.isQuiet) {
+			return;
+		}
 
 		if (this.cliProgressAvailable && this.multibar) {
 			// Use progress bars
@@ -124,7 +132,9 @@ class UploadProgressManager {
 	}
 
 	private truncateFilename(filename: string, maxLength: number): string {
-		if (filename.length <= maxLength) return filename;
+		if (filename.length <= maxLength) {
+			return filename;
+		}
 		return "..." + filename.slice(-(maxLength - 3));
 	}
 
@@ -419,6 +429,13 @@ const commands = {
 						multiple: true,
 						description:
 							"Label in the format KEY=VALUE or KEY alone (in this case VALUE defaults to empty string). Can be specified multiple times.",
+					},
+					{
+						name: "volume" as const,
+						short: "v",
+						multiple: true,
+						description:
+							"Volume to mount in the format SOURCE:MOUNTPATH[:OPTIONS]. SOURCE uses HuggingFace prefixes (datasets/user/repo, spaces/user/repo, buckets/user/bucket) or bare user/repo for models. OPTIONS are comma-separated: ro, revision=REV, path=SUBPATH. Can be specified multiple times.",
 					},
 					{
 						name: "flavor" as const,
@@ -895,6 +912,7 @@ async function run() {
 						env,
 						secret,
 						label,
+						volume: volumeArgs,
 						flavor,
 						attempts: attemptsStr,
 						namespace,
@@ -983,6 +1001,51 @@ async function run() {
 						}
 					}
 
+					const volumes: Parameters<typeof runJob>[0]["volumes"] = [];
+					if (volumeArgs) {
+						for (const volumeArg of volumeArgs) {
+							const colonIdx = volumeArg.indexOf(":");
+							if (colonIdx === -1) {
+								throw new Error(`Invalid volume format: ${volumeArg}. Expected SOURCE:MOUNTPATH[:OPTIONS]`);
+							}
+							const source = volumeArg.slice(0, colonIdx);
+							const rest = volumeArg.slice(colonIdx + 1);
+
+							const secondColon = rest.indexOf(":");
+							const mountPath = secondColon === -1 ? rest : rest.slice(0, secondColon);
+							const optionsStr = secondColon === -1 ? "" : rest.slice(secondColon + 1);
+
+							if (!mountPath.startsWith("/")) {
+								throw new Error(`Volume mountPath must start with "/": ${mountPath}`);
+							}
+
+							let readOnly: boolean | undefined;
+							let revision: string | undefined;
+							let subPath: string | undefined;
+							if (optionsStr) {
+								for (const opt of optionsStr.split(",")) {
+									if (opt === "ro") {
+										readOnly = true;
+									} else if (opt.startsWith("revision=")) {
+										revision = opt.slice("revision=".length);
+									} else if (opt.startsWith("path=")) {
+										subPath = opt.slice("path=".length);
+									} else {
+										throw new Error(`Unknown volume option: ${opt}`);
+									}
+								}
+							}
+
+							volumes.push({
+								source,
+								mountPath,
+								...(revision ? { revision } : {}),
+								...(readOnly ? { readOnly } : {}),
+								...(subPath ? { path: subPath } : {}),
+							});
+						}
+					}
+
 					const jobParams = {
 						namespace: finalNamespace,
 						...(dockerImage ? { dockerImage } : {}),
@@ -993,6 +1056,7 @@ async function run() {
 						secrets,
 						...(attempts !== undefined ? { attempts } : {}),
 						...(Object.keys(labels).length > 0 ? { labels } : {}),
+						...(volumes.length > 0 ? { volumes } : {}),
 						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
 						...(token ? { accessToken: token } : {}),
 					} as Parameters<typeof runJob>[0];

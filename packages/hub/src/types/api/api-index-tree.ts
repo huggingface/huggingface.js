@@ -9,6 +9,11 @@ export interface ApiIndexTreeEntry {
 		/** Size of the raw pointer file, 100~200 bytes */
 		pointerSize: number;
 	};
+	/**
+	 * Xet content hash. Set for bucket file entries (always) and for repo LFS entries
+	 * that have been migrated to xet.
+	 */
+	xetHash?: string;
 	lastCommit?: {
 		date: string;
 		id: string;

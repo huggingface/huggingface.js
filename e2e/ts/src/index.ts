@@ -11,7 +11,7 @@ const hf = new InferenceClient(hfToken);
 
 	if (hfToken) {
 		const result = await hf.chatCompletion({
-			model: "meta-llama/Llama-3.2-1B-Instruct",
+			model: "Qwen/Qwen2.5-7B-Instruct",
 			messages: [{ role: "user", content: "Can you summarize the Eiffel Tower?" }],
 			max_tokens: 10,
 		});

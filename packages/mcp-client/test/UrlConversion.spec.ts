@@ -76,6 +76,22 @@ describe("urlToServerConfig", () => {
 			}
 		});
 
+		it("should NOT include token for lookalike domains", () => {
+			const urls = [
+				"https://evilhuggingface.co/mcp",
+				"https://nothuggingface.co/mcp",
+				"https://evilhuggingface.co/sse",
+				"https://nothuggingface.co/sse",
+			];
+
+			for (const url of urls) {
+				const config = urlToServerConfig(url, TOKEN);
+				if (config.type === "http" || config.type === "sse") {
+					expect(config.config.options).toBeUndefined();
+				}
+			}
+		});
+
 		it("should NOT include token for non-HF/non-local domains regardless of transport type", () => {
 			const urls = [
 				"https://example.com/api/mcp", // StreamableHTTP

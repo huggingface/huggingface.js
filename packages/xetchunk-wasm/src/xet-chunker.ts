@@ -1,7 +1,6 @@
-import { nextMatch } from "@huggingface/gearhash-wasm";
-import { createKeyed } from "blake3-jit";
+import { Hasher } from "gearhash-jit";
+import { createKeyed, Hasher as Blake3Hasher } from "@huggingface/blake3-jit";
 
-// Constants
 const TARGET_CHUNK_SIZE = 64 * 1024; // 64KB
 const MINIMUM_CHUNK_DIVISOR = 8;
 const MAXIMUM_CHUNK_MULTIPLIER = 2;
@@ -17,7 +16,6 @@ export interface Chunk {
 	length: number;
 }
 
-// Type for the next() method return value
 interface NextResult {
 	chunk: Chunk | null;
 	bytesConsumed: number;
@@ -26,13 +24,12 @@ interface NextResult {
 class XetChunker {
 	private minimumChunk: number;
 	private maximumChunk: number;
-	private mask: bigint;
 	private chunkBuf: Uint8Array;
 	private curChunkLen: number;
-	private hash: bigint;
+	private gear: Hasher;
+	private blake3: Blake3Hasher;
 
 	constructor(targetChunkSize: number = TARGET_CHUNK_SIZE) {
-		// Validate target chunk size is a power of 2
 		if (targetChunkSize <= 0) {
 			throw new Error("Target chunk size must be greater than 0");
 		}
@@ -47,7 +44,6 @@ class XetChunker {
 		}
 
 		let mask = BigInt(targetChunkSize - 1);
-		// Count leading zeros (clz for 64-bit BigInt)
 		let leadingZeros = 0;
 		for (let i = 63; i >= 0; i--) {
 			if ((mask & (1n << BigInt(i))) !== 0n) {
@@ -55,48 +51,47 @@ class XetChunker {
 			}
 			leadingZeros++;
 		}
-		// Shift mask left by leading zeros count
 		mask = mask << BigInt(leadingZeros);
 
 		const maximumChunk = targetChunkSize * MAXIMUM_CHUNK_MULTIPLIER;
 
 		this.minimumChunk = targetChunkSize / MINIMUM_CHUNK_DIVISOR;
 		this.maximumChunk = maximumChunk;
-		this.mask = mask;
 		this.chunkBuf = new Uint8Array(maximumChunk);
 		this.curChunkLen = 0;
-		this.hash = 0n;
+		this.gear = new Hasher(mask);
+		this.blake3 = Blake3Hasher.newKeyed(BLAKE3_DATA_KEY);
 	}
 
+	/**
+	 * Streaming entry point: accepts an arbitrary slice of data, accumulates
+	 * it, and emits a chunk when a boundary (or max size) is reached.
+	 * Data is copied into an internal buffer because it may span calls.
+	 */
 	next(data: Uint8Array, isFinal: boolean): NextResult {
 		const nBytes = data.length;
 		let createChunk = false;
 		let consumeLen = 0;
 
 		if (nBytes !== 0) {
-			// Skip minimum chunk size
 			if (this.curChunkLen + HASH_WINDOW_SIZE < this.minimumChunk) {
 				const maxAdvance = Math.min(this.minimumChunk - this.curChunkLen - HASH_WINDOW_SIZE - 1, nBytes - consumeLen);
 				consumeLen += maxAdvance;
 				this.curChunkLen += maxAdvance;
 			}
 
-			// Calculate read end
 			const readEnd = Math.min(nBytes, consumeLen + this.maximumChunk - this.curChunkLen);
 
 			let bytesToNextBoundary: number;
-			const matchResult = nextMatch(data.subarray(consumeLen, readEnd), this.mask, this.hash);
+			const position = this.gear.nextMatch(data.subarray(consumeLen, readEnd));
 
-			if (matchResult.position !== -1) {
-				bytesToNextBoundary = matchResult.position;
+			if (position !== -1) {
+				bytesToNextBoundary = position;
 				createChunk = true;
-				this.hash = matchResult.hash;
 			} else {
 				bytesToNextBoundary = readEnd - consumeLen;
-				this.hash = matchResult.hash;
 			}
 
-			// Check if we hit maximum chunk
 			if (bytesToNextBoundary + this.curChunkLen >= this.maximumChunk) {
 				bytesToNextBoundary = this.maximumChunk - this.curChunkLen;
 				createChunk = true;
@@ -105,19 +100,18 @@ class XetChunker {
 			this.curChunkLen += bytesToNextBoundary;
 			consumeLen += bytesToNextBoundary;
 
-			// Copy data to chunk buffer
 			this.chunkBuf.set(data.subarray(0, consumeLen), this.curChunkLen - consumeLen);
 		}
 
 		if (createChunk || (isFinal && this.curChunkLen > 0)) {
 			const chunkData = this.chunkBuf.subarray(0, this.curChunkLen);
-			const hash = createKeyed(BLAKE3_DATA_KEY).update(chunkData).finalize(32);
+			const hash = this.blake3.reset().update(chunkData).finalize(32);
 			const chunk: Chunk = {
 				length: chunkData.length,
 				hash: hash,
 			};
 			this.curChunkLen = 0;
-			this.hash = 0n;
+			this.gear.resetHash();
 			return {
 				chunk,
 				bytesConsumed: consumeLen,
@@ -130,29 +124,85 @@ class XetChunker {
 		};
 	}
 
+	/**
+	 * Batch entry point: processes a large contiguous buffer and returns all
+	 * complete chunks. Hashes directly from `data` — no intermediate copy
+	 * to chunkBuf — for every chunk whose bytes are fully within `data`.
+	 */
 	nextBlock(data: Uint8Array, isFinal: boolean): Chunk[] {
 		const chunks: Chunk[] = [];
 		let pos = 0;
 
-		while (pos < data.length) {
-			const result = this.next(data.subarray(pos), isFinal);
-			if (result.chunk) {
-				chunks.push(result.chunk);
-			}
+		// Drain any leftover from a previous nextBlock / next call.
+		while (pos < data.length && this.curChunkLen > 0) {
+			const result = this.next(data.subarray(pos), false);
+			if (result.chunk) chunks.push(result.chunk);
 			pos += result.bytesConsumed;
+		}
+
+		const minSkip = this.minimumChunk > HASH_WINDOW_SIZE
+			? this.minimumChunk - HASH_WINDOW_SIZE - 1
+			: 0;
+
+		while (pos < data.length) {
+			const chunkStart = pos;
+			const scanStart = Math.min(pos + minSkip, data.length);
+			const scanEnd = Math.min(data.length, pos + this.maximumChunk);
+
+			const position = this.gear.nextMatch(data.subarray(scanStart, scanEnd));
+
+			let chunkEnd: number;
+			let foundBoundary: boolean;
+
+			if (position !== -1 && scanStart + position - chunkStart <= this.maximumChunk) {
+				chunkEnd = scanStart + position;
+				foundBoundary = true;
+			} else if (scanEnd - chunkStart >= this.maximumChunk) {
+				chunkEnd = chunkStart + this.maximumChunk;
+				foundBoundary = true;
+			} else {
+				foundBoundary = false;
+				chunkEnd = scanEnd;
+			}
+
+			if (foundBoundary) {
+				const hash = this.blake3.reset()
+					.update(data.subarray(chunkStart, chunkEnd))
+					.finalize(32);
+				chunks.push({ length: chunkEnd - chunkStart, hash });
+				pos = chunkEnd;
+				this.gear.resetHash();
+			} else if (isFinal) {
+				const hash = this.blake3.reset()
+					.update(data.subarray(chunkStart))
+					.finalize(32);
+				chunks.push({ length: data.length - chunkStart, hash });
+				pos = data.length;
+			} else {
+				this.chunkBuf.set(data.subarray(chunkStart), 0);
+				this.curChunkLen = data.length - chunkStart;
+				pos = data.length;
+			}
 		}
 
 		return chunks;
 	}
 
 	finish(): Chunk | null {
-		return this.next(new Uint8Array(0), true).chunk;
+		if (this.curChunkLen > 0) {
+			const chunkData = this.chunkBuf.subarray(0, this.curChunkLen);
+			const hash = this.blake3.reset().update(chunkData).finalize(32);
+			const chunk: Chunk = { length: this.curChunkLen, hash };
+			this.curChunkLen = 0;
+			this.gear.resetHash();
+			return chunk;
+		}
+		return null;
 	}
 }
 
 export function createChunker(targetChunkSize: number = TARGET_CHUNK_SIZE): XetChunker {
-	const chunker = new XetChunker(targetChunkSize);
-	return chunker;
+	return new XetChunker(targetChunkSize);
 }
 
 export function nextBlock(chunker: XetChunker, data: Uint8Array): Chunk[] {
@@ -175,10 +225,20 @@ export function hashToHex(hash: Uint8Array): string {
 	const u64_3 = view.getBigUint64(16, true);
 	const u64_4 = view.getBigUint64(24, true);
 
-	const hex =
+	return (
 		u64.toString(16).padStart(16, "0") +
 		u64_2.toString(16).padStart(16, "0") +
 		u64_3.toString(16).padStart(16, "0") +
-		u64_4.toString(16).padStart(16, "0");
-	return hex;
+		u64_4.toString(16).padStart(16, "0")
+	);
+}
+
+export function hexToBytes(hex: string): Uint8Array {
+	const bytes = new Uint8Array(32);
+	const view = new DataView(bytes.buffer);
+	view.setBigUint64(0, BigInt("0x" + hex.slice(0, 16)), true);
+	view.setBigUint64(8, BigInt("0x" + hex.slice(16, 32)), true);
+	view.setBigUint64(16, BigInt("0x" + hex.slice(32, 48)), true);
+	view.setBigUint64(24, BigInt("0x" + hex.slice(48, 64)), true);
+	return bytes;
 }

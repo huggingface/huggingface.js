@@ -188,7 +188,9 @@ async function main() {
 		const tensorMatched = line.match(/LLM_TENSOR_[A-Z0-9_]+[,\s]+"(?<name>.+?)"/);
 		if (tensorMatched?.groups) {
 			const arch = archList.find((a) => a.cppConst === currCppConst);
-			if (arch) arch.tensorNames.push(tensorMatched.groups.name);
+			if (arch) {
+				arch.tensorNames.push(tensorMatched.groups.name);
+			}
 		}
 	}
 

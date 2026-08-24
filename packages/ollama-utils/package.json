@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/ollama-utils",
-	"version": "0.0.17",
+	"version": "0.0.18",
 	"description": "Various utilities for maintaining Ollama compatibility with models on Hugging Face hub",
 	"keywords": [
 		"gguf",

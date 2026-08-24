@@ -9,10 +9,16 @@
 		"format:check": "oxfmt --check package.json .vscode .eslintrc.cjs .github *.md .devcontainer .oxfmtrc.json",
 		"check-deps": "tsx scripts/check-deps.ts"
 	},
+	"lint-staged": {
+		"**/*.{cjs,ts}": [
+			"oxfmt"
+		]
+	},
 	"devDependencies": {
 		"@types/node": "^22.14.1",
 		"@typescript-eslint/eslint-plugin": "^7.2.0",
 		"@typescript-eslint/parser": "^7.2.0",
+		"@typescript/native-preview": "7.0.0-dev.20260511.1",
 		"@vitest/browser": "^0.34.6",
 		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.0.0",

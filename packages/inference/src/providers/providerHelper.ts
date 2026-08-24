@@ -50,7 +50,7 @@ import type {
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
 import { InferenceClientProviderOutputError, InferenceClientRoutingError } from "../errors.js";
-import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
+import type { AudioToAudioArgs, AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import type {
 	BaseArgs,
 	BodyParams,
@@ -61,6 +61,7 @@ import type {
 	UrlParams,
 } from "../types.js";
 import { toArray } from "../utils/toArray.js";
+import { omit } from "../utils/omit.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
@@ -88,6 +89,7 @@ export abstract class TaskProviderHelper {
 		url?: string,
 		headers?: HeadersInit,
 		outputType?: OutputType,
+		signal?: AbortSignal,
 	): Promise<unknown>;
 
 	/**
@@ -154,41 +156,78 @@ export interface TextToImageTaskHelper {
 		url?: string,
 		headers?: HeadersInit,
 		outputType?: OutputType,
+		signal?: AbortSignal,
 	): Promise<string | Blob | Record<string, unknown>>;
 	preparePayload(params: BodyParams<TextToImageInput & BaseArgs>): Record<string, unknown>;
 }
 
 export interface TextToVideoTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: Record<string, string>): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: Record<string, string>,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<TextToVideoInput & BaseArgs>): Record<string, unknown>;
 }
 
 export interface ImageToImageTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<ImageToImageInput & BaseArgs>): Record<string, unknown>;
 	preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs>;
 }
 
 export interface ImageToVideoTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<ImageToVideoInput & BaseArgs>): Record<string, unknown>;
 	preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs>;
 }
 
 export interface ImageTextToImageTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<ImageTextToImageInput & BaseArgs>): Record<string, unknown>;
 	preparePayloadAsync(args: ImageTextToImageArgs): Promise<RequestArgs>;
 }
 
 export interface ImageTextToVideoTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<ImageTextToVideoInput & BaseArgs>): Record<string, unknown>;
 	preparePayloadAsync(args: ImageTextToVideoArgs): Promise<RequestArgs>;
 }
 
 export interface ImageSegmentationTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageSegmentationOutput>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<ImageSegmentationOutput>;
 	preparePayload(params: BodyParams<ImageSegmentationInput & BaseArgs>): Record<string, unknown> | BodyInit;
 	preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs>;
 }
@@ -206,7 +245,7 @@ export interface ObjectDetectionTaskHelper {
 export interface ImageToTextTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageToTextOutput>;
 	preparePayload(params: BodyParams<ImageToTextInput & BaseArgs>): Record<string, unknown> | BodyInit;
-	preparePayloadAsync(args: ImageToTextArgs): Promise<RequestArgs>;
+	preparePayloadAsync(args: ImageToTextArgs, signal?: AbortSignal): Promise<RequestArgs>;
 }
 
 export interface ZeroShotImageClassificationTaskHelper {
@@ -272,23 +311,48 @@ export interface SummarizationTaskHelper {
 
 // Audio Tasks
 export interface TextToSpeechTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<TextToSpeechInput & BaseArgs>): Record<string, unknown>;
 }
 
 export interface TextToAudioTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob>;
 	preparePayload(params: BodyParams<Record<string, unknown> & BaseArgs>): Record<string, unknown>;
 }
 
 export interface AudioToAudioTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AudioToAudioOutput[]>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<AudioToAudioOutput[]>;
 	preparePayload(
 		params: BodyParams<BaseArgs & { inputs: Blob } & Record<string, unknown>>,
 	): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: AudioToAudioArgs): Promise<RequestArgs>;
 }
 export interface AutomaticSpeechRecognitionTaskHelper {
-	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AutomaticSpeechRecognitionOutput>;
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<AutomaticSpeechRecognitionOutput>;
 	preparePayload(params: BodyParams<AutomaticSpeechRecognitionInput & BaseArgs>): Record<string, unknown> | BodyInit;
 	preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs>;
 }
@@ -340,9 +404,14 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
+		/// `model` is serialized first so that a router/proxy can resolve the target provider from a
+		/// small prefix of the request body instead of buffering the whole payload — `messages` can
+		/// hold megabytes of base64-encoded images.
+		/// `params.args` also carries the caller-supplied `model` (possibly with a `:provider` routing
+		/// suffix), which must not take precedence over the resolved provider model id: omit it.
 		return {
-			...params.args,
 			model: params.model,
+			...omit(params.args, "model"),
 		};
 	}
 
@@ -353,7 +422,7 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 			typeof response?.created === "number" &&
 			typeof response?.id === "string" &&
 			typeof response?.model === "string" &&
-			/// Together.ai and Nebius do not output a system_fingerprint
+			/// Some providers (e.g. Together.ai) do not output a system_fingerprint
 			(response.system_fingerprint === undefined ||
 				response.system_fingerprint === null ||
 				typeof response.system_fingerprint === "string") &&

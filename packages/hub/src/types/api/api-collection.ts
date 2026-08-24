@@ -188,6 +188,7 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 	colorFrom: string;
 	colorTo: string;
 	createdAt: string;
+	disabled?: boolean;
 	emoji: string;
 	id: string;
 	isLikedByUser: boolean;
@@ -293,6 +294,7 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 	authorData?: ApiAuthor;
 	shortDescription?: string;
 	semanticRelevancyScore?: number;
+	visibility?: "public" | "private" | "protected";
 }
 
 interface ApiCollectionItemPaper extends ApiCollectionItemBase {

@@ -2,6 +2,12 @@
  * List of supported Evaluation Frameworks supported in the `eval.yaml` file in benchmarks datasets.
  */
 export const EVALUATION_FRAMEWORKS = {
+	exgentic: {
+		name: "exgentic",
+		description:
+			"Exgentic is an open evaluation framework for general-purpose AI agents across diverse domains and benchmarks.",
+		url: "https://github.com/Exgentic/exgentic",
+	},
 	"inspect-ai": {
 		name: "inspect-ai",
 		description: "Inspect AI is an open-source framework for large language model evaluations.",
@@ -27,10 +33,45 @@ export const EVALUATION_FRAMEWORKS = {
 		description: "Harbor is a framework for evaluating and optimizing agents and language models.",
 		url: "https://github.com/laude-institute/harbor",
 	},
+	ifstruct: {
+		name: "ifstruct",
+		description:
+			"IFStruct is a benchmark for structured-output compliance: whether a model produces valid JSON/YAML that follows a requested schema, scored without constrained decoding.",
+		url: "https://github.com/Liquid4All/ifstruct",
+	},
+	pier: {
+		name: "pier",
+		description:
+			"Pier is a Harbor fork built for DeepSWE, with stronger support for CLI agents in no-internet tasks and more faithful, consistent agent trajectories.",
+		url: "https://github.com/datacurve-ai/pier",
+	},
+	"redline-bench": {
+		name: "redline-bench",
+		description:
+			"RedlineBench measures multi-turn contract redlining: agents produce tracked-change .docx edits that are graded against attorney-authored weighted rubrics by an LLM judge panel across five dimensions. Report: https://intelligence.crosby.ai/benchmark/",
+		url: "https://github.com/crosbylegal/redline-bench",
+	},
 	archipelago: {
 		name: "archipelago",
 		description: "Archipelago is a system for running and evaluating AI agents against MCP applications.",
 		url: "https://github.com/Mercor-Intelligence/archipelago",
+	},
+	benchflow: {
+		name: "benchflow",
+		description:
+			"BenchFlow is an evaluation framework for AI agents on professional, skill-aware workflows. It powers SkillsBench and runs containerized agent trials with paired with-skills / without-skills configurations.",
+		url: "https://github.com/benchflow-ai/benchflow",
+	},
+	"apex-evals": {
+		name: "apex-evals",
+		description: "APEX Evals is a benchmark suite and evaluation harness for evaluating large language models.",
+		url: "https://github.com/Mercor-Intelligence/apex-evals",
+	},
+	"screenspot-pro": {
+		name: "screenspot-pro",
+		description:
+			"ScreenSpot-Pro is a GUI grounding benchmark designed to evaluate how well AI agents can locate and identify UI elements across professional software applications in high-resolution screenshots, covering 1,585 annotated images from 26 professional tools.",
+		url: "https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding",
 	},
 	"swe-bench": {
 		name: "swe-bench",
@@ -48,5 +89,88 @@ export const EVALUATION_FRAMEWORKS = {
 		description:
 			"NeMo Evaluator is an open-source platform for robust, reproducible, and scalable evaluation of Large Language Models across 100+ benchmarks.",
 		url: "https://github.com/NVIDIA-NeMo/Evaluator",
+	},
+	"yc-bench": {
+		name: "yc-bench",
+		description:
+			"YC Bench is a long-horizon deterministic benchmark for LLM agents. The agent plays CEO of an AI startup over a simulated 1–3 year run.",
+		url: "https://github.com/collinear-ai/yc-bench",
+	},
+	"open-asr-leaderboard": {
+		name: "open-asr-leaderboard",
+		description: "The Open ASR Leaderboard ranks and evaluates speech recognition models.",
+		url: "https://github.com/huggingface/open_asr_leaderboard",
+	},
+	mdpbench: {
+		name: "mdpbench",
+		description:
+			"MDPBench is a benchmark for evaluating multilingual document parsing across digital, photographed, Latin, and non-Latin document subsets.",
+		url: "https://github.com/Yuliang-Liu/MultimodalOCR",
+	},
+	"real5-omnidocbench": {
+		name: "real5-omnidocbench",
+		description:
+			"Real5-OmniDocBench is a benchmark for evaluating document parsing robustness under five real-world acquisition scenarios: scanning, warping, screen-photography, illumination, and skew.",
+		url: "https://huggingface.co/datasets/PaddlePaddle/Real5-OmniDocBench",
+	},
+	parsebench: {
+		name: "parsebench",
+		description:
+			"ParseBench is a benchmark for evaluating document parsing systems on real-world enterprise documents across tables, charts, content faithfulness, semantic formatting, and visual grounding.",
+		url: "https://github.com/run-llama/ParseBench",
+	},
+	"video-mme-v2": {
+		name: "video-mme-v2",
+		description:
+			"Video-MME-v2 is a benchmark for evaluating the next stage of video understanding capabilities of multimodal large language models.",
+		url: "https://github.com/MME-Benchmarks/Video-MME-v2",
+	},
+	"claw-eval": {
+		name: "claw-eval",
+		description:
+			"CLAW-Eval is an evaluation framework for assessing LLMs as autonomous agents across 300 human-verified tasks covering communication, finance, and productivity domains.",
+		url: "https://github.com/claw-eval/claw-eval",
+	},
+	researchclawbench: {
+		name: "researchclawbench",
+		description:
+			"ResearchClawBench is a benchmark for evaluating AI agents on end-to-end scientific research tasks, from reading data and related work to producing code, figures, and publication-style reports.",
+		url: "https://github.com/InternScience/ResearchClawBench",
+	},
+	pbench: {
+		name: "pbench",
+		description:
+			"PBench is a multi-level referring expression segmentation benchmark for evaluating vision-language perception across a structured hierarchy of skills.",
+		url: "https://github.com/tiiuae/Falcon-Perception",
+	},
+	wildclawbench: {
+		name: "wildclawbench",
+		description:
+			"WildClawBench is an in-the-wild benchmark for evaluating AI agents in the OpenClaw environment across 60 hand-built, end-to-end tasks spanning productivity, code intelligence, social interaction, search, creative synthesis, and safety domains.",
+		url: "https://github.com/InternLM/WildClawBench",
+	},
+	wbench: {
+		name: "wbench",
+		description:
+			"WBench is a comprehensive multi-turn benchmark for interactive video world model evaluation, assessing models across 5 dimensions (video quality, setting adherence, interaction adherence, consistency, physics compliance) and 22 metrics over 289 multi-turn interaction cases.",
+		url: "https://github.com/meituan-longcat/WBench",
+	},
+	nanofold: {
+		name: "nanofold",
+		description:
+			"nanoFold is a data-efficiency benchmark for protein structure prediction. Its goal is to evaluate models on scenarios with scarce data.",
+		url: "https://github.com/ChrisHayduk/nanoFold-Competition",
+	},
+	mmmu: {
+		name: "mmmu",
+		description:
+			"MMMU is a new benchmark designed to evaluate multimodal models on massive multi-discipline tasks demanding college-level subject knowledge and deliberate reasoning.",
+		url: "https://mmmu-benchmark.github.io/",
+	},
+	extractbench: {
+		name: "extractbench",
+		description:
+			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
+		url: "https://github.com/run-llama/ExtractBench",
 	},
 } as const;

@@ -16,8 +16,6 @@ export const SHARD_FOOTER_VERSION = 1n;
 const MDB_FILE_FLAG_WITH_VERIFICATION = 0x80000000; // Cannot define as 1 << 31 because it becomes a negative number
 const MDB_FILE_FLAG_WITH_METADATA_EXT = 0x40000000;
 
-const EMPTY_HEX_HASH = "0".repeat(HASH_LENGTH * 2);
-
 export const SHARD_MAGIC_TAG = new Uint8Array([
 	"H".charCodeAt(0),
 	"F".charCodeAt(0),
@@ -89,6 +87,7 @@ export async function* uploadShards(
 	| { event: "fileProgress"; path: string; progress: number }
 > {
 	const xorbHashes: Array<string> = [];
+	const seenFileXetHashes = new Set<string>();
 
 	const fileInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.25);
 	const xorbInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.75);
@@ -174,11 +173,18 @@ export async function* uploadShards(
 					dedupRatio: output.dedupRatio,
 				}; // Maybe wait until shard is uploaded before yielding.
 
+				if (seenFileXetHashes.has(output.hash)) {
+					break;
+				}
+				seenFileXetHashes.add(output.hash);
+
 				// Calculate space needed for this file entry
 				const fileHeaderSize = HASH_LENGTH + 4 + 4 + 8; // hash + flags + rep length + reserved
 				const representationSize = output.representation.length * (HASH_LENGTH + 4 + 4 + 4 + 4); // per rep: xorb hash + flags + length + offset + endOffset
 				const verificationSize = output.representation.length * (HASH_LENGTH + 16); // per rep: range hash + reserved
-				const metadataSize = HASH_LENGTH + 16; // sha256 + reserved
+				const fileSha256 = output.sha256;
+				const hasMetadataExt = fileSha256 !== undefined;
+				const metadataSize = hasMetadataExt ? HASH_LENGTH + 16 : 0; // sha256 + reserved
 				const totalFileSize = fileHeaderSize + representationSize + verificationSize + metadataSize;
 
 				// Check if adding this file would exceed buffer capacity
@@ -192,7 +198,11 @@ export async function* uploadShards(
 				writeHashToArray(output.hash, fileInfoSection, fileViewOffset);
 				fileViewOffset += HASH_LENGTH;
 				// Cannot use | binary operator since it works with int32 not uint32 and one of the flags is 1 << 31
-				fileInfoView.setUint32(fileViewOffset, MDB_FILE_FLAG_WITH_METADATA_EXT + MDB_FILE_FLAG_WITH_VERIFICATION, true);
+				fileInfoView.setUint32(
+					fileViewOffset,
+					MDB_FILE_FLAG_WITH_VERIFICATION + (hasMetadataExt ? MDB_FILE_FLAG_WITH_METADATA_EXT : 0),
+					true,
+				);
 				fileViewOffset += 4;
 				fileInfoView.setUint32(fileViewOffset, output.representation.length, true);
 				fileViewOffset += 4;
@@ -227,15 +237,17 @@ export async function* uploadShards(
 					fileViewOffset += 16;
 				}
 
-				// File metadata ext
-				writeHashToArray(output.sha256 ?? EMPTY_HEX_HASH, fileInfoSection, fileViewOffset);
-				fileViewOffset += HASH_LENGTH;
+				if (hasMetadataExt) {
+					// File metadata ext
+					writeHashToArray(fileSha256, fileInfoSection, fileViewOffset);
+					fileViewOffset += HASH_LENGTH;
 
-				// reserved in file metadata ext
-				for (let i = 0; i < 16; i++) {
-					fileInfoSection[fileViewOffset + i] = 0;
+					// reserved in file metadata ext
+					for (let i = 0; i < 16; i++) {
+						fileInfoSection[fileViewOffset + i] = 0;
+					}
+					fileViewOffset += 16;
 				}
-				fileViewOffset += 16;
 
 				break;
 			}

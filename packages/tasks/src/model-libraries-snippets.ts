@@ -156,6 +156,20 @@ pred_df = pipeline.predict_df(
 	return [installSnippet, exampleSnippet];
 };
 
+export const collectorvision = (model: ModelData): string[] => [
+	`pip install git+https://github.com/HanClinto/CollectorVision huggingface_hub`,
+	`from huggingface_hub import hf_hub_download
+import collector_vision as cvg
+
+checkpoint = hf_hub_download(repo_id="${model.id}", filename="model.onnx")
+
+# Detector models, such as Cornelius:
+detector = cvg.NeuralCornerDetector(checkpoint)
+
+# Embedder models, such as Milo:
+embedder = cvg.NeuralEmbedder(checkpoint)`,
+];
+
 export const colipri = (model: ModelData): string[] => {
 	const installSnippet = `pip install colipri`;
 
@@ -734,6 +748,75 @@ export const flair = (model: ModelData): string[] => [
 tagger = SequenceTagger.load("${model.id}")`,
 ];
 
+export const flextab = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/flextab`;
+
+	const classificationSnippet = `# Run a classification task
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+from flextab import FlexTabClassifier
+
+# Load sample data
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize a classifier, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+clf = FlexTabClassifier(max_context_size=8192, bagging=8)
+
+clf.fit(X_train, y_train)
+
+# Predict probabilities
+prediction_probabilities = clf.predict_proba(X_test)
+# Predict labels
+predictions = clf.predict(X_test)
+print("Accuracy", accuracy_score(y_test, predictions))`;
+
+	const regressionsSnippet = `# Run a regression task
+from sklearn.datasets import fetch_openml
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from flextab import FlexTabRegressor
+
+# Load sample data
+df = fetch_openml(data_id=531, as_frame=True)
+X = df.data
+y = df.target.astype(float)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize the regressor, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+regressor = FlexTabRegressor(max_context_size=8192, bagging=8)
+
+regressor.fit(X_train, y_train)
+
+# Predict on the test set
+predictions = regressor.predict(X_test)
+
+r2 = r2_score(y_test, predictions)
+print("R² Score:", r2)`;
+
+	const matchingSnippet = `# Run a matching task
+from sklearn.metrics import accuracy_score, roc_auc_score
+
+from flextab import FlexTabMatcher
+from flextab.utils.test_utils import load_febrl4
+
+left_train, left_test, right_train, right_test, y_train, y_test = load_febrl4()
+
+matcher = FlexTabMatcher(max_context_size=8192, bagging=1)
+matcher.fit(left_train, right_train, y_train)
+predictions = matcher.predict(left_test, right_test)
+print(f'Accuracy {accuracy_score(y_test, predictions):.2%}')
+# Probabilities (e.g. for thresholding or AUROC):
+# probas = matcher.predict_proba_matching(left_test, right_test)
+# print(f'AUROC {roc_auc_score(y_test, probas[:, 1]):.2%}')`;
+	return [installSnippet, classificationSnippet, regressionsSnippet, matchingSnippet];
+};
+
 export const gliner = (model: ModelData): string[] => [
 	`from gliner import GLiNER
 
@@ -948,6 +1031,85 @@ import soundfile as sf
 sf.write('output.wav', audio, 24000)`,
 ];
 
+export const ltx = (model: ModelData): string[] => {
+	const localDir = `models/${nameWithoutNamespace(model.id)}`;
+	const install = `# Install the LTX-2 pipelines
+git clone https://github.com/Lightricks/LTX-2.git
+cd LTX-2
+uv sync --frozen`;
+
+	// Every pipeline needs the Gemma text encoder, which lives in a separate repo.
+	const download = `# Download the weights from this repo, plus the Gemma text encoder
+hf download ${model.id} --local-dir ${localDir}
+hf download google/gemma-3-12b-it-qat-q4_0-unquantized --local-dir models/gemma-3-12b`;
+
+	// Add "--image <path> <frame_idx> <strength>" to any command below to condition on
+	// an image (e.g. "--image image.jpg 0 0.8"), turning text-to-video into image-to-video.
+	const imageToVideoHint = `# For image-to-video, add: --image path/to/image.jpg 0 0.8`;
+
+	const tags = model.tags ?? [];
+
+	// IC-LoRA: video-to-video / image-to-video with a control (reference) signal.
+	// Checked before "lora" because an IC-LoRA repo may carry both tags.
+	if (tags.includes("ic-lora")) {
+		return [
+			install,
+			download,
+			`# Video-to-video with the IC-LoRA (runs on the distilled base model)
+uv run python -m ltx_pipelines.ic_lora \\
+    --distilled-checkpoint-path path/to/distilled_checkpoint.safetensors \\
+    --spatial-upsampler-path path/to/spatial_upsampler.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --lora ${localDir}/<weights>.safetensors 1.0 \\
+    --video-conditioning reference.mp4 1.0 \\
+    --prompt "your prompt here" \\
+    --output-path output.mp4`,
+		];
+	}
+
+	// Standard LoRA applied on top of the base pipeline.
+	if (tags.includes("lora")) {
+		return [
+			install,
+			download,
+			`# Text/image-to-video with the LoRA on the HQ two-stage base pipeline
+uv run python -m ltx_pipelines.ti2vid_two_stages_hq \\
+    --checkpoint-path path/to/checkpoint.safetensors \\
+    --distilled-lora path/to/distilled_lora.safetensors 0.8 \\
+    --spatial-upsampler-path path/to/spatial_upsampler.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --lora ${localDir}/<weights>.safetensors 1.0 \\
+    --prompt "your prompt here" \\
+    --output-path output.mp4
+${imageToVideoHint}`,
+		];
+	}
+
+	// Base model: the fast (distilled) and HQ (two-stage) pipelines. Substitute the
+	// .safetensors filenames with the ones listed under this repo's "Files and versions".
+	return [
+		install,
+		download,
+		`# Fast pipeline (distilled model, no distilled LoRA needed)
+uv run python -m ltx_pipelines.distilled \\
+    --distilled-checkpoint-path ${localDir}/<distilled-checkpoint>.safetensors \\
+    --spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --prompt "A beautiful sunset over the ocean" \\
+    --output-path output.mp4
+${imageToVideoHint}`,
+		`# HQ pipeline (two-stage, higher quality)
+uv run python -m ltx_pipelines.ti2vid_two_stages_hq \\
+    --checkpoint-path ${localDir}/<checkpoint>.safetensors \\
+    --distilled-lora ${localDir}/<distilled-lora>.safetensors 0.8 \\
+    --spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors \\
+    --gemma-root models/gemma-3-12b \\
+    --prompt "A beautiful sunset over the ocean" \\
+    --output-path output.mp4
+${imageToVideoHint}`,
+	];
+};
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
@@ -1052,6 +1214,23 @@ python -m lerobot.record \\
 	return [];
 };
 
+export const litert_lm = (model: ModelData): string[] => [
+	`# LiteRT-LM runs on various platforms (Android, iOS, Windows, Linux, macOS, IoT, Web/WASM)
+# and supports many APIs (C++, Python, Kotlin, Swift, JavaScript, Flutter).
+# For platform-specific integration guides, please refer to the official developer website:
+# https://ai.google.dev/edge/litert-lm
+
+# To try LiteRT-LM, the easiest way is to use our CLI tool.
+# 1. Install the LiteRT-LM CLI tool:
+pip install -U litert-lm
+
+# 2. Download and run this model locally:
+# See: https://ai.google.dev/edge/litert-lm/cli
+litert-lm run \\
+  --from-huggingface-repo=${model.id} \\
+  --prompt="Write me a poem"`,
+];
+
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
 # See https://github.com/keras-team/tf-keras for more details.
@@ -1094,12 +1273,74 @@ from MeshAnything.models.meshanything import MeshAnything
 model = MeshAnything(args)`,
 ];
 
+export const multimolecule = (model: ModelData): string[] => {
+	const widgetExample = model.widgetData?.[0] as WidgetExampleTextInput | undefined;
+	const exampleText = widgetExample?.text;
+	const maskToken = model.mask_token ?? "<mask>";
+	const sequence = exampleText?.replace(maskToken, "A");
+
+	const snippets = [`pip install multimolecule`];
+
+	if (sequence) {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")
+
+inputs = tokenizer("${sequence}", return_tensors="pt")
+outputs = model(**inputs)
+embeddings = outputs.last_hidden_state`,
+		);
+	} else {
+		snippets.push(
+			`from multimolecule import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("${model.id}")
+model = AutoModel.from_pretrained("${model.id}")`,
+		);
+	}
+
+	if (model.tags.includes("rna-secondary-structure") && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("rna-secondary-structure", model="${model.id}")
+output = predictor("${exampleText}")
+print(output["secondary_structure"])`,
+		);
+	} else if (model.pipeline_tag === "fill-mask" && exampleText) {
+		snippets.push(
+			`import multimolecule
+from transformers import pipeline
+
+predictor = pipeline("fill-mask", model="${model.id}")
+output = predictor("${exampleText}")`,
+		);
+	}
+
+	return snippets;
+};
+
 export const open_clip = (model: ModelData): string[] => [
 	`import open_clip
 
 model, preprocess_train, preprocess_val = open_clip.create_model_and_transforms('hf-hub:${model.id}')
 tokenizer = open_clip.get_tokenizer('hf-hub:${model.id}')`,
 ];
+
+export const openasr = (model: ModelData): string[] => {
+	// OpenASR's local model registry keys packs by their short id (the final path segment
+	// of the Hub repo id, e.g. "xasr-zh-en" for "OpenASR/xasr-zh-en"), not the full
+	// "org/repo" reference, so the CLI commands below use that short id.
+	const modelId = model.id.split("/").pop() ?? model.id;
+	return [
+		`# Install the openasr CLI: https://github.com/QuintinShaw/openasr/releases
+openasr pull ${modelId}
+openasr transcribe audio.wav --model ${modelId}`,
+	];
+};
 
 export const paddlenlp = (model: ModelData): string[] => {
 	if (model.config?.architectures?.[0]) {
@@ -1673,7 +1914,7 @@ export const transformers = (model: ModelData): string[] => {
 			`from transformers import ${info.processor}, ${info.auto_model}`,
 			"",
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
@@ -1710,7 +1951,7 @@ export const transformers = (model: ModelData): string[] => {
 		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', dtype="auto")',
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 	}
 
@@ -2025,6 +2266,28 @@ from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
+export const nobg = (model: ModelData): string[] => {
+	const installSnippet = `pip install nobg`;
+
+	const exampleSnippet = `import torch
+from loadimg import load_img
+from nobg import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("${model.id}").eval()
+processor = AutoProcessor.from_pretrained("${model.id}")
+
+image = load_img("input.jpg").convert("RGB")
+inputs = processor(image, return_tensors="pt")
+
+with torch.no_grad():
+    outputs = model(pixel_values=inputs["pixel_values"])
+
+alpha = processor.post_process_alpha_matting(outputs, target_sizes=[(image.height, image.width)])[0]
+processor.cutout(image, alpha).save("output.png")`;
+
+	return [installSnippet, exampleSnippet];
+};
+
 export const supertonic = (): string[] => [
 	`from supertonic import TTS
 
@@ -2149,6 +2412,29 @@ export const model2vec = (model: ModelData): string[] => [
 model = StaticModel.from_pretrained("${model.id}")`,
 ];
 
+export const mobilint = (model: ModelData): string[] => {
+	const modelName = nameWithoutNamespace(model.id);
+	return [
+		`# pip install mblt-model-zoo
+from mblt_model_zoo.vision import MBLT_Engine
+
+model = MBLT_Engine(
+    model_cls="${modelName}",
+    model_type="DEFAULT",
+    model_path="",
+    core_mode="global8",
+)
+
+try:
+    image = model.preprocess("path/to/image.jpg")
+    output = model(image)
+    result = model.postprocess(output)
+finally:
+    model.dispose()
+`,
+	];
+};
+
 export const pruna = (model: ModelData): string[] => {
 	let snippets: string[];
 
@@ -2243,7 +2529,9 @@ export const nemo = (model: ModelData): string[] => {
 export const outetts = (model: ModelData): string[] => {
 	// Don’t show this block on GGUF / ONNX mirrors
 	const t = model.tags ?? [];
-	if (t.includes("gguf") || t.includes("onnx")) return [];
+	if (t.includes("gguf") || t.includes("onnx")) {
+		return [];
+	}
 
 	// v1.0 HF → minimal runnable snippet
 	return [

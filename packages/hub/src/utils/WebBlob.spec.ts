@@ -8,10 +8,14 @@ describe("WebBlob", () => {
 	let contentType: string;
 
 	beforeAll(async () => {
-		const response = await fetch(resourceUrl, { method: "HEAD" });
-		size = Number(response.headers.get("content-length"));
+		// Compute the reference size from the response body itself; in browsers
+		// `Content-Length` is not reliably exposed when the response is gzipped
+		// on the fly by CloudFront.
+		const response = await fetch(resourceUrl);
+		const blob = await response.blob();
+		size = blob.size;
+		fullText = await blob.text();
 		contentType = response.headers.get("content-type") || "";
-		fullText = await (await fetch(resourceUrl)).text();
 	});
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {
@@ -91,5 +95,12 @@ describe("WebBlob", () => {
 
 		const streamText = await new Response(slice.stream()).text();
 		expect(streamText).toBe(expectedText);
+	});
+
+	it("should throw a TypeError on negative start/end", () => {
+		const webBlob = new WebBlob(resourceUrl, 0, 100, "text/plain", true, fetch, undefined);
+
+		expect(() => webBlob.slice(-5)).toThrow(TypeError);
+		expect(() => webBlob.slice(0, -1)).toThrow(TypeError);
 	});
 });

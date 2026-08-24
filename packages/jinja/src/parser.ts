@@ -543,9 +543,9 @@ export function parse(tokens: Token[]): Program {
 				expect(TOKEN_TYPES.CloseSquareBracket, "Expected closing square bracket");
 			} else {
 				// non-computed (i.e., dot notation: obj.expr)
-				property = parsePrimaryExpression(); // should be an identifier
-				if (property.type !== "Identifier") {
-					throw new SyntaxError(`Expected identifier following dot operator`);
+				property = parsePrimaryExpression(); // should be an identifier or integer
+				if (property.type !== "Identifier" && property.type !== "IntegerLiteral") {
+					throw new SyntaxError(`Expected identifier or integer following dot operator`);
 				}
 			}
 			object = new MemberExpression(object, property, computed);
@@ -589,7 +589,7 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseFilterExpression(): Statement {
-		let operand = parseCallMemberExpression();
+		let operand = parseUnarySignExpression();
 
 		while (is(TOKEN_TYPES.Pipe)) {
 			// Support chaining filters
@@ -604,6 +604,21 @@ export function parse(tokens: Token[]): Program {
 			operand = new FilterExpression(operand, filter as Identifier | CallExpression);
 		}
 		return operand;
+	}
+
+	function parseUnarySignExpression(): Statement {
+		const token = tokens[current];
+		if (
+			token &&
+			(token.type === TOKEN_TYPES.UnaryOperator || token.type === TOKEN_TYPES.AdditiveBinaryOperator) &&
+			(token.value === "-" || token.value === "+")
+		) {
+			const operator = tokens[current++];
+			const argument = parseUnarySignExpression();
+			return new UnaryExpression(operator, argument);
+		}
+
+		return parseCallMemberExpression();
 	}
 
 	function parsePrimaryExpression(): Statement {
