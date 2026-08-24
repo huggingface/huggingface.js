@@ -63,6 +63,11 @@ const FORMATTING_TESTS = Object.freeze({
 		formatted: `{{- namespace(*[{"a": 1}], **{"b": 2}).b -}}`,
 		rendered: `2`,
 	},
+	SELECT_EXPRESSION_AS_ARGUMENT: {
+		template: `{{ range(1 if 2, 5 or 6) | join(",") }}{{ [1 if 2, 3 if 4] | join(",") }}`,
+		formatted: `{{- range(1 if 2, 5 or 6) | join(",") -}}\n{{- [1 if 2, 3 if 4] | join(",") -}}`,
+		rendered: `1,2,3,41,3`,
+	},
 });
 
 describe("format", () => {

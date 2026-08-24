@@ -892,7 +892,7 @@ function getParameterName(argument: Expression): string | undefined {
  * variables `varargs` and `kwargs`: a load enables collection, while a prior
  * parameter/store declaration disables it.
  */
-function referencesUndeclaredIdentifier(nodes: unknown, name: string): boolean {
+function referencesUndeclaredIdentifier(nodes: Statement[], name: string): boolean {
 	let declared = false;
 
 	const declareTarget = (target: Expression): void => {

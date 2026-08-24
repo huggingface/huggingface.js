@@ -183,7 +183,7 @@ function formatSet(node: SetStatement, depth: number, indentStr: string): string
 
 function formatMacro(node: Macro, depth: number, indentStr: string): string {
 	const pad = indentStr.repeat(depth);
-	const args = node.args.map(formatExpression).join(", ");
+	const args = node.args.map((arg) => formatExpression(arg)).join(", ");
 	return (
 		pad +
 		createStatement("macro", `${node.name.value}(${args})`) +
@@ -198,7 +198,9 @@ function formatMacro(node: Macro, depth: number, indentStr: string): string {
 function formatCallStatement(node: CallStatement, depth: number, indentStr: string): string {
 	const pad = indentStr.repeat(depth);
 	const params =
-		node.callerArgs && node.callerArgs.length > 0 ? `(${node.callerArgs.map(formatExpression).join(", ")})` : "";
+		node.callerArgs && node.callerArgs.length > 0
+			? `(${node.callerArgs.map((arg) => formatExpression(arg)).join(", ")})`
+			: "";
 	const callExpr = formatExpression(node.call);
 	let out = pad + createStatement(`call${params}`, callExpr) + NEWLINE;
 	out += formatStatements(node.body, depth + 1, indentStr) + NEWLINE;
@@ -256,7 +258,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "CallExpression": {
 			const n = node as CallExpression;
-			const args = n.args.map(formatExpression).join(", ");
+			const args = n.args.map((arg) => formatExpression(arg)).join(", ");
 			return `${formatExpression(n.callee)}(${args})`;
 		}
 		case "MemberExpression": {
@@ -309,7 +311,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "ArrayLiteral":
 		case "TupleLiteral": {
-			const elems = ((node as ArrayLiteral | TupleLiteral).value as Expression[]).map(formatExpression);
+			const elems = ((node as ArrayLiteral | TupleLiteral).value as Expression[]).map((elem) => formatExpression(elem));
 			const brackets = node.type === "ArrayLiteral" ? "[]" : "()";
 			return `${brackets[0]}${elems.join(", ")}${brackets[1]}`;
 		}
