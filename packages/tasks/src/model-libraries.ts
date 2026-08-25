@@ -804,7 +804,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 	},
 	ltx: {
-		prettyLabel: "LTX.io",
+		prettyLabel: "LTX-2",
 		repoName: "LTX-2",
 		repoUrl: "https://github.com/Lightricks/LTX-2",
 		docsUrl: "https://github.com/Lightricks/LTX-2",
