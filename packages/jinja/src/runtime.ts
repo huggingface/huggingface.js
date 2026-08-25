@@ -896,40 +896,6 @@ function getParameterDescriptor(argument: Parameter): ParameterDescriptor {
 	return { name: keywordArgument.key.value, defaultValue: keywordArgument.value };
 }
 
-interface ParameterBindings {
-	positionalArguments: AnyRuntimeValue[];
-	keywordArguments: Map<string, AnyRuntimeValue>;
-	pendingDefaults: [string, Expression][];
-}
-
-function bindParameters(
-	parameters: Parameter[],
-	passedArguments: AnyRuntimeValue[],
-	scope: Environment,
-): ParameterBindings {
-	const positionalArguments = passedArguments.slice();
-	let keywordArguments = new Map<string, AnyRuntimeValue>();
-	if (positionalArguments.at(-1) instanceof KeywordArgumentsValue) {
-		keywordArguments = new Map((positionalArguments.pop() as KeywordArgumentsValue).value);
-	}
-
-	const pendingDefaults: [string, Expression][] = [];
-	for (let i = 0; i < parameters.length; ++i) {
-		const { name, defaultValue } = getParameterDescriptor(parameters[i]);
-		let value = positionalArguments[i] as AnyRuntimeValue | undefined;
-		if (value === undefined && keywordArguments.has(name)) {
-			value = keywordArguments.get(name);
-			keywordArguments.delete(name);
-		}
-		if (value === undefined && defaultValue !== undefined) {
-			pendingDefaults.push([name, defaultValue]);
-		}
-		scope.setVariable(name, value ?? new UndefinedValue());
-	}
-
-	return { positionalArguments, keywordArguments, pendingDefaults };
-}
-
 type SpecialMacroArgument = "kwargs" | "varargs";
 
 function isSpecialMacroArgument(name: string): name is SpecialMacroArgument {
@@ -941,7 +907,7 @@ function isSpecialMacroArgument(name: string): name is SpecialMacroArgument {
  * mirrors Jinja2's ordered undeclared-name analysis: a load enables collection,
  * while a prior parameter/store declaration disables it.
  */
-function findAccessedSpecialMacroArguments(macro: Macro): Set<SpecialMacroArgument> {
+function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statement[]): Set<SpecialMacroArgument> {
 	const declared = new Set<SpecialMacroArgument>();
 	const accessed = new Set<SpecialMacroArgument>();
 
@@ -1094,10 +1060,10 @@ function findAccessedSpecialMacroArguments(macro: Macro): Set<SpecialMacroArgume
 
 	// The macro's own defaults are not part of Jinja's special-argument scan,
 	// but its declared parameter names suppress the corresponding collectors.
-	for (const argument of macro.args) {
-		declareArgument(argument);
+	for (const parameter of parameters) {
+		declareArgument(parameter);
 	}
-	visit(macro.body);
+	visit(body);
 	return accessed;
 }
 
@@ -2058,50 +2024,70 @@ export class Interpreter {
 	}
 
 	/**
+	 * Binds the arguments of a macro-like invocation into `scope`, mirroring the
+	 * entry of a Python Jinja2 compiled macro function: bind every declared
+	 * parameter (positional value first, then passed keyword value, then
+	 * undefined), then install the special variables — or raise for arguments the
+	 * body cannot accept — and only then evaluate missing parameters' defaults in
+	 * declaration order. Defaults therefore see passed parameters, the special
+	 * variables, and earlier defaults, while parameter names not yet bound read
+	 * as undefined rather than leaking in from the outer scope.
+	 */
+	private bindMacroArguments(
+		displayName: string,
+		parameters: Parameter[],
+		specialArguments: Set<SpecialMacroArgument>,
+		args: AnyRuntimeValue[],
+		scope: Environment,
+	): void {
+		const positionalArguments = args.slice();
+		let keywordArguments = new Map<string, AnyRuntimeValue>();
+		if (positionalArguments.at(-1) instanceof KeywordArgumentsValue) {
+			keywordArguments = new Map((positionalArguments.pop() as KeywordArgumentsValue).value);
+		}
+
+		const pendingDefaults: [string, Expression][] = [];
+		for (let i = 0; i < parameters.length; ++i) {
+			const { name, defaultValue } = getParameterDescriptor(parameters[i]);
+			let value = positionalArguments[i] as AnyRuntimeValue | undefined;
+			if (value === undefined && keywordArguments.has(name)) {
+				value = keywordArguments.get(name);
+				keywordArguments.delete(name);
+			}
+			if (value === undefined && defaultValue !== undefined) {
+				pendingDefaults.push([name, defaultValue]);
+			}
+			scope.setVariable(name, value ?? new UndefinedValue());
+		}
+
+		if (specialArguments.has("kwargs")) {
+			scope.setVariable("kwargs", new ObjectValue(keywordArguments));
+		} else if (keywordArguments.size > 0) {
+			throw new Error(`macro ${displayName} takes no keyword argument '${keywordArguments.keys().next().value}'`);
+		}
+		if (specialArguments.has("varargs")) {
+			scope.setVariable("varargs", new ArrayValue(positionalArguments.slice(parameters.length)));
+		} else if (positionalArguments.length > parameters.length) {
+			throw new Error(`macro ${displayName} takes not more than ${parameters.length} argument(s)`);
+		}
+
+		for (const [name, defaultValue] of pendingDefaults) {
+			scope.setVariable(name, this.evaluate(defaultValue, scope));
+		}
+	}
+
+	/**
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
 		// Like Python Jinja2, detect at definition time whether the body references the
 		// special `varargs`/`kwargs` variables; only then do they collect extra arguments.
-		const specialArguments = findAccessedSpecialMacroArguments(node);
-		const catchVarargs = specialArguments.has("varargs");
-		const catchKwargs = specialArguments.has("kwargs");
+		const specialArguments = findAccessedSpecialMacroArguments(node.args, node.body);
 		environment.setVariable(
 			node.name.value,
 			new FunctionValue((args, scope) => {
 				const macroScope = new Environment(scope);
-
-				// Bind each declared parameter: positional value first, then passed keyword
-				// value, then undefined. Like Python Jinja2, which passes every parameter
-				// into the compiled macro function up front, parameters missing at call time
-				// are bound to undefined for now and their defaults are evaluated later,
-				// once all parameters and special variables are in scope.
-				const { positionalArguments, keywordArguments, pendingDefaults } = bindParameters(node.args, args, macroScope);
-
-				// Python Jinja2 raises for arguments the macro cannot accept, unless the
-				// body catches them via the special variables. This happens before any
-				// parameter default is evaluated.
-				if (catchKwargs) {
-					macroScope.setVariable("kwargs", new ObjectValue(keywordArguments));
-				} else if (keywordArguments.size > 0) {
-					throw new Error(
-						`macro '${node.name.value}' takes no keyword argument '${keywordArguments.keys().next().value}'`,
-					);
-				}
-				if (catchVarargs) {
-					macroScope.setVariable("varargs", new ArrayValue(positionalArguments.slice(node.args.length)));
-				} else if (positionalArguments.length > node.args.length) {
-					throw new Error(`macro '${node.name.value}' takes not more than ${node.args.length} argument(s)`);
-				}
-
-				// Defaults are evaluated in declaration order, in the macro scope: they see
-				// passed parameters, the special variables, and earlier defaults, while
-				// parameter names not yet bound read as undefined rather than leaking in
-				// from the outer scope.
-				for (const [name, defaultValue] of pendingDefaults) {
-					macroScope.setVariable(name, this.evaluate(defaultValue, macroScope));
-				}
-
+				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);
 				return this.evaluateBlock(node.body, macroScope);
 			}),
 		);
@@ -2111,25 +2097,15 @@ export class Interpreter {
 	}
 
 	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
+		// Python Jinja2 compiles a call block like an anonymous macro: its
+		// parameters support defaults, its body can catch the special
+		// `varargs`/`kwargs` variables, and its missing name renders as `None`
+		// in error messages.
+		const parameters = node.callerArgs ?? [];
+		const specialArguments = findAccessedSpecialMacroArguments(parameters, node.body);
 		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[], callerEnv: Environment) => {
 			const callBlockEnv = new Environment(callerEnv);
-			const parameters = node.callerArgs ?? [];
-			const { positionalArguments, keywordArguments, pendingDefaults } = bindParameters(
-				parameters,
-				callerArguments,
-				callBlockEnv,
-			);
-
-			if (keywordArguments.size > 0) {
-				throw new Error(`macro None takes no keyword argument '${keywordArguments.keys().next().value}'`);
-			}
-			if (positionalArguments.length > parameters.length) {
-				throw new Error(`macro None takes not more than ${parameters.length} argument(s)`);
-			}
-
-			for (const [name, defaultValue] of pendingDefaults) {
-				callBlockEnv.setVariable(name, this.evaluate(defaultValue, callBlockEnv));
-			}
+			this.bindMacroArguments("None", parameters, specialArguments, callerArguments, callBlockEnv);
 			return this.evaluateBlock(node.body, callBlockEnv);
 		});
 

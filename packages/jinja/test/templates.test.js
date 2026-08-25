@@ -6437,8 +6437,43 @@ describe("Feature regressions", () => {
 				source: `{% set a = 9 %}{% macro invoke() %}{{ caller() }}{% endmacro %}{% call(b=a, a=1) invoke() %}{{ a }}|{{ b }}{% endcall %}`,
 				expected: "1|",
 			},
+			{
+				name: "collects extra keyword arguments in the call block's kwargs",
+				source: `{% macro invoke() %}{{ caller(x=9) }}{% endmacro %}{% call invoke() %}{{ kwargs.x }}{% endcall %}`,
+				expected: "9",
+			},
+			{
+				name: "collects extra positional arguments in the call block's varargs",
+				source: `{% macro invoke() %}{{ caller(1, 2, 3) }}{% endmacro %}{% call(a) invoke() %}{{ a }}|{{ varargs | length }}{% endcall %}`,
+				expected: "1|2",
+			},
+			{
+				name: "shadows the enclosing macro's kwargs with the call block's own",
+				source: `{% macro invoke() %}{{ caller() }}{% endmacro %}{% macro m() %}{% call invoke() %}[{{ kwargs.y }}]{% endcall %}{% endmacro %}{{ m(y=5) }}`,
+				expected: "[]",
+			},
 		])("$name", ({ source, expected }) => {
 			expectTemplateToRender(source, expected);
+		});
+
+		it.each([
+			{
+				name: "unexpected caller keyword argument",
+				source: `{% macro invoke() %}{{ caller(x=9) }}{% endmacro %}{% call(a=1) invoke() %}{{ a }}{% endcall %}`,
+				error: "macro None takes no keyword argument 'x'",
+			},
+			{
+				name: "keyword argument for an explicit kwargs caller parameter",
+				source: `{% macro invoke() %}{{ caller(x=9) }}{% endmacro %}{% call(kwargs) invoke() %}{{ kwargs }}{% endcall %}`,
+				error: "macro None takes no keyword argument 'x'",
+			},
+			{
+				name: "extra caller positional argument",
+				source: `{% macro invoke() %}{{ caller(1, 2) }}{% endmacro %}{% call(a) invoke() %}{{ a }}{% endcall %}`,
+				error: "macro None takes not more than 1 argument(s)",
+			},
+		])("rejects an $name like an anonymous macro", ({ source, error }) => {
+			expect(() => new Template(source).render()).toThrowError(error);
 		});
 	});
 
