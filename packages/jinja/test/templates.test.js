@@ -6405,8 +6405,9 @@ describe("Feature regressions", () => {
 			{ name: "one-character pair", source: `{{ namespace(["a"]) }}` },
 			{ name: "three-character pair", source: `{{ namespace(["abc"]) }}` },
 			{ name: "top-level string source", source: `{{ namespace("ab") }}` },
-		])("rejects $name", ({ source }) => {
-			expect(() => new Template(source).render()).toThrowError();
+			{ name: "non-string key", source: `{{ namespace([[1, 2]]) }}`, error: "namespace keys must be strings" },
+		])("rejects $name", ({ source, error }) => {
+			expect(() => new Template(source).render()).toThrowError(error);
 		});
 	});
 
@@ -6438,6 +6439,11 @@ describe("Feature regressions", () => {
 				expected: "1|",
 			},
 			{
+				name: "evaluates call-block defaults and bodies in the calling scope",
+				source: `{% set x='outer' %}{% macro invoke() %}{% set x='inner' %}{{ caller() }}{% endmacro %}{% call(value=x) invoke() %}{{ value }}|{{ x }}{% endcall %}`,
+				expected: "outer|outer",
+			},
+			{
 				name: "collects extra keyword arguments in the call block's kwargs",
 				source: `{% macro invoke() %}{{ caller(x=9) }}{% endmacro %}{% call invoke() %}{{ kwargs.x }}{% endcall %}`,
 				expected: "9",
@@ -6463,7 +6469,7 @@ describe("Feature regressions", () => {
 				error: "macro None takes no keyword argument 'x'",
 			},
 			{
-				name: "keyword argument for an explicit kwargs caller parameter",
+				name: "extra keyword with an explicit kwargs caller parameter",
 				source: `{% macro invoke() %}{{ caller(x=9) }}{% endmacro %}{% call(kwargs) invoke() %}{{ kwargs }}{% endcall %}`,
 				error: "macro None takes no keyword argument 'x'",
 			},
@@ -6472,7 +6478,12 @@ describe("Feature regressions", () => {
 				source: `{% macro invoke() %}{{ caller(1, 2) }}{% endmacro %}{% call(a) invoke() %}{{ a }}{% endcall %}`,
 				error: "macro None takes not more than 1 argument(s)",
 			},
-		])("rejects an $name like an anonymous macro", ({ source, error }) => {
+			{
+				name: "extra positional with an explicit varargs caller parameter",
+				source: `{% macro invoke() %}{{ caller(1, 2) }}{% endmacro %}{% call(varargs) invoke() %}{{ varargs }}{% endcall %}`,
+				error: "macro None takes not more than 1 argument(s)",
+			},
+		])("rejects $name using anonymous-macro argument rules", ({ source, error }) => {
 			expect(() => new Template(source).render()).toThrowError(error);
 		});
 	});
@@ -6571,6 +6582,10 @@ describe("Feature regressions", () => {
 				`|{{ 2 ** true }}|{{ true ** 2 }}|{{ false ** 3 }}|{{ 4.0 ** false }}|{{ true ** -1 }}|`,
 			);
 			expect(template.render()).toBe("|2|1|0|1.0|1.0|");
+		});
+
+		it("preserves a float exponent's result type", () => {
+			expect(new Template("{{ 4 ** 0.5 }}").render()).toBe("2.0");
 		});
 
 		it.each([
