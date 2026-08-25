@@ -374,7 +374,6 @@ function toJSON(
 					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
 					: `[${core.join(itemSeparator)}]`;
 			} else {
-				// Map-backed runtime values
 				let entries = Array.from((input as ObjectValue | NamespaceValue).value.entries());
 				if (sortKeys) {
 					entries = entries.sort(([a], [b]) => a.localeCompare(b));
@@ -509,10 +508,7 @@ export class KeywordArgumentsValue extends ObjectValue {
 }
 
 /**
- * Represents a Namespace value at runtime. Mirroring Python Jinja2's Namespace,
- * this is a plain object rather than a mapping: it is always truthy, is not a
- * `mapping`, exposes no dict methods, and exposes its stored attributes through
- * both attribute and subscript access.
+ * Represents a mutable namespace with attribute/subscript access but no mapping behavior or builtins.
  */
 export class NamespaceValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	override type = "NamespaceValue";
@@ -607,9 +603,7 @@ export class Environment {
 		[
 			"namespace",
 			new FunctionValue((args) => {
-				// Python Jinja2's Namespace mirrors `dict(*args, **kwargs)`: at most one
-				// positional mapping (or iterable of key/value pairs) merged with keyword
-				// arguments, copied so mutating the namespace never mutates the source.
+				// Copy top-level entries so namespace assignment does not mutate the input.
 				const positional = args.slice();
 				let kwargs: KeywordArgumentsValue | undefined;
 				if (positional.at(-1) instanceof KeywordArgumentsValue) {
@@ -903,9 +897,7 @@ function isSpecialMacroArgument(name: string): name is SpecialMacroArgument {
 }
 
 /**
- * Finds the special macro arguments loaded before they are declared. This
- * mirrors Jinja2's ordered undeclared-name analysis: a load enables collection,
- * while a prior parameter/store declaration disables it.
+ * Find `kwargs` and `varargs` loads that precede a declaration, following Jinja's AST visit order.
  */
 function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statement[]): Set<SpecialMacroArgument> {
 	const declared = new Set<SpecialMacroArgument>();
@@ -941,7 +933,7 @@ function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statem
 	};
 
 	const visitFilter = (filter: Identifier | CallExpression): void => {
-		// Filter names are identifiers syntactically, but they are not variable loads.
+		// A filter name is syntax, not a variable load.
 		if (filter.type === "CallExpression") {
 			visit((filter as CallExpression).args);
 		}
@@ -971,7 +963,7 @@ function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statem
 				declareTarget(statement.loopvar);
 				if (statement.iterable.type === "SelectExpression") {
 					const iterable = statement.iterable as SelectExpression;
-					// Jinja's For node visits its filter after the body/default block.
+					// Jinja visits a for-loop condition after its body and else block.
 					visit(iterable.lhs);
 					visit(statement.body);
 					visit(statement.defaultBlock);
@@ -1049,17 +1041,13 @@ function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statem
 				visit((node as KeywordArgumentExpression).value);
 				return;
 			default:
-				// Ordinary AST nodes are traversed in field declaration order. Special
-				// nodes above override this to exclude identifier-like names or mirror
-				// Jinja's non-standard traversal order.
 				for (const child of Object.values(node)) {
 					visit(child);
 				}
 		}
 	};
 
-	// The macro's own defaults are not part of Jinja's special-argument scan,
-	// but its declared parameter names suppress the corresponding collectors.
+	// Do not scan this macro or call block's defaults; its parameter names still suppress collection.
 	for (const parameter of parameters) {
 		declareArgument(parameter);
 	}
@@ -1117,7 +1105,7 @@ export class Interpreter {
 			// toString and concatenation
 			return new StringValue(left.value.toString() + right.value.toString());
 		} else if (node.operator.value === "**" && isNumericLikeValue(left) && isNumericLikeValue(right)) {
-			// Python booleans are integers for arithmetic purposes.
+			// Jinja treats booleans as integers here.
 			const a = getNumericValue(left);
 			const b = getNumericValue(right);
 			if (a === 0 && b < 0) {
@@ -1126,12 +1114,11 @@ export class Interpreter {
 
 			const result = a ** b;
 			if (!Number.isFinite(result)) {
-				// Reject JavaScript's NaN/Infinity stand-ins for unsupported complex
-				// results and numeric overflow.
+				// NaN represents an unsupported complex result; Infinity represents overflow.
 				throw new Error("Exponentiation result is not a finite real number");
 			}
 
-			// Like Python, a negative exponent produces a float (e.g., 2 ** -1 == 0.5).
+			// Negative exponents produce floats.
 			const isFloat = left instanceof FloatValue || right instanceof FloatValue || b < 0;
 			return isFloat ? new FloatValue(result) : new IntegerValue(result);
 		} else if (
@@ -1256,7 +1243,6 @@ export class Interpreter {
 				const kwarg = argument as KeywordArgumentExpression;
 				addKeywordArgument(kwarg.key.value, this.evaluate(kwarg.value, environment));
 			} else {
-				// The parser rejects positional arguments after keyword arguments
 				positionalArguments.push(this.evaluate(argument, environment));
 			}
 		}
@@ -1886,7 +1872,6 @@ export class Interpreter {
 
 			const object = this.evaluate(member.object, environment);
 			if (!(object instanceof NamespaceValue)) {
-				// Python Jinja2 only permits attribute assignment on namespace objects
 				throw new Error("cannot assign attribute on non-namespace object");
 			}
 			if (member.property.type !== "Identifier") {
@@ -2024,14 +2009,8 @@ export class Interpreter {
 	}
 
 	/**
-	 * Binds the arguments of a macro-like invocation into `scope`, mirroring the
-	 * entry of a Python Jinja2 compiled macro function: bind every declared
-	 * parameter (positional value first, then passed keyword value, then
-	 * undefined), then install the special variables — or raise for arguments the
-	 * body cannot accept — and only then evaluate missing parameters' defaults in
-	 * declaration order. Defaults therefore see passed parameters, the special
-	 * variables, and earlier defaults, while parameter names not yet bound read
-	 * as undefined rather than leaking in from the outer scope.
+	 * Bind every parameter name and special argument before evaluating defaults,
+	 * preventing unbound parameters from resolving in an outer scope.
 	 */
 	private bindMacroArguments(
 		displayName: string,
@@ -2080,8 +2059,6 @@ export class Interpreter {
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
-		// Like Python Jinja2, detect at definition time whether the body references the
-		// special `varargs`/`kwargs` variables; only then do they collect extra arguments.
 		const specialArguments = findAccessedSpecialMacroArguments(node.args, node.body);
 		environment.setVariable(
 			node.name.value,
@@ -2097,14 +2074,11 @@ export class Interpreter {
 	}
 
 	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
-		// Python Jinja2 compiles a call block like an anonymous macro: its
-		// parameters support defaults, its body can catch the special
-		// `varargs`/`kwargs` variables, and its missing name renders as `None`
-		// in error messages.
+		// Call blocks use anonymous-macro argument rules; Jinja labels them `None` in errors.
 		const parameters = node.callerArgs ?? [];
 		const specialArguments = findAccessedSpecialMacroArguments(parameters, node.body);
-		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[], callerEnv: Environment) => {
-			const callBlockEnv = new Environment(callerEnv);
+		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[]) => {
+			const callBlockEnv = new Environment(environment);
 			this.bindMacroArguments("None", parameters, specialArguments, callerArguments, callBlockEnv);
 			return this.evaluateBlock(node.body, callBlockEnv);
 		});
