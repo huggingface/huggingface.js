@@ -14,12 +14,16 @@ function nameWithoutNamespace(modelId: string): string {
 
 const escapeStringForJson = (str: string): string => JSON.stringify(str).slice(1, -1); // slice is needed to remove surrounding quotes added by JSON.stringify
 
+const isValidIdentifier = (str: string): boolean => /^[A-Za-z_]\w*$/.test(str);
+
 //#region snippets
 
 export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
 
-model = AutoAdapterModel.from_pretrained("${model.config?.adapter_transformers?.model_name}")
+model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
+		model.config?.adapter_transformers?.model_name ?? "fill-in-model-name",
+	)}")
 model.load_adapter("${model.id}", set_active=True)`,
 ];
 
@@ -79,7 +83,7 @@ result, message = detector.detect_watermark(watermarked_audio, sr)`;
 };
 
 function get_base_diffusers_model(model: ModelData): string {
-	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
+	return escapeStringForJson(model.cardData?.base_model?.toString() ?? "fill-in-base-model");
 }
 
 function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
@@ -957,7 +961,8 @@ backbone = keras_hub.models.Backbone.from_preset("hf://${modelId}")
 
 export const keras_hub = (model: ModelData): string[] => {
 	const modelId = model.id;
-	const tasks = model.config?.keras_hub?.tasks ?? [];
+	// interpolated as a Python class name, so a non-identifier is treated as absent
+	const tasks = (model.config?.keras_hub?.tasks ?? []).filter(isValidIdentifier);
 
 	const snippets: string[] = [];
 
@@ -1275,7 +1280,7 @@ model = MeshAnything(args)`,
 
 export const multimolecule = (model: ModelData): string[] => {
 	const widgetExample = model.widgetData?.[0] as WidgetExampleTextInput | undefined;
-	const exampleText = widgetExample?.text;
+	const exampleText = escapeStringForJson(widgetExample?.text ?? "");
 	const maskToken = model.mask_token ?? "<mask>";
 	const sequence = exampleText?.replace(maskToken, "A");
 
@@ -1343,8 +1348,9 @@ openasr transcribe audio.wav --model ${modelId}`,
 };
 
 export const paddlenlp = (model: ModelData): string[] => {
-	if (model.config?.architectures?.[0]) {
-		const architecture = model.config.architectures[0];
+	const architecture = model.config?.architectures?.[0];
+	// interpolated as a Python class name, so a non-identifier is treated as absent
+	if (architecture && isValidIdentifier(architecture)) {
 		return [
 			[
 				`from paddlenlp.transformers import AutoTokenizer, ${architecture}`,
@@ -1602,7 +1608,7 @@ const skopsPickle = (model: ModelData, modelFile: string) => {
 from skops.hub_utils import download
 download("${model.id}", "path_to_folder")
 model = joblib.load(
-	"${modelFile}"
+	"${escapeStringForJson(modelFile)}"
 )
 # only load pickle files from sources you trust
 # read more about it here https://skops.readthedocs.io/en/stable/persistence.html`,
@@ -1616,7 +1622,7 @@ from skops.io import load
 download("${model.id}", "path_to_folder")
 # make sure model file is in skops format
 # if model is a pickle file, make sure it's from a source you trust
-model = load("path_to_folder/${modelFile}")`,
+model = load("path_to_folder/${escapeStringForJson(modelFile)}")`,
 	];
 };
 
@@ -1894,11 +1900,18 @@ const hasChatTemplate = (model: ModelData): boolean =>
 	model.config?.processor_config?.chat_template !== undefined ||
 	model.config?.chat_template_jinja !== undefined;
 
+// interpolated as a Python class name (and into RegExps in pruna_transformers), so a non-identifier is treated as absent
+const autoModelClass = (model: ModelData): string | undefined => {
+	const autoModel = model.transformersInfo?.auto_model;
+	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
+};
+
 export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
+	const auto_model = autoModelClass(model) ?? "AutoModel";
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
 	const autoSnippet = [];
@@ -1911,10 +1924,10 @@ export const transformers = (model: ModelData): string[] => {
 					: "processor";
 		autoSnippet.push(
 			"# Load model directly",
-			`from transformers import ${info.processor}, ${info.auto_model}`,
+			`from transformers import ${info.processor}, ${auto_model}`,
 			"",
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
+			`model = ${auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
@@ -1950,8 +1963,8 @@ export const transformers = (model: ModelData): string[] => {
 	} else {
 		autoSnippet.push(
 			"# Load model directly",
-			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
+			`from transformers import ${auto_model}`,
+			`model = ${auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 	}
 
@@ -2054,7 +2067,7 @@ export const peft = (model: ModelData): string[] => {
 		`from peft import PeftModel
 from transformers import AutoModelFor${pefttask}
 
-base_model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
+base_model = AutoModelFor${pefttask}.from_pretrained("${escapeStringForJson(peftBaseModel)}")
 model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
 };
@@ -2485,7 +2498,7 @@ const pruna_diffusers = (model: ModelData): string[] => {
 };
 
 const pruna_transformers = (model: ModelData): string[] => {
-	const info = model.transformersInfo;
+	const auto_model = autoModelClass(model);
 	const transformersSnippets = transformers(model);
 
 	// Replace pipeline with PrunaModel
@@ -2496,13 +2509,13 @@ const pruna_transformers = (model: ModelData): string[] => {
 	);
 
 	// Additional cleanup if auto_model info is available
-	if (info?.auto_model) {
+	if (auto_model) {
 		processedSnippets = processedSnippets.map((snippet) =>
 			snippet
-				.replace(new RegExp(`from transformers import ${info.auto_model}\n?`, "g"), "")
-				.replace(new RegExp(`${info.auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
-				.replace(new RegExp(`^.*from.*import.*(, *${info.auto_model})+.*$`, "gm"), (line) =>
-					line.replace(new RegExp(`, *${info.auto_model}`, "g"), ""),
+				.replace(new RegExp(`from transformers import ${auto_model}\n?`, "g"), "")
+				.replace(new RegExp(`${auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
+				.replace(new RegExp(`^.*from.*import.*(, *${auto_model})+.*$`, "gm"), (line) =>
+					line.replace(new RegExp(`, *${auto_model}`, "g"), ""),
 				),
 		);
 	}

@@ -133,7 +133,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		const snippet = snippetFunc(model);
 
 		expect(snippet[0].content).toContain(`llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
-		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
+		expect(snippet[1].setup).toContain("npm install -g @earendil-works/pi-coding-agent");
 		expect(snippet[1].content).toContain(`"id": "bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"`);
 		expect(snippet[2].content).toContain("pi");
 	});
@@ -155,7 +155,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
 		expect(snippet[0].content).toContain('mlx_lm.server --model "mlx-community/Llama-3.2-3B-Instruct-mlx"');
-		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
+		expect(snippet[1].setup).toContain("npm install -g @earendil-works/pi-coding-agent");
 		expect(snippet[1].content).toContain('"baseUrl": "http://localhost:8080/v1"');
 		expect(snippet[1].content).toContain('"id": "mlx-community/Llama-3.2-3B-Instruct-mlx"');
 		expect(snippet[2].content).toContain("pi");
