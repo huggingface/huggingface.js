@@ -33,25 +33,29 @@ import type {
 const NEWLINE = "\n";
 const OPEN_STATEMENT = "{%- ";
 const CLOSE_STATEMENT = " -%}";
-const CONDITIONAL_EXPRESSION_PRECEDENCE = -1;
-const TEST_EXPRESSION_PRECEDENCE = 6;
+// Precedence levels are spaced 10 apart so `precedence + 1` (used for the right
+// operand of left-associative binary operators) never collides with the next level,
+// which lets `not` (15) sit between `and` (10) and the comparison operators (20).
+const CONDITIONAL_EXPRESSION_PRECEDENCE = -10;
+const LOGICAL_NOT_PRECEDENCE = 15;
+const TEST_EXPRESSION_PRECEDENCE = 60;
 
 function getBinaryOperatorPrecedence(expr: BinaryExpression): number {
 	switch (expr.operator.type) {
 		case "ExponentiationBinaryOperator":
-			return 5;
+			return 50;
 		case "MultiplicativeBinaryOperator":
-			return 4;
+			return 40;
 		case "AdditiveBinaryOperator":
-			return 3;
+			return 30;
 		case "ComparisonBinaryOperator":
-			return 2;
+			return 20;
 		case "Identifier":
 			if (expr.operator.value === "and") {
-				return 1;
+				return 10;
 			}
 			if (expr.operator.value === "in" || expr.operator.value === "not in") {
-				return 2;
+				return 20;
 			}
 			return 0;
 	}
@@ -221,7 +225,7 @@ function formatFilterStatement(node: FilterStatement, depth: number, indentStr: 
 	return out;
 }
 
-function formatExpression(node: Expression, parentPrec: number = -1): string {
+function formatExpression(node: Expression, parentPrec: number = -Infinity): string {
 	switch (node.type) {
 		case "SpreadExpression": {
 			const n = node as SpreadExpression;
@@ -254,8 +258,13 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "UnaryExpression": {
 			const n = node as UnaryExpression;
-			const val = n.operator.value + (n.operator.value === "not" ? " " : "") + formatExpression(n.argument, Infinity);
-			return val;
+			// Sign operators bind tighter than everything below call/member access, so they never need parentheses.
+			const thisPrecedence = n.operator.value === "not" ? LOGICAL_NOT_PRECEDENCE : Infinity;
+			// Keep chained unary operators bare, but parenthesize any other compound operand for readability.
+			const operandPrecedence = n.argument.type === "UnaryExpression" ? thisPrecedence : Infinity;
+			const expr =
+				n.operator.value + (n.operator.value === "not" ? " " : "") + formatExpression(n.argument, operandPrecedence);
+			return thisPrecedence < parentPrec ? `(${expr})` : expr;
 		}
 		case "CallExpression": {
 			const n = node as CallExpression;

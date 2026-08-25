@@ -1219,6 +1219,8 @@ export class Interpreter {
 			keywordArguments.set(key, value);
 		};
 
+		// Like Python, the entire positional part (including a `*` unpacking placed after
+		// keyword arguments) is evaluated before any keyword argument value.
 		for (const argument of args) {
 			// TODO: Lazy evaluation of arguments
 			if (argument.type === "SpreadExpression") {
@@ -1230,6 +1232,14 @@ export class Interpreter {
 				for (const item of val.value) {
 					positionalArguments.push(item);
 				}
+			} else if (argument.type !== "KeywordArgumentExpression" && argument.type !== "KeywordSpreadExpression") {
+				positionalArguments.push(this.evaluate(argument, environment));
+			}
+		}
+		for (const argument of args) {
+			if (argument.type === "KeywordArgumentExpression") {
+				const kwarg = argument as KeywordArgumentExpression;
+				addKeywordArgument(kwarg.key.value, this.evaluate(kwarg.value, environment));
 			} else if (argument.type === "KeywordSpreadExpression") {
 				const spreadNode = argument as KeywordSpreadExpression;
 				const val = this.evaluate(spreadNode.argument, environment);
@@ -1239,11 +1249,6 @@ export class Interpreter {
 				for (const [key, value] of val.value) {
 					addKeywordArgument(key, value);
 				}
-			} else if (argument.type === "KeywordArgumentExpression") {
-				const kwarg = argument as KeywordArgumentExpression;
-				addKeywordArgument(kwarg.key.value, this.evaluate(kwarg.value, environment));
-			} else {
-				positionalArguments.push(this.evaluate(argument, environment));
 			}
 		}
 		return [positionalArguments, keywordArguments];

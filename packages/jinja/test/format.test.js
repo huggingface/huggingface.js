@@ -63,6 +63,16 @@ const FORMATTING_TESTS = Object.freeze({
 		formatted: `{{- (2 if 2) ** 3 -}}`,
 		rendered: `8`,
 	},
+	NOT_AS_EXPONENTIATION_OPERAND: {
+		template: `{{ (not true) ** 2 }}`,
+		formatted: `{{- (not true) ** 2 -}}`,
+		rendered: `0`,
+	},
+	NOT_AS_COMPARISON_AND_LOGICAL_OPERAND: {
+		template: `{{ (not 1) == false and true and not false }}`,
+		formatted: `{{- (not 1) == false and true and not false -}}`,
+		rendered: `true`,
+	},
 	ARGUMENT_UNPACKING: {
 		template: `{{ namespace(*[{'a': 1}], **{'b': 2}).b }}`,
 		formatted: `{{- namespace(*[{"a": 1}], **{"b": 2}).b -}}`,

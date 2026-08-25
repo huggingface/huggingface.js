@@ -6419,6 +6419,11 @@ describe("Feature regressions", () => {
 				expected: "12",
 			},
 			{
+				name: "evaluates the entire positional part of a call before keyword argument values",
+				source: `{% set ns = namespace(log="") %}{% macro mark(v) %}{% set ns.log = ns.log + v %}{{ v }}{% endmacro %}{% macro f(a, b, c) %}{{ a }},{{ b }},{{ c }}{% endmacro %}{{ f(b=mark("b"), *[mark("k")], **{"c": mark("c")}) }}|{{ ns.log }}`,
+				expected: "k,b,c|kbc",
+			},
+			{
 				name: "allows keyword unpacking in a call-statement callee",
 				source: `{% macro wrap(x) %}{{ caller() }}{{ x }}{% endmacro %}{% call wrap(**{"x": 2}) %}1{% endcall %}`,
 				expected: "12",
