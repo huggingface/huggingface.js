@@ -82,11 +82,7 @@ for await (const progressEvent of await hub.uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
-// Edit a file in place. When the original content is the blob returned by
-// `downloadFile` for a xet-backed file, the unchanged data is NOT re-downloaded:
-// the modified ranges (plus their chunk neighborhood) are the only parts fetched,
-// re-chunked and hashed. Editing a 1TB bucket file downloads ~nothing; for
-// models/datasets the unchanged data is streamed once for the new sha256.
+// Edit a file in place, without downloading/uploading its unchanged data
 const originalFile = await hub.downloadFile({ repo, path: "myfile.bin", accessToken: "hf_..." });
 await hub.commit({
   repo,
@@ -97,24 +93,18 @@ await hub.commit({
     path: "myfile.bin",
     originalContent: originalFile,
     edits: [{
-      // Replace bytes [0, 4) with a new prefix
+      // Replace bytes [0, 4)
       start: 0,
       end: 4,
       content: new Blob(["new prefix"])
     }, {
-      // Append at the end (start === end === size inserts without replacing)
+      // Append at the end
       start: originalFile.size,
       end: originalFile.size,
       content: new Blob(["suffix"])
     }]
   }]
 });
-
-// Repeatedly appending to the same file? Pass the same `rangeEditCache` to each
-// commit: the partial merkle state is kept in memory and appends skip the
-// storage-metadata API calls entirely.
-const rangeEditCache = new Map();
-await hub.commit({ repo, accessToken: "hf_...", title: "append", rangeEditCache, operations: [/* edit op appending to the file */] });
 
 await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
@@ -129,7 +119,7 @@ await hub.deleteRepo({ repo, accessToken: "hf_..." });
 
 ## CLI usage
 
-You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo. 
+You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo.
 
 ```console
 npx @huggingface/hub upload coyotte508/test-model .
@@ -238,7 +228,7 @@ Remote resources and local files should be passed as `URL` whenever it's possibl
 
 Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
 
-When **editing** an existing file, prefer an `edit` commit operation with the blob returned by `downloadFile` as `originalContent` over re-uploading the whole content: for xet-backed files, only the edited regions are downloaded, re-chunked and hashed — the rest of the file is reused server-side. For repeated appends to the same file, pass a shared `rangeEditCache` (`new Map()`) to the successive `commit` calls to also skip the storage-metadata round-trips.
+To edit an existing file, prefer an `edit` commit operation with the blob returned by `downloadFile` as `originalContent`: only the edited regions are downloaded, re-chunked and hashed. For repeated appends to the same file, pass a shared `rangeEditCache: new Map()` to the `commit` calls to also skip the storage-metadata round-trips.
 
 ## Dependencies
 
