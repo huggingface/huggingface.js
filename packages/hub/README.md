@@ -82,24 +82,39 @@ for await (const progressEvent of await hub.uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
-// Edit a file by adding prefix & suffix
-await commit({
+// Edit a file in place. When the original content is the blob returned by
+// `downloadFile` for a xet-backed file, the unchanged data is NOT re-downloaded:
+// the modified ranges (plus their chunk neighborhood) are the only parts fetched,
+// re-chunked and hashed. Editing a 1TB bucket file downloads ~nothing; for
+// models/datasets the unchanged data is streamed once for the new sha256.
+const originalFile = await hub.downloadFile({ repo, path: "myfile.bin", accessToken: "hf_..." });
+await hub.commit({
   repo,
   accessToken: "hf_...",
+  title: "edit myfile.bin",
   operations: [{
-    type: "edit",
+    operation: "edit",
+    path: "myfile.bin",
     originalContent: originalFile,
     edits: [{
+      // Replace bytes [0, 4) with a new prefix
       start: 0,
-      end: 0,
-      content: new Blob(["prefix"])
+      end: 4,
+      content: new Blob(["new prefix"])
     }, {
-      start: originalFile.length,
-      end: originalFile.length,
+      // Append at the end (start === end === size inserts without replacing)
+      start: originalFile.size,
+      end: originalFile.size,
       content: new Blob(["suffix"])
     }]
   }]
-})
+});
+
+// Repeatedly appending to the same file? Pass the same `rangeEditCache` to each
+// commit: the partial merkle state is kept in memory and appends skip the
+// storage-metadata API calls entirely.
+const rangeEditCache = new Map();
+await hub.commit({ repo, accessToken: "hf_...", title: "append", rangeEditCache, operations: [/* edit op appending to the file */] });
 
 await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
@@ -222,6 +237,8 @@ When uploading large files, you may want to run the `commit` calls inside a work
 Remote resources and local files should be passed as `URL` whenever it's possible so they can be lazy loaded in chunks to reduce RAM usage. Passing a `File` inside the browser's context is fine, because it natively behaves as a `Blob`.
 
 Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
+
+When **editing** an existing file, prefer an `edit` commit operation with the blob returned by `downloadFile` as `originalContent` over re-uploading the whole content: for xet-backed files, only the edited regions are downloaded, re-chunked and hashed — the rest of the file is reused server-side. For repeated appends to the same file, pass a shared `rangeEditCache` (`new Map()`) to the successive `commit` calls to also skip the storage-metadata round-trips.
 
 ## Dependencies
 
