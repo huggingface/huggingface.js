@@ -33,33 +33,68 @@ import type {
 const NEWLINE = "\n";
 const OPEN_STATEMENT = "{%- ";
 const CLOSE_STATEMENT = " -%}";
-// Precedence levels are spaced 10 apart so `precedence + 1` (used for the right
-// operand of left-associative binary operators) never collides with the next level,
-// which lets `not` (15) sit between `and` (10) and the comparison operators (20).
-const CONDITIONAL_EXPRESSION_PRECEDENCE = -10;
-const LOGICAL_NOT_PRECEDENCE = 15;
-const TEST_EXPRESSION_PRECEDENCE = 60;
+const PRECEDENCE = Object.freeze({
+	CONDITIONAL: 0, // a if b else c
+	LOGICAL_OR: 1, // or
+	LOGICAL_AND: 2, // and
+	LOGICAL_NOT: 3, // not a
+	COMPARISON: 4, // == != < <= > >= in, not in
+	ADDITIVE: 5, // + -
+	MULTIPLICATIVE: 6, // * / // %
+	EXPONENTIATION: 7, // **
+	TEST: 8, // is
+	FILTER: 9, // |
+	UNARY_SIGN: 10, // -a +a
+	ATOM: 11, // literals, identifiers, calls, member accesses
+});
 
 function getBinaryOperatorPrecedence(expr: BinaryExpression): number {
 	switch (expr.operator.type) {
 		case "ExponentiationBinaryOperator":
-			return 50;
+			return PRECEDENCE.EXPONENTIATION;
 		case "MultiplicativeBinaryOperator":
-			return 40;
+			return PRECEDENCE.MULTIPLICATIVE;
 		case "AdditiveBinaryOperator":
-			return 30;
+			return PRECEDENCE.ADDITIVE;
 		case "ComparisonBinaryOperator":
-			return 20;
+			return PRECEDENCE.COMPARISON;
 		case "Identifier":
 			if (expr.operator.value === "and") {
-				return 10;
+				return PRECEDENCE.LOGICAL_AND;
 			}
 			if (expr.operator.value === "in" || expr.operator.value === "not in") {
-				return 20;
+				return PRECEDENCE.COMPARISON;
 			}
-			return 0;
+			return PRECEDENCE.LOGICAL_OR;
 	}
-	return 0;
+	return PRECEDENCE.LOGICAL_OR;
+}
+
+function getPrecedence(node: Expression): number {
+	switch (node.type) {
+		case "SelectExpression":
+		case "Ternary":
+			return PRECEDENCE.CONDITIONAL;
+		case "BinaryExpression":
+			return getBinaryOperatorPrecedence(node as BinaryExpression);
+		case "UnaryExpression":
+			return (node as UnaryExpression).operator.value === "not" ? PRECEDENCE.LOGICAL_NOT : PRECEDENCE.UNARY_SIGN;
+		case "TestExpression":
+			return PRECEDENCE.TEST;
+		case "FilterExpression":
+			return PRECEDENCE.FILTER;
+		default:
+			return PRECEDENCE.ATOM;
+	}
+}
+
+/**
+ * Formats an expression appearing in an operand slot that the parser reads at
+ * `minPrecedence`, parenthesizing the expression when it binds more loosely.
+ */
+function formatOperand(node: Expression, minPrecedence: number): string {
+	const expr = formatExpression(node);
+	return getPrecedence(node) < minPrecedence ? `(${expr})` : expr;
 }
 
 export function format(program: Program, indent: string | number = "\t"): string {
@@ -225,7 +260,7 @@ function formatFilterStatement(node: FilterStatement, depth: number, indentStr: 
 	return out;
 }
 
-function formatExpression(node: Expression, parentPrec: number = -Infinity): string {
+function formatExpression(node: Expression): string {
 	switch (node.type) {
 		case "SpreadExpression": {
 			const n = node as SpreadExpression;
@@ -251,20 +286,16 @@ function formatExpression(node: Expression, parentPrec: number = -Infinity): str
 		case "BinaryExpression": {
 			const n = node as BinaryExpression;
 			const thisPrecedence = getBinaryOperatorPrecedence(n);
-			const left = formatExpression(n.left, thisPrecedence);
-			const right = formatExpression(n.right, thisPrecedence + 1);
-			const expr = `${left} ${n.operator.value} ${right}`;
-			return thisPrecedence < parentPrec ? `(${expr})` : expr;
+			// All binary operators are left-associative, so the right operand slot is the next-tighter level.
+			const left = formatOperand(n.left, thisPrecedence);
+			const right = formatOperand(n.right, thisPrecedence + 1);
+			return `${left} ${n.operator.value} ${right}`;
 		}
 		case "UnaryExpression": {
 			const n = node as UnaryExpression;
-			// Sign operators bind tighter than everything below call/member access, so they never need parentheses.
-			const thisPrecedence = n.operator.value === "not" ? LOGICAL_NOT_PRECEDENCE : Infinity;
 			// Keep chained unary operators bare, but parenthesize any other compound operand for readability.
-			const operandPrecedence = n.argument.type === "UnaryExpression" ? thisPrecedence : Infinity;
-			const expr =
-				n.operator.value + (n.operator.value === "not" ? " " : "") + formatExpression(n.argument, operandPrecedence);
-			return thisPrecedence < parentPrec ? `(${expr})` : expr;
+			const operandPrecedence = n.argument.type === "UnaryExpression" ? getPrecedence(n) : PRECEDENCE.ATOM;
+			return n.operator.value + (n.operator.value === "not" ? " " : "") + formatOperand(n.argument, operandPrecedence);
 		}
 		case "CallExpression": {
 			const n = node as CallExpression;
@@ -273,23 +304,7 @@ function formatExpression(node: Expression, parentPrec: number = -Infinity): str
 		}
 		case "MemberExpression": {
 			const n = node as MemberExpression;
-			let obj = formatExpression(n.object);
-			// only wrap if it's not a simple or chained access/call
-			if (
-				![
-					"Identifier",
-					"MemberExpression",
-					"CallExpression",
-					"StringLiteral",
-					"IntegerLiteral",
-					"FloatLiteral",
-					"ArrayLiteral",
-					"TupleLiteral",
-					"ObjectLiteral",
-				].includes(n.object.type)
-			) {
-				obj = `(${obj})`;
-			}
+			const obj = formatOperand(n.object, PRECEDENCE.ATOM);
 			let prop = formatExpression(n.property);
 			if (!n.computed && n.property.type !== "Identifier" && n.property.type !== "IntegerLiteral") {
 				prop = `(${prop})`;
@@ -298,7 +313,7 @@ function formatExpression(node: Expression, parentPrec: number = -Infinity): str
 		}
 		case "FilterExpression": {
 			const n = node as FilterExpression;
-			const operand = formatExpression(n.operand, Infinity);
+			const operand = formatOperand(n.operand, PRECEDENCE.FILTER);
 			if (n.filter.type === "CallExpression") {
 				return `${operand} | ${formatExpression(n.filter)}`;
 			}
@@ -306,18 +321,11 @@ function formatExpression(node: Expression, parentPrec: number = -Infinity): str
 		}
 		case "SelectExpression": {
 			const n = node as SelectExpression;
-			const expr = `${formatExpression(n.lhs, CONDITIONAL_EXPRESSION_PRECEDENCE + 1)} if ${formatExpression(
-				n.test,
-				CONDITIONAL_EXPRESSION_PRECEDENCE + 1,
-			)}`;
-			return CONDITIONAL_EXPRESSION_PRECEDENCE < parentPrec ? `(${expr})` : expr;
+			return `${formatOperand(n.lhs, PRECEDENCE.LOGICAL_OR)} if ${formatOperand(n.test, PRECEDENCE.LOGICAL_OR)}`;
 		}
 		case "TestExpression": {
 			const n = node as TestExpression;
-			const expr = `${formatExpression(n.operand, TEST_EXPRESSION_PRECEDENCE)} is${n.negate ? " not" : ""} ${
-				n.test.value
-			}`;
-			return TEST_EXPRESSION_PRECEDENCE < parentPrec ? `(${expr})` : expr;
+			return `${formatOperand(n.operand, PRECEDENCE.TEST)} is${n.negate ? " not" : ""} ${n.test.value}`;
 		}
 		case "ArrayLiteral":
 		case "TupleLiteral": {
@@ -344,11 +352,11 @@ function formatExpression(node: Expression, parentPrec: number = -Infinity): str
 		}
 		case "Ternary": {
 			const n = node as Ternary;
-			const expr = `${formatExpression(n.trueExpr, CONDITIONAL_EXPRESSION_PRECEDENCE + 1)} if ${formatExpression(
+			// `else` is right-recursive, so a conditional in the false branch stays bare.
+			return `${formatOperand(n.trueExpr, PRECEDENCE.LOGICAL_OR)} if ${formatOperand(
 				n.condition,
-				CONDITIONAL_EXPRESSION_PRECEDENCE + 1,
-			)} else ${formatExpression(n.falseExpr)}`;
-			return CONDITIONAL_EXPRESSION_PRECEDENCE < parentPrec ? `(${expr})` : expr;
+				PRECEDENCE.LOGICAL_OR,
+			)} else ${formatOperand(n.falseExpr, PRECEDENCE.CONDITIONAL)}`;
 		}
 		default:
 			throw new Error(`Unknown expression type: ${node.type}`);

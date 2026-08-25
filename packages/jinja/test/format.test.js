@@ -73,6 +73,16 @@ const FORMATTING_TESTS = Object.freeze({
 		formatted: `{{- (not 1) == false and true and not false -}}`,
 		rendered: `true`,
 	},
+	NEGATED_FILTER_OPERAND: {
+		template: `{{ -(5 | abs) }}`,
+		formatted: `{{- -(5 | abs) -}}`,
+		rendered: `-5`,
+	},
+	FILTER_AS_NOT_OPERAND: {
+		template: `{{ not 0 | string }}`,
+		formatted: `{{- not (0 | string) -}}`,
+		rendered: `false`,
+	},
 	ARGUMENT_UNPACKING: {
 		template: `{{ namespace(*[{'a': 1}], **{'b': 2}).b }}`,
 		formatted: `{{- namespace(*[{"a": 1}], **{"b": 2}).b -}}`,
