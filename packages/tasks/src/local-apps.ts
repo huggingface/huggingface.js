@@ -749,11 +749,17 @@ export const LOCAL_APPS = {
 	},
 	unsloth: {
 		prettyLabel: "Unsloth Desktop",
-		docsUrl: "https://unsloth.ai/docs/new/studio",
+		docsUrl: "https://unsloth.ai/",
 		mainTask: "text-generation",
 		displayOnModelPage: isUnslothModel,
-		deeplink: (model, filepath) =>
-			new URL(`https://unsloth.ai/open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
+		deeplink: (model, filepath) => {
+			const url = new URL("unsloth://open_from_hf");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
 	},
 	"docker-model-runner": {
 		prettyLabel: "Docker Model Runner",

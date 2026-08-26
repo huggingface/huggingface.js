@@ -309,7 +309,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 
 		expect(displayOnModelPage(model)).toBe(true);
-		expect(deeplink(model, undefined).href).toBe("https://unsloth.ai/open_from_hf?model=some-user/my-unsloth-finetune");
+		expect(deeplink(model, undefined).href).toBe("unsloth://open_from_hf?model=some-user%2Fmy-unsloth-finetune");
 	});
 
 	it("unsloth namespace gguf model", async () => {
@@ -322,11 +322,9 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 
 		expect(displayOnModelPage(model)).toBe(true);
-		expect(deeplink(model, undefined).href).toBe(
-			"https://unsloth.ai/open_from_hf?model=unsloth/Llama-3.2-3B-Instruct-GGUF",
-		);
+		expect(deeplink(model, undefined).href).toBe("unsloth://open_from_hf?model=unsloth%2FLlama-3.2-3B-Instruct-GGUF");
 		expect(deeplink(model, "Llama-3.2-3B-Instruct-UD-Q4_K_XL.gguf").href).toBe(
-			"https://unsloth.ai/open_from_hf?model=unsloth/Llama-3.2-3B-Instruct-GGUF&file=Llama-3.2-3B-Instruct-UD-Q4_K_XL.gguf",
+			"unsloth://open_from_hf?model=unsloth%2FLlama-3.2-3B-Instruct-GGUF&file=Llama-3.2-3B-Instruct-UD-Q4_K_XL.gguf",
 		);
 	});
 
