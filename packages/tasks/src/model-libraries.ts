@@ -1101,6 +1101,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"oasr"`,
 	},
+	opendde: {
+		prettyLabel: "OpenDDE",
+		repoName: "OpenDDE",
+		repoUrl: "https://github.com/aurekaresearch/OpenDDE",
+		docsUrl: "https://huggingface.co/aurekaresearch/OpenDDE/blob/main/docs/inference_instructions.md",
+		snippets: snippets.opendde,
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
 		repoName: "OpenPeerLLM",

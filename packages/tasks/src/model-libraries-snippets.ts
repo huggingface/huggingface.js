@@ -1552,6 +1552,13 @@ openasr transcribe audio.wav --model ${modelId}`,
 	];
 };
 
+export const opendde = (): string[] => [
+	`# pip install 'opendde[gpu]'
+# Checkpoints are fetched from the Hub into $OPENDDE_ROOT_DIR (default ~/.cache/opendde)
+opendde doctor
+opendde pred -i examples/input.json -o ./output -n opendde_v1`,
+];
+
 export const paddlenlp = (model: ModelData): string[] => {
 	const architecture = model.config?.architectures?.[0];
 	// interpolated as a Python class name, so a non-identifier is treated as absent
