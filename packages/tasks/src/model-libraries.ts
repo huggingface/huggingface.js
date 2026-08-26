@@ -924,6 +924,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.matanyone,
 		filter: false,
 	},
+	memra: {
+		prettyLabel: "memra",
+		repoName: "memra",
+		repoUrl: "https://github.com/avifenesh/memra",
+		snippets: snippets.memra,
+		filter: false,
+	},
 	"mesh-anything": {
 		prettyLabel: "MeshAnything",
 		repoName: "MeshAnything",
