@@ -749,7 +749,7 @@ export const LOCAL_APPS = {
 	},
 	unsloth: {
 		prettyLabel: "Unsloth Desktop",
-		docsUrl: "https://unsloth.ai/",
+		docsUrl: "https://unsloth.ai/docs",
 		mainTask: "text-generation",
 		displayOnModelPage: isUnslothModel,
 		deeplink: (model, filepath) => {
