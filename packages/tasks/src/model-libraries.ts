@@ -930,10 +930,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/avifenesh/memra",
 		snippets: snippets.memra,
 		filter: false,
-		// GGUF artifacts are self-contained, so one file is one load. Safetensors
-		// checkpoints are counted by their config.json instead, which is one per repo —
-		// counting the shards would overestimate a sharded model by its shard count.
-		countDownloads: `path_extension:"gguf" OR path:"config.json"`,
 	},
 	"mesh-anything": {
 		prettyLabel: "MeshAnything",
