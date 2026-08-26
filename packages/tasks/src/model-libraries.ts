@@ -1301,6 +1301,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	"routee-powertrain": {
+		prettyLabel: "RouteE-Powertrain",
+		repoName: "RouteE-Powertrain",
+		repoUrl: "https://github.com/NatLabRockies/routee-powertrain",
+		docsUrl: "https://natlabrockies.github.io/routee-powertrain/",
+		snippets: snippets.routee_powertrain,
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_extension:"joblib"`,
+	},
 	rwkv: {
 		prettyLabel: "RWKV",
 		repoName: "RWKV-LM",
