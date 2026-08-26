@@ -1256,7 +1256,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"routee-powertrain": {
 		prettyLabel: "RouteE-Powertrain",
-		repoName: "routee-powertrain",
+		repoName: "RouteE-Powertrain",
 		repoUrl: "https://github.com/NatLabRockies/routee-powertrain",
 		docsUrl: "https://natlabrockies.github.io/routee-powertrain/",
 		snippets: snippets.routee_powertrain,
