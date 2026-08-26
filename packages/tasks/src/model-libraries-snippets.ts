@@ -2486,15 +2486,30 @@ model = BiRefNet.from_pretrained("${model.id}")`,
 
 export const nobg = (model: ModelData): string[] => {
 	const installSnippet = `pip install nobg`;
+	// we check model tags and if it supports prompts we show an example for it, else we show the default example without prompts
+	const predictCall = model.tags.includes("promptable")
+		? `cutout = model.predict(processor, "image.jpg", "prompt")`
+		: `cutout = model.predict(processor, "image.jpg")`;
+	// snippet using the predict method
+	const predictSnippet = `# Option 1: use via the predict method
 
-	const exampleSnippet = `import torch
+from nobg import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("${model.id}").eval()
+processor = AutoProcessor.from_pretrained("${model.id}")
+
+${predictCall}`;
+	// snippet using the model and processor directly
+	const manualSnippet = `# Option 2: use the model and processor directly
+
+import torch
 from loadimg import load_img
 from nobg import AutoModel, AutoProcessor
 
 model = AutoModel.from_pretrained("${model.id}").eval()
 processor = AutoProcessor.from_pretrained("${model.id}")
 
-image = load_img("input.jpg").convert("RGB")
+image = load_img("image.jpg").convert("RGB")
 inputs = processor(image, return_tensors="pt")
 
 with torch.no_grad():
@@ -2503,7 +2518,7 @@ with torch.no_grad():
 alpha = processor.post_process_alpha_matting(outputs, target_sizes=[(image.height, image.width)])[0]
 processor.cutout(image, alpha).save("output.png")`;
 
-	return [installSnippet, exampleSnippet];
+	return [installSnippet, predictSnippet, manualSnippet];
 };
 
 export const supertonic = (): string[] => [
