@@ -234,56 +234,6 @@ const snippetDulus = (model: ModelData, filepath?: string): string => {
 	].join("\n");
 };
 
-const snippetUnsloth = (model: ModelData): LocalAppSnippet[] => {
-	const isGguf = isLlamaCppGgufModel(model);
-
-	const studio_content = [
-		"# Run unsloth studio",
-		"unsloth studio -H 0.0.0.0 -p 8888",
-		"# Then open http://localhost:8888 in your browser",
-		"# Search for " + model.id + " to start chatting",
-	].join("\n");
-
-	const studio_instructions: LocalAppSnippet = {
-		title: "Install Unsloth Studio (macOS, Linux, WSL)",
-		setup: "curl -fsSL https://unsloth.ai/install.sh | sh",
-		content: studio_content,
-	};
-
-	const studio_instructions_windows: LocalAppSnippet = {
-		title: "Install Unsloth Studio (Windows)",
-		setup: "irm https://unsloth.ai/install.ps1 | iex",
-		content: studio_content,
-	};
-
-	const hf_spaces_instructions: LocalAppSnippet = {
-		title: "Using HuggingFace Spaces for Unsloth",
-		setup: "# No setup required",
-		content:
-			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for " +
-			model.id +
-			" to start chatting",
-	};
-
-	const fastmodel_instructions: LocalAppSnippet = {
-		title: "Load model with FastModel",
-		setup: "pip install unsloth",
-		content: [
-			"from unsloth import FastModel",
-			"model, tokenizer = FastModel.from_pretrained(",
-			'    model_name="' + model.id + '",',
-			"    max_seq_length=2048,",
-			")",
-		].join("\n"),
-	};
-
-	if (isGguf) {
-		return [studio_instructions, studio_instructions_windows, hf_spaces_instructions];
-	} else {
-		return [studio_instructions, studio_instructions_windows, hf_spaces_instructions, fastmodel_instructions];
-	}
-};
-
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		["# Load and run the model:", `${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`].join("\n");
@@ -807,11 +757,18 @@ export const LOCAL_APPS = {
 		snippet: snippetOllama,
 	},
 	unsloth: {
-		prettyLabel: "Unsloth Studio",
-		docsUrl: "https://unsloth.ai/docs/new/studio",
+		prettyLabel: "Unsloth Desktop",
+		docsUrl: "https://unsloth.ai/docs",
 		mainTask: "text-generation",
 		displayOnModelPage: isUnslothModel,
-		snippet: snippetUnsloth,
+		deeplink: (model, filepath) => {
+			const url = new URL("unsloth://open_from_hf");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
 	},
 	"docker-model-runner": {
 		prettyLabel: "Docker Model Runner",

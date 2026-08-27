@@ -247,6 +247,31 @@ print("R² Score:", r2)`;
 	return [installSnippet, classificationSnippet, regressionsSnippet];
 };
 
+export const cortiq = (model: ModelData): string[] => {
+	const setup = `# one Rust binary, no additional dependencies
+cargo install cortiq-cli   # or a prebuilt binary from github.com/infosave2007/cmf/releases
+hf download ${model.id} --include "*.cmf" --local-dir .
+ls *.cmf                   # some repos ship more than one quantization`;
+	if (model.pipeline_tag === "text-to-image") {
+		return [setup, `cortiq imagine FILE.cmf --prompt "a red fox in a snowy forest" --out fox.ppm`];
+	}
+	if (model.pipeline_tag === "text-to-video") {
+		return [setup, `cortiq animate FILE.cmf --prompt "a corgi in a chef hat flipping a pancake" --out clip.avi`];
+	}
+	if (model.pipeline_tag === "text-to-audio") {
+		return [
+			setup,
+			`cortiq music FILE.cmf --prompt "dream pop, warm analog synths, brushed drums" \\
+  --lyrics "[verse] the tide came in and took the map" --seconds 20 --out song.wav`,
+		];
+	}
+	return [
+		setup,
+		`cortiq run FILE.cmf --prompt "What is the capital of France?"`,
+		`cortiq serve FILE.cmf --port 8080   # OpenAI-compatible server`,
+	];
+};
+
 export const cxr_foundation = (): string[] => [
 	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
 
@@ -1473,6 +1498,20 @@ from matanyone import InferenceCore
 processor = InferenceCore("${model.id}")`,
 ];
 
+export const memra = (model: ModelData): string[] => [
+	`# memra serves NVIDIA Blackwell workstation and consumer cards (sm_120a), with a
+# compile-gated Hopper lane. Prebuilt binaries need Linux x86_64 and driver 580+,
+# and no CUDA toolkit.
+curl -fsSL https://raw.githubusercontent.com/avifenesh/memra/main/tools/install.sh | sh`,
+
+	`# One chat-templated generation. In a repo with several GGUF files, append
+# :<substring> to choose one, for example hf:${model.id}:Q4_K_M
+MEMRA_CHAT=1 run-gen hf:${model.id} --prompt "Explain KV caches in one sentence."`,
+
+	`# Or an OpenAI-compatible server on 127.0.0.1:8080.
+MEMRA_MODELS="model=hf:${model.id}" memra-server`,
+];
+
 export const mesh_anything = (): string[] => [
 	`# Install from https://github.com/buaacyw/MeshAnything.git
 
@@ -1551,6 +1590,13 @@ openasr pull ${modelId}
 openasr transcribe audio.wav --model ${modelId}`,
 	];
 };
+
+export const opendde = (): string[] => [
+	`# pip install 'opendde[gpu]'
+# Checkpoints are fetched from the Hub into $OPENDDE_ROOT_DIR (default ~/.cache/opendde)
+opendde doctor
+opendde pred -i examples/input.json -o ./output -n opendde_v1`,
+];
 
 export const paddlenlp = (model: ModelData): string[] => {
 	const architecture = model.config?.architectures?.[0];
@@ -1742,6 +1788,28 @@ export const renderformer = (model: ModelData): string[] => [
 
 from renderformer import RenderFormerRenderingPipeline
 pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
+];
+
+export const routee_powertrain = (model: ModelData): string[] => [
+	`# pip install routee.powertrain
+import pandas as pd
+import routee.powertrain as pt
+from routee.powertrain.registry import HFRegistry
+
+registry = HFRegistry(repo_id="${model.id}")
+
+# find a vehicle: filter by make, model, year, powertrain type, features, ...
+pt.query_available_models(make="tesla", model="model 3", registry=registry)
+
+# load one by its id: "<make>/<vehicle_slug>/<year>/<config_slug>"
+model = pt.load_model("tesla/model_3_bev/2022/rf_c3326385", registry=registry)
+
+links = pd.DataFrame({
+    "distance": [0.1, 0.2],  # miles
+    "speed_mph": [30, 55],
+    "grade_percent": [-2.0, 1.0],
+})
+model.predict(links)`,
 ];
 
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
@@ -2486,15 +2554,30 @@ model = BiRefNet.from_pretrained("${model.id}")`,
 
 export const nobg = (model: ModelData): string[] => {
 	const installSnippet = `pip install nobg`;
+	// we check model tags and if it supports prompts we show an example for it, else we show the default example without prompts
+	const predictCall = model.tags.includes("promptable")
+		? `cutout = model.predict(processor, "image.jpg", "prompt")`
+		: `cutout = model.predict(processor, "image.jpg")`;
+	// snippet using the predict method
+	const predictSnippet = `# Option 1: use via the predict method
 
-	const exampleSnippet = `import torch
+from nobg import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("${model.id}").eval()
+processor = AutoProcessor.from_pretrained("${model.id}")
+
+${predictCall}`;
+	// snippet using the model and processor directly
+	const manualSnippet = `# Option 2: use the model and processor directly
+
+import torch
 from loadimg import load_img
 from nobg import AutoModel, AutoProcessor
 
 model = AutoModel.from_pretrained("${model.id}").eval()
 processor = AutoProcessor.from_pretrained("${model.id}")
 
-image = load_img("input.jpg").convert("RGB")
+image = load_img("image.jpg").convert("RGB")
 inputs = processor(image, return_tensors="pt")
 
 with torch.no_grad():
@@ -2503,7 +2586,7 @@ with torch.no_grad():
 alpha = processor.post_process_alpha_matting(outputs, target_sizes=[(image.height, image.width)])[0]
 processor.cutout(image, alpha).save("output.png")`;
 
-	return [installSnippet, exampleSnippet];
+	return [installSnippet, predictSnippet, manualSnippet];
 };
 
 export const supertonic = (): string[] => [
