@@ -334,6 +334,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
 	},
+	cortiq: {
+		prettyLabel: "cortiq",
+		repoName: "cortiq",
+		repoUrl: "https://github.com/infosave2007/cmf",
+		docsUrl: "https://github.com/infosave2007/cmf/blob/master/docs/CMF_V2_SPEC.md",
+		snippets: snippets.cortiq,
+		countDownloads: `path_extension:"cmf"`,
+	},
 	cosmos: {
 		prettyLabel: "Cosmos",
 		repoName: "Cosmos",
@@ -607,6 +615,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+	"minimax-h3": {
+		prettyLabel: "MiniMax H3",
+		repoName: "MiniMax-H3",
+		repoUrl: "https://github.com/MiniMax-AI/MiniMax-H3",
+		docsUrl: "https://huggingface.co/MiniMaxAI/MiniMax-H3",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_filename:"model_index" OR path_filename:"config" OR path:"modular_model_index.json"`,
+	},
 	hermes: {
 		prettyLabel: "HERMES",
 		repoName: "HERMES",
@@ -740,6 +756,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras_hub,
 		filter: true,
 	},
+	kerasformers: {
+		prettyLabel: "KerasFormers",
+		repoName: "KerasFormers",
+		repoUrl: "https://github.com/IMvision12/KerasFormers",
+		docsUrl: "https://imvision12.github.io/KerasFormers/",
+		countDownloads: `path:"model.weights.h5" OR path:"model.weights.json"`,
+		filter: false,
+	},
 	kernels: {
 		prettyLabel: "Kernels",
 		repoName: "Kernels",
@@ -786,6 +810,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/lagernvs",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	ltx: {
+		prettyLabel: "LTX-2",
+		repoName: "LTX-2",
+		repoUrl: "https://github.com/Lightricks/LTX-2",
+		docsUrl: "https://github.com/Lightricks/LTX-2",
+		snippets: snippets.ltx,
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"lightning-ir": {
 		prettyLabel: "Lightning IR",
@@ -899,6 +932,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.matanyone,
 		filter: false,
 	},
+	memra: {
+		prettyLabel: "memra",
+		repoName: "memra",
+		repoUrl: "https://github.com/avifenesh/memra",
+		snippets: snippets.memra,
+		filter: false,
+	},
 	"mesh-anything": {
 		prettyLabel: "MeshAnything",
 		repoName: "MeshAnything",
@@ -920,6 +960,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/StanfordMIMI/MedVAE",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
+	},
+	mflux: {
+		prettyLabel: "mflux",
+		repoName: "mflux",
+		repoUrl: "https://github.com/filipstrand/mflux",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
@@ -983,6 +1030,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mobilint,
 		filter: false,
 	},
+	"montreal-forced-aligner": {
+		prettyLabel: "Montreal Forced Aligner",
+		repoName: "Montreal Forced Aligner",
+		repoUrl: "https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner",
+		docsUrl: "https://montreal-forced-aligner.readthedocs.io",
+		filter: false,
+		countDownloads: `path:"acoustic/final.mdl" OR path_extension:"zip"`,
+	},
 	moshi: {
 		prettyLabel: "Moshi",
 		repoName: "Moshi",
@@ -1021,6 +1076,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"ninfer"`,
 	},
+	nobg: {
+		prettyLabel: "nobg",
+		repoName: "nobg",
+		repoUrl: "https://github.com/feyninc/nobg",
+		snippets: snippets.nobg,
+		filter: false,
+	},
 	"nv-medtech": {
 		prettyLabel: "NV-MedTech",
 		repoName: "NV-MedTech",
@@ -1053,6 +1115,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.openasr,
 		filter: false,
 		countDownloads: `path_extension:"oasr"`,
+	},
+	opendde: {
+		prettyLabel: "OpenDDE",
+		repoName: "OpenDDE",
+		repoUrl: "https://github.com/aurekaresearch/OpenDDE",
+		docsUrl: "https://huggingface.co/aurekaresearch/OpenDDE/blob/main/docs/inference_instructions.md",
+		snippets: snippets.opendde,
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
@@ -1117,6 +1188,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.phantom_wan,
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	piper: {
+		prettyLabel: "Piper",
+		repoName: "Piper",
+		repoUrl: "https://github.com/OHF-Voice/piper1-gpl",
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_extension:"ckpt"`,
 	},
 	"pocket-tts": {
 		prettyLabel: "Pocket-TTS",
@@ -1222,6 +1300,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/HorizonRobotics/RoboOrchardLab",
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	"routee-powertrain": {
+		prettyLabel: "RouteE-Powertrain",
+		repoName: "RouteE-Powertrain",
+		repoUrl: "https://github.com/NatLabRockies/routee-powertrain",
+		docsUrl: "https://natlabrockies.github.io/routee-powertrain/",
+		snippets: snippets.routee_powertrain,
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_extension:"joblib"`,
 	},
 	rwkv: {
 		prettyLabel: "RWKV",

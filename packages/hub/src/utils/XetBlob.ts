@@ -4,6 +4,10 @@ import { checkCredentials } from "./checkCredentials";
 import { combineUint8Arrays } from "./combineUint8Arrays";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
+import { StreamingMultipartParser } from "./multipart";
+import { sum } from "./sum";
+import { isFrontend } from "./isFrontend";
+import { concatUint8Arrays } from "./concatUint8Arrays";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -28,9 +32,84 @@ type XetBlobCreateOptions = {
 	 * Pre-fetched read token to avoid the refresh URL roundtrip.
 	 */
 	readToken?: XetReadToken;
+	/**
+	 * Fetch xorb data with multiple parallel requests, instead of one at a time.
+	 *
+	 * Concurrency is tuned automatically (starting serially, between 1 and `maxConcurrency`):
+	 * extra connections are added one at a time and only kept while they improve aggregate
+	 * throughput, so an already-saturated link stays at (or near) serial speed. Rate-limits
+	 * always back off. Memory is bounded: at most `maxInFlightBytes` of
+	 * downloaded-but-not-yet-consumed data is held (by default derived from the file's
+	 * reconstruction, between 64MB and 256MB).
+	 *
+	 * Pass `false` to download serially, or an object to tune the ceiling/budget.
+	 *
+	 * @default true
+	 */
+	parallelDownloads?: boolean | ParallelDownloadOptions;
 } & ({ hash: string; reconstructionUrl?: string } | { hash?: string; reconstructionUrl: string }) &
 	Partial<CredentialsParams>;
 
+export interface ParallelDownloadOptions {
+	/** Ceiling for the auto-tuned number of concurrent xorb requests. @default 8 */
+	maxConcurrency?: number;
+	/**
+	 * Budget of downloaded-but-not-yet-consumed bytes.
+	 *
+	 * @default derived from the file's reconstruction: 3x the largest xorb fetch, clamped to [64MB, 256MB]
+	 */
+	maxInFlightBytes?: number;
+	/**
+	 * @internal Instrumentation callback for tests and benchmarks, called once per download.
+	 */
+	onStat?: (stat: Record<string, unknown>) => void;
+	/**
+	 * @internal Concurrency controller tick interval, for tests and benchmarks.
+	 */
+	controllerTickMs?: number;
+}
+
+// Browsers get a lower concurrency ceiling: connections may share an HTTP/2 session, and
+// tab/worker memory is scarcer than in Node. The byte budget derivation is identical
+// everywhere — a cap below ~3x the entry size degrades below serial performance (entries
+// reserve their estimated size before fetching), and since entries max out at one xorb
+// (~64MB compressed) the derivation self-limits at ~192MB; actual browser memory is further
+// bounded by the lower ceiling.
+const PARALLEL_DEFAULT_MAX_CONCURRENCY = isFrontend ? 4 : 8;
+const PARALLEL_MIN_IN_FLIGHT_BYTES = 64 * 1024 * 1024;
+const PARALLEL_MAX_IN_FLIGHT_BYTES = 256 * 1024 * 1024;
+const PARALLEL_CONTROLLER_TICK_MS = 500;
+/** An extra connection is kept only if aggregate throughput improves by at least this factor. */
+const PARALLEL_PROBE_KEEP_MARGIN = 1.05;
+/** Ticks between upward re-probes once a concurrency plateau has been found (~5s). */
+const PARALLEL_PLATEAU_HOLD_TICKS = 10;
+
+/** Simple broadcast notifier: `wait()` resolves at the next `notifyAll()`. */
+class Notifier {
+	#resolvers: Array<() => void> = [];
+	wait(): Promise<void> {
+		return new Promise((resolve) => this.#resolvers.push(resolve));
+	}
+	notifyAll(): void {
+		const resolvers = this.#resolvers;
+		this.#resolvers = [];
+		for (const resolve of resolvers) {
+			resolve();
+		}
+	}
+}
+
+function delay(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Response shape of `GET /v2/reconstructions/{hash}`, see https://huggingface.co/docs/xet/en/download-protocol
+ *
+ * Unlike the (deprecated) V1 endpoint, a signed URL carries all the byte ranges needed from a xorb,
+ * signed together in the URL's `X-Xet-Signed-Range` query param. Requesting bytes outside that set
+ * fails authorization, which prevents a leaked URL from exposing arbitrary parts of the xorb.
+ */
 export interface ReconstructionInfo {
 	/**
 	 * List of CAS blocks
@@ -45,20 +124,26 @@ export interface ReconstructionInfo {
 	}>;
 
 	/**
-	 * Dictionnary of CAS block hash => list of ranges in the block + url to fetch it
+	 * Dictionnary of CAS block hash => list of fetch entries for the block.
+	 *
+	 * Typically one entry per xorb; multiple entries only when the signed URL would exceed the URL
+	 * length limit.
 	 */
-	fetch_info: Record<
+	xorbs: Record<
 		string,
 		Array<{
-			url: string;
-			/** Chunk range */
-			range: { start: number; end: number };
 			/**
-			 * Byte range, when making the call to the URL.
-			 *
-			 * We assume that we're given non-overlapping ranges for each hash
+			 * Signed URL covering all of `ranges`. The `Range` header sent to it must be built from
+			 * the `bytes` ranges below; requesting other bytes fails authorization.
 			 */
-			url_range: { start: number; end: number };
+			url: string;
+			/** Fragmented ranges, ordered by ascending `chunks.start` */
+			ranges: Array<{
+				/** Chunk index range within the xorb, end-exclusive: [start, end) */
+				chunks: { start: number; end: number };
+				/** Physical byte range for the HTTP Range header, end-inclusive: [start, end] */
+				bytes: { start: number; end: number };
+			}>;
 		}>
 	>;
 	/**
@@ -66,6 +151,9 @@ export interface ReconstructionInfo {
 	 */
 	offset_into_first_range: number;
 }
+
+type XorbFetchEntry = ReconstructionInfo["xorbs"][string][number];
+type XorbRangeDescriptor = XorbFetchEntry["ranges"][number];
 
 export enum XetChunkCompressionScheme {
 	None = 0,
@@ -88,6 +176,123 @@ interface ChunkHeader {
 
 export const XET_CHUNK_HEADER_BYTES = 8;
 
+function parseChunkHeader(view: DataView): ChunkHeader {
+	const chunkHeader: ChunkHeader = {
+		version: view.getUint8(0),
+		compressed_length: view.getUint8(1) | (view.getUint8(2) << 8) | (view.getUint8(3) << 16),
+		compression_scheme: view.getUint8(4),
+		uncompressed_length: view.getUint8(5) | (view.getUint8(6) << 8) | (view.getUint8(7) << 16),
+	};
+
+	if (chunkHeader.version !== 0) {
+		throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
+	}
+
+	if (
+		chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
+		chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
+		chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
+	) {
+		throw new Error(
+			`Unsupported compression scheme ${
+				compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
+			}`,
+		);
+	}
+
+	return chunkHeader;
+}
+
+function decompressChunk(chunkHeader: ChunkHeader, compressed: Uint8Array): Uint8Array {
+	switch (chunkHeader.compression_scheme) {
+		case XetChunkCompressionScheme.LZ4:
+			return lz4_decompress(compressed, chunkHeader.uncompressed_length);
+		case XetChunkCompressionScheme.ByteGroupingLZ4:
+			return bg4_regroup_bytes(lz4_decompress(compressed, chunkHeader.uncompressed_length));
+		default:
+			// Copy so we don't retain the (possibly much larger) source buffer
+			return compressed.slice();
+	}
+}
+
+type StagedChunks = Map<{ data: Uint8Array[] | null }, Uint8Array[]>;
+
+/**
+ * Decode one complete xorb chunk stream (a single `multipart/byteranges` part) into per-range
+ * staged chunk arrays. Throws if it doesn't decode to exactly the chunks the descriptor covers,
+ * so a truncated/corrupt part never leaves partial data to be committed to the cache.
+ */
+function decodePartChunks(
+	data: Uint8Array,
+	descriptor: XorbRangeDescriptor,
+	rangeList: RangeList<Uint8Array[]>,
+): StagedChunks {
+	const ranges = rangeList.getRanges(descriptor.chunks.start, descriptor.chunks.end);
+	const staged: StagedChunks = new Map();
+	let chunkIndex = descriptor.chunks.start;
+	let offset = 0;
+
+	while (offset < data.byteLength) {
+		if (chunkIndex >= descriptor.chunks.end) {
+			throw new Error(
+				`Multipart part for chunks ${descriptor.chunks.start}-${descriptor.chunks.end} contains more chunks than expected`,
+			);
+		}
+		if (data.byteLength - offset < XET_CHUNK_HEADER_BYTES) {
+			throw new Error("Truncated chunk header in multipart part");
+		}
+
+		const chunkHeader = parseChunkHeader(new DataView(data.buffer, data.byteOffset + offset, XET_CHUNK_HEADER_BYTES));
+		const compressedStart = offset + XET_CHUNK_HEADER_BYTES;
+		const compressedEnd = compressedStart + chunkHeader.compressed_length;
+
+		if (compressedEnd > data.byteLength) {
+			throw new Error("Truncated chunk data in multipart part");
+		}
+
+		const uncompressed = decompressChunk(chunkHeader, data.subarray(compressedStart, compressedEnd));
+
+		const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
+		if (range) {
+			let chunks = staged.get(range);
+			if (!chunks) {
+				chunks = [];
+				staged.set(range, chunks);
+			}
+			chunks.push(uncompressed);
+		}
+
+		chunkIndex++;
+		offset = compressedEnd;
+	}
+
+	if (chunkIndex !== descriptor.chunks.end) {
+		throw new Error(
+			`Multipart part decoded chunks ${descriptor.chunks.start}-${chunkIndex} but expected ${descriptor.chunks.start}-${descriptor.chunks.end}`,
+		);
+	}
+
+	return staged;
+}
+
+/**
+ * Commit staged chunks to their ranges and return the number of bytes committed.
+ *
+ * Ranges that already have data (eg from a previous attempt of a retried fetch) are skipped, so
+ * re-decoding an entry never commits — or counts — the same range twice.
+ */
+function commitChunks(staged: StagedChunks): number {
+	let committed = 0;
+	for (const [range, chunks] of staged) {
+		if (range.data) {
+			continue;
+		}
+		range.data = chunks;
+		committed += sum(chunks.map((chunk) => chunk.byteLength));
+	}
+	return committed;
+}
+
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
  */
@@ -102,6 +307,7 @@ export class XetBlob extends Blob {
 	internalLogging = false;
 	reconstructionInfo: ReconstructionInfo | undefined;
 	listener: XetBlobCreateOptions["listener"];
+	parallelDownloads?: boolean | ParallelDownloadOptions;
 
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
@@ -114,6 +320,7 @@ export class XetBlob extends Blob {
 		this.hash = params.hash;
 		this.listener = params.listener;
 		this.internalLogging = params.internalLogging ?? false;
+		this.parallelDownloads = params.parallelDownloads;
 
 		if (params.readToken) {
 			const key = cacheKey({ refreshUrl: this.refreshUrl, initialAccessToken: this.accessToken });
@@ -145,13 +352,14 @@ export class XetBlob extends Blob {
 		blob.reconstructionInfo = this.reconstructionInfo;
 		blob.listener = this.listener;
 		blob.internalLogging = this.internalLogging;
+		blob.parallelDownloads = this.parallelDownloads;
 
 		return blob;
 	}
 
 	override slice(start = 0, end = this.size): XetBlob {
 		if (start < 0 || end < 0) {
-			new TypeError("Unsupported negative start/end on XetBlob.slice");
+			throw new TypeError("Unsupported negative start/end on XetBlob.slice");
 		}
 
 		const slice = this.#clone();
@@ -176,11 +384,15 @@ export class XetBlob extends Blob {
 		this.#reconstructionInfoPromise = (async () => {
 			const connParams = await getAccessToken(this.accessToken, this.fetch, this.refreshUrl);
 
-			// debug(
-			// 	`curl '${connParams.casUrl}/v1/reconstructions/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
-			// );
+			// The `xet-reconstruction-info` Link header from the Hub points to the deprecated V1
+			// endpoint; derive the V2 URL from it.
+			const url = this.reconstructionUrl
+				? this.reconstructionUrl.replace("/v1/reconstructions/", "/v2/reconstructions/")
+				: `${connParams.casUrl}/v2/reconstructions/${this.hash}`;
 
-			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/v1/reconstructions/${this.hash}`, {
+			// debug(`curl '${url}' -H 'Authorization: Bearer ${connParams.accessToken}'`);
+
+			const resp = await this.fetch(url, {
 				headers: {
 					Authorization: `Bearer ${connParams.accessToken}`,
 					Range: `bytes=${this.start}-${this.end - 1}`,
@@ -249,11 +461,131 @@ export class XetBlob extends Blob {
 					throw new Error(`Failed to find range list for term ${term.hash}`);
 				}
 
-				{
-					const termRanges = rangeList.getRanges(term.range.start, term.range.end);
+				// Locate the fetch entry + range descriptor whose chunk range covers this term
+				const locate = (info: ReconstructionInfo) => {
+					for (const entry of info.xorbs[term.hash] ?? []) {
+						const descriptor = entry.ranges.find(
+							(r) => r.chunks.start <= term.range.start && r.chunks.end >= term.range.end,
+						);
+						if (descriptor) {
+							return { entry, descriptor };
+						}
+					}
+					return undefined;
+				};
 
+				const buildMultiRangeHeader = (entry: XorbFetchEntry) =>
+					`bytes=${entry.ranges.map((r) => `${r.bytes.start}-${r.bytes.end}`).join(",")}`;
+
+				// Fetch all signed ranges of a multi-range entry in a single request, and store the
+				// decoded chunks into the cache. The reconstruction server is expected to only emit
+				// multi-range URLs when its CDN supports them; servers without multi-range support get
+				// one fetch entry per range instead (single-range streaming path below).
+				const fetchMultiRangeEntry = async (entry: XorbFetchEntry): Promise<void> => {
+					let resp = await customFetch(entry.url, { headers: { Range: buildMultiRangeHeader(entry) } });
+
+					if (resp.status === 403) {
+						// In case it's expired
+						reconstructionInfo = await reloadReconstructionInfo();
+						const relocated = locate(reconstructionInfo);
+						if (!relocated) {
+							throw new Error(
+								`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end} after refresh`,
+							);
+						}
+						entry = relocated.entry;
+						resp = await customFetch(entry.url, { headers: { Range: buildMultiRangeHeader(entry) } });
+					}
+
+					if (!resp.ok) {
+						throw await createApiError(resp);
+					}
+
+					const contentType = resp.headers.get("content-type") ?? "";
+					if (!contentType.includes("multipart/byteranges")) {
+						// The server ignored (or coalesced) the multi-range request, so the body can't be
+						// mapped back to the signed ranges; decoding it heuristically would risk corruption.
+						throw new Error(`Expected multipart/byteranges response for multi-range request, got "${contentType}"`);
+					}
+
+					const reader = resp.body?.getReader();
+					if (!reader) {
+						throw new Error("Failed to get reader from response body");
+					}
+
+					// Stream the body: decode each part as it completes and stage its chunks, so memory
+					// stays bounded by the largest part instead of the whole xorb. Parts arrive in the
+					// same ascending order as the entry's ranges.
+					const parser = new StreamingMultipartParser(contentType);
+					const stagedParts: StagedChunks[] = [];
+					let partIndex = 0;
+
+					const consumeParts = (parts: Uint8Array[]) => {
+						for (const part of parts) {
+							const descriptor = entry.ranges[partIndex];
+							if (!descriptor) {
+								throw new Error(`Received more multipart parts than the ${entry.ranges.length} signed ranges`);
+							}
+							stagedParts.push(decodePartChunks(part, descriptor, rangeList));
+							partIndex++;
+						}
+					};
+
+					try {
+						for (;;) {
+							const result = await reader.read();
+							listener?.({ event: "read" });
+							if (result.done) {
+								break;
+							}
+							if (result.value) {
+								consumeParts(parser.push(result.value));
+							}
+						}
+						consumeParts(parser.push());
+					} finally {
+						await reader.cancel().catch(() => {});
+					}
+
+					if (partIndex !== entry.ranges.length) {
+						throw new Error(
+							`Multi-range fetch produced ${partIndex} parts but expected ${entry.ranges.length} for term ${term.hash}`,
+						);
+					}
+
+					// All parts decoded cleanly and cover every signed range: commit to the cache.
+					for (const staged of stagedParts) {
+						commitChunks(staged);
+					}
+				};
+
+				let termRanges = rangeList.getRanges(term.range.start, term.range.end);
+
+				if (!termRanges.every((range) => range.data)) {
+					const located = locate(reconstructionInfo);
+					if (!located) {
+						throw new Error(
+							`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
+						);
+					}
+					if (located.entry.ranges.length > 1) {
+						await fetchMultiRangeEntry(located.entry);
+						termRanges = rangeList.getRanges(term.range.start, term.range.end);
+					}
+				}
+
+				{
 					if (termRanges.every((range) => range.data)) {
 						log("all data available for term", term.hash, readBytesToSkip);
+
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						const cachedLength = sum(termRanges.map((range) => sum(range.data!.map((chunk) => chunk.byteLength))));
+						if (cachedLength !== term.unpacked_length) {
+							throw new Error(
+								`Term ${term.hash} range ${term.range.start}-${term.range.end} decoded to ${cachedLength} bytes, expected ${term.unpacked_length}`,
+							);
+						}
+
 						rangeLoop: for (const range of termRanges) {
 							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							for (let chunk of range.data!) {
@@ -284,40 +616,41 @@ export class XetBlob extends Blob {
 					}
 				}
 
-				let fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
-					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
-				);
+				// Stream a single range: fetch the descriptor covering this term with a single-range
+				// header. Each individual range is part of the URL's signed range set, so this stays
+				// authorized even when the multi-range request isn't supported by the server.
+				let located = locate(reconstructionInfo);
 
-				if (!fetchInfo) {
+				if (!located) {
 					throw new Error(
 						`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
 					);
 				}
+				let descriptor = located.descriptor;
 
 				log("term", term);
-				log("fetchinfo", fetchInfo);
+				log("descriptor", descriptor);
 				log("readBytesToSkip", readBytesToSkip);
 
-				let resp = await customFetch(fetchInfo.url, {
+				let resp = await customFetch(located.entry.url, {
 					headers: {
-						Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
+						Range: `bytes=${descriptor.bytes.start}-${descriptor.bytes.end}`,
 					},
 				});
 
 				if (resp.status === 403) {
 					// In case it's expired
 					reconstructionInfo = await reloadReconstructionInfo();
-					fetchInfo = reconstructionInfo.fetch_info[term.hash]?.find(
-						(info) => info.range.start <= term.range.start && info.range.end >= term.range.end,
-					);
-					if (!fetchInfo) {
+					located = locate(reconstructionInfo);
+					if (!located) {
 						throw new Error(
 							`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end} after refresh`,
 						);
 					}
-					resp = await customFetch(fetchInfo.url, {
+					descriptor = located.descriptor;
+					resp = await customFetch(located.entry.url, {
 						headers: {
-							Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
+							Range: `bytes=${descriptor.bytes.start}-${descriptor.bytes.end}`,
 						},
 					});
 				}
@@ -330,7 +663,7 @@ export class XetBlob extends Blob {
 					"expected content length",
 					resp.headers.get("content-length"),
 					"range",
-					fetchInfo.url_range,
+					descriptor.bytes,
 					resp.headers.get("content-range"),
 				);
 
@@ -340,8 +673,8 @@ export class XetBlob extends Blob {
 				}
 
 				let done = false;
-				let chunkIndex = fetchInfo.range.start;
-				const ranges = rangeList.getRanges(fetchInfo.range.start, fetchInfo.range.end);
+				let chunkIndex = descriptor.chunks.start;
+				const ranges = rangeList.getRanges(descriptor.chunks.start, descriptor.chunks.end);
 
 				let leftoverBytes: Uint8Array | undefined = undefined;
 				let totalFetchBytes = 0;
@@ -374,30 +707,9 @@ export class XetBlob extends Blob {
 						}
 
 						const header = new DataView(result.value.buffer, result.value.byteOffset, XET_CHUNK_HEADER_BYTES);
-						const chunkHeader: ChunkHeader = {
-							version: header.getUint8(0),
-							compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
-							compression_scheme: header.getUint8(4),
-							uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
-						};
+						const chunkHeader = parseChunkHeader(header);
 
 						log("chunk header", chunkHeader, "to skip", readBytesToSkip);
-
-						if (chunkHeader.version !== 0) {
-							throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
-						}
-
-						if (
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
-							chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
-						) {
-							throw new Error(
-								`Unsupported compression scheme ${
-									compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
-								}`,
-							);
-						}
 
 						if (result.value.byteLength < chunkHeader.compressed_length + XET_CHUNK_HEADER_BYTES) {
 							// We need more data to read the full chunk
@@ -407,24 +719,14 @@ export class XetBlob extends Blob {
 
 						result.value = result.value.slice(XET_CHUNK_HEADER_BYTES);
 
-						let uncompressed =
-							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
-								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
-								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
-									? bg4_regroup_bytes(
-											lz4_decompress(
-												result.value.slice(0, chunkHeader.compressed_length),
-												chunkHeader.uncompressed_length,
-											),
-										)
-									: result.value.slice(0, chunkHeader.compressed_length);
+						let uncompressed = decompressChunk(chunkHeader, result.value.subarray(0, chunkHeader.compressed_length));
 
 						const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
 						const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
 						const minRefCountToStore = shouldYield ? 2 : 1;
 						let stored = false;
 
-						// Assuming non-overlapping fetch_info ranges for the same hash
+						// Assuming non-overlapping fetch ranges for the same hash
 						if (range && range.refCount >= minRefCountToStore) {
 							range.data ??= [];
 							range.data.push(uncompressed);
@@ -463,16 +765,12 @@ export class XetBlob extends Blob {
 					}
 				}
 
-				if (
-					done &&
-					totalBytesRead < maxBytes &&
-					totalFetchBytes < fetchInfo.url_range.end - fetchInfo.url_range.start + 1
-				) {
+				if (done && totalBytesRead < maxBytes && totalFetchBytes < descriptor.bytes.end - descriptor.bytes.start + 1) {
 					log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
 					log("failed to fetch all data for term", term.hash);
 					throw new Error(
 						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
-							fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+							descriptor.bytes.end - descriptor.bytes.start + 1
 						}`,
 					);
 				}
@@ -485,12 +783,510 @@ export class XetBlob extends Blob {
 			}
 		}
 
-		const iterator = readData(
-			this.reconstructionInfo,
-			this.fetch,
-			this.end - this.start,
-			this.#loadReconstructionInfo.bind(this),
-		);
+		// EXPERIMENT: parallel scheduler. Fetches xorb entries with N workers, decodes into the
+		// rangeList cache under a decoded-bytes budget, and yields terms in order from the cache.
+		const parallelOptions =
+			this.parallelDownloads === false
+				? undefined
+				: this.parallelDownloads === true || this.parallelDownloads === undefined
+					? {}
+					: this.parallelDownloads;
+		async function* readDataParallel(
+			reconstructionInfo: ReconstructionInfo,
+			customFetch: typeof fetch,
+			maxBytes: number,
+			reloadReconstructionInfo: () => Promise<ReconstructionInfo>,
+			opts: ParallelDownloadOptions,
+		) {
+			let totalBytesRead = 0;
+			let readBytesToSkip = reconstructionInfo.offset_into_first_range;
+			const terms = reconstructionInfo.terms;
+
+			// ---- Plan: unique fetch entries, ordered by first term that needs them
+			interface PlanItem {
+				hash: string;
+				ranges: XorbFetchEntry["ranges"];
+				url: string;
+			}
+			const locateEntryFor = (info: ReconstructionInfo, term: (typeof terms)[number]) => {
+				for (const entry of info.xorbs[term.hash] ?? []) {
+					const descriptor = entry.ranges.find(
+						(r) => r.chunks.start <= term.range.start && r.chunks.end >= term.range.end,
+					);
+					if (descriptor) {
+						return entry;
+					}
+				}
+				return undefined;
+			};
+			const plan: PlanItem[] = [];
+			const planIndexByUrl = new Map<string, number>();
+			const termEntryIndex: number[] = [];
+			for (const term of terms) {
+				const entry = locateEntryFor(reconstructionInfo, term);
+				if (!entry) {
+					throw new Error(
+						`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`,
+					);
+				}
+				let idx = planIndexByUrl.get(entry.url);
+				if (idx === undefined) {
+					idx = plan.length;
+					plan.push({ hash: term.hash, ranges: entry.ranges, url: entry.url });
+					planIndexByUrl.set(entry.url, idx);
+				}
+				termEntryIndex.push(idx);
+			}
+
+			const maxConcurrency = Math.max(1, opts.maxConcurrency ?? PARALLEL_DEFAULT_MAX_CONCURRENCY);
+			const estimateEntryBytes = (item: PlanItem) => sum(item.ranges.map((r) => r.bytes.end - r.bytes.start + 1));
+			// Budget for downloaded-but-not-yet-consumed bytes. Derived from the reconstruction so a
+			// file with large xorb fetches still gets real parallelism, without an unbounded worst case.
+			const largestEntryBytes = plan.length ? Math.max(...plan.map(estimateEntryBytes)) : 0;
+			const maxInFlightBytes =
+				opts.maxInFlightBytes ??
+				Math.min(PARALLEL_MAX_IN_FLIGHT_BYTES, Math.max(PARALLEL_MIN_IN_FLIGHT_BYTES, 3 * largestEntryBytes));
+
+			const state = {
+				nextEntry: 0,
+				neededEntry: 0,
+				target: 1,
+				error: undefined as unknown,
+				finished: false,
+				inFlightBytes: 0,
+				decodedBytes: 0,
+				active: 0,
+				claimed: 0,
+				maxActive: 0,
+				activeHighWater: 0,
+				count429: 0,
+				targetHistory: [] as number[],
+			};
+			const notifier = new Notifier();
+
+			// Budget is reserved BEFORE the fetch starts (estimated from the entry's compressed byte
+			// ranges), so streams are always read at full speed once open — a worker stalled on
+			// budget mid-stream would get its idle socket closed by the server.
+			const budgetAcquire = async (n: number, entryIdx: number) => {
+				while (
+					!state.error &&
+					!state.finished &&
+					state.inFlightBytes + n > maxInFlightBytes &&
+					entryIdx !== state.neededEntry
+				) {
+					await notifier.wait();
+				}
+				state.inFlightBytes += n;
+			};
+			const budgetRelease = (n: number) => {
+				state.inFlightBytes -= n;
+				notifier.notifyAll();
+			};
+
+			// Signed URLs rotate on auth refresh: re-resolve plan URLs by chunk-range identity.
+			const refreshPlanUrls = (info: ReconstructionInfo) => {
+				for (const item of plan) {
+					const match = (info.xorbs[item.hash] ?? []).find(
+						(e) =>
+							e.ranges.length === item.ranges.length &&
+							e.ranges.every(
+								(r, i) => r.chunks.start === item.ranges[i].chunks.start && r.chunks.end === item.ranges[i].chunks.end,
+							),
+					);
+					if (match) {
+						item.url = match.url;
+						item.ranges = match.ranges;
+					}
+				}
+			};
+
+			const rangeHeaderFor = (item: PlanItem) =>
+				`bytes=${item.ranges.map((r) => `${r.bytes.start}-${r.bytes.end}`).join(",")}`;
+
+			// Fetch + decode one entry into the rangeList cache (per-range atomic commits).
+			// `tally.committed` counts decoded bytes committed to the cache (for budget accounting).
+			// The tally is shared across retry attempts: commits skip already-populated ranges, so
+			// each range is counted at most once no matter how often the entry is re-fetched.
+			const decodeEntry = async (item: PlanItem, entryIdx: number, tally: { committed: number }): Promise<void> => {
+				if (state.error || state.finished) {
+					// Cancelled or failed while waiting for budget: don't open a new connection.
+					return;
+				}
+				const rangeList = rangeLists.get(item.hash);
+				if (!rangeList) {
+					throw new Error(`Failed to find range list for entry ${item.hash}`);
+				}
+
+				let resp = await customFetch(item.url, { headers: { Range: rangeHeaderFor(item) } });
+				let attempts403 = 0;
+				let attempts429 = 0;
+				while ((resp.status === 403 && attempts403 < 1) || (resp.status === 429 && attempts429 < 3)) {
+					await resp.body?.cancel().catch(() => {});
+					if (resp.status === 403) {
+						attempts403++;
+						reconstructionInfo = await reloadReconstructionInfo();
+						refreshPlanUrls(reconstructionInfo);
+					} else {
+						attempts429++;
+						state.count429++;
+						notifier.notifyAll();
+						await delay(300 * attempts429);
+					}
+					resp = await customFetch(item.url, { headers: { Range: rangeHeaderFor(item) } });
+				}
+				if (!resp.ok) {
+					throw await createApiError(resp);
+				}
+				const reader = resp.body?.getReader();
+				if (!reader) {
+					throw new Error("Failed to get reader from response body");
+				}
+
+				try {
+					if (item.ranges.length > 1) {
+						const contentType = resp.headers.get("content-type") ?? "";
+						if (!contentType.includes("multipart/byteranges")) {
+							throw new Error(`Expected multipart/byteranges response for multi-range request, got "${contentType}"`);
+						}
+						const parser = new StreamingMultipartParser(contentType);
+						let partIndex = 0;
+						const handleParts = async (parts: Uint8Array[]) => {
+							for (const part of parts) {
+								const descriptor = item.ranges[partIndex];
+								if (!descriptor) {
+									throw new Error(`Received more multipart parts than the ${item.ranges.length} signed ranges`);
+								}
+								const staged = decodePartChunks(part, descriptor, rangeList);
+								tally.committed += commitChunks(staged);
+								// Throughput signal counts decode work even for skipped (re-fetched) ranges
+								state.decodedBytes += part.byteLength;
+								partIndex++;
+								notifier.notifyAll();
+							}
+						};
+						for (;;) {
+							if (state.error || state.finished) {
+								return;
+							}
+							const result = await reader.read();
+							listener?.({ event: "read" });
+							if (result.done) {
+								break;
+							}
+							if (result.value) {
+								await handleParts(parser.push(result.value));
+							}
+						}
+						await handleParts(parser.push());
+						if (!state.finished && partIndex !== item.ranges.length) {
+							throw new Error(
+								`Multi-range fetch produced ${partIndex} parts but expected ${item.ranges.length} for ${item.hash}`,
+							);
+						}
+					} else {
+						// Single-range entry: parse the chunk stream, committing each range as it completes.
+						const descriptor = item.ranges[0];
+						const ranges = rangeList.getRanges(descriptor.chunks.start, descriptor.chunks.end);
+						const staged = new Map<(typeof ranges)[number], Uint8Array[]>();
+						let chunkIndex = descriptor.chunks.start;
+						let leftover: Uint8Array | undefined;
+						let done = false;
+						while (!done) {
+							if (state.error || state.finished) {
+								return;
+							}
+							const result = await reader.read();
+							listener?.({ event: "read" });
+							done = result.done;
+							let value = result.value;
+							if (!value) {
+								continue;
+							}
+							if (leftover) {
+								value = combineUint8Arrays(leftover, value);
+								leftover = undefined;
+							}
+							while (value.byteLength) {
+								if (value.byteLength < XET_CHUNK_HEADER_BYTES) {
+									leftover = value;
+									break;
+								}
+								const chunkHeader = parseChunkHeader(
+									new DataView(value.buffer, value.byteOffset, XET_CHUNK_HEADER_BYTES),
+								);
+								if (value.byteLength < XET_CHUNK_HEADER_BYTES + chunkHeader.compressed_length) {
+									leftover = value;
+									break;
+								}
+								const uncompressed = decompressChunk(
+									chunkHeader,
+									value.subarray(XET_CHUNK_HEADER_BYTES, XET_CHUNK_HEADER_BYTES + chunkHeader.compressed_length),
+								);
+								const range = ranges.find((r) => chunkIndex >= r.start && chunkIndex < r.end);
+								if (range) {
+									let chunks = staged.get(range);
+									if (!chunks) {
+										chunks = [];
+										staged.set(range, chunks);
+									}
+									chunks.push(uncompressed);
+									// Commit (and count) only when the range completes, and only if it wasn't
+									// already committed by a previous attempt of this entry.
+									if (chunkIndex === range.end - 1 && !range.data) {
+										range.data = chunks;
+										tally.committed += sum(chunks.map((chunk) => chunk.byteLength));
+										notifier.notifyAll();
+									}
+								}
+								state.decodedBytes += uncompressed.byteLength;
+								chunkIndex++;
+								value = value.slice(XET_CHUNK_HEADER_BYTES + chunkHeader.compressed_length);
+							}
+						}
+						if (!state.finished) {
+							for (const range of ranges) {
+								if (!range.data) {
+									throw new Error(
+										`Failed to fetch all data for ${item.hash} chunks ${range.start}-${range.end} (stream ended early)`,
+									);
+								}
+							}
+						}
+					}
+				} finally {
+					await reader.cancel().catch(() => {});
+				}
+			};
+
+			// ---- Workers
+			const isTransientNetworkError = (error: unknown) =>
+				error instanceof TypeError || /terminated|socket|network|ECONNRESET|fetch failed/i.test(String(error));
+			const runWorker = async (workerId: number) => {
+				for (;;) {
+					if (state.error || state.finished) {
+						return;
+					}
+					if (workerId >= state.target) {
+						await notifier.wait();
+						continue;
+					}
+					const idx = state.nextEntry;
+					if (idx >= plan.length) {
+						return;
+					}
+					state.nextEntry++;
+					state.claimed++;
+					const est = estimateEntryBytes(plan[idx]);
+					try {
+						// Reserve budget BEFORE opening the connection, so streams are never stalled.
+						await budgetAcquire(est, idx);
+						if (state.error || state.finished) {
+							// Cancelled or failed while waiting for budget: don't start the fetch.
+							budgetRelease(est);
+							return;
+						}
+						state.active++;
+						state.maxActive = Math.max(state.maxActive, state.active);
+						state.activeHighWater = Math.max(state.activeHighWater, state.active);
+						let lastError: unknown;
+						// One tally across attempts: commits skip already-populated ranges, so bytes
+						// committed by a failed attempt (possibly consumed and freed by the reader in
+						// the meantime) are never double-counted, keeping the budget accounting exact.
+						const tally = { committed: 0 };
+						for (let attempt = 0; attempt < 2; attempt++) {
+							try {
+								await decodeEntry(plan[idx], idx, tally);
+								// Swap the reservation for the actual committed bytes (released as consumed).
+								budgetRelease(est - tally.committed);
+								lastError = undefined;
+								break;
+							} catch (error) {
+								lastError = error;
+								if (attempt === 0 && !state.finished && isTransientNetworkError(error)) {
+									log("retrying entry after transient error", plan[idx].hash, error);
+									await delay(250);
+									continue;
+								}
+							}
+						}
+						if (lastError) {
+							// The download is failing: release the whole reservation. Bytes committed by a
+							// partial attempt are not re-released by the consumer since it stops on error.
+							budgetRelease(est);
+							state.error ??= lastError;
+						}
+						state.active--;
+					} finally {
+						state.claimed--;
+						notifier.notifyAll();
+					}
+				}
+			};
+			const workersDone = Promise.allSettled(Array.from({ length: maxConcurrency }, (_, i) => runWorker(i)));
+
+			// ---- Adaptive concurrency controller (plateau-seeking, throughput-driven)
+			//
+			// Starts serial and probes one extra connection at a time, keeping a per-level
+			// average of aggregate decode throughput. A probe is kept only when the new level
+			// actually improves aggregate throughput; otherwise back off to the plateau and
+			// hold there, re-probing only occasionally in case conditions changed. On an
+			// already-saturated link this settles back to serial — the worst case is a brief
+			// probe — while unsaturated paths keep ramping. Ticks where nothing flowed probe
+			// up regardless: the bottleneck is latency, which extra connections hide. Rate
+			// limits (429s) always step down.
+			const levelRate = new Map<number, number>();
+			let lastBytes = 0;
+			let last429 = 0;
+			let settleTicks = 1; // measurements skipped while the latest target change takes effect
+			let holdTicks = 0; // plateau hold: no upward probes while positive
+			const controller = setInterval(() => {
+				const rate = state.decodedBytes - lastBytes;
+				lastBytes = state.decodedBytes;
+				// Highest number of simultaneously active connections during the tick: after a
+				// down-step, the retired worker keeps draining its entry for a while, and those
+				// ticks must not be credited to the lower level (an inflated baseline would
+				// suppress legitimate climbs later).
+				const tickHighWater = state.activeHighWater;
+				state.activeHighWater = state.active;
+				holdTicks = Math.max(0, holdTicks - 1);
+				if (state.count429 > last429) {
+					last429 = state.count429;
+					state.target = Math.max(1, state.target - 1);
+					settleTicks = 1;
+					holdTicks = PARALLEL_PLATEAU_HOLD_TICKS;
+				} else if (rate === 0 && state.nextEntry < plan.length) {
+					// Nothing decoded during the tick: latency-bound (TTFB) or stalled, so an
+					// extra connection cannot reduce aggregate throughput. (Pointless once no
+					// unclaimed entries remain — an extra worker would have nothing to fetch.)
+					state.target = Math.min(maxConcurrency, state.target + 1);
+					settleTicks = 1;
+				} else if (settleTicks > 0) {
+					settleTicks--;
+				} else if (state.claimed >= state.target && tickHighWater <= state.target) {
+					// Enough work for every connection during the tick (workers hold their claim
+					// between entries) and no extra connections still draining: a valid
+					// throughput sample for the current level.
+					const ewma = ((levelRate.get(state.target) ?? rate) + rate) / 2;
+					levelRate.set(state.target, ewma);
+					const below = levelRate.get(state.target - 1);
+					if (state.target > 1 && below === undefined) {
+						// The level below was never measured (skipped by a zero-rate climb): step
+						// down to establish its baseline, keeping this level's average for the way
+						// back up. Repeats until a measured level (or 1) is reached, so stall-climbs
+						// always have a path back down.
+						state.target--;
+						settleTicks = 1;
+					} else if (below !== undefined && ewma < below * PARALLEL_PROBE_KEEP_MARGIN) {
+						// The extra connection doesn't pay for itself: back off and hold.
+						levelRate.delete(state.target);
+						state.target--;
+						settleTicks = 1;
+						holdTicks = PARALLEL_PLATEAU_HOLD_TICKS;
+					} else if (holdTicks === 0 && state.target < maxConcurrency) {
+						state.target++;
+						settleTicks = 1;
+					}
+				}
+				state.targetHistory.push(state.target);
+				notifier.notifyAll();
+			}, opts.controllerTickMs ?? PARALLEL_CONTROLLER_TICK_MS);
+
+			// ---- In-order consumer
+			try {
+				for (let termIdx = 0; termIdx < terms.length; termIdx++) {
+					const term = terms[termIdx];
+					if (totalBytesRead >= maxBytes) {
+						break;
+					}
+					state.neededEntry = termEntryIndex[termIdx];
+					notifier.notifyAll();
+
+					const rangeList = rangeLists.get(term.hash);
+					if (!rangeList) {
+						throw new Error(`Failed to find range list for term ${term.hash}`);
+					}
+					let termRanges = rangeList.getRanges(term.range.start, term.range.end);
+					while (!termRanges.every((range) => range.data)) {
+						if (state.error) {
+							throw state.error;
+						}
+						if (state.claimed === 0 && state.nextEntry >= plan.length) {
+							throw new Error(
+								`Download workers finished without producing data for term ${term.hash} range ${term.range.start}-${term.range.end}`,
+							);
+						}
+						await notifier.wait();
+						termRanges = rangeList.getRanges(term.range.start, term.range.end);
+					}
+
+					log("all data available for term", term.hash, readBytesToSkip);
+
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					const cachedLength = sum(termRanges.map((range) => sum(range.data!.map((chunk) => chunk.byteLength))));
+					if (cachedLength !== term.unpacked_length) {
+						throw new Error(
+							`Term ${term.hash} range ${term.range.start}-${term.range.end} decoded to ${cachedLength} bytes, expected ${term.unpacked_length}`,
+						);
+					}
+
+					rangeLoop: for (const range of termRanges) {
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						for (let chunk of range.data!) {
+							if (readBytesToSkip) {
+								const skipped = Math.min(readBytesToSkip, chunk.byteLength);
+								chunk = chunk.slice(skipped);
+								readBytesToSkip -= skipped;
+								if (!chunk.byteLength) {
+									continue;
+								}
+							}
+							if (chunk.byteLength > maxBytes - totalBytesRead) {
+								chunk = chunk.slice(0, maxBytes - totalBytesRead);
+							}
+							totalBytesRead += chunk.byteLength;
+							yield range.refCount > 1 ? chunk.slice() : chunk;
+							listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
+
+							if (totalBytesRead >= maxBytes) {
+								break rangeLoop;
+							}
+						}
+					}
+
+					let freed = 0;
+					for (const range of termRanges) {
+						if (range.refCount === 1 && range.data) {
+							freed += sum(range.data.map((chunk) => chunk.byteLength));
+						}
+					}
+					rangeList.remove(term.range.start, term.range.end);
+					budgetRelease(freed);
+				}
+			} finally {
+				state.finished = true;
+				clearInterval(controller);
+				notifier.notifyAll();
+				await workersDone;
+				opts.onStat?.({
+					entries: plan.length,
+					maxActive: state.maxActive,
+					finalTarget: state.target,
+					count429: state.count429,
+					targetHistory: state.targetHistory,
+				});
+			}
+		}
+
+		const iterator =
+			parallelOptions && (parallelOptions.maxConcurrency ?? PARALLEL_DEFAULT_MAX_CONCURRENCY) > 1
+				? readDataParallel(
+						this.reconstructionInfo,
+						this.fetch,
+						this.end - this.start,
+						this.#loadReconstructionInfo.bind(this),
+						parallelOptions,
+					)
+				: readData(this.reconstructionInfo, this.fetch, this.end - this.start, this.#loadReconstructionInfo.bind(this));
 
 		// todo: when Chrome/Safari support it, use ReadableStream.from(readData)
 		return new ReadableStream<Uint8Array>(
@@ -507,6 +1303,11 @@ export class XetBlob extends Blob {
 						controller.close();
 					}
 				},
+				async cancel() {
+					// Consumer cancelled the stream: return the generator so its cleanup runs
+					// (parallel mode: stop workers, cancel in-flight readers, clear the controller timer).
+					await iterator.return?.(undefined);
+				},
 				type: "bytes",
 				// todo: when Safari supports it, add autoAllocateChunkSize param
 			},
@@ -518,15 +1319,23 @@ export class XetBlob extends Blob {
 	}
 
 	override async arrayBuffer(): Promise<ArrayBuffer> {
-		const result = await this.#fetch();
-
-		return new Response(result).arrayBuffer();
+		// Consume the stream manually instead of via `new Response(stream).arrayBuffer()`:
+		// browsers replace stream errors with a generic "Failed to fetch" TypeError, losing
+		// the original error message.
+		const reader = (await this.#fetch()).getReader();
+		const chunks: Uint8Array[] = [];
+		for (;;) {
+			const { done, value } = await reader.read();
+			if (done) {
+				break;
+			}
+			chunks.push(value);
+		}
+		return concatUint8Arrays(chunks).buffer;
 	}
 
 	override async text(): Promise<string> {
-		const result = await this.#fetch();
-
-		return new Response(result).text();
+		return new TextDecoder().decode(await this.arrayBuffer());
 	}
 
 	async response(): Promise<Response> {
