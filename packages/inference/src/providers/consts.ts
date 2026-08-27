@@ -34,6 +34,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	ovhcloud: {},
 	replicate: {},
 	scaleway: {},
+	sciforium: {},
 	together: {},
 	wavespeed: {},
 	"zai-org": {},
