@@ -88,14 +88,22 @@ class XetChunker {
 
 			const readEnd = Math.min(nBytes, consumeLen + this.maximumChunk - this.curChunkLen);
 
-			let bytesToNextBoundary: number;
-			const position = this.gear.nextMatch(data.subarray(consumeLen, readEnd));
+			// A match can rarely be caused by rolling-hash state predating this
+			// scan window. Preserve that state and keep scanning until the minimum.
+			let bytesToNextBoundary = 0;
+			while (bytesToNextBoundary < readEnd - consumeLen) {
+				const position = this.gear.nextMatch(data.subarray(consumeLen + bytesToNextBoundary, readEnd));
 
-			if (position !== -1) {
-				bytesToNextBoundary = position;
-				createChunk = true;
-			} else {
-				bytesToNextBoundary = readEnd - consumeLen;
+				if (position === -1) {
+					bytesToNextBoundary = readEnd - consumeLen;
+					break;
+				}
+
+				bytesToNextBoundary += position;
+				if (bytesToNextBoundary + this.curChunkLen >= this.minimumChunk) {
+					createChunk = true;
+					break;
+				}
 			}
 
 			if (bytesToNextBoundary + this.curChunkLen >= this.maximumChunk) {
@@ -151,7 +159,9 @@ class XetChunker {
 		// Drain any leftover from a previous nextBlock / next call.
 		while (pos < data.length && this.curChunkLen > 0) {
 			const result = this.next(data.subarray(pos), false);
-			if (result.chunk) chunks.push(result.chunk);
+			if (result.chunk) {
+				chunks.push(result.chunk);
+			}
 			pos += result.bytesConsumed;
 		}
 
@@ -176,20 +186,30 @@ class XetChunker {
 				this.gear.loadInput(data.subarray(loadedStart, loadedEnd));
 			}
 
-			const position = this.gear.nextMatchIn(scanStart - loadedStart, scanEnd - scanStart);
+			// As in next(), reject matches before the minimum without resetting
+			// the rolling hash, then continue scanning the loaded input.
+			let searchStart = scanStart;
+			let chunkEnd = scanEnd;
+			let foundBoundary = false;
 
-			let chunkEnd: number;
-			let foundBoundary: boolean;
+			while (searchStart < scanEnd) {
+				const position = this.gear.nextMatchIn(searchStart - loadedStart, scanEnd - searchStart);
+				if (position === -1) {
+					break;
+				}
 
-			if (position !== -1 && scanStart + position - chunkStart <= this.maximumChunk) {
-				chunkEnd = scanStart + position;
-				foundBoundary = true;
-			} else if (scanEnd - chunkStart >= this.maximumChunk) {
+				const candidateEnd = searchStart + position;
+				if (candidateEnd - chunkStart >= this.minimumChunk) {
+					chunkEnd = candidateEnd;
+					foundBoundary = true;
+					break;
+				}
+				searchStart = candidateEnd;
+			}
+
+			if (!foundBoundary && scanEnd - chunkStart >= this.maximumChunk) {
 				chunkEnd = chunkStart + this.maximumChunk;
 				foundBoundary = true;
-			} else {
-				foundBoundary = false;
-				chunkEnd = scanEnd;
 			}
 
 			if (foundBoundary) {
