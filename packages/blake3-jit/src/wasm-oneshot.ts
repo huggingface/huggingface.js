@@ -758,26 +758,37 @@ function buildParentGroup(): Code {
 }
 
 /**
- * Function 4: hashOneShot(inputLen)
- * Full BLAKE3 of mem[INPUT .. INPUT+inputLen) with key/flags from memory.
- * Writes the 32-byte root hash to mem[OUT].
+ * Function 4: hashOneShot(inputPtr, inputLen)
+ * Full BLAKE3 of mem[inputPtr .. inputPtr+inputLen) with key/flags from
+ * memory. Writes the 32-byte root hash to mem[OUT].
+ * The caller must guarantee the final block is zero-padded in memory and
+ * that INPUT_SLACK readable bytes exist past the end of the input.
  */
 function buildHashOneShot(leafWide: number): Code {
 	const c: Code = [];
-	// locals: 7 x i32 - nf=1, rem=2, nc=3, i=4, cvCount=5, pairs=6, odd=7
+	const PTR = 0; // param: input pointer
+	const LEN = 1; // param: input length
+	const NF = 2; // locals...
+	const REM = 3;
+	const NC = 4;
+	const I = 5;
+	const CVCOUNT = 6;
+	const PAIRS = 7;
+	const ODD = 8;
+	// locals: 7 x i32
 	c.push(0x01, 0x07, 0x7f);
 
 	// nf = len >> 10; rem = len & 1023; nc = nf + (rem != 0)
-	c.push(LOCAL_GET, 0, I32_CONST, 10, I32_SHR_U, LOCAL_SET, 1);
-	c.push(LOCAL_GET, 0);
+	c.push(LOCAL_GET, LEN, I32_CONST, 10, I32_SHR_U, LOCAL_SET, NF);
+	c.push(LOCAL_GET, LEN);
 	emitI32Const(c, 1023);
-	c.push(I32_AND, LOCAL_SET, 2);
-	c.push(LOCAL_GET, 1, LOCAL_GET, 2, I32_CONST, 0, I32_NE, I32_ADD, LOCAL_SET, 3);
+	c.push(I32_AND, LOCAL_SET, REM);
+	c.push(LOCAL_GET, NF, LOCAL_GET, REM, I32_CONST, 0, I32_NE, I32_ADD, LOCAL_SET, NC);
 
 	// single-chunk (or empty) message: scalar chunk with ROOT
-	c.push(LOCAL_GET, 3, I32_CONST, 2, I32_LT_U, IF, VOID);
-	emitI32Const(c, INPUT_OFF);
-	c.push(LOCAL_GET, 0);
+	c.push(LOCAL_GET, NC, I32_CONST, 2, I32_LT_U, IF, VOID);
+	c.push(LOCAL_GET, PTR);
+	c.push(LOCAL_GET, LEN);
 	emitI32Const(c, 0);
 	emitI32Const(c, 8); // ROOT
 	emitI32Const(c, OUT_OFF);
@@ -787,88 +798,88 @@ function buildHashOneShot(leafWide: number): Code {
 	// === leaves, leafWide-wide (interleaved 4-lane groups) ===
 	// i = 0
 	emitI32Const(c, 0);
-	c.push(LOCAL_SET, 4);
+	c.push(LOCAL_SET, I);
 	c.push(BLOCK, VOID, LOOP, VOID);
 	{
-		c.push(LOCAL_GET, 4, I32_CONST, leafWide, I32_ADD, LOCAL_GET, 1, I32_GT_U, BR_IF, 0x01);
-		emitI32Const(c, INPUT_OFF);
-		c.push(LOCAL_GET, 4, I32_CONST, 10, I32_SHL, I32_ADD);
-		c.push(LOCAL_GET, 4);
+		c.push(LOCAL_GET, I, I32_CONST, leafWide, I32_ADD, LOCAL_GET, NF, I32_GT_U, BR_IF, 0x01);
+		c.push(LOCAL_GET, PTR);
+		c.push(LOCAL_GET, I, I32_CONST, 10, I32_SHL, I32_ADD);
+		c.push(LOCAL_GET, I);
 		emitI32Const(c, CV_ARR_OFF);
-		c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD);
+		c.push(LOCAL_GET, I, I32_CONST, 5, I32_SHL, I32_ADD);
 		c.push(CALL, 0x05);
-		c.push(LOCAL_GET, 4, I32_CONST, leafWide, I32_ADD, LOCAL_SET, 4);
+		c.push(LOCAL_GET, I, I32_CONST, leafWide, I32_ADD, LOCAL_SET, I);
 		c.push(BR, 0x00);
 	}
 	c.push(END, END);
 	// 4..leafWide-1 full chunks left: 4-wide groups
 	c.push(BLOCK, VOID, LOOP, VOID);
 	{
-		c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_GET, 1, I32_GT_U, BR_IF, 0x01);
-		emitI32Const(c, INPUT_OFF);
-		c.push(LOCAL_GET, 4, I32_CONST, 10, I32_SHL, I32_ADD);
-		c.push(LOCAL_GET, 4);
+		c.push(LOCAL_GET, I, I32_CONST, 4, I32_ADD, LOCAL_GET, NF, I32_GT_U, BR_IF, 0x01);
+		c.push(LOCAL_GET, PTR);
+		c.push(LOCAL_GET, I, I32_CONST, 10, I32_SHL, I32_ADD);
+		c.push(LOCAL_GET, I);
 		emitI32Const(c, CV_ARR_OFF);
-		c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD);
+		c.push(LOCAL_GET, I, I32_CONST, 5, I32_SHL, I32_ADD);
 		c.push(CALL, 0x02);
-		c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_SET, 4);
+		c.push(LOCAL_GET, I, I32_CONST, 4, I32_ADD, LOCAL_SET, I);
 		c.push(BR, 0x00);
 	}
 	c.push(END, END);
 	// tail of full chunks (1-3 remaining): run one more 4-wide group; the
 	// extra lanes read past the valid input (capacity guaranteed by JS) and
 	// their CVs are either never read or overwritten by the partial chunk below.
-	c.push(LOCAL_GET, 4, LOCAL_GET, 1, I32_LT_U, IF, VOID);
-	emitI32Const(c, INPUT_OFF);
-	c.push(LOCAL_GET, 4, I32_CONST, 10, I32_SHL, I32_ADD);
-	c.push(LOCAL_GET, 4);
+	c.push(LOCAL_GET, I, LOCAL_GET, NF, I32_LT_U, IF, VOID);
+	c.push(LOCAL_GET, PTR);
+	c.push(LOCAL_GET, I, I32_CONST, 10, I32_SHL, I32_ADD);
+	c.push(LOCAL_GET, I);
 	emitI32Const(c, CV_ARR_OFF);
-	c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD);
+	c.push(LOCAL_GET, I, I32_CONST, 5, I32_SHL, I32_ADD);
 	c.push(CALL, 0x02);
 	c.push(END);
 	// trailing partial chunk (scalar)
-	c.push(LOCAL_GET, 2, IF, VOID);
-	emitI32Const(c, INPUT_OFF);
-	c.push(LOCAL_GET, 1, I32_CONST, 10, I32_SHL, I32_ADD);
-	c.push(LOCAL_GET, 2);
-	c.push(LOCAL_GET, 1);
+	c.push(LOCAL_GET, REM, IF, VOID);
+	c.push(LOCAL_GET, PTR);
+	c.push(LOCAL_GET, NF, I32_CONST, 10, I32_SHL, I32_ADD);
+	c.push(LOCAL_GET, REM);
+	c.push(LOCAL_GET, NF);
 	emitI32Const(c, 0);
 	emitI32Const(c, CV_ARR_OFF);
-	c.push(LOCAL_GET, 1, I32_CONST, 5, I32_SHL, I32_ADD);
+	c.push(LOCAL_GET, NF, I32_CONST, 5, I32_SHL, I32_ADD);
 	c.push(CALL, 0x01);
 	c.push(END);
 
 	// === merge levels (pairwise, odd CV carries up) ===
-	c.push(LOCAL_GET, 3, LOCAL_SET, 5); // cvCount = nc
+	c.push(LOCAL_GET, NC, LOCAL_SET, CVCOUNT); // cvCount = nc
 	c.push(BLOCK, VOID, LOOP, VOID);
 	{
-		c.push(LOCAL_GET, 5, I32_CONST, 2, I32_LE_U, BR_IF, 0x01);
-		c.push(LOCAL_GET, 5, I32_CONST, 1, I32_SHR_U, LOCAL_SET, 6); // pairs
-		c.push(LOCAL_GET, 5, I32_CONST, 1, I32_AND, LOCAL_SET, 7); // odd
+		c.push(LOCAL_GET, CVCOUNT, I32_CONST, 2, I32_LE_U, BR_IF, 0x01);
+		c.push(LOCAL_GET, CVCOUNT, I32_CONST, 1, I32_SHR_U, LOCAL_SET, PAIRS); // pairs
+		c.push(LOCAL_GET, CVCOUNT, I32_CONST, 1, I32_AND, LOCAL_SET, ODD); // odd
 		emitI32Const(c, 0);
-		c.push(LOCAL_SET, 4);
+		c.push(LOCAL_SET, I);
 		// 4-wide parents
 		c.push(BLOCK, VOID, LOOP, VOID);
 		{
-			c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_GET, 6, I32_GT_U, BR_IF, 0x01);
+			c.push(LOCAL_GET, I, I32_CONST, 4, I32_ADD, LOCAL_GET, PAIRS, I32_GT_U, BR_IF, 0x01);
 			emitI32Const(c, CV_ARR_OFF);
-			c.push(LOCAL_GET, 4, I32_CONST, 6, I32_SHL, I32_ADD);
+			c.push(LOCAL_GET, I, I32_CONST, 6, I32_SHL, I32_ADD);
 			emitI32Const(c, CV_ARR_OFF);
-			c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD);
+			c.push(LOCAL_GET, I, I32_CONST, 5, I32_SHL, I32_ADD);
 			c.push(CALL, 0x03);
-			c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_SET, 4);
+			c.push(LOCAL_GET, I, I32_CONST, 4, I32_ADD, LOCAL_SET, I);
 			c.push(BR, 0x00);
 		}
 		c.push(END, END);
 		// scalar tail parents
 		c.push(BLOCK, VOID, LOOP, VOID);
 		{
-			c.push(LOCAL_GET, 4, LOCAL_GET, 6, I32_GE_U, BR_IF, 0x01);
+			c.push(LOCAL_GET, I, LOCAL_GET, PAIRS, I32_GE_U, BR_IF, 0x01);
 			emitI32Const(c, CV_ARR_OFF);
-			c.push(LOCAL_GET, 4, I32_CONST, 6, I32_SHL, I32_ADD); // msg = CV_ARR + i*64
+			c.push(LOCAL_GET, I, I32_CONST, 6, I32_SHL, I32_ADD); // msg = CV_ARR + i*64
 			emitI32Const(c, KEY_OFF); // cv = key
 			emitI32Const(c, CV_ARR_OFF);
-			c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD); // out = CV_ARR + i*32
+			c.push(LOCAL_GET, I, I32_CONST, 5, I32_SHL, I32_ADD); // out = CV_ARR + i*32
 			emitI32Const(c, 0); // counter
 			emitI32Const(c, 64); // blockLen
 			emitI32Const(c, FLAGS_OFF);
@@ -876,23 +887,23 @@ function buildHashOneShot(leafWide: number): Code {
 			emitI32Const(c, 4);
 			c.push(I32_OR); // flags | PARENT
 			c.push(CALL, 0x00);
-			c.push(LOCAL_GET, 4, I32_CONST, 1, I32_ADD, LOCAL_SET, 4);
+			c.push(LOCAL_GET, I, I32_CONST, 1, I32_ADD, LOCAL_SET, I);
 			c.push(BR, 0x00);
 		}
 		c.push(END, END);
 		// odd: carry last CV up - copy CV[cvCount-1] to CV[pairs]
-		c.push(LOCAL_GET, 7, IF, VOID);
+		c.push(LOCAL_GET, ODD, IF, VOID);
 		for (let half = 0; half < 2; half++) {
 			emitI32Const(c, CV_ARR_OFF);
-			c.push(LOCAL_GET, 6, I32_CONST, 5, I32_SHL, I32_ADD);
+			c.push(LOCAL_GET, PAIRS, I32_CONST, 5, I32_SHL, I32_ADD);
 			emitI32Const(c, CV_ARR_OFF);
-			c.push(LOCAL_GET, 5, I32_CONST, 1, I32_SUB, I32_CONST, 5, I32_SHL, I32_ADD);
+			c.push(LOCAL_GET, CVCOUNT, I32_CONST, 1, I32_SUB, I32_CONST, 5, I32_SHL, I32_ADD);
 			emitV128Load(c, half * 16);
 			emitV128Store(c, half * 16);
 		}
 		c.push(END);
 		// cvCount = pairs + odd
-		c.push(LOCAL_GET, 6, LOCAL_GET, 7, I32_ADD, LOCAL_SET, 5);
+		c.push(LOCAL_GET, PAIRS, LOCAL_GET, ODD, I32_ADD, LOCAL_SET, CVCOUNT);
 		c.push(BR, 0x00);
 	}
 	c.push(END, END);
@@ -956,8 +967,8 @@ function generateOneShotWasm(): Uint8Array {
 	// Imports: memory js.mem
 	section(0x02, [0x01, 0x02, 0x6a, 0x73, 0x03, 0x6d, 0x65, 0x6d, 0x02, 0x00, INITIAL_PAGES]);
 
-	// Functions (leafGroup8 shares leafGroup's 3-param type)
-	section(0x03, [0x06, 0x00, 0x01, 0x02, 0x03, 0x04, 0x02]);
+	// Functions (hashOneShot uses the 2-param type 3; leafGroupN the 3-param type 2)
+	section(0x03, [0x06, 0x00, 0x01, 0x02, 0x03, 0x03, 0x02]);
 
 	// Exports: hashOneShot -> func 4
 	const name = "hashOneShot";
@@ -994,7 +1005,7 @@ function generateOneShotWasm(): Uint8Array {
 const IS_LE = new Uint8Array(new Uint32Array([0x01020304]).buffer)[0] === 0x04;
 
 let memory: WebAssembly.Memory | null = null;
-let hashFn: ((len: number) => void) | null = null;
+let hashFn: ((ptr: number, len: number) => void) | null = null;
 let view8: Uint8Array = new Uint8Array(0);
 let view32: Uint32Array = new Uint32Array(0);
 let initFailed = false;
@@ -1029,7 +1040,7 @@ export function initOneShot(): boolean {
 		memory = new WebAssembly.Memory({ initial: INITIAL_PAGES });
 		const module = new WebAssembly.Module(bytes.buffer as ArrayBuffer);
 		const instance = new WebAssembly.Instance(module, { js: { mem: memory } });
-		hashFn = instance.exports.hashOneShot as (len: number) => void;
+		hashFn = instance.exports.hashOneShot as (ptr: number, len: number) => void;
 		refreshViews();
 		return true;
 	} catch {
@@ -1055,12 +1066,16 @@ function generateSimdProbe(): Uint8Array {
 }
 
 function ensureCapacity(totalBytes: number): void {
-	if (view8.length >= totalBytes) {
-		return;
+	// Consult the memory itself (not the cached view): the shared-memory path
+	// lets external callers hold this memory too, and any grow() detaches the
+	// old buffer, zeroing the cached view's length.
+	const mem = memory as WebAssembly.Memory;
+	if (mem.buffer.byteLength < totalBytes) {
+		mem.grow(Math.ceil((totalBytes - mem.buffer.byteLength) / PAGE_SIZE));
 	}
-	const pages = Math.ceil((totalBytes - view8.length) / PAGE_SIZE);
-	(memory as WebAssembly.Memory).grow(pages);
-	refreshViews();
+	if (view8.buffer !== mem.buffer) {
+		refreshViews();
+	}
 }
 
 // Extra readable/writable slack past the input: the 4-wide leaf tail may
@@ -1115,7 +1130,7 @@ export function runOneShot(keyWords: Uint32Array, flags: number, len: number, ou
 	// zero-pad the final block (wasm always reads full 64-byte blocks)
 	const padEnd = INPUT_OFF + ((len + 63) & ~63 || 64);
 	view8.fill(0, INPUT_OFF + len, padEnd);
-	(hashFn as (len: number) => void)(len);
+	(hashFn as (ptr: number, len: number) => void)(INPUT_OFF, len);
 	out.set(view8.subarray(OUT_OFF, OUT_OFF + outLen));
 }
 
@@ -1124,4 +1139,71 @@ export function runOneShot(keyWords: Uint32Array, flags: number, len: number, ou
  */
 export function oneShotReady(): boolean {
 	return hashFn !== null;
+}
+
+// ===== Shared-memory API =====
+//
+// Lets a cooperating module (e.g. the xet chunker) place input bytes in THIS
+// wasm memory once and hash arbitrary [ptr, ptr+len) regions of it in place,
+// eliminating a full input memcpy. External regions must start at or after
+// ONESHOT_RESERVED_END; the engine's fixed regions and its (growable) input
+// staging area live below it.
+
+/** First byte offset safe for external use in the shared memory. */
+export const ONESHOT_RESERVED_END = INPUT_OFF + ONESHOT_MAX_INPUT + INPUT_SLACK;
+
+/**
+ * Shared-memory context: init the engine and expose its memory.
+ * Returns null when the wasm one-shot engine is unavailable.
+ */
+export function getOneShotContext(): { memory: WebAssembly.Memory; reservedEnd: number } | null {
+	if (!initOneShot()) {
+		return null;
+	}
+	return { memory: memory as WebAssembly.Memory, reservedEnd: ONESHOT_RESERVED_END };
+}
+
+/**
+ * Grow the shared memory (if needed) to hold `totalBytes` and return a fresh
+ * byte view (valid until the next grow from any party).
+ */
+export function ensureOneShotCapacity(totalBytes: number): Uint8Array {
+	ensureCapacity(totalBytes);
+	return view8;
+}
+
+// Saved bytes clobbered by final-block zero-padding in runOneShotRegion.
+const padSave = new Uint8Array(64);
+
+/**
+ * Hash `len` bytes already residing in the shared memory at `ptr` (an
+ * absolute offset >= ONESHOT_RESERVED_END). The engine zero-pads the final
+ * 64-byte block in place and restores the clobbered bytes afterwards, so
+ * neighbouring data survives. Writes `outLen` (<= 32) hash bytes to `out`.
+ */
+export function runOneShotRegion(
+	keyWords: Uint32Array,
+	flags: number,
+	ptr: number,
+	len: number,
+	out: Uint8Array,
+	outLen: number,
+): void {
+	ensureCapacity(ptr + len + INPUT_SLACK);
+	view32.set(keyWords, 0);
+	view32[FLAGS_OFF >> 2] = flags;
+	// zero-pad the final block in place (wasm always reads full 64-byte
+	// blocks), saving the clobbered bytes for restore below
+	const padStart = ptr + len;
+	const padEnd = ptr + (((len + 63) & ~63) || 64);
+	const padLen = padEnd - padStart;
+	if (padLen > 0) {
+		padSave.set(view8.subarray(padStart, padEnd));
+		view8.fill(0, padStart, padEnd);
+	}
+	(hashFn as (ptr: number, len: number) => void)(ptr, len);
+	if (padLen > 0) {
+		view8.set(padSave.subarray(0, padLen), padStart);
+	}
+	out.set(view8.subarray(OUT_OFF, OUT_OFF + outLen));
 }

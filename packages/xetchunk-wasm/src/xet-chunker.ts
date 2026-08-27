@@ -1,5 +1,11 @@
-import { Hasher } from "gearhash-jit";
-import { Hasher as Blake3Hasher } from "@huggingface/blake3-jit";
+import { Hasher, instantiateGearScanner } from "gearhash-jit";
+import {
+	Hasher as Blake3Hasher,
+	getOneShotContext,
+	ensureOneShotCapacity,
+	runOneShotRegion,
+	KEYED_HASH,
+} from "@huggingface/blake3-jit";
 
 const TARGET_CHUNK_SIZE = 64 * 1024; // 64KB
 const MINIMUM_CHUNK_DIVISOR = 8;
@@ -19,6 +25,63 @@ export interface Chunk {
 	length: number;
 }
 
+/**
+ * Shared-memory fast path: gearhash scanner + blake3 one-shot engine bound to
+ * ONE WebAssembly.Memory (blake3's), with the input segment loaded once.
+ * Gearhash scans it in place and blake3 hashes [chunkStart, chunkEnd) in
+ * place, eliminating a full extra memcpy of all input.
+ *
+ * The gear table/hash/mask and the input region live above the blake3
+ * engine's reserved area, so regular blake3 Hasher users (xorb hashing etc.)
+ * can keep using the same memory concurrently. Gear hash/mask state is copied
+ * in/out around every scan (8 bytes each), so multiple chunkers stay
+ * independent, exactly like gearhash-jit's own Hasher.
+ */
+interface SharedCtx {
+	memory: WebAssembly.Memory;
+	nextMatch: (inputStart: number, inputLen: number) => number;
+	hashOffset: number;
+	maskOffset: number;
+	inputBase: number;
+	view: Uint8Array;
+}
+
+let sharedCtx: SharedCtx | null | undefined;
+
+function getSharedCtx(): SharedCtx | null {
+	if (sharedCtx !== undefined) {
+		return sharedCtx;
+	}
+	try {
+		const blake3Ctx = getOneShotContext();
+		if (!blake3Ctx) {
+			sharedCtx = null;
+			return sharedCtx;
+		}
+		const gearBase = (blake3Ctx.reservedEnd + 63) & ~63;
+		const scanner = instantiateGearScanner(blake3Ctx.memory, gearBase);
+		sharedCtx = {
+			memory: blake3Ctx.memory,
+			nextMatch: scanner.nextMatch,
+			hashOffset: scanner.hashOffset,
+			maskOffset: scanner.maskOffset,
+			inputBase: (gearBase + 2064 + 63) & ~63,
+			view: new Uint8Array(blake3Ctx.memory.buffer),
+		};
+	} catch {
+		sharedCtx = null;
+	}
+	return sharedCtx;
+}
+
+/** Current byte view of the shared memory (grow-safe). */
+function sharedView(ctx: SharedCtx): Uint8Array {
+	if (ctx.view.buffer !== ctx.memory.buffer) {
+		ctx.view = new Uint8Array(ctx.memory.buffer);
+	}
+	return ctx.view;
+}
+
 interface NextResult {
 	chunk: Chunk | null;
 	bytesConsumed: number;
@@ -31,6 +94,8 @@ class XetChunker {
 	private curChunkLen: number;
 	private gear: Hasher;
 	private blake3: Blake3Hasher;
+	private maskBytes: Uint8Array;
+	private keyWords: Uint32Array;
 
 	constructor(targetChunkSize: number = TARGET_CHUNK_SIZE) {
 		if (targetChunkSize <= 0) {
@@ -64,6 +129,30 @@ class XetChunker {
 		this.curChunkLen = 0;
 		this.gear = new Hasher(mask);
 		this.blake3 = Blake3Hasher.newKeyed(BLAKE3_DATA_KEY);
+		this.maskBytes = new Uint8Array(8);
+		new DataView(this.maskBytes.buffer).setBigUint64(0, mask, true);
+		// Key words for the shared-memory blake3 path (only used when the
+		// one-shot engine is available, which implies little-endian).
+		this.keyWords = new Uint32Array(BLAKE3_DATA_KEY.buffer, BLAKE3_DATA_KEY.byteOffset, 8);
+	}
+
+	/**
+	 * Scan a window of the shared input region ([offset, offset+length) is
+	 * relative to the loaded segment). Mirrors gearhash-jit's nextMatchIn:
+	 * per-hasher hash/mask state is copied in and out around the wasm call,
+	 * reusing `this.gear.hash` so state stays consistent with the streaming
+	 * path in next().
+	 */
+	private sharedScan(ctx: SharedCtx, offset: number, length: number): number {
+		if (length <= 0) {
+			return -1;
+		}
+		const view = sharedView(ctx);
+		view.set(this.gear.hash, ctx.hashOffset);
+		view.set(this.maskBytes, ctx.maskOffset);
+		const pos = ctx.nextMatch(ctx.inputBase + offset, length);
+		this.gear.hash.set(view.subarray(ctx.hashOffset, ctx.hashOffset + 8));
+		return pos;
 	}
 
 	/**
@@ -167,10 +256,13 @@ class XetChunker {
 
 		const minSkip = this.minimumChunk > HASH_WINDOW_SIZE ? this.minimumChunk - HASH_WINDOW_SIZE - 1 : 0;
 
-		// Copy the input into gearhash wasm memory in large segments so each
-		// scan window is a zero-copy view (a per-window nextMatch would re-copy
+		// Copy the input into wasm memory in large segments so each scan
+		// window is a zero-copy view (a per-window nextMatch would re-copy
 		// up to maximumChunk bytes per chunk — ~2× the data). Segments overlap
 		// by at most maximumChunk when a chunk straddles a segment end.
+		// With the shared-memory fast path the segment is the ONLY input copy:
+		// gearhash scans it in place and blake3 hashes chunk regions in place.
+		const shared = getSharedCtx();
 		const loadSize = Math.max(LOAD_SEGMENT_SIZE, 4 * this.maximumChunk);
 		let loadedStart = 0;
 		let loadedEnd = 0;
@@ -183,7 +275,14 @@ class XetChunker {
 			if (pos < loadedStart || scanEnd > loadedEnd) {
 				loadedStart = pos;
 				loadedEnd = Math.min(data.length, pos + loadSize);
-				this.gear.loadInput(data.subarray(loadedStart, loadedEnd));
+				if (shared) {
+					// +8256: final-block padding (64) + 4-wide leaf overshoot
+					// slack (4096+64) required by the one-shot engine, rounded up.
+					const view = ensureOneShotCapacity(shared.inputBase + (loadedEnd - loadedStart) + 8256);
+					view.set(data.subarray(loadedStart, loadedEnd), shared.inputBase);
+				} else {
+					this.gear.loadInput(data.subarray(loadedStart, loadedEnd));
+				}
 			}
 
 			// As in next(), reject matches before the minimum without resetting
@@ -193,7 +292,9 @@ class XetChunker {
 			let foundBoundary = false;
 
 			while (searchStart < scanEnd) {
-				const position = this.gear.nextMatchIn(searchStart - loadedStart, scanEnd - searchStart);
+				const position = shared
+					? this.sharedScan(shared, searchStart - loadedStart, scanEnd - searchStart)
+					: this.gear.nextMatchIn(searchStart - loadedStart, scanEnd - searchStart);
 				if (position === -1) {
 					break;
 				}
@@ -213,12 +314,12 @@ class XetChunker {
 			}
 
 			if (foundBoundary) {
-				const hash = this.blake3.reset().update(data.subarray(chunkStart, chunkEnd)).finalize(32);
+				const hash = this.hashLoaded(shared, data, chunkStart, chunkEnd, loadedStart);
 				chunks.push({ length: chunkEnd - chunkStart, hash });
 				pos = chunkEnd;
 				this.gear.resetHash();
 			} else if (isFinal) {
-				const hash = this.blake3.reset().update(data.subarray(chunkStart)).finalize(32);
+				const hash = this.hashLoaded(shared, data, chunkStart, data.length, loadedStart);
 				chunks.push({ length: data.length - chunkStart, hash });
 				pos = data.length;
 			} else {
@@ -229,6 +330,26 @@ class XetChunker {
 		}
 
 		return chunks;
+	}
+
+	/**
+	 * Hash [chunkStart, chunkEnd) of `data`. On the shared-memory path the
+	 * bytes are already in wasm memory (the loop guarantees the chunk lies
+	 * within the loaded segment) and are hashed in place.
+	 */
+	private hashLoaded(
+		shared: SharedCtx | null,
+		data: Uint8Array,
+		chunkStart: number,
+		chunkEnd: number,
+		loadedStart: number,
+	): Uint8Array {
+		if (shared) {
+			const hash = new Uint8Array(32);
+			runOneShotRegion(this.keyWords, KEYED_HASH, shared.inputBase + (chunkStart - loadedStart), chunkEnd - chunkStart, hash, 32);
+			return hash;
+		}
+		return this.blake3.reset().update(data.subarray(chunkStart, chunkEnd)).finalize(32);
 	}
 
 	finish(): Chunk | null {

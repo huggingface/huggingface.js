@@ -27,6 +27,11 @@
 export { Hasher, XofReader } from "./hasher.js";
 export { hash, hashInto, warmupSimd } from "./hash.js";
 
+// Shared-memory one-shot engine (advanced; used by @huggingface/xetchunk-wasm
+// to hash regions of a shared WebAssembly.Memory in place)
+export { getOneShotContext, ensureOneShotCapacity, runOneShotRegion, ONESHOT_RESERVED_END } from "./wasm-oneshot.js";
+export { KEYED_HASH } from "./constants.js";
+
 // Convenience imports
 import { Hasher } from "./hasher.js";
 
