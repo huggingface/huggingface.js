@@ -72,9 +72,9 @@ export class Hasher {
 	 * @returns 1-based byte position of the match within the window, or -1.
 	 */
 	nextMatchIn(offset: number, length: number): number {
-    if (length <= 0) {
-      return -1;
-    }
+		if (length <= 0) {
+			return -1;
+		}
 		if (offset < 0 || offset + length > this.loadedLength) {
 			throw new RangeError(`Scan window [${offset}, ${offset + length}) outside loaded input (${this.loadedLength})`);
 		}

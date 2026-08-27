@@ -85,14 +85,14 @@ function generateWasmBytes(): Uint8Array {
 		code.push(...bytes);
 	}
 
-  // Locals: $0 = inputStart (param i32), $1 = inputLen (param i32)
-  //         $2 = hash (i64), $3 = mask (i64)
-  //         $4 = ptr (i32),  $5 = end (i32),  $6 = endU (i32)
-  const HASH = 2,
-    MASK = 3,
-    PTR = 4,
-    END = 5,
-    ENDU = 6;
+	// Locals: $0 = inputStart (param i32), $1 = inputLen (param i32)
+	//         $2 = hash (i64), $3 = mask (i64)
+	//         $4 = ptr (i32),  $5 = end (i32),  $6 = endU (i32)
+	const HASH = 2,
+		MASK = 3,
+		PTR = 4,
+		END = 5,
+		ENDU = 6;
 
 	// ── Module header ──
 	emit(0x00, 0x61, 0x73, 0x6d); // magic
@@ -122,8 +122,8 @@ function generateWasmBytes(): Uint8Array {
 
 	const bodyStart = code.length;
 
-  // Local declarations: 2 × i64 ($2-$3), 3 × i32 ($4-$6)
-  emit(0x02, 0x02, 0x7e, 0x03, 0x7f);
+	// Local declarations: 2 × i64 ($2-$3), 3 × i32 ($4-$6)
+	emit(0x02, 0x02, 0x7e, 0x03, 0x7f);
 
 	// hash = mem64[HASH_OFFSET]
 	emit(0x41, ...toSignedLeb128(HASH_OFFSET));
