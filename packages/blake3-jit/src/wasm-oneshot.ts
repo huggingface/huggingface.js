@@ -1117,6 +1117,14 @@ export function appendInput(data: Uint8Array, offset: number): void {
  * View over currently buffered input (valid until next append/grow).
  */
 export function bufferedInput(len: number): Uint8Array {
+	// The shared-memory path lets external callers (e.g. gearhash-jit's
+	// instantiateGearScanner) grow this memory directly, detaching the cached
+	// view. grow() preserves contents, so after a refresh the buffered bytes
+	// are still at INPUT_OFF; without it a detached view8 reads as empty and
+	// an evicted hasher would silently replay zero bytes.
+	if (view8.buffer !== (memory as WebAssembly.Memory).buffer) {
+		refreshViews();
+	}
 	return view8.subarray(INPUT_OFF, INPUT_OFF + len);
 }
 
