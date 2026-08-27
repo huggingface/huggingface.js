@@ -1,10 +1,13 @@
 import { Hasher } from "gearhash-jit";
-import { createKeyed, Hasher as Blake3Hasher } from "@huggingface/blake3-jit";
+import { Hasher as Blake3Hasher } from "@huggingface/blake3-jit";
 
 const TARGET_CHUNK_SIZE = 64 * 1024; // 64KB
 const MINIMUM_CHUNK_DIVISOR = 8;
 const MAXIMUM_CHUNK_MULTIPLIER = 2;
 const HASH_WINDOW_SIZE = 64;
+// Size of the segments copied into gearhash wasm memory by nextBlock.
+// Bounds wasm memory growth when chunking very large one-shot buffers.
+const LOAD_SEGMENT_SIZE = 4 * 1024 * 1024;
 
 const BLAKE3_DATA_KEY = new Uint8Array([
 	102, 151, 245, 119, 91, 149, 80, 222, 49, 53, 203, 172, 165, 151, 24, 28, 157, 228, 33, 16, 155, 235, 43, 88, 180,
@@ -66,10 +69,13 @@ class XetChunker {
 	/**
 	 * Streaming entry point: accepts an arbitrary slice of data, accumulates
 	 * it, and emits a chunk when a boundary (or max size) is reached.
-	 * Data is copied into an internal buffer because it may span calls.
+	 * Data is buffered internally only while a chunk is incomplete; when a
+	 * chunk completes, its bytes are hashed straight from the accumulated
+	 * buffer + `data` without an extra copy.
 	 */
 	next(data: Uint8Array, isFinal: boolean): NextResult {
 		const nBytes = data.length;
+		const prevLen = this.curChunkLen;
 		let createChunk = false;
 		let consumeLen = 0;
 
@@ -99,16 +105,21 @@ class XetChunker {
 
 			this.curChunkLen += bytesToNextBoundary;
 			consumeLen += bytesToNextBoundary;
-
-			this.chunkBuf.set(data.subarray(0, consumeLen), this.curChunkLen - consumeLen);
 		}
 
 		if (createChunk || (isFinal && this.curChunkLen > 0)) {
-			const chunkData = this.chunkBuf.subarray(0, this.curChunkLen);
-			const hash = this.blake3.reset().update(chunkData).finalize(32);
+			// Hash directly from the accumulated buffer plus this call's bytes —
+			// no need to copy `data` into chunkBuf for a completing chunk.
+			this.blake3.reset();
+			if (prevLen > 0) {
+				this.blake3.update(this.chunkBuf.subarray(0, prevLen));
+			}
+			if (consumeLen > 0) {
+				this.blake3.update(data.subarray(0, consumeLen));
+			}
 			const chunk: Chunk = {
-				length: chunkData.length,
-				hash: hash,
+				length: this.curChunkLen,
+				hash: this.blake3.finalize(32),
 			};
 			this.curChunkLen = 0;
 			this.gear.resetHash();
@@ -116,6 +127,10 @@ class XetChunker {
 				chunk,
 				bytesConsumed: consumeLen,
 			};
+		}
+
+		if (consumeLen > 0) {
+			this.chunkBuf.set(data.subarray(0, consumeLen), prevLen);
 		}
 
 		return {
@@ -140,16 +155,28 @@ class XetChunker {
 			pos += result.bytesConsumed;
 		}
 
-		const minSkip = this.minimumChunk > HASH_WINDOW_SIZE
-			? this.minimumChunk - HASH_WINDOW_SIZE - 1
-			: 0;
+		const minSkip = this.minimumChunk > HASH_WINDOW_SIZE ? this.minimumChunk - HASH_WINDOW_SIZE - 1 : 0;
+
+		// Copy the input into gearhash wasm memory in large segments so each
+		// scan window is a zero-copy view (a per-window nextMatch would re-copy
+		// up to maximumChunk bytes per chunk — ~2× the data). Segments overlap
+		// by at most maximumChunk when a chunk straddles a segment end.
+		const loadSize = Math.max(LOAD_SEGMENT_SIZE, 4 * this.maximumChunk);
+		let loadedStart = 0;
+		let loadedEnd = 0;
 
 		while (pos < data.length) {
 			const chunkStart = pos;
 			const scanStart = Math.min(pos + minSkip, data.length);
 			const scanEnd = Math.min(data.length, pos + this.maximumChunk);
 
-			const position = this.gear.nextMatch(data.subarray(scanStart, scanEnd));
+			if (pos < loadedStart || scanEnd > loadedEnd) {
+				loadedStart = pos;
+				loadedEnd = Math.min(data.length, pos + loadSize);
+				this.gear.loadInput(data.subarray(loadedStart, loadedEnd));
+			}
+
+			const position = this.gear.nextMatchIn(scanStart - loadedStart, scanEnd - scanStart);
 
 			let chunkEnd: number;
 			let foundBoundary: boolean;
@@ -166,16 +193,12 @@ class XetChunker {
 			}
 
 			if (foundBoundary) {
-				const hash = this.blake3.reset()
-					.update(data.subarray(chunkStart, chunkEnd))
-					.finalize(32);
+				const hash = this.blake3.reset().update(data.subarray(chunkStart, chunkEnd)).finalize(32);
 				chunks.push({ length: chunkEnd - chunkStart, hash });
 				pos = chunkEnd;
 				this.gear.resetHash();
 			} else if (isFinal) {
-				const hash = this.blake3.reset()
-					.update(data.subarray(chunkStart))
-					.finalize(32);
+				const hash = this.blake3.reset().update(data.subarray(chunkStart)).finalize(32);
 				chunks.push({ length: data.length - chunkStart, hash });
 				pos = data.length;
 			} else {
