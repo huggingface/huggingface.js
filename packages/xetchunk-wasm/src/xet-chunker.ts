@@ -346,7 +346,14 @@ class XetChunker {
 	): Uint8Array {
 		if (shared) {
 			const hash = new Uint8Array(32);
-			runOneShotRegion(this.keyWords, KEYED_HASH, shared.inputBase + (chunkStart - loadedStart), chunkEnd - chunkStart, hash, 32);
+			runOneShotRegion(
+				this.keyWords,
+				KEYED_HASH,
+				shared.inputBase + (chunkStart - loadedStart),
+				chunkEnd - chunkStart,
+				hash,
+				32,
+			);
 			return hash;
 		}
 		return this.blake3.reset().update(data.subarray(chunkStart, chunkEnd)).finalize(32);

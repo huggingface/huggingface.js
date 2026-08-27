@@ -1195,7 +1195,7 @@ export function runOneShotRegion(
 	// zero-pad the final block in place (wasm always reads full 64-byte
 	// blocks), saving the clobbered bytes for restore below
 	const padStart = ptr + len;
-	const padEnd = ptr + (((len + 63) & ~63) || 64);
+	const padEnd = ptr + ((len + 63) & ~63 || 64);
 	const padLen = padEnd - padStart;
 	if (padLen > 0) {
 		padSave.set(view8.subarray(padStart, padEnd));
