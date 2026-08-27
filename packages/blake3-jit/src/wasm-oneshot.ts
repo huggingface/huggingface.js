@@ -177,27 +177,42 @@ const V_SPLAT = [SIMD, 0x11]; // i32x4.splat
 const ROTR16 = [2, 3, 0, 1, 6, 7, 4, 5, 10, 11, 8, 9, 14, 15, 12, 13];
 const ROTR8 = [1, 2, 3, 0, 5, 6, 7, 4, 9, 10, 11, 8, 13, 14, 15, 12];
 
-/**
- * Emit the 7 rounds of SIMD (4-wide) BLAKE3 mixing.
- * State lives in v128 locals [sBase..sBase+15], message in [mBase..mBase+15].
- */
-function emitVecRounds(c: Code, sBase: number, mBase: number): void {
-	let msgIdx = 0;
+/** One independent 4-lane SIMD mixing group: state + message local bases. */
+interface VecGroup {
+	s: number;
+	m: number;
+}
 
+/** Interleave granularity for multi-group emission (perf A/B knob). */
+export type VecInterleave = "step" | "quad";
+
+/**
+ * Emit the 7 rounds of SIMD (4-wide) BLAKE3 mixing for one or more
+ * independent groups. With several groups the instruction streams are
+ * interleaved to hide the serial add→xor→rotate dependency chains:
+ *  - "step": groups alternate at every G step (finest interleave)
+ *  - "quad": groups alternate per column/diagonal quad
+ */
+function emitVecRounds(c: Code, groups: VecGroup[], interleave: VecInterleave = "step"): void {
 	// One quad of independent G functions (4 columns or 4 diagonals), emitted
-	// interleaved step-by-step so the 4 dependency chains are adjacent in the
+	// interleaved step-by-step so the dependency chains are adjacent in the
 	// instruction stream (helps the register allocator / OoO scheduling).
-	function gQuad(quads: number[][]): void {
-		const mxs: number[] = [];
-		const mys: number[] = [];
-		for (let i = 0; i < 4; i++) {
-			mxs.push(mBase + MSG_ACCESS_ORDER[msgIdx++]);
-			mys.push(mBase + MSG_ACCESS_ORDER[msgIdx++]);
+	// msgBase indexes MSG_ACCESS_ORDER (shared schedule across groups).
+	function gQuad(quads: number[][], msgBase: number, gs: VecGroup[]): void {
+		const mxs: number[][] = [];
+		const mys: number[][] = [];
+		const sa: number[][] = [];
+		const sb: number[][] = [];
+		const sc: number[][] = [];
+		const sd: number[][] = [];
+		for (const g of gs) {
+			mxs.push(quads.map((_, i) => g.m + MSG_ACCESS_ORDER[msgBase + 2 * i]));
+			mys.push(quads.map((_, i) => g.m + MSG_ACCESS_ORDER[msgBase + 2 * i + 1]));
+			sa.push(quads.map((q) => g.s + q[0]));
+			sb.push(quads.map((q) => g.s + q[1]));
+			sc.push(quads.map((q) => g.s + q[2]));
+			sd.push(quads.map((q) => g.s + q[3]));
 		}
-		const sa = quads.map((q) => sBase + q[0]);
-		const sb = quads.map((q) => sBase + q[1]);
-		const sc = quads.map((q) => sBase + q[2]);
-		const sd = quads.map((q) => sBase + q[3]);
 
 		for (let half = 0; half < 2; half++) {
 			const msg = half === 0 ? mxs : mys;
@@ -206,43 +221,62 @@ function emitVecRounds(c: Code, sBase: number, mBase: number): void {
 			const shlB = half === 0 ? 20 : 25;
 
 			// s[a] = s[a] + s[b] + m
-			for (let i = 0; i < 4; i++) {
-				c.push(LOCAL_GET, sa[i], LOCAL_GET, sb[i], ...V_ADD, LOCAL_GET, msg[i], ...V_ADD, LOCAL_SET, sa[i]);
+			for (let gi = 0; gi < gs.length; gi++) {
+				for (let i = 0; i < 4; i++) {
+					c.push(LOCAL_GET, sa[gi][i], LOCAL_GET, sb[gi][i], ...V_ADD, LOCAL_GET, msg[gi][i], ...V_ADD, LOCAL_SET, sa[gi][i]);
+				}
 			}
 			// s[d] = rotr16/8(s[d] ^ s[a])
-			for (let i = 0; i < 4; i++) {
-				c.push(LOCAL_GET, sd[i], LOCAL_GET, sa[i], ...V_XOR, LOCAL_TEE, sd[i], LOCAL_GET, sd[i]);
-				emitShuffle(c, rotD);
-				c.push(LOCAL_SET, sd[i]);
+			for (let gi = 0; gi < gs.length; gi++) {
+				for (let i = 0; i < 4; i++) {
+					c.push(LOCAL_GET, sd[gi][i], LOCAL_GET, sa[gi][i], ...V_XOR, LOCAL_TEE, sd[gi][i], LOCAL_GET, sd[gi][i]);
+					emitShuffle(c, rotD);
+					c.push(LOCAL_SET, sd[gi][i]);
+				}
 			}
 			// s[c] = s[c] + s[d]
-			for (let i = 0; i < 4; i++) {
-				c.push(LOCAL_GET, sc[i], LOCAL_GET, sd[i], ...V_ADD, LOCAL_SET, sc[i]);
+			for (let gi = 0; gi < gs.length; gi++) {
+				for (let i = 0; i < 4; i++) {
+					c.push(LOCAL_GET, sc[gi][i], LOCAL_GET, sd[gi][i], ...V_ADD, LOCAL_SET, sc[gi][i]);
+				}
 			}
 			// s[b] = rotr12/7(s[b] ^ s[c])
-			for (let i = 0; i < 4; i++) {
-				c.push(LOCAL_GET, sb[i], LOCAL_GET, sc[i], ...V_XOR, LOCAL_TEE, sb[i]);
-				c.push(I32_CONST, shrB, ...V_SHR_U, LOCAL_GET, sb[i], I32_CONST, shlB, ...V_SHL, ...V_OR);
-				c.push(LOCAL_SET, sb[i]);
+			for (let gi = 0; gi < gs.length; gi++) {
+				for (let i = 0; i < 4; i++) {
+					c.push(LOCAL_GET, sb[gi][i], LOCAL_GET, sc[gi][i], ...V_XOR, LOCAL_TEE, sb[gi][i]);
+					c.push(I32_CONST, shrB, ...V_SHR_U, LOCAL_GET, sb[gi][i], I32_CONST, shlB, ...V_SHL, ...V_OR);
+					c.push(LOCAL_SET, sb[gi][i]);
+				}
 			}
 		}
 	}
 
+	const COLS = [
+		[0, 4, 8, 12],
+		[1, 5, 9, 13],
+		[2, 6, 10, 14],
+		[3, 7, 11, 15],
+	];
+	const DIAGS = [
+		[0, 5, 10, 15],
+		[1, 6, 11, 12],
+		[2, 7, 8, 13],
+		[3, 4, 9, 14],
+	];
+
 	for (let round = 0; round < 7; round++) {
-		// columns
-		gQuad([
-			[0, 4, 8, 12],
-			[1, 5, 9, 13],
-			[2, 6, 10, 14],
-			[3, 7, 11, 15],
-		]);
-		// diagonals
-		gQuad([
-			[0, 5, 10, 15],
-			[1, 6, 11, 12],
-			[2, 7, 8, 13],
-			[3, 4, 9, 14],
-		]);
+		const base = round * 16;
+		if (interleave === "step") {
+			gQuad(COLS, base, groups);
+			gQuad(DIAGS, base + 8, groups);
+		} else {
+			for (const g of groups) {
+				gQuad(COLS, base, [g]);
+			}
+			for (const g of groups) {
+				gQuad(DIAGS, base + 8, [g]);
+			}
+		}
 	}
 }
 
@@ -296,11 +330,12 @@ function emitTransposedLoad(
 	wg: number,
 	mBase: number,
 	tBase: number,
+	baseOff: number = 0,
 ): void {
 	// load rows r0..r3 into t0..t3
 	for (let lane = 0; lane < 4; lane++) {
 		c.push(LOCAL_GET, addrLocal);
-		emitV128Load(c, lane * laneStride + wg * 16);
+		emitV128Load(c, baseOff + lane * laneStride + wg * 16);
 		c.push(LOCAL_SET, tBase + lane);
 	}
 	// u0 = A(r0,r1), u1 = A(r2,r3), u2 = B(r0,r1), u3 = B(r2,r3)
@@ -336,10 +371,10 @@ function emitTransposedLoad(
  * stored at address in local(dstLocal) - CV j at dst + j*32.
  * s locals sBase..sBase+7 hold words 0..7 across lanes; t temps at tBase (4 used).
  */
-function emitUntransposeStore(c: Code, sBase: number, tBase: number, dstLocal: number): void {
+function emitUntransposeStore(c: Code, sBase: number, tBase: number, dstLocal: number, baseOff: number = 0): void {
 	for (let group = 0; group < 2; group++) {
 		const s0 = sBase + group * 4;
-		const byteOff = group * 16;
+		const byteOff = baseOff + group * 16;
 		c.push(LOCAL_GET, s0, LOCAL_GET, s0 + 1);
 		emitShuffle(c, SHUF_A);
 		c.push(LOCAL_SET, tBase);
@@ -531,7 +566,7 @@ function buildLeafGroup(): Code {
 		c.push(LOCAL_GET, 3, I32_CONST, 15, I32_EQ, I32_CONST, 1, I32_SHL);
 		c.push(I32_OR, I32_OR, ...V_SPLAT, LOCAL_SET, S + 15);
 
-		emitVecRounds(c, S, M);
+		emitVecRounds(c, [{ s: S, m: M }]);
 
 		// cv[i] = s[i] ^ s[i+8]
 		for (let i = 0; i < 8; i++) {
@@ -544,6 +579,100 @@ function buildLeafGroup(): Code {
 	c.push(END, END);
 
 	emitUntransposeStore(c, S, T, 2);
+	c.push(END);
+	return c;
+}
+
+/**
+ * Function 5: leafGroup8(inPtr, counterLo, cvOutPtr)
+ * Compress 8 consecutive FULL chunks (8192 bytes) as TWO independent 4-lane
+ * SIMD groups whose instruction streams are interleaved, hiding the serial
+ * add→xor→rotate dependency chains of a single group. Writes 8 lane-major
+ * CVs (256 bytes) to cvOutPtr.
+ */
+function buildLeafGroup8(interleave: VecInterleave): Code {
+	const c: Code = [];
+	// locals: 3 x i32 (pos=3, addr=4, flagsBase=5), 78 x v128 ($6..$83)
+	c.push(0x02, 0x03, 0x7f, 0x4e, 0x7b);
+	const MA = 6; // 6..21
+	const MB = 22; // 22..37
+	const SA = 38; // 38..53
+	const SB = 54; // 54..69
+	const T = 70; // 70..77
+	const CTRA = 78;
+	const CTRB = 79;
+
+	// flagsBase = mem[FLAGS]
+	emitI32Const(c, FLAGS_OFF);
+	emitI32Load(c, 0);
+	c.push(LOCAL_SET, 5);
+	// ctrA = splat(counterLo) + [0,1,2,3]; ctrB = splat(counterLo) + [4,5,6,7]
+	c.push(LOCAL_GET, 1, ...V_SPLAT);
+	emitV128Const(c, [0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0]);
+	c.push(...V_ADD, LOCAL_SET, CTRA);
+	c.push(LOCAL_GET, 1, ...V_SPLAT);
+	emitV128Const(c, [4, 0, 0, 0, 5, 0, 0, 0, 6, 0, 0, 0, 7, 0, 0, 0]);
+	c.push(...V_ADD, LOCAL_SET, CTRB);
+	// sA0..7 = sB0..7 = splat(key[i]) - the CVs carry across all 16 blocks
+	for (let i = 0; i < 8; i++) {
+		emitI32Const(c, KEY_OFF);
+		emitI32Load(c, i * 4);
+		c.push(...V_SPLAT, LOCAL_TEE, SA + i, LOCAL_SET, SB + i);
+	}
+	// pos = 0
+	emitI32Const(c, 0);
+	c.push(LOCAL_SET, 3);
+
+	c.push(BLOCK, VOID, LOOP, VOID);
+	{
+		// addr = inPtr + (pos << 6)
+		c.push(LOCAL_GET, 0, LOCAL_GET, 3, I32_CONST, 6, I32_SHL, I32_ADD, LOCAL_SET, 4);
+		// load + transpose 16 message words per group (lane stride = 1024);
+		// group B lanes live 4096 bytes further in.
+		for (let wg = 0; wg < 4; wg++) {
+			emitTransposedLoad(c, 4, 1024, wg, MA, T);
+			emitTransposedLoad(c, 4, 1024, wg, MB, T, 4096);
+		}
+		// s8..s11 = IV[0..3]
+		for (let i = 0; i < 4; i++) {
+			emitV128Const(c, splatBytes(IV[i]));
+			c.push(LOCAL_TEE, SA + 8 + i, LOCAL_SET, SB + 8 + i);
+		}
+		// s12 = ctr, s13 = 0, s14 = 64
+		c.push(LOCAL_GET, CTRA, LOCAL_SET, SA + 12);
+		c.push(LOCAL_GET, CTRB, LOCAL_SET, SB + 12);
+		emitV128Const(c, new Array(16).fill(0));
+		c.push(LOCAL_TEE, SA + 13, LOCAL_SET, SB + 13);
+		emitV128Const(c, splatBytes(64));
+		c.push(LOCAL_TEE, SA + 14, LOCAL_SET, SB + 14);
+		// s15 = splat(flagsBase | (pos==0 ? CHUNK_START : 0) | (pos==15 ? CHUNK_END : 0))
+		c.push(LOCAL_GET, 5);
+		c.push(LOCAL_GET, 3, I32_EQZ);
+		c.push(LOCAL_GET, 3, I32_CONST, 15, I32_EQ, I32_CONST, 1, I32_SHL);
+		c.push(I32_OR, I32_OR, ...V_SPLAT, LOCAL_TEE, SA + 15, LOCAL_SET, SB + 15);
+
+		emitVecRounds(
+			c,
+			[
+				{ s: SA, m: MA },
+				{ s: SB, m: MB },
+			],
+			interleave,
+		);
+
+		// cv[i] = s[i] ^ s[i+8]
+		for (let i = 0; i < 8; i++) {
+			c.push(LOCAL_GET, SA + i, LOCAL_GET, SA + 8 + i, ...V_XOR, LOCAL_SET, SA + i);
+			c.push(LOCAL_GET, SB + i, LOCAL_GET, SB + 8 + i, ...V_XOR, LOCAL_SET, SB + i);
+		}
+		// pos++; loop while pos < 16
+		c.push(LOCAL_GET, 3, I32_CONST, 1, I32_ADD, LOCAL_TEE, 3);
+		c.push(I32_CONST, 16, I32_LT_U, BR_IF, 0x00);
+	}
+	c.push(END, END);
+
+	emitUntransposeStore(c, SA, T, 2);
+	emitUntransposeStore(c, SB, T, 2, 128);
 	c.push(END);
 	return c;
 }
@@ -589,7 +718,7 @@ function buildParentGroup(): Code {
 	emitI32Const(c, 4);
 	c.push(I32_OR, ...V_SPLAT, LOCAL_SET, S + 15);
 
-	emitVecRounds(c, S, M);
+	emitVecRounds(c, [{ s: S, m: M }]);
 
 	for (let i = 0; i < 8; i++) {
 		c.push(LOCAL_GET, S + i, LOCAL_GET, S + 8 + i, ...V_XOR, LOCAL_SET, S + i);
@@ -626,23 +755,33 @@ function buildHashOneShot(): Code {
 	c.push(CALL, 0x01, RETURN);
 	c.push(END);
 
-	// === leaves, 4-wide ===
+	// === leaves, 8-wide (two interleaved 4-lane groups) ===
 	// i = 0
 	emitI32Const(c, 0);
 	c.push(LOCAL_SET, 4);
 	c.push(BLOCK, VOID, LOOP, VOID);
 	{
-		c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_GET, 1, I32_GT_U, BR_IF, 0x01);
+		c.push(LOCAL_GET, 4, I32_CONST, 8, I32_ADD, LOCAL_GET, 1, I32_GT_U, BR_IF, 0x01);
 		emitI32Const(c, INPUT_OFF);
 		c.push(LOCAL_GET, 4, I32_CONST, 10, I32_SHL, I32_ADD);
 		c.push(LOCAL_GET, 4);
 		emitI32Const(c, CV_ARR_OFF);
 		c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD);
-		c.push(CALL, 0x02);
-		c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_SET, 4);
+		c.push(CALL, 0x05);
+		c.push(LOCAL_GET, 4, I32_CONST, 8, I32_ADD, LOCAL_SET, 4);
 		c.push(BR, 0x00);
 	}
 	c.push(END, END);
+	// 4-7 full chunks left: one 4-wide group
+	c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_GET, 1, I32_LE_U, IF, VOID);
+	emitI32Const(c, INPUT_OFF);
+	c.push(LOCAL_GET, 4, I32_CONST, 10, I32_SHL, I32_ADD);
+	c.push(LOCAL_GET, 4);
+	emitI32Const(c, CV_ARR_OFF);
+	c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD);
+	c.push(CALL, 0x02);
+	c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_SET, 4);
+	c.push(END);
 	// tail of full chunks (1-3 remaining): run one more 4-wide group; the
 	// extra lanes read past the valid input (capacity guaranteed by JS) and
 	// their CVs are either never read or overwritten by the partial chunk below.
@@ -742,6 +881,11 @@ function buildHashOneShot(): Code {
 
 // ===== Module assembly =====
 
+// Interleave granularity for the 8-wide leaf kernel. Benchmarked on V8 11/2025
+// (Zen 5): "step" ≈ +17% over the 4-wide kernel; "quad" ≈ -60% (the whole
+// second state set stays live across each quad and the allocator thrashes).
+const LEAF8_INTERLEAVE: VecInterleave = "step";
+
 function generateOneShotWasm(): Uint8Array {
 	const code: Code = [];
 
@@ -770,8 +914,8 @@ function generateOneShotWasm(): Uint8Array {
 	// Imports: memory js.mem
 	section(0x02, [0x01, 0x02, 0x6a, 0x73, 0x03, 0x6d, 0x65, 0x6d, 0x02, 0x00, INITIAL_PAGES]);
 
-	// Functions
-	section(0x03, [0x05, 0x00, 0x01, 0x02, 0x03, 0x04]);
+	// Functions (leafGroup8 shares leafGroup's 3-param type)
+	section(0x03, [0x06, 0x00, 0x01, 0x02, 0x03, 0x04, 0x02]);
 
 	// Exports: hashOneShot -> func 4
 	const name = "hashOneShot";
@@ -781,8 +925,15 @@ function generateOneShotWasm(): Uint8Array {
 	section(0x07, exp);
 
 	// Code section
-	const bodies = [buildCompressScalar(), buildChunkScalar(), buildLeafGroup(), buildParentGroup(), buildHashOneShot()];
-	const codeSec: Code = [0x05];
+	const bodies = [
+		buildCompressScalar(),
+		buildChunkScalar(),
+		buildLeafGroup(),
+		buildParentGroup(),
+		buildHashOneShot(),
+		buildLeafGroup8(LEAF8_INTERLEAVE),
+	];
+	const codeSec: Code = [0x06];
 	for (const body of bodies) {
 		codeSec.push(...lebUPadded5(body.length));
 		for (let i = 0; i < body.length; i++) {codeSec.push(body[i]);}
