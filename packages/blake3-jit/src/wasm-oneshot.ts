@@ -60,7 +60,9 @@ function lebU(n: number): number[] {
 	do {
 		let b = v & 0x7f;
 		v >>>= 7;
-		if (v !== 0) {b |= 0x80;}
+		if (v !== 0) {
+			b |= 0x80;
+		}
 		out.push(b);
 	} while (v !== 0);
 	return out;
@@ -223,7 +225,18 @@ function emitVecRounds(c: Code, groups: VecGroup[], interleave: VecInterleave = 
 			// s[a] = s[a] + s[b] + m
 			for (let gi = 0; gi < gs.length; gi++) {
 				for (let i = 0; i < 4; i++) {
-					c.push(LOCAL_GET, sa[gi][i], LOCAL_GET, sb[gi][i], ...V_ADD, LOCAL_GET, msg[gi][i], ...V_ADD, LOCAL_SET, sa[gi][i]);
+					c.push(
+						LOCAL_GET,
+						sa[gi][i],
+						LOCAL_GET,
+						sb[gi][i],
+						...V_ADD,
+						LOCAL_GET,
+						msg[gi][i],
+						...V_ADD,
+						LOCAL_SET,
+						sa[gi][i],
+					);
 				}
 			}
 			// s[d] = rotr16/8(s[d] ^ s[a])
@@ -584,40 +597,42 @@ function buildLeafGroup(): Code {
 }
 
 /**
- * Function 5: leafGroup8(inPtr, counterLo, cvOutPtr)
- * Compress 8 consecutive FULL chunks (8192 bytes) as TWO independent 4-lane
+ * Function 5: leafGroupN(inPtr, counterLo, cvOutPtr)
+ * Compress nGroups*4 consecutive FULL chunks as nGroups independent 4-lane
  * SIMD groups whose instruction streams are interleaved, hiding the serial
- * add→xor→rotate dependency chains of a single group. Writes 8 lane-major
- * CVs (256 bytes) to cvOutPtr.
+ * add→xor→rotate dependency chains of a single group. Writes nGroups*4
+ * lane-major CVs (nGroups*128 bytes) to cvOutPtr.
  */
-function buildLeafGroup8(interleave: VecInterleave): Code {
+function buildLeafGroupN(nGroups: number, interleave: VecInterleave): Code {
 	const c: Code = [];
-	// locals: 3 x i32 (pos=3, addr=4, flagsBase=5), 78 x v128 ($6..$83)
-	c.push(0x02, 0x03, 0x7f, 0x4e, 0x7b);
-	const MA = 6; // 6..21
-	const MB = 22; // 22..37
-	const SA = 38; // 38..53
-	const SB = 54; // 54..69
-	const T = 70; // 70..77
-	const CTRA = 78;
-	const CTRB = 79;
+	// locals: 3 x i32 (pos=3, addr=4, flagsBase=5), then per group 16 message
+	// + 16 state v128 locals, 8 shared temps, and one counter vector per group.
+	const numV128 = nGroups * 32 + 8 + nGroups;
+	c.push(0x02, 0x03, 0x7f, numV128, 0x7b);
+	const M = (g: number) => 6 + g * 32; // 16 message words
+	const S = (g: number) => 6 + g * 32 + 16; // 16 state words
+	const T = 6 + nGroups * 32; // 8 shared temps
+	const CTR = (g: number) => T + 8 + g;
 
 	// flagsBase = mem[FLAGS]
 	emitI32Const(c, FLAGS_OFF);
 	emitI32Load(c, 0);
 	c.push(LOCAL_SET, 5);
-	// ctrA = splat(counterLo) + [0,1,2,3]; ctrB = splat(counterLo) + [4,5,6,7]
-	c.push(LOCAL_GET, 1, ...V_SPLAT);
-	emitV128Const(c, [0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0]);
-	c.push(...V_ADD, LOCAL_SET, CTRA);
-	c.push(LOCAL_GET, 1, ...V_SPLAT);
-	emitV128Const(c, [4, 0, 0, 0, 5, 0, 0, 0, 6, 0, 0, 0, 7, 0, 0, 0]);
-	c.push(...V_ADD, LOCAL_SET, CTRB);
-	// sA0..7 = sB0..7 = splat(key[i]) - the CVs carry across all 16 blocks
+	// ctr[g] = splat(counterLo) + [g*4, g*4+1, g*4+2, g*4+3]
+	for (let g = 0; g < nGroups; g++) {
+		c.push(LOCAL_GET, 1, ...V_SPLAT);
+		emitV128Const(c, [g * 4, 0, 0, 0, g * 4 + 1, 0, 0, 0, g * 4 + 2, 0, 0, 0, g * 4 + 3, 0, 0, 0]);
+		c.push(...V_ADD, LOCAL_SET, CTR(g));
+	}
+	// s0..s7 = splat(key[i]) in every group - the CVs carry across all 16 blocks
 	for (let i = 0; i < 8; i++) {
 		emitI32Const(c, KEY_OFF);
 		emitI32Load(c, i * 4);
-		c.push(...V_SPLAT, LOCAL_TEE, SA + i, LOCAL_SET, SB + i);
+		c.push(...V_SPLAT);
+		for (let g = 0; g < nGroups - 1; g++) {
+			c.push(LOCAL_TEE, S(g) + i);
+		}
+		c.push(LOCAL_SET, S(nGroups - 1) + i);
 	}
 	// pos = 0
 	emitI32Const(c, 0);
@@ -628,42 +643,55 @@ function buildLeafGroup8(interleave: VecInterleave): Code {
 		// addr = inPtr + (pos << 6)
 		c.push(LOCAL_GET, 0, LOCAL_GET, 3, I32_CONST, 6, I32_SHL, I32_ADD, LOCAL_SET, 4);
 		// load + transpose 16 message words per group (lane stride = 1024);
-		// group B lanes live 4096 bytes further in.
+		// group g's lanes live g*4096 bytes further in.
 		for (let wg = 0; wg < 4; wg++) {
-			emitTransposedLoad(c, 4, 1024, wg, MA, T);
-			emitTransposedLoad(c, 4, 1024, wg, MB, T, 4096);
+			for (let g = 0; g < nGroups; g++) {
+				emitTransposedLoad(c, 4, 1024, wg, M(g), T, g * 4096);
+			}
 		}
 		// s8..s11 = IV[0..3]
 		for (let i = 0; i < 4; i++) {
 			emitV128Const(c, splatBytes(IV[i]));
-			c.push(LOCAL_TEE, SA + 8 + i, LOCAL_SET, SB + 8 + i);
+			for (let g = 0; g < nGroups - 1; g++) {
+				c.push(LOCAL_TEE, S(g) + 8 + i);
+			}
+			c.push(LOCAL_SET, S(nGroups - 1) + 8 + i);
 		}
 		// s12 = ctr, s13 = 0, s14 = 64
-		c.push(LOCAL_GET, CTRA, LOCAL_SET, SA + 12);
-		c.push(LOCAL_GET, CTRB, LOCAL_SET, SB + 12);
+		for (let g = 0; g < nGroups; g++) {
+			c.push(LOCAL_GET, CTR(g), LOCAL_SET, S(g) + 12);
+		}
 		emitV128Const(c, new Array(16).fill(0));
-		c.push(LOCAL_TEE, SA + 13, LOCAL_SET, SB + 13);
+		for (let g = 0; g < nGroups - 1; g++) {
+			c.push(LOCAL_TEE, S(g) + 13);
+		}
+		c.push(LOCAL_SET, S(nGroups - 1) + 13);
 		emitV128Const(c, splatBytes(64));
-		c.push(LOCAL_TEE, SA + 14, LOCAL_SET, SB + 14);
+		for (let g = 0; g < nGroups - 1; g++) {
+			c.push(LOCAL_TEE, S(g) + 14);
+		}
+		c.push(LOCAL_SET, S(nGroups - 1) + 14);
 		// s15 = splat(flagsBase | (pos==0 ? CHUNK_START : 0) | (pos==15 ? CHUNK_END : 0))
 		c.push(LOCAL_GET, 5);
 		c.push(LOCAL_GET, 3, I32_EQZ);
 		c.push(LOCAL_GET, 3, I32_CONST, 15, I32_EQ, I32_CONST, 1, I32_SHL);
-		c.push(I32_OR, I32_OR, ...V_SPLAT, LOCAL_TEE, SA + 15, LOCAL_SET, SB + 15);
+		c.push(I32_OR, I32_OR, ...V_SPLAT);
+		for (let g = 0; g < nGroups - 1; g++) {
+			c.push(LOCAL_TEE, S(g) + 15);
+		}
+		c.push(LOCAL_SET, S(nGroups - 1) + 15);
 
 		emitVecRounds(
 			c,
-			[
-				{ s: SA, m: MA },
-				{ s: SB, m: MB },
-			],
+			Array.from({ length: nGroups }, (_, g) => ({ s: S(g), m: M(g) })),
 			interleave,
 		);
 
 		// cv[i] = s[i] ^ s[i+8]
 		for (let i = 0; i < 8; i++) {
-			c.push(LOCAL_GET, SA + i, LOCAL_GET, SA + 8 + i, ...V_XOR, LOCAL_SET, SA + i);
-			c.push(LOCAL_GET, SB + i, LOCAL_GET, SB + 8 + i, ...V_XOR, LOCAL_SET, SB + i);
+			for (let g = 0; g < nGroups; g++) {
+				c.push(LOCAL_GET, S(g) + i, LOCAL_GET, S(g) + 8 + i, ...V_XOR, LOCAL_SET, S(g) + i);
+			}
 		}
 		// pos++; loop while pos < 16
 		c.push(LOCAL_GET, 3, I32_CONST, 1, I32_ADD, LOCAL_TEE, 3);
@@ -671,8 +699,9 @@ function buildLeafGroup8(interleave: VecInterleave): Code {
 	}
 	c.push(END, END);
 
-	emitUntransposeStore(c, SA, T, 2);
-	emitUntransposeStore(c, SB, T, 2, 128);
+	for (let g = 0; g < nGroups; g++) {
+		emitUntransposeStore(c, S(g), T, 2, g * 128);
+	}
 	c.push(END);
 	return c;
 }
@@ -733,7 +762,7 @@ function buildParentGroup(): Code {
  * Full BLAKE3 of mem[INPUT .. INPUT+inputLen) with key/flags from memory.
  * Writes the 32-byte root hash to mem[OUT].
  */
-function buildHashOneShot(): Code {
+function buildHashOneShot(leafWide: number): Code {
 	const c: Code = [];
 	// locals: 7 x i32 - nf=1, rem=2, nc=3, i=4, cvCount=5, pairs=6, odd=7
 	c.push(0x01, 0x07, 0x7f);
@@ -755,33 +784,37 @@ function buildHashOneShot(): Code {
 	c.push(CALL, 0x01, RETURN);
 	c.push(END);
 
-	// === leaves, 8-wide (two interleaved 4-lane groups) ===
+	// === leaves, leafWide-wide (interleaved 4-lane groups) ===
 	// i = 0
 	emitI32Const(c, 0);
 	c.push(LOCAL_SET, 4);
 	c.push(BLOCK, VOID, LOOP, VOID);
 	{
-		c.push(LOCAL_GET, 4, I32_CONST, 8, I32_ADD, LOCAL_GET, 1, I32_GT_U, BR_IF, 0x01);
+		c.push(LOCAL_GET, 4, I32_CONST, leafWide, I32_ADD, LOCAL_GET, 1, I32_GT_U, BR_IF, 0x01);
 		emitI32Const(c, INPUT_OFF);
 		c.push(LOCAL_GET, 4, I32_CONST, 10, I32_SHL, I32_ADD);
 		c.push(LOCAL_GET, 4);
 		emitI32Const(c, CV_ARR_OFF);
 		c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD);
 		c.push(CALL, 0x05);
-		c.push(LOCAL_GET, 4, I32_CONST, 8, I32_ADD, LOCAL_SET, 4);
+		c.push(LOCAL_GET, 4, I32_CONST, leafWide, I32_ADD, LOCAL_SET, 4);
 		c.push(BR, 0x00);
 	}
 	c.push(END, END);
-	// 4-7 full chunks left: one 4-wide group
-	c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_GET, 1, I32_LE_U, IF, VOID);
-	emitI32Const(c, INPUT_OFF);
-	c.push(LOCAL_GET, 4, I32_CONST, 10, I32_SHL, I32_ADD);
-	c.push(LOCAL_GET, 4);
-	emitI32Const(c, CV_ARR_OFF);
-	c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD);
-	c.push(CALL, 0x02);
-	c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_SET, 4);
-	c.push(END);
+	// 4..leafWide-1 full chunks left: 4-wide groups
+	c.push(BLOCK, VOID, LOOP, VOID);
+	{
+		c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_GET, 1, I32_GT_U, BR_IF, 0x01);
+		emitI32Const(c, INPUT_OFF);
+		c.push(LOCAL_GET, 4, I32_CONST, 10, I32_SHL, I32_ADD);
+		c.push(LOCAL_GET, 4);
+		emitI32Const(c, CV_ARR_OFF);
+		c.push(LOCAL_GET, 4, I32_CONST, 5, I32_SHL, I32_ADD);
+		c.push(CALL, 0x02);
+		c.push(LOCAL_GET, 4, I32_CONST, 4, I32_ADD, LOCAL_SET, 4);
+		c.push(BR, 0x00);
+	}
+	c.push(END, END);
 	// tail of full chunks (1-3 remaining): run one more 4-wide group; the
 	// extra lanes read past the valid input (capacity guaranteed by JS) and
 	// their CVs are either never read or overwritten by the partial chunk below.
@@ -881,16 +914,23 @@ function buildHashOneShot(): Code {
 
 // ===== Module assembly =====
 
-// Interleave granularity for the 8-wide leaf kernel. Benchmarked on V8 11/2025
-// (Zen 5): "step" ≈ +17% over the 4-wide kernel; "quad" ≈ -60% (the whole
-// second state set stays live across each quad and the allocator thrashes).
-const LEAF8_INTERLEAVE: VecInterleave = "step";
+// Wide leaf kernel tuning, benchmarked on V8 13 (Zen 5), 11/2025:
+//  - interleave "step": +17% over the 4-wide kernel; "quad" is ~2.4x SLOWER
+//    than 4-wide (the whole second state set stays live across each quad and
+//    the register allocator thrashes).
+//  - groups: 2 (8-wide) is the sweet spot; 3 groups falls off a spill cliff
+//    (885 MB/s vs 1557 MB/s at 64KB). Note nGroups >= 4 would also need
+//    multi-byte LEB local declarations.
+const LEAF_INTERLEAVE: VecInterleave = "step";
+const LEAF_GROUPS = 2;
 
 function generateOneShotWasm(): Uint8Array {
 	const code: Code = [];
 
 	function put(bytes: number[]): void {
-		for (let i = 0; i < bytes.length; i++) {code.push(bytes[i]);}
+		for (let i = 0; i < bytes.length; i++) {
+			code.push(bytes[i]);
+		}
 	}
 
 	function section(id: number, contents: number[]): void {
@@ -906,7 +946,9 @@ function generateOneShotWasm(): Uint8Array {
 	const paramCounts = [6, 5, 3, 2, 1];
 	for (const n of paramCounts) {
 		types.push(0x60, n);
-		for (let i = 0; i < n; i++) {types.push(0x7f);}
+		for (let i = 0; i < n; i++) {
+			types.push(0x7f);
+		}
 		types.push(0x00);
 	}
 	section(0x01, types);
@@ -920,7 +962,9 @@ function generateOneShotWasm(): Uint8Array {
 	// Exports: hashOneShot -> func 4
 	const name = "hashOneShot";
 	const exp: Code = [0x01, name.length];
-	for (let i = 0; i < name.length; i++) {exp.push(name.charCodeAt(i));}
+	for (let i = 0; i < name.length; i++) {
+		exp.push(name.charCodeAt(i));
+	}
 	exp.push(0x00, 0x04);
 	section(0x07, exp);
 
@@ -930,13 +974,15 @@ function generateOneShotWasm(): Uint8Array {
 		buildChunkScalar(),
 		buildLeafGroup(),
 		buildParentGroup(),
-		buildHashOneShot(),
-		buildLeafGroup8(LEAF8_INTERLEAVE),
+		buildHashOneShot(LEAF_GROUPS * 4),
+		buildLeafGroupN(LEAF_GROUPS, LEAF_INTERLEAVE),
 	];
 	const codeSec: Code = [0x06];
 	for (const body of bodies) {
 		codeSec.push(...lebUPadded5(body.length));
-		for (let i = 0; i < body.length; i++) {codeSec.push(body[i]);}
+		for (let i = 0; i < body.length; i++) {
+			codeSec.push(body[i]);
+		}
 	}
 	section(0x0a, codeSec);
 
@@ -954,7 +1000,9 @@ let view32: Uint32Array = new Uint32Array(0);
 let initFailed = false;
 
 function refreshViews(): void {
-	if (!memory) {return;}
+	if (!memory) {
+		return;
+	}
 	view8 = new Uint8Array(memory.buffer);
 	view32 = new Uint32Array(memory.buffer);
 }
@@ -963,8 +1011,12 @@ function refreshViews(): void {
  * Initialize the one-shot engine (idempotent). Returns availability.
  */
 export function initOneShot(): boolean {
-	if (hashFn) {return true;}
-	if (initFailed || !IS_LE) {return false;}
+	if (hashFn) {
+		return true;
+	}
+	if (initFailed || !IS_LE) {
+		return false;
+	}
 	try {
 		if (
 			typeof WebAssembly === "undefined" ||
@@ -1003,7 +1055,9 @@ function generateSimdProbe(): Uint8Array {
 }
 
 function ensureCapacity(totalBytes: number): void {
-	if (view8.length >= totalBytes) {return;}
+	if (view8.length >= totalBytes) {
+		return;
+	}
 	const pages = Math.ceil((totalBytes - view8.length) / PAGE_SIZE);
 	(memory as WebAssembly.Memory).grow(pages);
 	refreshViews();
@@ -1026,10 +1080,14 @@ export interface OneShotOwner {
 let inputOwner: OneShotOwner | null = null;
 
 export function claimInput(owner: OneShotOwner | null): void {
-	if (inputOwner === owner) {return;}
+	if (inputOwner === owner) {
+		return;
+	}
 	const prev = inputOwner;
 	inputOwner = owner;
-	if (prev) {prev.evictOneShot();}
+	if (prev) {
+		prev.evictOneShot();
+	}
 }
 
 /**
