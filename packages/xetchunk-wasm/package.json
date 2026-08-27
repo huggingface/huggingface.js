@@ -21,7 +21,9 @@
 	"scripts": {
 		"prepare": "tshy",
 		"test": "vitest run",
-		"bench": "node tests/bench.js"
+		"bench": "node tests/bench.js",
+		"bench:stages": "node tests/bench-stages.js",
+		"bench:matrix": "node tests/bench-matrix.js"
 	},
 	"tshy": {
 		"exports": {
