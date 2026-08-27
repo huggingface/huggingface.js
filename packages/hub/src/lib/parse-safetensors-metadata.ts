@@ -147,7 +147,7 @@ const SUB_BYTE_FORMAT_BITS: Array<[pattern: string, bits: number]> = [
  * quantized like the rest of the model, so they're excluded.
  */
 function isRoutedExpertTensor(tensorName: string): boolean {
-	return tensorName.includes(".experts.") && !tensorName.includes("shared_experts");
+	return tensorName.includes(".experts.") && !tensorName.includes("shared_expert");
 }
 
 /** Reads a bit width out of a free-form format/dtype string, e.g. `"mxfp4-pack-quantized"` -> 4. */
@@ -299,6 +299,83 @@ export interface SafetensorsIndexJson {
 }
 
 export type SafetensorsShardedHeaders = Record<FileName, SafetensorsFileHeader>;
+
+export interface QuantizationConfig {
+	quant_method?: string;
+	modules_to_not_convert?: string[];
+	bits?: number;
+	load_in_4bit?: boolean;
+	load_in_8bit?: boolean;
+	// compressed-tensors specific
+	format?: string;
+	config_groups?: Record<string, { format?: string; targets?: string[]; weights?: { num_bits?: number } }>;
+	/**
+	 * compressed-tensors names its exclusion list `ignore` rather than `modules_to_not_convert`,
+	 * using the same `re:`-prefixed target syntax as `config_groups[].targets`.
+	 */
+	ignore?: string[];
+}
+
+interface MoeConfigFields {
+	/** Common across Mixtral, Qwen2/3-MoE, Llama4, GPT-OSS, … */
+	num_experts_per_tok?: number;
+	/** Alternative spelling used by some checkpoints. */
+	num_experts_per_token?: number;
+	/** Switch Transformers spelling. */
+	num_selected_experts?: number;
+	num_local_experts?: number;
+	num_experts?: number;
+	/** DeepSeek family. */
+	n_routed_experts?: number;
+	/** Ernie 4.5 / DBRX spellings. */
+	moe_k?: number;
+	moe_top_k?: number;
+	moe_num_experts?: number;
+	/** Shared-expert aliases used by DeepSeek, Qwen, and Ernie families. */
+	n_shared_experts?: number;
+	num_shared_experts?: number;
+	moe_num_shared_experts?: number;
+}
+
+interface TextModelConfig extends MoeConfigFields {
+	quantization_config?: QuantizationConfig;
+	expert_dtype?: string;
+}
+
+export interface ModelConfig extends MoeConfigFields {
+	quantization_config?: QuantizationConfig;
+	text_config?: TextModelConfig;
+	/** DBRX stores its MoE dimensions in this nested object. */
+	ffn_config?: MoeConfigFields;
+	/**
+	 * Some MoEs store their experts at a narrower precision than the rest of the model and declare
+	 * it here, *outside* `quantization_config` (e.g. DeepSeek-V4 is `quant_method: "fp8"` for
+	 * attention but `expert_dtype: "fp4"` for the experts, which dominate the parameter count).
+	 */
+	expert_dtype?: string;
+}
+
+/**
+ * Active-parameter breakdown for Mixture-of-Experts models.
+ *
+ * For MoE models, only `topK` of `numExperts` routed experts run per token, so the
+ * usable ("active") parameter count is much smaller than the total stored on disk.
+ * `active = alwaysActive + topK * perExpert`. Counts use the same logical-parameter
+ * rules as `parameterCount`: packed weights are expanded and quantization bookkeeping
+ * tensors are excluded.
+ */
+export interface MoeInfo {
+	numExperts: number;
+	topK: number;
+	/** Average parameter count per routed expert (= sum-of-routed / numExperts). */
+	perExpert: number;
+	/** Everything that runs on every token: embeddings, attention, norms, lm_head, router, shared experts, … */
+	alwaysActive: number;
+	/** alwaysActive + topK * perExpert */
+	active: number;
+	/** True when the model has a dense shared-expert MLP alongside routed experts (DeepSeek, Qwen-MoE, Command-A, …). */
+	hasSharedExpert: boolean;
+}
 
 export type SafetensorsParseFromRepo =
 	| {
@@ -654,7 +731,12 @@ export async function parseSafetensorsMetadata(
 							header.__metadata__?.total_parameters,
 							sum(Object.values(parameterCount)),
 						),
-						moe: computeMoeInfoFromHeaders([header], modelConfig),
+						// A directly requested shard contains only part of the model, so a model-level
+						// active-parameter breakdown cannot be inferred from it safely.
+						moe:
+							params.path && parseSafetensorsShardFilename(location.path.split("/").at(-1) ?? "")
+								? undefined
+								: computeMoeInfoFromHeaders([header], modelConfig),
 					};
 				})()
 			: undefined;
@@ -692,70 +774,6 @@ export async function parseSafetensorsMetadata(
 		throw new Error("model id does not seem to contain safetensors weights");
 	}
 }
-
-export interface QuantizationConfig {
-	quant_method?: string;
-	modules_to_not_convert?: string[];
-	bits?: number;
-	load_in_4bit?: boolean;
-	load_in_8bit?: boolean;
-	// compressed-tensors specific
-	format?: string;
-	config_groups?: Record<string, { format?: string; targets?: string[]; weights?: { num_bits?: number } }>;
-	/**
-	 * compressed-tensors names its exclusion list `ignore` rather than `modules_to_not_convert`,
-	 * using the same `re:`-prefixed target syntax as `config_groups[].targets`.
-	 */
-	ignore?: string[];
-}
-
-interface MoeConfigFields {
-	/** Common across Mixtral, Qwen2/3-MoE, Llama4, GPT-OSS, … */
-	num_experts_per_tok?: number;
-	/** Alternative spelling (some checkpoints) */
-	num_experts_per_token?: number;
-	num_local_experts?: number;
-	num_experts?: number;
-	/** DeepSeek family */
-	n_routed_experts?: number;
-	n_shared_experts?: number;
-	/** Multi-modal Ernie 4.5 */
-	moe_num_shared_experts?: number;
-}
-
-export interface ModelConfig extends MoeConfigFields {
-	quantization_config?: QuantizationConfig;
-	text_config?: { quantization_config?: QuantizationConfig } & MoeConfigFields & Pick<ModelConfig, "expert_dtype">;
-	/**
-	 * Some MoEs store their experts at a narrower precision than the rest of the model and declare
-	 * it here, *outside* `quantization_config` (e.g. DeepSeek-V4 is `quant_method: "fp8"` for
-	 * attention but `expert_dtype: "fp4"` for the experts, which dominate the parameter count).
-	 */
-	expert_dtype?: string;
-}
-
-/**
- * Active-parameter breakdown for Mixture-of-Experts models.
- *
- * For MoE models, only `topK` of `numExperts` routed experts run per token, so the
- * usable ("active") parameter count is much smaller than the total stored on disk.
- * `active = alwaysActive + topK * perExpert`. Returned by `parseSafetensorsMetadata`
- * when the model's `config.json` exposes MoE fields and tensor names indicate a
- * supported expert layout.
- */
-export interface MoeInfo {
-	numExperts: number;
-	topK: number;
-	/** Average parameter count per routed expert (= sum-of-routed / numExperts). */
-	perExpert: number;
-	/** Everything that runs on every token: embeddings, attention, norms, lm_head, router, shared experts, … */
-	alwaysActive: number;
-	/** alwaysActive + topK * perExpert */
-	active: number;
-	/** True when the model has a dense shared-expert MLP alongside routed experts (Deepseek, Qwen-MoE, Command-A, …). */
-	hasSharedExpert: boolean;
-}
-
 /**
  * @internal
  * Glob match without RegExp: splits pattern on `*` and checks that each literal
@@ -950,21 +968,49 @@ export function getQuantizationMultiplier(
 	}
 }
 
-function getMoeConfig(config: ModelConfig | null): Pick<MoeInfo, "topK" | "numExperts"> | undefined {
+type ResolvedMoeConfig = Pick<MoeInfo, "topK" | "numExperts" | "hasSharedExpert">;
+
+function isPositiveSafeInteger(value: unknown): value is number {
+	return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
+function firstPositiveSafeInteger(values: unknown[]): number | undefined {
+	return values.find(isPositiveSafeInteger);
+}
+
+function getMoeConfig(config: ModelConfig | null): ResolvedMoeConfig | undefined {
 	if (!config) {
 		return undefined;
 	}
-	const sources: MoeConfigFields[] = [config, config.text_config ?? {}];
-	let topK: number | undefined;
-	let numExperts: number | undefined;
+	const sources: MoeConfigFields[] = [
+		config,
+		...(config.text_config ? [config.text_config] : []),
+		...(config.ffn_config ? [config.ffn_config] : []),
+	];
 	for (const src of sources) {
-		topK = topK ?? src.num_experts_per_tok ?? src.num_experts_per_token;
-		numExperts = numExperts ?? src.num_local_experts ?? src.num_experts ?? src.n_routed_experts;
+		const topK = firstPositiveSafeInteger([
+			src.num_experts_per_tok,
+			src.num_experts_per_token,
+			src.num_selected_experts,
+			src.moe_k,
+			src.moe_top_k,
+		]);
+		const numExperts = firstPositiveSafeInteger([
+			src.num_local_experts,
+			src.num_experts,
+			src.n_routed_experts,
+			src.moe_num_experts,
+		]);
+		const hasSharedExpert = [src.n_shared_experts, src.num_shared_experts, src.moe_num_shared_experts].some(
+			isPositiveSafeInteger,
+		);
+		// Resolve both values from one config object. Mixing a partial multimodal root config
+		// with unrelated `text_config` fields can manufacture a plausible but false pair.
+		if (topK !== undefined && numExperts !== undefined && topK <= numExperts) {
+			return { topK, numExperts, hasSharedExpert };
+		}
 	}
-	if (!topK || !numExperts || topK <= 0 || numExperts <= 0 || topK > numExperts) {
-		return undefined;
-	}
-	return { topK, numExperts };
+	return undefined;
 }
 
 /**
@@ -977,17 +1023,48 @@ function getMoeConfig(config: ModelConfig | null): Pick<MoeInfo, "topK" | "numEx
  *   - stacked 3D:        `…experts.<name>` where shape[0] === numExperts
  *                        (GPT-OSS, modern Mixtral/Qwen/Deepseek in-memory format, GraniteMoE, JetMoE)
  */
+function getPerExpertIndex(name: string): number | null {
+	const match = /\.experts\.(?:expert_)?(\d+)\./.exec(name);
+	return match ? Number(match[1]) : null;
+}
+
 function isMoeRoutedExpertTensor(name: string, info: TensorInfo, numExperts: number): boolean {
-	if (name.includes("shared_expert")) {
+	if (!isRoutedExpertTensor(name)) {
 		return false;
 	}
-	if (/\.experts\.(?:expert_)?\d+\./.test(name)) {
+	const expertIndex = getPerExpertIndex(name);
+	if (expertIndex !== null) {
+		return Number.isSafeInteger(expertIndex) && expertIndex < numExperts;
+	}
+	// Stacked layouts can use names such as `gate_up_proj.weight`, `down_proj_blocks`,
+	// or `weight_packed`; the leading dimension, rather than a suffix allowlist, identifies them.
+	if (info.shape[0] === numExperts) {
 		return true;
 	}
-	if (/\.experts\.[A-Za-z_][\w]*(?:\.(?:weight|bias))?$/.test(name) && info.shape[0] === numExperts) {
-		return true;
+	// DBRX flattens the expert and intermediate dimensions into the leading dimension.
+	return /\.experts\.mlp\.(?:w1|v1|w2)(?:\.|$)/.test(name) && info.shape[0] % numExperts === 0;
+}
+
+function computeTensorParameterCount(
+	tensorName: string,
+	info: TensorInfo,
+	quantConfig?: QuantizationConfig,
+	expertDtype?: string,
+): number {
+	if (shouldSkipTensor(tensorName, info.dtype, quantConfig) || info.shape.length === 0) {
+		return 0;
 	}
-	return false;
+	const elements = info.shape.reduce((a, b) => a * b, 1);
+	if (!Number.isFinite(elements)) {
+		return 0;
+	}
+	const multiplier = getQuantizationMultiplier(tensorName, info.dtype, quantConfig, expertDtype);
+	if (multiplier === 0) {
+		return 0;
+	}
+	// Rounded because the packing factor is a ratio, not necessarily a whole number (see
+	// `packingFactor`); a parameter count is always an integer.
+	return Math.round(elements * multiplier);
 }
 
 function computeMoeInfoFromHeaders(
@@ -998,10 +1075,14 @@ function computeMoeInfoFromHeaders(
 	if (!moeCfg) {
 		return undefined;
 	}
+	const quantConfig = config?.quantization_config ?? config?.text_config?.quantization_config;
+	const expertDtype = config?.expert_dtype ?? config?.text_config?.expert_dtype;
 
 	let total = 0;
 	let routedExpert = 0;
-	let hasSharedExpert = false;
+	let hasSharedExpert = moeCfg.hasSharedExpert;
+	let hasStackedExperts = false;
+	const perExpertIndices = new Set<number>();
 
 	for (const header of headers) {
 		for (const [name, value] of Object.entries(header)) {
@@ -1009,16 +1090,23 @@ function computeMoeInfoFromHeaders(
 				continue;
 			}
 			const info = value as TensorInfo;
-			if (info.shape.length === 0) {
+			const parameterCount = computeTensorParameterCount(name, info, quantConfig, expertDtype);
+			if (parameterCount === 0) {
 				continue;
 			}
-			const n = info.shape.reduce((a, b) => a * b, 1);
-			if (!Number.isFinite(n)) {
-				continue;
+			const expertIndex = getPerExpertIndex(name);
+			if (expertIndex !== null && (!Number.isSafeInteger(expertIndex) || expertIndex >= moeCfg.numExperts)) {
+				// A tensor/config mismatch means dividing by the configured expert count is unsafe.
+				return undefined;
 			}
-			total += n;
+			total += parameterCount;
 			if (isMoeRoutedExpertTensor(name, info, moeCfg.numExperts)) {
-				routedExpert += n;
+				routedExpert += parameterCount;
+				if (expertIndex === null) {
+					hasStackedExperts = true;
+				} else {
+					perExpertIndices.add(expertIndex);
+				}
 			} else if (name.includes("shared_expert")) {
 				hasSharedExpert = true;
 			}
@@ -1026,8 +1114,14 @@ function computeMoeInfoFromHeaders(
 	}
 
 	if (routedExpert === 0) {
+		// Config says MoE but tensors do not look like a supported routed-expert layout.
 		return undefined;
-	} // config says MoE but tensors don't look like one — bail safely
+	}
+	if (!hasStackedExperts && perExpertIndices.size !== moeCfg.numExperts) {
+		// A partial expert set (for example, one non-standard shard filename) cannot produce
+		// a model-level average per expert reliably.
+		return undefined;
+	}
 
 	const perExpert = routedExpert / moeCfg.numExperts;
 	const alwaysActive = total - routedExpert;
@@ -1057,24 +1151,11 @@ export function computeNumOfParamsByDtypeSingleFile(
 	const tensors = omit(header, "__metadata__");
 
 	for (const [tensorName, v] of typedEntries(tensors)) {
-		if (shouldSkipTensor(tensorName, v.dtype, quantConfig)) {
+		const parameterCount = computeTensorParameterCount(tensorName, v, quantConfig, expertDtype);
+		if (parameterCount === 0) {
 			continue;
 		}
-		if (v.shape.length === 0) {
-			continue;
-		}
-
-		const elements = v.shape.reduce((a, b) => a * b);
-		if (!Number.isFinite(elements)) {
-			continue;
-		}
-		const multiplier = quantConfig ? getQuantizationMultiplier(tensorName, v.dtype, quantConfig, expertDtype) : 1;
-		if (multiplier === 0) {
-			continue;
-		}
-		// Rounded because the packing factor is a ratio, not necessarily a whole number (see
-		// `packingFactor`); a parameter count is always an integer.
-		counter[v.dtype] = (counter[v.dtype] ?? 0) + Math.round(elements * multiplier);
+		counter[v.dtype] = (counter[v.dtype] ?? 0) + parameterCount;
 	}
 	return counter;
 }
