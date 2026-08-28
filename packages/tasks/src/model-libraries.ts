@@ -1425,7 +1425,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	shadow: {
 		prettyLabel: "Shadow",
-		repoName: "SHADOW",
+		repoName: "Shadow",
 		repoUrl: "https://github.com/QLNI/SHADOW-250M-Instruct",
 		filter: false,
 		countDownloads: `path_extension:"shdw"`,
