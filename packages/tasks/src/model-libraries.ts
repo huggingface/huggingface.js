@@ -1423,6 +1423,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.setfit,
 		filter: true,
 	},
+	shadow: {
+		prettyLabel: "shadow",
+		repoName: "SHADOW",
+		repoUrl: "https://github.com/QLNI/SHADOW-250M-Instruct",
+		filter: false,
+		countDownloads: `path_extension:"shdw"`,
+	},
 	sklearn: {
 		prettyLabel: "Scikit-learn",
 		repoName: "Scikit-learn",
