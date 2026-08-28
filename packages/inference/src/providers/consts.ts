@@ -33,6 +33,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	publicai: {},
 	ovhcloud: {},
 	replicate: {},
+	scalattice: {},
 	scaleway: {},
 	together: {},
 	wavespeed: {},

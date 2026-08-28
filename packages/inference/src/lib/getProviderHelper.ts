@@ -48,6 +48,7 @@ import type {
 	ZeroShotImageClassificationTaskHelper,
 } from "../providers/providerHelper.js";
 import * as Replicate from "../providers/replicate.js";
+import * as Scalattice from "../providers/scalattice.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
 import * as Wavespeed from "../providers/wavespeed.js";
@@ -151,6 +152,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-video": new Replicate.ReplicateTextToVideoTask(),
 		"image-to-image": new Replicate.ReplicateImageToImageTask(),
 		"automatic-speech-recognition": new Replicate.ReplicateAutomaticSpeechRecognitionTask(),
+	},
+	scalattice: {
+		conversational: new Scalattice.ScalatticeConversationalTask(),
 	},
 	scaleway: {
 		conversational: new Scaleway.ScalewayConversationalTask(),
