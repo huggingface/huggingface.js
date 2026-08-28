@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Hasher, hash, hashInto, createKeyed, createDeriveKey, createHasher } from "../src/index.js";
+import { Hasher, hash, hashInto, createKeyed, createDeriveKey, createHasher, getOneShotContext } from "../src/index.js";
 // Official BLAKE3 test vectors from https://github.com/BLAKE3-team/BLAKE3
 import * as vectorsJson from "./test-vectors.json";
 
@@ -185,5 +185,57 @@ describe("misc", () => {
 		expect(toHex(Hasher.newKeyed(KEY).update(view).finalize(32))).toBe(
 			toHex(Hasher.newKeyed(KEY).update(copy).finalize(32)),
 		);
+	});
+});
+
+// Regression tests: the shared-memory API hands the one-shot engine's
+// WebAssembly.Memory to external callers (e.g. gearhash-jit's
+// instantiateGearScanner), which may grow it directly. grow() detaches the
+// engine's cached views; an in-flight hasher buffering its message in the
+// staging area must still replay the correct bytes when evicted afterwards.
+describe("external memory growth (shared-memory path)", () => {
+	function growExternally(): boolean {
+		const ctx = getOneShotContext();
+		if (!ctx) {
+			return false; // wasm one-shot engine unavailable: fast path off, nothing to test
+		}
+		ctx.memory.grow(1); // detaches all views cached before this call
+		return true;
+	}
+
+	it("eviction by another hasher replays buffered bytes after external grow", () => {
+		const input = makeInput(1000);
+		const expected = toHex(new Hasher().update(input).finalize(32));
+
+		const a = new Hasher().update(input); // buffers into wasm staging (fast path)
+		if (!growExternally()) {
+			return;
+		}
+		new Hasher().update(makeInput(10)).finalize(32); // claims staging → evicts `a`
+		expect(toHex(a.finalize(32))).toBe(expected);
+	});
+
+	it("eviction by keyed one-shot claim replays buffered bytes after external grow", () => {
+		const input = makeInput(4096);
+		const expected = toHex(Hasher.newKeyed(KEY).update(input).finalize(32));
+
+		const a = Hasher.newKeyed(KEY).update(input);
+		if (!growExternally()) {
+			return;
+		}
+		hash(makeInput(5)); // one-shot hash() claims staging → evicts `a`
+		expect(toHex(a.finalize(32))).toBe(expected);
+	});
+
+	it("XOF finalize (>32B) replays buffered bytes after external grow", () => {
+		const input = makeInput(2048);
+		const expected = toHex(hash(input, 64));
+
+		const a = new Hasher().update(input);
+		if (!growExternally()) {
+			return;
+		}
+		// outputLength > 32 forces the scalar output machinery → evictOneShot
+		expect(toHex(a.finalize(64))).toBe(expected);
 	});
 });

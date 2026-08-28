@@ -13,6 +13,8 @@ import {
 } from "../src/index.js";
 import type { Chunk } from "../src/index.js";
 import { createRandomArray } from "@huggingface/splitmix64-wasm";
+import { Hasher as Blake3Hasher, getOneShotContext } from "@huggingface/blake3-jit";
+import { instantiateGearScanner } from "gearhash-jit";
 
 // Helper function to get chunk boundaries from chunks
 function getChunkBoundaries(chunks: Array<{ length: number; hash: Uint8Array }>): number[] {
@@ -559,6 +561,45 @@ describe("xetchunk-wasm", () => {
 		it("hexToBytes round-trip", () => {
 			const hex = "118bbac5c38b2bca9c2b7ae8307786de066696b91b2b5ccb7dbbd4608c966882";
 			expect(hashToHex(hexToBytes(hex))).toBe(hex);
+		});
+	});
+
+	describe("shared wasm memory coexistence with blake3-jit hashers", () => {
+		// Regression: instantiateGearScanner grows the blake3 one-shot engine's
+		// memory directly, detaching its cached views. An in-flight blake3
+		// Hasher buffering its message in the engine's staging area must still
+		// replay the correct bytes when evicted after such a grow (previously
+		// it replayed an empty detached view → wrong digest).
+		it("in-flight hasher survives a gear-scanner-triggered memory grow", () => {
+			const ctx = getOneShotContext();
+			if (!ctx) {
+				return; // wasm engine unavailable: shared path is off
+			}
+
+			const key = new Uint8Array(32).fill(7);
+			const input = new Uint8Array(createRandomArray(100000, 42n));
+			const expected = hashToHex(Blake3Hasher.newKeyed(key).update(input).finalize(32));
+
+			const a = Blake3Hasher.newKeyed(key).update(input); // buffers in wasm staging
+			// Bind a scanner past the current end of memory: forces memory.grow,
+			// exactly what XetChunker construction does via getSharedCtx().
+			instantiateGearScanner(ctx.memory, ctx.memory.buffer.byteLength);
+			new Blake3Hasher().update(new Uint8Array(8)).finalize(32); // claims staging → evicts `a`
+			expect(hashToHex(a.finalize(32))).toBe(expected);
+		});
+
+		// End-to-end sanity: chunking (which instantiates the shared scanner and
+		// grows memory on first use) must not corrupt a concurrent hasher.
+		it("in-flight hasher survives chunker creation and use", () => {
+			const key = new Uint8Array(32).fill(9);
+			const input = new Uint8Array(createRandomArray(200000, 7n));
+			const expected = hashToHex(Blake3Hasher.newKeyed(key).update(input).finalize(32));
+
+			const a = Blake3Hasher.newKeyed(key).update(input);
+			const data = new Uint8Array(createRandomArray(1000000, 1n));
+			const viaStream = nextBlock(createChunker(), data);
+			expect(viaStream.length).toBeGreaterThan(0);
+			expect(hashToHex(a.finalize(32))).toBe(expected);
 		});
 	});
 });
