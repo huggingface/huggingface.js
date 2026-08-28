@@ -17,6 +17,7 @@ import {
 } from "./wasm.js";
 
 export { GEAR_TABLE } from "./table.js";
+export { instantiateGearScanner } from "./wasm.js";
 
 export class Hasher {
 	private readonly maskBytes: Uint8Array;

@@ -79,7 +79,11 @@ function toLebU32Padded5(n: number): number[] {
  * for `inputLen` bytes, writes updated hash back.
  * Returns 1-based match position within the scanned range, or -1.
  */
-function generateWasmBytes(): Uint8Array {
+function generateWasmBytes(
+	tableOffset: number = TABLE_OFFSET,
+	hashOffset: number = HASH_OFFSET,
+	maskOffset: number = MASK_OFFSET,
+): Uint8Array {
 	const code: number[] = [];
 	function emit(...bytes: number[]): void {
 		code.push(...bytes);
@@ -126,12 +130,12 @@ function generateWasmBytes(): Uint8Array {
 	emit(0x02, 0x02, 0x7e, 0x03, 0x7f);
 
 	// hash = mem64[HASH_OFFSET]
-	emit(0x41, ...toSignedLeb128(HASH_OFFSET));
+	emit(0x41, ...toSignedLeb128(hashOffset));
 	emit(0x29, 0x03, 0x00);
 	emit(0x21, HASH);
 
 	// mask = mem64[MASK_OFFSET]
-	emit(0x41, ...toSignedLeb128(MASK_OFFSET));
+	emit(0x41, ...toSignedLeb128(maskOffset));
 	emit(0x29, 0x03, 0x00);
 	emit(0x21, MASK);
 
@@ -157,7 +161,7 @@ function generateWasmBytes(): Uint8Array {
 		emit(0x2d, 0x00, ...toUnsignedLeb128(k)); // i32.load8_u align=0 offset=k
 		emit(0x41, 0x03); // i32.const 3
 		emit(0x74); // i32.shl
-		emit(0x29, 0x03, ...toUnsignedLeb128(TABLE_OFFSET)); // i64.load align=3
+		emit(0x29, 0x03, ...toUnsignedLeb128(tableOffset)); // i64.load align=3
 	}
 
 	// Emits: test i64 on stack against mask; if (v & mask) == 0,
@@ -168,7 +172,7 @@ function generateWasmBytes(): Uint8Array {
 		emit(0x83); // i64.and
 		emit(0x50); // i64.eqz
 		emit(0x04, 0x40); // if (void)
-		emit(0x41, ...toSignedLeb128(HASH_OFFSET)); // i32.const HASH_OFFSET
+		emit(0x41, ...toSignedLeb128(hashOffset)); // i32.const HASH_OFFSET
 		emit(0x20, local); // local.get <matched hash>
 		emit(0x37, 0x03, 0x00); // i64.store align=3
 		emit(0x20, PTR); // local.get ptr
@@ -249,7 +253,7 @@ function generateWasmBytes(): Uint8Array {
 	emit(0x0b); // end block
 
 	// no match: store hash, return -1
-	emit(0x41, ...toSignedLeb128(HASH_OFFSET));
+	emit(0x41, ...toSignedLeb128(hashOffset));
 	emit(0x20, HASH);
 	emit(0x37, 0x03, 0x00);
 	emit(0x41, 0x7f);
@@ -266,6 +270,48 @@ function generateWasmBytes(): Uint8Array {
 	for (let i = 0; i < 5; i++) code[sectionSizeOff + i] = ssPatch[i];
 
 	return new Uint8Array(code);
+}
+
+/**
+ * Instantiate an additional gear scanner bound to an EXTERNAL (shared)
+ * WebAssembly.Memory, with its fixed regions (table/hash/mask) rebased to
+ * `baseOffset` (2064 bytes are used). Input windows are addressed absolutely
+ * within the shared memory via `nextMatch(inputStart, inputLen)`.
+ *
+ * The caller owns hash/mask state management (8 LE bytes each at the returned
+ * offsets) and must tolerate `memory.grow` detaching prior buffer views.
+ */
+export function instantiateGearScanner(
+	memory: WebAssembly.Memory,
+	baseOffset: number,
+): {
+	nextMatch: (inputStart: number, inputLen: number) => number;
+	hashOffset: number;
+	maskOffset: number;
+} {
+	const tableOffset = baseOffset;
+	const hashOffset = baseOffset + 2048;
+	const maskOffset = baseOffset + 2056;
+
+	const needed = baseOffset + 2064;
+	if (memory.buffer.byteLength < needed) {
+		memory.grow(Math.ceil((needed - memory.buffer.byteLength) / 65536));
+	}
+
+	const bytes = generateWasmBytes(tableOffset, hashOffset, maskOffset);
+	const module = new WebAssembly.Module(bytes);
+	const instance = new WebAssembly.Instance(module, { js: { mem: memory } });
+
+	const dv = new DataView(memory.buffer);
+	for (let i = 0; i < 256; i++) {
+		dv.setBigUint64(tableOffset + i * 8, GEAR_TABLE[i], true);
+	}
+
+	return {
+		nextMatch: instance.exports.nextMatch as (start: number, len: number) => number,
+		hashOffset,
+		maskOffset,
+	};
 }
 
 export function initWasm(): void {
