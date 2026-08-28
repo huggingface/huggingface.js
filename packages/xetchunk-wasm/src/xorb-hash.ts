@@ -13,6 +13,16 @@ const INDEX_OF_LAST_BYTE_OF_LAST_U64_IN_CHUNK_HASH = 3 * 8;
 
 const nodeHasher = Hasher.newKeyed(BLAKE3_NODE_KEY);
 
+/**
+ * @internal
+ *
+ * `hash % 4 === 0` in Rust's `is_natural_cut`, where `%` operates on the
+ * little-endian u64 at byte offset 24 — so only the low byte matters.
+ */
+export function isNaturalCut(hash: Uint8Array): boolean {
+	return hash[INDEX_OF_LAST_BYTE_OF_LAST_U64_IN_CHUNK_HASH] % MEAN_CHUNK_PER_NODE === 0;
+}
+
 export function xorbHash(chunks: Chunk[]): Uint8Array {
 	if (chunks.length === 0) {
 		return new Uint8Array(32);
@@ -46,10 +56,12 @@ export function xorbHash(chunks: Chunk[]): Uint8Array {
 }
 
 /**
+ * @internal
+ *
  * Matches Rust's `merged_hash_of_sequence`: serializes each entry as
  * "{hash_hex} : {length_decimal}\n" then hashes with BLAKE3_NODE_KEY.
  */
-function mergedHashOfSequence(chunks: Chunk[]): Chunk {
+export function mergedHashOfSequence(chunks: Chunk[]): Chunk {
 	let text = "";
 	let totalLength = 0;
 	for (const chunk of chunks) {
