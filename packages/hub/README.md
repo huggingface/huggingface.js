@@ -82,24 +82,29 @@ for await (const progressEvent of await hub.uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
-// Edit a file by adding prefix & suffix
-await commit({
+// Edit a file in place, without downloading/uploading its unchanged data
+const originalFile = await hub.downloadFile({ repo, path: "myfile.bin", accessToken: "hf_..." });
+await hub.commit({
   repo,
   accessToken: "hf_...",
+  title: "edit myfile.bin",
   operations: [{
-    type: "edit",
+    operation: "edit",
+    path: "myfile.bin",
     originalContent: originalFile,
     edits: [{
+      // Replace bytes [0, 4)
       start: 0,
-      end: 0,
-      content: new Blob(["prefix"])
+      end: 4,
+      content: new Blob(["new prefix"])
     }, {
-      start: originalFile.length,
-      end: originalFile.length,
+      // Append at the end
+      start: originalFile.size,
+      end: originalFile.size,
       content: new Blob(["suffix"])
     }]
   }]
-})
+});
 
 await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
@@ -114,7 +119,7 @@ await hub.deleteRepo({ repo, accessToken: "hf_..." });
 
 ## CLI usage
 
-You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo. 
+You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo.
 
 ```console
 npx @huggingface/hub upload coyotte508/test-model .
@@ -222,6 +227,8 @@ When uploading large files, you may want to run the `commit` calls inside a work
 Remote resources and local files should be passed as `URL` whenever it's possible so they can be lazy loaded in chunks to reduce RAM usage. Passing a `File` inside the browser's context is fine, because it natively behaves as a `Blob`.
 
 Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
+
+To edit an existing file, prefer an `edit` commit operation with the blob returned by `downloadFile` as `originalContent`: only the edited regions are downloaded, re-chunked and hashed. For repeated appends to the same file, pass a shared `rangeEditCache: new Map()` to the `commit` calls to also skip the storage-metadata round-trips.
 
 ## Dependencies
 
