@@ -225,13 +225,20 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
-const snippetDulus = (model: ModelData, filepath?: string): string => {
+const snippetDulus = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const command = `dulus --model ollama/hf.co/${model.id}${getQuantTag(filepath)}`;
 	return [
-		"# Install Dulus:",
-		"pip install dulus",
-		"# Chat with this model in Dulus (runs GGUF models via Ollama):",
-		`dulus --model ollama/hf.co/${model.id}${getQuantTag(filepath)}`,
-	].join("\n");
+		{
+			title: "Install with pip",
+			setup: "pip install dulus",
+			content: command,
+		},
+		{
+			title: "Install with the setup script (Linux, macOS, WSL)",
+			setup: "curl -fsSL https://raw.githubusercontent.com/KevRojo/Dulus/main/install.sh | bash",
+			content: command,
+		},
+	];
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -807,7 +814,7 @@ export const LOCAL_APPS = {
 	},
 	dulus: {
 		prettyLabel: "Dulus",
-		docsUrl: "https://dulus.ai",
+		docsUrl: "https://github.com/KevRojo/Dulus",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetDulus,
