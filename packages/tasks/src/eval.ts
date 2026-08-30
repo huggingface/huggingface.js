@@ -177,6 +177,6 @@ export const EVALUATION_FRAMEWORKS = {
 		name: "fidelity-kld",
 		description:
 			"Distribution-fidelity measurement: full-vocabulary KL divergence between a candidate model and an unquantized reference model, over frozen token IDs, teacher-forced, accumulated in fp64. Measures what quantization costs rather than task accuracy. Lower is better; 0.0 means the candidate reproduces the reference distribution exactly.",
-		url: "https://github.com/malaiwah/glm53-flash-fidelity-suite",
+		url: "https://github.com/malaiwah/quant-fidelity-suite",
 	},
 } as const;
