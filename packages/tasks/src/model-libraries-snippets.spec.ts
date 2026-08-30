@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ModelData } from "./model-data.js";
 import {
 	adapters,
+	aneforge,
 	diffusers,
 	keras_hub,
 	llama_cpp_python,
@@ -13,6 +14,27 @@ import {
 } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
+	it("aneforge dispatches per pipeline: text-generation, zero-shot (CLIP), and the sentence-transformers default", async () => {
+		const llm = aneforge({ id: "aneforge/gpt2", pipeline_tag: "text-generation", tags: [], inference: "" });
+		expect(llm.join("\n")).toContain(`af.load_llm("aneforge/gpt2")`);
+
+		const clip = aneforge({
+			id: "aneforge/clip-vit-base-patch32",
+			pipeline_tag: "zero-shot-image-classification",
+			tags: ["clip"],
+			inference: "",
+		});
+		expect(clip.join("\n")).toContain(`af.load_clip("aneforge/clip-vit-base-patch32")`);
+
+		const emb = aneforge({
+			id: "aneforge/all-MiniLM-L6-v2",
+			pipeline_tag: "sentence-similarity",
+			tags: [],
+			inference: "",
+		});
+		expect(emb.join("\n")).toContain(`SentenceTransformer("aneforge/all-MiniLM-L6-v2")`);
+	});
+
 	it("llama_cpp_python conversational", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",

@@ -2046,6 +2046,15 @@ ids = tok.encode("The Neural Engine is")
 print(tok.decode(model.generate(ids, max_new_tokens=20)))`,
 		];
 	}
+	if (model.pipeline_tag === "zero-shot-image-classification" || model.tags.includes("clip")) {
+		return [
+			`${header}
+import aneforge as af
+
+clip = af.load_clip("${model.id}")
+labels = clip.classify(image, ["a photo of a cat", "a photo of a dog"])  # image: a PIL.Image; zero-shot (label, prob)`,
+		];
+	}
 	if (model.pipeline_tag === "image-classification") {
 		return [
 			`${header}
