@@ -173,4 +173,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
 		url: "https://github.com/run-llama/ExtractBench",
 	},
+	"fidelity-kld": {
+		name: "fidelity-kld",
+		description:
+			"Distribution-fidelity measurement: full-vocabulary KL divergence between a candidate model and an unquantized reference model, over frozen token IDs, teacher-forced, accumulated in fp64. Measures what quantization costs rather than task accuracy. Lower is better; 0.0 means the candidate reproduces the reference distribution exactly.",
+		url: "https://github.com/malaiwah/glm53-flash-fidelity-suite",
+	},
 } as const;
