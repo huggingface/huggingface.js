@@ -14,7 +14,7 @@ import {
 } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
-	it("aneforge dispatches per pipeline: text-generation, zero-shot (CLIP), and the sentence-transformers default", async () => {
+	it("aneforge dispatches per pipeline: text-generation, zero-shot (CLIP), image-classification (ResNet vs ViT), and the sentence-transformers default", async () => {
 		const llm = aneforge({ id: "aneforge/gpt2", pipeline_tag: "text-generation", tags: [], inference: "" });
 		expect(llm.join("\n")).toContain(`af.load_llm("aneforge/gpt2")`);
 
@@ -25,6 +25,22 @@ describe("model-libraries-snippets", () => {
 			inference: "",
 		});
 		expect(clip.join("\n")).toContain(`af.load_clip("aneforge/clip-vit-base-patch32")`);
+
+		const resnet = aneforge({
+			id: "aneforge/resnet-50",
+			pipeline_tag: "image-classification",
+			tags: ["resnet"],
+			inference: "",
+		});
+		expect(resnet.join("\n")).toContain(`af.load_resnet("aneforge/resnet-50")`);
+
+		const vit = aneforge({
+			id: "aneforge/vit-base-patch16-224",
+			pipeline_tag: "image-classification",
+			tags: ["vit"],
+			inference: "",
+		});
+		expect(vit.join("\n")).toContain(`af.load_vit("aneforge/vit-base-patch16-224")`);
 
 		const emb = aneforge({
 			id: "aneforge/all-MiniLM-L6-v2",

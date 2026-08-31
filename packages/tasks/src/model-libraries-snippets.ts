@@ -2055,6 +2055,15 @@ clip = af.load_clip("${model.id}")
 labels = clip.classify(image, ["a photo of a cat", "a photo of a dog"])  # image: a PIL.Image; zero-shot (label, prob)`,
 		];
 	}
+	if (model.tags.includes("resnet")) {
+		return [
+			`${header}
+import aneforge as af
+
+net = af.load_resnet("${model.id}")             # BatchNorm folded into the preceding conv at load
+logits = net(pixels)                          # pixels: a preprocessed [1, 3, 224, 224] float32 batch -> [1, 1000]`,
+		];
+	}
 	if (model.pipeline_tag === "image-classification") {
 		return [
 			`${header}
