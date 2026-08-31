@@ -82,6 +82,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.allennlp,
 		filter: true,
 	},
+	aneforge: {
+		prettyLabel: "ANEForge",
+		repoName: "ANEForge",
+		repoUrl: "https://github.com/sbryngelson/ANEForge",
+		docsUrl: "https://aneforge.readthedocs.io",
+		snippets: snippets.aneforge,
+		filter: false,
+	},
 	anemoi: {
 		prettyLabel: "AnemoI",
 		repoName: "AnemoI",
