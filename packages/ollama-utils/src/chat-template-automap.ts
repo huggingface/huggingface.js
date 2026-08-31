@@ -5,42 +5,13 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/deepseek-r1:1.5b
- * - library/llama3.2:1b
- * - library/llama3.2:latest
- * - library/phi4:14b
- * - library/gemma:latest
- * - library/qwen2.5:0.5b
- * - library/olmo2:latest
- * - library/mistral-small:22b
- * - library/qwen:latest
- * - library/gemma3:latest
- * - library/llava-llama3:8b
- * - library/granite3.1-moe:latest
- * - library/all-minilm:22m
- * - library/falcon3:latest
- * - library/gemma3n:latest
- * - library/qwen2:latest
- * - library/qwen2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:latest
- * - library/mistral-small3.2:24b
- * - library/cogito:latest
+ * - library/gemma4:latest
+ * - library/qwen3.5:latest
+ * - library/glm-ocr:latest
  * - library/phi4-mini:3.8b
- * - library/openthinker:latest
- * - library/openthinker:latest
- * - library/qwq:latest
- * - library/granite-code:3b
- * - library/neural-chat:latest
- * - library/paraphrase-multilingual:latest
- * - library/llama3-groq-tool-use:latest
- * - library/aya-expanse:latest
- * - library/reader-lm:latest
- * - library/shieldgemma:latest
- * - library/command-a:latest
- * - library/sailor2:latest
- * - library/yarn-mistral:7b
- * - library/qwen3-next:latest
+ * - library/snowflake-arctic-embed2:568m
+ * - library/command-r7b:latest
+ * - library/muse-glimmer:latest
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
@@ -734,6 +705,42 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 		},
 	},
 	{
+		model: "library/laguna-s-2.1:latest",
+		gguf: '{#- Iteration on laguna_glm_thinking_v8/chat_template.jinja -#}\n{#- No formatting instructions -#}\n{{- "〈|EOS|〉" -}}\n{%- set enable_thinking = enable_thinking | default(true) -%}\n{%- set add_generation_prompt = add_generation_prompt | default(false) -%}\n{%- set preserve_thinking = preserve_thinking | default(false) -%}\n\n{#- ───── header (system message) ───── -#}\n{#- A caller-supplied system message with empty content opts out of the default below, producing no <system> block — used to train without a system message. -#}\n{%- set system_message = "You are a helpful, conversationally-fluent assistant made by Poolside. You are here to be helpful to users through natural language conversations." -%}\n{%- if messages and messages[0].role == "system" -%}\n  {%- set system_message = messages[0].content -%}\n  {%- set messages = messages[1:] -%}\n{%- endif -%}\n\n{%- set has_sys = system_message and system_message.strip() -%}\n{%- if has_sys or tools or enable_thinking -%}\n  {{- "<system>" -}}\n\n  {%- if has_sys -%}\n    {{- system_message.rstrip() -}}\n    {%- if tools -%}{{- "\\n\\n" -}}{%- endif -%}\n  {%- endif -%}\n\n  {%- if tools -%}\n    {{- "### Tools\\n\\n" -}}\n    {{- "You may call functions to assist with the user query.\\n" -}}\n    {{- "All available function signatures are listed below:\\n" -}}\n    {{- "<available_tools>\\n" -}}\n    {%- for tool in tools -%}\n      {{- (tool | tojson) ~ "\\n" -}}\n    {%- endfor -%}\n    {{- "</available_tools>" -}}\n  {%- endif -%}\n\n  {{- "</system>\\n" -}}\n{%- endif -%}\n\n{#- ───── main loop ───── -#}\n{%- for message in messages -%}\n  {%- set content = message.content if message.content is string else "" -%}\n  {%- if message.role == "user" -%}\n    {{- "<user>" + content + "</user>\\n" -}}\n  {%- elif message.role == "assistant" -%}\n    {%- generation -%}\n      {{- "<assistant>" -}}\n      {#- Extract reasoning content from message.reasoning (vLLM field name) or message.reasoning_content -#}\n      {%- set reasoning_content = \'\' -%}\n      {%- if message.reasoning is string -%}\n        {%- set reasoning_content = message.reasoning -%}\n      {%- elif message.reasoning_content is string -%}\n        {%- set reasoning_content = message.reasoning_content -%}\n      {%- endif -%}\n      {#- Display reasoning content for all messages if enable_thinking -#}\n      {%- if enable_thinking or preserve_thinking -%}\n        {{- \'<think>\' + reasoning_content + \'</think>\' -}}\n      {%- else -%}\n        {{- \'</think>\' -}}\n      {%- endif -%}\n      {#- Display main content (trailing newline only when no tool_calls follow) -#}\n      {%- if content -%}\n        {{- content -}}\n      {%- endif -%}\n      {%- if message.tool_calls -%}\n        {%- for tool_call in message.tool_calls -%}\n          {%- set function_data = tool_call.function -%}\n          {{- \'<tool_call>\' + function_data.name -}}\n          {%- set _args = function_data.arguments -%}\n          {%- for k, v in _args.items() -%}\n            {{- "<arg_key>" ~ k ~ "</arg_key>" -}}\n            {{- "<arg_value>" -}}{{- v | tojson(ensure_ascii=False) if v is not string else v -}}{{- "</arg_value>" -}}\n          {%- endfor -%}\n          {{- "</tool_call>" -}}\n        {%- endfor -%}\n      {%- endif -%}\n      {{- "</assistant>\\n" -}}\n    {%- endgeneration -%}\n  {%- elif message.role == "tool" -%}\n    {{- "<tool_response>" + content + "</tool_response>\\n" -}}\n  {%- elif message.role == "system" -%}\n    {#- Render additional system messages (the first one, if any, is handled separately in the header and was sliced off above) -#}\n    {{- "<system>" + content + "</system>\\n" -}}\n  {%- endif -%}\n{%- endfor -%}\n{#- ───── generation prompt ───── -#}\n{%- if add_generation_prompt -%}\n  {{- "<assistant>" -}}\n  {#- ───── Include reasoning mode directive ───── -#}\n  {%- if enable_thinking -%}\n    {{- \'<think>\' -}}\n  {%- else -%}\n    {{- \'</think>\' -}}\n  {%- endif -%}\n{%- endif -%}',
+		ollama: {
+			template: "{{ .Prompt }}",
+			tokens: [
+				"<system>",
+				"<available_tools>",
+				"<user>",
+				"<assistant>",
+				"<think>",
+				"<tool_call>",
+				"<arg_key>",
+				"<arg_value>",
+				"<tool_response>",
+			],
+		},
+	},
+	{
+		model: "library/laguna-xs-2.1:latest",
+		gguf: '{#- Iteration on laguna_glm_thinking_v8/chat_template.jinja -#}\n{#- No formatting instructions -#}\n{{- "〈|EOS|〉" -}}\n{%- set enable_thinking = enable_thinking | default(false) -%}\n{%- set add_generation_prompt = add_generation_prompt | default(false) -%}\n\n{#- ───── header (system message) ───── -#}\n{#- A caller-supplied system message with empty content opts out of the default below, producing no <system> block — used to train without a system message. -#}\n{%- set system_message = "You are a helpful, conversationally-fluent assistant made by Poolside. You are here to be helpful to users through natural language conversations." -%}\n{%- if messages and messages[0].role == "system" -%}\n  {%- set system_message = messages[0].content -%}\n  {%- set messages = messages[1:] -%}\n{%- endif -%}\n\n{%- set has_sys = system_message and system_message.strip() -%}\n{%- if has_sys or tools or enable_thinking -%}\n  {{- "<system>" -}}\n\n  {%- if has_sys -%}\n    {{- system_message.rstrip() -}}\n    {%- if tools -%}{{- "\\n\\n" -}}{%- endif -%}\n  {%- endif -%}\n\n  {%- if tools -%}\n    {{- "### Tools\\n\\n" -}}\n    {{- "You may call functions to assist with the user query.\\n" -}}\n    {{- "All available function signatures are listed below:\\n" -}}\n    {{- "<available_tools>\\n" -}}\n    {%- for tool in tools -%}\n      {{- (tool | tojson) ~ "\\n" -}}\n    {%- endfor -%}\n    {{- "</available_tools>" -}}\n  {%- endif -%}\n\n  {{- "</system>\\n" -}}\n{%- endif -%}\n\n{#- ───── main loop ───── -#}\n{%- for message in messages -%}\n  {%- set content = message.content if message.content is string else "" -%}\n  {%- if message.role == "user" -%}\n    {{- "<user>" + content + "</user>\\n" -}}\n  {%- elif message.role == "assistant" -%}\n    {%- generation -%}\n      {{- "<assistant>" -}}\n      {#- Extract reasoning content from message.reasoning (vLLM field name) or message.reasoning_content -#}\n      {%- set reasoning_content = \'\' -%}\n      {%- if message.reasoning is string -%}\n        {%- set reasoning_content = message.reasoning -%}\n      {%- elif message.reasoning_content is string -%}\n        {%- set reasoning_content = message.reasoning_content -%}\n      {%- endif -%}\n      {#- Display reasoning content for all messages if enable_thinking -#}\n      {%- if enable_thinking -%}\n        {{- \'<think>\' + reasoning_content + \'</think>\' -}}\n      {%- else -%}\n        {{- \'</think>\' -}}\n      {%- endif -%}\n      {#- Display main content (trailing newline only when no tool_calls follow) -#}\n      {%- if content -%}\n        {{- content -}}\n      {%- endif -%}\n      {%- if message.tool_calls -%}\n        {%- for tool_call in message.tool_calls -%}\n          {%- set function_data = tool_call.function -%}\n          {{- \'<tool_call>\' + function_data.name -}}\n          {%- set _args = function_data.arguments -%}\n          {%- for k, v in _args.items() -%}\n            {{- "<arg_key>" ~ k ~ "</arg_key>" -}}\n            {{- "<arg_value>" -}}{{- v | tojson(ensure_ascii=False) if v is not string else v -}}{{- "</arg_value>" -}}\n          {%- endfor -%}\n          {{- "</tool_call>" -}}\n        {%- endfor -%}\n      {%- endif -%}\n      {{- "</assistant>\\n" -}}\n    {%- endgeneration -%}\n  {%- elif message.role == "tool" -%}\n    {{- "<tool_response>" + content + "</tool_response>\\n" -}}\n  {%- elif message.role == "system" -%}\n    {#- Render additional system messages (the first one, if any, is handled separately in the header and was sliced off above) -#}\n    {{- "<system>" + content + "</system>\\n" -}}\n  {%- endif -%}\n{%- endfor -%}\n{#- ───── generation prompt ───── -#}\n{%- if add_generation_prompt -%}\n  {{- "<assistant>" -}}\n  {#- ───── Include reasoning mode directive ───── -#}\n  {%- if enable_thinking -%}\n    {{- \'<think>\' -}}\n  {%- else -%}\n    {{- \'</think>\' -}}\n  {%- endif -%}\n{%- endif -%}',
+		ollama: {
+			template: "{{ .Prompt }}",
+			tokens: [
+				"<system>",
+				"<available_tools>",
+				"<user>",
+				"<assistant>",
+				"<think>",
+				"<tool_call>",
+				"<arg_key>",
+				"<arg_value>",
+				"<tool_response>",
+			],
+		},
+	},
+	{
 		model: "library/llama-guard3:1b",
 		gguf: '{%- if messages|length % 2 == 0 -%}\n    {%- set role = \'Agent\' -%}\n{%-  else -%}\n    {%-  set role = \'User\' -%}\n{%-  endif -%}\n{%-  if categories is not defined -%}\n    {%-  \n        set categories = ({\n            "S1": "Violent Crimes.",\n            "S2": "Non-Violent Crimes.",\n            "S3": "Sex Crimes.",\n            "S4": "Child Exploitation.",\n            "S5": "Defamation.",\n            "S6": "Specialized Advice.",\n            "S7": "Privacy.",\n            "S8": "Intellectual Property.",\n            "S9": "Indiscriminate Weapons.",\n            "S10": "Hate.",\n            "S11": "Self-Harm.",\n            "S12": "Sexual Content.",\n            "S13": "Elections.",\n        })\n    -%}\n{%-  endif -%}\n\n{{- "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\\n\\n" -}}\n{%- set ns = namespace(contains_image=false) -%}\n{%-  for message in messages -%}\n    {%- for content in message[\'content\'] | selectattr(\'type\', \'equalto\', \'image\') -%}\n        {%- set ns.contains_image = true -%}\n    {%- endfor -%}\n{%- endfor -%}\n{%- if ns.contains_image -%}\n{{- "<|image|> "-}}\n{%- endif -%}\n{{- "Task: Check if there is unsafe content in \'" + role + "\' messages in conversations according our safety policy with the below categories.\\n\\n" -}}\n{{- "<BEGIN UNSAFE CONTENT CATEGORIES>\\n"-}}\n\n{%-  for key in categories -%}\n    {%-  if key not in excluded_category_keys -%}\n        {{-key + ": " + categories[key] + "\\n" -}}\n    {%-  endif -%}\n{%-  endfor -%}\n\n{{- "<END UNSAFE CONTENT CATEGORIES>\\n\\n"-}}\n{{- "<BEGIN CONVERSATION>\\n\\n"-}}\n{%-  for message in messages -%}\n    {%-  if (message[\'role\'] == \'user\') != (loop.index0 % 2 == 0) -%}\n        {{ raise_exception(\'Conversation roles must alternate user/assistant/user/assistant/...\')-}}\n    {%-  endif -%}\n    {%-  set content = message[\'content\'] -%}\n    {%-  if message[\'role\'] == \'user\' -%}\n        {%-  set role = \'User\' -%}\n    {%-  elif message[\'role\'] == \'assistant\' -%}\n        {%-  set role = \'Agent\' -%}\n    {%-  endif -%}\n    {%-  for content in message[\'content\'] | selectattr(\'type\', \'equalto\', \'text\') -%}\n{{- role + \': \' + content[\'text\'] | trim + \'\\n\\n\'-}}\n    {%-  endfor -%}\n{%-  endfor -%}\n{{- "<END CONVERSATION>\\n\\n"-}}\n{{- "Provide your safety assessment for ONLY THE LAST " + role + " message in the above conversation:\\n"-}}\n{{- " - First line must read \'safe\' or \'unsafe\'.\\n"-}}\n{{- " - If unsafe, a second line must include a comma-separated list of violated categories. <|eot_id|><|start_header_id|>assistant<|end_header_id|>"-}}\n',
 		ollama: {
@@ -952,6 +959,35 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 			tokens: ["[INST]"],
 			params: {
 				stop: ["[INST]", "[/INST]"],
+			},
+		},
+	},
+	{
+		model: "library/nemotron-3.5-lightning:latest",
+		gguf: "{% macro render_extra_keys(json_dict, handled_keys) %}\n    {%- if json_dict is mapping %}\n        {%- for json_key in json_dict if json_key not in handled_keys %}\n            {%- if json_dict[json_key] is mapping or (json_dict[json_key] is sequence and json_dict[json_key] is not string) %}\n                {{- '\\n<' ~ json_key ~ '>' ~ (json_dict[json_key] | tojson | safe) ~ '</' ~ json_key ~ '>' }}\n            {%- else %}\n                {{-'\\n<' ~ json_key ~ '>' ~ (json_dict[json_key] | string) ~ '</' ~ json_key ~ '>' }}\n            {%- endif %}\n        {%- endfor %}\n    {%- endif %}\n{% endmacro %}\n{%- set enable_thinking = enable_thinking if enable_thinking is defined else True %}\n{%- set medium_effort = medium_effort if medium_effort is defined else False %}\n{%- set truncate_history_thinking = truncate_history_thinking if truncate_history_thinking is defined else True %}\n{%- set ns = namespace(last_user_idx = -1) %}\n{%- set loop_messages = messages %}\n{%- for m in loop_messages %}\n  {%- if m[\"role\"] == \"user\" %}\n    {%- set ns.last_user_idx = loop.index0 %}\n  {%- endif %}\n{%- endfor %}\n{%- if messages[0][\"role\"] == \"system\" %}\n    {%- set system_message = messages[0][\"content\"] %}\n    {%- set loop_messages = messages[1:] %}\n{%- else %}\n    {%- set system_message = \"\" %}\n    {%- set loop_messages = messages %}\n{%- endif %}\n{%- if not tools is defined %}\n    {%- set tools = [] %}\n{%- endif %}\n{%- set ns = namespace(last_user_idx = -1) %}\n{%- for m in loop_messages %}\n  {%- if m[\"role\"] == \"user\" %}\n    {%- set ns.last_user_idx = loop.index0 %}\n  {%- endif %}\n{%- endfor %}\n{%- if system_message is defined %}\n    {{- \"<|im_start|>system\\n\" + system_message }}\n{%- else %}\n    {%- if tools is iterable and tools | length > 0 %}\n        {{- \"<|im_start|>system\\n\" }}\n    {%- endif %}\n{%- endif %}\n{%- if tools is iterable and tools | length > 0 %}\n    {%- if system_message is defined and system_message | length > 0 %}\n        {{- \"\\n\\n\" }}\n    {%- endif %}\n    {{- \"# Tools\\n\\nYou have access to the following functions:\\n\\n\" }}\n    {{- \"<tools>\" }}\n    {%- for tool in tools %}\n        {%- if tool.function is defined %}\n            {%- set tool = tool.function %}\n        {%- endif %}\n        {{- \"\\n<function>\\n<name>\" ~ tool.name ~ \"</name>\" }}\n        {%- if tool.description is defined %}\n            {{- '\\n<description>' ~ (tool.description | trim) ~ '</description>' }}\n        {%- endif %}\n        {{- '\\n<parameters>' }}\n        {%- if tool.parameters is defined and tool.parameters is mapping and tool.parameters.properties is defined and tool.parameters.properties is mapping %}\n            {%- for param_name, param_fields in tool.parameters.properties|items %}\n                {{- '\\n<parameter>' }}\n                {{- '\\n<name>' ~ param_name ~ '</name>' }}\n                {%- if param_fields.type is defined %}\n                    {{- '\\n<type>' ~ (param_fields.type | string) ~ '</type>' }}\n                {%- endif %}\n                {%- if param_fields.description is defined %}\n                    {{- '\\n<description>' ~ (param_fields.description | trim) ~ '</description>' }}\n                {%- endif %}\n                {%- if param_fields.enum is defined %}\n                    {{- '\\n<enum>' ~ (param_fields.enum | tojson | safe) ~ '</enum>' }}\n                {%- endif %}\n                {%- set handled_keys = ['name', 'type', 'description', 'enum'] %}\n                {{- render_extra_keys(param_fields, handled_keys) }}\n                {{- '\\n</parameter>' }}\n            {%- endfor %}\n        {%- endif %}\n        {% set handled_keys = ['type', 'properties', 'required'] %}\n        {{- render_extra_keys(tool.parameters, handled_keys) }}\n        {%- if tool.parameters is defined and tool.parameters.required is defined %}\n            {{- '\\n<required>' ~ (tool.parameters.required | tojson | safe) ~ '</required>' }}\n        {%- endif %}\n        {{- '\\n</parameters>' }}\n        {%- set handled_keys = ['type', 'name', 'description', 'parameters'] %}\n        {{- render_extra_keys(tool, handled_keys) }}\n        {{- '\\n</function>' }}\n    {%- endfor %}\n    {{- \"\\n</tools>\" }}\n    {{- '\\n\\nIf you choose to call a function ONLY reply in the following format with NO suffix:\\n\\n<tool_call>\\n<function=example_function_name>\\n<parameter=example_parameter_1>\\nvalue_1\\n</parameter>\\n<parameter=example_parameter_2>\\nThis is the value for the second parameter\\nthat can span\\nmultiple lines\\n</parameter>\\n</function>\\n</tool_call>\\n\\n<IMPORTANT>\\nReminder:\\n- Function calls MUST follow the specified format: an inner <function=...></function> block must be nested within <tool_call></tool_call> XML tags\\n- Required parameters MUST be specified\\n- You may provide optional reasoning for your function call in natural language BEFORE the function call, but NOT after\\n- If there is no function call available, answer the question like normal with your current knowledge and do not tell the user about function calls\\n</IMPORTANT>' }}\n{%- endif %}\n{%- if system_message is defined %}\n    {{- '<|im_end|>\\n' }}\n{%- else %}\n    {%- if tools is iterable and tools | length > 0 %}\n        {{- '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in loop_messages %}\n    {%- if message.role == \"assistant\" %}\n        {%- if message.reasoning_content is defined and message.reasoning_content is string and message.reasoning_content | trim | length > 0 %}\n            {%- set content = \"<think>\\n\" ~ message.reasoning_content ~ \"</think>\" ~ (message.content | default('', true)) %}\n        {%- else %}\n            {%- set content = message.content | default('', true) %}\n            {%- if content is string -%}\n                {%- if '<think>' not in content and '</think>' not in content -%}\n                    {%- set content = \"<think></think>\" ~ content -%}\n                {%- endif -%}\n            {%- else -%}\n                {%- set content = content -%}\n            {%- endif -%}\n        {%- endif %}\n        {%- if message.tool_calls is defined and message.tool_calls is iterable and message.tool_calls | length > 0 %}\n            {{- '<|im_start|>assistant\\n' }}\n                {%- set include_content = not (truncate_history_thinking and loop.index0 < ns.last_user_idx) %}\n                {%- if content is string and content | trim | length > 0 %}\n                    {%- if include_content %}\n                        {{- (content | trim) ~ '\\n' -}}\n                    {%- else %}\n                        {%- set c = (content | string) %}\n                        {%- if '</think>' in c %}\n                            {%- set c = c.split('</think>')[-1] %}\n                        {%- elif '<think>' in c %}\n                            {%- set c = c.split('<think>')[0] %}\n                        {%- endif %}\n                        {%- set c = \"<think></think>\" ~ c %}\n                        {%- if c | length > 0 %}\n                            {{- c ~ '\\n' -}}\n                        {%- endif %}\n                    {%- endif %}\n                {%- else %}\n                    {{- \"<think></think>\" -}}\n                {%- endif %}\n                {%- for tool_call in message.tool_calls %}\n                    {%- if tool_call.function is defined %}\n                        {%- set tool_call = tool_call.function %}\n                    {%- endif %}\n                    {{- '<tool_call>\\n<function=' ~ tool_call.name ~ '>\\n' -}}\n                        {%- if tool_call.arguments is defined %}\n                            {%- for args_name, args_value in tool_call.arguments|items %}\n                                {{- '<parameter=' ~ args_name ~ '>\\n' -}}\n                                    {%- set args_value = args_value | tojson | safe if args_value is mapping or (args_value is sequence and args_value is not string) else args_value | string %}\n                                {{- args_value ~ '\\n</parameter>\\n' -}}\n                            {%- endfor %}\n                        {%- endif %}\n                    {{- '</function>\\n</tool_call>\\n' -}}\n                {%- endfor %}\n                {{- '<|im_end|>\\n' }}\n        {%- else %}\n            {%- if not (truncate_history_thinking and loop.index0 < ns.last_user_idx) %}\n                {{- '<|im_start|>assistant\\n' ~ (content | default('', true) | string | trim) ~ '<|im_end|>\\n' }}\n            {%- else %}\n                {%- set c = (content | default('', true) | string) %}\n                {%- if '<think>' in c and '</think>' in c %}\n                    {%- set c = \"<think></think>\" ~ c.split('</think>')[-1] %}\n                {%- endif %}\n                {%- set c = c | trim %}\n                {%- if c | length > 0 %}\n                    {{- '<|im_start|>assistant\\n' ~ c ~ '<|im_end|>\\n' }}\n                {%- else %}\n                    {{- '<|im_start|>assistant\\n<|im_end|>\\n' }}\n                {%- endif %}\n            {%- endif %}\n        {%- endif %}\n    {%- elif message.role == \"user\" or message.role == \"system\" %}\n        {{- '<|im_start|>' + message.role + '\\n' }}\n        {%- set content = message.content | string %}\n        {%- if message.role == \"user\" and loop.index0 == ns.last_user_idx and medium_effort %}\n            {{- content + '\\n\\n{reasoning effort: efficient}' }}\n        {%- else %}\n            {{- content }}\n        {%- endif %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.previtem and loop.previtem.role != \"tool\" %}\n            {{- '<|im_start|>user\\n' }}\n        {%- endif %}\n        {{- '<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>\\n' }}\n        {%- if not loop.last and loop.nextitem.role != \"tool\" %}\n            {{- '<|im_end|>\\n' }}\n        {%- elif loop.last %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- else %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {%- if enable_thinking %}\n        {{- '<|im_start|>assistant\\n<think>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>assistant\\n<think></think>' }}\n    {%- endif %}\n{%- endif %}",
+		ollama: {
+			template: "{{ .Prompt }}",
+			tokens: [
+				"<|im_start|>",
+				"<tools>",
+				"<function>",
+				"<name>",
+				"<description>",
+				"<parameters>",
+				"<parameter>",
+				"<type>",
+				"<enum>",
+				"<required>",
+				"<tool_call>",
+				"<IMPORTANT>",
+				"<|im_end|>",
+				"<think>",
+				"<tool_response>",
+			],
+			params: {
+				draft_num_predict: 2,
+				temperature: 1,
+				top_p: 0.95,
 			},
 		},
 	},
