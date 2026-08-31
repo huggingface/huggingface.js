@@ -8,6 +8,7 @@ import { toRepoId } from "../utils/toRepoId";
 import { join, dirname } from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
 import { downloadFileToCacheDir } from "./download-file-to-cache-dir";
+import { validateRelativeFilename } from "../utils/validateRelativeFilename";
 
 export const DEFAULT_REVISION = "main";
 
@@ -110,6 +111,8 @@ export async function snapshotDownload(
 				});
 				break;
 			case "directory":
+				// `downloadFileToCacheDir` validates file paths itself, directories are only created here.
+				validateRelativeFilename(entry.path);
 				await mkdir(join(snapshotFolder, entry.path), { recursive: true });
 				break;
 			default:
