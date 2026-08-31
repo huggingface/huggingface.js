@@ -156,6 +156,12 @@ export const AGENT_HARNESSES = {
 		description: "Open-source, self-hosted personal AI assistant that runs on your own devices.",
 		envVars: { OPENCLAW_SHELL: "*" },
 	},
+	"sandbase-harness": {
+		prettyLabel: "SandBase Harness",
+		repoUrl: "https://github.com/sandbaseai/sandbase-harness",
+		docsUrl: "https://github.com/sandbaseai/sandbase-harness/blob/main/docs/installation.md",
+		description: "Local-first, self-hosted runtime for persistent AI agent sessions and MCP tools.",
+	},
 	opencode: {
 		prettyLabel: "opencode",
 		repoUrl: "https://github.com/anomalyco/opencode",
