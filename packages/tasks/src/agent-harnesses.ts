@@ -161,7 +161,6 @@ export const AGENT_HARNESSES = {
 		repoUrl: "https://github.com/sandbaseai/sandbase-harness",
 		docsUrl: "https://github.com/sandbaseai/sandbase-harness/blob/main/docs/installation.md",
 		description: "Local-first, self-hosted runtime for persistent AI agent sessions and MCP tools.",
-		envVars: { MANAGED_AGENTS_HOME: "*" },
 	},
 	opencode: {
 		prettyLabel: "opencode",
