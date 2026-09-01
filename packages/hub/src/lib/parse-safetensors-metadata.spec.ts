@@ -15,6 +15,49 @@ import type { Dtype, TensorInfo, SafetensorsFileHeader } from "./parse-safetenso
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
+	/**
+	 * Builds a minimal safetensors file and a fetch that serves it plus an optional config.json.
+	 * Range support covers both the file-info probe and the later WebBlob reads.
+	 */
+	const fetchForFile = (
+		header: Record<string, unknown>,
+		dataBytes = 0,
+		config?: Record<string, unknown>,
+	): typeof fetch => {
+		const headerBytes = new TextEncoder().encode(JSON.stringify(header));
+		const safetensorsFile = new Uint8Array(8 + headerBytes.length + dataBytes);
+		new DataView(safetensorsFile.buffer).setBigUint64(0, BigInt(headerBytes.length), true);
+		safetensorsFile.set(headerBytes, 8);
+		const configFile = config ? new TextEncoder().encode(JSON.stringify(config)) : undefined;
+
+		return (async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+			const file = url.endsWith(".safetensors")
+				? safetensorsFile
+				: url.endsWith("/config.json")
+					? configFile
+					: undefined;
+			if (!file) {
+				// downloadFile treats a 404 as "not found" only when the Hub's X-Error-Code says so.
+				return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
+			}
+			const range = new Headers(init?.headers).get("range");
+			if (range?.startsWith("bytes=")) {
+				const [start, endRaw] = range.slice("bytes=".length).split("-");
+				const startByte = Number(start);
+				const endByte = endRaw === "" ? file.length - 1 : Number(endRaw);
+				return new Response(file.slice(startByte, endByte + 1), {
+					status: 206,
+					headers: {
+						"content-range": `bytes ${startByte}-${endByte}/${file.length}`,
+						etag: '"hermetic-test-file"',
+					},
+				});
+			}
+			return new Response(file, { status: 200, headers: { etag: '"hermetic-test-file"' } });
+		}) as typeof fetch;
+	};
+
 	it("fetch info for single-file (with the default conventional filename)", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "google-bert/bert-base-uncased",
@@ -190,40 +233,6 @@ describe("parseSafetensorsMetadata", () => {
 	});
 
 	describe("malformed headers (crafted parameter counts)", () => {
-		/**
-		 * Builds the bytes of a minimal safetensors file from a JSON header plus a data buffer,
-		 * and a fetch that serves it (including the `Range: bytes=0-0` probe `WebBlob.create`
-		 * uses to learn the file size).
-		 */
-		const fetchForFile = (header: Record<string, unknown>, dataBytes = 0): typeof fetch => {
-			const headerBytes = new TextEncoder().encode(JSON.stringify(header));
-			const file = new Uint8Array(8 + headerBytes.length + dataBytes);
-			new DataView(file.buffer).setBigUint64(0, BigInt(headerBytes.length), true);
-			file.set(headerBytes, 8);
-			return (async (input: RequestInfo | URL, init?: RequestInit) => {
-				const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-				if (!url.endsWith(".safetensors")) {
-					// config.json, the sharded index, existence probes... — `downloadFile` treats a
-					// 404 as "not found" only when the Hub's X-Error-Code says so.
-					return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
-				}
-				const range = new Headers(init?.headers).get("range");
-				if (range?.startsWith("bytes=")) {
-					const [start, endRaw] = range.slice("bytes=".length).split("-");
-					const startByte = Number(start);
-					const endByte = endRaw === "" ? file.length - 1 : Number(endRaw);
-					return new Response(file.slice(startByte, endByte + 1), {
-						status: 206,
-						headers: {
-							"content-range": `bytes ${startByte}-${endByte}/${file.length}`,
-							etag: '"hermetic-test-file"',
-						},
-					});
-				}
-				return new Response(file, { status: 200, headers: { etag: '"hermetic-test-file"' } });
-			}) as typeof fetch;
-		};
-
 		it("rejects absurd tensor dims (the 1.8e308-param single-file PoC shape)", async () => {
 			const fetch = fetchForFile(
 				{
@@ -333,6 +342,163 @@ describe("parseSafetensorsMetadata", () => {
 			assert.strictEqual(parseTotalParameters("not-a-number", 200), undefined);
 			assert.strictEqual(parseTotalParameters(undefined, 200), undefined);
 		});
+	});
+
+	describe("MoE active parameter counts", () => {
+		it("uses logical counts for packed stacked experts and excludes quantization metadata", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt" },
+					"model.embed_tokens.weight": { dtype: "BF16", shape: [10], data_offsets: [0, 0] },
+					"model.layers.0.mlp.experts.down_proj.weight_packed": {
+						dtype: "U8",
+						shape: [4, 3],
+						data_offsets: [0, 0],
+					},
+					"model.layers.0.mlp.experts.down_proj.weight_scale": {
+						dtype: "U8",
+						shape: [4, 100],
+						data_offsets: [0, 0],
+					},
+				},
+				0,
+				{
+					moe_k: 2,
+					moe_num_experts: 4,
+					moe_num_shared_experts: 1,
+					quantization_config: {
+						quant_method: "compressed-tensors",
+						format: "pack-quantized",
+						config_groups: { group_0: { weights: { num_bits: 4 } } },
+					},
+				},
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/synthetic-packed-moe",
+				path: "model.safetensors",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { BF16: 10, U8: 24 });
+			assert(parse.moe);
+			assert.deepStrictEqual(parse.moe, {
+				numExperts: 4,
+				topK: 2,
+				perExpert: 6,
+				alwaysActive: 10,
+				active: 22,
+				hasSharedExpert: true,
+			});
+			assert.strictEqual(
+				parse.moe.alwaysActive + parse.moe.numExperts * parse.moe.perExpert,
+				sum(Object.values(parse.parameterCount)),
+			);
+		});
+
+		it("omits model-level MoE stats for an explicitly requested shard", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt" },
+					"model.layers.0.mlp.experts.0.weight": { dtype: "F32", shape: [10], data_offsets: [0, 0] },
+				},
+				0,
+				{ num_experts_per_tok: 2, num_local_experts: 4 },
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/synthetic-sharded-moe",
+				path: "model-00001-of-00002.safetensors",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { F32: 10 });
+			assert.strictEqual(parse.moe, undefined);
+		});
+	});
+
+	it("computes MoE active-params for Mixtral-style per-expert layout", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "mistralai/Mixtral-8x7B-v0.1",
+			computeParametersCount: true,
+			revision: "fc7ac94680e38d7348cfa806e51218e6273104b0",
+		});
+
+		assert(parse.sharded);
+		assert(parse.moe, "expected `moe` field on MoE repo");
+		assert.deepStrictEqual(parse.moe, {
+			numExperts: 8,
+			topK: 2,
+			perExpert: 5_637_144_576,
+			alwaysActive: 1_605_636_096,
+			active: 12_879_925_248,
+			hasSharedExpert: false,
+		});
+		assert.strictEqual(
+			parse.moe.alwaysActive + parse.moe.numExperts * parse.moe.perExpert,
+			sum(Object.values(parse.parameterCount)),
+		);
+	});
+
+	it("computes MoE active-params for Qwen3's per-expert layout", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "Qwen/Qwen3-30B-A3B",
+			computeParametersCount: true,
+			revision: "ad44e777bcd18fa416d9da3bd8f70d33ebb85d39",
+		});
+
+		assert(parse.sharded);
+		assert(parse.moe, "expected `moe` field on MoE repo");
+		assert.deepStrictEqual(parse.moe, {
+			numExperts: 128,
+			topK: 8,
+			perExpert: 226_492_416,
+			alwaysActive: 1_541_093_376,
+			active: 3_353_032_704,
+			hasSharedExpert: false,
+		});
+		assert.strictEqual(
+			parse.moe.alwaysActive + parse.moe.numExperts * parse.moe.perExpert,
+			sum(Object.values(parse.parameterCount)),
+		);
+	});
+
+	it("detects shared experts (DeepSeek-V2-Lite)", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "deepseek-ai/DeepSeek-V2-Lite",
+			computeParametersCount: true,
+			revision: "604d5664dddd88a0433dbae533b7fe9472482de0",
+		});
+
+		assert(parse.sharded);
+		assert(parse.moe, "expected `moe` field on MoE repo");
+		assert.deepStrictEqual(parse.moe, {
+			numExperts: 64,
+			topK: 6,
+			perExpert: 224_919_552,
+			alwaysActive: 1_311_632_896,
+			active: 2_661_150_208,
+			hasSharedExpert: true,
+		});
+		assert.strictEqual(
+			parse.moe.alwaysActive + parse.moe.numExperts * parse.moe.perExpert,
+			sum(Object.values(parse.parameterCount)),
+		);
+	});
+
+	it("omits `moe` for dense models", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "google-bert/bert-base-uncased",
+			computeParametersCount: true,
+			revision: "86b5e0934494bd15c9632b12f734a8a67f723594",
+		});
+
+		assert(!parse.sharded);
+		assert.strictEqual(parse.moe, undefined);
 	});
 
 	it("should detect sharded safetensors filename", async () => {
