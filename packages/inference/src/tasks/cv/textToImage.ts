@@ -35,7 +35,7 @@ export async function textToImage(
 	args: TextToImageArgs,
 	options?: TextToImageOptions,
 ): Promise<Blob | string | Record<string, unknown>> {
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 	const providerHelper = getProviderHelper(provider, "text-to-image");
 	const { data: res } = await innerRequest<Record<string, unknown>>(args, providerHelper, {
 		...options,

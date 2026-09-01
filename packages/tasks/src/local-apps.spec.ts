@@ -133,7 +133,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		const snippet = snippetFunc(model);
 
 		expect(snippet[0].content).toContain(`llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
-		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
+		expect(snippet[1].setup).toContain("npm install -g @earendil-works/pi-coding-agent");
 		expect(snippet[1].content).toContain(`"id": "bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"`);
 		expect(snippet[2].content).toContain("pi");
 	});
@@ -155,7 +155,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
 		expect(snippet[0].content).toContain('mlx_lm.server --model "mlx-community/Llama-3.2-3B-Instruct-mlx"');
-		expect(snippet[1].setup).toContain("npm install -g @mariozechner/pi-coding-agent");
+		expect(snippet[1].setup).toContain("npm install -g @earendil-works/pi-coding-agent");
 		expect(snippet[1].content).toContain('"baseUrl": "http://localhost:8080/v1"');
 		expect(snippet[1].content).toContain('"id": "mlx-community/Llama-3.2-3B-Instruct-mlx"');
 		expect(snippet[2].content).toContain("pi");
@@ -301,7 +301,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	});
 
 	it("unsloth tagged model", async () => {
-		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.unsloth;
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.unsloth;
 		const model: ModelData = {
 			id: "some-user/my-unsloth-finetune",
 			tags: ["unsloth", "conversational"],
@@ -309,25 +309,11 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 
 		expect(displayOnModelPage(model)).toBe(true);
-		const snippet = snippetFunc(model);
-		expect(snippet[0].setup).toBe("curl -fsSL https://unsloth.ai/install.sh | sh");
-		expect(snippet[0].content).toBe(
-			"# Run unsloth studio\nunsloth studio -H 0.0.0.0 -p 8888\n# Then open http://localhost:8888 in your browser\n# Search for some-user/my-unsloth-finetune to start chatting",
-		);
-		expect(snippet[1].setup).toBe("irm https://unsloth.ai/install.ps1 | iex");
-		expect(snippet[1].content).toBe(snippet[0].content);
-		expect(snippet[2].setup).toBe("# No setup required");
-		expect(snippet[2].content).toBe(
-			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for some-user/my-unsloth-finetune to start chatting",
-		);
-		expect(snippet[3].setup).toBe("pip install unsloth");
-		expect(snippet[3].content).toBe(
-			'from unsloth import FastModel\nmodel, tokenizer = FastModel.from_pretrained(\n    model_name="some-user/my-unsloth-finetune",\n    max_seq_length=2048,\n)',
-		);
+		expect(deeplink(model, undefined).href).toBe("unsloth://open_from_hf?model=some-user%2Fmy-unsloth-finetune");
 	});
 
 	it("unsloth namespace gguf model", async () => {
-		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.unsloth;
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.unsloth;
 		const model: ModelData = {
 			id: "unsloth/Llama-3.2-3B-Instruct-GGUF",
 			tags: ["conversational"],
@@ -336,18 +322,10 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 
 		expect(displayOnModelPage(model)).toBe(true);
-		const snippet = snippetFunc(model);
-		expect(snippet[0].setup).toBe("curl -fsSL https://unsloth.ai/install.sh | sh");
-		expect(snippet[0].content).toBe(
-			"# Run unsloth studio\nunsloth studio -H 0.0.0.0 -p 8888\n# Then open http://localhost:8888 in your browser\n# Search for unsloth/Llama-3.2-3B-Instruct-GGUF to start chatting",
+		expect(deeplink(model, undefined).href).toBe("unsloth://open_from_hf?model=unsloth%2FLlama-3.2-3B-Instruct-GGUF");
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-UD-Q4_K_XL.gguf").href).toBe(
+			"unsloth://open_from_hf?model=unsloth%2FLlama-3.2-3B-Instruct-GGUF&file=Llama-3.2-3B-Instruct-UD-Q4_K_XL.gguf",
 		);
-		expect(snippet[1].setup).toBe("irm https://unsloth.ai/install.ps1 | iex");
-		expect(snippet[1].content).toBe(snippet[0].content);
-		expect(snippet[2].setup).toBe("# No setup required");
-		expect(snippet[2].content).toBe(
-			"# Open https://huggingface.co/spaces/unsloth/studio in your browser\n# Search for unsloth/Llama-3.2-3B-Instruct-GGUF to start chatting",
-		);
-		expect(snippet).toHaveLength(3); // GGUF models only get 3 snippets
 	});
 
 	it("non unsloth namespace gguf model", async () => {
