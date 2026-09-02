@@ -35,6 +35,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	replicate: {},
 	scaleway: {},
 	together: {},
+	"venice-ai": {},
 	wavespeed: {},
 	"zai-org": {},
 };
