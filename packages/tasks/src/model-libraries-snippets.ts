@@ -910,6 +910,21 @@ model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
+export const zeromodels = (model: ModelData): string[] => [
+	`# pip install -U zeromodels
+# ZeroModels is pure Keras 3, so pick a backend: "jax", "torch" or "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "jax"
+
+from zeromodels import AutoZModel
+
+# AutoZModel reads the repo's model_type and loads the matching class.
+# For a task head use the matching loader, e.g. AutoZMImageClassify / AutoZMDetect /
+# AutoZMSemanticSegment / AutoZMTextGenerate (see zeromodels.auto).
+model = AutoZModel.from_weights("${model.id}")
+`,
+];
+
 const _keras_hub_causal_lm = (modelId: string): string => `
 import keras_hub
 
