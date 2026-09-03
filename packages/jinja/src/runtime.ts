@@ -3,7 +3,6 @@ import type {
 	FloatLiteral,
 	IntegerLiteral,
 	ArrayLiteral,
-	Statement,
 	Program,
 	If,
 	For,
@@ -20,13 +19,16 @@ import type {
 	ObjectLiteral,
 	TupleLiteral,
 	Macro,
+	Parameter,
 	Expression,
 	SelectExpression,
 	CallStatement,
 	FilterStatement,
 	Ternary,
 	SpreadExpression,
+	KeywordSpreadExpression,
 } from "./ast";
+import { Statement } from "./ast";
 import { range, replace, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
@@ -35,6 +37,7 @@ export type AnyRuntimeValue =
 	| StringValue
 	| BooleanValue
 	| ObjectValue
+	| NamespaceValue
 	| ArrayValue
 	| FunctionValue
 	| NullValue
@@ -359,6 +362,7 @@ function toJSON(
 			return result;
 		}
 		case "ArrayValue":
+		case "NamespaceValue":
 		case "ObjectValue": {
 			const indentValue = indent ? " ".repeat(indent) : "";
 			const basePadding = "\n" + indentValue.repeat(depth);
@@ -370,8 +374,7 @@ function toJSON(
 					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
 					: `[${core.join(itemSeparator)}]`;
 			} else {
-				// ObjectValue
-				let entries = Array.from((input as ObjectValue).value.entries());
+				let entries = Array.from((input as ObjectValue | NamespaceValue).value.entries());
 				if (sortKeys) {
 					entries = entries.sort(([a], [b]) => a.localeCompare(b));
 				}
@@ -505,6 +508,17 @@ export class KeywordArgumentsValue extends ObjectValue {
 }
 
 /**
+ * Represents a mutable namespace with attribute/subscript access but no mapping behavior or builtins.
+ */
+export class NamespaceValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
+	override type = "NamespaceValue";
+
+	override toString(): string {
+		return toJSON(this, {}, 0, false);
+	}
+}
+
+/**
  * Represents an Array value at runtime.
  */
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
@@ -560,6 +574,24 @@ export class UndefinedValue extends RuntimeValue<undefined> {
 	override type = "UndefinedValue";
 }
 
+function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntimeValue] {
+	let values: AnyRuntimeValue[] | undefined;
+	if (pair instanceof ArrayValue) {
+		values = pair.value;
+	} else if (pair instanceof StringValue) {
+		values = Array.from(pair.value, (char) => new StringValue(char));
+	}
+	if (!values || values.length !== 2) {
+		throw new Error("namespace expected an object or an iterable of [key, value] pairs");
+	}
+
+	const [key, value] = values;
+	if (!(key instanceof StringValue)) {
+		throw new Error("namespace keys must be strings");
+	}
+	return [key, value];
+}
+
 /**
  * Represents the current environment (scope) at runtime.
  */
@@ -571,13 +603,37 @@ export class Environment {
 		[
 			"namespace",
 			new FunctionValue((args) => {
-				if (args.length === 0) {
-					return new ObjectValue(new Map());
+				// Copy top-level entries so namespace assignment does not mutate the input.
+				const positional = args.slice();
+				let kwargs: KeywordArgumentsValue | undefined;
+				if (positional.at(-1) instanceof KeywordArgumentsValue) {
+					kwargs = positional.pop() as KeywordArgumentsValue;
 				}
-				if (args.length !== 1 || !(args[0] instanceof ObjectValue)) {
-					throw new Error("`namespace` expects either zero arguments or a single object argument");
+				if (positional.length > 1) {
+					throw new Error(`namespace expected at most 1 argument, got ${positional.length}`);
 				}
-				return args[0];
+				const entries = new Map<string, AnyRuntimeValue>();
+				if (positional.length === 1) {
+					const source = positional[0];
+					if (source instanceof ObjectValue) {
+						for (const [key, value] of source.value) {
+							entries.set(key, value);
+						}
+					} else if (source instanceof ArrayValue) {
+						for (const pair of source.value) {
+							const [key, value] = normalizeNamespaceEntry(pair);
+							entries.set(key.value, value);
+						}
+					} else {
+						throw new Error(`'${source.type}' object is not iterable`);
+					}
+				}
+				if (kwargs) {
+					for (const [key, value] of kwargs.value) {
+						entries.set(key, value);
+					}
+				}
+				return new NamespaceValue(entries);
 			}),
 		],
 	]);
@@ -720,6 +776,22 @@ export function setupGlobals(env: Environment): void {
 	env.set("None", null);
 }
 
+type AttributeContainer = ObjectValue | NamespaceValue;
+
+function isAttributeContainer(value: AnyRuntimeValue): value is AttributeContainer {
+	return value instanceof ObjectValue || value instanceof NamespaceValue;
+}
+
+type NumericLikeValue = IntegerValue | FloatValue | BooleanValue;
+
+function isNumericLikeValue(value: AnyRuntimeValue): value is NumericLikeValue {
+	return value instanceof IntegerValue || value instanceof FloatValue || value instanceof BooleanValue;
+}
+
+function getNumericValue(value: NumericLikeValue): number {
+	return value instanceof BooleanValue ? Number(value.value) : value.value;
+}
+
 /**
  * Helper function to get a nested attribute value from an object using dot notation.
  * Supports both object properties and array indices.
@@ -732,7 +804,7 @@ function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRun
 	let value: AnyRuntimeValue = item;
 
 	for (const part of parts) {
-		if (value instanceof ObjectValue) {
+		if (isAttributeContainer(value)) {
 			value = value.value.get(part) ?? new UndefinedValue();
 		} else if (value instanceof ArrayValue) {
 			const index = parseInt(part, 10);
@@ -778,18 +850,8 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 		throw new Error(`Cannot compare ${a.type} with ${b.type}`);
 	}
 
-	const isNumericLike = (v: AnyRuntimeValue): boolean =>
-		v instanceof IntegerValue || v instanceof FloatValue || v instanceof BooleanValue;
-
-	const getNumericValue = (v: AnyRuntimeValue): number => {
-		if (v instanceof BooleanValue) {
-			return v.value ? 1 : 0;
-		}
-		return (v as IntegerValue | FloatValue).value;
-	};
-
 	// Allow comparing numeric-like types (integers, floats, and booleans)
-	if (isNumericLike(a) && isNumericLike(b)) {
+	if (isNumericLikeValue(a) && isNumericLikeValue(b)) {
 		const aNum = getNumericValue(a);
 		const bNum = getNumericValue(b);
 		return aNum < bNum ? -1 : aNum > bNum ? 1 : 0;
@@ -813,6 +875,184 @@ function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensit
 		default:
 			throw new Error(`Cannot compare type: ${a.type}`);
 	}
+}
+
+interface ParameterDescriptor {
+	name: string;
+	defaultValue?: Expression;
+}
+
+function getParameterDescriptor(argument: Parameter): ParameterDescriptor {
+	if (argument.type === "Identifier") {
+		return { name: (argument as Identifier).value };
+	}
+	const keywordArgument = argument as KeywordArgumentExpression;
+	return { name: keywordArgument.key.value, defaultValue: keywordArgument.value };
+}
+
+type SpecialMacroArgument = "kwargs" | "varargs";
+
+function isSpecialMacroArgument(name: string): name is SpecialMacroArgument {
+	return name === "kwargs" || name === "varargs";
+}
+
+/**
+ * Find `kwargs` and `varargs` loads that precede a declaration, following Jinja's AST visit order.
+ */
+function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statement[]): Set<SpecialMacroArgument> {
+	const declared = new Set<SpecialMacroArgument>();
+	const accessed = new Set<SpecialMacroArgument>();
+
+	const declareName = (name: string): void => {
+		if (isSpecialMacroArgument(name)) {
+			declared.add(name);
+		}
+	};
+
+	const declareTarget = (target: Expression): void => {
+		if (target.type === "Identifier") {
+			declareName((target as Identifier).value);
+		} else if (target.type === "TupleLiteral") {
+			for (const item of (target as TupleLiteral).value) {
+				declareTarget(item);
+			}
+		}
+	};
+
+	const declareArgument = (argument: Parameter): void => {
+		declareName(getParameterDescriptor(argument).name);
+	};
+
+	const visitArgumentDefaults = (args: Parameter[]): void => {
+		for (const argument of args) {
+			const parameter = getParameterDescriptor(argument);
+			if (parameter.defaultValue) {
+				visit(parameter.defaultValue);
+			}
+		}
+	};
+
+	const visitFilter = (filter: Identifier | CallExpression): void => {
+		// A filter name is syntax, not a variable load.
+		if (filter.type === "CallExpression") {
+			visit((filter as CallExpression).args);
+		}
+	};
+
+	const visit = (node: unknown): void => {
+		if (Array.isArray(node)) {
+			for (const item of node) {
+				visit(item);
+			}
+			return;
+		}
+		if (node instanceof Map) {
+			for (const [key, value] of node) {
+				visit(key);
+				visit(value);
+			}
+			return;
+		}
+		if (!(node instanceof Statement)) {
+			return;
+		}
+
+		switch (node.type) {
+			case "For": {
+				const statement = node as For;
+				declareTarget(statement.loopvar);
+				if (statement.iterable.type === "SelectExpression") {
+					const iterable = statement.iterable as SelectExpression;
+					// Jinja visits a for-loop condition after its body and else block.
+					visit(iterable.lhs);
+					visit(statement.body);
+					visit(statement.defaultBlock);
+					visit(iterable.test);
+					return;
+				}
+				visit(statement.iterable);
+				visit(statement.body);
+				visit(statement.defaultBlock);
+				return;
+			}
+			case "Set": {
+				const statement = node as SetStatement;
+				declareTarget(statement.assignee);
+				visit(statement.value);
+				visit(statement.body);
+				return;
+			}
+			case "Macro": {
+				const statement = node as Macro;
+				for (const argument of statement.args) {
+					declareArgument(argument);
+				}
+				visitArgumentDefaults(statement.args);
+				visit(statement.body);
+				return;
+			}
+			case "CallStatement": {
+				const statement = node as CallStatement;
+				visit(statement.call);
+				for (const argument of statement.callerArgs ?? []) {
+					declareArgument(argument);
+				}
+				visitArgumentDefaults(statement.callerArgs ?? []);
+				visit(statement.body);
+				return;
+			}
+			case "FilterStatement": {
+				const statement = node as FilterStatement;
+				visit(statement.body);
+				visitFilter(statement.filter);
+				return;
+			}
+			case "Identifier": {
+				const name = (node as Identifier).value;
+				if (isSpecialMacroArgument(name) && !declared.has(name)) {
+					accessed.add(name);
+				}
+				return;
+			}
+			case "MemberExpression": {
+				const expression = node as MemberExpression;
+				visit(expression.object);
+				if (expression.computed) {
+					visit(expression.property);
+				}
+				return;
+			}
+			case "FilterExpression": {
+				const expression = node as FilterExpression;
+				visit(expression.operand);
+				visitFilter(expression.filter);
+				return;
+			}
+			case "TestExpression":
+				visit((node as TestExpression).operand);
+				return;
+			case "SelectExpression": {
+				const expression = node as SelectExpression;
+				visit(expression.test);
+				visit(expression.lhs);
+				return;
+			}
+			case "KeywordArgumentExpression":
+				visit((node as KeywordArgumentExpression).value);
+				return;
+			default:
+				for (const child of Object.values(node)) {
+					visit(child);
+				}
+		}
+	};
+
+	// Do not scan this macro or call block's defaults; its parameter names still suppress collection.
+	for (const parameter of parameters) {
+		declareArgument(parameter);
+	}
+	visit(body);
+	return accessed;
 }
 
 export class Interpreter {
@@ -864,6 +1104,23 @@ export class Interpreter {
 		} else if (node.operator.value === "~") {
 			// toString and concatenation
 			return new StringValue(left.value.toString() + right.value.toString());
+		} else if (node.operator.value === "**" && isNumericLikeValue(left) && isNumericLikeValue(right)) {
+			// Jinja treats booleans as integers here.
+			const a = getNumericValue(left);
+			const b = getNumericValue(right);
+			if (a === 0 && b < 0) {
+				throw new Error("0.0 cannot be raised to a negative power");
+			}
+
+			const result = a ** b;
+			if (!Number.isFinite(result)) {
+				// NaN represents an unsupported complex result; Infinity represents overflow.
+				throw new Error("Exponentiation result is not a finite real number");
+			}
+
+			// Negative exponents produce floats.
+			const isFloat = left instanceof FloatValue || right instanceof FloatValue || b < 0;
+			return isFloat ? new FloatValue(result) : new IntegerValue(result);
 		} else if (
 			(left instanceof IntegerValue || left instanceof FloatValue) &&
 			(right instanceof IntegerValue || right instanceof FloatValue)
@@ -955,7 +1212,15 @@ export class Interpreter {
 		// Accumulate args and kwargs
 		const positionalArguments: AnyRuntimeValue[] = [];
 		const keywordArguments = new Map<string, AnyRuntimeValue>();
+		const addKeywordArgument = (key: string, value: AnyRuntimeValue): void => {
+			if (keywordArguments.has(key)) {
+				throw new Error(`Got multiple values for keyword argument '${key}'`);
+			}
+			keywordArguments.set(key, value);
+		};
 
+		// Like Python, the entire positional part (including a `*` unpacking placed after
+		// keyword arguments) is evaluated before any keyword argument value.
 		for (const argument of args) {
 			// TODO: Lazy evaluation of arguments
 			if (argument.type === "SpreadExpression") {
@@ -967,14 +1232,23 @@ export class Interpreter {
 				for (const item of val.value) {
 					positionalArguments.push(item);
 				}
-			} else if (argument.type === "KeywordArgumentExpression") {
-				const kwarg = argument as KeywordArgumentExpression;
-				keywordArguments.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
-			} else {
-				if (keywordArguments.size > 0) {
-					throw new Error("Positional arguments must come before keyword arguments");
-				}
+			} else if (argument.type !== "KeywordArgumentExpression" && argument.type !== "KeywordSpreadExpression") {
 				positionalArguments.push(this.evaluate(argument, environment));
+			}
+		}
+		for (const argument of args) {
+			if (argument.type === "KeywordArgumentExpression") {
+				const kwarg = argument as KeywordArgumentExpression;
+				addKeywordArgument(kwarg.key.value, this.evaluate(kwarg.value, environment));
+			} else if (argument.type === "KeywordSpreadExpression") {
+				const spreadNode = argument as KeywordSpreadExpression;
+				const val = this.evaluate(spreadNode.argument, environment);
+				if (!(val instanceof ObjectValue)) {
+					throw new Error(`Argument after ** must be a mapping, not ${val.type}`);
+				}
+				for (const [key, value] of val.value) {
+					addKeywordArgument(key, value);
+				}
 			}
 		}
 		return [positionalArguments, keywordArguments];
@@ -1281,7 +1555,7 @@ export class Interpreter {
 					case "rejectattr": {
 						const select = filterName === "selectattr";
 
-						if (operand.value.some((x) => !(x instanceof ObjectValue))) {
+						if (operand.value.some((item) => !isAttributeContainer(item))) {
 							throw new Error(`\`${filterName}\` can only be applied to array of objects`);
 						}
 						if (filter.args.some((x) => x.type !== "StringLiteral")) {
@@ -1304,7 +1578,7 @@ export class Interpreter {
 						}
 
 						// Filter the array using the test function
-						const filtered = (operand.value as ObjectValue[]).filter((item) => {
+						const filtered = (operand.value as AttributeContainer[]).filter((item) => {
 							const a = item.value.get(attr.value);
 							const result = a ? testFunction(a, value) : false;
 							return select ? result : !result;
@@ -1324,7 +1598,7 @@ export class Interpreter {
 							}
 							const defaultValue = kwargs.get("default");
 							const mapped = operand.value.map((item) => {
-								if (!(item instanceof ObjectValue)) {
+								if (!isAttributeContainer(item)) {
 									throw new Error("items in map must be an object");
 								}
 
@@ -1549,11 +1823,13 @@ export class Interpreter {
 		}
 
 		let value;
-		if (object instanceof ObjectValue) {
+		if (isAttributeContainer(object)) {
 			if (!(property instanceof StringValue)) {
 				throw new Error(`Cannot access property with non-string: got ${property.type}`);
 			}
-			value = object.value.get(property.value) ?? object.builtins.get(property.value);
+			value =
+				object.value.get(property.value) ??
+				(object instanceof ObjectValue ? object.builtins.get(property.value) : undefined);
 		} else if (object instanceof ArrayValue || object instanceof StringValue) {
 			if (property instanceof IntegerValue) {
 				value = object.value.at(property.value);
@@ -1600,8 +1876,8 @@ export class Interpreter {
 			const member = node.assignee as MemberExpression;
 
 			const object = this.evaluate(member.object, environment);
-			if (!(object instanceof ObjectValue)) {
-				throw new Error("Cannot assign to member of non-object");
+			if (!(object instanceof NamespaceValue)) {
+				throw new Error("cannot assign attribute on non-namespace object");
 			}
 			if (member.property.type !== "Identifier") {
 				throw new Error("Cannot assign to member with non-identifier property");
@@ -1738,43 +2014,62 @@ export class Interpreter {
 	}
 
 	/**
+	 * Bind every parameter name and special argument before evaluating defaults,
+	 * preventing unbound parameters from resolving in an outer scope.
+	 */
+	private bindMacroArguments(
+		displayName: string,
+		parameters: Parameter[],
+		specialArguments: Set<SpecialMacroArgument>,
+		args: AnyRuntimeValue[],
+		scope: Environment,
+	): void {
+		const positionalArguments = args.slice();
+		let keywordArguments = new Map<string, AnyRuntimeValue>();
+		if (positionalArguments.at(-1) instanceof KeywordArgumentsValue) {
+			keywordArguments = new Map((positionalArguments.pop() as KeywordArgumentsValue).value);
+		}
+
+		const pendingDefaults: [string, Expression][] = [];
+		for (let i = 0; i < parameters.length; ++i) {
+			const { name, defaultValue } = getParameterDescriptor(parameters[i]);
+			let value = positionalArguments[i] as AnyRuntimeValue | undefined;
+			if (value === undefined && keywordArguments.has(name)) {
+				value = keywordArguments.get(name);
+				keywordArguments.delete(name);
+			}
+			if (value === undefined && defaultValue !== undefined) {
+				pendingDefaults.push([name, defaultValue]);
+			}
+			scope.setVariable(name, value ?? new UndefinedValue());
+		}
+
+		if (specialArguments.has("kwargs")) {
+			scope.setVariable("kwargs", new ObjectValue(keywordArguments));
+		} else if (keywordArguments.size > 0) {
+			throw new Error(`macro ${displayName} takes no keyword argument '${keywordArguments.keys().next().value}'`);
+		}
+		if (specialArguments.has("varargs")) {
+			scope.setVariable("varargs", new ArrayValue(positionalArguments.slice(parameters.length)));
+		} else if (positionalArguments.length > parameters.length) {
+			throw new Error(`macro ${displayName} takes not more than ${parameters.length} argument(s)`);
+		}
+
+		for (const [name, defaultValue] of pendingDefaults) {
+			scope.setVariable(name, this.evaluate(defaultValue, scope));
+		}
+	}
+
+	/**
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
+		const specialArguments = findAccessedSpecialMacroArguments(node.args, node.body);
 		environment.setVariable(
 			node.name.value,
 			new FunctionValue((args, scope) => {
 				const macroScope = new Environment(scope);
-
-				args = args.slice(); // Make a copy of the arguments
-
-				// Separate positional and keyword arguments
-				let kwargs;
-				if (args.at(-1)?.type === "KeywordArgumentsValue") {
-					kwargs = args.pop() as KeywordArgumentsValue;
-				}
-
-				// Assign values to all arguments defined by the node
-				for (let i = 0; i < node.args.length; ++i) {
-					const nodeArg = node.args[i];
-					const passedArg = args[i];
-					if (nodeArg.type === "Identifier") {
-						const identifier = nodeArg as Identifier;
-						if (!passedArg) {
-							throw new Error(`Missing positional argument: ${identifier.value}`);
-						}
-						macroScope.setVariable(identifier.value, passedArg);
-					} else if (nodeArg.type === "KeywordArgumentExpression") {
-						const kwarg = nodeArg as KeywordArgumentExpression;
-						const value =
-							passedArg ?? // Try positional arguments first
-							kwargs?.value.get(kwarg.key.value) ?? // Look in user-passed kwargs
-							this.evaluate(kwarg.value, macroScope); // Use the default defined by the node
-						macroScope.setVariable(kwarg.key.value, value);
-					} else {
-						throw new Error(`Unknown argument type: ${nodeArg.type}`);
-					}
-				}
+				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);
 				return this.evaluateBlock(node.body, macroScope);
 			}),
 		);
@@ -1784,17 +2079,12 @@ export class Interpreter {
 	}
 
 	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
-		const callerFn = new FunctionValue((callerArgs: AnyRuntimeValue[], callerEnv: Environment) => {
-			const callBlockEnv = new Environment(callerEnv);
-			if (node.callerArgs) {
-				for (let i = 0; i < node.callerArgs.length; ++i) {
-					const param = node.callerArgs[i];
-					if (param.type !== "Identifier") {
-						throw new Error(`Caller parameter must be an identifier, got ${param.type}`);
-					}
-					callBlockEnv.setVariable((param as Identifier).value, callerArgs[i] ?? new UndefinedValue());
-				}
-			}
+		// Call blocks use anonymous-macro argument rules; Jinja labels them `None` in errors.
+		const parameters = node.callerArgs ?? [];
+		const specialArguments = findAccessedSpecialMacroArguments(parameters, node.body);
+		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[]) => {
+			const callBlockEnv = new Environment(environment);
+			this.bindMacroArguments("None", parameters, specialArguments, callerArguments, callBlockEnv);
 			return this.evaluateBlock(node.body, callBlockEnv);
 		});
 

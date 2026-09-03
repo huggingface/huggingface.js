@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/xetchunk-wasm",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Content-defined chunking and hashing for Hugging Face Xet storage",
 	"keywords": [
 		"xet",
@@ -21,7 +21,9 @@
 	"scripts": {
 		"prepare": "tshy",
 		"test": "vitest run",
-		"bench": "node tests/bench.js"
+		"bench": "node tests/bench.js",
+		"bench:stages": "node tests/bench-stages.js",
+		"bench:matrix": "node tests/bench-matrix.js"
 	},
 	"tshy": {
 		"exports": {

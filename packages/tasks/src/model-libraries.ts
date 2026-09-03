@@ -82,6 +82,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.allennlp,
 		filter: true,
 	},
+	aneforge: {
+		prettyLabel: "ANEForge",
+		repoName: "ANEForge",
+		repoUrl: "https://github.com/sbryngelson/ANEForge",
+		docsUrl: "https://aneforge.readthedocs.io",
+		snippets: snippets.aneforge,
+		filter: false,
+	},
 	anemoi: {
 		prettyLabel: "AnemoI",
 		repoName: "AnemoI",
@@ -333,6 +341,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "COMET",
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
+	},
+	cortiq: {
+		prettyLabel: "cortiq",
+		repoName: "cortiq",
+		repoUrl: "https://github.com/infosave2007/cmf",
+		docsUrl: "https://github.com/infosave2007/cmf/blob/master/docs/CMF_V2_SPEC.md",
+		snippets: snippets.cortiq,
+		countDownloads: `path_extension:"cmf"`,
 	},
 	cosmos: {
 		prettyLabel: "Cosmos",
@@ -748,11 +764,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras_hub,
 		filter: true,
 	},
-	kerasformers: {
-		prettyLabel: "KerasFormers",
-		repoName: "KerasFormers",
-		repoUrl: "https://github.com/IMvision12/KerasFormers",
-		docsUrl: "https://imvision12.github.io/KerasFormers/",
+	zeromodels: {
+		prettyLabel: "ZeroModels",
+		repoName: "ZeroModels",
+		repoUrl: "https://github.com/IMvision12/ZeroModels",
+		docsUrl: "https://imvision12.github.io/ZeroModels/",
+		snippets: snippets.zeromodels,
 		countDownloads: `path:"model.weights.h5" OR path:"model.weights.json"`,
 		filter: false,
 	},
@@ -804,7 +821,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 	},
 	ltx: {
-		prettyLabel: "LTX.io",
+		prettyLabel: "LTX-2",
 		repoName: "LTX-2",
 		repoUrl: "https://github.com/Lightricks/LTX-2",
 		docsUrl: "https://github.com/Lightricks/LTX-2",
@@ -924,6 +941,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.matanyone,
 		filter: false,
 	},
+	memra: {
+		prettyLabel: "memra",
+		repoName: "memra",
+		repoUrl: "https://github.com/avifenesh/memra",
+		snippets: snippets.memra,
+		filter: false,
+	},
 	"mesh-anything": {
 		prettyLabel: "MeshAnything",
 		repoName: "MeshAnything",
@@ -1015,6 +1039,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mobilint,
 		filter: false,
 	},
+	"montreal-forced-aligner": {
+		prettyLabel: "Montreal Forced Aligner",
+		repoName: "Montreal Forced Aligner",
+		repoUrl: "https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner",
+		docsUrl: "https://montreal-forced-aligner.readthedocs.io",
+		filter: false,
+		countDownloads: `path:"acoustic/final.mdl" OR path_extension:"zip"`,
+	},
 	moshi: {
 		prettyLabel: "Moshi",
 		repoName: "Moshi",
@@ -1093,6 +1125,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"oasr"`,
 	},
+	opendde: {
+		prettyLabel: "OpenDDE",
+		repoName: "OpenDDE",
+		repoUrl: "https://github.com/aurekaresearch/OpenDDE",
+		docsUrl: "https://huggingface.co/aurekaresearch/OpenDDE/blob/main/docs/inference_instructions.md",
+		snippets: snippets.opendde,
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
 		repoName: "OpenPeerLLM",
@@ -1156,6 +1197,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.phantom_wan,
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	piper: {
+		prettyLabel: "Piper",
+		repoName: "Piper",
+		repoUrl: "https://github.com/OHF-Voice/piper1-gpl",
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_extension:"ckpt"`,
 	},
 	"pocket-tts": {
 		prettyLabel: "Pocket-TTS",
@@ -1261,6 +1309,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/HorizonRobotics/RoboOrchardLab",
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	"routee-powertrain": {
+		prettyLabel: "RouteE-Powertrain",
+		repoName: "RouteE-Powertrain",
+		repoUrl: "https://github.com/NatLabRockies/routee-powertrain",
+		docsUrl: "https://natlabrockies.github.io/routee-powertrain/",
+		snippets: snippets.routee_powertrain,
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_extension:"joblib"`,
 	},
 	rwkv: {
 		prettyLabel: "RWKV",
@@ -1374,6 +1431,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/hub/setfit",
 		snippets: snippets.setfit,
 		filter: true,
+	},
+	shadow: {
+		prettyLabel: "Shadow",
+		repoName: "Shadow",
+		repoUrl: "https://github.com/QLNI/SHADOW-250M-Instruct",
+		filter: false,
+		countDownloads: `path_extension:"shdw"`,
 	},
 	sklearn: {
 		prettyLabel: "Scikit-learn",
