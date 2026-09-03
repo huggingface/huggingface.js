@@ -910,6 +910,21 @@ model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
+export const zeromodels = (model: ModelData): string[] => [
+	`# pip install -U zeromodels
+# ZeroModels is pure Keras 3, so pick a backend: "jax", "torch" or "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "jax"
+
+from zeromodels import AutoZModel
+
+# AutoZModel reads the repo's model_type and loads the matching class.
+# For a task head use the matching loader, e.g. AutoZMImageClassify / AutoZMDetect /
+# AutoZMSemanticSegment / AutoZMTextGenerate (see zeromodels.auto).
+model = AutoZModel.from_weights("${model.id}")
+`,
+];
+
 const _keras_hub_causal_lm = (modelId: string): string => `
 import keras_hub
 
@@ -2044,6 +2059,24 @@ tok = AutoTokenizer.from_pretrained("${model.id}")
 model = af.load_llm("${model.id}")            # prefill + resident-KV-cache decode on the ANE
 ids = tok.encode("The Neural Engine is")
 print(tok.decode(model.generate(ids, max_new_tokens=20)))`,
+		];
+	}
+	if (model.pipeline_tag === "zero-shot-image-classification" || model.tags.includes("clip")) {
+		return [
+			`${header}
+import aneforge as af
+
+clip = af.load_clip("${model.id}")
+labels = clip.classify(image, ["a photo of a cat", "a photo of a dog"])  # image: a PIL.Image; zero-shot (label, prob)`,
+		];
+	}
+	if (model.tags.includes("resnet")) {
+		return [
+			`${header}
+import aneforge as af
+
+net = af.load_resnet("${model.id}")             # BatchNorm folded into the preceding conv at load
+logits = net(pixels)                          # pixels: a preprocessed [1, 3, 224, 224] float32 batch -> [1, 1000]`,
 		];
 	}
 	if (model.pipeline_tag === "image-classification") {
