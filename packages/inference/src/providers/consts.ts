@@ -27,6 +27,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	"fireworks-ai": {},
 	groq: {},
 	"hf-inference": {},
+	neuronpool: {},
 	novita: {},
 	nscale: {},
 	openai: {},
