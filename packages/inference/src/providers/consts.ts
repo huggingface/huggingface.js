@@ -21,6 +21,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	baseten: {},
 	cerebras: {},
 	cohere: {},
+	corvex: {},
 	deepinfra: {},
 	"fal-ai": {},
 	"featherless-ai": {},
