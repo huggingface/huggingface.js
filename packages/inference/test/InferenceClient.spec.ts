@@ -1672,6 +1672,9 @@ describe.skip("InferenceClient", () => {
 			const FE_HF_MODEL = "Qwen/Qwen3-Embedding-0.6B";
 			const FE_PROVIDER_ID = "Qwen/Qwen3-Embedding-0.6B";
 
+			const T2V_HF_MODEL = "Wan-AI/Wan2.1-T2V-14B";
+			const T2V_PROVIDER_ID = "Wan-AI/Wan2.1-T2V-14B";
+
 			const setMapping = (task: "conversational" | "text-generation") => {
 				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
 					[HF_MODEL]: {
@@ -1716,6 +1719,18 @@ describe.skip("InferenceClient", () => {
 						providerId: FE_PROVIDER_ID,
 						status: "live",
 						task: "feature-extraction",
+					},
+				};
+			};
+
+			const setTextToVideoMapping = () => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[T2V_HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: T2V_HF_MODEL,
+						providerId: T2V_PROVIDER_ID,
+						status: "live",
+						task: "text-to-video",
 					},
 				};
 			};
@@ -1803,6 +1818,16 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(Array.isArray(res)).toBe(true);
 				expect(res.length).toBeGreaterThan(0);
+			});
+
+			it("textToVideo", async () => {
+				setTextToVideoMapping();
+				const res = await client.textToVideo({
+					model: T2V_HF_MODEL,
+					provider: "deepinfra",
+					inputs: "A cat playing the piano in a jazz club.",
+				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT,
