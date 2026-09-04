@@ -1829,6 +1829,18 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
+
+			it("textToImage with url output", async () => {
+				setTextToImageMapping();
+				const res = await client.textToImage({
+					model: T2I_HF_MODEL,
+					provider: "deepinfra",
+					inputs: "An astronaut riding a horse on the moon.",
+					outputType: "url",
+				});
+				expect(typeof res).toBe("string");
+				expect(res).toMatch(/^https?:\/\//);
+			});
 		},
 		TIMEOUT,
 	);

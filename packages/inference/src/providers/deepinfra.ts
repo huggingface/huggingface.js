@@ -100,6 +100,7 @@ interface DeepInfraEmbeddingsResponse {
 interface DeepInfraImageGenerationResponse {
 	data: Array<{
 		b64_json?: string;
+		url?: string;
 	}>;
 }
 
@@ -318,18 +319,12 @@ export class DeepInfraTextToImageTask extends TaskProviderHelper implements Text
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
-		// DeepInfra's OpenAI-compatible images endpoint only returns base64 payloads.
-		if (params.outputType === "url") {
-			throw new InferenceClientInputError(
-				"DeepInfra provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead.",
-			);
-		}
 		// `prompt` and `model` are applied after the caller parameters so neither can be
 		// overridden by them.
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown> | undefined),
-			response_format: "b64_json",
+			response_format: params.outputType === "url" ? "url" : "b64_json",
 			prompt: params.args.inputs,
 			model: params.model,
 		};
@@ -349,17 +344,21 @@ export class DeepInfraTextToImageTask extends TaskProviderHelper implements Text
 			!!response &&
 			"data" in response &&
 			Array.isArray(response.data) &&
-			response.data.length > 0 &&
-			typeof response.data[0].b64_json === "string"
+			response.data.length > 0
 		) {
 			if (outputType === "json") {
 				return { ...response };
 			}
-			const base64Data = response.data[0].b64_json;
-			if (outputType === "dataUrl") {
-				return `data:image/jpeg;base64,${base64Data}`;
+			if (typeof response.data[0].url === "string") {
+				return response.data[0].url;
 			}
-			return fetch(`data:image/jpeg;base64,${base64Data}`, { signal }).then((res) => res.blob());
+			if (typeof response.data[0].b64_json === "string") {
+				const base64Data = response.data[0].b64_json;
+				if (outputType === "dataUrl") {
+					return `data:image/jpeg;base64,${base64Data}`;
+				}
+				return fetch(`data:image/jpeg;base64,${base64Data}`, { signal }).then((res) => res.blob());
+			}
 		}
 		throw new InferenceClientProviderOutputError("Received malformed response from DeepInfra text-to-image API");
 	}
