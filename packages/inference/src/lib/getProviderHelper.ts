@@ -70,6 +70,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new DeepInfra.DeepInfraConversationalTask(),
 		"feature-extraction": new DeepInfra.DeepInfraFeatureExtractionTask(),
 		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
+		"text-to-image": new DeepInfra.DeepInfraTextToImageTask(),
 		"text-to-speech": new DeepInfra.DeepInfraTextToSpeechTask(),
 	},
 	"fal-ai": {
