@@ -1672,6 +1672,9 @@ describe.skip("InferenceClient", () => {
 			const FE_HF_MODEL = "Qwen/Qwen3-Embedding-0.6B";
 			const FE_PROVIDER_ID = "Qwen/Qwen3-Embedding-0.6B";
 
+			const SS_HF_MODEL = "Qwen/Qwen3-Embedding-0.6B";
+			const SS_PROVIDER_ID = "Qwen/Qwen3-Embedding-0.6B";
+
 			const setMapping = (task: "conversational" | "text-generation") => {
 				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
 					[HF_MODEL]: {
@@ -1716,6 +1719,18 @@ describe.skip("InferenceClient", () => {
 						providerId: FE_PROVIDER_ID,
 						status: "live",
 						task: "feature-extraction",
+					},
+				};
+			};
+
+			const setSentenceSimilarityMapping = () => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[SS_HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: SS_HF_MODEL,
+						providerId: SS_PROVIDER_ID,
+						status: "live",
+						task: "sentence-similarity",
 					},
 				};
 			};
@@ -1803,6 +1818,23 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(Array.isArray(res)).toBe(true);
 				expect(res.length).toBeGreaterThan(0);
+			});
+
+			it("sentenceSimilarity", async () => {
+				setSentenceSimilarityMapping();
+				const res = await client.sentenceSimilarity({
+					model: SS_HF_MODEL,
+					provider: "deepinfra",
+					inputs: {
+						source_sentence: "That is a happy person",
+						sentences: ["That is a happy dog", "That is a very happy person", "Today is a sunny day"],
+					},
+				});
+				expect(Array.isArray(res)).toBe(true);
+				expect(res.length).toBe(3);
+				for (const score of res) {
+					expect(typeof score).toBe("number");
+				}
 			});
 		},
 		TIMEOUT,
