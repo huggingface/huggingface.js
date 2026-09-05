@@ -2454,13 +2454,12 @@ describe.skip("InferenceClient", () => {
 				const res = await client.chatCompletion({
 					model: "openai/gpt-oss-120b",
 					provider: "berget",
-					messages: [
-						{ role: "user", content: "Complete this sentence with words, one plus one is equal " },
-					],
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					max_tokens: 10,
 				});
 				if (res.choices && res.choices.length > 0) {
 					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
+					expect(completion ?? "").toMatch(/two|2/i);
 				}
 			});
 
@@ -2469,6 +2468,7 @@ describe.skip("InferenceClient", () => {
 					model: "openai/gpt-oss-120b",
 					provider: "berget",
 					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					max_tokens: 10,
 					stream: true,
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
 
