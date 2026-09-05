@@ -60,7 +60,7 @@ jobs:
       - name: Run targeted regression test
         run: pnpm --filter @huggingface/tasks test -- model-libraries-snippets.spec.ts
       - name: Format changed files
-        run: pnpm exec prettier --write packages/tasks/src/model-libraries-snippets.ts packages/tasks/src/model-libraries-snippets.spec.ts
+        run: pnpm exec oxfmt packages/tasks/src/model-libraries-snippets.ts packages/tasks/src/model-libraries-snippets.spec.ts
       - name: Re-run targeted regression test after formatting
         run: pnpm --filter @huggingface/tasks test -- model-libraries-snippets.spec.ts
       - name: Commit focused fix
