@@ -46,6 +46,7 @@ export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
 	"baseten",
+	"berget",
 	"cerebras",
 	"cohere",
 	"deepinfra",
@@ -79,6 +80,7 @@ export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
  */
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	baseten: "baseten",
+	berget: "berget",
 	cerebras: "cerebras",
 	cohere: "CohereLabs",
 	deepinfra: "DeepInfra",

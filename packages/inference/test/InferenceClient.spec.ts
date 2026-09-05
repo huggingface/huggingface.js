@@ -2434,4 +2434,59 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT,
 	);
+
+	describe.concurrent(
+		"Berget",
+		() => {
+			const client = new InferenceClient(env.HF_BERGET_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["berget"] = {
+				"google/gemma-4-31B-it": {
+					provider: "berget",
+					hfModelId: "google/gemma-4-31B-it",
+					providerId: "google/gemma-4-31B-it",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion - gemma-4 31B", async () => {
+				const res = await client.chatCompletion({
+					model: "google/gemma-4-31B-it",
+					provider: "berget",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					max_tokens: 10,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion ?? "").toMatch(/two|2/i);
+				}
+			});
+
+			it("chatCompletion stream - gemma-4 31B", async () => {
+				const stream = client.chatCompletionStream({
+					model: "google/gemma-4-31B-it",
+					provider: "berget",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					max_tokens: 10,
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
 });

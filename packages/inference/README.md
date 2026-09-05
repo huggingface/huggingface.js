@@ -59,6 +59,7 @@ Currently, we support the following providers:
 - [Scaleway](https://www.scaleway.com/en/generative-apis/)
 - [Together](https://together.xyz)
 - [Baseten](https://baseten.co)
+- [Berget](https://berget.ai)
 - [Cohere](https://cohere.com)
 - [Cerebras](https://cerebras.ai/)
 - [DeepInfra](https://deepinfra.com)
