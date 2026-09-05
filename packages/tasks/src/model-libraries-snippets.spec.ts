@@ -68,6 +68,24 @@ print(output)`);
 
 	// a repo owner can put anything in config.json / the model card, so every interpolated value
 	// must either be escaped (string literals) or rejected (bare identifiers)
+	it("diffusers MiniMax Music 3 uses the modular text-to-audio pipeline", () => {
+		const model: ModelData = {
+			id: "MiniMaxAI/MiniMax-Music3",
+			pipeline_tag: "text-to-audio",
+			tags: ["minimax_music3"],
+			inference: "",
+		};
+		const snippet = diffusers(model).join("\n");
+
+		expect(snippet).toContain("from diffusers import ModularPipeline");
+		expect(snippet).toContain('ModularPipeline.from_pretrained("MiniMaxAI/MiniMax-Music3")');
+		expect(snippet).toContain("lyrics =");
+		expect(snippet).toContain('output="audios"');
+		expect(snippet).toContain('sf.write("song.wav"');
+		expect(snippet).not.toContain("from diffusers import DiffusionPipeline");
+		expect(snippet).not.toContain(".images[0]");
+	});
+
 	describe("repo-controlled values are not injectable", () => {
 		const PAYLOAD = `")\nimport os; os.system("id`;
 
