@@ -2441,18 +2441,18 @@ describe.skip("InferenceClient", () => {
 			const client = new InferenceClient(env.HF_BERGET_KEY ?? "dummy");
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["berget"] = {
-				"openai/gpt-oss-120b": {
+				"google/gemma-4-31B-it": {
 					provider: "berget",
-					hfModelId: "openai/gpt-oss-120b",
-					providerId: "openai/gpt-oss-120b",
+					hfModelId: "google/gemma-4-31B-it",
+					providerId: "google/gemma-4-31B-it",
 					status: "live",
 					task: "conversational",
 				},
 			};
 
-			it("chatCompletion - gpt-oss 120b", async () => {
+			it("chatCompletion - gemma-4 31B", async () => {
 				const res = await client.chatCompletion({
-					model: "openai/gpt-oss-120b",
+					model: "google/gemma-4-31B-it",
 					provider: "berget",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
 					max_tokens: 10,
@@ -2463,9 +2463,9 @@ describe.skip("InferenceClient", () => {
 				}
 			});
 
-			it("chatCompletion stream - gpt-oss 120b", async () => {
+			it("chatCompletion stream - gemma-4 31B", async () => {
 				const stream = client.chatCompletionStream({
-					model: "openai/gpt-oss-120b",
+					model: "google/gemma-4-31B-it",
 					provider: "berget",
 					messages: [{ role: "user", content: "Say 'this is a test'" }],
 					max_tokens: 10,
