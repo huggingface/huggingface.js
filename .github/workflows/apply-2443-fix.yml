@@ -1,0 +1,73 @@
+name: Apply issue 2443 fix
+
+on:
+  push:
+    branches:
+      - fix/diffusers-text-to-audio-snippet
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/diffusers-text-to-audio-snippet
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Apply focused source and regression-test changes
+        shell: python
+        run: |
+          from pathlib import Path
+
+          source = Path("packages/tasks/src/model-libraries-snippets.ts")
+          text = source.read_text()
+
+          anchor = '''const diffusers_image_to_image = (model: ModelData) => [\n'''
+          helper = '''const diffusers_minimax_music3 = (model: ModelData) => [\n\t`pip install soundfile`,\n\t`import soundfile as sf\nimport torch\nfrom diffusers import ModularPipeline\n\npipe = ModularPipeline.from_pretrained("${model.id}")\npipe.load_components(dtype=torch.bfloat16)\npipe.to("cuda")\n\nlyrics = """[Verse]\nMorning light filtering through the pine\n\n[Chorus]\nSoftly the world begins to breathe"""\n\nprompt = "An acoustic pop song with warm vocals and a gentle arrangement."\n\naudio = pipe(\n    prompt=prompt,\n    lyrics=lyrics,\n    audio_duration=30.0,\n    generator=torch.Generator("cuda").manual_seed(7),\n    output="audios",\n)[0]\n\nsf.write("song.wav", audio.T.float().cpu().numpy(), pipe.sampling_rate)`,\n];\n\n'''
+          if helper not in text:
+              if anchor not in text:
+                  raise SystemExit("source helper anchor not found")
+              text = text.replace(anchor, helper + anchor, 1)
+
+          branch_anchor = '''\t} else if (model.pipeline_tag === "image-to-video") {\n\t\tcodeSnippets = diffusers_image_to_video(model);\n'''
+          branch = '''\t} else if (model.pipeline_tag === "text-to-audio" && model.tags.includes("minimax_music3")) {\n\t\tcodeSnippets = diffusers_minimax_music3(model);\n'''
+          if branch not in text:
+              if branch_anchor not in text:
+                  raise SystemExit("source dispatch anchor not found")
+              text = text.replace(branch_anchor, branch + branch_anchor, 1)
+          source.write_text(text)
+
+          tests = Path("packages/tasks/src/model-libraries-snippets.spec.ts")
+          test_text = tests.read_text()
+          test_anchor = '''\tdescribe("repo-controlled values are not injectable", () => {\n'''
+          test = '''\tit("diffusers MiniMax Music 3 uses the modular text-to-audio pipeline", () => {\n\t\tconst model: ModelData = {\n\t\t\tid: "MiniMaxAI/MiniMax-Music3",\n\t\t\tpipeline_tag: "text-to-audio",\n\t\t\ttags: ["minimax_music3"],\n\t\t\tinference: "",\n\t\t};\n\t\tconst snippet = diffusers(model).join("\\n");\n\n\t\texpect(snippet).toContain("from diffusers import ModularPipeline");\n\t\texpect(snippet).toContain('ModularPipeline.from_pretrained("MiniMaxAI/MiniMax-Music3")');\n\t\texpect(snippet).toContain("lyrics =");\n\t\texpect(snippet).toContain('output="audios"');\n\t\texpect(snippet).toContain('sf.write("song.wav"');\n\t\texpect(snippet).not.toContain("from diffusers import DiffusionPipeline");\n\t\texpect(snippet).not.toContain(".images[0]");\n\t});\n\n'''
+          if test not in test_text:
+              if test_anchor not in test_text:
+                  raise SystemExit("test anchor not found")
+              test_text = test_text.replace(test_anchor, test + test_anchor, 1)
+          tests.write_text(test_text)
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run targeted regression test
+        run: pnpm --filter @huggingface/tasks test -- model-libraries-snippets.spec.ts
+      - name: Format changed files
+        run: pnpm exec prettier --write packages/tasks/src/model-libraries-snippets.ts packages/tasks/src/model-libraries-snippets.spec.ts
+      - name: Re-run targeted regression test after formatting
+        run: pnpm --filter @huggingface/tasks test -- model-libraries-snippets.spec.ts
+      - name: Commit focused fix
+        run: |
+          rm .github/workflows/apply-2443-fix.yml
+          git config user.name "karatarassul4-max"
+          git config user.email "299435798+karatarassul4-max@users.noreply.github.com"
+          git add packages/tasks/src/model-libraries-snippets.ts packages/tasks/src/model-libraries-snippets.spec.ts .github/workflows/apply-2443-fix.yml
+          git commit -m "🐛 Fix Diffusers MiniMax Music 3 snippet"
+          git push origin HEAD:fix/diffusers-text-to-audio-snippet
