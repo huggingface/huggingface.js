@@ -79,6 +79,7 @@ print(output)`);
 
 		expect(snippet).toContain("from diffusers import ModularPipeline");
 		expect(snippet).toContain('ModularPipeline.from_pretrained("MiniMaxAI/MiniMax-Music3")');
+		expect(snippet).toContain("pipe.load_components(dtype=torch.bfloat16)");
 		expect(snippet).toContain("lyrics =");
 		expect(snippet).toContain('output="audios"');
 		expect(snippet).toContain('sf.write("song.wav"');
