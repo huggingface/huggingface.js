@@ -21,7 +21,7 @@ interface SpliceOperation {
  * @example
  * const originalBlob = new Blob(["Hello, World!"]);
  * const insertBlob = new Blob(["Beautiful "]);
- * const splicedBlob = SplicedBlob.create(originalBlob, insertBlob, 7, 7);
+ * const splicedBlob = SplicedBlob.create(originalBlob, [{ insert: insertBlob, start: 7, end: 7 }]);
  * // Result represents: "Hello, Beautiful World!"
  */
 export class SplicedBlob extends Blob {
@@ -35,7 +35,22 @@ export class SplicedBlob extends Blob {
 		this.spliceOperations = spliceOperations; // Create a copy to prevent external mutation
 	}
 
-	static create(originalBlob: Blob, operations: SpliceOperation[]): SplicedBlob {
+	/**
+	 * Create a SplicedBlob from an original blob and a set of splice operations.
+	 *
+	 * Each operation replaces the original content in `[start, end)` with `insert`
+	 * (a pure insertion when `start === end`). Positions are byte offsets in the
+	 * original blob, are relative to the **original** content (not shifted by other
+	 * operations), and operations must not overlap (they can be passed in any order).
+	 *
+	 * As a convenience, a single `{ insert, start, end }` object is also accepted
+	 * instead of a one-element array.
+	 */
+	static create(originalBlob: Blob, operations: SpliceOperation | SpliceOperation[]): SplicedBlob {
+		if (!Array.isArray(operations)) {
+			operations = [operations];
+		}
+
 		// Validate all operations
 		for (const op of operations) {
 			if (op.start < 0 || op.end < 0) {
