@@ -229,6 +229,18 @@ print(output)`);
 				config: { peft: { base_model_name_or_path: "openai/whisper-large-v3", task_type: "SEQ_2_SEQ_LM" } },
 			} as ModelData)[0];
 			expect(whisper).toContain("AutoModelForSpeechSeq2Seq");
+			for (const baseId of [
+				"facebook/s2t-small-librispeech-asr",
+				"facebook/seamless-m4t-v2-large",
+				"microsoft/speecht5_asr",
+			]) {
+				expect(
+					peft({
+						...base,
+						config: { peft: { base_model_name_or_path: baseId, task_type: "SEQ_2_SEQ_LM" } },
+					} as ModelData)[0],
+				).toContain("AutoModelForSpeechSeq2Seq");
+			}
 
 			const t5 = peft({
 				...base,

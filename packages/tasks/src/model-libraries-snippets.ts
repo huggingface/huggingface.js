@@ -920,7 +920,8 @@ pipeline = Pipeline(
 
 export const keras = (model: ModelData): string[] => [
 	`# !pip install -U keras tensorflow huggingface_hub
-# TensorFlow is required to load from "hf://" paths, even when computing with the "jax" or "torch" backend.
+# Keras needs TensorFlow installed to read "hf://" paths, so the tensorflow backend is selected here;
+# "jax" and "torch" also work for computation once TensorFlow is installed.
 import os
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -2474,10 +2475,12 @@ const PEFT_TASK_TYPE_TO_AUTO_CLASS: Record<string, string> = {
 	FEATURE_EXTRACTION: "AutoModel",
 };
 
-// PEFT has no speech-specific task type: Whisper-style adapters are tagged SEQ_2_SEQ_LM, but transformers only
-// registers Whisper, SpeechT5, Speech2Text and SeamlessM4T under AutoModelForSpeechSeq2Seq. Other audio seq2seq
-// models (Qwen2-Audio, GLM-ASR) stay under AutoModelForSeq2SeqLM, so the base model name is the only safe signal.
-const PEFT_SPEECH_SEQ2SEQ_BASE_MODEL = /whisper|speecht5|speech_to_text|seamless_m4t/i;
+// PEFT has no speech-specific task type: Whisper-style adapters are tagged SEQ_2_SEQ_LM, but transformers registers
+// Whisper, SpeechT5 and Speech2Text only under AutoModelForSpeechSeq2Seq (SeamlessM4T is under both auto classes).
+// Other audio seq2seq models (Qwen2-Audio, GLM-ASR) stay under AutoModelForSeq2SeqLM, so the base model name is the
+// only safe signal. Matched against Hub repo ids, which are hyphenated (facebook/s2t-small-librispeech-asr,
+// facebook/seamless-m4t-v2-large), not against transformers model_type identifiers.
+const PEFT_SPEECH_SEQ2SEQ_BASE_MODEL = /whisper|speecht5|\bs2t\b|speech[-_]to[-_]text|seamless[-_]m4t/i;
 
 export const peft = (model: ModelData): string[] => {
 	const { base_model_name_or_path: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
@@ -2614,7 +2617,7 @@ export const lvface = (model: ModelData): string[] => [
 from inference_onnx import LVFaceONNXInferencer
 
 model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K/LVFace-L_Glint360K.onnx")
-inferencer = LVFaceONNXInferencer(model_path, use_gpu=True, timeout=300)
+inferencer = LVFaceONNXInferencer(model_path, use_gpu=True)
 img_path = 'path/to/image1.jpg'
 embedding = inferencer.infer_from_image(img_path)`,
 ];
@@ -2672,7 +2675,7 @@ import torch
 import torchaudio
 
 chat = ChatTTS.Chat()
-chat.load_models(compile=False) # Set to True for better performance
+chat.load(compile=False) # Set to True for better performance
 
 texts = ["PUT YOUR TEXT HERE",]
 
