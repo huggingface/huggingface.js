@@ -142,7 +142,8 @@ export class StringValue extends RuntimeValue<string> {
 			[
 				"capitalize",
 				new FunctionValue(() => {
-					return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
+					// Python lower-cases everything after the first character.
+					return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase());
 				}),
 			],
 			["length", new IntegerValue(this.value.length)],

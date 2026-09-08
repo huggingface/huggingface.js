@@ -60,7 +60,13 @@ export function slice<T>(array: T[], start?: number, stop?: number, step = 1): T
  * @returns The title cased string.
  */
 export function titleCase(value: string): string {
-	return value.replace(/\b\w/g, (c) => c.toUpperCase());
+	// Mirrors Python's `str.title()` as Jinja implements it: split on runs of "-", whitespace,
+	// "(", "{", "[" or "<" (keeping the separators), then upper-case the first character of each
+	// piece and lower-case the rest. `\b` is not equivalent — it also breaks on "'" and ".".
+	return value
+		.split(/([-\s({[<]+)/)
+		.map((piece) => piece.charAt(0).toUpperCase() + piece.slice(1).toLowerCase())
+		.join("");
 }
 
 export function strftime_now(format: string): string {

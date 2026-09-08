@@ -6421,6 +6421,31 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("String case filters", () => {
+		// Both filters lower-case everything after each word's first character, and `title`
+		// only breaks words on "-", whitespace, "(", "{", "[" and "<" — not on "'" or ".".
+		// Verified against Python jinja2 3.1.6.
+		it.each([
+			["hello WORLD", "Hello world", "Hello World"],
+			["HELLO", "Hello", "Hello"],
+			["hELLO wORLD", "Hello world", "Hello World"],
+			["ABC def", "Abc def", "Abc Def"],
+			["don't stop", "Don't stop", "Don't Stop"],
+			["x.y z", "X.y z", "X.y Z"],
+			["o'NEIL", "O'neil", "O'neil"],
+			["foo-bar baz", "Foo-bar baz", "Foo-Bar Baz"],
+			["3rd PLACE", "3rd place", "3rd Place"],
+			["ÉCOLE test", "École test", "École Test"],
+			["", "", ""],
+		])("%o capitalizes and titles like Python", (input, capitalized, titled) => {
+			expect(new Template("{{ s|capitalize }}").render({ s: input })).toEqual(capitalized);
+			expect(new Template("{{ s|title }}").render({ s: input })).toEqual(titled);
+			// The method forms share the same builtins as the filters.
+			expect(new Template("{{ s.capitalize() }}").render({ s: input })).toEqual(capitalized);
+			expect(new Template("{{ s.title() }}").render({ s: input })).toEqual(titled);
+		});
+	});
+
 	describe("Macros and call statements", () => {
 		it.each([
 			{
