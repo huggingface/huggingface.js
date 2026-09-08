@@ -582,7 +582,7 @@ from diffusers import AutoPipelineForInpainting
 from diffusers.utils import load_image
 
 # switch to "mps" for apple devices
-pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", dtype=torch.float16, variant="fp16", device_map="cuda")
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", dtype=torch.float16, device_map="cuda")
 
 img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
 mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
@@ -1755,6 +1755,7 @@ model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
 export const phantom_wan = (model: ModelData): string[] => [
 	`from huggingface_hub import snapshot_download
 from phantom_wan import WanI2V, configs
+from PIL import Image
 
 checkpoint_dir = snapshot_download("${model.id}")
 wan_i2v = WanI2V(
@@ -1763,7 +1764,7 @@ wan_i2v = WanI2V(
 )
 
 text_prompt = "A cat playing with a ball of yarn"
-image_prompt = "path/to/image.jpg"
+image_prompt = Image.open("path/to/image.jpg").convert("RGB")
 video = wan_i2v.generate(text_prompt, image_prompt)`,
 ];
 
@@ -2474,7 +2475,8 @@ const PEFT_TASK_TYPE_TO_AUTO_CLASS: Record<string, string> = {
 };
 
 // PEFT has no speech-specific task type: Whisper-style adapters are tagged SEQ_2_SEQ_LM, but transformers only
-// registers those architectures under AutoModelForSpeechSeq2Seq
+// registers Whisper, SpeechT5, Speech2Text and SeamlessM4T under AutoModelForSpeechSeq2Seq. Other audio seq2seq
+// models (Qwen2-Audio, GLM-ASR) stay under AutoModelForSeq2SeqLM, so the base model name is the only safe signal.
 const PEFT_SPEECH_SEQ2SEQ_BASE_MODEL = /whisper|speecht5|speech_to_text|seamless_m4t/i;
 
 export const peft = (model: ModelData): string[] => {
@@ -2491,10 +2493,7 @@ export const peft = (model: ModelData): string[] => {
 	if (!baseModel) {
 		return [`Base model is not found.`];
 	}
-	if (
-		peftTaskType === "SEQ_2_SEQ_LM" &&
-		(model.pipeline_tag === "automatic-speech-recognition" || PEFT_SPEECH_SEQ2SEQ_BASE_MODEL.test(baseModel))
-	) {
+	if (peftTaskType === "SEQ_2_SEQ_LM" && PEFT_SPEECH_SEQ2SEQ_BASE_MODEL.test(baseModel)) {
 		autoClass = "AutoModelForSpeechSeq2Seq";
 	}
 

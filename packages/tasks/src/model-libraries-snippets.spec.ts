@@ -176,6 +176,8 @@ print(output)`);
 		it("diffusers: prefixed pipeline class tags reach the dedicated branches", () => {
 			const inpainting = diffusers({ ...base, tags: ["diffusers:StableDiffusionInpaintPipeline"] } as ModelData);
 			expect(inpainting.join("\n")).toContain("AutoPipelineForInpainting");
+			// several inpainting repos only ship non-variant weights
+			expect(inpainting.join("\n")).not.toContain('variant="fp16"');
 
 			const fluxFill = diffusers({ ...base, config: { diffusers: { _class_name: "FluxFillPipeline" } } } as ModelData);
 			expect(fluxFill.join("\n")).toContain("FluxFillPipeline");
@@ -233,6 +235,14 @@ print(output)`);
 				config: { peft: { base_model_name_or_path: "google/flan-t5-base", task_type: "SEQ_2_SEQ_LM" } },
 			} as ModelData)[0];
 			expect(t5).toContain("AutoModelForSeq2SeqLM");
+
+			// audio models that transformers registers under the text seq2seq class must not be overridden
+			const qwenAudio = peft({
+				...base,
+				pipeline_tag: "automatic-speech-recognition",
+				config: { peft: { base_model_name_or_path: "Qwen/Qwen2-Audio-7B", task_type: "SEQ_2_SEQ_LM" } },
+			} as ModelData)[0];
+			expect(qwenAudio).toContain("AutoModelForSeq2SeqLM");
 		});
 
 		it("peft: falls back to the model card's base model", () => {
@@ -287,6 +297,7 @@ print(output)`);
 			expect(gliner2(base as ModelData)[0]).toContain("extractor = GLiNER2.from_pretrained");
 			expect(cartesia_pytorch(base as ModelData)[0].trimEnd()).toMatch(/print\(out_message\)$/);
 			expect(vui()[0]).toContain("from vui.model import Vui\n");
+			expect(phantom_wan(base as ModelData)[0]).toContain('Image.open("path/to/image.jpg")');
 		});
 	});
 });
