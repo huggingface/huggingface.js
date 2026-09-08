@@ -22,7 +22,7 @@ export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
 
 model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
-		model.config?.adapter_transformers?.model_name ?? "fill-in-model-name",
+		model.config?.adapter_transformers?.model_name ?? "<base-model-id>",
 	)}")
 model.load_adapter("${model.id}", set_active=True)`,
 ];
@@ -83,7 +83,10 @@ result, message = detector.detect_watermark(watermarked_audio, sr)`;
 };
 
 function get_base_diffusers_model(model: ModelData): string {
-	return escapeStringForJson(model.cardData?.base_model?.toString() ?? "fill-in-base-model");
+	const baseModel = model.cardData?.base_model;
+	// several base models can be listed (e.g. a LoRA trained for a base and its turbo variant); the first one is used
+	const first = Array.isArray(baseModel) ? baseModel[0] : baseModel;
+	return escapeStringForJson(first?.toString() ?? "fill-in-base-model");
 }
 
 function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
@@ -174,7 +177,7 @@ detector = cvg.NeuralCornerDetector(checkpoint)
 embedder = cvg.NeuralEmbedder(checkpoint)`,
 ];
 
-export const colipri = (model: ModelData): string[] => {
+export const colipri = (): string[] => {
 	const installSnippet = `pip install colipri`;
 
 	const exampleSnippet = `from colipri import get_model
@@ -184,7 +187,7 @@ from colipri import ZeroShotImageClassificationPipeline
 
 model = get_model().cuda()
 processor = get_processor()
-pipeline = ZeroShotImageClassificationPipeline("${model.id}", processor)
+pipeline = ZeroShotImageClassificationPipeline(model, processor)
 
 image = load_sample_ct()
 
@@ -308,7 +311,7 @@ export const depth_anything_v2 = (model: ModelData): string[] => {
 	} else if (model.id === "depth-anything/Depth-Anything-V2-Large") {
 		encoder = "vitl";
 		features = "256";
-		out_channels = "[256, 512, 1024, 1024";
+		out_channels = "[256, 512, 1024, 1024]";
 	}
 
 	return [
@@ -318,6 +321,7 @@ export const depth_anything_v2 = (model: ModelData): string[] => {
 # Load the model and infer depth from an image
 import cv2
 import torch
+from huggingface_hub import hf_hub_download
 
 from depth_anything_v2.dpt import DepthAnythingV2
 
@@ -337,8 +341,8 @@ depth = model.infer_image(raw_img) # HxW raw depth map in numpy
 
 export const depth_pro = (model: ModelData): string[] => {
 	const installSnippet = `# Download checkpoint
-pip install huggingface-hub
-huggingface-cli download --local-dir checkpoints ${model.id}`;
+pip install huggingface_hub
+hf download ${model.id} --local-dir checkpoints`;
 
 	const inferenceSnippet = `import depth_pro
 
@@ -412,7 +416,7 @@ export const describe_anything = (model: ModelData): string[] => [
 from huggingface_hub import snapshot_download
 from dam import DescribeAnythingModel
 
-snapshot_download(${model.id}, local_dir="checkpoints")
+snapshot_download("${model.id}", local_dir="checkpoints")
 
 dam = DescribeAnythingModel(
 	model_path="checkpoints",
@@ -535,7 +539,7 @@ pipe.load_lora_weights("${model.id}")
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
 input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/guitar-man.png")
 
-image = pipe(image=input_image, prompt=prompt).frames[0]
+output = pipe(image=input_image, prompt=prompt).frames[0]
 export_to_video(output, "output.mp4")`,
 ];
 
@@ -601,11 +605,14 @@ image = pipe(
 ];
 
 export const diffusers = (model: ModelData): string[] => {
+	// the Hub emits pipeline class tags as `diffusers:<ClassName>`; bare names are kept for manually added tags
+	const hasPipelineClass = (className: string): boolean =>
+		model.tags.includes(`diffusers:${className}`) ||
+		model.tags.includes(className) ||
+		model.config?.diffusers?._class_name === className;
+
 	let codeSnippets: string[];
-	if (
-		model.tags.includes("StableDiffusionInpaintPipeline") ||
-		model.tags.includes("StableDiffusionXLInpaintPipeline")
-	) {
+	if (hasPipelineClass("StableDiffusionInpaintPipeline") || hasPipelineClass("StableDiffusionXLInpaintPipeline")) {
 		codeSnippets = diffusers_inpainting(model);
 	} else if (model.tags.includes("controlnet")) {
 		codeSnippets = diffusers_controlnet(model);
@@ -621,7 +628,7 @@ export const diffusers = (model: ModelData): string[] => {
 		}
 	} else if (model.tags.includes("textual_inversion")) {
 		codeSnippets = diffusers_textual_inversion(model);
-	} else if (model.tags.includes("FluxFillPipeline")) {
+	} else if (hasPipelineClass("FluxFillPipeline")) {
 		codeSnippets = diffusers_flux_fill(model);
 	} else if (model.pipeline_tag === "image-to-video") {
 		codeSnippets = diffusers_image_to_video(model);
@@ -641,7 +648,7 @@ from diffusionkit.mlx import DiffusionPipeline
 pipeline = DiffusionPipeline(
 	shift=3.0,
 	use_t5=False,
-	model_version=${model.id},
+	model_version="${model.id}",
 	low_memory_mode=True,
 	a16=True,
 	w16=True,
@@ -652,7 +659,7 @@ from diffusionkit.mlx import FluxPipeline
 
 pipeline = FluxPipeline(
   shift=1.0,
-  model_version=${model.id},
+  model_version="${model.id}",
   low_memory_mode=True,
   a16=True,
   w16=True,
@@ -690,8 +697,7 @@ inputs = tokenizer(in_message, return_tensors="pt")
 outputs = model.generate(inputs.input_ids, max_length=50, top_k=100, top_p=0.99)
 out_message = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
 
-print(out_message)
-)`,
+print(out_message)`,
 ];
 
 export const cartesia_mlx = (model: ModelData): string[] => [
@@ -742,7 +748,8 @@ speech, *_ = model("text to generate speech from")`,
 ];
 
 export const espnetASR = (model: ModelData): string[] => [
-	`from espnet2.bin.asr_inference import Speech2Text
+	`import soundfile
+from espnet2.bin.asr_inference import Speech2Text
 
 model = Speech2Text.from_pretrained(
   "${model.id}"
@@ -772,9 +779,14 @@ models, cfg, task = load_model_ensemble_and_task_from_hf_hub(
 ];
 
 export const flair = (model: ModelData): string[] => [
-	`from flair.models import SequenceTagger
+	`from flair.data import Sentence
+from flair.models import SequenceTagger
 
-tagger = SequenceTagger.load("${model.id}")`,
+tagger = SequenceTagger.load("${model.id}")
+
+sentence = Sentence("George Washington went to Washington.")
+tagger.predict(sentence)
+print(sentence)`,
 ];
 
 export const flextab = (): string[] => {
@@ -849,13 +861,20 @@ print(f'Accuracy {accuracy_score(y_test, predictions):.2%}')
 export const gliner = (model: ModelData): string[] => [
 	`from gliner import GLiNER
 
-model = GLiNER.from_pretrained("${model.id}")`,
+model = GLiNER.from_pretrained("${model.id}")
+
+text = "Cristiano Ronaldo dos Santos Aveiro was born on 5 February 1985 in Funchal, Madeira, Portugal."
+labels = ["person", "date", "location"]
+
+entities = model.predict_entities(text, labels)
+for entity in entities:
+    print(entity["text"], "=>", entity["label"])`,
 ];
 
 export const gliner2 = (model: ModelData): string[] => [
 	`from gliner2 import GLiNER2
 
-model = GLiNER2.from_pretrained("${model.id}")
+extractor = GLiNER2.from_pretrained("${model.id}")
 
 # Extract entities
 text = "Apple CEO Tim Cook announced iPhone 15 in Cupertino yesterday."
@@ -868,7 +887,7 @@ export const indextts = (model: ModelData): string[] => [
 	`# Download model
 from huggingface_hub import snapshot_download
 
-snapshot_download(${model.id}, local_dir="checkpoints")
+snapshot_download("${model.id}", local_dir="checkpoints")
 
 from indextts.infer import IndexTTS
 
@@ -900,9 +919,10 @@ pipeline = Pipeline(
 ];
 
 export const keras = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "torch", "tensorflow".
+	`# !pip install -U keras tensorflow huggingface_hub
+# TensorFlow is required to load from "hf://" paths, even when computing with the "jax" or "torch" backend.
 import os
-os.environ["KERAS_BACKEND"] = "jax"
+os.environ["KERAS_BACKEND"] = "tensorflow"
 
 import keras
 
@@ -1029,13 +1049,15 @@ export const kernels = (model: ModelData): string[] => [
 
 from kernels import get_kernel
 
-kernel = get_kernel("${model.id}")`,
+# a version (or an explicit revision) is required; see the "Files and versions" tab for the available ones
+kernel = get_kernel("${model.id}", version=1)`,
 ];
 
 export const kimi_audio = (model: ModelData): string[] => [
 	`# Example usage for KimiAudio
 # pip install git+https://github.com/MoonshotAI/Kimi-Audio.git
 
+import soundfile as sf
 from kimia_infer.api.kimia import KimiAudio
 
 model = KimiAudio(model_path="${model.id}", load_detokenizer=True)
@@ -1476,14 +1498,16 @@ pip install -U litert-lm
 
 # 2. Download and run this model locally:
 # See: https://ai.google.dev/edge/litert-lm/cli
+# Pick the .litertlm file to run from this repo's "Files and versions" tab
 litert-lm run \\
-  --from-huggingface-repo=${model.id} \\
+  --from-huggingface-repo=${model.id} <model-file>.litertlm \\
   --prompt="Write me a poem"`,
 ];
 
 export const tf_keras = (model: ModelData): string[] => [
-	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
+	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy), and from_pretrained_keras was removed in huggingface_hub 1.0.
 # See https://github.com/keras-team/tf-keras for more details.
+# !pip install "huggingface_hub<1.0" tf_keras
 from huggingface_hub import from_pretrained_keras
 
 model = from_pretrained_keras("${model.id}")
@@ -1730,14 +1754,17 @@ model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
 };
 export const phantom_wan = (model: ModelData): string[] => [
 	`from huggingface_hub import snapshot_download
-from phantom_wan import WANI2V, configs
+from phantom_wan import WanI2V, configs
 
 checkpoint_dir = snapshot_download("${model.id}")
 wan_i2v = WanI2V(
-            config=configs.WAN_CONFIGS['i2v-14B'],
-            checkpoint_dir=checkpoint_dir,
-        )
- video = wan_i2v.generate(text_prompt, image_prompt)`,
+    config=configs.WAN_CONFIGS['i2v-14B'],
+    checkpoint_dir=checkpoint_dir,
+)
+
+text_prompt = "A cat playing with a ball of yarn"
+image_prompt = "path/to/image.jpg"
+video = wan_i2v.generate(text_prompt, image_prompt)`,
 ];
 
 export const pocket_tts = (model: ModelData): string[] => [
@@ -1862,7 +1889,7 @@ export const tensorflowtts = (model: ModelData): string[] => {
 export const timm = (model: ModelData): string[] => [
 	`import timm
 
-model = timm.create_model("hf_hub:${model.id}", pretrained=True)`,
+model = timm.create_model("hf-hub:${model.id}", pretrained=True)`,
 ];
 
 export const saelens = (/* model: ModelData */): string[] => [
@@ -1915,11 +1942,13 @@ model = load("path_to_folder/${escapeStringForJson(modelFile)}")`,
 };
 
 const skopsJobLib = (model: ModelData) => {
+	// repos pushed without skops often still declare their filename in config.json
+	const modelFile = model.config?.sklearn?.model?.file ?? "sklearn_model.joblib";
 	return [
 		`from huggingface_hub import hf_hub_download
 import joblib
 model = joblib.load(
-	hf_hub_download("${model.id}", "sklearn_model.joblib")
+	hf_hub_download("${model.id}", "${escapeStringForJson(modelFile)}")
 )
 # only load pickle files from sources you trust
 # read more about it here https://skops.readthedocs.io/en/stable/persistence.html`,
@@ -1991,7 +2020,7 @@ export const sam2 = (model: ModelData): string[] => {
 import torch
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
-predictor = SAM2ImagePredictor.from_pretrained(${model.id})
+predictor = SAM2ImagePredictor.from_pretrained("${model.id}")
 
 with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
     predictor.set_image(<your_image>)
@@ -2001,7 +2030,7 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
 import torch
 from sam2.sam2_video_predictor import SAM2VideoPredictor
 
-predictor = SAM2VideoPredictor.from_pretrained(${model.id})
+predictor = SAM2VideoPredictor.from_pretrained("${model.id}")
 
 with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
     state = predictor.init_state(<your_video>)
@@ -2031,7 +2060,7 @@ output = inference(image, mask)`,
 export const sam_3d_body = (model: ModelData): string[] => [
 	`from notebook.utils import setup_sam_3d_body
 
-estimator = setup_sam_3d_body(${model.id})
+estimator = setup_sam_3d_body("${model.id}")
 outputs = estimator.process_one_image(image)
 rend_img = visualize_sample_together(image, outputs, estimator.faces)`,
 ];
@@ -2130,7 +2159,15 @@ docs_emb = model.encode(documents, is_query=False)`,
 		];
 	}
 
-	if (model.tags.includes("cross-encoder") || model.pipeline_tag == "text-ranking") {
+	// Rerankers saved in the CrossEncoder format are often tagged text-classification rather than text-ranking;
+	// their architecture still identifies them (e.g. BAAI/bge-reranker-v2-m3).
+	const isCrossEncoder =
+		model.tags.includes("cross-encoder") ||
+		model.pipeline_tag == "text-ranking" ||
+		(model.pipeline_tag === "text-classification" &&
+			(model.config?.architectures ?? []).some((arch) => arch.endsWith("ForSequenceClassification")));
+
+	if (isCrossEncoder) {
 		return [
 			`from sentence_transformers import CrossEncoder
 
@@ -2146,6 +2183,28 @@ passages = [
 
 scores = model.predict([(query, passage) for passage in passages])
 print(scores)`,
+		];
+	}
+
+	// sentence-transformers tags SparseEncoder repos (SPLADE & co) with "sparse-encoder" when pushing them
+	if (model.tags.includes("sparse-encoder")) {
+		return [
+			`from sentence_transformers import SparseEncoder
+
+model = SparseEncoder("${model.id}"${remote_code_snippet})
+
+queries = ["Which planet is known as the Red Planet?"]
+documents = [
+	"Venus is often called Earth's twin because of its similar size and proximity.",
+	"Mars, known for its reddish appearance, is often referred to as the Red Planet.",
+	"Jupiter, the largest planet in our solar system, has a prominent red spot.",
+]
+
+query_embeddings = model.encode_query(queries)
+document_embeddings = model.encode_document(documents)
+
+similarities = model.similarity(query_embeddings, document_embeddings)
+print(similarities)`,
 		];
 	}
 
@@ -2172,7 +2231,10 @@ print(similarities.shape)
 export const setfit = (model: ModelData): string[] => [
 	`from setfit import SetFitModel
 
-model = SetFitModel.from_pretrained("${model.id}")`,
+model = SetFitModel.from_pretrained("${model.id}")
+
+preds = model.predict(["i loved the spiderman movie!", "pineapple on pizza is the worst"])
+print(preds)`,
 ];
 
 export const spacy = (model: ModelData): string[] => [
@@ -2190,7 +2252,10 @@ nlp = ${nameWithoutNamespace(model.id)}.load()`,
 export const span_marker = (model: ModelData): string[] => [
 	`from span_marker import SpanMarkerModel
 
-model = SpanMarkerModel.from_pretrained("${model.id}")`,
+model = SpanMarkerModel.from_pretrained("${model.id}")
+
+entities = model.predict("Amelia Earhart flew her single engine Lockheed Vega 5B across the Atlantic to Paris.")
+print(entities)`,
 ];
 
 export const stanza = (model: ModelData): string[] => [
@@ -2211,6 +2276,8 @@ const speechBrainMethod = (speechbrainInterface: string) => {
 			return "enhance_file";
 		case "SepformerSeparation":
 			return "separate_file";
+		case "SpeakerRecognition":
+			return "verify_files";
 		default:
 			return undefined;
 	}
@@ -2227,12 +2294,14 @@ export const speechbrain = (model: ModelData): string[] => {
 		return [`# interface in config.json invalid`];
 	}
 
+	// speaker verification compares two recordings
+	const methodArgs = speechbrainMethod === "verify_files" ? '"speaker1.wav", "speaker2.wav"' : '"file.wav"';
 	return [
 		`from speechbrain.pretrained import ${speechbrainInterface}
 model = ${speechbrainInterface}.from_hparams(
   "${model.id}"
 )
-model.${speechbrainMethod}("file.wav")`,
+model.${speechbrainMethod}(${methodArgs})`,
 	];
 };
 
@@ -2270,6 +2339,7 @@ export const transformers = (model: ModelData): string[] => {
 					? "extractor"
 					: "processor";
 		autoSnippet.push(
+			"# pip install -U transformers accelerate",
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${auto_model}`,
 			"",
@@ -2303,12 +2373,13 @@ export const transformers = (model: ModelData): string[] => {
 				'	return_tensors="pt",',
 				").to(model.device)",
 				"",
-				"outputs = model.generate(**inputs, max_new_tokens=40)",
+				"outputs = model.generate(**inputs, max_new_tokens=256)",
 				`print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))`,
 			);
 		}
 	} else {
 		autoSnippet.push(
+			"# pip install -U transformers accelerate",
 			"# Load model directly",
 			`from transformers import ${auto_model}`,
 			`model = ${auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
@@ -2321,7 +2392,7 @@ export const transformers = (model: ModelData): string[] => {
 			pipelineSnippet.push(
 				`# Warning: Pipeline type "${model.pipeline_tag}" is no longer supported in transformers v5.`,
 				`# You must load the model directly (see below) or downgrade to v4.x with:`,
-				`# 'pip install "transformers<5.0.0'`,
+				`# pip install "transformers<5.0.0"`,
 			);
 		}
 
@@ -2331,7 +2402,7 @@ export const transformers = (model: ModelData): string[] => {
 			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
 		);
 
-		if (model.tags.includes("conversational")) {
+		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
 				pipelineSnippet.push(
 					"messages = [",
@@ -2369,52 +2440,69 @@ export const transformers = (model: ModelData): string[] => {
 	return [autoSnippet.join("\n")];
 };
 
+// Hub tasks that transformers.js exposes under a different pipeline() task name
+const TRANSFORMERS_JS_TASK_ALIASES: Record<string, string> = {
+	"sentence-similarity": "feature-extraction",
+	"text-ranking": "text-classification",
+};
+
 export const transformersJS = (model: ModelData): string[] => {
 	if (!model.pipeline_tag) {
 		return [`// ⚠️ Unknown pipeline tag`];
 	}
 
 	const libName = "@huggingface/transformers";
+	const task = TRANSFORMERS_JS_TASK_ALIASES[model.pipeline_tag] ?? model.pipeline_tag;
 
 	return [
 		`// npm i ${libName}
 import { pipeline } from '${libName}';
 
 // Allocate pipeline
-const pipe = await pipeline('${model.pipeline_tag}', '${model.id}');`,
+const pipe = await pipeline('${task}', '${model.id}');`,
 	];
 };
 
-const peftTask = (peftTaskType?: string) => {
-	switch (peftTaskType) {
-		case "CAUSAL_LM":
-			return "CausalLM";
-		case "SEQ_2_SEQ_LM":
-			return "Seq2SeqLM";
-		case "TOKEN_CLS":
-			return "TokenClassification";
-		case "SEQ_CLS":
-			return "SequenceClassification";
-		default:
-			return undefined;
-	}
+const PEFT_TASK_TYPE_TO_AUTO_CLASS: Record<string, string> = {
+	CAUSAL_LM: "AutoModelForCausalLM",
+	SEQ_2_SEQ_LM: "AutoModelForSeq2SeqLM",
+	TOKEN_CLS: "AutoModelForTokenClassification",
+	SEQ_CLS: "AutoModelForSequenceClassification",
+	QUESTION_ANS: "AutoModelForQuestionAnswering",
+	// transformers has no AutoModelForFeatureExtraction; PEFT's own AutoPeftModelForFeatureExtraction resolves to AutoModel
+	FEATURE_EXTRACTION: "AutoModel",
 };
+
+// PEFT has no speech-specific task type: Whisper-style adapters are tagged SEQ_2_SEQ_LM, but transformers only
+// registers those architectures under AutoModelForSpeechSeq2Seq
+const PEFT_SPEECH_SEQ2SEQ_BASE_MODEL = /whisper|speecht5|speech_to_text|seamless_m4t/i;
 
 export const peft = (model: ModelData): string[] => {
 	const { base_model_name_or_path: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
-	const pefttask = peftTask(peftTaskType);
-	if (!pefttask) {
+	let autoClass = peftTaskType ? PEFT_TASK_TYPE_TO_AUTO_CLASS[peftTaskType] : undefined;
+	if (!autoClass) {
 		return [`Task type is invalid.`];
 	}
-	if (!peftBaseModel) {
+	// adapter_config.json sometimes omits the base model; the model card's base_model is the next best source
+	const cardBaseModel = Array.isArray(model.cardData?.base_model)
+		? model.cardData.base_model[0]
+		: model.cardData?.base_model;
+	const baseModel = peftBaseModel || cardBaseModel;
+	if (!baseModel) {
 		return [`Base model is not found.`];
+	}
+	if (
+		peftTaskType === "SEQ_2_SEQ_LM" &&
+		(model.pipeline_tag === "automatic-speech-recognition" || PEFT_SPEECH_SEQ2SEQ_BASE_MODEL.test(baseModel))
+	) {
+		autoClass = "AutoModelForSpeechSeq2Seq";
 	}
 
 	return [
 		`from peft import PeftModel
-from transformers import AutoModelFor${pefttask}
+from transformers import ${autoClass}
 
-base_model = AutoModelFor${pefttask}.from_pretrained("${escapeStringForJson(peftBaseModel)}")
+base_model = ${autoClass}.from_pretrained("${escapeStringForJson(baseModel)}")
 model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
 };
@@ -2449,7 +2537,7 @@ transcriptions = asr_model.transcribe(["file.wav"])`,
 };
 
 export const mlAgents = (model: ModelData): string[] => [
-	`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./download: string[]s"`,
+	`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./downloads"`,
 ];
 
 export const sentis = (/* model: ModelData */): string[] => [
@@ -2524,7 +2612,7 @@ model = Model.from_pretrained("${model.id}")`,
 
 export const lvface = (model: ModelData): string[] => [
 	`from huggingface_hub import hf_hub_download
-	 from inference_onnx import LVFaceONNXInferencer
+from inference_onnx import LVFaceONNXInferencer
 
 model_path = hf_hub_download("${model.id}", "LVFace-L_Glint360K/LVFace-L_Glint360K.onnx")
 inferencer = LVFaceONNXInferencer(model_path, use_gpu=True, timeout=300)
@@ -2567,7 +2655,7 @@ export const vui = (): string[] => [
 import torchaudio
 
 from vui.inference import render
-from vui.model import Vui,
+from vui.model import Vui
 
 model = Vui.from_pretrained().cuda()
 waveform = render(
@@ -2581,6 +2669,7 @@ torchaudio.save("out.opus", waveform[0], 22050)
 
 export const chattts = (): string[] => [
 	`import ChatTTS
+import torch
 import torchaudio
 
 chat = ChatTTS.Chat()
@@ -2594,19 +2683,25 @@ torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
 export const ultralytics = (model: ModelData): string[] => {
-	// ultralytics models must have a version tag (e.g. `yolov8`)
-	const versionTag = model.tags.find((tag) => tag.match(/^yolov\d+$/));
+	// the YOLOv10 fork ships its own `YOLOv10` class with a `from_pretrained` helper
+	if (model.tags.includes("yolov10")) {
+		return [
+			`from ultralytics import YOLOv10
 
-	const className = versionTag ? `YOLOv${versionTag.slice(4)}` : "YOLOvXX";
-	const prefix = versionTag
-		? ""
-		: `# Couldn't find a valid YOLO version tag.\n# Replace XX with the correct version.\n`;
+model = YOLOv10.from_pretrained("${model.id}")
+source = 'http://images.cocodataset.org/val2017/000000039769.jpg'
+model.predict(source=source, save=True)`,
+		];
+	}
 
+	// mainline ultralytics loads weights from a local file
 	return [
-		prefix +
-			`from ultralytics import ${className}
+		`from huggingface_hub import hf_hub_download
+from ultralytics import YOLO
 
-model = ${className}.from_pretrained("${model.id}")
+# pick the weights file from this repo's "Files and versions" tab
+weights = hf_hub_download("${model.id}", "<weights>.pt")
+model = YOLO(weights)
 source = 'http://images.cocodataset.org/val2017/000000039769.jpg'
 model.predict(source=source, save=True)`,
 	];
@@ -2685,14 +2780,16 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 
 export const univa = (model: ModelData): string[] => [
 	`# Follow installation instructions at https://github.com/PKU-YuanGroup/UniWorld-V1
-
+import torch
+from transformers import AutoProcessor
 from univa.models.qwen2p5vl.modeling_univa_qwen2p5vl import UnivaQwen2p5VLForConditionalGeneration
-	model = UnivaQwen2p5VLForConditionalGeneration.from_pretrained(
-        "${model.id}",
-        torch_dtype=torch.bfloat16,
-        attn_implementation="flash_attention_2",
-    ).to("cuda")
-	processor = AutoProcessor.from_pretrained("${model.id}")
+
+model = UnivaQwen2p5VLForConditionalGeneration.from_pretrained(
+    "${model.id}",
+    torch_dtype=torch.bfloat16,
+    attn_implementation="flash_attention_2",
+).to("cuda")
+processor = AutoProcessor.from_pretrained("${model.id}")
 `,
 ];
 
@@ -2700,7 +2797,7 @@ const mlx_unknown = (model: ModelData): string[] => [
 	`# Download the model from the Hub
 pip install huggingface_hub[hf_xet]
 
-huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
+hf download ${model.id} --local-dir ${nameWithoutNamespace(model.id)}`,
 ];
 
 const mlxlm = (model: ModelData): string[] => [
@@ -2764,7 +2861,7 @@ print(output)`,
 export const mlxim = (model: ModelData): string[] => [
 	`from mlxim.model import create_model
 
-model = create_model(${model.id})`,
+model = create_model("${model.id}")`,
 ];
 
 export const mlx = (model: ModelData): string[] => {
@@ -2784,7 +2881,10 @@ export const mlx = (model: ModelData): string[] => {
 export const model2vec = (model: ModelData): string[] => [
 	`from model2vec import StaticModel
 
-model = StaticModel.from_pretrained("${model.id}")`,
+model = StaticModel.from_pretrained("${model.id}")
+
+embeddings = model.encode(["It's dangerous to go alone!", "It's a secret to everybody."])
+print(embeddings.shape)`,
 ];
 
 export const mobilint = (model: ModelData): string[] => {
@@ -2830,8 +2930,9 @@ export const pruna = (model: ModelData): string[] => {
 	snippets = snippets.map(ensurePrunaModelImport);
 
 	if (model.tags.includes("pruna_pro-ai")) {
+		// only rewrite the import and the class name, never the repo id (an org name can contain "pruna")
 		return snippets.map((snippet) =>
-			snippet.replace(/\bpruna\b/g, "pruna_pro").replace(/\bPrunaModel\b/g, "PrunaProModel"),
+			snippet.replace(/^from pruna import /gm, "from pruna_pro import ").replace(/\bPrunaModel\b/g, "PrunaProModel"),
 		);
 	}
 
@@ -2910,21 +3011,19 @@ export const outetts = (model: ModelData): string[] => {
 
 	// v1.0 HF → minimal runnable snippet
 	return [
-		`
-  import outetts
+		`import outetts
 
-  enum = outetts.Models("${model.id}".split("/", 1)[1])       # VERSION_1_0_SIZE_1B
-  cfg  = outetts.ModelConfig.auto_config(enum, outetts.Backend.HF)
-  tts  = outetts.Interface(cfg)
+enum = outetts.Models("${model.id}".split("/", 1)[1])       # VERSION_1_0_SIZE_1B
+cfg  = outetts.ModelConfig.auto_config(enum, outetts.Backend.HF)
+tts  = outetts.Interface(cfg)
 
-  speaker = tts.load_default_speaker("EN-FEMALE-1-NEUTRAL")
-  tts.generate(
-	  outetts.GenerationConfig(
-		  text="Hello there, how are you doing?",
-		  speaker=speaker,
-	  )
-  ).save("output.wav")
-  `,
+speaker = tts.load_default_speaker("EN-FEMALE-1-NEUTRAL")
+tts.generate(
+    outetts.GenerationConfig(
+        text="Hello there, how are you doing?",
+        speaker=speaker,
+    )
+).save("output.wav")`,
 	];
 };
 
