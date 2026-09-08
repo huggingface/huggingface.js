@@ -59,14 +59,40 @@ export function slice<T>(array: T[], start?: number, stop?: number, step = 1): T
  * @param value The string to title case.
  * @returns The title cased string.
  */
+// Jinja splits words on Python's `([-\s({\[<]+)`. The class is spelled out because JS and
+// Python disagree on `\s`: JS misses U+001C-U+001F and U+0085, and adds U+FEFF.
+// eslint-disable-next-line no-control-regex -- Python's `\s` matches these separators, so Jinja splits on them.
+const WORD_SEPARATOR = /([-\t\n\v\f\r\x1c-\x1f \x85\xa0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000({[<]+)/;
+
+/** Upper-case the first code point and lower-case the rest. Indexing by code point keeps an
+ *  astral letter such as Deseret "\u{10428}" intact instead of splitting its surrogate pair. */
+function upperFirstLowerRest(value: string): string {
+	const first = value.codePointAt(0);
+	if (first === undefined) {
+		return value;
+	}
+	const head = String.fromCodePoint(first);
+	return head.toUpperCase() + value.slice(head.length).toLowerCase();
+}
+
+/** Jinja's `title` filter: upper-case each word's first character, lower-case the rest. */
 export function titleCase(value: string): string {
-	// Mirrors Python's `str.title()` as Jinja implements it: split on runs of "-", whitespace,
-	// "(", "{", "[" or "<" (keeping the separators), then upper-case the first character of each
-	// piece and lower-case the rest. `\b` is not equivalent — it also breaks on "'" and ".".
-	return value
-		.split(/([-\s({[<]+)/)
-		.map((piece) => piece.charAt(0).toUpperCase() + piece.slice(1).toLowerCase())
-		.join("");
+	return value.split(WORD_SEPARATOR).map(upperFirstLowerRest).join("");
+}
+
+/** Python's `str.capitalize()`: title-case the first character, lower-case the rest. Title-case
+ *  is not upper-case where a character expands — "\u00df" title-cases to "Ss" but upper-cases to
+ *  "SS", which is why {@link titleCase} cannot be reused here. JS has no title-case mapping, so
+ *  the ~45 code points whose title-case is a distinct character (the "\u01f3" digraphs, and the
+ *  Greek iota-subscript block) still come out upper-cased. */
+export function capitalizeFirst(value: string): string {
+	const first = value.codePointAt(0);
+	if (first === undefined) {
+		return value;
+	}
+	const head = String.fromCodePoint(first);
+	const upper = head.toUpperCase();
+	return (upper.length > 1 ? upper[0] + upper.slice(1).toLowerCase() : upper) + value.slice(head.length).toLowerCase();
 }
 
 export function strftime_now(format: string): string {
