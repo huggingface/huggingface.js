@@ -362,6 +362,9 @@ export class XetBlob extends Blob {
 			throw new TypeError("Unsupported negative start/end on XetBlob.slice");
 		}
 
+		start = Math.min(start, this.size);
+		end = Math.max(start, Math.min(end, this.size));
+
 		const slice = this.#clone();
 
 		slice.start = this.start + start;
