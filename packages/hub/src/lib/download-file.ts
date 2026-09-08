@@ -77,6 +77,7 @@ export async function downloadFile(
 		return new XetBlob({
 			refreshUrl: info.xet.refreshUrl.href,
 			reconstructionUrl: info.xet.reconstructionUrl.href,
+			hash: info.xet.hash,
 			fetch: params.fetch,
 			accessToken,
 			size: info.size,

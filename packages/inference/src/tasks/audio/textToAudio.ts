@@ -16,7 +16,7 @@ interface OutputUrlTextToAudioGeneration {
  * Example model: stabilityai/stable-audio-open-1.0
  */
 export async function textToAudio(args: TextToAudioArgs, options?: Options): Promise<Blob> {
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 	const providerHelper = getProviderHelper(provider, "text-to-audio");
 	const { data: res } = await innerRequest<Blob | OutputUrlTextToAudioGeneration>(args, providerHelper, {
 		...options,

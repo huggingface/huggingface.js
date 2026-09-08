@@ -7,6 +7,7 @@ import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { toRepoId } from "../utils/toRepoId";
 import { downloadFile } from "./download-file";
 import { createSymlink } from "../utils/symlink";
+import { validateRelativeFilename } from "../utils/validateRelativeFilename";
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 import { pipeline } from "node:stream/promises";
@@ -70,6 +71,9 @@ export async function downloadFileToCacheDir(
 	if (repoId.type === "bucket") {
 		throw new Error("downloadFileToCacheDir is not supported for bucket repos.");
 	}
+	// The path comes from the tree API, ie. from the repo, and is joined onto the cache dir below:
+	// reject anything that would escape it (see huggingface_hub#4540).
+	validateRelativeFilename(params.path);
 	const revision = params.revision ?? "main";
 	const cacheDir = params.cacheDir ?? getHFHubCachePath();
 	const storageFolder = join(cacheDir, getRepoFolderName(repoId));

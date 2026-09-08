@@ -14,12 +14,16 @@ function nameWithoutNamespace(modelId: string): string {
 
 const escapeStringForJson = (str: string): string => JSON.stringify(str).slice(1, -1); // slice is needed to remove surrounding quotes added by JSON.stringify
 
+const isValidIdentifier = (str: string): boolean => /^[A-Za-z_]\w*$/.test(str);
+
 //#region snippets
 
 export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
 
-model = AutoAdapterModel.from_pretrained("${model.config?.adapter_transformers?.model_name}")
+model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
+		model.config?.adapter_transformers?.model_name ?? "fill-in-model-name",
+	)}")
 model.load_adapter("${model.id}", set_active=True)`,
 ];
 
@@ -79,7 +83,7 @@ result, message = detector.detect_watermark(watermarked_audio, sr)`;
 };
 
 function get_base_diffusers_model(model: ModelData): string {
-	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
+	return escapeStringForJson(model.cardData?.base_model?.toString() ?? "fill-in-base-model");
 }
 
 function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
@@ -241,6 +245,31 @@ predictions = regressor.predict(X_test)
 r2 = r2_score(y_test, predictions)
 print("R² Score:", r2)`;
 	return [installSnippet, classificationSnippet, regressionsSnippet];
+};
+
+export const cortiq = (model: ModelData): string[] => {
+	const setup = `# one Rust binary, no additional dependencies
+cargo install cortiq-cli   # or a prebuilt binary from github.com/infosave2007/cmf/releases
+hf download ${model.id} --include "*.cmf" --local-dir .
+ls *.cmf                   # some repos ship more than one quantization`;
+	if (model.pipeline_tag === "text-to-image") {
+		return [setup, `cortiq imagine FILE.cmf --prompt "a red fox in a snowy forest" --out fox.ppm`];
+	}
+	if (model.pipeline_tag === "text-to-video") {
+		return [setup, `cortiq animate FILE.cmf --prompt "a corgi in a chef hat flipping a pancake" --out clip.avi`];
+	}
+	if (model.pipeline_tag === "text-to-audio") {
+		return [
+			setup,
+			`cortiq music FILE.cmf --prompt "dream pop, warm analog synths, brushed drums" \\
+  --lyrics "[verse] the tide came in and took the map" --seconds 20 --out song.wav`,
+		];
+	}
+	return [
+		setup,
+		`cortiq run FILE.cmf --prompt "What is the capital of France?"`,
+		`cortiq serve FILE.cmf --port 8080   # OpenAI-compatible server`,
+	];
 };
 
 export const cxr_foundation = (): string[] => [
@@ -881,6 +910,21 @@ model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
+export const zeromodels = (model: ModelData): string[] => [
+	`# pip install -U zeromodels
+# ZeroModels is pure Keras 3, so pick a backend: "jax", "torch" or "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "jax"
+
+from zeromodels import AutoZModel
+
+# AutoZModel reads the repo's model_type and loads the matching class.
+# For a task head use the matching loader, e.g. AutoZMImageClassify / AutoZMDetect /
+# AutoZMSemanticSegment / AutoZMTextGenerate (see zeromodels.auto).
+model = AutoZModel.from_weights("${model.id}")
+`,
+];
+
 const _keras_hub_causal_lm = (modelId: string): string => `
 import keras_hub
 
@@ -957,7 +1001,8 @@ backbone = keras_hub.models.Backbone.from_preset("hf://${modelId}")
 
 export const keras_hub = (model: ModelData): string[] => {
 	const modelId = model.id;
-	const tasks = model.config?.keras_hub?.tasks ?? [];
+	// interpolated as a Python class name, so a non-identifier is treated as absent
+	const tasks = (model.config?.keras_hub?.tasks ?? []).filter(isValidIdentifier);
 
 	const snippets: string[] = [];
 
@@ -1031,83 +1076,288 @@ import soundfile as sf
 sf.write('output.wav', audio, 24000)`,
 ];
 
-export const ltx = (model: ModelData): string[] => {
-	const localDir = `models/${nameWithoutNamespace(model.id)}`;
-	const install = `# Install the LTX-2 pipelines
+/**
+ * Detect LTX-2.5 (split weights + Gemma 4 TE file) vs LTX-2.3
+ * (monolith checkpoint + separate Gemma 3 root). Prefer explicit tags / ids /
+ * base_model refs; fall back to 2.3 for unmarked legacy cards.
+ */
+function _isLtx25Model(model: ModelData): boolean {
+	const refs: string[] = [model.id, ...(model.tags ?? [])];
+	const base = model.cardData?.base_model;
+	if (Array.isArray(base)) {
+		refs.push(...base);
+	} else if (base) {
+		refs.push(base);
+	}
+	return refs.some((ref) => /ltx[-_]?2\.5/i.test(ref));
+}
+
+const _LTX_I2V_HINT = `# For image-to-video, add: --image path/to/image.jpg 0 0.8`;
+const _LTX_GEMMA3_ROOT = "models/gemma-3-12b";
+const _LTX_DEFAULT_PROMPT = "A beautiful sunset over the ocean";
+
+function _ltxInstall(is25: boolean): string {
+	// natten is only needed for the LTX-2.5 diffusion VAE (skipped automatically on Windows/macOS).
+	return `# Install the LTX-2 pipelines
 git clone https://github.com/Lightricks/LTX-2.git
 cd LTX-2
-uv sync --frozen`;
+uv sync ${is25 ? "--extra natten" : "--frozen"}`;
+}
 
-	// Every pipeline needs the Gemma text encoder, which lives in a separate repo.
-	const download = `# Download the weights from this repo, plus the Gemma text encoder
-hf download ${model.id} --local-dir ${localDir}
-hf download google/gemma-3-12b-it-qat-q4_0-unquantized --local-dir models/gemma-3-12b`;
+function _ltxRun(
+	module: string,
+	args: string[],
+	comment: string,
+	options?: { hint?: boolean; footer?: string },
+): string {
+	const body = `uv run python -m ltx_pipelines.${module} \\\n    ${args.join(" \\\n    ")}`;
+	const parts = [`# ${comment}`, body];
+	if (options?.footer) {
+		parts.push(options.footer);
+	}
+	if (options?.hint) {
+		parts.push(_LTX_I2V_HINT);
+	}
+	return parts.join("\n");
+}
 
-	// Add "--image <path> <frame_idx> <strength>" to any command below to condition on
-	// an image (e.g. "--image image.jpg 0 0.8"), turning text-to-video into image-to-video.
-	const imageToVideoHint = `# For image-to-video, add: --image path/to/image.jpg 0 0.8`;
+interface Ltx25SplitPaths {
+	transformer: string;
+	textEncoder: string;
+	videoVae: string;
+	audioVae: string;
+	spatialUpsampler: string;
+	temporalUpsampler?: string;
+}
 
-	const tags = model.tags ?? [];
+const _LTX_DETAILING_LORA_REPO = "Lightricks/LTX-2.5-22b-IC-LoRA-Pixel-Spatial-Upscaler";
+const _LTX_DETAILING_LORA_FILE = "ltx-2.5-22b-ic-lora-pixel-spatial-upscaler-x2-1.0.safetensors";
 
-	// IC-LoRA: video-to-video / image-to-video with a control (reference) signal.
-	// Checked before "lora" because an IC-LoRA repo may carry both tags.
+function _ltx25SplitArgs(paths: Ltx25SplitPaths): string[] {
+	const args = [
+		`--transformer-path ${paths.transformer}`,
+		`--text-encoder-path ${paths.textEncoder}`,
+		`--video-vae-path ${paths.videoVae}`,
+		`--audio-vae-path ${paths.audioVae}`,
+		`--spatial-upsampler-path ${paths.spatialUpsampler}`,
+	];
+	if (paths.temporalUpsampler) {
+		args.push(`--temporal-upsampler-path ${paths.temporalUpsampler}`);
+	}
+	return args;
+}
+
+function _ltx25RepoPaths(localDir: string): { distilled: Ltx25SplitPaths; dfr: Ltx25SplitPaths } {
+	const shared = {
+		transformer: `${localDir}/diffusion_models/<distilled-transformer>.safetensors`,
+		textEncoder: `${localDir}/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors`,
+		videoVae: `${localDir}/vae/<video-vae>.safetensors`,
+		audioVae: `${localDir}/vae/<audio-vae>.safetensors`,
+		spatialUpsampler: `${localDir}/latent_upscale_models/<spatial-upsampler>.safetensors`,
+	};
+	return {
+		distilled: shared,
+		// DFR runs on the distilled transformer; detailing IC-LoRA is required separately.
+		dfr: {
+			...shared,
+			temporalUpsampler: `${localDir}/latent_upscale_models/<temporal-upsampler>.safetensors`,
+		},
+	};
+}
+
+function _ltx25BasePlaceholderPaths(): Ltx25SplitPaths {
+	return {
+		transformer: "path/to/distilled-transformer.safetensors",
+		textEncoder: "path/to/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors",
+		videoVae: "path/to/video-vae.safetensors",
+		audioVae: "path/to/audio-vae.safetensors",
+		spatialUpsampler: "path/to/spatial-upsampler.safetensors",
+	};
+}
+
+function _ltx25Download(modelId: string, localDir: string, kind: "base" | "adapter"): string {
+	if (kind === "adapter") {
+		return `# Download the adapter weights from this repo
+# (base components come from Lightricks/LTX-2.5 — see Files and versions)
+hf download ${modelId} --local-dir ${localDir}`;
+	}
+	const detailingDir = `models/${_LTX_DETAILING_LORA_REPO.split("/")[1]}`;
+	return `# Download weights from this repo
+# Substitute filenames from this repo's "Files and versions" if they differ
+hf download ${modelId} \\
+    diffusion_models/<distilled-transformer>.safetensors \\
+    text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors \\
+    vae/<video-vae>.safetensors \\
+    vae/<audio-vae>.safetensors \\
+    latent_upscale_models/<spatial-upsampler>.safetensors \\
+    latent_upscale_models/<temporal-upsampler>.safetensors \\
+    --local-dir ${localDir}
+# DFR requires the detailing IC-LoRA (separate repo; strength is fixed at 0.5)
+hf download ${_LTX_DETAILING_LORA_REPO} --local-dir ${detailingDir}`;
+}
+
+function _ltx23Download(modelId: string, localDir: string): string {
+	return `# Download the weights from this repo, plus the Gemma text encoder
+hf download ${modelId} --local-dir ${localDir}
+hf download google/gemma-3-12b-it-qat-q4_0-unquantized --local-dir ${_LTX_GEMMA3_ROOT}`;
+}
+
+function _ltx25Snippets(model: ModelData, localDir: string, tags: string[]): string[] {
+	const install = _ltxInstall(true);
+	const loraArg = `--lora ${localDir}/<weights>.safetensors 1.0`;
+	const basePaths = _ltx25BasePlaceholderPaths();
+
+	if (tags.includes("ic-lora")) {
+		return [
+			install,
+			_ltx25Download(model.id, localDir, "adapter"),
+			_ltxRun(
+				"ic_lora",
+				[
+					..._ltx25SplitArgs(basePaths),
+					loraArg,
+					"--video-conditioning reference.mp4 1.0",
+					`--prompt "your prompt here"`,
+					"--output-path output.mp4",
+				],
+				"Video-to-video with the IC-LoRA (runs on the distilled LTX-2.5 base)",
+			),
+		];
+	}
+
+	if (tags.includes("lora")) {
+		return [
+			install,
+			_ltx25Download(model.id, localDir, "adapter"),
+			_ltxRun(
+				"distilled",
+				[..._ltx25SplitArgs(basePaths), loraArg, `--prompt "your prompt here"`, "--output-path output.mp4"],
+				"Text/image-to-video with the LoRA on the distilled LTX-2.5 pipeline",
+				{ hint: true },
+			),
+		];
+	}
+
+	const { distilled, dfr } = _ltx25RepoPaths(localDir);
+	const detailingDir = `models/${_LTX_DETAILING_LORA_REPO.split("/")[1]}`;
+	return [
+		install,
+		_ltx25Download(model.id, localDir, "base"),
+		_ltxRun(
+			"distilled",
+			[
+				..._ltx25SplitArgs(distilled),
+				"--num-frames 121",
+				`--prompt "${_LTX_DEFAULT_PROMPT}"`,
+				"--output-path output.mp4",
+			],
+			"Distilled LTX-2.5 pipeline (fast)",
+			{ hint: true },
+		),
+		_ltxRun(
+			"dfr_pipeline",
+			[
+				..._ltx25SplitArgs(dfr),
+				`--detailing-lora ${detailingDir}/${_LTX_DETAILING_LORA_FILE}`,
+				"--spatial-upscalings 1",
+				"--temporal-upscalings 1",
+				"--height 1088",
+				"--width 1920",
+				"--num-frames 121",
+				`--prompt "${_LTX_DEFAULT_PROMPT}"`,
+				"--output-path output.mp4",
+			],
+			"DFR pipeline (higher detail fidelity; optional temporal 2x/4x)",
+			{
+				footer: "# For 4K: --spatial-upscalings 2 --width 3840 --height 2176",
+				hint: true,
+			},
+		),
+	];
+}
+
+function _ltx23Snippets(model: ModelData, localDir: string, tags: string[]): string[] {
+	const install = _ltxInstall(false);
+	const download = _ltx23Download(model.id, localDir);
+	const loraArg = `--lora ${localDir}/<weights>.safetensors 1.0`;
+	const gemma = `--gemma-root ${_LTX_GEMMA3_ROOT}`;
+
 	if (tags.includes("ic-lora")) {
 		return [
 			install,
 			download,
-			`# Video-to-video with the IC-LoRA (runs on the distilled base model)
-uv run python -m ltx_pipelines.ic_lora \\
-    --distilled-checkpoint-path path/to/distilled_checkpoint.safetensors \\
-    --spatial-upsampler-path path/to/spatial_upsampler.safetensors \\
-    --gemma-root models/gemma-3-12b \\
-    --lora ${localDir}/<weights>.safetensors 1.0 \\
-    --video-conditioning reference.mp4 1.0 \\
-    --prompt "your prompt here" \\
-    --output-path output.mp4`,
+			_ltxRun(
+				"ic_lora",
+				[
+					"--distilled-checkpoint-path path/to/distilled_checkpoint.safetensors",
+					"--spatial-upsampler-path path/to/spatial_upsampler.safetensors",
+					gemma,
+					loraArg,
+					"--video-conditioning reference.mp4 1.0",
+					`--prompt "your prompt here"`,
+					"--output-path output.mp4",
+				],
+				"Video-to-video with the IC-LoRA (runs on the distilled base model)",
+			),
 		];
 	}
 
-	// Standard LoRA applied on top of the base pipeline.
 	if (tags.includes("lora")) {
 		return [
 			install,
 			download,
-			`# Text/image-to-video with the LoRA on the HQ two-stage base pipeline
-uv run python -m ltx_pipelines.ti2vid_two_stages_hq \\
-    --checkpoint-path path/to/checkpoint.safetensors \\
-    --distilled-lora path/to/distilled_lora.safetensors 0.8 \\
-    --spatial-upsampler-path path/to/spatial_upsampler.safetensors \\
-    --gemma-root models/gemma-3-12b \\
-    --lora ${localDir}/<weights>.safetensors 1.0 \\
-    --prompt "your prompt here" \\
-    --output-path output.mp4
-${imageToVideoHint}`,
+			_ltxRun(
+				"ti2vid_two_stages_hq",
+				[
+					"--checkpoint-path path/to/checkpoint.safetensors",
+					"--distilled-lora path/to/distilled_lora.safetensors 0.8",
+					"--spatial-upsampler-path path/to/spatial_upsampler.safetensors",
+					gemma,
+					loraArg,
+					`--prompt "your prompt here"`,
+					"--output-path output.mp4",
+				],
+				"Text/image-to-video with the LoRA on the HQ two-stage base pipeline",
+				{ hint: true },
+			),
 		];
 	}
 
-	// Base model: the fast (distilled) and HQ (two-stage) pipelines. Substitute the
-	// .safetensors filenames with the ones listed under this repo's "Files and versions".
 	return [
 		install,
 		download,
-		`# Fast pipeline (distilled model, no distilled LoRA needed)
-uv run python -m ltx_pipelines.distilled \\
-    --distilled-checkpoint-path ${localDir}/<distilled-checkpoint>.safetensors \\
-    --spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors \\
-    --gemma-root models/gemma-3-12b \\
-    --prompt "A beautiful sunset over the ocean" \\
-    --output-path output.mp4
-${imageToVideoHint}`,
-		`# HQ pipeline (two-stage, higher quality)
-uv run python -m ltx_pipelines.ti2vid_two_stages_hq \\
-    --checkpoint-path ${localDir}/<checkpoint>.safetensors \\
-    --distilled-lora ${localDir}/<distilled-lora>.safetensors 0.8 \\
-    --spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors \\
-    --gemma-root models/gemma-3-12b \\
-    --prompt "A beautiful sunset over the ocean" \\
-    --output-path output.mp4
-${imageToVideoHint}`,
+		_ltxRun(
+			"distilled",
+			[
+				`--distilled-checkpoint-path ${localDir}/<distilled-checkpoint>.safetensors`,
+				`--spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors`,
+				gemma,
+				`--prompt "${_LTX_DEFAULT_PROMPT}"`,
+				"--output-path output.mp4",
+			],
+			"Fast pipeline (distilled model, no distilled LoRA needed)",
+			{ hint: true },
+		),
+		_ltxRun(
+			"ti2vid_two_stages_hq",
+			[
+				`--checkpoint-path ${localDir}/<checkpoint>.safetensors`,
+				`--distilled-lora ${localDir}/<distilled-lora>.safetensors 0.8`,
+				`--spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors`,
+				gemma,
+				`--prompt "${_LTX_DEFAULT_PROMPT}"`,
+				"--output-path output.mp4",
+			],
+			"HQ pipeline (two-stage, higher quality)",
+			{ hint: true },
+		),
 	];
+}
+
+export const ltx = (model: ModelData): string[] => {
+	const localDir = `models/${nameWithoutNamespace(model.id)}`;
+	const tags = model.tags ?? [];
+	return _isLtx25Model(model) ? _ltx25Snippets(model, localDir, tags) : _ltx23Snippets(model, localDir, tags);
 };
 
 export const lightning_ir = (model: ModelData): string[] => {
@@ -1263,6 +1513,20 @@ from matanyone import InferenceCore
 processor = InferenceCore("${model.id}")`,
 ];
 
+export const memra = (model: ModelData): string[] => [
+	`# memra serves NVIDIA Blackwell workstation and consumer cards (sm_120a), with a
+# compile-gated Hopper lane. Prebuilt binaries need Linux x86_64 and driver 580+,
+# and no CUDA toolkit.
+curl -fsSL https://raw.githubusercontent.com/avifenesh/memra/main/tools/install.sh | sh`,
+
+	`# One chat-templated generation. In a repo with several GGUF files, append
+# :<substring> to choose one, for example hf:${model.id}:Q4_K_M
+MEMRA_CHAT=1 run-gen hf:${model.id} --prompt "Explain KV caches in one sentence."`,
+
+	`# Or an OpenAI-compatible server on 127.0.0.1:8080.
+MEMRA_MODELS="model=hf:${model.id}" memra-server`,
+];
+
 export const mesh_anything = (): string[] => [
 	`# Install from https://github.com/buaacyw/MeshAnything.git
 
@@ -1275,7 +1539,7 @@ model = MeshAnything(args)`,
 
 export const multimolecule = (model: ModelData): string[] => {
 	const widgetExample = model.widgetData?.[0] as WidgetExampleTextInput | undefined;
-	const exampleText = widgetExample?.text;
+	const exampleText = escapeStringForJson(widgetExample?.text ?? "");
 	const maskToken = model.mask_token ?? "<mask>";
 	const sequence = exampleText?.replace(maskToken, "A");
 
@@ -1342,9 +1606,17 @@ openasr transcribe audio.wav --model ${modelId}`,
 	];
 };
 
+export const opendde = (): string[] => [
+	`# pip install 'opendde[gpu]'
+# Checkpoints are fetched from the Hub into $OPENDDE_ROOT_DIR (default ~/.cache/opendde)
+opendde doctor
+opendde pred -i examples/input.json -o ./output -n opendde_v1`,
+];
+
 export const paddlenlp = (model: ModelData): string[] => {
-	if (model.config?.architectures?.[0]) {
-		const architecture = model.config.architectures[0];
+	const architecture = model.config?.architectures?.[0];
+	// interpolated as a Python class name, so a non-identifier is treated as absent
+	if (architecture && isValidIdentifier(architecture)) {
 		return [
 			[
 				`from paddlenlp.transformers import AutoTokenizer, ${architecture}`,
@@ -1533,6 +1805,28 @@ from renderformer import RenderFormerRenderingPipeline
 pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
 ];
 
+export const routee_powertrain = (model: ModelData): string[] => [
+	`# pip install routee.powertrain
+import pandas as pd
+import routee.powertrain as pt
+from routee.powertrain.registry import HFRegistry
+
+registry = HFRegistry(repo_id="${model.id}")
+
+# find a vehicle: filter by make, model, year, powertrain type, features, ...
+pt.query_available_models(make="tesla", model="model 3", registry=registry)
+
+# load one by its id: "<make>/<vehicle_slug>/<year>/<config_slug>"
+model = pt.load_model("tesla/model_3_bev/2022/rf_c3326385", registry=registry)
+
+links = pd.DataFrame({
+    "distance": [0.1, 0.2],  # miles
+    "speed_mph": [30, 55],
+    "grade_percent": [-2.0, 1.0],
+})
+model.predict(links)`,
+];
+
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
 	`from tensorflow_tts.inference import AutoProcessor, TFAutoModel
 
@@ -1602,7 +1896,7 @@ const skopsPickle = (model: ModelData, modelFile: string) => {
 from skops.hub_utils import download
 download("${model.id}", "path_to_folder")
 model = joblib.load(
-	"${modelFile}"
+	"${escapeStringForJson(modelFile)}"
 )
 # only load pickle files from sources you trust
 # read more about it here https://skops.readthedocs.io/en/stable/persistence.html`,
@@ -1616,7 +1910,7 @@ from skops.io import load
 download("${model.id}", "path_to_folder")
 # make sure model file is in skops format
 # if model is a pickle file, make sure it's from a source you trust
-model = load("path_to_folder/${modelFile}")`,
+model = load("path_to_folder/${escapeStringForJson(modelFile)}")`,
 	];
 };
 
@@ -1752,6 +2046,65 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 		return [widgetExample.source_sentence, ...widgetExample.sentences];
 	}
 }
+
+export const aneforge = (model: ModelData): string[] => {
+	const header = "# Run this model on the Apple Neural Engine, without CoreML.";
+	if (model.pipeline_tag === "text-generation") {
+		return [
+			`${header}
+import aneforge as af
+from transformers import AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained("${model.id}")
+model = af.load_llm("${model.id}")            # prefill + resident-KV-cache decode on the ANE
+ids = tok.encode("The Neural Engine is")
+print(tok.decode(model.generate(ids, max_new_tokens=20)))`,
+		];
+	}
+	if (model.pipeline_tag === "zero-shot-image-classification" || model.tags.includes("clip")) {
+		return [
+			`${header}
+import aneforge as af
+
+clip = af.load_clip("${model.id}")
+labels = clip.classify(image, ["a photo of a cat", "a photo of a dog"])  # image: a PIL.Image; zero-shot (label, prob)`,
+		];
+	}
+	if (model.tags.includes("resnet")) {
+		return [
+			`${header}
+import aneforge as af
+
+net = af.load_resnet("${model.id}")             # BatchNorm folded into the preceding conv at load
+logits = net(pixels)                          # pixels: a preprocessed [1, 3, 224, 224] float32 batch -> [1, 1000]`,
+		];
+	}
+	if (model.pipeline_tag === "image-classification") {
+		return [
+			`${header}
+import aneforge as af
+
+vit = af.load_vit("${model.id}")
+labels = vit.classify(image)                  # image: a PIL.Image; returns top-k (label, logit)`,
+		];
+	}
+	if (model.pipeline_tag === "automatic-speech-recognition") {
+		return [
+			`${header}
+import aneforge as af
+
+asr = af.load_whisper("${model.id}")
+text = asr.transcribe(audio)                  # audio: a 16 kHz mono float32 waveform`,
+		];
+	}
+	return [
+		`# Run this model's encoder on the Apple Neural Engine, without CoreML.
+from aneforge.sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("${model.id}")
+embeddings = model.encode(["Hello from the Neural Engine"], normalize_embeddings=True)`,
+	];
+};
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
@@ -1894,11 +2247,18 @@ const hasChatTemplate = (model: ModelData): boolean =>
 	model.config?.processor_config?.chat_template !== undefined ||
 	model.config?.chat_template_jinja !== undefined;
 
+// interpolated as a Python class name (and into RegExps in pruna_transformers), so a non-identifier is treated as absent
+const autoModelClass = (model: ModelData): string | undefined => {
+	const autoModel = model.transformersInfo?.auto_model;
+	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
+};
+
 export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
+	const auto_model = autoModelClass(model) ?? "AutoModel";
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
 	const autoSnippet = [];
@@ -1911,10 +2271,10 @@ export const transformers = (model: ModelData): string[] => {
 					: "processor";
 		autoSnippet.push(
 			"# Load model directly",
-			`from transformers import ${info.processor}, ${info.auto_model}`,
+			`from transformers import ${info.processor}, ${auto_model}`,
 			"",
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
+			`model = ${auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
@@ -1950,8 +2310,8 @@ export const transformers = (model: ModelData): string[] => {
 	} else {
 		autoSnippet.push(
 			"# Load model directly",
-			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
+			`from transformers import ${auto_model}`,
+			`model = ${auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 	}
 
@@ -2054,7 +2414,7 @@ export const peft = (model: ModelData): string[] => {
 		`from peft import PeftModel
 from transformers import AutoModelFor${pefttask}
 
-base_model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
+base_model = AutoModelFor${pefttask}.from_pretrained("${escapeStringForJson(peftBaseModel)}")
 model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
 };
@@ -2268,15 +2628,30 @@ model = BiRefNet.from_pretrained("${model.id}")`,
 
 export const nobg = (model: ModelData): string[] => {
 	const installSnippet = `pip install nobg`;
+	// we check model tags and if it supports prompts we show an example for it, else we show the default example without prompts
+	const predictCall = model.tags.includes("promptable")
+		? `cutout = model.predict(processor, "image.jpg", "prompt")`
+		: `cutout = model.predict(processor, "image.jpg")`;
+	// snippet using the predict method
+	const predictSnippet = `# Option 1: use via the predict method
 
-	const exampleSnippet = `import torch
+from nobg import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("${model.id}").eval()
+processor = AutoProcessor.from_pretrained("${model.id}")
+
+${predictCall}`;
+	// snippet using the model and processor directly
+	const manualSnippet = `# Option 2: use the model and processor directly
+
+import torch
 from loadimg import load_img
 from nobg import AutoModel, AutoProcessor
 
 model = AutoModel.from_pretrained("${model.id}").eval()
 processor = AutoProcessor.from_pretrained("${model.id}")
 
-image = load_img("input.jpg").convert("RGB")
+image = load_img("image.jpg").convert("RGB")
 inputs = processor(image, return_tensors="pt")
 
 with torch.no_grad():
@@ -2285,7 +2660,7 @@ with torch.no_grad():
 alpha = processor.post_process_alpha_matting(outputs, target_sizes=[(image.height, image.width)])[0]
 processor.cutout(image, alpha).save("output.png")`;
 
-	return [installSnippet, exampleSnippet];
+	return [installSnippet, predictSnippet, manualSnippet];
 };
 
 export const supertonic = (): string[] => [
@@ -2485,7 +2860,7 @@ const pruna_diffusers = (model: ModelData): string[] => {
 };
 
 const pruna_transformers = (model: ModelData): string[] => {
-	const info = model.transformersInfo;
+	const auto_model = autoModelClass(model);
 	const transformersSnippets = transformers(model);
 
 	// Replace pipeline with PrunaModel
@@ -2496,13 +2871,13 @@ const pruna_transformers = (model: ModelData): string[] => {
 	);
 
 	// Additional cleanup if auto_model info is available
-	if (info?.auto_model) {
+	if (auto_model) {
 		processedSnippets = processedSnippets.map((snippet) =>
 			snippet
-				.replace(new RegExp(`from transformers import ${info.auto_model}\n?`, "g"), "")
-				.replace(new RegExp(`${info.auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
-				.replace(new RegExp(`^.*from.*import.*(, *${info.auto_model})+.*$`, "gm"), (line) =>
-					line.replace(new RegExp(`, *${info.auto_model}`, "g"), ""),
+				.replace(new RegExp(`from transformers import ${auto_model}\n?`, "g"), "")
+				.replace(new RegExp(`${auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
+				.replace(new RegExp(`^.*from.*import.*(, *${auto_model})+.*$`, "gm"), (line) =>
+					line.replace(new RegExp(`, *${auto_model}`, "g"), ""),
 				),
 		);
 	}
