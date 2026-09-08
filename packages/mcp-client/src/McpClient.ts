@@ -32,6 +32,7 @@ export class McpClient {
 
 	protected model: string;
 	private clients: Map<ToolName, Client> = new Map();
+	private connectedClients: Set<Client> = new Set();
 	public readonly availableTools: ChatCompletionInputTool[] = [];
 
 	constructor({
@@ -90,6 +91,7 @@ export class McpClient {
 		}
 		const mcp = new Client({ name: "@huggingface/mcp-client", version: packageVersion });
 		await mcp.connect(transport);
+		this.connectedClients.add(mcp);
 
 		const toolsResult = await mcp.listTools();
 		debug(
@@ -249,8 +251,7 @@ export class McpClient {
 	}
 
 	async cleanup(): Promise<void> {
-		const clients = new Set(this.clients.values());
-		await Promise.all([...clients].map((client) => client.close()));
+		await Promise.all([...this.connectedClients].map((client) => client.close()));
 	}
 
 	async [Symbol.dispose](): Promise<void> {
