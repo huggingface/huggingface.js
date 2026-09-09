@@ -59,8 +59,13 @@ export function slice<T>(array: T[], start?: number, stop?: number, step = 1): T
  * @param value The string to title case.
  * @returns The title cased string.
  */
-// Jinja splits words on Python's `([-\s({\[<]+)`. The class is spelled out because JS and
-// Python disagree on `\s`: JS misses U+001C-U+001F and U+0085, and adds U+FEFF.
+// Jinja splits words on `([-\s({\[<]+)`:
+// https://github.com/pallets/jinja/blob/3.1.6/src/jinja2/filters.py#L328
+// `\s` is spelled out because the two languages define it differently. Python's `\s` matches
+// exactly what `str.isspace()` does — an "Other"/"Separator" category, or bidirectional class
+// WS, B or S (https://docs.python.org/3/library/stdtypes.html#str.isspace) — so it covers
+// U+001C-U+001F (bidi B/S) and U+0085 (bidi B). ECMAScript's is WhiteSpace + LineTerminator
+// (https://tc39.es/ecma262/#sec-white-space), which omits those four and adds U+FEFF.
 // eslint-disable-next-line no-control-regex -- Python's `\s` matches these separators, so Jinja splits on them.
 const WORD_SEPARATOR = /([-\t\n\v\f\r\x1c-\x1f \x85\xa0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000({[<]+)/;
 
