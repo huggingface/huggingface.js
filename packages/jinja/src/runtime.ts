@@ -1832,9 +1832,11 @@ export class Interpreter {
 				(object instanceof ObjectValue ? object.builtins.get(property.value) : undefined);
 		} else if (object instanceof ArrayValue || object instanceof StringValue) {
 			if (property instanceof IntegerValue) {
-				value = object.value.at(property.value);
 				if (object instanceof StringValue) {
-					value = new StringValue(object.value.at(property.value));
+					const character = object.value.at(property.value);
+					value = character === undefined ? undefined : new StringValue(character);
+				} else {
+					value = object.value.at(property.value);
 				}
 			} else if (property instanceof StringValue) {
 				value = object.builtins.get(property.value);

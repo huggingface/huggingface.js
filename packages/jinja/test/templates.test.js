@@ -6382,6 +6382,16 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Member access", () => {
+		it.each([3, -4])("returns undefined for out-of-range string index %i", (index) => {
+			const template = new Template(
+				`[{{ "abc"[${index}] }}]|{{ "abc"[${index}] | default("missing") }}|{{ "abc"[${index}] is defined }}`,
+			);
+
+			expect(template.render()).toBe("[]|missing|false");
+		});
+	});
+
 	describe("Namespaces", () => {
 		it("supports namespace attributes in collection filters", () => {
 			const template = new Template(`{%- set a = namespace(x=2, active=true, inner=namespace(value=2)) -%}
