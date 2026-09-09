@@ -82,6 +82,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.allennlp,
 		filter: true,
 	},
+	aneforge: {
+		prettyLabel: "ANEForge",
+		repoName: "ANEForge",
+		repoUrl: "https://github.com/sbryngelson/ANEForge",
+		docsUrl: "https://aneforge.readthedocs.io",
+		snippets: snippets.aneforge,
+		filter: false,
+	},
 	anemoi: {
 		prettyLabel: "AnemoI",
 		repoName: "AnemoI",
@@ -761,6 +769,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "ZeroModels",
 		repoUrl: "https://github.com/IMvision12/ZeroModels",
 		docsUrl: "https://imvision12.github.io/ZeroModels/",
+		snippets: snippets.zeromodels,
 		countDownloads: `path:"model.weights.h5" OR path:"model.weights.json"`,
 		filter: false,
 	},
@@ -1627,7 +1636,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "timesfm",
 		repoUrl: "https://github.com/google-research/timesfm",
 		filter: false,
-		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint" OR path:"checkpoints/checkpoint_2150000/state/checkpoint" OR path_extension:"ckpt"`,
+		countDownloads: `path:"config.json" OR path:"torch_model.ckpt" OR path:"checkpoints/checkpoint_1100000/state/checkpoint" OR path:"checkpoints/checkpoint_2150000/state/checkpoint"`,
 	},
 	"timee-ts": {
 		prettyLabel: "timee-ts",

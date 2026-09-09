@@ -83,15 +83,13 @@ for await (const progressEvent of await hub.uploadFilesWithProgress({
 }
 
 // Edit a file in place, without downloading/uploading its unchanged data
-const originalFile = await hub.downloadFile({ repo, path: "myfile.bin", accessToken: "hf_..." });
-await hub.commit({
+const file = await hub.downloadFile({ repo, path: "myfile.bin", accessToken: "hf_..." });
+await hub.uploadFile({
   repo,
   accessToken: "hf_...",
-  title: "edit myfile.bin",
-  operations: [{
-    operation: "edit",
+  file: {
     path: "myfile.bin",
-    originalContent: originalFile,
+    originalContent: file,
     edits: [{
       // Replace bytes [0, 4)
       start: 0,
@@ -99,11 +97,11 @@ await hub.commit({
       content: new Blob(["new prefix"])
     }, {
       // Append at the end
-      start: originalFile.size,
-      end: originalFile.size,
+      start: file.size,
+      end: file.size,
       content: new Blob(["suffix"])
     }]
-  }]
+  }
 });
 
 await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});

@@ -910,6 +910,21 @@ model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
+export const zeromodels = (model: ModelData): string[] => [
+	`# pip install -U zeromodels
+# ZeroModels is pure Keras 3, so pick a backend: "jax", "torch" or "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "jax"
+
+from zeromodels import AutoZModel
+
+# AutoZModel reads the repo's model_type and loads the matching class.
+# For a task head use the matching loader, e.g. AutoZMImageClassify / AutoZMDetect /
+# AutoZMSemanticSegment / AutoZMTextGenerate (see zeromodels.auto).
+model = AutoZModel.from_weights("${model.id}")
+`,
+];
+
 const _keras_hub_causal_lm = (modelId: string): string => `
 import keras_hub
 
@@ -2031,6 +2046,65 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 		return [widgetExample.source_sentence, ...widgetExample.sentences];
 	}
 }
+
+export const aneforge = (model: ModelData): string[] => {
+	const header = "# Run this model on the Apple Neural Engine, without CoreML.";
+	if (model.pipeline_tag === "text-generation") {
+		return [
+			`${header}
+import aneforge as af
+from transformers import AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained("${model.id}")
+model = af.load_llm("${model.id}")            # prefill + resident-KV-cache decode on the ANE
+ids = tok.encode("The Neural Engine is")
+print(tok.decode(model.generate(ids, max_new_tokens=20)))`,
+		];
+	}
+	if (model.pipeline_tag === "zero-shot-image-classification" || model.tags.includes("clip")) {
+		return [
+			`${header}
+import aneforge as af
+
+clip = af.load_clip("${model.id}")
+labels = clip.classify(image, ["a photo of a cat", "a photo of a dog"])  # image: a PIL.Image; zero-shot (label, prob)`,
+		];
+	}
+	if (model.tags.includes("resnet")) {
+		return [
+			`${header}
+import aneforge as af
+
+net = af.load_resnet("${model.id}")             # BatchNorm folded into the preceding conv at load
+logits = net(pixels)                          # pixels: a preprocessed [1, 3, 224, 224] float32 batch -> [1, 1000]`,
+		];
+	}
+	if (model.pipeline_tag === "image-classification") {
+		return [
+			`${header}
+import aneforge as af
+
+vit = af.load_vit("${model.id}")
+labels = vit.classify(image)                  # image: a PIL.Image; returns top-k (label, logit)`,
+		];
+	}
+	if (model.pipeline_tag === "automatic-speech-recognition") {
+		return [
+			`${header}
+import aneforge as af
+
+asr = af.load_whisper("${model.id}")
+text = asr.transcribe(audio)                  # audio: a 16 kHz mono float32 waveform`,
+		];
+	}
+	return [
+		`# Run this model's encoder on the Apple Neural Engine, without CoreML.
+from aneforge.sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("${model.id}")
+embeddings = model.encode(["Hello from the Neural Engine"], normalize_embeddings=True)`,
+	];
+};
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";

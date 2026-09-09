@@ -11,7 +11,7 @@ import {
 	parseTotalParameters,
 	SafetensorParseError,
 } from "./parse-safetensors-metadata";
-import type { Dtype, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
+import type { Dtype, MlxQuantizationConfig, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -195,32 +195,38 @@ describe("parseSafetensorsMetadata", () => {
 		 * and a fetch that serves it (including the `Range: bytes=0-0` probe `WebBlob.create`
 		 * uses to learn the file size).
 		 */
-		const fetchForFile = (header: Record<string, unknown>, dataBytes = 0): typeof fetch => {
+		const fetchForFile = (
+			header: Record<string, unknown>,
+			dataBytes = 0,
+			config?: Record<string, unknown>,
+		): typeof fetch => {
 			const headerBytes = new TextEncoder().encode(JSON.stringify(header));
 			const file = new Uint8Array(8 + headerBytes.length + dataBytes);
 			new DataView(file.buffer).setBigUint64(0, BigInt(headerBytes.length), true);
 			file.set(headerBytes, 8);
+			const configFile = config ? new TextEncoder().encode(JSON.stringify(config)) : undefined;
 			return (async (input: RequestInfo | URL, init?: RequestInit) => {
 				const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-				if (!url.endsWith(".safetensors")) {
-					// config.json, the sharded index, existence probes... — `downloadFile` treats a
-					// 404 as "not found" only when the Hub's X-Error-Code says so.
+				const resource = url.endsWith(".safetensors") ? file : url.endsWith("config.json") ? configFile : undefined;
+				if (!resource) {
+					// The sharded index, existence probes... — `downloadFile` treats a 404 as "not
+					// found" only when the Hub's X-Error-Code says so.
 					return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
 				}
 				const range = new Headers(init?.headers).get("range");
 				if (range?.startsWith("bytes=")) {
 					const [start, endRaw] = range.slice("bytes=".length).split("-");
 					const startByte = Number(start);
-					const endByte = endRaw === "" ? file.length - 1 : Number(endRaw);
-					return new Response(file.slice(startByte, endByte + 1), {
+					const endByte = endRaw === "" ? resource.length - 1 : Math.min(Number(endRaw), resource.length - 1);
+					return new Response(resource.slice(startByte, endByte + 1), {
 						status: 206,
 						headers: {
-							"content-range": `bytes ${startByte}-${endByte}/${file.length}`,
+							"content-range": `bytes ${startByte}-${endByte}/${resource.length}`,
 							etag: '"hermetic-test-file"',
 						},
 					});
 				}
-				return new Response(file, { status: 200, headers: { etag: '"hermetic-test-file"' } });
+				return new Response(resource, { status: 200, headers: { etag: '"hermetic-test-file"' } });
 			}) as typeof fetch;
 		};
 
@@ -309,6 +315,113 @@ describe("parseSafetensorsMetadata", () => {
 			assert(!parse.sharded);
 			assert.deepStrictEqual(parse.parameterCount, { F32: 200 });
 			assert.strictEqual(parse.parameterTotal, 200);
+		});
+
+		it("honors total_parameters for packed MLX weights without weakening the metadata cap", async () => {
+			const quantization = { group_size: 64, bits: 8, mode: "affine" };
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "mlx", total_parameters: "210" },
+					"quantized.weight": { dtype: "U32", shape: [10, 5], data_offsets: [0, 200] },
+					"quantized.scales": { dtype: "BF16", shape: [10, 2], data_offsets: [200, 240] },
+					"quantized.biases": { dtype: "BF16", shape: [10, 2], data_offsets: [240, 280] },
+					"norm.weight": { dtype: "BF16", shape: [10], data_offsets: [280, 300] },
+				},
+				300,
+				{ quantization, quantization_config: quantization },
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/packed-mlx-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			// 50 packed U32 containers hold 200 8-bit weights. Plural scales/biases are
+			// quantization state; the BF16 norm remains a real parameter.
+			assert.deepStrictEqual(parse.parameterCount, { U32: 200, BF16: 10 });
+			assert.strictEqual(parse.parameterTotal, 210);
+		});
+
+		it("caps inflated total_parameters at the MLX-aware logical count", async () => {
+			const quantization = { group_size: 64, bits: 8, mode: "affine" };
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "mlx", total_parameters: "999000000000" },
+					"quantized.weight": { dtype: "U32", shape: [10, 5], data_offsets: [0, 200] },
+					"quantized.scales": { dtype: "BF16", shape: [10, 2], data_offsets: [200, 240] },
+					"quantized.biases": { dtype: "BF16", shape: [10, 2], data_offsets: [240, 280] },
+					"norm.weight": { dtype: "BF16", shape: [10], data_offsets: [280, 300] },
+				},
+				300,
+				{ quantization, quantization_config: quantization },
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/inflated-packed-mlx-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { U32: 200, BF16: 10 });
+			assert.strictEqual(parse.parameterTotal, 210);
+		});
+
+		it("does not relabel another top-level quantizer as MLX", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt" },
+					"quantized.qweight": { dtype: "I32", shape: [10], data_offsets: [0, 40] },
+					"quantized.scales": { dtype: "F16", shape: [2], data_offsets: [40, 44] },
+				},
+				44,
+				{
+					quantization: { quant_method: "gptq", bits: 2, group_size: 64, mode: "affine" },
+					quantization_config: { quant_method: "gptq", bits: 4 },
+				},
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/gptq-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { I32: 80 });
+		});
+
+		it("accepts valid per-module MLX overrides when the top-level tuple is only a placeholder", async () => {
+			const quantization = {
+				group_size: 16,
+				bits: 4,
+				mode: "affine",
+				nvfp4_layer: { group_size: 16, bits: 4, mode: "nvfp4" },
+				affine_layer: { group_size: 64, bits: 8, mode: "affine" },
+			};
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "mlx" },
+					"nvfp4_layer.weight": { dtype: "U32", shape: [12], data_offsets: [0, 48] },
+					"nvfp4_layer.scales": { dtype: "U8", shape: [3], data_offsets: [48, 51] },
+					"affine_layer.weight": { dtype: "U32", shape: [24], data_offsets: [51, 147] },
+					"affine_layer.scales": { dtype: "BF16", shape: [3], data_offsets: [147, 153] },
+					"affine_layer.biases": { dtype: "BF16", shape: [3], data_offsets: [153, 159] },
+				},
+				159,
+				{ quantization, quantization_config: quantization },
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/mixed-mlx-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { U32: 192 });
 		});
 
 		it("skips the offsets check (rather than guessing) when the file size is unknown", () => {
@@ -403,6 +516,145 @@ describe("parseSafetensorsMetadata", () => {
 			);
 
 			assert.deepStrictEqual(parameterCount, { F32: 12 });
+		});
+	});
+
+	describe("MLX packed weights", () => {
+		const tensor = (dtype: Dtype, shape: number[]): TensorInfo => ({ dtype, shape, data_offsets: [0, 0] });
+
+		for (const [bits, storedElements] of [
+			[4, 12],
+			[6, 18],
+			[8, 24],
+		] as const) {
+			it(`reports the same logical count for ${bits}-bit U32 weights`, () => {
+				const parameterCount = computeNumOfParamsByDtypeSingleFile(
+					{
+						"quantized.weight": tensor("U32", [storedElements]),
+						"quantized.scales": tensor("BF16", [3]),
+						"quantized.biases": tensor("BF16", [3]),
+						"quantized.bias": tensor("BF16", [2]),
+						"dense.weight": tensor("BF16", [5]),
+					},
+					{ quant_method: "mlx", mode: "affine", bits, group_size: 64 },
+				);
+
+				// Singular `.bias` is learned; only MLX's plural `.biases` is quantization state.
+				assert.deepStrictEqual(parameterCount, { U32: 96, BF16: 7 });
+			});
+		}
+
+		it("uses per-module bit widths and leaves explicitly unquantized modules alone", () => {
+			const quantConfig = {
+				quant_method: "mlx",
+				mode: "affine",
+				bits: 8,
+				group_size: 64,
+				four_bit: { bits: 4 },
+				dense: false,
+			};
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"four_bit.weight": tensor("U32", [12]),
+					"four_bit.scales": tensor("BF16", [1]),
+					"four_bit.biases": tensor("BF16", [1]),
+					"dense.weight": tensor("U32", [12]),
+				},
+				quantConfig,
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 108 });
+		});
+
+		it("applies MLX defaults independently inside partial per-module overrides", () => {
+			const quantConfig: MlxQuantizationConfig = {
+				quant_method: "mlx",
+				mode: "affine",
+				bits: 8,
+				group_size: 64,
+				partial_affine: { group_size: 32 },
+				partial_mxfp4: { mode: "mxfp4" },
+			};
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"partial_affine.weight": tensor("U32", [12]),
+					"partial_affine.scales": tensor("BF16", [1]),
+					"partial_affine.biases": tensor("BF16", [1]),
+					"partial_mxfp4.weight": tensor("U32", [12]),
+					"partial_mxfp4.scales": tensor("U8", [1]),
+				},
+				quantConfig,
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 192 });
+		});
+
+		it("does not trust explicit overrides without their serialized quantization state", () => {
+			const quantConfig: MlxQuantizationConfig = {
+				quant_method: "mlx",
+				mode: "affine",
+				bits: 4,
+				group_size: 64,
+				quantized: { bits: 4 },
+			};
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{ "quantized.weight": tensor("U32", [12]) },
+				quantConfig,
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 12 });
+		});
+
+		it("keeps orphan plural tensors that do not belong to a packed module", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"quantized.weight": tensor("U32", [12]),
+					"quantized.scales": tensor("BF16", [3]),
+					"quantized.biases": tensor("BF16", [3]),
+					"learned.scales": tensor("BF16", [4]),
+					"learned.biases": tensor("BF16", [5]),
+				},
+				{ quant_method: "mlx", mode: "affine", bits: 4, group_size: 64 },
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 96, BF16: 9 });
+		});
+
+		it("only treats plural biases as affine quantization state", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"quantized.weight": tensor("U32", [12]),
+					"quantized.scales": tensor("U8", [3]),
+					"quantized.biases": tensor("BF16", [4]),
+				},
+				{ quant_method: "mlx", mode: "mxfp4", bits: 4, group_size: 32 },
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 96, BF16: 4 });
+		});
+
+		it("does not inflate weights for unsupported bit widths", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"quantized.weight": tensor("U32", [12]),
+					"quantized.scales": tensor("BF16", [3]),
+				},
+				{ quant_method: "mlx", mode: "affine", bits: 1, group_size: 64 },
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 12, BF16: 3 });
+		});
+
+		it("ignores malformed non-string modes", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"quantized.weight": tensor("U32", [12]),
+					"quantized.scales": tensor("BF16", [3]),
+				},
+				{ quant_method: "mlx", mode: 1 as unknown as string, bits: 4, group_size: 64 },
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 12, BF16: 3 });
 		});
 	});
 
