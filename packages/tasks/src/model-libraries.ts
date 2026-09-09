@@ -342,6 +342,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
 	},
+	coreai: {
+		prettyLabel: "Core AI",
+		repoName: "coreai-models",
+		repoUrl: "https://github.com/apple/coreai-models",
+		docsUrl: "https://developer.apple.com/documentation/coreai",
+		snippets: snippets.coreai,
+		filter: false,
+		countDownloads: `path_extension:"mlirb"`,
+	},
 	cortiq: {
 		prettyLabel: "cortiq",
 		repoName: "cortiq",
