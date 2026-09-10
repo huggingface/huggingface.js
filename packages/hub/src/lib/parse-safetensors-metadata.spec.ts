@@ -317,6 +317,62 @@ describe("parseSafetensorsMetadata", () => {
 			assert.strictEqual(parse.parameterTotal, 200);
 		});
 
+		it.each([
+			{
+				location: "quantization_config",
+				config: { quantization_config: { quant_method: "fp8", expert_dtype: "fp4" } },
+			},
+			{
+				location: "text_config.quantization_config",
+				config: { text_config: { quantization_config: { quant_method: "fp8", expert_dtype: "fp4" } } },
+			},
+			{
+				location: "the model config",
+				config: { expert_dtype: "fp4", quantization_config: { quant_method: "fp8" } },
+			},
+			{
+				location: "text_config",
+				config: { text_config: { expert_dtype: "fp4", quantization_config: { quant_method: "fp8" } } },
+			},
+		])("reads expert_dtype from $location when counting packed weights", async ({ config }) => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", total_parameters: "30" },
+					"model.layers.0.mlp.experts.0.up_proj.weight": {
+						dtype: "I8",
+						shape: [2, 4],
+						data_offsets: [0, 8],
+					},
+					"model.layers.0.self_attn.q_proj.weight": {
+						dtype: "F8_E4M3",
+						shape: [2, 4],
+						data_offsets: [8, 16],
+					},
+					"model.layers.0.mlp.experts.0.up_proj.weight_scale_inv": {
+						dtype: "F8_E8M0",
+						shape: [1],
+						data_offsets: [16, 17],
+					},
+					"model.engram.embedding.weight": { dtype: "I8", shape: [2, 2], data_offsets: [17, 21] },
+					"model.norm.weight": { dtype: "BF16", shape: [2], data_offsets: [21, 25] },
+				},
+				25,
+				config,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/fp8-model-with-fp4-experts",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			// Only the packed experts expand: 8 bytes hold 16 FP4 parameters. The Engram
+			// embedding and attention retain their original counts, and block scales are excluded.
+			assert.deepStrictEqual(parse.parameterCount, { I8: 20, F8_E4M3: 8, BF16: 2 });
+			assert.strictEqual(parse.parameterTotal, 30);
+		});
+
 		it("honors total_parameters for packed MLX weights without weakening the metadata cap", async () => {
 			const quantization = { group_size: 64, bits: 8, mode: "affine" };
 			const fetch = fetchForFile(
@@ -778,6 +834,22 @@ describe("parseSafetensorsMetadata", () => {
 				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, "fp4"), 2);
 			});
 
+			it("reads the expert width from quantization_config for direct callers", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", { ...fp8, expert_dtype: "fp4" }), 2);
+			});
+
+			it("prefers the quantizer's expert width over the legacy model-level fallback", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", { ...fp8, expert_dtype: "fp8" }, "fp4"), 1);
+			});
+
+			it.each([4, {}, null])("ignores a malformed expert_dtype (%j)", (expertDtype) => {
+				// Config is parsed from untrusted JSON, which may not match the TypeScript interface.
+				assert.strictEqual(
+					getQuantizationMultiplier(EXPERT, "I8", { ...fp8, expert_dtype: expertDtype as unknown as string }),
+					1,
+				);
+			});
+
 			it("leaves shared experts alone — they're dense, not routed", () => {
 				const shared = "model.layers.0.ffn.shared_experts.w1.weight";
 				assert.strictEqual(getQuantizationMultiplier(shared, "I8", fp8, "fp4"), 1);
@@ -1035,5 +1107,31 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 1_598_839_674_782);
 		// the F8_E8M0 block scales (49_150_268_416) must not appear at all
 		assert.strictEqual(parse.parameterCount["F8_E8M0"], undefined);
+	});
+
+	it("counts fp4 experts declared inside quantization_config (deepseek-ai/DeepSeek-V4.1-Flash)", async () => {
+		// V4.1 moved expert_dtype into quantization_config. Ignoring it counted the packed I8
+		// expert weights once per byte, reporting 484.620B instead of 763.205B for the checkpoint.
+		// The card's 552B is the backbone (551.566B), excluding Engram (196.929B), DSpark
+		// draft weights (14.225B), and the vision encoder/projector (0.485B).
+		const parse = await parseSafetensorsMetadata({
+			repo: "deepseek-ai/DeepSeek-V4.1-Flash",
+			revision: "df42c109f1defefcbfcedbe7d905718a12266e40",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 48);
+		assert.deepStrictEqual(
+			parse.headers["model-00003-of-00048.safetensors"]["layers.0.ffn.experts.0.w1.weight"].shape,
+			[2304, 2560],
+		);
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 1_976_441_856,
+			F32: 42_307_282,
+			F8_E4M3: 204_015_223_296,
+			I8: 557_171_343_360, // 278_585_671_680 packed bytes x 2
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 763_205_315_794);
 	});
 });
