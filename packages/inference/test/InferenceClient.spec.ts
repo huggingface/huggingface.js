@@ -2434,4 +2434,92 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT,
 	);
+	describe.concurrent(
+		"LambdaQ",
+		() => {
+			const client = new InferenceClient(env.HF_LAMBDAQ_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING.lambdaq = {
+				"deepseek-ai/DeepSeek-V3.2": {
+					provider: "lambdaq",
+					hfModelId: "deepseek-ai/DeepSeek-V3.2",
+					providerId: "deepseek-v3.2",
+					status: "live",
+					task: "conversational",
+				},
+				"stabilityai/sdxl-turbo": {
+					provider: "lambdaq",
+					hfModelId: "stabilityai/sdxl-turbo",
+					providerId: "sdxl-turbo",
+					status: "live",
+					task: "text-to-image",
+				},
+				"hexgrad/Kokoro-82M": {
+					provider: "lambdaq",
+					hfModelId: "hexgrad/Kokoro-82M",
+					providerId: "kokoro-82m",
+					status: "live",
+					task: "text-to-speech",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-V3.2",
+					provider: "lambdaq",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					max_tokens: 10,
+				});
+				if (res.choices && res.choices.length > 0) {
+					expect(res.choices[0].message?.content).toMatch(/(to )?(two|2)/i);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-V3.2",
+					provider: "lambdaq",
+					messages: [{ role: "user", content: "Count from 1 to 3" }],
+					max_tokens: 20,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content ?? "";
+					}
+				}
+				expect(out).toMatch(/1[\s\S]*2[\s\S]*3/);
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "deepseek-ai/DeepSeek-V3.2",
+					provider: "lambdaq",
+					inputs: "Paris is",
+					temperature: 0,
+					max_new_tokens: 8,
+				});
+				expect(res.generated_text.length).toBeGreaterThan(0);
+			});
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "stabilityai/sdxl-turbo",
+					provider: "lambdaq",
+					inputs: "award winning high resolution photo of a giant tortoise",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToSpeech", async () => {
+				const res = await client.textToSpeech({
+					model: "hexgrad/Kokoro-82M",
+					provider: "lambdaq",
+					inputs: "Hello there, this is a test.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		TIMEOUT,
+	);
 });
