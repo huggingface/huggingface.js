@@ -19,13 +19,45 @@ interface WebBlobCreateOptions {
 export class WebBlob extends Blob {
 	static async create(url: URL, opts?: WebBlobCreateOptions): Promise<Blob> {
 		const customFetch = opts?.fetch ?? fetch;
+		const cacheBelow = opts?.cacheBelow ?? 1_000_000;
 		const response = await customFetch(url, { method: "HEAD" });
+		let size = Number(response.headers.get("content-length"));
+		let contentType = response.headers.get("content-type") || "";
+		let supportRange = response.headers.get("accept-ranges") === "bytes";
+		const knownSize = Number.isFinite(size) && size > 0;
 
-		const size = Number(response.headers.get("content-length"));
-		const contentType = response.headers.get("content-type") || "";
-		const supportRange = response.headers.get("accept-ranges") === "bytes";
+		// A HEAD response can lack both `content-length` and `accept-ranges` (see #2118, which replaced the
+		// HEAD call in the packages/hub copy of this file for that reason), and neither absence means the
+		// server cannot serve ranges. Probe only when the answer can change the outcome: HEAD gave no usable
+		// size, or it withheld `accept-ranges` for a resource large enough to have taken the lazy path.
+		if (!knownSize || (!supportRange && size >= cacheBelow)) {
+			const probe = await customFetch(url, { headers: { Range: "bytes=0-0" } });
+			const contentRange = probe.headers.get("content-range");
+			const totalMatch = contentRange?.match(/^bytes\s+0-0\/(\d+)$/i);
 
-		if (!supportRange || size < (opts?.cacheBelow ?? 1_000_000)) {
+			if (probe.status === 200) {
+				// The server ignored `Range` and sent the whole body already.
+				return await probe.blob();
+			}
+
+			if (probe.status === 416 && contentRange?.match(/^bytes\s+\*\/0$/i)) {
+				await probe.body?.cancel();
+				return new Blob([], { type: probe.headers.get("content-type") || contentType });
+			}
+
+			if (probe.status !== 206 || !totalMatch || Number(totalMatch[1]) <= 0) {
+				// Nothing conclusive came back: keep the previous behaviour and GET the whole thing.
+				await probe.body?.cancel();
+				return await (await customFetch(url)).blob();
+			}
+
+			size = Number(totalMatch[1]);
+			contentType = probe.headers.get("content-type") || contentType;
+			supportRange = true;
+			await probe.body?.cancel();
+		}
+
+		if (!supportRange || size < cacheBelow) {
 			return await (await customFetch(url)).blob();
 		}
 
