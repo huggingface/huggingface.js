@@ -15,13 +15,13 @@ export async function* chatCompletionStream(
 ): AsyncGenerator<ChatCompletionStreamOutput> {
 	let providerHelper: ConversationalTaskHelper & TaskProviderHelper;
 	if (args.endpointUrl) {
-		const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+		const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 		providerHelper = getProviderHelper(provider, "conversational");
 	} else if (!args.provider || args.provider === "auto") {
 		// Special case: we have a dedicated auto-router for conversational models. No need to fetch provider mapping.
 		providerHelper = new AutoRouterConversationalTask();
 	} else {
-		const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+		const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 		providerHelper = getProviderHelper(provider, "conversational");
 	}
 	yield* innerStreamingRequest<ChatCompletionStreamOutput>(args, providerHelper, {

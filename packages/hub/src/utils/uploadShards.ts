@@ -1,6 +1,8 @@
 import { createApiError } from "../error";
 import type { RepoId } from "../types/public";
 import { createXorbs } from "./createXorbs";
+import { addToRangeEditCache } from "./rangeEdit";
+import type { RangeEditCache } from "./rangeEdit";
 import { sum } from "./sum";
 import { xetWriteToken } from "./xetWriteToken";
 
@@ -68,6 +70,12 @@ interface UploadShardsParams {
 	rev: string;
 	isPullRequest?: boolean;
 	yieldCallback?: (event: { event: "fileProgress"; path: string; progress: number }) => void;
+	/**
+	 * When provided, files written through this cache can later be appended to (or have
+	 * their last term edited) without any CAS metadata API call: the partial merkle state
+	 * needed is kept in memory. See {@link RangeEditCache}.
+	 */
+	rangeEditCache?: RangeEditCache;
 }
 
 /**
@@ -172,6 +180,21 @@ export async function* uploadShards(
 					sha256: output.sha256,
 					dedupRatio: output.dedupRatio,
 				}; // Maybe wait until shard is uploaded before yielding.
+
+				if (params.rangeEditCache && output.rangeEditCachePayload) {
+					// Local xorb ids can only be resolved here, where the xorb hashes are known
+					addToRangeEditCache(params.rangeEditCache, output.hash, {
+						size: output.rangeEditCachePayload.size,
+						terms: output.representation.map((rep) => ({
+							hash: typeof rep.xorbId === "number" ? xorbHashes[rep.xorbId] : rep.xorbId,
+							unpackedLength: rep.length,
+							range: { start: rep.indexStart, end: rep.indexEnd },
+							rangeHash: rep.rangeHash,
+						})),
+						openSubtree: output.rangeEditCachePayload.openSubtree,
+						lastTermChunks: output.rangeEditCachePayload.lastTermChunks,
+					});
+				}
 
 				if (seenFileXetHashes.has(output.hash)) {
 					break;

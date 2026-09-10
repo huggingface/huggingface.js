@@ -59,6 +59,7 @@ jobs:
             echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
             exit 0
           fi
+          echo "::add-mask::$token"
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test
@@ -118,6 +119,7 @@ jobs:
             echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
             exit 0
           fi
+          echo "::add-mask::$token"
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test in browser
@@ -157,6 +159,7 @@ jobs:
             echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
             exit 0
           fi
+          echo "::add-mask::$token"
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: E2E - start mock npm registry

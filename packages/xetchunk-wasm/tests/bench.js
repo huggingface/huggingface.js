@@ -1,7 +1,14 @@
 import { parseArgs } from "node:util";
 import { createChunker, finalize, nextBlock, hashToHex } from "../dist/esm/index.js";
 import { createReadStream } from "node:fs";
-import { Chunker } from "../vendor/chunker_wasm.js";
+// Fresh xet-core wasm build vendored in @huggingface/hub (same ground truth as
+// tests/conformance.test.ts). The local ../vendor copy is a stale pre-#2422
+// build with different minimum-boundary semantics. Node >= 23 (or 22 with
+// --experimental-strip-types) is required to load the .ts base64 module.
+import initWasm, { Chunker } from "../../hub/src/vendor/xet-chunk/chunker_wasm_bg.js";
+import { wasmBinary } from "../../hub/src/vendor/xet-chunk/chunker_wasm_bg.wasm.base64.ts";
+
+await initWasm({ module_or_path: wasmBinary });
 
 const { positionals } = parseArgs({
 	args: process.argv.slice(2),
