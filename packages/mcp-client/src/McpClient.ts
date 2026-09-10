@@ -142,6 +142,7 @@ export class McpClient {
 			role: "unknown",
 			content: "",
 		} satisfies ChatCompletionInputMessage;
+		let reasoningContent = "";
 		const finalToolCalls: Record<number, ChatCompletionStreamOutputDeltaToolCall> = {};
 		let numOfChunks = 0;
 
@@ -160,6 +161,9 @@ export class McpClient {
 			}
 			if (delta.content) {
 				message.content += delta.content;
+			}
+			if (typeof delta.reasoning_content === "string") {
+				reasoningContent += delta.reasoning_content;
 			}
 			for (const toolCall of delta.tool_calls ?? []) {
 				// aggregating chunks into an encoded arguments JSON object
@@ -189,6 +193,9 @@ export class McpClient {
 			role: "assistant",
 			content: message.content,
 		};
+		if (reasoningContent) {
+			assistantMessage.reasoning_content = reasoningContent;
+		}
 
 		const finalToolCallValues = Object.values(finalToolCalls);
 
