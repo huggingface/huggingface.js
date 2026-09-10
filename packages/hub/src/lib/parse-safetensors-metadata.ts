@@ -9,9 +9,11 @@ import type { SetRequired } from "../vendor/type-fest/set-required";
 import { parseSafetensorsIndexStream } from "./parse-safetensors-index";
 import { sum } from "../utils/sum";
 import { computeMoeInfoFromHeaders } from "./safetensors-moe-analysis";
+import { computeParameterCountByComponent } from "./safetensors-component-analysis";
 import {
 	computeNumOfParamsByDtypeSharded,
 	computeNumOfParamsByDtypeSingleFile,
+	getModelQuantizationConfig,
 } from "./safetensors-parameter-analysis";
 import type {
 	Dtype,
@@ -19,6 +21,7 @@ import type {
 	MoeInfo,
 	SafetensorsFileHeader,
 	SafetensorsIndexJson,
+	SafetensorsParameterCountByComponent,
 	SafetensorsShardedHeaders,
 	TensorInfo,
 } from "./safetensors-analysis-types";
@@ -33,10 +36,13 @@ export {
 export type {
 	Dtype,
 	ModelConfig,
+	MlxQuantizationConfig,
 	MoeInfo,
 	QuantizationConfig,
 	SafetensorsFileHeader,
 	SafetensorsIndexJson,
+	SafetensorsParameterComponent,
+	SafetensorsParameterCountByComponent,
 	SafetensorsShardedHeaders,
 	TensorInfo,
 	TensorName,
@@ -149,6 +155,8 @@ export type SafetensorsParseFromRepo =
 			header: SafetensorsFileHeader;
 			parameterCount?: Partial<Record<Dtype, number>>;
 			parameterTotal?: number;
+			/** Disjoint logical totals for recognized serialized model components; each tensor is counted once. */
+			parameterCountByComponent?: SafetensorsParameterCountByComponent;
 			/**
 			 * For Mixture-of-Experts models: breakdown of routed vs. always-active params,
 			 * computed when `computeParametersCount: true` and the repo's `config.json`
@@ -163,6 +171,8 @@ export type SafetensorsParseFromRepo =
 			headers: SafetensorsShardedHeaders;
 			parameterCount?: Partial<Record<Dtype, number>>;
 			parameterTotal?: number;
+			/** Disjoint logical totals for recognized serialized model components; each tensor is counted once. */
+			parameterCountByComponent?: SafetensorsParameterCountByComponent;
 			/**
 			 * For Mixture-of-Experts models: breakdown of routed vs. always-active params,
 			 * computed when `computeParametersCount: true` and the repo's `config.json`
@@ -453,7 +463,8 @@ export async function parseSafetensorsMetadata(
 
 	// Fetch model config for quantization information
 	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
-	const quantConfig = modelConfig?.quantization_config ?? modelConfig?.text_config?.quantization_config;
+	const quantConfig =
+		getModelQuantizationConfig(modelConfig) ?? getModelQuantizationConfig(modelConfig?.text_config ?? null);
 	const expertDtype = modelConfig?.expert_dtype ?? modelConfig?.text_config?.expert_dtype;
 
 	// Resolve which file to parse, in order:
@@ -490,6 +501,9 @@ export async function parseSafetensorsMetadata(
 		const paramStats = params.computeParametersCount
 			? (() => {
 					const parameterCount = computeNumOfParamsByDtypeSingleFile(header, quantConfig, expertDtype);
+					const isExplicitShard = Boolean(
+						params.path && parseSafetensorsShardFilename(location.path.split("/").at(-1) ?? ""),
+					);
 					return {
 						parameterCount,
 						/// shortcut: get param count directly from metadata
@@ -499,10 +513,10 @@ export async function parseSafetensorsMetadata(
 						),
 						// A directly requested shard contains only part of the model, so a model-level
 						// active-parameter breakdown cannot be inferred from it safely.
-						moe:
-							params.path && parseSafetensorsShardFilename(location.path.split("/").at(-1) ?? "")
-								? undefined
-								: computeMoeInfoFromHeaders([header], modelConfig),
+						moe: isExplicitShard ? undefined : computeMoeInfoFromHeaders([header], modelConfig),
+						parameterCountByComponent: isExplicitShard
+							? undefined
+							: computeParameterCountByComponent([header], modelConfig),
 					};
 				})()
 			: undefined;
@@ -526,6 +540,7 @@ export async function parseSafetensorsMetadata(
 						/// shortcut: get param count directly from metadata
 						parameterTotal: parseTotalParameters(index.metadata?.total_parameters, sum(Object.values(parameterCount))),
 						moe: computeMoeInfoFromHeaders(Object.values(shardedMap), modelConfig),
+						parameterCountByComponent: computeParameterCountByComponent(Object.values(shardedMap), modelConfig),
 					};
 				})()
 			: undefined;

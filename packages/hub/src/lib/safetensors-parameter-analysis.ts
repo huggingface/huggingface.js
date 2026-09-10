@@ -2,6 +2,8 @@ import { omit } from "../utils/omit";
 import { typedEntries } from "../utils/typedEntries";
 import type {
 	Dtype,
+	ModelConfig,
+	MlxQuantizationConfig,
 	QuantizationConfig,
 	SafetensorsFileHeader,
 	SafetensorsShardedHeaders,
@@ -15,6 +17,10 @@ import type {
 
 const GPTQ_QWEIGHT_SUFFIX = "qweight";
 const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
+const MLX_QUANTIZATION_METHOD = "mlx";
+const MLX_QUANTIZATION_MODES: ReadonlySet<string> = new Set(["affine", "mxfp4", "nvfp4", "mxfp8"]);
+const MLX_AFFINE_BITS: ReadonlySet<number> = new Set([2, 3, 4, 5, 6, 8]);
+const MLX_AFFINE_GROUP_SIZES: ReadonlySet<number> = new Set([32, 64, 128]);
 
 /**
  * Block/group scales and zero-points stored alongside quantized weights. They are quantization
@@ -116,7 +122,7 @@ export function isRoutedExpertTensor(tensorName: string): boolean {
 
 /** Reads a bit width out of a free-form format/dtype string, e.g. `"mxfp4-pack-quantized"` -> 4. */
 function bitsFromFormatString(format: string | undefined): number | undefined {
-	if (!format) {
+	if (typeof format !== "string") {
 		return undefined;
 	}
 	const normalized = format.toLowerCase();
@@ -142,6 +148,177 @@ function packingFactor(dtype: Dtype, numBits: number | undefined): number {
 		return 1;
 	}
 	return containerBits / numBits;
+}
+
+interface MlxQuantizationParameters {
+	bits: number;
+	groupSize: number;
+	mode: string;
+}
+
+const MLX_MODE_DEFAULTS: Readonly<Record<string, { bits: number; groupSize: number }>> = {
+	affine: { bits: 4, groupSize: 64 },
+	mxfp4: { bits: 4, groupSize: 32 },
+	nvfp4: { bits: 4, groupSize: 16 },
+	mxfp8: { bits: 8, groupSize: 32 },
+};
+
+function getQuantizationMethod(quantConfig: QuantizationConfig | undefined): string | undefined {
+	return typeof quantConfig?.quant_method === "string" ? quantConfig.quant_method.toLowerCase() : undefined;
+}
+
+/** Validates a complete set of MLX parameters. Config is untrusted and defines the safety cap. */
+function parseMlxQuantizationParameters(
+	bits: unknown,
+	groupSize: unknown,
+	mode: unknown,
+): MlxQuantizationParameters | undefined {
+	if (mode !== undefined && typeof mode !== "string") {
+		return undefined;
+	}
+	const normalizedMode = (mode ?? "affine").toLowerCase();
+	if (!MLX_QUANTIZATION_MODES.has(normalizedMode)) {
+		return undefined;
+	}
+	const defaults = MLX_MODE_DEFAULTS[normalizedMode];
+	const resolvedBits = bits ?? defaults.bits;
+	const resolvedGroupSize = groupSize ?? defaults.groupSize;
+	if (
+		typeof resolvedBits !== "number" ||
+		!Number.isInteger(resolvedBits) ||
+		typeof resolvedGroupSize !== "number" ||
+		!Number.isInteger(resolvedGroupSize)
+	) {
+		return undefined;
+	}
+
+	const valid =
+		(normalizedMode === "affine" &&
+			MLX_AFFINE_BITS.has(resolvedBits) &&
+			MLX_AFFINE_GROUP_SIZES.has(resolvedGroupSize)) ||
+		(normalizedMode === "mxfp4" && resolvedBits === 4 && resolvedGroupSize === 32) ||
+		(normalizedMode === "nvfp4" && resolvedBits === 4 && resolvedGroupSize === 16) ||
+		(normalizedMode === "mxfp8" && resolvedBits === 8 && resolvedGroupSize === 32);
+	return valid ? { bits: resolvedBits, groupSize: resolvedGroupSize, mode: normalizedMode } : undefined;
+}
+
+function hasMlxParameterFields(value: Record<string, unknown>): boolean {
+	return "bits" in value || "group_size" in value || "mode" in value;
+}
+
+function hasValidMlxConfiguration(quantConfig: QuantizationConfig & Record<string, unknown>): boolean {
+	if (
+		hasMlxParameterFields(quantConfig) &&
+		parseMlxQuantizationParameters(quantConfig.bits, quantConfig.group_size, quantConfig.mode)
+	) {
+		return true;
+	}
+	return Object.values(quantConfig).some(
+		(value) =>
+			typeof value === "object" &&
+			value !== null &&
+			hasMlxParameterFields(value as Record<string, unknown>) &&
+			Boolean(
+				parseMlxQuantizationParameters(
+					(value as { bits?: unknown }).bits,
+					(value as { group_size?: unknown }).group_size,
+					(value as { mode?: unknown }).mode,
+				),
+			),
+	);
+}
+
+/**
+ * Normalizes MLX's `quantization` convention into the quantization dispatch used by all analyses.
+ */
+export function getModelQuantizationConfig(modelConfig: ModelConfig | null): QuantizationConfig | undefined {
+	const mlxConfig = modelConfig?.quantization;
+	const mlxMethod = getQuantizationMethod(mlxConfig);
+	if (
+		mlxConfig &&
+		(mlxConfig.quant_method === undefined || mlxMethod === MLX_QUANTIZATION_METHOD) &&
+		hasValidMlxConfiguration(mlxConfig)
+	) {
+		return {
+			...mlxConfig,
+			quant_method: MLX_QUANTIZATION_METHOD,
+			mode: mlxConfig.mode ?? "affine",
+		};
+	}
+
+	const quantConfig = modelConfig?.quantization_config;
+	const quantMethod = getQuantizationMethod(quantConfig);
+	if (quantConfig && (quantConfig.quant_method === undefined || quantMethod === MLX_QUANTIZATION_METHOD)) {
+		const mode = quantConfig.mode ?? "affine";
+		if (hasValidMlxConfiguration(quantConfig as QuantizationConfig & Record<string, unknown>)) {
+			return { ...quantConfig, mode, quant_method: MLX_QUANTIZATION_METHOD };
+		}
+	}
+	return quantConfig;
+}
+
+/** Resolves MLX's optional per-module quantization override for one tensor. */
+function getMlxQuantizationParameters(
+	tensorName: string,
+	quantConfig: QuantizationConfig,
+): MlxQuantizationParameters | undefined {
+	const moduleName = getTensorModuleName(tensorName);
+	const moduleConfig = (quantConfig as MlxQuantizationConfig)[moduleName];
+	if (moduleConfig === false) {
+		return undefined;
+	}
+
+	const override =
+		typeof moduleConfig === "object" && moduleConfig !== null
+			? (moduleConfig as { bits?: unknown; group_size?: unknown; mode?: unknown })
+			: undefined;
+	return override
+		? parseMlxQuantizationParameters(override.bits, override.group_size, override.mode)
+		: parseMlxQuantizationParameters(quantConfig.bits, quantConfig.group_size, quantConfig.mode);
+}
+
+function getTensorModuleName(tensorName: string): string {
+	const suffixIndex = tensorName.lastIndexOf(".");
+	return suffixIndex === -1 ? tensorName : tensorName.slice(0, suffixIndex);
+}
+
+/** Identifies actual MLX-packed modules from their weight/scales/biases sibling tensors. */
+export function getMlxQuantizedModules(
+	headers: SafetensorsFileHeader[],
+	quantConfig?: QuantizationConfig,
+): ReadonlySet<string> | undefined {
+	if (!quantConfig || getQuantizationMethod(quantConfig) !== MLX_QUANTIZATION_METHOD) {
+		return undefined;
+	}
+
+	const modulesWithScales = new Set<string>();
+	const modulesWithBiases = new Set<string>();
+	const modulesWithU32Weights = new Set<string>();
+	for (const header of headers) {
+		for (const [tensorName, info] of typedEntries(omit(header, "__metadata__"))) {
+			const suffix = getTensorSuffix(tensorName);
+			if (suffix === "scales") {
+				modulesWithScales.add(getTensorModuleName(tensorName));
+			} else if (suffix === "biases") {
+				modulesWithBiases.add(getTensorModuleName(tensorName));
+			} else if (suffix === "weight" && info.dtype === "U32") {
+				modulesWithU32Weights.add(getTensorModuleName(tensorName));
+			}
+		}
+	}
+
+	const quantizedModules = new Set<string>();
+	for (const moduleName of modulesWithU32Weights) {
+		const params = getMlxQuantizationParameters(`${moduleName}.weight`, quantConfig);
+		if (
+			params &&
+			modulesWithScales.has(moduleName) &&
+			(params.mode !== "affine" || modulesWithBiases.has(moduleName))
+		) {
+			quantizedModules.add(moduleName);
+		}
+	}
+	return quantizedModules;
 }
 
 /**
@@ -219,9 +396,19 @@ export function matchesCompressedTensorsTarget(target: string, moduleName: strin
  * so bare names like `"lm_head"` must match `"model.lm_head.weight"`. When the
  * pattern contains a `*` we fall back to proper glob matching for flexibility.
  */
-export function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
+export function isQuantizedTensor(
+	tensorName: string,
+	quantConfig?: QuantizationConfig,
+	mlxQuantizedModules?: ReadonlySet<string>,
+): boolean {
 	if (!quantConfig) {
 		return false;
+	}
+	if (getQuantizationMethod(quantConfig) === MLX_QUANTIZATION_METHOD) {
+		return (
+			getMlxQuantizationParameters(tensorName, quantConfig) !== undefined &&
+			(mlxQuantizedModules === undefined || mlxQuantizedModules.has(getTensorModuleName(tensorName)))
+		);
 	}
 	// compressed-tensors spells the same concept `ignore`, with `re:`-prefixed targets
 	if (quantConfig.ignore?.length) {
@@ -251,14 +438,23 @@ export function getQuantizationMultiplier(
 	dtype: Dtype,
 	quantConfig?: QuantizationConfig,
 	expertDtype?: string,
+	mlxQuantizedModules?: ReadonlySet<string>,
 ): number {
-	if (!quantConfig || !isQuantizedTensor(tensorName, quantConfig)) {
+	if (!quantConfig || !isQuantizedTensor(tensorName, quantConfig, mlxQuantizedModules)) {
 		return 1;
 	}
 
-	const quantMethod = quantConfig.quant_method?.toLowerCase();
+	const quantMethod = getQuantizationMethod(quantConfig);
 
 	switch (quantMethod) {
+		case MLX_QUANTIZATION_METHOD: {
+			// MLX packs quantized weights into U32 containers. Scales/biases are skipped separately.
+			if (dtype !== "U32" || getTensorSuffix(tensorName) !== "weight") {
+				return 1;
+			}
+			return packingFactor(dtype, getMlxQuantizationParameters(tensorName, quantConfig)?.bits);
+		}
+
 		case "mxfp4":
 			if (dtype === "U8" && tensorName.includes("_blocks")) {
 				return 2;
@@ -321,7 +517,7 @@ export function getQuantizationMultiplier(
 			if (!isRoutedExpertTensor(tensorName)) {
 				return 1;
 			}
-			return packingFactor(dtype, bitsFromFormatString(expertDtype));
+			return packingFactor(dtype, bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype));
 
 		case "bitsandbytes":
 			if (quantConfig.load_in_4bit && dtype === "U8") {
@@ -342,15 +538,16 @@ export function computeTensorParameterCount(
 	info: TensorInfo,
 	quantConfig?: QuantizationConfig,
 	expertDtype?: string,
+	mlxQuantizedModules?: ReadonlySet<string>,
 ): number {
-	if (shouldSkipTensor(tensorName, info.dtype, quantConfig) || info.shape.length === 0) {
+	if (shouldSkipTensor(tensorName, info.dtype, quantConfig, mlxQuantizedModules) || info.shape.length === 0) {
 		return 0;
 	}
 	const elements = info.shape.reduce((a, b) => a * b, 1);
 	if (!Number.isFinite(elements)) {
 		return 0;
 	}
-	const multiplier = getQuantizationMultiplier(tensorName, info.dtype, quantConfig, expertDtype);
+	const multiplier = getQuantizationMultiplier(tensorName, info.dtype, quantConfig, expertDtype, mlxQuantizedModules);
 	if (multiplier === 0) {
 		return 0;
 	}
@@ -369,11 +566,31 @@ export function computeNumOfParamsByDtypeSingleFile(
 	quantConfig?: QuantizationConfig,
 	expertDtype?: string,
 ): Partial<Record<Dtype, number>> {
+	return computeNumOfParamsByDtypeForHeader(
+		header,
+		quantConfig,
+		expertDtype,
+		getMlxQuantizedModules([header], quantConfig),
+	);
+}
+
+function computeNumOfParamsByDtypeForHeader(
+	header: SafetensorsFileHeader,
+	quantConfig?: QuantizationConfig,
+	expertDtype?: string,
+	mlxQuantizedModules?: ReadonlySet<string>,
+): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
 
 	for (const [tensorName, value] of typedEntries(tensors)) {
-		const parameterCount = computeTensorParameterCount(tensorName, value, quantConfig, expertDtype);
+		const parameterCount = computeTensorParameterCount(
+			tensorName,
+			value,
+			quantConfig,
+			expertDtype,
+			mlxQuantizedModules,
+		);
 		if (parameterCount === 0) {
 			continue;
 		}
@@ -388,8 +605,12 @@ export function computeNumOfParamsByDtypeSharded(
 	expertDtype?: string,
 ): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
-	for (const header of Object.values(shardedMap)) {
-		for (const [dtype, count] of typedEntries(computeNumOfParamsByDtypeSingleFile(header, quantConfig, expertDtype))) {
+	const headers = Object.values(shardedMap);
+	const mlxQuantizedModules = getMlxQuantizedModules(headers, quantConfig);
+	for (const header of headers) {
+		for (const [dtype, count] of typedEntries(
+			computeNumOfParamsByDtypeForHeader(header, quantConfig, expertDtype, mlxQuantizedModules),
+		)) {
 			counter[dtype] = (counter[dtype] ?? 0) + (count ?? 0);
 		}
 	}
@@ -401,7 +622,12 @@ function getTensorSuffix(tensorName: string): string {
 	return lastDotIndex === -1 ? tensorName : tensorName.slice(lastDotIndex + 1);
 }
 
-function shouldSkipTensor(tensorName: string, dtype: Dtype, quantConfig?: QuantizationConfig): boolean {
+function shouldSkipTensor(
+	tensorName: string,
+	dtype: Dtype,
+	quantConfig?: QuantizationConfig,
+	mlxQuantizedModules?: ReadonlySet<string>,
+): boolean {
 	// Exponent-only dtypes only ever hold MX block scales, so they're never parameters — true even
 	// with no quantization_config at all, since a model can ship scales without declaring a config.
 	if (SCALE_ONLY_DTYPES.has(dtype)) {
@@ -414,7 +640,13 @@ function shouldSkipTensor(tensorName: string, dtype: Dtype, quantConfig?: Quanti
 	if (QUANTIZATION_AUXILIARY_SUFFIXES.includes(getTensorSuffix(tensorName))) {
 		return true;
 	}
-	const quantMethod = quantConfig.quant_method?.toLowerCase();
+	const quantMethod = getQuantizationMethod(quantConfig);
+
+	if (quantMethod === MLX_QUANTIZATION_METHOD && isQuantizedTensor(tensorName, quantConfig, mlxQuantizedModules)) {
+		const suffix = getTensorSuffix(tensorName);
+		const mode = getMlxQuantizationParameters(tensorName, quantConfig)?.mode;
+		return suffix === "scales" || (suffix === "biases" && mode === "affine");
+	}
 
 	// gpt-oss-style mxfp4 keeps the UE8M0 block exponents in `..._scales` next to `..._blocks`.
 	// Gated on the U8 container the scales actually use, so a learnable `*_scales` parameter in some
@@ -431,7 +663,7 @@ function shouldSkipTensor(tensorName: string, dtype: Dtype, quantConfig?: Quanti
 	if (quantMethod !== "gptq" && quantMethod !== "awq") {
 		return false;
 	}
-	if (!isQuantizedTensor(tensorName, quantConfig)) {
+	if (!isQuantizedTensor(tensorName, quantConfig, mlxQuantizedModules)) {
 		return false;
 	}
 	const suffix = getTensorSuffix(tensorName);

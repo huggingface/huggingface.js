@@ -584,6 +584,81 @@ describe("parseSafetensorsMetadata", () => {
 		});
 	});
 
+	describe("component parameter counts", () => {
+		const qwenHeader = {
+			__metadata__: { format: "pt" },
+			"model.language_model.norm.weight": { dtype: "BF16", shape: [5], data_offsets: [0, 0] },
+			"model.language_model.layers.1.ple.key_proj.weight": {
+				dtype: "BF16",
+				shape: [7],
+				data_offsets: [0, 0],
+			},
+			"mtp.layers.0.self_attn.q_proj.weight": { dtype: "BF16", shape: [11], data_offsets: [0, 0] },
+			"model.visual.patch_embed.proj.weight": { dtype: "BF16", shape: [13], data_offsets: [0, 0] },
+		};
+		const qwenConfig = {
+			model_type: "qwen4_exp",
+			vision_config: { model_type: "qwen4_exp_vision" },
+			text_config: {
+				model_type: "qwen4_exp_text",
+				mtp_num_hidden_layers: 1,
+				ngram_size: 3,
+				ple_layer_ids: [2],
+			},
+		};
+
+		it("exposes a disjoint component partition through the parser facade", async () => {
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/synthetic-qwen4-exp",
+				computeParametersCount: true,
+				fetch: fetchForFile(qwenHeader, 0, qwenConfig),
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCountByComponent, {
+				backbone: 5,
+				ngram: 7,
+				mtp: 11,
+				vision: 13,
+			});
+			assert.strictEqual(
+				sum(Object.values(parse.parameterCountByComponent ?? {})),
+				sum(Object.values(parse.parameterCount)),
+			);
+		});
+
+		it("omits model-level component stats for an explicitly requested shard", async () => {
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/synthetic-qwen4-exp",
+				path: "model-00001-of-00002.safetensors",
+				computeParametersCount: true,
+				fetch: fetchForFile(qwenHeader, 0, qwenConfig),
+			});
+
+			assert(!parse.sharded);
+			assert.strictEqual(parse.parameterCountByComponent, undefined);
+		});
+
+		it("matches the stored component partition for Qwen/Qwen3.8-Flash-Next", async () => {
+			const parse = await parseSafetensorsMetadata({
+				repo: "Qwen/Qwen3.8-Flash-Next",
+				revision: "de4b8e4d43b917e7706784d8bb445c9af86a3540",
+				computeParametersCount: true,
+			});
+
+			assert(parse.sharded);
+			assert(parse.parameterCountByComponent);
+			assert.deepStrictEqual(parse.parameterCountByComponent, {
+				backbone: 125_710_814_080,
+				ngram: 51_233_085_475,
+				mtp: 2_607_150_848,
+				vision: 448_931_056,
+			});
+			assert.strictEqual(sum(Object.values(parse.parameterCountByComponent)), 179_999_981_459);
+			assert.strictEqual(sum(Object.values(parse.parameterCountByComponent)), sum(Object.values(parse.parameterCount)));
+		});
+	});
+
 	it("computes MoE active-params for Mixtral-style per-expert layout", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "mistralai/Mixtral-8x7B-v0.1",
@@ -1276,7 +1351,7 @@ describe("parseSafetensorsMetadata", () => {
 		// draft weights (14.225B), and the vision encoder/projector (0.485B).
 		const parse = await parseSafetensorsMetadata({
 			repo: "deepseek-ai/DeepSeek-V4.1-Flash",
-			revision: "df42c109f1defefcbfcedbe7d905718a12266e40",
+			revision: "dba1be0a40aa45a94ad051997016db3960a90277",
 			computeParametersCount: true,
 		});
 
@@ -1293,5 +1368,13 @@ describe("parseSafetensorsMetadata", () => {
 			I8: 557_171_343_360, // 278_585_671_680 packed bytes x 2
 		});
 		assert.strictEqual(sum(Object.values(parse.parameterCount)), 763_205_315_794);
+		assert(parse.parameterCountByComponent);
+		assert.deepStrictEqual(parse.parameterCountByComponent, {
+			backbone: 551_566_180_464,
+			engram: 196_928_504_320,
+			dspark: 14_225_362_530,
+			vision: 485_268_480,
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCountByComponent)), sum(Object.values(parse.parameterCount)));
 	});
 });

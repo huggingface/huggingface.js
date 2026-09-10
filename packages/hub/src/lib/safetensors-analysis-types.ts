@@ -57,8 +57,30 @@ export interface SafetensorsIndexJson {
 
 export type SafetensorsShardedHeaders = Record<string, SafetensorsFileHeader>;
 
+/**
+ * Stable machine-readable buckets for disjoint stored-parameter ownership.
+ * Shared tensors stay with their serialized namespace and are never duplicated into every
+ * component that consumes them, so all reported buckets add back up to `parameterCount`.
+ */
+export type SafetensorsParameterComponent =
+	| "backbone"
+	| "vision"
+	| "ngram"
+	| "engram"
+	| "mtp"
+	| "eagle3"
+	| "dflash"
+	| "dspark";
+
+export type SafetensorsParameterCountByComponent = Partial<Record<SafetensorsParameterComponent, number>>;
+
 export interface QuantizationConfig {
 	quant_method?: string;
+	/** Routed expert precision when it differs from the main quantizer. */
+	expert_dtype?: string;
+	/** MLX quantization mode (e.g. `affine`); MLX configs do not declare `quant_method`. */
+	mode?: string;
+	group_size?: number;
 	modules_to_not_convert?: string[];
 	bits?: number;
 	load_in_4bit?: boolean;
@@ -71,6 +93,10 @@ export interface QuantizationConfig {
 	 * using the same `re:`-prefixed target syntax as `config_groups[].targets`.
 	 */
 	ignore?: string[];
+}
+
+export interface MlxQuantizationConfig extends QuantizationConfig {
+	[key: string]: unknown;
 }
 
 export interface MoeConfigFields {
@@ -94,14 +120,33 @@ export interface MoeConfigFields {
 	moe_num_shared_experts?: number;
 }
 
-interface TextModelConfig extends MoeConfigFields {
-	quantization_config?: QuantizationConfig;
+export interface ComponentConfigFields {
+	model_type?: string;
+	architectures?: string[];
+	/** Generic and family-specific names for the number of bundled MTP stages. */
+	num_mtp_layers?: number;
+	mtp_num_hidden_layers?: number;
+	num_nextn_predict_layers?: number;
+	/** Qwen PLE / hashed n-gram signals. */
+	ngram_size?: number;
+	ple_layer_ids?: number[];
+	/** DeepSeek Engram and DSpark signals. */
+	engram_layer_ids?: number[];
+	dspark_block_size?: number;
+}
+
+interface TextModelConfig extends MoeConfigFields, ComponentConfigFields {
+	quantization?: MlxQuantizationConfig;
+	quantization_config?: QuantizationConfig | MlxQuantizationConfig;
 	expert_dtype?: string;
 }
 
-export interface ModelConfig extends MoeConfigFields {
-	quantization_config?: QuantizationConfig;
+export interface ModelConfig extends MoeConfigFields, ComponentConfigFields {
+	/** Current MLX format, optionally with per-module overrides keyed by module name. */
+	quantization?: MlxQuantizationConfig;
+	quantization_config?: QuantizationConfig | MlxQuantizationConfig;
 	text_config?: TextModelConfig;
+	vision_config?: unknown;
 	/** DBRX stores its MoE dimensions in this nested object. */
 	ffn_config?: MoeConfigFields;
 	/**

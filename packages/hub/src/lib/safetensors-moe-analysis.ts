@@ -1,4 +1,9 @@
-import { computeTensorParameterCount, isRoutedExpertTensor } from "./safetensors-parameter-analysis";
+import {
+	computeTensorParameterCount,
+	getMlxQuantizedModules,
+	getModelQuantizationConfig,
+	isRoutedExpertTensor,
+} from "./safetensors-parameter-analysis";
 import type {
 	ModelConfig,
 	MoeConfigFields,
@@ -97,8 +102,10 @@ export function computeMoeInfoFromHeaders(
 	if (!moeConfig) {
 		return undefined;
 	}
-	const quantConfig = config?.quantization_config ?? config?.text_config?.quantization_config;
+	const headerList = [...headers];
+	const quantConfig = getModelQuantizationConfig(config) ?? getModelQuantizationConfig(config?.text_config ?? null);
 	const expertDtype = config?.expert_dtype ?? config?.text_config?.expert_dtype;
+	const mlxQuantizedModules = getMlxQuantizedModules(headerList, quantConfig);
 
 	let total = 0;
 	let routedExpert = 0;
@@ -106,13 +113,13 @@ export function computeMoeInfoFromHeaders(
 	let hasStackedExperts = false;
 	const perExpertIndices = new Set<number>();
 
-	for (const header of headers) {
+	for (const header of headerList) {
 		for (const [name, value] of Object.entries(header)) {
 			if (name === "__metadata__") {
 				continue;
 			}
 			const info = value as TensorInfo;
-			const parameterCount = computeTensorParameterCount(name, info, quantConfig, expertDtype);
+			const parameterCount = computeTensorParameterCount(name, info, quantConfig, expertDtype, mlxQuantizedModules);
 			if (parameterCount === 0) {
 				continue;
 			}
