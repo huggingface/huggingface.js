@@ -440,6 +440,35 @@ prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
+const diffusers_minimax_music3 = (model: ModelData) => [
+	`pip install soundfile`,
+	`import soundfile as sf
+import torch
+from diffusers import ModularPipeline
+
+pipe = ModularPipeline.from_pretrained("${model.id}")
+pipe.load_components(dtype=torch.bfloat16)
+pipe.to("cuda")
+
+lyrics = """[Verse]
+Morning light filtering through the pine
+
+[Chorus]
+Softly the world begins to breathe"""
+
+prompt = "An acoustic pop song with warm vocals and a gentle arrangement."
+
+audio = pipe(
+    prompt=prompt,
+    lyrics=lyrics,
+    audio_duration=30.0,
+    generator=torch.Generator("cuda").manual_seed(7),
+    output="audios",
+)[0]
+
+sf.write("song.wav", audio.T.float().cpu().numpy(), pipe.sampling_rate)`,
+];
+
 const diffusers_image_to_image = (model: ModelData) => [
 	`import torch
 from diffusers import DiffusionPipeline
@@ -623,6 +652,8 @@ export const diffusers = (model: ModelData): string[] => {
 		codeSnippets = diffusers_textual_inversion(model);
 	} else if (model.tags.includes("FluxFillPipeline")) {
 		codeSnippets = diffusers_flux_fill(model);
+	} else if (model.pipeline_tag === "text-to-audio" && model.tags.includes("minimax_music3")) {
+		codeSnippets = diffusers_minimax_music3(model);
 	} else if (model.pipeline_tag === "image-to-video") {
 		codeSnippets = diffusers_image_to_video(model);
 	} else if (model.pipeline_tag === "image-to-image") {
