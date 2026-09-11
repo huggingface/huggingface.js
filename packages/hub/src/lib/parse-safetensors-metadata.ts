@@ -156,7 +156,7 @@ function isRoutedExpertTensor(tensorName: string): boolean {
 
 /** Reads a bit width out of a free-form format/dtype string, e.g. `"mxfp4-pack-quantized"` -> 4. */
 function bitsFromFormatString(format: string | undefined): number | undefined {
-	if (!format) {
+	if (typeof format !== "string") {
 		return undefined;
 	}
 	const normalized = format.toLowerCase();
@@ -686,6 +686,8 @@ export async function parseSafetensorsMetadata(
 
 export interface QuantizationConfig {
 	quant_method?: string;
+	/** Routed expert precision when it differs from the main quantizer (e.g. FP4 experts with FP8 attention). */
+	expert_dtype?: string;
 	/** MLX quantization mode (e.g. `affine`); MLX configs do not declare `quant_method`. */
 	mode?: string;
 	group_size?: number;
@@ -718,8 +720,8 @@ export interface ModelConfig {
 	text_config?: Pick<ModelConfig, "expert_dtype" | "quantization" | "quantization_config">;
 	/**
 	 * Some MoEs store their experts at a narrower precision than the rest of the model and declare
-	 * it here, *outside* `quantization_config` (e.g. DeepSeek-V4 is `quant_method: "fp8"` for
-	 * attention but `expert_dtype: "fp4"` for the experts, which dominate the parameter count).
+	 * it here, outside `quantization_config` (e.g. DeepSeek-V4). Used as a fallback when the
+	 * quantization config does not declare its own `expert_dtype` (as DeepSeek-V4.1 does).
 	 */
 	expert_dtype?: string;
 }
@@ -1087,8 +1089,9 @@ export function getQuantizationMultiplier(
 
 		case "fp8": {
 			// fp8 weights live in F8_* dtypes at one value per byte, so nothing to do for them.
-			// But some fp8 MoEs keep their *experts* narrower still and declare it out-of-band in
-			// `expert_dtype` (DeepSeek-V4-Pro: "fp4"), storing them packed in an I8 container.
+			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8.
+			// `expert_dtype` is in quantization_config for DeepSeek-V4.1, or in the model config
+			// for DeepSeek-V4-Pro. Both declare "fp4", i.e. two weights per byte.
 			// Those experts dominate the parameter count, so missing this halves the total.
 			//
 			// `expert_dtype` describes the experts and nothing else, so it must not be applied to
@@ -1097,7 +1100,7 @@ export function getQuantizationMultiplier(
 			if (!isRoutedExpertTensor(tensorName)) {
 				return 1;
 			}
-			return packingFactor(dtype, bitsFromFormatString(expertDtype));
+			return packingFactor(dtype, bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype));
 		}
 
 		case "bitsandbytes":
