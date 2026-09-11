@@ -247,6 +247,37 @@ print("R² Score:", r2)`;
 	return [installSnippet, classificationSnippet, regressionsSnippet];
 };
 
+export const coreai = (model: ModelData): string[] => {
+	const folder = model.id.split("/").pop() ?? "model";
+	const header = `// Apple Core AI (iOS 27 / macOS 27): this repo holds an .aimodel bundle that runs fully on-device.
+// 1. Download the bundle folder:  hf download ${model.id} --local-dir ./${folder}
+// 2. Load it with Apple's Swift package: https://github.com/apple/coreai-models`;
+	if (model.pipeline_tag === "text-generation") {
+		return [
+			`${header}
+import FoundationModels
+import CoreAILanguageModels
+
+let model = try await CoreAILanguageModel(resourcesAt: bundleFolderURL)   // folder with the .aimodel + tokenizer/
+let session = LanguageModelSession(model: model)
+print(try await session.respond(to: "Explain on-device AI in one sentence."))`,
+			`// Or with the community CoreAIKit package, which downloads from this repo on first use:
+// https://github.com/john-rocky/coreai-kit
+import CoreAIKit
+
+let chat = try await ChatSession(model: ModelID("${model.id}"))   // add path: "<subfolder>" if the bundle sits in one
+print(try await chat.respond(to: "Explain on-device AI in one sentence."))`,
+		];
+	}
+	return [
+		`${header}
+import CoreAI
+
+let model = try await AIModel(contentsOf: aimodelURL)   // the .aimodel inside the downloaded folder
+// Inputs, outputs and any companion files are described on this model's card.`,
+	];
+};
+
 export const cortiq = (model: ModelData): string[] => {
 	const setup = `# one Rust binary, no additional dependencies
 cargo install cortiq-cli   # or a prebuilt binary from github.com/infosave2007/cmf/releases
