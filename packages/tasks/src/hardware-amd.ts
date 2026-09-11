@@ -236,6 +236,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 130,
 		releaseYear: 2019,
 	},
+	"Radeon Pro 5300M": {
+		tflops: 6.4,
+		memory: [4],
+		gfxVersion: "gfx1012",
+		msrp: 200,
+		power: 50,
+		releaseYear: 2019,
+	},
 	"Radeon Pro V620": {
 		tflops: 40.55,
 		memory: [32],
