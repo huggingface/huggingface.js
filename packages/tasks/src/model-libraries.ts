@@ -1076,7 +1076,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVIDIA/NeMo",
 		snippets: snippets.nemo,
 		filter: true,
-		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
+		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json" OR path:"onnx/sherpa-onnx-orukeet-v0.1.0-int8.tar.bz2"`,
 	},
 	ninfer: {
 		prettyLabel: "NInfer",
