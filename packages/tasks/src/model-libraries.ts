@@ -985,7 +985,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	mjlab: {
 		prettyLabel: "MJLab",
-		repoName: "mjlab",
+		repoName: "MJLab",
 		repoUrl: "https://github.com/mujocolab/mjlab",
 		docsUrl: "https://mujocolab.github.io/mjlab/",
 		filter: false,
