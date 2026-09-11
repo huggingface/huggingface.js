@@ -983,6 +983,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/mit-nlp/MITIE",
 		countDownloads: `path_filename:"total_word_feature_extractor"`,
 	},
+	mjlab: {
+		prettyLabel: "MJLab",
+		repoName: "MJLab",
+		repoUrl: "https://github.com/mujocolab/mjlab",
+		docsUrl: "https://mujocolab.github.io/mjlab/",
+		filter: false,
+		countDownloads: `path:"policy.onnx" OR path:"final.onnx"`,
+	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
 		repoName: "ml-agents",
