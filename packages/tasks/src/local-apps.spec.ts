@@ -249,6 +249,46 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain('openclaw agent --local --agent main --message "Hello from Hugging Face"');
 	});
 
+	it("protoagent", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.protoagent;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096, chat_template: "{% if tools %}" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toContain(`llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
+		expect(snippet[1].setup).toContain("uv tool install protolabs-agent");
+		expect(snippet[1].content).toContain(
+			"protoagent model use --base-url http://127.0.0.1:8080/v1 --model bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}",
+		);
+		expect(snippet[2].content).toContain("protoagent up");
+	});
+
+	it("protoagent - mlx", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.protoagent;
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-mlx",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			config: {
+				tokenizer_config: {
+					chat_template: "{% if tools %}...{% endif %}",
+				},
+			},
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
+		expect(snippet[1].content).toContain(
+			"protoagent model use --base-url http://127.0.0.1:8080/v1 --model mlx-community/Llama-3.2-3B-Instruct-mlx",
+		);
+		expect(snippet[2].content).toContain("protoagent up");
+	});
+
 	it("docker model runner", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
 		const model: ModelData = {

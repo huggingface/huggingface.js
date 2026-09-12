@@ -496,6 +496,23 @@ const snippetHermesAgent = (model: ModelData, filepath?: string): LocalAppSnippe
 	];
 };
 
+const snippetProtoagent = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const modelId = isMlxModel(model) ? model.id : `${model.id}${getQuantTag(filepath)}`;
+	const serverStep = getLocalServerStep(model, filepath);
+	return [
+		serverStep,
+		{
+			title: "Point protoAgent at the local server",
+			setup: ["# Install protoAgent:", "uv tool install protolabs-agent"].join("\n"),
+			content: [
+				"# Point protoAgent at the local server:",
+				`protoagent model use --base-url http://127.0.0.1:8080/v1 --model ${modelId}`,
+			].join("\n"),
+		},
+		{ title: "Run protoAgent", content: "protoagent up" },
+	];
+};
+
 const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const isMLX = isMlxModel(model);
 	const providerId = isMLX ? "mlx-lm" : "llama-cpp";
@@ -795,6 +812,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	protoagent: {
+		prettyLabel: "protoAgent",
+		docsUrl: "https://github.com/protoLabsAI/protoAgent/blob/main/docs/guides/cli.md#point-at-a-local-model",
+		mainTask: "text-generation",
+		displayOnModelPage: isToolCallingLocalAgentModel,
+		snippet: snippetProtoagent,
 	},
 } satisfies Record<string, LocalApp>;
 
