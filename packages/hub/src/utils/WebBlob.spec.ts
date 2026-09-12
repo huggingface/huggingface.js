@@ -103,4 +103,15 @@ describe("WebBlob", () => {
 		expect(() => webBlob.slice(-5)).toThrow(TypeError);
 		expect(() => webBlob.slice(0, -1)).toThrow(TypeError);
 	});
+
+	it("should clamp slices outside the resource", async () => {
+		const unexpectedFetch = (() => Promise.reject(new Error("empty slices must not fetch"))) as typeof fetch;
+		const webBlob = new WebBlob(resourceUrl, 0, 100, "text/plain", true, unexpectedFetch, undefined);
+
+		for (const slice of [webBlob.slice(101), webBlob.slice(20, 10)]) {
+			expect(slice.size).toBe(0);
+			expect(await slice.text()).toBe("");
+			expect(await new Response(slice.stream()).text()).toBe("");
+		}
+	});
 });
