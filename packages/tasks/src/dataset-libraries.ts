@@ -95,6 +95,30 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVIDIA-NeMo/DataDesigner",
 		docsUrl: "https://nvidia-nemo.github.io/DataDesigner/",
 	},
+	harbor: {
+		prettyLabel: "Harbor",
+		repoName: "harbor",
+		repoUrl: "https://github.com/harbor-framework/harbor",
+		docsUrl: "https://harborframework.com/docs",
+	},
+	verifiers: {
+		prettyLabel: "Verifiers",
+		repoName: "verifiers",
+		repoUrl: "https://github.com/PrimeIntellect-ai/verifiers",
+		docsUrl: "https://github.com/PrimeIntellect-ai/verifiers/tree/main/docs",
+	},
+	openenv: {
+		prettyLabel: "OpenEnv",
+		repoName: "OpenEnv",
+		repoUrl: "https://github.com/huggingface/OpenEnv",
+		docsUrl: "https://huggingface.github.io/openenv/",
+	},
+	"nemo-gym": {
+		prettyLabel: "NeMo Gym",
+		repoName: "Gym",
+		repoUrl: "https://github.com/NVIDIA-NeMo/Gym",
+		docsUrl: "https://docs.nvidia.com/nemo/gym/",
+	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
 /// List of the dataset libraries supported by the Hub
