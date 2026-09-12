@@ -1,10 +1,12 @@
 import type { TextToImageArgs } from "../tasks/cv/textToImage.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { VideoToVideoArgs } from "../tasks/cv/videoToVideo.js";
 import type { ImageTextToImageArgs } from "../tasks/cv/imageTextToImage.js";
 import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
 import type { BodyParams, OutputType, RequestArgs, UrlParams } from "../types.js";
 import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
+import { HF_HUB_URL } from "../config.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
@@ -16,6 +18,7 @@ import type {
 	ImageToVideoTaskHelper,
 	ImageTextToImageTaskHelper,
 	ImageTextToVideoTaskHelper,
+	VideoToVideoTaskHelper,
 } from "./providerHelper.js";
 import { TaskProviderHelper } from "./providerHelper.js";
 import {
@@ -116,7 +119,11 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		if (params.mapping?.adapter === "lora") {
 			payload.loras = [
 				{
-					path: params.mapping.hfModelId,
+					// Point at the exact weights file when the mapping specifies one — a bare
+					// repo id is ambiguous for repos that contain several LoRA files.
+					path: params.mapping.adapterWeightsPath
+						? `${HF_HUB_URL}/${params.mapping.hfModelId}/resolve/main/${params.mapping.adapterWeightsPath}`
+						: params.mapping.hfModelId,
 					scale: 1, // Default scale value
 				},
 			];
@@ -277,12 +284,43 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 	}
 }
 
+export class WavespeedAIVideoToVideoTask extends WavespeedAITask implements VideoToVideoTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+
+	async preparePayloadAsync(args: VideoToVideoArgs): Promise<RequestArgs> {
+		const inputs = args.inputs as Blob | ArrayBuffer | ArrayBufferView;
+		const bytes =
+			inputs instanceof ArrayBuffer
+				? new Uint8Array(inputs)
+				: ArrayBuffer.isView(inputs)
+					? new Uint8Array(inputs.buffer, inputs.byteOffset, inputs.byteLength)
+					: new Uint8Array(await inputs.arrayBuffer());
+		const contentType = inputs instanceof Blob && inputs.type ? inputs.type : "video/mp4";
+		const video = `data:${contentType};base64,${base64FromBytes(bytes)}`;
+		return { ...args, inputs: args.parameters?.prompt, video };
+	}
+
+	override async getResponse(
+		response: WaveSpeedAISubmitTaskResponse,
+		url?: string,
+		headers?: Record<string, string>,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob> {
+		return super.getResponse(response, url, headers, undefined, signal) as Promise<Blob>;
+	}
+}
+
 // 1x1 fully transparent PNG for use when no input image is provided
 const TRANSPARENT_1PX_PNG_BASE64 =
 	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
 function getTransparentPngBlob(): Blob {
-	const bytes = Uint8Array.from(Buffer.from(TRANSPARENT_1PX_PNG_BASE64, "base64"));
+	const bytes = globalThis.Buffer
+		? Uint8Array.from(globalThis.Buffer.from(TRANSPARENT_1PX_PNG_BASE64, "base64"))
+		: Uint8Array.from(globalThis.atob(TRANSPARENT_1PX_PNG_BASE64), (c) => c.charCodeAt(0));
 	return new Blob([bytes], { type: "image/png" });
 }
 
