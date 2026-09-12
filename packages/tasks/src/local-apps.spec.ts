@@ -161,6 +161,33 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain("pi");
 	});
 
+	it("localchat deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.localchat;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe(
+			"localchat://models/hf/llm/bartowski/Llama-3.2-3B-Instruct-GGUF",
+		);
+	});
+
+	it("localchat not shown for unrelated model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.localchat;
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			tags: ["conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("hermes-agent", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["hermes-agent"];
 		const model: ModelData = {
