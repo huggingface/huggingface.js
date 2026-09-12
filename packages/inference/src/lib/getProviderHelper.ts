@@ -7,6 +7,7 @@ import * as FeatherlessAI from "../providers/featherless-ai.js";
 import * as Fireworks from "../providers/fireworks-ai.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
+import * as Infersia from "../providers/infersia.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
@@ -125,6 +126,11 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	groq: {
 		conversational: new Groq.GroqConversationalTask(),
 		"text-generation": new Groq.GroqTextGenerationTask(),
+	},
+	infersia: {
+		"automatic-speech-recognition": new Infersia.InfersiaAutomaticSpeechRecognitionTask(),
+		conversational: new Infersia.InfersiaConversationalTask(),
+		"text-to-speech": new Infersia.InfersiaTextToSpeechTask(),
 	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),

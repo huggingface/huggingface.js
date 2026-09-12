@@ -51,6 +51,7 @@ Currently, we support the following providers:
 - [Featherless AI](https://featherless.ai)
 - [Fireworks AI](https://fireworks.ai)
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
+- [Infersia](https://infersia.com)
 - [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
 - [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
@@ -100,6 +101,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Groq supported models](https://console.groq.com/docs/models)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
+- [Infersia supported models](https://huggingface.co/api/partners/infersia/models)
 - [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.

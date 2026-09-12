@@ -2434,4 +2434,92 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT,
 	);
+	describe.concurrent(
+		"Infersia",
+		() => {
+			const client = new InferenceClient(env.HF_INFERSIA_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING.infersia = {
+				"Qwen/Qwen3-8B": {
+					provider: "infersia",
+					hfModelId: "Qwen/Qwen3-8B",
+					providerId: "qwen/qwen3-8b",
+					status: "live",
+					task: "conversational",
+				},
+				"deepseek-ai/DeepSeek-V4-Flash-0731": {
+					provider: "infersia",
+					hfModelId: "deepseek-ai/DeepSeek-V4-Flash-0731",
+					providerId: "deepseek/deepseek-v4-flash-0731",
+					status: "live",
+					task: "conversational",
+				},
+				"openai/whisper-large-v3-turbo": {
+					provider: "infersia",
+					hfModelId: "openai/whisper-large-v3-turbo",
+					providerId: "openai/whisper-large-v3-turbo",
+					status: "live",
+					task: "automatic-speech-recognition",
+				},
+				"hexgrad/Kokoro-82M": {
+					provider: "infersia",
+					hfModelId: "hexgrad/Kokoro-82M",
+					providerId: "hexgrad/kokoro-82m",
+					status: "live",
+					task: "text-to-speech",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3-8B",
+					provider: "infersia",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					tool_choice: "none",
+					temperature: 0,
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toMatch(/(to )?(two|2)/i);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-V4-Flash-0731",
+					provider: "infersia",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+					temperature: 0,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toMatch(/(two|2)/i);
+			});
+
+			it("automaticSpeechRecognition", async () => {
+				const res = await client.automaticSpeechRecognition({
+					model: "openai/whisper-large-v3-turbo",
+					provider: "infersia",
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+				});
+				expect(typeof res.text).toBe("string");
+				expect(res.text.length).toBeGreaterThan(0);
+			});
+
+			it("textToSpeech", async () => {
+				const res = await client.textToSpeech({
+					model: "hexgrad/Kokoro-82M",
+					provider: "infersia",
+					inputs: "Hello from Infersia text to speech.",
+					parameters: { voice: "af_heart" },
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		TIMEOUT,
+	);
 });
