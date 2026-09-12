@@ -639,6 +639,20 @@ export const LOCAL_APPS = {
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
 	},
+	loci: {
+		prettyLabel: "Loci",
+		docsUrl: "https://askloci.ai/",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => ["unsloth/Qwen3.5-2B-GGUF", "unsloth/Qwen3.5-4B-GGUF"].includes(model.id),
+		deeplink: (model, filepath) => {
+			const url = new URL("loci://open_from_hf");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
+	},
 	localai: {
 		prettyLabel: "LocalAI",
 		docsUrl: "https://github.com/mudler/LocalAI",
