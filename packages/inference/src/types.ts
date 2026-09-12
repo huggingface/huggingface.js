@@ -62,6 +62,7 @@ export const INFERENCE_PROVIDERS = [
 	"replicate",
 	"scaleway",
 	"together",
+	"venice-ai",
 	"wavespeed",
 	"zai-org",
 ] as const;
@@ -95,6 +96,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	replicate: "replicate",
 	scaleway: "scaleway",
 	together: "togethercomputer",
+	"venice-ai": "venice-ai",
 	wavespeed: "wavespeed",
 	"zai-org": "zai-org",
 };
