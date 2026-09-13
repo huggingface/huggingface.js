@@ -6,6 +6,8 @@ import { getLines, getMessages } from "../vendor/fetch-event-source/parse.js";
 import { InferenceClientProviderApiError } from "../errors.js";
 import type { JsonObject } from "../vendor/type-fest/basic.js";
 
+const MAX_503_RETRIES = 10;
+
 export interface ResponseWrapper<T> {
 	data: T;
 	requestContext: {
@@ -45,14 +47,16 @@ export async function innerRequest<T>(
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
 	},
+	/** @internal */
+	_retries = 0,
 ): Promise<ResponseWrapper<T>> {
 	const { url, info } = await makeRequestOptions(args, providerHelper, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	const requestContext: ResponseWrapper<T>["requestContext"] = { url, info };
 
-	if (options?.retry_on_error !== false && response.status === 503) {
-		return innerRequest(args, providerHelper, options);
+	if (options?.retry_on_error !== false && response.status === 503 && _retries < MAX_503_RETRIES) {
+		return innerRequest(args, providerHelper, options, _retries + 1);
 	}
 
 	if (!response.ok) {
@@ -131,12 +135,14 @@ export async function* innerStreamingRequest<T>(
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
 	},
+	/** @internal */
+	_retries = 0,
 ): AsyncGenerator<T> {
 	const { url, info } = await makeRequestOptions({ ...args, stream: true }, providerHelper, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
-	if (options?.retry_on_error !== false && response.status === 503) {
-		return yield* innerStreamingRequest(args, providerHelper, options);
+	if (options?.retry_on_error !== false && response.status === 503 && _retries < MAX_503_RETRIES) {
+		return yield* innerStreamingRequest(args, providerHelper, options, _retries + 1);
 	}
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
