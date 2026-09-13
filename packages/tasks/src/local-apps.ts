@@ -135,6 +135,51 @@ function getChatTemplate(model: ModelData): string | undefined {
 	return undefined;
 }
 
+function isLociModel(model: ModelData): boolean {
+	if (
+		(model.pipeline_tag && !["text-generation", "image-text-to-text"].includes(model.pipeline_tag)) ||
+		model.config?.peft ||
+		model.config?.adapter_transformers ||
+		model.config?.diffusers ||
+		model.tags.some((tag) => ["peft", "sentence-transformers", "text-embeddings-inference", "diffusers"].includes(tag))
+	) {
+		return false;
+	}
+	if (isLlamaCppGgufModel(model)) {
+		return !/bert|embed|clip|t5encoder/i.test(model.gguf?.architecture ?? "");
+	}
+	if (isMlxModel(model)) {
+		// Model types implemented by Loci's MLX VLM runtime. Missing metadata is checked in the app.
+		return (
+			!model.config?.model_type ||
+			[
+				"paligemma",
+				"qwen2_vl",
+				"qwen2_5_vl",
+				"qwen3_vl",
+				"qwen3_vl_moe",
+				"qwen3_5",
+				"qwen3_5_moe",
+				"idefics3",
+				"gemma3",
+				"gemma4",
+				"gemma4_unified",
+				"smolvlm",
+				"fastvlm",
+				"llava_qwen2",
+				"pixtral",
+				"mistral3",
+				"lfm2_vl",
+				"lfm2-vl",
+				"glm_ocr",
+				"muse_glimmer",
+			].includes(model.config.model_type)
+		);
+	}
+	// LiteRT-LM imports currently require one of the app's wired model bundles.
+	return ["litert-community/gemma-4-E2B-it-litert-lm", "litert-community/gemma-4-E4B-it-litert-lm"].includes(model.id);
+}
+
 function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
@@ -643,41 +688,8 @@ export const LOCAL_APPS = {
 		prettyLabel: "Loci",
 		docsUrl: "https://askloci.ai/",
 		mainTask: "text-generation",
-		// Repositories offered by the native catalogs; availability varies by platform and hardware.
-		displayOnModelPage: (model) =>
-			[
-				"LiquidAI/LFM2.5-VL-1.6B-GGUF",
-				"bartowski/Llama-3.2-3B-Instruct-GGUF",
-				"bartowski/Llama-3.3-70B-Instruct-abliterated-GGUF",
-				"bartowski/google_gemma-4-E2B-it-GGUF",
-				"bartowski/microsoft_Phi-4-mini-instruct-GGUF",
-				"bartowski/microsoft_Phi-4-mini-reasoning-GGUF",
-				"bartowski/nvidia_Nemotron-Cascade-2-30B-A3B-GGUF",
-				"huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF",
-				"ibm-granite/granite-4.1-3b-GGUF",
-				"litert-community/gemma-4-E2B-it-litert-lm",
-				"litert-community/gemma-4-E4B-it-litert-lm",
-				"lukaskremla/Qwen3.8-27B-3bit-MLX",
-				"mlx-community/Qwen3.8-27B-4bit",
-				"mlx-community/Qwen3.8-27B-8bit",
-				"mlx-community/Qwen3.8-27B-oQ6",
-				"mlx-community/gemma-4-12B-it-4bit",
-				"mlx-community/gemma-4-26B-A4B-it-heretic-4bit",
-				"mlx-community/gemma-4-26b-a4b-it-4bit",
-				"mlx-community/gemma-4-31b-it-4bit",
-				"mlx-community/gemma-4-e2b-it-4bit",
-				"mlx-community/gemma-4-e4b-it-4bit",
-				"mradermacher/Huihui-Qwen3.5-4B-abliterated-GGUF",
-				"mradermacher/Huihui-Qwen3.5-9B-abliterated-GGUF",
-				"prism-ml/Bonsai-27B-gguf",
-				"prism-ml/Bonsai-8B-gguf",
-				"unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF",
-				"unsloth/Qwen3-Coder-Next-GGUF",
-				"unsloth/Qwen3.5-2B-GGUF",
-				"unsloth/Qwen3.5-4B-GGUF",
-				"unsloth/Qwen3.5-9B-GGUF",
-				"unsloth/gemma-4-E4B-it-GGUF",
-			].includes(model.id),
+		// The app verifies the selected files, runtime compatibility and device fit before importing.
+		displayOnModelPage: isLociModel,
 		deeplink: (model, filepath) => {
 			const url = new URL("loci://open_from_hf");
 			url.searchParams.set("model", model.id);
