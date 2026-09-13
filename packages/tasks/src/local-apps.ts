@@ -135,6 +135,51 @@ function getChatTemplate(model: ModelData): string | undefined {
 	return undefined;
 }
 
+function isLociModel(model: ModelData): boolean {
+	if (
+		(model.pipeline_tag && !["text-generation", "image-text-to-text"].includes(model.pipeline_tag)) ||
+		model.config?.peft ||
+		model.config?.adapter_transformers ||
+		model.config?.diffusers ||
+		model.tags.some((tag) => ["peft", "sentence-transformers", "text-embeddings-inference", "diffusers"].includes(tag))
+	) {
+		return false;
+	}
+	if (isLlamaCppGgufModel(model)) {
+		return !/bert|embed|clip|t5encoder/i.test(model.gguf?.architecture ?? "");
+	}
+	if (isMlxModel(model)) {
+		// Model types implemented by Loci's MLX VLM runtime. Missing metadata is checked in the app.
+		return (
+			!model.config?.model_type ||
+			[
+				"paligemma",
+				"qwen2_vl",
+				"qwen2_5_vl",
+				"qwen3_vl",
+				"qwen3_vl_moe",
+				"qwen3_5",
+				"qwen3_5_moe",
+				"idefics3",
+				"gemma3",
+				"gemma4",
+				"gemma4_unified",
+				"smolvlm",
+				"fastvlm",
+				"llava_qwen2",
+				"pixtral",
+				"mistral3",
+				"lfm2_vl",
+				"lfm2-vl",
+				"glm_ocr",
+				"muse_glimmer",
+			].includes(model.config.model_type)
+		);
+	}
+	// LiteRT-LM imports currently require one of the app's wired model bundles.
+	return ["litert-community/gemma-4-E2B-it-litert-lm", "litert-community/gemma-4-E4B-it-litert-lm"].includes(model.id);
+}
+
 function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
@@ -638,6 +683,21 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
+	},
+	loci: {
+		prettyLabel: "Loci",
+		docsUrl: "https://askloci.ai/",
+		mainTask: "text-generation",
+		// The app verifies the selected files, runtime compatibility and device fit before importing.
+		displayOnModelPage: isLociModel,
+		deeplink: (model, filepath) => {
+			const url = new URL("loci://open_from_hf");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
 	},
 	localai: {
 		prettyLabel: "LocalAI",
