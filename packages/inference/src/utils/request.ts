@@ -74,8 +74,14 @@ export async function innerRequest<T>(
 				);
 			}
 			if (typeof output.error === "string" || typeof output.detail === "string" || typeof output.message === "string") {
+				const errorMessage =
+					typeof output.error === "string"
+						? output.error
+						: typeof output.detail === "string"
+							? output.detail
+							: output.message;
 				throw new InferenceClientProviderApiError(
-					`Failed to perform inference: ${output.error ?? output.detail ?? output.message}`,
+					`Failed to perform inference: ${errorMessage}`,
 					{
 						url,
 						method: info.method ?? "GET",
@@ -156,8 +162,14 @@ export async function* innerStreamingRequest<T>(
 				);
 			}
 			if (typeof output.error === "string" || typeof output.detail === "string" || typeof output.message === "string") {
+				const errorMessage =
+					typeof output.error === "string"
+						? output.error
+						: typeof output.detail === "string"
+							? output.detail
+							: output.message;
 				throw new InferenceClientProviderApiError(
-					`Failed to perform inference: ${output.error ?? output.detail ?? output.message}`,
+					`Failed to perform inference: ${errorMessage}`,
 					{
 						url,
 						method: info.method ?? "GET",
