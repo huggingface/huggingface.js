@@ -538,6 +538,7 @@ describe("parseSafetensorsMetadata", () => {
 			// element is one parameter.
 			const parameterCount = computeNumOfParamsByDtypeSingleFile(
 				header({
+					tensor_u3: tensor("U3", [9]),
 					tensor_f4: tensor("F4", [10, 20]),
 					tensor_fp4: tensor("FP4", [100, 200]),
 					tensor_f6_e2m3: tensor("F6_E2M3", [5, 10]),
@@ -545,7 +546,13 @@ describe("parseSafetensorsMetadata", () => {
 				}),
 			);
 
-			assert.deepStrictEqual(parameterCount, { F4: 200, FP4: 20_000, F6_E2M3: 50, F6_E3M2: 96 });
+			assert.deepStrictEqual(parameterCount, {
+				U3: 9,
+				F4: 200,
+				FP4: 20_000,
+				F6_E2M3: 50,
+				F6_E3M2: 96,
+			});
 		});
 
 		it("never counts exponent-only dtypes, even with no quantization_config", () => {
