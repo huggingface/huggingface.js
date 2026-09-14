@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasH2DefaultFetch } from "./defaultFetch";
+import { hasH2DefaultFetch, withHttp1, type Dispatcher } from "./defaultFetch";
 
 describe("hasH2DefaultFetch", () => {
 	it("matches Node with undici >= 8", () => {
@@ -20,5 +20,23 @@ describe("hasH2DefaultFetch", () => {
 
 	it("reads the current runtime by default", () => {
 		expect(hasH2DefaultFetch(undefined, false)).toBe(hasH2DefaultFetch(process.versions, false));
+	});
+});
+
+describe("withHttp1", () => {
+	it("forwards to the base dispatcher with allowH2 disabled and the handler untouched", () => {
+		const calls: Array<{ options: Record<string, unknown>; handler: unknown }> = [];
+		const base: Dispatcher = {
+			dispatch(options, handler) {
+				calls.push({ options, handler });
+				return true;
+			},
+		};
+		const handler = { onHeaders: () => true };
+		const options = { origin: "https://example.com", path: "/x", method: "GET" };
+
+		expect(withHttp1(base).dispatch(options, handler)).toBe(true);
+		expect(calls).toEqual([{ options: { ...options, allowH2: false }, handler }]);
+		expect(options).not.toHaveProperty("allowH2");
 	});
 });

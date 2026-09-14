@@ -228,9 +228,8 @@ Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the f
 
 To edit an existing file, prefer an `edit` commit operation with the blob returned by `downloadFile` as `originalContent`: only the edited regions are downloaded, re-chunked and hashed. For repeated appends to the same file, pass a shared `rangeEditCache: new Map()` to the `commit` calls to also skip the storage-metadata round-trips.
 
-On Node >= 26, whose built-in `fetch` negotiates HTTP/2 with small flow-control windows, `downloadFile` and the blobs it returns use `undici` with HTTP/1.1 by default (like the Hub server does), which keeps large downloads at full speed. Passing your own `fetch` disables this.
+On Node >= 26, whose built-in `fetch` negotiates HTTP/2 with small flow-control windows, `downloadFile` and the blobs it returns force HTTP/1.1 by default (like the Hub server does), which keeps large downloads at full speed. Passing your own `fetch` disables this.
 
 ## Dependencies
 
 - `@huggingface/tasks` : Typings only
-- `undici` : HTTP/1.1 downloads on Node >= 26 (see [Performance considerations](#performance-considerations))

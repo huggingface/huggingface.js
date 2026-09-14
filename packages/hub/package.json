@@ -27,7 +27,6 @@
 	"module": "./dist/index.mjs",
 	"browser": {
 		"./src/utils/sha256-node.ts": false,
-		"./src/utils/http1Fetch-node.ts": false,
 		"./src/utils/sub-paths.ts": false,
 		"./src/utils/FileBlob.ts": false,
 		"./src/lib/cache-management.ts": false,
@@ -64,8 +63,7 @@
 	},
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^",
-		"@huggingface/xetchunk-wasm": "workspace:^",
-		"undici": "^8.10.0"
+		"@huggingface/xetchunk-wasm": "workspace:^"
 	},
 	"devDependencies": {
 		"@types/cli-progress": "^3.11.6"
