@@ -1507,6 +1507,20 @@ describe("XetBlob", () => {
 		expect(() => blob.slice(-5)).toThrow(TypeError);
 		expect(() => blob.slice(0, -1)).toThrow(TypeError);
 	});
+
+	it("should clamp slices outside the resource", async () => {
+		const blob = new XetBlob({
+			hash: "test",
+			size: 100,
+			refreshUrl: "https://huggingface.co",
+		});
+
+		for (const slice of [blob.slice(101), blob.slice(20, 10)]) {
+			expect(slice.size).toBe(0);
+			expect(await slice.text()).toBe("");
+			expect(await new Response(slice.stream()).text()).toBe("");
+		}
+	});
 });
 
 function makeChunk(content: string) {
