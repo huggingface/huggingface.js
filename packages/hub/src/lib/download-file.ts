@@ -1,5 +1,6 @@
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+import { defaultFetch } from "../utils/defaultFetch";
 import { WebBlob } from "../utils/WebBlob";
 import { XetBlob } from "../utils/XetBlob";
 import type { ParallelDownloadOptions } from "../utils/XetBlob";
@@ -86,5 +87,5 @@ export async function downloadFile(
 		});
 	}
 
-	return new WebBlob(new URL(info.url), 0, info.size, "", true, params.fetch ?? fetch, accessToken);
+	return new WebBlob(new URL(info.url), 0, info.size, "", true, params.fetch ?? defaultFetch, accessToken);
 }
