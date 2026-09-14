@@ -1,7 +1,51 @@
 import { describe, expect, it } from "vitest";
 import { checkDDUF, type DDUFFileEntry } from "./check-dduf";
 
+function createCentralDirectoryEntry(name: string, diskNumber: number): Uint8Array {
+	const nameBytes = new TextEncoder().encode(name);
+	const entry = new Uint8Array(46 + nameBytes.length);
+	const view = new DataView(entry.buffer);
+
+	view.setUint32(0, 0x02014b50, true);
+	view.setUint16(28, nameBytes.length, true);
+	view.setUint16(34, diskNumber, true);
+	entry.set(nameBytes, 46);
+
+	return entry;
+}
+
+function createArchive(entries: Uint8Array[]): Blob {
+	const centralDirectorySize = entries.reduce((size, entry) => size + entry.byteLength, 0);
+	const footer = new Uint8Array(22);
+	const footerView = new DataView(footer.buffer);
+
+	footerView.setUint32(0, 0x06054b50, true);
+	footerView.setUint16(8, entries.length, true);
+	footerView.setUint16(10, entries.length, true);
+	footerView.setUint32(12, centralDirectorySize, true);
+	footerView.setUint32(16, 0, true);
+
+	return new Blob([...entries, footer]);
+}
+
 describe("check-dduf", () => {
+	it("rejects a later central directory entry from another disk", async () => {
+		const archive = createArchive([
+			createCentralDirectoryEntry("first.txt", 0),
+			createCentralDirectoryEntry("second.txt", 1),
+		]);
+
+		const files = async () => {
+			const entries: DDUFFileEntry[] = [];
+			for await (const entry of checkDDUF(archive)) {
+				entries.push(entry);
+			}
+			return entries;
+		};
+
+		await expect(files()).rejects.toThrow("Multi-disk archives not supported");
+	});
+
 	it("should work", async () => {
 		const files: DDUFFileEntry[] = [];
 		for await (const file of checkDDUF(
