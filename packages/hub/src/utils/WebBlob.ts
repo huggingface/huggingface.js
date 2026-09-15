@@ -3,6 +3,7 @@
  */
 
 import { createApiError } from "../error";
+import { defaultFetch } from "./defaultFetch";
 
 interface WebBlobCreateOptions {
 	/**
@@ -21,7 +22,7 @@ interface WebBlobCreateOptions {
 
 export class WebBlob extends Blob {
 	static async create(url: URL, opts?: WebBlobCreateOptions): Promise<Blob> {
-		const customFetch = opts?.fetch ?? fetch;
+		const customFetch = opts?.fetch ?? defaultFetch;
 
 		// Probe with `Range: bytes=0-0` rather than `HEAD` to learn the file size
 		// and confirm range support in a single round trip.
