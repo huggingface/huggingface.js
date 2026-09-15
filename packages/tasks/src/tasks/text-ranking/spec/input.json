@@ -1,0 +1,33 @@
+{
+	"$id": "/inference/schemas/text-ranking/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Text Ranking inference",
+	"title": "TextRankingInput",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"title": "TextRankingInputData",
+			"type": "object",
+			"properties": {
+				"query": {
+					"type": "string",
+					"description": "The query to rank the documents against."
+				},
+				"texts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"description": "The documents to rank."
+				},
+				"return_documents": {
+					"type": "boolean",
+					"default": false,
+					"description": "Whether to include the document text in the output."
+				}
+			},
+			"required": ["query", "texts"]
+		}
+	},
+	"required": ["inputs"]
+}

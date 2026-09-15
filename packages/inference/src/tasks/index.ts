@@ -29,6 +29,7 @@ export * from "./nlp/featureExtraction.js";
 export * from "./nlp/fillMask.js";
 export * from "./nlp/questionAnswering.js";
 export * from "./nlp/sentenceSimilarity.js";
+export * from "./nlp/textRanking.js";
 export * from "./nlp/summarization.js";
 export * from "./nlp/tableQuestionAnswering.js";
 export * from "./nlp/textClassification.js";
