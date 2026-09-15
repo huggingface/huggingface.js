@@ -582,6 +582,39 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
  *
  * Ping the HF team if we can help with anything!
  */
+const snippetXyntetikRunner = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const file = filepath ?? "{{GGUF_FILE}}";
+	const download = [
+		"# Download the GGUF from the Hub:",
+		`curl -L --create-dirs -o "${file}" "https://huggingface.co/${model.id}/resolve/main/${file}"`,
+	].join("\n");
+	const serve = (binary: string) =>
+		[
+			"# Serve it: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080",
+			`${binary} -m "${file}" --serve`,
+		].join("\n");
+	const cli = (binary: string) =>
+		["# Or run one prompt in the terminal:", `${binary} -m "${file}" -p "Hello" -n 64`].join("\n");
+	return [
+		{
+			title: "Use the pre-built binary (macOS, Linux, Windows)",
+			setup: [
+				"# Download the single binary for your platform from the latest release",
+				"# and put it on your PATH as `runner` (`runner.exe` on Windows):",
+				"# https://github.com/Joakimpalm-Zen/xyntetik-runner/releases/latest",
+			].join("\n"),
+			content: [download, serve("runner"), cli("runner")],
+		},
+		{
+			title: "Build from source (C11, no dependencies)",
+			setup: ["git clone https://github.com/Joakimpalm-Zen/xyntetik-runner.git", "cd xyntetik-runner", "make"].join(
+				"\n",
+			),
+			content: [download, serve("./runner"), cli("./runner")],
+		},
+	];
+};
+
 export const LOCAL_APPS = {
 	"llama.cpp": {
 		prettyLabel: "llama.cpp",
@@ -795,6 +828,14 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	"xyntetik-runner": {
+		prettyLabel: "Xyntetik Runner",
+		docsUrl: "https://xyntetik.com",
+		links: [{ label: "GitHub", url: "https://github.com/Joakimpalm-Zen/xyntetik-runner" }],
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetXyntetikRunner,
 	},
 } satisfies Record<string, LocalApp>;
 

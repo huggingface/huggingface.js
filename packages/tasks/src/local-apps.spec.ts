@@ -366,4 +366,47 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			{ label: "Releases", url: "https://github.com/bartowski/Llama-3.2-3B-Instruct-GGUF/releases" },
 		]);
 	});
+	it("xyntetik-runner gguf", async () => {
+		const { snippet: snippetFunc, displayOnModelPage } = LOCAL_APPS["xyntetik-runner"];
+		const model: ModelData = {
+			id: "Joakimpalm-Zen/Qwen3-30B-A3B-selective-attnQ8_0-expQ4_0-GGUF",
+			tags: ["gguf", "conversational"],
+			gguf: { total: 585, context_length: 40960 },
+			inference: "",
+		};
+		expect(displayOnModelPage(model)).toBe(true);
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toEqual([
+			`# Download the GGUF from the Hub:
+curl -L --create-dirs -o "{{GGUF_FILE}}" "https://huggingface.co/Joakimpalm-Zen/Qwen3-30B-A3B-selective-attnQ8_0-expQ4_0-GGUF/resolve/main/{{GGUF_FILE}}"`,
+			`# Serve it: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080
+runner -m "{{GGUF_FILE}}" --serve`,
+			`# Or run one prompt in the terminal:
+runner -m "{{GGUF_FILE}}" -p "Hello" -n 64`,
+		]);
+	});
+
+	it("xyntetik-runner with a selected file", async () => {
+		const { snippet: snippetFunc, displayOnModelPage } = LOCAL_APPS["xyntetik-runner"];
+		const model: ModelData = {
+			id: "ibm-granite/granite-4.1-3b-GGUF",
+			tags: ["gguf"],
+			gguf: { total: 363, context_length: 131072 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model, "granite-4.1-3b-Q8_0.gguf");
+
+		expect(snippet[1].content).toEqual([
+			`# Download the GGUF from the Hub:
+curl -L --create-dirs -o "granite-4.1-3b-Q8_0.gguf" "https://huggingface.co/ibm-granite/granite-4.1-3b-GGUF/resolve/main/granite-4.1-3b-Q8_0.gguf"`,
+			`# Serve it: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080
+./runner -m "granite-4.1-3b-Q8_0.gguf" --serve`,
+			`# Or run one prompt in the terminal:
+./runner -m "granite-4.1-3b-Q8_0.gguf" -p "Hello" -n 64`,
+		]);
+		expect(displayOnModelPage({ id: "meta-llama/Llama-3.2-3B-Instruct", tags: ["transformers"], inference: "" })).toBe(
+			false,
+		);
+	});
 });
