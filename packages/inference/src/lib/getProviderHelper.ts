@@ -1,4 +1,5 @@
 import * as Baseten from "../providers/baseten.js";
+import * as Boundless from "../providers/boundless.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
 import * as DeepInfra from "../providers/deepinfra.js";
@@ -58,6 +59,9 @@ import { InferenceClientInputError } from "../errors.js";
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	baseten: {
 		conversational: new Baseten.BasetenConversationalTask(),
+	},
+	boundless: {
+		conversational: new Boundless.BoundlessConversationalTask(),
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
