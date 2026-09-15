@@ -94,6 +94,11 @@ const inputsImageToVideo = () => `{
     "prompt": "The cat starts to dance"
 }`;
 
+const inputsVideoToVideo = () => `{
+    "video": "cat.mp4",
+    "prompt": "The cat starts to dance"
+}`;
+
 const inputsImageTextToImage = () => `{
     "image": "cat.png",
     "prompt": "Turn the cat into a tiger."
@@ -140,6 +145,7 @@ const modelInputSnippets: {
 	"image-to-text": inputsImageToText,
 	"image-to-image": inputsImageToImage,
 	"image-to-video": inputsImageToVideo,
+	"video-to-video": inputsVideoToVideo,
 	"image-text-to-image": inputsImageTextToImage,
 	"image-text-to-video": inputsImageTextToVideo,
 	"image-segmentation": inputsImageSegmentation,

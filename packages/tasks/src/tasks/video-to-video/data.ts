@@ -32,6 +32,14 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
+			description: "Character animation model that transfers motion from a reference video onto a character.",
+			id: "Wan-AI/Wan2.2-Animate-14B",
+		},
+		{
+			description: "One-step diffusion model for high-quality video restoration and upscaling.",
+			id: "ByteDance-Seed/SeedVR2-3B",
+		},
+		{
 			description: "Model for editing outfits, character, and scenery in videos.",
 			id: "decart-ai/Lucy-Edit-Dev",
 		},
