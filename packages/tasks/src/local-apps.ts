@@ -583,18 +583,14 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
  * Ping the HF team if we can help with anything!
  */
 const snippetXyntetikRunner = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const file = filepath ?? "{{GGUF_FILE}}";
-	const download = [
-		"# Download the GGUF from the Hub:",
-		`curl -L --create-dirs -o "${file}" "https://huggingface.co/${model.id}/resolve/main/${file}"`,
-	].join("\n");
+	const spec = `${model.id}${getQuantTag(filepath)}`;
 	const serve = (binary: string) =>
 		[
-			"# Serve it: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080",
-			`${binary} -m "${file}" --serve`,
+			"# Fetch (once, sha256-verified, cached) and serve: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080",
+			`${binary} -hf ${spec} --serve`,
 		].join("\n");
 	const cli = (binary: string) =>
-		["# Or run one prompt in the terminal:", `${binary} -m "${file}" -p "Hello" -n 64`].join("\n");
+		["# Or run one prompt in the terminal:", `${binary} -hf ${spec} -p "Hello" -n 64`].join("\n");
 	return [
 		{
 			title: "Use the pre-built binary (macOS, Linux, Windows)",
@@ -603,14 +599,14 @@ const snippetXyntetikRunner = (model: ModelData, filepath?: string): LocalAppSni
 				"# and put it on your PATH as `runner` (`runner.exe` on Windows):",
 				"# https://github.com/Joakimpalm-Zen/xyntetik-runner/releases/latest",
 			].join("\n"),
-			content: [download, serve("runner"), cli("runner")],
+			content: [serve("runner"), cli("runner")],
 		},
 		{
 			title: "Build from source (C11, no dependencies)",
 			setup: ["git clone https://github.com/Joakimpalm-Zen/xyntetik-runner.git", "cd xyntetik-runner", "make"].join(
 				"\n",
 			),
-			content: [download, serve("./runner"), cli("./runner")],
+			content: [serve("./runner"), cli("./runner")],
 		},
 	];
 };

@@ -378,12 +378,10 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		const snippet = snippetFunc(model);
 
 		expect(snippet[0].content).toEqual([
-			`# Download the GGUF from the Hub:
-curl -L --create-dirs -o "{{GGUF_FILE}}" "https://huggingface.co/Joakimpalm-Zen/Qwen3-30B-A3B-selective-attnQ8_0-expQ4_0-GGUF/resolve/main/{{GGUF_FILE}}"`,
-			`# Serve it: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080
-runner -m "{{GGUF_FILE}}" --serve`,
+			`# Fetch (once, sha256-verified, cached) and serve: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080
+runner -hf Joakimpalm-Zen/Qwen3-30B-A3B-selective-attnQ8_0-expQ4_0-GGUF:{{QUANT_TAG}} --serve`,
 			`# Or run one prompt in the terminal:
-runner -m "{{GGUF_FILE}}" -p "Hello" -n 64`,
+runner -hf Joakimpalm-Zen/Qwen3-30B-A3B-selective-attnQ8_0-expQ4_0-GGUF:{{QUANT_TAG}} -p "Hello" -n 64`,
 		]);
 	});
 
@@ -398,12 +396,10 @@ runner -m "{{GGUF_FILE}}" -p "Hello" -n 64`,
 		const snippet = snippetFunc(model, "granite-4.1-3b-Q8_0.gguf");
 
 		expect(snippet[1].content).toEqual([
-			`# Download the GGUF from the Hub:
-curl -L --create-dirs -o "granite-4.1-3b-Q8_0.gguf" "https://huggingface.co/ibm-granite/granite-4.1-3b-GGUF/resolve/main/granite-4.1-3b-Q8_0.gguf"`,
-			`# Serve it: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080
-./runner -m "granite-4.1-3b-Q8_0.gguf" --serve`,
+			`# Fetch (once, sha256-verified, cached) and serve: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080
+./runner -hf ibm-granite/granite-4.1-3b-GGUF:Q8_0 --serve`,
 			`# Or run one prompt in the terminal:
-./runner -m "granite-4.1-3b-Q8_0.gguf" -p "Hello" -n 64`,
+./runner -hf ibm-granite/granite-4.1-3b-GGUF:Q8_0 -p "Hello" -n 64`,
 		]);
 		expect(displayOnModelPage({ id: "meta-llama/Llama-3.2-3B-Instruct", tags: ["transformers"], inference: "" })).toBe(
 			false,
