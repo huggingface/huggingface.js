@@ -236,8 +236,7 @@ function isLociModel(model: ModelData): boolean {
 			].includes(model.config.model_type)
 		);
 	}
-	// LiteRT-LM imports currently require one of the app's wired model bundles.
-	return ["litert-community/gemma-4-E2B-it-litert-lm", "litert-community/gemma-4-E4B-it-litert-lm"].includes(model.id);
+	return model.library_name === "litert-lm" || model.tags.includes("litert-lm");
 }
 
 function isUnslothModel(model: ModelData) {
