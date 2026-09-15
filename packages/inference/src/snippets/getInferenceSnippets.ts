@@ -74,7 +74,7 @@ const loadTemplate = (
 	client: Client,
 	templateName: string,
 ): ((data: TemplateParams) => string) => {
-	const template = templates[language]?.[client]?.[templateName];
+	const template = templates[language]?.[client]?.[templateName]?.replace(/\r\n/g, "\n");
 	if (!template) {
 		throw new Error(`Template not found: ${language}/${client}/${templateName}`);
 	}
@@ -222,6 +222,11 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 						}
 				: providerInputs;
 
+		const curlInputs =
+			templateName === "basic" && !opts?.inputs && !inputPreparationFn
+				? { ...providerInputs, inputs: JSON.parse(getModelInputSnippet(model) as string) }
+				: providerInputs;
+
 		/// Prepare template injection data
 		const params: TemplateParams = {
 			accessToken: accessTokenOrPlaceholder,
@@ -243,7 +248,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			},
 			providerInputs: {
 				asObj: providerInputs,
-				asCurlString: formatBody(providerInputs, "curl"),
+				asCurlString: formatBody(curlInputs, "curl"),
 				asJsonString: formatBody(providerInputs, "json"),
 				asPythonString: formatBody(providerInputs, "python"),
 				asTsString: formatBody(providerInputs, "ts"),
@@ -432,7 +437,7 @@ export function getInferenceSnippets(
 function formatBody(obj: object, format: "curl" | "json" | "python" | "ts"): string {
 	switch (format) {
 		case "curl":
-			return indentString(formatBody(obj, "json"));
+			return indentString(formatBody(obj, "json")).replace(/'/g, "'\"'\"'");
 
 		case "json":
 			/// Hacky: remove outer brackets to make is extendable in templates
