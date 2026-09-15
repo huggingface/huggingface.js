@@ -148,7 +148,7 @@ function isLociModel(model: ModelData): boolean {
 	) {
 		return false;
 	}
-	if (isLlamaCppGgufModel(model)) {
+	if (model.gguf || model.tags.includes("gguf") || model.library_name === "gguf") {
 		return !/bert|embed|clip|t5encoder/i.test(model.gguf?.architecture ?? "");
 	}
 	if (isMlxModel(model)) {
