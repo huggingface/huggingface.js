@@ -196,13 +196,6 @@ export const AGENT_HARNESSES = {
 			VTCODE: "1",
 		},
 	},
-	warp: {
-		prettyLabel: "Warp",
-		repoUrl: "https://github.com/warpdotdev/Warp",
-		docsUrl: "https://docs.warp.dev",
-		description: "AI-powered terminal with an agentic Agent Mode.",
-		envVars: { TERM_PROGRAM: "WarpTerminal" },
-	},
 	zed: {
 		prettyLabel: "Zed",
 		repoUrl: "https://github.com/zed-industries/zed",
