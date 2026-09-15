@@ -527,6 +527,34 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetDeel = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const serverStep = getLocalServerStep(model, filepath);
+
+	return [
+		serverStep,
+		{
+			title: "Register the local server with deel",
+			setup: "# No install step needed - npx runs it (Node 20+, zero dependencies):",
+			content: [
+				"# Probes 127.0.0.1 only, finds the running server and saves it:",
+				"npx -y deel-local-cli scan --save",
+				"",
+				"# If the server listens somewhere else:",
+				"# npx -y deel-local-cli scan --save --ports 9000,9100",
+			].join("\n"),
+		},
+		{
+			title: "Run deel in your project",
+			content: [
+				"cd /path/to/your/project",
+				"npx -y deel-local-cli",
+				"",
+				"# Switch server or model any time with /model",
+			].join("\n"),
+		},
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	// Only add quant tag for GGUF models, not safetensors
 	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
@@ -795,6 +823,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	deel: {
+		prettyLabel: "deel",
+		docsUrl: "https://github.com/jysvai/deel-local-cli",
+		mainTask: "text-generation",
+		displayOnModelPage: isToolCallingLocalAgentModel,
+		snippet: snippetDeel,
 	},
 } satisfies Record<string, LocalApp>;
 
