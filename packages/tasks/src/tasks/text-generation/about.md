@@ -71,15 +71,15 @@ text2text_generator("translate from English to French: I'm very happy")
 [{'generated_text': 'Je suis très heureux'}]
 ```
 
-You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer text classification models on Hugging Face Hub.
+You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer text generation models on Hugging Face Hub.
 
 ```javascript
 import { InferenceClient } from "@huggingface/inference";
 
 const inference = new InferenceClient(HF_TOKEN);
-await inference.conversational({
-	model: "distilbert-base-uncased-finetuned-sst-2-english",
-	inputs: "I love this movie!",
+await inference.textGeneration({
+	model: "HuggingFaceH4/zephyr-7b-beta",
+	inputs: "Hello, I'm a language model",
 });
 ```
 
