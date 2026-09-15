@@ -128,6 +128,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
+		"image-text-to-video": new Novita.NovitaImageTextToVideoTask(),
 		"text-generation": new Novita.NovitaTextGenerationTask(),
 		"text-to-video": new Novita.NovitaTextToVideoTask(),
 	},
