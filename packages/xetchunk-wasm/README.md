@@ -1,6 +1,6 @@
 # @huggingface/xetchunk-wasm
 
-Content-defined chunking and hashing for Hugging Face [Xet storage](https://huggingface.co/docs/hub/storage-regions), matching the [Rust reference implementation](https://github.com/huggingface/xet-core/blob/main/deduplication/src/chunking.rs).
+Content-defined chunking and hashing for Hugging Face [Xet storage](https://huggingface.co/docs/hub/storage-regions), matching the [Rust reference implementation](https://github.com/huggingface/xet-core/blob/main/xet_data/src/deduplication/chunking.rs).
 
 Uses [`gearhash-jit`](https://www.npmjs.com/package/gearhash-jit) for fast GEAR rolling hash boundary detection and [`@huggingface/blake3-jit`](https://www.npmjs.com/package/@huggingface/blake3-jit) for BLAKE3 chunk hashing.
 
