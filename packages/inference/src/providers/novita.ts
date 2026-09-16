@@ -118,6 +118,9 @@ export class NovitaImageTextToVideoTask extends TaskProviderHelper implements Im
 			...restParameters
 		} = params.args.parameters ?? {};
 		const imageUrl = params.args.inputs;
+		if (!prompt?.trim()) {
+			throw new InferenceClientInputError("Novita MiniMax H3 requires a non-empty parameters.prompt.");
+		}
 
 		return {
 			...omit(restParameters, ["guidance_scale", "negative_prompt", "num_inference_steps", "seed"]),
