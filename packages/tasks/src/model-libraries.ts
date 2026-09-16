@@ -574,6 +574,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TencentARC/GeometryCrafter",
 		countDownloads: `path:"point_map_vae/diffusion_pytorch_model.safetensors"`,
 	},
+	gliformer: {
+    prettyLabel: "GLiFormer",
+    repoName: "GLiFormer",
+    repoUrl: "https://github.com/Knowledgator/GLiFormer",
+    filter: false,
+    countDownloads: `path:"gliner_config.json"`,
+  },
 	gliner: {
 		prettyLabel: "GLiNER",
 		repoName: "GLiNER",
