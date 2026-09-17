@@ -7,7 +7,7 @@ import { RangeList } from "./RangeList";
 import { StreamingMultipartParser } from "./multipart";
 import { sum } from "./sum";
 import { isFrontend } from "./isFrontend";
-import { defaultFetch } from "./defaultFetch";
+import { xetFetch } from "./xetFetch";
 import { concatUint8Arrays } from "./concatUint8Arrays";
 
 const JWT_SAFETY_PERIOD = 60_000;
@@ -313,7 +313,7 @@ export class XetBlob extends Blob {
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
 
-		this.fetch = params.fetch ?? defaultFetch;
+		this.fetch = params.fetch ?? xetFetch;
 		this.accessToken = checkCredentials(params);
 		this.refreshUrl = params.refreshUrl;
 		this.end = params.size;
