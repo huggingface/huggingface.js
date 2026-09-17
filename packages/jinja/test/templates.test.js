@@ -6421,6 +6421,42 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("String case filters", () => {
+		// Both filters lower-case everything after each word's first character, and `title`
+		// only breaks words on "-", whitespace, "(", "{", "[" and "<" — not on "'" or ".".
+		// Verified against Python jinja2 3.1.6.
+		it.each([
+			["hello WORLD", "Hello world", "Hello World"],
+			["HELLO", "Hello", "Hello"],
+			["hELLO wORLD", "Hello world", "Hello World"],
+			["ABC def", "Abc def", "Abc Def"],
+			["don't stop", "Don't stop", "Don't Stop"],
+			["x.y z", "X.y z", "X.y Z"],
+			["o'NEIL", "O'neil", "O'neil"],
+			["foo-bar baz", "Foo-bar baz", "Foo-Bar Baz"],
+			["3rd PLACE", "3rd place", "3rd Place"],
+			["ÉCOLE test", "École test", "École Test"],
+			["", "", ""],
+			// Astral letters: indexing by UTF-16 code unit would split the surrogate pair.
+			["\u{10428}bc", "\u{10400}bc", "\u{10400}bc"],
+			// `capitalize` title-cases the first character, `title` upper-cases it.
+			["\u00dfabc", "Ssabc", "SSabc"],
+			["\ufb01ne DAY", "Fine day", "FIne Day"],
+			["\u0131stanbul", "Istanbul", "Istanbul"],
+			// Python's `\s` covers U+0085 and U+001C-U+001F; JS's does not.
+			["a\u0085b", "A\u0085b", "A\u0085B"],
+			["a\u001cb", "A\u001cb", "A\u001cB"],
+			// ...and JS's `\s` covers U+FEFF, which Python does not treat as a separator.
+			["a\ufeffB", "A\ufeffb", "A\ufeffb"],
+		])("%o capitalizes and titles like Python", (input, capitalized, titled) => {
+			expect(new Template("{{ s|capitalize }}").render({ s: input })).toEqual(capitalized);
+			expect(new Template("{{ s|title }}").render({ s: input })).toEqual(titled);
+			// The method forms share the same builtins as the filters.
+			expect(new Template("{{ s.capitalize() }}").render({ s: input })).toEqual(capitalized);
+			expect(new Template("{{ s.title() }}").render({ s: input })).toEqual(titled);
+		});
+	});
+
 	describe("Macros and call statements", () => {
 		it.each([
 			{
