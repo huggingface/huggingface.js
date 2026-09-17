@@ -16,10 +16,6 @@ export interface TextRankingInputData {
 	 */
 	query: string;
 	/**
-	 * Whether to include the document text in the output.
-	 */
-	return_documents?: boolean;
-	/**
 	 * The documents to rank.
 	 */
 	texts: string[];
@@ -38,9 +34,5 @@ export interface TextRankingOutputElement {
 	 * The relevance score of the document.
 	 */
 	score: number;
-	/**
-	 * The document text, included when return_documents is true.
-	 */
-	text?: string;
 	[property: string]: unknown;
 }

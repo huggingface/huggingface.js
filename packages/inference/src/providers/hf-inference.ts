@@ -617,14 +617,13 @@ export class HFInferenceTextRankingTask extends HFInferenceTask implements TextR
 					item !== null &&
 					Number.isInteger(item.index) &&
 					item.index >= 0 &&
-					typeof item.score === "number" &&
-					(item.text === undefined || typeof item.text === "string"),
+					typeof item.score === "number",
 			)
 		) {
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference text-ranking API: expected Array<{ index: number, score: number, text?: string }>",
+			"Received malformed response from HF-Inference text-ranking API: expected Array<{ index: number, score: number }>",
 		);
 	}
 }

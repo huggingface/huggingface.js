@@ -435,8 +435,7 @@ await hf.textRanking({
       'Mars, known for its reddish appearance, is often referred to as the Red Planet.',
       'Jupiter, the largest planet in our solar system, has a prominent red spot.',
       'Saturn, famous for its rings, is sometimes mistaken for the Red Planet.'
-    ],
-    return_documents: true
+    ]
   }
 })
 ```

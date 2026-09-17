@@ -16,10 +16,6 @@
 			"score": {
 				"type": "number",
 				"description": "The relevance score of the document."
-			},
-			"text": {
-				"type": "string",
-				"description": "The document text, included when return_documents is true."
 			}
 		},
 		"required": ["index", "score"]

@@ -19,11 +19,6 @@
 						"type": "string"
 					},
 					"description": "The documents to rank."
-				},
-				"return_documents": {
-					"type": "boolean",
-					"default": false,
-					"description": "Whether to include the document text in the output."
 				}
 			},
 			"required": ["query", "texts"]
