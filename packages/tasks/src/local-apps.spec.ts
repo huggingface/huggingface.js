@@ -366,4 +366,34 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			{ label: "Releases", url: "https://github.com/bartowski/Llama-3.2-3B-Instruct-GGUF/releases" },
 		]);
 	});
+
+	it("mtplx", async () => {
+		const { snippet: snippetFunc, displayOnModelPage } = LOCAL_APPS["mtplx"];
+		const model: ModelData = {
+			id: "Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed",
+			pipeline_tag: "text-generation",
+			tags: ["mlx", "mtplx", "conversational"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		const snippet = snippetFunc(model);
+		expect(snippet[0].content).toEqual(`# Download the pack if needed and start a chat
+mtplx start cli --model "Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed" --download`);
+		expect(snippet[1].content)
+			.toEqual(`# Serve on http://127.0.0.1:8000, then point OpenCode, Claude Code or any OpenAI client at /v1
+mtplx serve --model "Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed" --download`);
+	});
+
+	it("mtplx not shown for an MLX model without the mtplx tag", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["mtplx"];
+		const model: ModelData = {
+			id: "mlx-community/Qwen3.8-27B-4bit",
+			pipeline_tag: "text-generation",
+			tags: ["mlx", "conversational"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
 });

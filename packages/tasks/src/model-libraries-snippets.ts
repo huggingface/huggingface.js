@@ -2781,6 +2781,17 @@ export const mlx = (model: ModelData): string[] => {
 	return mlx_unknown(model);
 };
 
+export const mtplx = (model: ModelData): string[] => [
+	`# Install MTPLX with Homebrew, or download the Mac app from https://mtplx.com
+brew install youssofal/mtplx/mtplx
+
+# Download the pack if needed and start a chat in the terminal
+mtplx start cli --model "${model.id}" --download
+
+# Or serve an OpenAI and Anthropic compatible API on http://127.0.0.1:8000
+mtplx serve --model "${model.id}" --download`,
+];
+
 export const model2vec = (model: ModelData): string[] => [
 	`from model2vec import StaticModel
 
