@@ -19,13 +19,15 @@ defaults:
   run:
     working-directory: packages/agents
 
-permissions:
-  contents: write
-  id-token: write
-  packages: write
+
+permissions: {}
 
 jobs:
   version_and_release:
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -46,9 +48,11 @@ jobs:
       - run: pnpm install
       - run: git config --global user.name machineuser
       - run: git config --global user.email infra+machineuser@huggingface.co
-      - run: |
+      - env:
+          NEW_VERSION: ${{ github.event.inputs.newversion }}
+        run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
+          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', process.env.NEW_VERSION)")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           pnpm --filter doc-internal run fix-cdn-versions
