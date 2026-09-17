@@ -64,14 +64,14 @@ async function getHttp1Dispatcher(): Promise<Dispatcher | undefined> {
  * force HTTP/1.1, which uses TCP's autotuned receive window instead. Falls back to the plain fetch if
  * the global dispatcher cannot be found.
  */
-const http1Fetch: typeof fetch = async (input, init) => {
+const undiciHttp1Fetch: typeof fetch = async (input, init) => {
 	const dispatcher = await getHttp1Dispatcher();
 	return dispatcher ? fetch(input, { ...init, dispatcher } as RequestInit) : fetch(input, init);
 };
 
 /**
- * The fetch used for xet downloads when the caller does not pass one. On Node >= 26 it forces HTTP/1.1;
- * everywhere else it is the global fetch, looked up at call time so test doubles installed on
- * `globalThis` still apply.
+ * The fetch used for xet downloads when the caller does not pass one. Only Node >= 26 actually forces
+ * HTTP/1.1; on every other runtime there is nothing to force and this is the global fetch, looked up at
+ * call time so test doubles installed on `globalThis` still apply.
  */
-export const xetFetch: typeof fetch = hasH2Fetch() ? http1Fetch : (input, init) => fetch(input, init);
+export const http1Fetch: typeof fetch = hasH2Fetch() ? undiciHttp1Fetch : (input, init) => fetch(input, init);

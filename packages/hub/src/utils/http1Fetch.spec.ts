@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasH2Fetch, withHttp1, type Dispatcher } from "./xetFetch";
+import { hasH2Fetch, withHttp1, type Dispatcher } from "./http1Fetch";
 
 describe("hasH2Fetch", () => {
 	it("matches Node with undici >= 8", () => {
