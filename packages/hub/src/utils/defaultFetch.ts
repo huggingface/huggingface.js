@@ -70,7 +70,7 @@ const http1Fetch: typeof fetch = async (input, init) => {
 };
 
 /**
- * The fetch used for downloads when the caller does not pass one. On Node >= 26 it forces HTTP/1.1;
+ * The fetch used for xet downloads when the caller does not pass one. On Node >= 26 it forces HTTP/1.1;
  * everywhere else it is the global fetch, looked up at call time so test doubles installed on
  * `globalThis` still apply.
  */
