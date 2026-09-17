@@ -229,6 +229,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
 		snippets: snippets.cartesia_mlx,
 	},
+	causilo: {
+		prettyLabel: "Causilo",
+		repoName: "Causilo",
+		repoUrl: "https://github.com/nums-ai/causilo",
+		filter: false,
+		countDownloads: `path:"classifier/config.json" OR path:"regressor/config.json"`,
+	},
 	ccpfn: {
 		prettyLabel: "CCPFN",
 		repoName: "CCPFN",
@@ -566,6 +573,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "GeometryCrafter",
 		repoUrl: "https://github.com/TencentARC/GeometryCrafter",
 		countDownloads: `path:"point_map_vae/diffusion_pytorch_model.safetensors"`,
+	},
+	gliformer: {
+		prettyLabel: "GLiFormer",
+		repoName: "GLiFormer",
+		repoUrl: "https://github.com/Knowledgator/GLiFormer",
+		filter: false,
+		countDownloads: `path:"gliner_config.json"`,
 	},
 	gliner: {
 		prettyLabel: "GLiNER",

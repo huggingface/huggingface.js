@@ -1509,8 +1509,6 @@ async function getAccessToken(
 			casUrl: json.casUrl,
 		};
 
-		jwtPromises.delete(key);
-
 		for (const [key, value] of jwts.entries()) {
 			if (value.expiresAt < new Date(Date.now() + JWT_SAFETY_PERIOD)) {
 				jwts.delete(key);
@@ -1530,7 +1528,11 @@ async function getAccessToken(
 			accessToken: json.accessToken,
 			casUrl: json.casUrl,
 		};
-	})();
+	})().finally(() => {
+		// Drop the in-flight entry whether the refresh succeeded or failed: a
+		// rejected promise left here would be handed back to every later caller.
+		jwtPromises.delete(key);
+	});
 
 	jwtPromises.set(key, promise);
 
