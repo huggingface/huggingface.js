@@ -5,13 +5,13 @@ on:
   schedule:
     - cron: "0 7 * * 1" # every monday at 7am, so I'll review it after having a 🥐
 
-permissions:
-  pull-requests: write # for creating PR
-  issues: write # for adding labels to the created PR
-  contents: write # for git push new branch
+
+permissions: {}
 
 jobs:
   update-ollama-templates:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

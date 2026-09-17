@@ -23,16 +23,18 @@ defaults:
   run:
     working-directory: packages/inference
 
-permissions:
-  contents: write
-  id-token: write
-  packages: write
+
+permissions: {}
 
 jobs:
   version_and_release:
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Needed to push the tag and the commit on the main branch, otherwise we get:
           # > Run git push --follow-tags
@@ -40,7 +42,7 @@ jobs:
           # remote: error: Changes must be made through a pull request. Required status check "lint" is expected.
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
       - run: npm install -g corepack@latest && corepack enable
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24"
           cache: "pnpm"
@@ -52,7 +54,7 @@ jobs:
       - run: git config --global user.email infra+machineuser@huggingface.co
       - run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
+          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', process.env.NEW_VERSION)")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           pnpm --filter inference package-to-ts
@@ -61,6 +63,8 @@ jobs:
           git commit -m "🔖 @huggingface/inference $BUMPED_VERSION"
           git tag "inference-v$BUMPED_VERSION"
           echo "RELEASE_TAG=inference-v$BUMPED_VERSION" >> $GITHUB_ENV
+        env:
+          NEW_VERSION: ${{ github.event.inputs.newversion }}
 
       - if: ${{ !github.event.inputs.bypass_deps_check }}
         name: "Check Deps are published before publishing this package"
@@ -70,7 +74,7 @@ jobs:
 
       - run: pnpm publish --no-git-checks .
       # hack - reuse actions/setup-node@v4 just to set a new registry
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24"
           registry-url: "https://npm.pkg.github.com"
