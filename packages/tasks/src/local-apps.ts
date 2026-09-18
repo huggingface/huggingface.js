@@ -119,6 +119,10 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
+function isMtplxModel(model: ModelData) {
+	return model.tags.includes("mtplx");
+}
+
 /**
  * Returns the model's chat template string, coalescing across sources:
  * GGUF metadata > chat_template_jinja file > tokenizer_config.json
@@ -435,6 +439,31 @@ const getLocalServerStep = (model: ModelData, filepath?: string): LocalAppSnippe
 			};
 };
 
+const snippetMtplx = (model: ModelData): LocalAppSnippet[] => {
+	const setup = [
+		"# Install MTPLX with Homebrew, or download the Mac app from https://mtplx.com",
+		"brew install youssofal/mtplx/mtplx",
+	].join("\n");
+	return [
+		{
+			title: "Chat with the model in the terminal",
+			setup,
+			content: [
+				"# Download the pack if needed and start a chat",
+				`mtplx start cli --model "${model.id}" --download`,
+			].join("\n"),
+		},
+		{
+			title: "Run an OpenAI and Anthropic compatible server",
+			setup,
+			content: [
+				"# Serve on http://127.0.0.1:8000, then point OpenCode, Claude Code or any OpenAI client at /v1",
+				`mtplx serve --model "${model.id}" --download`,
+			].join("\n"),
+		},
+	];
+};
+
 const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const isMLX = isMlxModel(model);
 	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
@@ -623,6 +652,14 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
 		snippet: snippetMlxLm,
+	},
+	mtplx: {
+		prettyLabel: "MTPLX",
+		docsUrl: "https://mtplx.com",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMtplxModel(model),
+		snippet: snippetMtplx,
 	},
 	tgi: {
 		prettyLabel: "TGI",
