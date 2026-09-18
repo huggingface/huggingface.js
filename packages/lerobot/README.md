@@ -19,12 +19,9 @@ This package hides that difference behind one `LeRobotEpisode` shape.
 npm install @huggingface/lerobot
 ```
 
-Reading `v3.0` datasets additionally needs [hyparquet](https://github.com/hyparam/hyparquet), declared
-as an optional peer dependency:
-
-```bash
-npm install hyparquet
-```
+[hyparquet](https://github.com/hyparam/hyparquet) comes with it, and is used to read the `v3.0`
+episode index. It is imported on demand, so callers that only need `info()` or a `v2` dataset never
+load it.
 
 ## Usage
 

@@ -40,17 +40,11 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {
-		"@types/node": "^20.12.8",
+	"dependencies": {
 		"hyparquet": "^1.25.1"
 	},
-	"peerDependencies": {
-		"hyparquet": ">=1.10.0"
-	},
-	"peerDependenciesMeta": {
-		"hyparquet": {
-			"optional": true
-		}
+	"devDependencies": {
+		"@types/node": "^20.12.8"
 	},
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
