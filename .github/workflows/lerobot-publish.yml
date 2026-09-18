@@ -26,6 +26,8 @@ jobs:
   version_and_release:
     permissions:
       contents: write
+      # Required for npm trusted publishing (OIDC); the npmjs publish step has no NODE_AUTH_TOKEN.
+      id-token: write
       packages: write
     runs-on: ubuntu-latest
     steps:
