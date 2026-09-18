@@ -1,7 +1,7 @@
 import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
-import { fetchRange, fetchTextPrefix, openRemoteFile } from "./http";
+import { fetchRange, fetchTextPrefix, HttpError, openRemoteFile } from "./http";
 import { formatPathTemplate } from "./paths";
 
 /** v3 keeps its episode index in parquet under a fixed layout; the path is not templated in info.json. */
@@ -14,6 +14,8 @@ export function episodesMetadataPath(chunkIndex: number, fileIndex: number): str
 /** Enough for ~10 episodes of `meta/episodes.jsonl`; grown geometrically when it is not. */
 const JSONL_INITIAL_PREFIX_BYTES = 8 * 1024;
 const JSONL_MAX_PREFIX_BYTES = 4 * 1024 * 1024;
+/** Bounds the shard walk so a pathological `offset` cannot loop forever (CWE-835). */
+const MAX_INDEX_FILES = 64;
 
 function toNumber(value: unknown): number | undefined {
 	if (typeof value === "bigint") {
@@ -104,17 +106,26 @@ async function readEpisodesV2(
 	let prefixBytes = JSONL_INITIAL_PREFIX_BYTES;
 
 	for (;;) {
-		const text = await fetchTextPrefix(url, prefixBytes, options);
+		const { text, byteLength } = await fetchTextPrefix(url, prefixBytes, options);
+		/// `byteLength`, not `text.length`: a UTF-8 string is shorter than its byte count for any
+		/// non-ASCII task description, which would otherwise look like end-of-file.
+		const reachedEof = byteLength < prefixBytes;
 		const lines = text.split("\n");
 		/// A prefix read almost always cuts the final line in half, so drop it unless we reached EOF.
-		const complete = text.length < prefixBytes ? lines : lines.slice(0, -1);
+		const complete = reachedEof ? lines : lines.slice(0, -1);
 		const parsed: RawEpisode[] = [];
 
 		for (const line of complete) {
 			if (line.trim().length === 0) {
 				continue;
 			}
-			const row: unknown = JSON.parse(line);
+			let row: unknown;
+			try {
+				row = JSON.parse(line);
+			} catch {
+				/// One malformed line should not fail the whole listing.
+				continue;
+			}
 			if (typeof row !== "object" || row === null) {
 				continue;
 			}
@@ -127,7 +138,7 @@ async function readEpisodesV2(
 			parsed.push({ index, length, tasks: toTasks(record.tasks) });
 		}
 
-		if (parsed.length >= wanted || text.length < prefixBytes || prefixBytes >= JSONL_MAX_PREFIX_BYTES) {
+		if (parsed.length >= wanted || reachedEof || prefixBytes >= JSONL_MAX_PREFIX_BYTES) {
 			return parsed.slice(offset, wanted);
 		}
 		prefixBytes = Math.min(prefixBytes * 4, JSONL_MAX_PREFIX_BYTES);
@@ -141,6 +152,7 @@ interface HyparquetModule {
 		rowStart?: number;
 		rowEnd?: number;
 	}): Promise<Record<string, unknown>[]>;
+	parquetMetadataAsync(file: RandomAccessFile): Promise<{ num_rows: number | bigint }>;
 }
 
 async function loadHyparquet(): Promise<HyparquetModule> {
@@ -153,7 +165,42 @@ async function loadHyparquet(): Promise<HyparquetModule> {
 	}
 }
 
-/** Reads the v3.0 episode index under `meta/episodes/`. */
+function toRawEpisodeV3(row: Record<string, unknown>, info: LeRobotInfo): RawEpisode {
+	const index = toNumber(row.episode_index) ?? 0;
+	const length = toNumber(row.length) ?? 0;
+	const videos: NonNullable<RawEpisode["v3"]>["videos"] = {};
+
+	for (const camera of info.cameras) {
+		const prefix = `videos/${camera.key}/`;
+		videos[camera.key] = {
+			chunk: toNumber(row[`${prefix}chunk_index`]) ?? 0,
+			file: toNumber(row[`${prefix}file_index`]) ?? 0,
+			fromSec: toNumber(row[`${prefix}from_timestamp`]) ?? 0,
+			toSec: toNumber(row[`${prefix}to_timestamp`]) ?? length / info.fps,
+		};
+	}
+
+	return {
+		index,
+		length,
+		tasks: toTasks(row.tasks),
+		v3: {
+			dataChunk: toNumber(row["data/chunk_index"]) ?? 0,
+			dataFile: toNumber(row["data/file_index"]) ?? 0,
+			fromRow: toNumber(row.dataset_from_index) ?? 0,
+			toRow: toNumber(row.dataset_to_index) ?? length,
+			videos,
+		},
+	};
+}
+
+/**
+ * Reads the v3.0 episode index under `meta/episodes/`.
+ *
+ * The index is sharded: `chunks_size` files per chunk directory, so a request can span several of
+ * them. Files are walked in order, skipping whole shards that fall before `offset` using only their
+ * parquet footer, and stopping at the first missing shard.
+ */
 async function readEpisodesV3(
 	toUrl: (path: string) => string,
 	info: LeRobotInfo,
@@ -161,38 +208,43 @@ async function readEpisodesV3(
 	limit: number,
 	options?: FetchOptions,
 ): Promise<RawEpisode[]> {
-	const { parquetReadObjects } = await loadHyparquet();
-	const file = await openRemoteFile(toUrl(episodesMetadataPath(0, 0)), options);
-	const rows = await parquetReadObjects({ file, rowStart: offset, rowEnd: offset + limit });
+	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
+	const collected: RawEpisode[] = [];
+	let chunkIndex = 0;
+	let fileIndex = 0;
+	let seen = 0;
 
-	return rows.map((row: Record<string, unknown>): RawEpisode => {
-		const index = toNumber(row.episode_index) ?? 0;
-		const length = toNumber(row.length) ?? 0;
-		const videos: NonNullable<RawEpisode["v3"]>["videos"] = {};
-
-		for (const camera of info.cameras) {
-			const prefix = `videos/${camera.key}/`;
-			videos[camera.key] = {
-				chunk: toNumber(row[`${prefix}chunk_index`]) ?? 0,
-				file: toNumber(row[`${prefix}file_index`]) ?? 0,
-				fromSec: toNumber(row[`${prefix}from_timestamp`]) ?? 0,
-				toSec: toNumber(row[`${prefix}to_timestamp`]) ?? length / info.fps,
-			};
+	for (let visited = 0; visited < MAX_INDEX_FILES && collected.length < limit; visited++) {
+		let file: RandomAccessFile;
+		try {
+			file = await openRemoteFile(toUrl(episodesMetadataPath(chunkIndex, fileIndex)), options);
+		} catch (error) {
+			if (!(error instanceof HttpError) || error.status !== 404) {
+				throw error;
+			}
+			/// Files run out within a chunk before the chunk itself runs out.
+			if (fileIndex === 0) {
+				break;
+			}
+			chunkIndex++;
+			fileIndex = 0;
+			continue;
 		}
 
-		return {
-			index,
-			length,
-			tasks: toTasks(row.tasks),
-			v3: {
-				dataChunk: toNumber(row["data/chunk_index"]) ?? 0,
-				dataFile: toNumber(row["data/file_index"]) ?? 0,
-				fromRow: toNumber(row.dataset_from_index) ?? 0,
-				toRow: toNumber(row.dataset_to_index) ?? length,
-				videos,
-			},
-		};
-	});
+		const rowCount = Number((await parquetMetadataAsync(file)).num_rows);
+		if (seen + rowCount > offset) {
+			const rowStart = Math.max(0, offset - seen);
+			const rowEnd = Math.min(rowCount, offset + limit - seen);
+			const rows = await parquetReadObjects({ file, rowStart, rowEnd });
+			for (const row of rows) {
+				collected.push(toRawEpisodeV3(row, info));
+			}
+		}
+		seen += rowCount;
+		fileIndex++;
+	}
+
+	return collected;
 }
 
 export async function readEpisodes(

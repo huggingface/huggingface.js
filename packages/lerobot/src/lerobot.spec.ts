@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { formatPathTemplate, isSafeRepoPath, LeRobotDataset, parseInfo, resolveUrl } from "./index";
 
 /**
@@ -239,6 +239,121 @@ describe("v2 and v3 agree", () => {
 				episodes.map((episode) => ({ index: episode.index, length: episode.length, tasks: episode.tasks }));
 
 			expect(summary(v21)).toEqual(summary(v30));
+		},
+		TIMEOUT,
+	);
+});
+
+/** Minimal in-memory origin with Range support, so shard-walking can be exercised deterministically. */
+function mockFetch(files: Record<string, Uint8Array>, seen?: string[]): typeof fetch {
+	return (async (input: RequestInfo | URL, init?: RequestInit) => {
+		const url = String(input);
+		const path = url.split("/resolve/")[1].split("/").slice(1).join("/");
+		seen?.push(path);
+		const body = files[path];
+		if (body === undefined) {
+			return new Response(null, { status: 404 });
+		}
+		const range = new Headers(init?.headers).get("Range");
+		const match = range?.match(/^bytes=(-?\d+)-(\d*)$/);
+		if (!match) {
+			return new Response(body as BodyInit, { status: 200 });
+		}
+		const first = Number(match[1]);
+		const start = first < 0 ? Math.max(0, body.byteLength + first) : first;
+		const end = match[2] === "" ? body.byteLength - 1 : Math.min(Number(match[2]), body.byteLength - 1);
+		const slice = body.slice(start, end + 1);
+		return new Response(slice as BodyInit, {
+			status: 206,
+			headers: { "content-range": `bytes ${start}-${end}/${body.byteLength}` },
+		});
+	}) as typeof fetch;
+}
+
+const encoder = new TextEncoder();
+
+describe("v2 prefix reads are byte-accurate", () => {
+	/// A long non-ASCII task makes the decoded string much shorter than its byte count, which used to
+	/// look like end-of-file and cut the listing short.
+	const task = "ranger le cube rouge dans la boîte transparente à côté de l'étagère ".repeat(24);
+	const jsonl =
+		Array.from({ length: 40 }, (_, index) =>
+			JSON.stringify({ episode_index: index, tasks: [task], length: 100 + index }),
+		).join("\n") + "\n";
+
+	it("returns the requested count when the prefix is full of multi-byte text", async () => {
+		const bytes = encoder.encode(jsonl);
+		expect(bytes.byteLength).toBeGreaterThan(8 * 1024);
+		expect(jsonl.length).toBeLessThan(bytes.byteLength);
+
+		const dataset = new LeRobotDataset(REPO_ID, {
+			revision: REV_V21,
+			fetch: mockFetch({
+				"meta/info.json": encoder.encode(
+					JSON.stringify({
+						codebase_version: "v2.1",
+						fps: 30,
+						total_episodes: 40,
+						chunks_size: 1000,
+						data_path: "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet",
+					}),
+				),
+				"meta/episodes.jsonl": bytes,
+			}),
+		});
+
+		const episodes = await dataset.episodes({ limit: 10 });
+		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+		expect(episodes[9]?.length).toBe(109);
+		expect(episodes[0]?.tasks[0]).toBe(task);
+	});
+});
+
+describe("v3 index sharding", () => {
+	let indexShard: Uint8Array;
+	let infoJson: Uint8Array;
+
+	beforeAll(async () => {
+		const base = `https://huggingface.co/datasets/${REPO_ID}/resolve/${REV_V30}`;
+		const [index, info] = await Promise.all([
+			fetch(`${base}/meta/episodes/chunk-000/file-000.parquet`).then((r) => r.arrayBuffer()),
+			fetch(`${base}/meta/info.json`).then((r) => r.arrayBuffer()),
+		]);
+		indexShard = new Uint8Array(index);
+		infoJson = new Uint8Array(info);
+	}, TIMEOUT);
+
+	it(
+		"walks into later shards when the range spans them",
+		async () => {
+			const seen: string[] = [];
+			/// The same 50-episode shard served twice, so the index looks like two shards.
+			const dataset = new LeRobotDataset(REPO_ID, {
+				revision: REV_V30,
+				fetch: mockFetch(
+					{
+						"meta/info.json": infoJson,
+						"meta/episodes/chunk-000/file-000.parquet": indexShard,
+						"meta/episodes/chunk-000/file-001.parquet": indexShard,
+					},
+					seen,
+				),
+			});
+
+			const episodes = await dataset.episodes({ offset: 48, limit: 4 });
+			expect(episodes).toHaveLength(4);
+			expect(seen).toContain("meta/episodes/chunk-000/file-001.parquet");
+			/// Two from the tail of the first shard, two from the head of the second.
+			expect(episodes.map((episode) => episode.index)).toEqual([48, 49, 0, 1]);
+		},
+		TIMEOUT,
+	);
+
+	it(
+		"stops cleanly when the offset is past the end",
+		async () => {
+			const dataset = new LeRobotDataset(REPO_ID, { revision: REV_V30 });
+			await expect(dataset.episodes({ offset: 10_000, limit: 5 })).resolves.toEqual([]);
 		},
 		TIMEOUT,
 	);

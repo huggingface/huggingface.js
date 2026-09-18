@@ -52,7 +52,7 @@ export class LeRobotDataset {
 	/** Parsed `meta/info.json`. Memoized for the lifetime of this instance. */
 	info(): Promise<LeRobotInfo> {
 		this.infoPromise ??= fetchTextPrefix(this.fileUrl("meta/info.json"), MAX_INFO_BYTES, this.fetchOptions).then(
-			parseInfo,
+			({ text }) => parseInfo(text),
 		);
 		return this.infoPromise;
 	}
@@ -72,8 +72,8 @@ export class LeRobotDataset {
 export { parseInfo } from "./info";
 export { formatPathTemplate, isSafeRepoPath, MAX_INFO_BYTES, resolveUrl } from "./paths";
 export { episodesMetadataPath } from "./episodes";
-export { fetchRange, fetchTextPrefix, openRemoteFile } from "./http";
-export type { FetchOptions, RandomAccessFile, RangeResult } from "./http";
+export { fetchRange, fetchTextPrefix, HttpError, openRemoteFile } from "./http";
+export type { FetchOptions, RandomAccessFile, RangeResult, TextPrefix } from "./http";
 export type {
 	LeRobotCamera,
 	LeRobotCodebaseVersion,

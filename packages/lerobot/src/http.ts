@@ -26,12 +26,23 @@ function parseTotalFromContentRange(contentRange: string | null): number | undef
 	return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : undefined;
 }
 
+/** Thrown for any non-2xx response, carrying the status so callers can special-case 404. */
+export class HttpError extends Error {
+	constructor(
+		message: string,
+		public readonly status: number,
+	) {
+		super(message);
+		this.name = "HttpError";
+	}
+}
+
 async function request(url: string, headers: Record<string, string>, options?: FetchOptions): Promise<Response> {
 	const response = await (options?.fetch ?? fetch)(url, {
 		headers: { ...(options?.additionalFetchHeaders ?? {}), ...headers },
 	});
 	if (!response.ok) {
-		throw new Error(`Failed to fetch ${url} (HTTP ${response.status})`);
+		throw new HttpError(`Failed to fetch ${url} (HTTP ${response.status})`, response.status);
 	}
 	return response;
 }
@@ -51,10 +62,19 @@ export async function fetchRange(
 	};
 }
 
+export interface TextPrefix {
+	text: string;
+	/**
+	 * Bytes actually returned. Compare this, never `text.length`, when deciding whether a prefix read
+	 * reached the end of the file: a UTF-8 string is shorter than its byte count for any non-ASCII input.
+	 */
+	byteLength: number;
+}
+
 /** Reads at most `maxBytes` from the start of a file and decodes it as UTF-8. */
-export async function fetchTextPrefix(url: string, maxBytes: number, options?: FetchOptions): Promise<string> {
+export async function fetchTextPrefix(url: string, maxBytes: number, options?: FetchOptions): Promise<TextPrefix> {
 	const { bytes } = await fetchRange(url, 0, maxBytes - 1, options);
-	return new TextDecoder().decode(bytes);
+	return { text: new TextDecoder().decode(bytes), byteLength: bytes.byteLength };
 }
 
 const TAIL_PROBE_BYTES = 64 * 1024;
