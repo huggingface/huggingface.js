@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/lerobot",
 	"packageManager": "pnpm@10.10.0",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Parser for LeRobot robotics datasets hosted on the Hugging Face Hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -40,17 +40,11 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {
-		"@types/node": "^20.12.8",
+	"dependencies": {
 		"hyparquet": "^1.25.1"
 	},
-	"peerDependencies": {
-		"hyparquet": ">=1.10.0"
-	},
-	"peerDependenciesMeta": {
-		"hyparquet": {
-			"optional": true
-		}
+	"devDependencies": {
+		"@types/node": "^20.12.8"
 	},
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",

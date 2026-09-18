@@ -145,24 +145,12 @@ async function readEpisodesV2(
 	}
 }
 
-/** The slice of hyparquet this package uses, declared locally so its types stay optional. */
-interface HyparquetModule {
-	parquetReadObjects(options: {
-		file: RandomAccessFile;
-		rowStart?: number;
-		rowEnd?: number;
-	}): Promise<Record<string, unknown>[]>;
-	parquetMetadataAsync(file: RandomAccessFile): Promise<{ num_rows: number | bigint }>;
-}
-
-async function loadHyparquet(): Promise<HyparquetModule> {
-	try {
-		return (await import("hyparquet")) as unknown as HyparquetModule;
-	} catch {
-		throw new Error(
-			"Reading a v3.0 LeRobot dataset needs the optional peer dependency `hyparquet`. Install it with `npm install hyparquet`.",
-		);
-	}
+/**
+ * hyparquet is a hard dependency but is still loaded on demand: callers that only need `info()` or a
+ * v2 dataset never pay for the parquet reader.
+ */
+async function loadHyparquet() {
+	return import("hyparquet");
 }
 
 function toRawEpisodeV3(row: Record<string, unknown>, info: LeRobotInfo): RawEpisode {
