@@ -1672,6 +1672,9 @@ describe.skip("InferenceClient", () => {
 			const FE_HF_MODEL = "Qwen/Qwen3-Embedding-0.6B";
 			const FE_PROVIDER_ID = "Qwen/Qwen3-Embedding-0.6B";
 
+			const T2I_HF_MODEL = "stabilityai/sdxl-turbo";
+			const T2I_PROVIDER_ID = "stabilityai/sdxl-turbo";
+
 			const setMapping = (task: "conversational" | "text-generation") => {
 				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
 					[HF_MODEL]: {
@@ -1716,6 +1719,18 @@ describe.skip("InferenceClient", () => {
 						providerId: FE_PROVIDER_ID,
 						status: "live",
 						task: "feature-extraction",
+					},
+				};
+			};
+
+			const setTextToImageMapping = () => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[T2I_HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: T2I_HF_MODEL,
+						providerId: T2I_PROVIDER_ID,
+						status: "live",
+						task: "text-to-image",
 					},
 				};
 			};
@@ -1803,6 +1818,28 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(Array.isArray(res)).toBe(true);
 				expect(res.length).toBeGreaterThan(0);
+			});
+
+			it("textToImage", async () => {
+				setTextToImageMapping();
+				const res = await client.textToImage({
+					model: T2I_HF_MODEL,
+					provider: "deepinfra",
+					inputs: "An astronaut riding a horse on the moon.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage with url output", async () => {
+				setTextToImageMapping();
+				const res = await client.textToImage({
+					model: T2I_HF_MODEL,
+					provider: "deepinfra",
+					inputs: "An astronaut riding a horse on the moon.",
+					outputType: "url",
+				});
+				expect(typeof res).toBe("string");
+				expect(res).toMatch(/^https?:\/\//);
 			});
 		},
 		TIMEOUT,
