@@ -57,6 +57,7 @@ export async function innerRequest<T>(
 
 	if (!response.ok) {
 		const contentType = response.headers.get("Content-Type");
+		const mediaType = contentType?.split(";", 1)[0].trim().toLowerCase();
 		if (["application/json", "application/problem+json"].some((ct) => contentType?.startsWith(ct))) {
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
@@ -97,7 +98,7 @@ export async function innerRequest<T>(
 				);
 			}
 		}
-		const message = contentType?.startsWith("text/plain;") ? await response.text() : undefined;
+		const message = mediaType === "text/plain" ? await response.text() : undefined;
 		throw new InferenceClientProviderApiError(
 			`Failed to perform inference: ${message ?? "an HTTP error occurred when requesting the provider"}`,
 			{
