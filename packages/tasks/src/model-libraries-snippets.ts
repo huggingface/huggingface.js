@@ -16,7 +16,7 @@ const escapeStringForJson = (str: string): string => JSON.stringify(str).slice(1
 
 const isValidIdentifier = (str: string): boolean => /^[A-Za-z_]\w*$/.test(str);
 
-//#region snippets
+//#region snippets causing error -> 
 
 export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
@@ -945,6 +945,7 @@ text_to_image = keras_hub.models.TextToImage.from_preset("hf://${modelId}", dtyp
 # Generate images with a TextToImage model.
 text_to_image.generate("Astronaut in a jungle")
 `;
+
 
 const _keras_hub_text_classifier = (modelId: string): string => `
 import keras_hub
