@@ -83,7 +83,7 @@ const undiciHttp1Fetch: typeof fetch = async (input, init) => {
  * HTTP/1.1; on every other runtime there is nothing to force and this is the global fetch, looked up at
  * call time so test doubles installed on `globalThis` still apply.
  */
-const http1Fetch: typeof fetch = hasH2Fetch() ? undiciHttp1Fetch : (input, init) => fetch(input, init);
+const http1Fetch: typeof fetch = hasH2Fetch() ? undiciHttp1Fetch : fetch;
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
