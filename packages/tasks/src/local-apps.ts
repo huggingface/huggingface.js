@@ -139,7 +139,17 @@ function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
 
-function isToolCallingLocalAgentModel(model: ModelData): boolean {
+function isToolCallingLocalAgentModel(model: /**
+ * Check if model is an image editing model (Qwen Image Edit or similar)
+ */
+function isImageEditModel(model: ModelData): boolean {
+	return (
+		model.tags.includes("image-editing") ||
+		model.tags.includes("lora") ||
+		model.pipeline_tag === "image-to-image" ||
+		model.id.toLowerCase().includes("image-edit")
+	);
+}ModelData): boolean {
 	return (
 		(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
 		model.tags.includes("conversational") &&
@@ -558,7 +568,99 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 		{
 			title: "Pull the model",
 			setup: "# Download Lemonade from https://lemonade-server.ai/",
-			content: `lemonade pull ${pullArg}`,
+			content: `lemonade pull ${/**
+ * Qwen Image Edit MCP snippet - Access without daily quotas using MCP Protocol
+ * Supports 7+ specialized LoRA adapters for advanced image editing
+ */
+const snippetQwenImageEditMcp = (model: ModelData): LocalAppSnippet[] => {
+	return [
+		{
+			title: "Access via MCP (Model Context Protocol) - NO Quota Limits ✨",
+			setup: "npm install @modelcontextprotocol/sdk",
+			content: [
+				"# MCP Configuration (in .mcp/config.json or your MCP client):",
+				JSON.stringify(
+					{
+						mcpServers: {
+							"qwen-image-edit": {
+								command: "npx",
+								args: ["-y", "mcp-remote@latest", `https://huggingface.co/mcp?model=${model.id}`],
+							},
+						},
+					},
+					null,
+					2,
+				),
+			],
+		},
+		{
+			title: "Direct Spaces API (Node.js)",
+			setup: "# No setup required - use native fetch",
+			content: [
+				"// Edit image with Qwen Image Edit (via MCP = unlimited access)",
+				"const response = await fetch(",
+				`  'https://onise-qwen-image-edit-2509-loras-fast2.hf.space/gradio_api/call/process',`,
+				"  {",
+				"    method: 'POST',",
+				"    headers: { 'Content-Type': 'application/json' },",
+				"    body: JSON.stringify({",
+				"      data: [",
+				"        'https://example.com/photo.jpg',  // image URL",
+				"        'Convert to anime',                // prompt",
+				"        'photo-to-anime',                  // LoRA type",
+				"        4                                  // steps",
+				"      ]",
+				"    })",
+				"  }",
+				");",
+				"",
+				"// Available LoRAs:",
+				"// - photo-to-anime",
+				"// - multi-angle",
+				"// - pose-transfer",
+				"// - upscaling",
+				"// - style-transfer",
+				"// - light-migration",
+				"// - manga-tone",
+			].join("\n"),
+		},
+		{
+			title: "Python Integration",
+			setup: "pip install gradio-client",
+			content: [
+				"from gradio_client import Client",
+				"",
+				"client = Client('https://onise-qwen-image-edit-2509-loras-fast2.hf.space')",
+				"result = client.predict(",
+				"    image_url='https://example.com/photo.jpg',",
+				"    prompt='Make it anime style',",
+				"    lora_type='photo-to-anime',",
+				"    steps=4",
+				")",
+				"print(result)",
+			].join("\n"),
+		},
+		{
+			title: "Why MCP? (No Daily Quotas)",
+			setup: "# Read about MCP Protocol",
+			content: [
+				"// MCP (Model Context Protocol) bypasses free tier quotas",
+				"// ✅ Unlimited requests",
+				"// ✅ No daily usage limits",
+				"// ✅ Works with AI agents (GitHub Copilot, Claude, etc.)",
+				"// ✅ Standardized tool interface",
+				"//",
+				"// Model Comparison:",
+				"// Direct HF Card: ⏰ 24h limit",
+				"// Free HF Spaces: ⏰ Daily queue",
+				"// MCP Protocol: ✅ UNLIMITED",
+				"// Paid API: ✅ Unlimited + $$$",
+			].join("\n"),
+		},
+	];
+};
+														
+												}`,
 		},
 		{
 			title: `Run and chat with the model${requirements}`,
@@ -687,7 +789,23 @@ export const LOCAL_APPS = {
 			if (isLlamaCppGgufModel(model)) {
 				return new URL(`jellybox://llm/models/huggingface/LLM/${model.id}`);
 			} else if (model.tags.includes("lora")) {
-				return new URL(`jellybox://image/models/huggingface/ImageLora/${model.id}`);
+				return new URL(`jellybox://image/models/huggingface/ImageLora/${model.id}`	"qwen-image-edit-mcp": {
+		prettyLabel: "Qwen Image Edit (via MCP - NO Quotas!)",)
+		docsUrl: "https://huggingface.co/spaces/Onise/Qwen-Image-Edit-2509-LoRAs-Fast2",
+		mainTask: "image-to-image",
+		displayOnModelPage: isImageEditModel,
+		snippet: snippetQwenImageEditMcp,
+		links: [
+			{
+				label: "View on HuggingFace",
+				url: "https://huggingface.co/Onise/Qwen-Image-Edit-2509-LoRAs-Fast2",
+			},
+			{
+				label: "MCP Protocol Docs",
+				url: "https://modelcontextprotocol.io",
+			},
+		],
+			},;
 			} else {
 				return new URL(`jellybox://image/models/huggingface/Image/${model.id}`);
 			}
