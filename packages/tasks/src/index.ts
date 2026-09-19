@@ -31,6 +31,7 @@ export type {
 	WidgetExampleAssetInput,
 	WidgetExampleChatInput,
 	WidgetExampleSentenceSimilarityInput,
+	WidgetExampleTextRankingInput,
 	WidgetExampleStructuredDataInput,
 	WidgetExampleTableDataInput,
 	WidgetExampleTextAndContextInput,

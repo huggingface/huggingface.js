@@ -30,6 +30,7 @@ import type {
 	ObjectDetectionTaskHelper,
 	QuestionAnsweringTaskHelper,
 	SentenceSimilarityTaskHelper,
+	TextRankingTaskHelper,
 	SummarizationTaskHelper,
 	TableQuestionAnsweringTaskHelper,
 	TabularClassificationTaskHelper,
@@ -110,6 +111,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"zero-shot-classification": new HFInference.HFInferenceZeroShotClassificationTask(),
 		"image-to-image": new HFInference.HFInferenceImageToImageTask(),
 		"sentence-similarity": new HFInference.HFInferenceSentenceSimilarityTask(),
+		"text-ranking": new HFInference.HFInferenceTextRankingTask(),
 		"table-question-answering": new HFInference.HFInferenceTableQuestionAnsweringTask(),
 		"tabular-classification": new HFInference.HFInferenceTabularClassificationTask(),
 		"text-to-speech": new HFInference.HFInferenceTextToSpeechTask(),
@@ -284,6 +286,10 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "image-text-to-video",
 ): ImageTextToVideoTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
+	task: "text-ranking",
+): TextRankingTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "sentence-similarity",
