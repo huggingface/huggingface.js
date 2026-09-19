@@ -9,9 +9,14 @@ export type FeatureExtractionOutput = Array<number[]>;
  *
  * Auto-generated from TEI specs.
  * For more details, check out
- * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tei-import.ts.
+ * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks-gen/scripts/inference-tei-import.ts.
  */
 export interface FeatureExtractionInput {
+	/**
+	 * The number of dimensions that the output embeddings should have. If not set, the original
+	 * shape of the representation will be returned instead.
+	 */
+	dimensions?: number;
 	/**
 	 * The text or list of texts to embed.
 	 */
@@ -38,4 +43,4 @@ export interface FeatureExtractionInput {
  * The text or list of texts to embed.
  */
 export type FeatureExtractionInputs = string[] | string;
-export type FeatureExtractionInputTruncationDirection = "left" | "right";
+export type FeatureExtractionInputTruncationDirection = "Left" | "Right";
