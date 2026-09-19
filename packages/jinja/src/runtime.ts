@@ -2089,8 +2089,23 @@ export class Interpreter {
 		const specialArguments = getAccessedSpecialMacroArguments(node, node.args, node.body);
 		environment.setVariable(
 			node.name.value,
-			new FunctionValue((args, scope) => {
-				const macroScope = new Environment(scope);
+			new FunctionValue((args, callSite) => {
+				// Macros are lexically scoped: the body resolves free names against the environment the
+				// macro was defined in, not the one it is called from. Capturing that environment by
+				// reference rather than copying it also preserves Jinja's late binding, so a name assigned
+				// in the defining scope after the macro is declared is still visible to the body.
+				let parent = environment;
+
+				// `{% call %}` hands `caller` to the macro it invokes, and to that macro alone. Keeping it
+				// in its own layer stops it from becoming an own variable of the macro scope, which would
+				// otherwise leak it into the macros that this macro calls.
+				const caller = callSite.variables.get("caller");
+				if (caller !== undefined) {
+					parent = new Environment(environment);
+					parent.setVariable("caller", caller);
+				}
+
+				const macroScope = new Environment(parent);
 				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);
 				return this.evaluateBlock(node.body, macroScope);
 			}),
