@@ -1055,6 +1055,26 @@ function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statem
 	return accessed;
 }
 
+/**
+ * The scan above is a pure function of the AST, so its result is cached per `Macro`/`CallStatement`
+ * node. A parsed template is reused across renders, so each macro and call block is scanned at most
+ * once, however often it is rendered and however deeply it is nested inside a loop.
+ */
+const specialMacroArgumentCache = new WeakMap<Macro | CallStatement, Set<SpecialMacroArgument>>();
+
+function getAccessedSpecialMacroArguments(
+	node: Macro | CallStatement,
+	parameters: Parameter[],
+	body: Statement[],
+): Set<SpecialMacroArgument> {
+	let accessed = specialMacroArgumentCache.get(node);
+	if (accessed === undefined) {
+		accessed = findAccessedSpecialMacroArguments(parameters, body);
+		specialMacroArgumentCache.set(node, accessed);
+	}
+	return accessed;
+}
+
 export class Interpreter {
 	global: Environment;
 
@@ -2066,7 +2086,7 @@ export class Interpreter {
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
-		const specialArguments = findAccessedSpecialMacroArguments(node.args, node.body);
+		const specialArguments = getAccessedSpecialMacroArguments(node, node.args, node.body);
 		environment.setVariable(
 			node.name.value,
 			new FunctionValue((args, scope) => {
@@ -2083,7 +2103,7 @@ export class Interpreter {
 	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
 		// Call blocks use anonymous-macro argument rules; Jinja labels them `None` in errors.
 		const parameters = node.callerArgs ?? [];
-		const specialArguments = findAccessedSpecialMacroArguments(parameters, node.body);
+		const specialArguments = getAccessedSpecialMacroArguments(node, parameters, node.body);
 		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[]) => {
 			const callBlockEnv = new Environment(environment);
 			this.bindMacroArguments("None", parameters, specialArguments, callerArguments, callBlockEnv);
