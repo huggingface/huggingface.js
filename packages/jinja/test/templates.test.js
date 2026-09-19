@@ -6503,6 +6503,110 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("Macro scoping", () => {
+		it.each([
+			{
+				name: "resolves a free name in the defining scope, not at the call site",
+				source: `{% macro m() %}[{{ i }}]{% endmacro %}{% for i in [1] %}{{ m() }}{% endfor %}`,
+				expected: "[]",
+			},
+			{
+				name: "prefers the defining scope over a caller local of the same name",
+				source: `{% set v = 'outer' %}{% macro m() %}[{{ v }}]{% endmacro %}{% macro w() %}{% set v = 'inner' %}{{ m() }}{% endmacro %}{{ w() }}|{{ m() }}`,
+				expected: "[outer]|[outer]",
+			},
+			{
+				name: "binds names in the defining scope late",
+				source: `{% macro m() %}[{{ later }}]{% endmacro %}{{ m() }}{% set later = 'x' %}{{ m() }}`,
+				expected: "[][x]",
+			},
+			{
+				name: "ignores a name assigned in a nested scope after the definition",
+				source: `{% macro m() %}[{{ later }}]{% endmacro %}{% for _ in [1] %}{% set later = 'x' %}{{ m() }}{% endfor %}`,
+				expected: "[]",
+			},
+			{
+				name: "ignores the locals of a macro that calls it",
+				source: `{% macro outer() %}{% set s = 'S' %}{{ inner() }}{% endmacro %}{% macro inner() %}[{{ s }}]{% endmacro %}{{ outer() }}`,
+				expected: "[]",
+			},
+			{
+				name: "captures the loop variable when defined inside a loop",
+				source: `{% for i in [1, 2] %}{% macro m() %}[{{ i }}]{% endmacro %}{{ m() }}{% endfor %}`,
+				expected: "[1][2]",
+			},
+			{
+				name: "sees the locals of the macro it is defined in",
+				source: `{% macro outer() %}{% set s = 'S' %}{% macro inner() %}[{{ s }}]{% endmacro %}{{ inner() }}{% endmacro %}{{ outer() }}`,
+				expected: "[S]",
+			},
+			{
+				name: "resolves through three levels of nested calls",
+				source: `{% set v = '0' %}{% macro a() %}[{{ v }}]{% endmacro %}{% macro b() %}{% set v = '1' %}{{ a() }}{% endmacro %}{% macro c() %}{% set v = '2' %}{{ b() }}{% endmacro %}{{ c() }}`,
+				expected: "[0]",
+			},
+			{
+				name: "keeps the defining scope across recursive calls",
+				source: `{% set s = '.' %}{% macro f(n) %}{% if n > 0 %}{{ s }}{{ f(n - 1) }}{% endif %}{% endmacro %}{% for s in ['!'] %}{{ f(3) }}{% endfor %}`,
+				expected: "...",
+			},
+			{
+				name: "resolves a macro result assigned inside a loop",
+				source: `{% set g = 'G' %}{% macro m() %}{{ g }}{% endmacro %}{% for g in ['L'] %}{% set r = m() %}[{{ r }}]{% endfor %}`,
+				expected: "[G]",
+			},
+			{
+				name: "reads an outer name before a later local assignment",
+				source: `{% set v = 'OUTER' %}{% macro m() %}[{{ v }}]{% set v = 'INNER' %}[{{ v }}]{% endmacro %}{{ m() }}`,
+				expected: "[OUTER][INNER]",
+			},
+			{
+				name: "passes caller to the macro it invokes",
+				source: `{% macro m() %}[{{ caller() }}]{% endmacro %}{% call m() %}C{% endcall %}`,
+				expected: "[C]",
+			},
+			{
+				name: "passes caller positional arguments",
+				source: `{% macro m() %}[{{ caller('X') }}]{% endmacro %}{% call(u) m() %}{{ u }}{% endcall %}`,
+				expected: "[X]",
+			},
+			{
+				name: "passes caller keyword arguments",
+				source: `{% macro m() %}[{{ caller(y=2) }}]{% endmacro %}{% call(y) m() %}{{ y }}{% endcall %}`,
+				expected: "[2]",
+			},
+			{
+				name: "resolves a call block body in its own defining scope",
+				source: `{% macro m() %}[{{ caller() }}]{% endmacro %}{% for i in [1, 2] %}{% call m() %}{{ i }}{% endcall %}{% endfor %}`,
+				expected: "[1][2]",
+			},
+			{
+				name: "nests call blocks",
+				source: `{% macro o() %}[{{ caller() }}]{% endmacro %}{% macro i() %}({{ caller() }}){% endmacro %}{% call o() %}{% call i() %}z{% endcall %}{% endcall %}`,
+				expected: "[(z)]",
+			},
+			{
+				name: "invokes caller inside a loop in the macro body",
+				source: `{% macro m() %}{% for i in [1, 2] %}{{ caller() }}{% endfor %}{% endmacro %}{% call m() %}c{% endcall %}`,
+				expected: "cc",
+			},
+		])("$name", ({ source, expected }) => {
+			expectTemplateToRender(source, expected);
+		});
+
+		it("resolves a render-time variable shadowed at the call site", () => {
+			const template = new Template(
+				`{% macro m() %}[{{ rt }}]{% endmacro %}{% for rt in ['L'] %}{{ m() }}{% endfor %}`,
+			);
+			expect(template.render({ rt: "RT" })).toBe("[RT]");
+		});
+
+		it("does not leak caller into the macros an invoked macro calls", () => {
+			const source = `{% macro b() %}[{{ caller() }}]{% endmacro %}{% macro a() %}{{ b() }}{% endmacro %}{% call a() %}C{% endcall %}`;
+			expect(() => new Template(source).render()).toThrowError();
+		});
+	});
+
 	describe("Macro special arguments", () => {
 		it.each([
 			{
@@ -6554,6 +6658,26 @@ describe("Feature regressions", () => {
 
 		it("keeps undeclared-name detection order-sensitive", () => {
 			expectTemplateToRender(`{% macro f() %}{{ kwargs.x }}{% set kwargs = {} %}{% endmacro %}{{ f(x=1) }}`, "1");
+		});
+
+		it.each([
+			{
+				name: "two macros in one template",
+				source: `{% macro f() %}{{ kwargs.a }}{% endmacro %}{% macro g() %}{{ varargs | join('-') }}{% endmacro %}{{ f(a=1) }}|{{ g(2, 3) }}`,
+				expected: "1|2-3",
+			},
+			{
+				name: "a macro redeclared on every iteration",
+				source: `{% for _ in [1, 2] %}{% macro m() %}{{ varargs | join('-') }}{% endmacro %}{{ m(1, 2) }}{% endfor %}`,
+				expected: "1-21-2",
+			},
+			{
+				name: "a call block re-entered on every iteration",
+				source: `{% macro m() %}{{ caller(1, 2) }}{% endmacro %}{% for _ in [1, 2] %}{% call() m() %}[{{ varargs | join('-') }}]{% endcall %}{% endfor %}`,
+				expected: "[1-2][1-2]",
+			},
+		])("detects collectors independently for $name", ({ source, expected }) => {
+			expectTemplateToRender(source, expected);
 		});
 	});
 
