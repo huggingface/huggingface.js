@@ -9,6 +9,8 @@ import {
 	getQuantizationMultiplier,
 	validateTensorEntry,
 	parseTotalParameters,
+	assertSafeShardFilename,
+	encodeShardFilename,
 	SafetensorParseError,
 } from "./parse-safetensors-metadata";
 import type { Dtype, MlxQuantizationConfig, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
@@ -1133,5 +1135,58 @@ describe("parseSafetensorsMetadata", () => {
 			I8: 557_171_343_360, // 278_585_671_680 packed bytes x 2
 		});
 		assert.strictEqual(sum(Object.values(parse.parameterCount)), 763_205_315_794);
+	});
+});
+
+describe("assertSafeShardFilename", () => {
+	it("accepts plain relative filenames", () => {
+		for (const filename of [
+			"model-00001-of-00002.safetensors",
+			"unet/diffusion_pytorch_model.safetensors",
+			"sub.dir/model..safetensors",
+			"model with spaces.safetensors",
+		]) {
+			expect(() => assertSafeShardFilename(filename)).not.toThrow();
+		}
+	});
+
+	it("rejects literal traversal and absolute / remote paths", () => {
+		for (const filename of [
+			"",
+			"../victim/private/resolve/main/model.safetensors",
+			"./model.safetensors",
+			"/etc/passwd",
+			"https://evil.example/model.safetensors",
+			"//evil.example/model.safetensors",
+			"..\\model.safetensors",
+		]) {
+			expect(() => assertSafeShardFilename(filename)).toThrow(SafetensorParseError);
+		}
+	});
+
+	it("rejects percent-encoded dot segments, which the URL parser normalizes after the check", () => {
+		for (const filename of [
+			"%2e%2e/%2e%2e/victim/private/resolve/main/model.safetensors",
+			"%2E%2E/model.safetensors",
+			".%2e/model.safetensors",
+			"%2e/model.safetensors",
+			"%252e%252e/model.safetensors",
+			"https%3A%2F%2Fevil.example/model.safetensors",
+		]) {
+			expect(() => assertSafeShardFilename(filename)).toThrow(SafetensorParseError);
+		}
+	});
+
+	it("really would have escaped the repo without the check", () => {
+		const evil = "%2e%2e/%2e%2e/%2e%2e/%2e%2e/victim/private/resolve/main/model.safetensors";
+		expect(new URL(`https://hub.example/org/mine/resolve/main/${evil}`).href).toBe(
+			"https://hub.example/victim/private/resolve/main/model.safetensors",
+		);
+		expect(() => assertSafeShardFilename(evil)).toThrow(SafetensorParseError);
+	});
+
+	it("encodes each path segment separately", () => {
+		expect(encodeShardFilename("unet/model 1.safetensors")).toBe("unet/model%201.safetensors");
+		expect(encodeShardFilename("model-00001-of-00002.safetensors")).toBe("model-00001-of-00002.safetensors");
 	});
 });
