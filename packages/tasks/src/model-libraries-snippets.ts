@@ -777,6 +777,15 @@ export const flair = (model: ModelData): string[] => [
 tagger = SequenceTagger.load("${model.id}")`,
 ];
 
+export const flexray = (model: ModelData): string[] => [
+	`pip install flexray`,
+	`from fxr.inference import FleXraySegmenter
+
+segmenter = FleXraySegmenter.from_pretrained("${model.id}")
+prediction = segmenter.predict("image.png", threshold=0.5)
+masks = prediction.masks`,
+];
+
 export const flextab = (): string[] => {
 	const installSnippet = `pip install git+https://github.com/SAP-samples/flextab`;
 
