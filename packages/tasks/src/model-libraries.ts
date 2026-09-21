@@ -1811,6 +1811,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.vui,
 	},
+	vqweb: {
+		prettyLabel: "vqweb",
+		repoName: "vqweb",
+		repoUrl: "https://github.com/rosecky/embedding-quantization-public/tree/main/packages/vqweb",
+		docsUrl: "https://www.npmjs.com/package/@thinletterio/vqweb",
+		countDownloads: `path_extension:"vqw"`,
+		filter: false,
+	},
 	vibevoice: {
 		prettyLabel: "VibeVoice",
 		repoName: "VibeVoice",
