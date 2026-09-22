@@ -131,6 +131,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	nagame: {
 		conversational: new Nagame.NagameConversationalTask(),
+	},
 	"humain-ai": {
 		conversational: new Humain.HumainAIConversationalTask(),
 	},
