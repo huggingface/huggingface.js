@@ -546,6 +546,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	flexray: {
+		prettyLabel: "FleXray",
+		repoName: "FleXray",
+		repoUrl: "https://github.com/VictorButoi/FleXray",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"onnx"`,
+		snippets: snippets.flexray,
+	},
 	flextab: {
 		prettyLabel: "FlexTab",
 		repoName: "FlexTab",

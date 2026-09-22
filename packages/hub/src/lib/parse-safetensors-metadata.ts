@@ -761,6 +761,11 @@ export interface QuantizationConfig {
 	quant_method?: string;
 	/** Routed expert precision when it differs from the main quantizer (e.g. FP4 experts with FP8 attention). */
 	expert_dtype?: string;
+	/**
+	 * Same role as `expert_dtype` under another name: MiMo-V2.6 is `quant_method: "fp8"` for its
+	 * dense layers but stores the routed experts as `store_dtype: "mxfp4"`, packed two per `U8`.
+	 */
+	store_dtype?: string;
 	/** MLX quantization mode (e.g. `affine`); MLX configs do not declare `quant_method`. */
 	mode?: string;
 	group_size?: number;
@@ -1162,18 +1167,22 @@ export function getQuantizationMultiplier(
 
 		case "fp8": {
 			// fp8 weights live in F8_* dtypes at one value per byte, so nothing to do for them.
-			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8.
+			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8/U8.
 			// `expert_dtype` is in quantization_config for DeepSeek-V4.1, or in the model config
-			// for DeepSeek-V4-Pro. Both declare "fp4", i.e. two weights per byte.
+			// for DeepSeek-V4-Pro. Both declare "fp4", i.e. two weights per byte. MiMo-V2.6 declares
+			// the same packing as `store_dtype: "mxfp4"` in quantization_config instead.
 			// Those experts dominate the parameter count, so missing this halves the total.
 			//
-			// `expert_dtype` describes the experts and nothing else, so it must not be applied to
+			// These keys describe the experts and nothing else, so they must not be applied to
 			// every integer tensor in the model: a routing table or other integer bookkeeping would
 			// otherwise be inflated by the packing factor — 8x for an I32 one.
 			if (!isRoutedExpertTensor(tensorName)) {
 				return 1;
 			}
-			return packingFactor(dtype, bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype));
+			return packingFactor(
+				dtype,
+				bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype ?? quantConfig.store_dtype),
+			);
 		}
 
 		case "bitsandbytes":
