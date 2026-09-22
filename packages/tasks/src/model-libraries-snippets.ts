@@ -27,13 +27,15 @@ model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
 model.load_adapter("${model.id}", set_active=True)`,
 ];
 
-export const aic_sdk = (model: ModelData): string[] => {
-	if (model.id.includes("voice-activity-detection")) {
-		return [
-			`# pip install aic-sdk
+const aicSdkSetup = `# pip install aic-sdk
 import aic_sdk as aic
 
-license_key = "YOUR_SDK_KEY"  # free key at https://developers.ai-coustics.com/login
+license_key = "YOUR_SDK_KEY"  # free key at https://developers.ai-coustics.com/login`;
+
+export const aic_sdk = (model: ModelData): string[] => {
+	if (model.pipeline_tag === "voice-activity-detection") {
+		return [
+			`${aicSdkSetup}
 
 model = aic.Model.from_file(aic.Model.download("vad-ms-2.1-xxs-16khz", "./models"))
 config = aic.ProcessorConfig.optimal(model)
@@ -45,12 +47,9 @@ vad.process(audio_block)
 speech_detected = ctx.is_speech_detected()`,
 		];
 	}
-	if (model.id.includes("audio-insight")) {
+	if (model.pipeline_tag === "audio-classification") {
 		return [
-			`# pip install aic-sdk
-import aic_sdk as aic
-
-license_key = "YOUR_SDK_KEY"  # free key at https://developers.ai-coustics.com/login
+			`${aicSdkSetup}
 
 model = aic.Model.from_file(aic.Model.download("tyto-1.1-l-16khz", "./models"))
 analyzer = aic.FileAnalyzer(model, license_key)
@@ -61,10 +60,7 @@ print(results[0].risk_score, results[0].noise, results[0].interfering_speech)`,
 		];
 	}
 	return [
-		`# pip install aic-sdk
-import aic_sdk as aic
-
-license_key = "YOUR_SDK_KEY"  # free key at https://developers.ai-coustics.com/login
+		`${aicSdkSetup}
 
 model = aic.Model.from_file(aic.Model.download("quail-vf-2.2-l-16khz", "./models"))
 config = aic.ProcessorConfig.optimal(model)
