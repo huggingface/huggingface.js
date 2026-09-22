@@ -789,6 +789,23 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
 	},
+	boollm: {
+		prettyLabel: "Boollm",
+		docsUrl: "https://boollm.com/support",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			model.pipeline_tag === "text-generation" &&
+			isLlamaCppGgufModel(model) &&
+			["llama", "qwen2"].includes(model.gguf?.architecture ?? ""),
+		deeplink: (model, filepath) => {
+			const url = new URL("boollm://open_from_hf");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
