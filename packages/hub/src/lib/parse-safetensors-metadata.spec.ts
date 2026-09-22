@@ -9,6 +9,8 @@ import {
 	getQuantizationMultiplier,
 	validateTensorEntry,
 	parseTotalParameters,
+	assertSafeShardFilename,
+	encodeShardFilename,
 	SafetensorParseError,
 } from "./parse-safetensors-metadata";
 import type { Dtype, MlxQuantizationConfig, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
@@ -370,6 +372,46 @@ describe("parseSafetensorsMetadata", () => {
 			// Only the packed experts expand: 8 bytes hold 16 FP4 parameters. The Engram
 			// embedding and attention retain their original counts, and block scales are excluded.
 			assert.deepStrictEqual(parse.parameterCount, { I8: 20, F8_E4M3: 8, BF16: 2 });
+			assert.strictEqual(parse.parameterTotal, 30);
+		});
+
+		it("reads store_dtype from quantization_config when counting packed U8 experts", async () => {
+			// MiMo-V2.6: `quant_method: "fp8"` for the dense layers, but the routed experts are
+			// `store_dtype: "mxfp4"` — two weights per U8 byte, with U8 `weight_scale` blocks beside them.
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", total_parameters: "30" },
+					"model.layers.1.mlp.experts.0.gate_proj.weight": { dtype: "U8", shape: [2, 4], data_offsets: [0, 8] },
+					"model.layers.1.mlp.experts.0.gate_proj.weight_scale": { dtype: "U8", shape: [2, 1], data_offsets: [8, 10] },
+					"model.layers.0.mlp.gate_proj.weight": { dtype: "F8_E4M3", shape: [2, 4], data_offsets: [10, 18] },
+					"model.layers.0.mlp.gate_proj.weight_scale_inv": { dtype: "F32", shape: [1], data_offsets: [18, 22] },
+					"model.layers.1.self_attn.o_proj.weight": { dtype: "BF16", shape: [2, 2], data_offsets: [22, 30] },
+					"model.layers.1.mlp.gate.e_score_correction_bias": { dtype: "F32", shape: [2], data_offsets: [30, 38] },
+				},
+				38,
+				{
+					quantization_config: {
+						activation_scheme: "dynamic",
+						fmt: "e4m3",
+						mxfp4_block_size: 32,
+						quant_method: "fp8",
+						store_dtype: "mxfp4",
+						weight_block_size: [128, 128],
+					},
+				},
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/fp8-model-with-mxfp4-experts",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			// Only the packed experts expand: 8 bytes hold 16 MXFP4 parameters. The dense fp8 layer and
+			// attention keep their counts, the router bias is a real F32 parameter, and both kinds of
+			// block scales are excluded.
+			assert.deepStrictEqual(parse.parameterCount, { U8: 16, F8_E4M3: 8, BF16: 4, F32: 2 });
 			assert.strictEqual(parse.parameterTotal, 30);
 		});
 
@@ -872,6 +914,43 @@ describe("parseSafetensorsMetadata", () => {
 			});
 		});
 
+		describe("fp8 with store_dtype", () => {
+			// MiMo-V2.6 spells the packed-expert declaration `store_dtype` and uses U8 containers.
+			const mimo = { quant_method: "fp8", store_dtype: "mxfp4" };
+
+			it("packs routed experts two-per-byte in either 8-bit container", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", mimo), 2);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", mimo), 2);
+			});
+
+			it("leaves everything that is not a packed routed expert alone", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "F8_E4M3", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "BF16", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.mlp.gate_proj.weight", "U8", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.ffn.shared_experts.w1.weight", "U8", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.self_attn.qkv_proj.weight", "F8_E4M3", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.mlp.gate.tid2eid", "I32", mimo), 1);
+			});
+
+			it("is a no-op for a store_dtype that isn't sub-byte", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, store_dtype: "fp8" }), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, store_dtype: "bf16" }), 1);
+			});
+
+			it("defers to an explicit expert_dtype, in the quantizer or at the model level", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, expert_dtype: "fp8" }), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", mimo, "fp8"), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, expert_dtype: "fp4" }), 2);
+			});
+
+			it.each([4, {}, null])("ignores a malformed store_dtype (%j)", (storeDtype) => {
+				assert.strictEqual(
+					getQuantizationMultiplier(EXPERT, "U8", { ...mimo, store_dtype: storeDtype as unknown as string }),
+					1,
+				);
+			});
+		});
+
 		describe("compressed-tensors packing factor", () => {
 			const packed = (numBits: number) => ({
 				quant_method: "compressed-tensors",
@@ -1133,5 +1212,85 @@ describe("parseSafetensorsMetadata", () => {
 			I8: 557_171_343_360, // 278_585_671_680 packed bytes x 2
 		});
 		assert.strictEqual(sum(Object.values(parse.parameterCount)), 763_205_315_794);
+	});
+
+	it("counts mxfp4 experts declared as store_dtype (XiaomiMiMo/MiMo-V2.6-Flash-RL)", async () => {
+		// `quant_method: "fp8"` with `store_dtype: "mxfp4"`: the routed experts are packed two per U8
+		// byte. Counting them once per byte reported 159.359B for a 309B model. The corrected total is
+		// exactly what this parser counts for XiaomiMiMo/MiMo-V2.5, the same weights stored as unpacked
+		// fp8: its F8_E4M3 count equals the F8_E4M3 plus unpacked U8 counts here.
+		const parse = await parseSafetensorsMetadata({
+			repo: "XiaomiMiMo/MiMo-V2.6-Flash-RL",
+			revision: "3b38d063180c3e4aed9691fdc735f3d10b266ee4",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 65);
+		// hidden_size 4096 packed into 2048 bytes per row
+		assert.deepStrictEqual(
+			parse.headers["model_pp0_ep0_shard0.safetensors"]["model.layers.1.mlp.experts.0.gate_proj.weight"].shape,
+			[2048, 2048],
+		);
+		assert.deepStrictEqual(parse.parameterCount, {
+			F32: 12_032,
+			BF16: 4_101_308_032,
+			F8_E4M3: 3_859_808_256,
+			U8: 302_795_194_368, // 151_397_597_184 packed bytes x 2
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 310_756_322_688);
+	});
+});
+
+describe("assertSafeShardFilename", () => {
+	it("accepts plain relative filenames", () => {
+		for (const filename of [
+			"model-00001-of-00002.safetensors",
+			"unet/diffusion_pytorch_model.safetensors",
+			"sub.dir/model..safetensors",
+			"model with spaces.safetensors",
+		]) {
+			expect(() => assertSafeShardFilename(filename)).not.toThrow();
+		}
+	});
+
+	it("rejects literal traversal and absolute / remote paths", () => {
+		for (const filename of [
+			"",
+			"../victim/private/resolve/main/model.safetensors",
+			"./model.safetensors",
+			"/etc/passwd",
+			"https://evil.example/model.safetensors",
+			"//evil.example/model.safetensors",
+			"..\\model.safetensors",
+		]) {
+			expect(() => assertSafeShardFilename(filename)).toThrow(SafetensorParseError);
+		}
+	});
+
+	it("rejects percent-encoded dot segments, which the URL parser normalizes after the check", () => {
+		for (const filename of [
+			"%2e%2e/%2e%2e/victim/private/resolve/main/model.safetensors",
+			"%2E%2E/model.safetensors",
+			".%2e/model.safetensors",
+			"%2e/model.safetensors",
+			"%252e%252e/model.safetensors",
+			"https%3A%2F%2Fevil.example/model.safetensors",
+		]) {
+			expect(() => assertSafeShardFilename(filename)).toThrow(SafetensorParseError);
+		}
+	});
+
+	it("really would have escaped the repo without the check", () => {
+		const evil = "%2e%2e/%2e%2e/%2e%2e/%2e%2e/victim/private/resolve/main/model.safetensors";
+		expect(new URL(`https://hub.example/org/mine/resolve/main/${evil}`).href).toBe(
+			"https://hub.example/victim/private/resolve/main/model.safetensors",
+		);
+		expect(() => assertSafeShardFilename(evil)).toThrow(SafetensorParseError);
+	});
+
+	it("encodes each path segment separately", () => {
+		expect(encodeShardFilename("unet/model 1.safetensors")).toBe("unet/model%201.safetensors");
+		expect(encodeShardFilename("model-00001-of-00002.safetensors")).toBe("model-00001-of-00002.safetensors");
 	});
 });

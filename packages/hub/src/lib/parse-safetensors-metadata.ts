@@ -438,6 +438,81 @@ async function parseShardedIndex(
 	}
 }
 
+/**
+ * `weight_map` filenames come from a repo file, so they're attacker-controlled: they must stay
+ * relative paths inside the index's own directory.
+ *
+ * A literal `includes("..")` check isn't enough, because the URL the filename ends up in is parsed
+ * by the WHATWG URL parser *after* the check, and that parser percent-decodes dot segments:
+ * `%2e%2e` (or `.%2e`, `%2E%2E`, …) is a `..` segment for it, so it escapes the repo — and with a
+ * credential attached, the request lands authorized on another repo's `resolve` URL.
+ *
+ * So decode before validating (repeatedly, to catch `%252e%252e`), and reject anything that isn't a
+ * plain relative path.
+ */
+export function assertSafeShardFilename(filename: string): void {
+	const unsafe = (reason: string): never => {
+		throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}" (${reason})`);
+	};
+
+	if (!filename) {
+		unsafe("empty");
+	}
+
+	// Percent-decode until stable, so nested encodings can't hide a dot segment or a separator.
+	let decoded = filename;
+	for (let i = 0; i < 5; i++) {
+		let next: string;
+		try {
+			next = decodeURIComponent(decoded);
+		} catch {
+			// Malformed percent-escape: the URL parser would keep it verbatim, but nothing legitimate
+			// looks like that.
+			return unsafe("malformed percent-encoding");
+		}
+		if (next === decoded) {
+			break;
+		}
+		decoded = next;
+	}
+
+	// Validate both the raw and the decoded form: the fetch may see either one depending on how the
+	// path is assembled downstream.
+	for (const candidate of new Set([filename, decoded])) {
+		for (let i = 0; i < candidate.length; i++) {
+			const code = candidate.charCodeAt(i);
+			if (code <= 0x1f || code === 0x7f) {
+				unsafe("control character");
+			}
+		}
+		if (candidate.includes("\\")) {
+			unsafe("backslash");
+		}
+		if (candidate.startsWith("/")) {
+			// Also covers protocol-relative `//host/…`.
+			unsafe("absolute path");
+		}
+		if (candidate.slice(0, candidate.indexOf("/") === -1 ? candidate.length : candidate.indexOf("/")).includes(":")) {
+			// A colon in the first segment is what makes the URL parser see a scheme (`https:…`) or a
+			// Windows drive letter.
+			unsafe("scheme-like first path segment");
+		}
+		for (const segment of candidate.split("/")) {
+			if (segment === "." || segment === "..") {
+				unsafe("dot segment");
+			}
+		}
+	}
+}
+
+/**
+ * Defense in depth: the download URL is built by string interpolation, so encode each path segment
+ * of the (already validated) filename rather than trusting it to be URL-safe.
+ */
+export function encodeShardFilename(filename: string): string {
+	return filename.split("/").map(encodeURIComponent).join("/");
+}
+
 async function fetchAllHeaders(
 	path: string,
 	filenames: string[],
@@ -458,16 +533,14 @@ async function fetchAllHeaders(
 		);
 	}
 	for (const filename of filenames) {
-		if (filename.includes("..") || filename.startsWith("/") || filename.includes("://")) {
-			throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}"`);
-		}
+		assertSafeShardFilename(filename);
 	}
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
 		(
 			await promisesQueue(
 				filenames.map(
 					(filename) => async () =>
-						[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [
+						[filename, await parseSingleFile(pathPrefix + encodeShardFilename(filename), params)] satisfies [
 							string,
 							{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined },
 						],
@@ -688,6 +761,11 @@ export interface QuantizationConfig {
 	quant_method?: string;
 	/** Routed expert precision when it differs from the main quantizer (e.g. FP4 experts with FP8 attention). */
 	expert_dtype?: string;
+	/**
+	 * Same role as `expert_dtype` under another name: MiMo-V2.6 is `quant_method: "fp8"` for its
+	 * dense layers but stores the routed experts as `store_dtype: "mxfp4"`, packed two per `U8`.
+	 */
+	store_dtype?: string;
 	/** MLX quantization mode (e.g. `affine`); MLX configs do not declare `quant_method`. */
 	mode?: string;
 	group_size?: number;
@@ -1089,18 +1167,22 @@ export function getQuantizationMultiplier(
 
 		case "fp8": {
 			// fp8 weights live in F8_* dtypes at one value per byte, so nothing to do for them.
-			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8.
+			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8/U8.
 			// `expert_dtype` is in quantization_config for DeepSeek-V4.1, or in the model config
-			// for DeepSeek-V4-Pro. Both declare "fp4", i.e. two weights per byte.
+			// for DeepSeek-V4-Pro. Both declare "fp4", i.e. two weights per byte. MiMo-V2.6 declares
+			// the same packing as `store_dtype: "mxfp4"` in quantization_config instead.
 			// Those experts dominate the parameter count, so missing this halves the total.
 			//
-			// `expert_dtype` describes the experts and nothing else, so it must not be applied to
+			// These keys describe the experts and nothing else, so they must not be applied to
 			// every integer tensor in the model: a routing table or other integer bookkeeping would
 			// otherwise be inflated by the packing factor — 8x for an I32 one.
 			if (!isRoutedExpertTensor(tensorName)) {
 				return 1;
 			}
-			return packingFactor(dtype, bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype));
+			return packingFactor(
+				dtype,
+				bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype ?? quantConfig.store_dtype),
+			);
 		}
 
 		case "bitsandbytes":
