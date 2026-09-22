@@ -44,7 +44,8 @@
 		"hyparquet": "^1.25.1"
 	},
 	"devDependencies": {
-		"@types/node": "^20.12.8"
+		"@types/node": "^20.12.8",
+		"hyparquet-writer": "^0.16.10"
 	},
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",

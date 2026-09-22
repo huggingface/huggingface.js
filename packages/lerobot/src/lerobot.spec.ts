@@ -1,4 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
+import { parquetReadObjects } from "hyparquet";
+import { parquetWriteBuffer } from "hyparquet-writer";
 import { formatPathTemplate, isSafeRepoPath, LeRobotDataset, parseInfo, resolveUrl } from "./index";
 
 /**
@@ -272,6 +274,80 @@ function mockFetch(files: Record<string, Uint8Array>, seen?: string[]): typeof f
 
 const encoder = new TextEncoder();
 
+function parquet(rows: Record<string, number>[]): Uint8Array {
+	return new Uint8Array(
+		parquetWriteBuffer({
+			columnData: Object.keys(rows[0]).map((name) => ({
+				name,
+				type: "INT64" as const,
+				data: rows.map((row) => BigInt(row[name])),
+			})),
+		}),
+	);
+}
+
+describe("v3 data row offsets", () => {
+	const metadata = (index: number, chunk: number, file: number, from: number, to: number) => ({
+		episode_index: index,
+		length: to - from,
+		"data/chunk_index": chunk,
+		"data/file_index": file,
+		dataset_from_index: from,
+		dataset_to_index: to,
+	});
+	const dataPath = (chunk: number, file: number) =>
+		`data/chunk-${String(chunk).padStart(3, "0")}/file-${String(file).padStart(3, "0")}.parquet`;
+	const files = {
+		"meta/info.json": encoder.encode(
+			JSON.stringify({
+				codebase_version: "v3.0",
+				fps: 30,
+				total_episodes: 4,
+				data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+			}),
+		),
+		"meta/episodes/chunk-000/file-000.parquet": parquet([metadata(0, 0, 0, 0, 3), metadata(1, 0, 1, 3, 5)]),
+		"meta/episodes/chunk-000/file-001.parquet": parquet([metadata(2, 0, 1, 5, 8), metadata(3, 1, 0, 8, 10)]),
+		[dataPath(0, 0)]: parquet([0, 1, 2].map((index) => ({ index, episode_index: 0 }))),
+		[dataPath(0, 1)]: parquet([3, 4, 5, 6, 7].map((index) => ({ index, episode_index: index < 5 ? 1 : 2 }))),
+		[dataPath(1, 0)]: parquet([8, 9].map((index) => ({ index, episode_index: 3 }))),
+	};
+
+	it("returns usable file-relative ranges across files and chunks", async () => {
+		const seen: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files, seen) });
+		const episodes = await dataset.episodes({ limit: 4 });
+		expect(episodes.map(({ data }) => [data.fromRow, data.toRow])).toEqual([
+			[0, 3],
+			[0, 2],
+			[2, 5],
+			[0, 2],
+		]);
+		for (const episode of episodes) {
+			const path = episode.data.url.split("/resolve/main/")[1];
+			const rows = await parquetReadObjects({
+				file: files[path].slice().buffer as ArrayBuffer,
+				rowStart: episode.data.fromRow,
+				rowEnd: episode.data.toRow,
+			});
+			expect(rows).toHaveLength(episode.length);
+			expect(rows.every((row) => Number(row.episode_index) === episode.index)).toBe(true);
+		}
+		expect(seen.filter((path) => path === dataPath(0, 1))).toHaveLength(1);
+	});
+
+	it("finds the file start even when earlier episodes and index shards are skipped", async () => {
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
+		const [episode] = await dataset.episodes({ offset: 2, limit: 1 });
+		expect(episode.index).toBe(2);
+		expect(episode.data).toEqual({
+			url: dataset.fileUrl(dataPath(0, 1)),
+			fromRow: 2,
+			toRow: 5,
+		});
+	});
+});
+
 describe("v2 prefix reads are byte-accurate", () => {
 	/// A long non-ASCII task makes the decoded string much shorter than its byte count, which used to
 	/// look like end-of-file and cut the listing short.
@@ -335,6 +411,7 @@ describe("v3 index sharding", () => {
 						"meta/info.json": infoJson,
 						"meta/episodes/chunk-000/file-000.parquet": indexShard,
 						"meta/episodes/chunk-000/file-001.parquet": indexShard,
+						"data/chunk-000/file-000.parquet": parquet(Array.from({ length: 11939 }, (_, index) => ({ index }))),
 					},
 					seen,
 				),

@@ -61,7 +61,9 @@ one file, so seek to `fromSec` and stop at `toSec`; on `v2.x` each episode has i
 range simply spans it.
 
 `data` points at the frame rows for that episode, for callers that want to chart
-`observation.state` or `action` themselves.
+`observation.state` or `action` themselves. `fromRow` is inclusive and `toRow` is exclusive;
+both are row offsets inside `data.url`, not indexes across the dataset. For v3, listing episodes
+also reads the first `index` value from each referenced data file to calculate these offsets.
 
 ### Pinning a revision
 

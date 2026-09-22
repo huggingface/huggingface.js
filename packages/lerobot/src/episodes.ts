@@ -246,7 +246,38 @@ export async function readEpisodes(
 		info.codebaseVersion === "v3.0"
 			? await readEpisodesV3(toUrl, info, offset, limit, options)
 			: await readEpisodesV2(toUrl("meta/episodes.jsonl"), offset, limit, options);
-	return raw.map((episode) => buildEpisode(episode, info, toUrl));
+	const episodes = raw.map((episode) => buildEpisode(episode, info, toUrl));
+	if (info.codebaseVersion !== "v3.0" || episodes.length === 0) {
+		return episodes;
+	}
+
+	const { parquetReadObjects } = await loadHyparquet();
+	const fileStarts = new Map<string, Promise<number>>();
+	async function readFileStart(url: string): Promise<number> {
+		const file = await openRemoteFile(url, options);
+		const [first] = await parquetReadObjects({ file, columns: ["index"], rowStart: 0, rowEnd: 1 });
+		const start = toNumber(first?.index);
+		if (start === undefined || !Number.isSafeInteger(start) || start < 0) {
+			throw new Error(`Invalid first frame index in ${url}`);
+		}
+		return start;
+	}
+
+	// v3 metadata uses dataset-wide indexes; callers need rows inside the referenced file.
+	// Read each file's first index once, even when the requested page skips its first episode.
+	return Promise.all(
+		episodes.map(async (episode) => {
+			let start = fileStarts.get(episode.data.url);
+			if (start === undefined) {
+				start = readFileStart(episode.data.url);
+				fileStarts.set(episode.data.url, start);
+			}
+			const fileStart = await start;
+			episode.data.fromRow -= fileStart;
+			episode.data.toRow -= fileStart;
+			return episode;
+		}),
+	);
 }
 
 /** Re-exported for tests and callers that want to read a row range themselves. */
