@@ -23,12 +23,13 @@ jobs:
         env:
           PR_REF: ${{  github.event.pull_request.head.ref }}
           BASE_REF: origin/${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.sha }}
         run: |
-          if [ -z $PR_REF ]
+          if [ -z "$PR_REF" ]
           then
-            echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
+            echo "SINCE=${HEAD_SHA}^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base $BASE_REF ${{ github.sha }})" >> $GITHUB_OUTPUT
+            echo "SINCE=$(git merge-base "$BASE_REF" "$HEAD_SHA")" >> $GITHUB_OUTPUT
           fi
 
       - run: npm install -g corepack@latest && corepack enable
@@ -81,12 +82,14 @@ jobs:
         id: since
         env:
           PR_REF: ${{  github.event.pull_request.head.ref }}
+          BASE_REF: origin/${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.sha }}
         run: |
-          if [ -z $PR_REF ]
+          if [ -z "$PR_REF" ]
           then
-            echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
+            echo "SINCE=${HEAD_SHA}^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
+            echo "SINCE=$(git merge-base "$BASE_REF" "$HEAD_SHA")" >> $GITHUB_OUTPUT
           fi
 
       - run: google-chrome --version
