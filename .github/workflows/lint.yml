@@ -5,8 +5,12 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   lint:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -53,6 +57,8 @@ jobs:
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] check
 
   format:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
