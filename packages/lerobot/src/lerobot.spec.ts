@@ -97,6 +97,47 @@ describe("parseInfo", () => {
 	});
 });
 
+describe("parseInfo on hostile input", () => {
+	const base = {
+		codebase_version: "v3.0",
+		fps: 30,
+		total_episodes: 1,
+		data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+	};
+
+	it("drops oversized feature keys, robot types and codecs", () => {
+		const info = parseInfo(
+			JSON.stringify({
+				...base,
+				robot_type: "r".repeat(1_000),
+				features: {
+					["k".repeat(1_000)]: { dtype: "video", shape: [480, 640, 3] },
+					["j".repeat(1_000)]: { dtype: "float32", shape: [1], names: ["a"] },
+					"observation.images.up": { dtype: "video", shape: [480, 640, 3], info: { "video.codec": "c".repeat(100) } },
+				},
+			}),
+		);
+		expect(info.robotType).toBeUndefined();
+		expect(info.cameras).toEqual([{ key: "observation.images.up", width: 640, height: 480, codec: undefined }]);
+		expect(info.joints).toEqual({});
+	});
+
+	it("falls back to the default chunk size unless it is a positive integer", () => {
+		for (const chunks_size of [0, -1, 0.5, 1e300]) {
+			expect(parseInfo(JSON.stringify({ ...base, chunks_size })).chunksSize).toBe(1_000);
+		}
+		expect(parseInfo(JSON.stringify({ ...base, chunks_size: 500 })).chunksSize).toBe(500);
+	});
+
+	it("keeps a `__proto__` feature key as plain data", () => {
+		const info = parseInfo(
+			JSON.stringify({ ...base, features: JSON.parse('{"__proto__": {"dtype": "float32", "names": ["a"]}}') }),
+		);
+		expect(Object.getPrototypeOf(info.joints)).toBe(Object.prototype);
+		expect(Object.keys(info.joints)).toEqual(["__proto__"]);
+	});
+});
+
 describe("formatPathTemplate", () => {
 	it("zero-pads v3 indices", () => {
 		expect(
@@ -116,6 +157,20 @@ describe("formatPathTemplate", () => {
 				episode_index: 42,
 			}),
 		).toBe("videos/chunk-000/observation.images.side/episode_000042.mp4");
+	});
+
+	it("refuses a template that walks out of the repo, directly or through a key", () => {
+		expect(() => formatPathTemplate("../../api/whoami-v2", {})).toThrow(/unsafe repo path/);
+		expect(() => formatPathTemplate("/etc/passwd", {})).toThrow(/unsafe repo path/);
+		expect(() => formatPathTemplate("videos/{video_key}.mp4", { video_key: "../../settings" })).toThrow(
+			/unsafe repo path/,
+		);
+	});
+
+	it("bounds the formatted path, not only the template", () => {
+		/// 990 characters of template that would otherwise expand to megabytes
+		expect(() => formatPathTemplate("{video_key}".repeat(90), { video_key: "k".repeat(40_000) })).toThrow(/too long/);
+		expect(() => formatPathTemplate(`videos/${"a".repeat(1_100)}.mp4`, {})).toThrow(/too long/);
 	});
 });
 

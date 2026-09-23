@@ -13,7 +13,7 @@ export interface LeRobotCamera {
 /** Normalized view of `meta/info.json`. */
 export interface LeRobotInfo {
 	codebaseVersion: LeRobotCodebaseVersion;
-	/** Raw `robot_type`; `unknown` and blank values are dropped. */
+	/** Raw `robot_type`; `unknown`, blank and implausibly long values are dropped. */
 	robotType?: string;
 	fps: number;
 	totalEpisodes: number;
