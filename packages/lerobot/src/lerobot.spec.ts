@@ -1,4 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
+import { parquetReadObjects } from "hyparquet";
+import { parquetWriteBuffer } from "hyparquet-writer";
 import { formatPathTemplate, isSafeRepoPath, LeRobotDataset, parseInfo, resolveUrl } from "./index";
 
 /**
@@ -95,6 +97,80 @@ describe("parseInfo", () => {
 	});
 });
 
+describe("parseInfo on hostile input", () => {
+	const base = {
+		codebase_version: "v3.0",
+		fps: 30,
+		total_episodes: 1,
+		data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+	};
+
+	it("drops oversized feature keys, robot types and codecs", () => {
+		const info = parseInfo(
+			JSON.stringify({
+				...base,
+				robot_type: "r".repeat(1_000),
+				features: {
+					["k".repeat(1_000)]: { dtype: "video", shape: [480, 640, 3] },
+					["j".repeat(1_000)]: { dtype: "float32", shape: [1], names: ["a"] },
+					"observation.images.up": { dtype: "video", shape: [480, 640, 3], info: { "video.codec": "c".repeat(100) } },
+				},
+			}),
+		);
+		expect(info.robotType).toBeUndefined();
+		expect(info.cameras).toEqual([{ key: "observation.images.up", width: 640, height: 480, codec: undefined }]);
+		expect(info.joints).toEqual({});
+	});
+
+	it("keeps only the first cameras and joint features", () => {
+		const features: Record<string, unknown> = {};
+		for (let i = 0; i < 100; i++) {
+			features[`cam${i}`] = { dtype: "video", shape: [480, 640, 3] };
+			features[`joint${i}`] = { dtype: "float32", shape: [1], names: ["a"] };
+		}
+		const info = parseInfo(JSON.stringify({ ...base, features }));
+		expect(info.cameras.map((camera) => camera.key)).toEqual(Array.from({ length: 32 }, (_, i) => `cam${i}`));
+		expect(Object.keys(info.joints)).toEqual(Array.from({ length: 64 }, (_, i) => `joint${i}`));
+	});
+
+	it("drops joint names that are too many or too long", () => {
+		const names = (list: string[]) => ({ dtype: "float32", shape: [list.length], names: list });
+		const info = parseInfo(
+			JSON.stringify({
+				...base,
+				features: {
+					many: names(Array.from({ length: 257 }, (_, i) => `j${i}`)),
+					long: names(["a", "n".repeat(201)]),
+					nested: { dtype: "float32", shape: [257], names: { motors: Array.from({ length: 257 }, (_, i) => `j${i}`) } },
+					ok: names(Array.from({ length: 256 }, (_, i) => `j${i}`)),
+				},
+			}),
+		);
+		expect(Object.keys(info.joints)).toEqual(["ok"]);
+	});
+
+	it("bounds path templates", () => {
+		const long = `videos/${"a".repeat(1_000)}.mp4`;
+		expect(() => parseInfo(JSON.stringify({ ...base, data_path: long }))).toThrow(/data_path/);
+		expect(parseInfo(JSON.stringify({ ...base, video_path: long })).videoPath).toBeUndefined();
+	});
+
+	it("falls back to the default chunk size unless it is a positive integer", () => {
+		for (const chunks_size of [0, -1, 0.5, 1e300]) {
+			expect(parseInfo(JSON.stringify({ ...base, chunks_size })).chunksSize).toBe(1_000);
+		}
+		expect(parseInfo(JSON.stringify({ ...base, chunks_size: 500 })).chunksSize).toBe(500);
+	});
+
+	it("keeps a `__proto__` feature key as plain data", () => {
+		const info = parseInfo(
+			JSON.stringify({ ...base, features: JSON.parse('{"__proto__": {"dtype": "float32", "names": ["a"]}}') }),
+		);
+		expect(Object.getPrototypeOf(info.joints)).toBe(Object.prototype);
+		expect(Object.keys(info.joints)).toEqual(["__proto__"]);
+	});
+});
+
 describe("formatPathTemplate", () => {
 	it("zero-pads v3 indices", () => {
 		expect(
@@ -114,6 +190,20 @@ describe("formatPathTemplate", () => {
 				episode_index: 42,
 			}),
 		).toBe("videos/chunk-000/observation.images.side/episode_000042.mp4");
+	});
+
+	it("refuses a template that walks out of the repo, directly or through a key", () => {
+		expect(() => formatPathTemplate("../../api/whoami-v2", {})).toThrow(/unsafe repo path/);
+		expect(() => formatPathTemplate("/etc/passwd", {})).toThrow(/unsafe repo path/);
+		expect(() => formatPathTemplate("videos/{video_key}.mp4", { video_key: "../../settings" })).toThrow(
+			/unsafe repo path/,
+		);
+	});
+
+	it("bounds the formatted path, not only the template", () => {
+		/// 990 characters of template that would otherwise expand to megabytes
+		expect(() => formatPathTemplate("{video_key}".repeat(90), { video_key: "k".repeat(40_000) })).toThrow(/too long/);
+		expect(() => formatPathTemplate(`videos/${"a".repeat(1_100)}.mp4`, {})).toThrow(/too long/);
 	});
 });
 
@@ -168,7 +258,7 @@ describe("LeRobotDataset (v2.1)", () => {
 			expect(episodes[0]?.videos[0]?.url).toBe(
 				`https://huggingface.co/datasets/${REPO_ID}/resolve/${REV_V21}/videos/chunk-000/observation.images.up/episode_000000.mp4`,
 			);
-			expect(episodes[0]?.data.url).toBe(
+			expect(episodes[0]?.data?.url).toBe(
 				`https://huggingface.co/datasets/${REPO_ID}/resolve/${REV_V21}/data/chunk-000/episode_000000.parquet`,
 			);
 		},
@@ -224,6 +314,19 @@ describe("LeRobotDataset (v3.0)", () => {
 		},
 		TIMEOUT,
 	);
+
+	it(
+		"locates rows inside the data file when the page starts mid-file",
+		async () => {
+			const [episode] = await dataset.episodes({ offset: 1, limit: 1 });
+			expect(episode?.data).toEqual({
+				url: `https://huggingface.co/datasets/${REPO_ID}/resolve/${REV_V30}/data/chunk-000/file-000.parquet`,
+				fromRow: 303,
+				toRow: 303 + 266,
+			});
+		},
+		TIMEOUT,
+	);
 });
 
 describe("v2 and v3 agree", () => {
@@ -271,6 +374,123 @@ function mockFetch(files: Record<string, Uint8Array>, seen?: string[]): typeof f
 }
 
 const encoder = new TextEncoder();
+
+function parquet(rows: Record<string, number>[], { statistics = true } = {}): Uint8Array {
+	return new Uint8Array(
+		parquetWriteBuffer({
+			statistics,
+			columnData: Object.keys(rows[0]).map((name) => ({
+				name,
+				type: "INT64" as const,
+				data: rows.map((row) => BigInt(row[name])),
+			})),
+		}),
+	);
+}
+
+describe("v3 data row offsets", () => {
+	const metadata = (index: number, chunk: number, file: number, from: number, to: number) => ({
+		episode_index: index,
+		length: to - from,
+		"data/chunk_index": chunk,
+		"data/file_index": file,
+		dataset_from_index: from,
+		dataset_to_index: to,
+	});
+	const dataPath = (chunk: number, file: number) =>
+		`data/chunk-${String(chunk).padStart(3, "0")}/file-${String(file).padStart(3, "0")}.parquet`;
+	const files = {
+		"meta/info.json": encoder.encode(
+			JSON.stringify({
+				codebase_version: "v3.0",
+				fps: 30,
+				total_episodes: 4,
+				data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+			}),
+		),
+		"meta/episodes/chunk-000/file-000.parquet": parquet([metadata(0, 0, 0, 0, 3), metadata(1, 0, 1, 3, 5)]),
+		"meta/episodes/chunk-000/file-001.parquet": parquet([metadata(2, 0, 1, 5, 8), metadata(3, 1, 0, 8, 10)]),
+		[dataPath(0, 0)]: parquet([0, 1, 2].map((index) => ({ index, episode_index: 0 }))),
+		[dataPath(0, 1)]: parquet([3, 4, 5, 6, 7].map((index) => ({ index, episode_index: index < 5 ? 1 : 2 }))),
+		[dataPath(1, 0)]: parquet([8, 9].map((index) => ({ index, episode_index: 3 }))),
+	};
+
+	it("returns usable file-relative ranges across files and chunks", async () => {
+		const seen: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files, seen) });
+		const episodes = await dataset.episodes({ limit: 4 });
+		expect(episodes.map(({ data }) => [data?.fromRow, data?.toRow])).toEqual([
+			[0, 3],
+			[0, 2],
+			[2, 5],
+			[0, 2],
+		]);
+		for (const { data, length, index } of episodes) {
+			if (data === undefined) {
+				throw new Error(`episode ${index} has no data range`);
+			}
+			const path = data.url.split("/resolve/main/")[1];
+			const rows = await parquetReadObjects({
+				file: files[path].slice().buffer as ArrayBuffer,
+				rowStart: data.fromRow,
+				rowEnd: data.toRow,
+			});
+			expect(rows).toHaveLength(length);
+			expect(rows.every((row) => Number(row.episode_index) === index)).toBe(true);
+		}
+		/// Every file starts on this page, so its first episode's metadata is enough.
+		expect(seen.filter((path) => path.startsWith("data/"))).toEqual([]);
+	});
+
+	it("finds the file start even when earlier episodes and index shards are skipped", async () => {
+		const seen: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files, seen) });
+		const [episode, next] = await dataset.episodes({ offset: 2, limit: 2 });
+		expect(episode.index).toBe(2);
+		expect(episode.data).toEqual({
+			url: dataset.fileUrl(dataPath(0, 1)),
+			fromRow: 2,
+			toRow: 5,
+		});
+		expect(next.data).toEqual({ url: dataset.fileUrl(dataPath(1, 0)), fromRow: 0, toRow: 2 });
+		/// Only the file whose first episode is off the page is opened.
+		expect(seen.filter((path) => path.startsWith("data/"))).toEqual([dataPath(0, 1)]);
+	});
+
+	it("falls back to reading the index column when the footer has no statistics", async () => {
+		const withoutStatistics = {
+			...files,
+			[dataPath(0, 1)]: parquet(
+				[3, 4, 5, 6, 7].map((index) => ({ index, episode_index: index < 5 ? 1 : 2 })),
+				{ statistics: false },
+			),
+		};
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(withoutStatistics) });
+		const [episode] = await dataset.episodes({ offset: 2, limit: 1 });
+		expect(episode.data).toEqual({ url: dataset.fileUrl(dataPath(0, 1)), fromRow: 2, toRow: 5 });
+	});
+
+	it("drops only the row range when a data file cannot be read", async () => {
+		const withoutFile: Record<string, Uint8Array> = { ...files };
+		delete withoutFile[dataPath(0, 1)];
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(withoutFile) });
+		const episodes = await dataset.episodes({ offset: 2, limit: 2 });
+		expect(episodes.map((episode) => episode.index)).toEqual([2, 3]);
+		expect(episodes[0].data).toBeUndefined();
+		expect(episodes[1].data).toEqual({ url: dataset.fileUrl(dataPath(1, 0)), fromRow: 0, toRow: 2 });
+	});
+
+	it("drops the row range when metadata points before the start of the data file", async () => {
+		const shifted = {
+			...files,
+			[dataPath(0, 1)]: parquet([6, 7].map((index) => ({ index, episode_index: 2 }))),
+		};
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(shifted) });
+		const [episode] = await dataset.episodes({ offset: 2, limit: 1 });
+		expect(episode.index).toBe(2);
+		expect(episode.data).toBeUndefined();
+	});
+});
 
 describe("v2 prefix reads are byte-accurate", () => {
 	/// A long non-ASCII task makes the decoded string much shorter than its byte count, which used to
