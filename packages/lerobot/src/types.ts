@@ -41,8 +41,9 @@ export interface LeRobotEpisodeVideo {
 /** Where an episode's frame rows live, for callers that want to chart them. */
 export interface LeRobotEpisodeData {
 	url: string;
+	/** Inclusive row offset inside `url`, not a dataset-wide frame index. */
 	fromRow: number;
-	/** Exclusive. */
+	/** Exclusive row offset inside `url`. */
 	toRow: number;
 }
 
@@ -56,5 +57,6 @@ export interface LeRobotEpisode {
 	durationSec: number;
 	tasks: string[];
 	videos: LeRobotEpisodeVideo[];
-	data: LeRobotEpisodeData;
+	/** Absent when the episode's rows inside its v3 data file could not be located. */
+	data?: LeRobotEpisodeData;
 }

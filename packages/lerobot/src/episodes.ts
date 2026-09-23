@@ -1,5 +1,5 @@
 import type { FetchOptions, RandomAccessFile } from "./http";
-import type { LeRobotEpisode, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
+import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
 import { fetchRange, fetchTextPrefix, HttpError, openRemoteFile } from "./http";
 import { formatPathTemplate } from "./paths";
@@ -45,7 +45,9 @@ interface RawEpisode {
 	};
 }
 
-function buildEpisode(raw: RawEpisode, info: LeRobotInfo, toUrl: (path: string) => string): LeRobotEpisode {
+type BuiltEpisode = LeRobotEpisode & { data: LeRobotEpisodeData };
+
+function buildEpisode(raw: RawEpisode, info: LeRobotInfo, toUrl: (path: string) => string): BuiltEpisode {
 	const videos: LeRobotEpisodeVideo[] = [];
 	const fallbackDuration = raw.length / info.fps;
 
@@ -246,7 +248,67 @@ export async function readEpisodes(
 		info.codebaseVersion === "v3.0"
 			? await readEpisodesV3(toUrl, info, offset, limit, options)
 			: await readEpisodesV2(toUrl("meta/episodes.jsonl"), offset, limit, options);
-	return raw.map((episode) => buildEpisode(episode, info, toUrl));
+	const episodes = raw.map((episode) => buildEpisode(episode, info, toUrl));
+	return info.codebaseVersion === "v3.0" ? toFileRows(episodes, offset, options) : episodes;
+}
+
+/**
+ * First `index` of a v3 data file. Taken from the footer's column statistics when present, so the
+ * column itself is not downloaded; data files are written in `index` order, so the minimum is row 0.
+ */
+async function readFileStart(url: string, options?: FetchOptions): Promise<number> {
+	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
+	const file = await openRemoteFile(url, options);
+	const metadata = await parquetMetadataAsync(file);
+	const column = metadata.row_groups[0]?.columns.find(
+		(chunk) => chunk.meta_data?.path_in_schema.length === 1 && chunk.meta_data.path_in_schema[0] === "index",
+	);
+	let start = toNumber(column?.meta_data?.statistics?.min_value);
+	if (start === undefined) {
+		const [first] = await parquetReadObjects({ file, metadata, columns: ["index"], rowEnd: 1 });
+		start = toNumber(first?.index);
+	}
+	if (start === undefined || !Number.isSafeInteger(start) || start < 0) {
+		throw new Error(`Invalid first frame index in ${url}`);
+	}
+	return start;
+}
+
+/**
+ * v3 metadata carries dataset-wide frame indexes; callers need row offsets inside `data.url`.
+ *
+ * Data files are written in episode order, so an episode whose file differs from the previous
+ * episode's is the first in its file, and that file starts at the episode's own dataset index. Only a
+ * file whose first episode falls before the requested page needs a remote read.
+ */
+async function toFileRows(episodes: BuiltEpisode[], offset: number, options?: FetchOptions): Promise<LeRobotEpisode[]> {
+	const fileStarts = new Map<string, Promise<number | undefined>>();
+	episodes.forEach((episode, position) => {
+		const { url, fromRow } = episode.data;
+		if (fileStarts.has(url)) {
+			return;
+		}
+		const startsFile = position === 0 ? offset === 0 : episodes[position - 1].data.url !== url;
+		/// A data file that cannot be read drops the row range of its episodes, not the whole listing.
+		fileStarts.set(url, startsFile ? Promise.resolve(fromRow) : readFileStart(url, options).catch(() => undefined));
+	});
+
+	return Promise.all(
+		episodes.map(async (episode): Promise<LeRobotEpisode> => {
+			const { data, ...rest } = episode;
+			const start = await fileStarts.get(data.url);
+			if (start === undefined) {
+				return rest;
+			}
+			const fromRow = data.fromRow - start;
+			const toRow = data.toRow - start;
+			/// Metadata that disagrees with the data file would yield a range that is not in it.
+			if (fromRow < 0 || toRow < fromRow) {
+				return rest;
+			}
+			return { ...rest, data: { url: data.url, fromRow, toRow } };
+		}),
+	);
 }
 
 /** Re-exported for tests and callers that want to read a row range themselves. */
