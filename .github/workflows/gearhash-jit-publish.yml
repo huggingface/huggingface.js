@@ -19,7 +19,6 @@ defaults:
   run:
     working-directory: packages/gearhash-jit
 
-
 permissions: {}
 
 jobs:

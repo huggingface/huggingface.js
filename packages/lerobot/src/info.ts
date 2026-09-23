@@ -1,7 +1,24 @@
 import type { LeRobotCamera, LeRobotCodebaseVersion, LeRobotInfo } from "./types";
 
+import { MAX_PATH_TEMPLATE_LENGTH } from "./paths";
+
 const SUPPORTED_VERSIONS: LeRobotCodebaseVersion[] = ["v2.0", "v2.1", "v3.0"];
 const DEFAULT_CHUNKS_SIZE = 1_000;
+/**
+ * `meta/info.json` is user-authored and callers render these strings, so each is bounded. Real
+ * values are a few dozen characters at most; anything longer is dropped rather than truncated.
+ */
+const MAX_FEATURE_KEY_LENGTH = 200;
+const MAX_ROBOT_TYPE_LENGTH = 100;
+const MAX_CODEC_LENGTH = 32;
+/**
+ * Counts are bounded too: each camera yields a formatted URL per episode, so the per-path cap alone
+ * would not bound a listing. Real datasets have a handful of cameras and joint features.
+ */
+const MAX_CAMERAS = 32;
+const MAX_JOINT_FEATURES = 64;
+/** A feature with more names is dropped rather than truncated, which would mislabel its dimensions. */
+const MAX_JOINT_NAMES = 256;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -11,12 +28,16 @@ function asFiniteNumber(value: unknown): number | undefined {
 	return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function asNonEmptyString(value: unknown): string | undefined {
+function asNonEmptyString(value: unknown, maxLength = Infinity): string | undefined {
 	if (typeof value !== "string") {
 		return undefined;
 	}
 	const trimmed = value.trim();
-	return trimmed.length > 0 ? trimmed : undefined;
+	return trimmed.length > 0 && trimmed.length <= maxLength ? trimmed : undefined;
+}
+
+function asPositiveInteger(value: unknown): number | undefined {
+	return typeof value === "number" && Number.isSafeInteger(value) && value > 0 ? value : undefined;
 }
 
 function asStringArray(value: unknown): string[] | undefined {
@@ -38,7 +59,7 @@ function readCodec(feature: Record<string, unknown>): string | undefined {
 	for (const key of ["info", "video_info"]) {
 		const block = feature[key];
 		if (isRecord(block)) {
-			const codec = asNonEmptyString(block["video.codec"]);
+			const codec = asNonEmptyString(block["video.codec"], MAX_CODEC_LENGTH);
 			if (codec !== undefined) {
 				return codec;
 			}
@@ -67,19 +88,23 @@ function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamer
  */
 function readJointNames(feature: Record<string, unknown>): string[] | undefined {
 	const names = feature.names;
-	const flat = asStringArray(names);
-	if (flat !== undefined) {
-		return flat;
-	}
-	if (isRecord(names)) {
+	let list = asStringArray(names);
+	if (list === undefined && isRecord(names)) {
 		for (const nested of Object.values(names)) {
-			const list = asStringArray(nested);
+			list = asStringArray(nested);
 			if (list !== undefined) {
-				return list;
+				break;
 			}
 		}
 	}
-	return undefined;
+	if (
+		list === undefined ||
+		list.length > MAX_JOINT_NAMES ||
+		list.some((name) => name.length > MAX_FEATURE_KEY_LENGTH)
+	) {
+		return undefined;
+	}
+	return list;
 }
 
 /**
@@ -114,34 +139,41 @@ export function parseInfo(text: string): LeRobotInfo {
 	if (fps === undefined || fps <= 0) {
 		throw new Error("meta/info.json is missing a valid fps");
 	}
-	const dataPath = asNonEmptyString(json.data_path);
+	const dataPath = asNonEmptyString(json.data_path, MAX_PATH_TEMPLATE_LENGTH);
 	if (dataPath === undefined) {
-		throw new Error("meta/info.json is missing data_path");
+		throw new Error("meta/info.json is missing a valid data_path");
 	}
 
 	const cameras: LeRobotCamera[] = [];
-	const joints: Record<string, string[]> = {};
+	/// Collected as entries so that a `__proto__` feature key stays an own property
+	const joints: [string, string[]][] = [];
 	const features = json.features;
 	if (isRecord(features)) {
 		for (const [key, rawFeature] of Object.entries(features)) {
-			if (!isRecord(rawFeature)) {
+			if (!isRecord(rawFeature) || key.length > MAX_FEATURE_KEY_LENGTH) {
 				continue;
 			}
 			if (rawFeature.dtype === "video") {
+				if (cameras.length >= MAX_CAMERAS) {
+					continue;
+				}
 				const camera = readCamera(key, rawFeature);
 				if (camera !== undefined) {
 					cameras.push(camera);
 				}
 				continue;
 			}
+			if (joints.length >= MAX_JOINT_FEATURES) {
+				continue;
+			}
 			const names = readJointNames(rawFeature);
 			if (names !== undefined) {
-				joints[key] = names;
+				joints.push([key, names]);
 			}
 		}
 	}
 
-	const robotType = asNonEmptyString(json.robot_type);
+	const robotType = asNonEmptyString(json.robot_type, MAX_ROBOT_TYPE_LENGTH);
 
 	return {
 		codebaseVersion,
@@ -150,10 +182,10 @@ export function parseInfo(text: string): LeRobotInfo {
 		totalEpisodes,
 		totalFrames: asFiniteNumber(json.total_frames),
 		totalTasks: asFiniteNumber(json.total_tasks),
-		chunksSize: asFiniteNumber(json.chunks_size) ?? DEFAULT_CHUNKS_SIZE,
+		chunksSize: asPositiveInteger(json.chunks_size) ?? DEFAULT_CHUNKS_SIZE,
 		dataPath,
-		videoPath: asNonEmptyString(json.video_path),
+		videoPath: asNonEmptyString(json.video_path, MAX_PATH_TEMPLATE_LENGTH),
 		cameras,
-		joints,
+		joints: Object.fromEntries(joints),
 	};
 }
