@@ -19,13 +19,14 @@ defaults:
   run:
     working-directory: packages/space-header
 
-permissions:
-  contents: write
-  id-token: write
-  packages: write
+
+permissions: {}
 
 jobs:
   version_and_release:
+    permissions:
+      contents: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
