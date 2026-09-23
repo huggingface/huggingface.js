@@ -30,11 +30,11 @@ jobs:
       packages: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
       - run: npm install -g corepack@latest && corepack enable
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: "pnpm"
@@ -54,7 +54,7 @@ jobs:
       - run: (git pull --rebase && git push && git push origin "$RELEASE_TAG") || (git pull --rebase && git push && git push origin "$RELEASE_TAG")
 
       - run: pnpm publish --no-git-checks .
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "24"
           registry-url: "https://npm.pkg.github.com"
