@@ -62,8 +62,9 @@ range simply spans it.
 
 `data` points at the frame rows for that episode, for callers that want to chart
 `observation.state` or `action` themselves. `fromRow` is inclusive and `toRow` is exclusive;
-both are row offsets inside `data.url`, not indexes across the dataset. For v3, listing episodes
-also reads the first `index` value from each referenced data file to calculate these offsets.
+both are row offsets inside `data.url`, not indexes across the dataset. For v3, when a page starts
+partway through a data file, listing episodes also reads that file's parquet footer to find where it
+starts. `data` is absent when that file cannot be read or disagrees with the episode metadata.
 
 ### Pinning a revision
 

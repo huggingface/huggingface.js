@@ -57,5 +57,6 @@ export interface LeRobotEpisode {
 	durationSec: number;
 	tasks: string[];
 	videos: LeRobotEpisodeVideo[];
-	data: LeRobotEpisodeData;
+	/** Absent when the episode's rows inside its v3 data file could not be located. */
+	data?: LeRobotEpisodeData;
 }

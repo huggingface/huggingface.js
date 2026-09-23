@@ -170,7 +170,7 @@ describe("LeRobotDataset (v2.1)", () => {
 			expect(episodes[0]?.videos[0]?.url).toBe(
 				`https://huggingface.co/datasets/${REPO_ID}/resolve/${REV_V21}/videos/chunk-000/observation.images.up/episode_000000.mp4`,
 			);
-			expect(episodes[0]?.data.url).toBe(
+			expect(episodes[0]?.data?.url).toBe(
 				`https://huggingface.co/datasets/${REPO_ID}/resolve/${REV_V21}/data/chunk-000/episode_000000.parquet`,
 			);
 		},
@@ -226,6 +226,19 @@ describe("LeRobotDataset (v3.0)", () => {
 		},
 		TIMEOUT,
 	);
+
+	it(
+		"locates rows inside the data file when the page starts mid-file",
+		async () => {
+			const [episode] = await dataset.episodes({ offset: 1, limit: 1 });
+			expect(episode?.data).toEqual({
+				url: `https://huggingface.co/datasets/${REPO_ID}/resolve/${REV_V30}/data/chunk-000/file-000.parquet`,
+				fromRow: 303,
+				toRow: 303 + 266,
+			});
+		},
+		TIMEOUT,
+	);
 });
 
 describe("v2 and v3 agree", () => {
@@ -274,9 +287,10 @@ function mockFetch(files: Record<string, Uint8Array>, seen?: string[]): typeof f
 
 const encoder = new TextEncoder();
 
-function parquet(rows: Record<string, number>[]): Uint8Array {
+function parquet(rows: Record<string, number>[], { statistics = true } = {}): Uint8Array {
 	return new Uint8Array(
 		parquetWriteBuffer({
+			statistics,
 			columnData: Object.keys(rows[0]).map((name) => ({
 				name,
 				type: "INT64" as const,
@@ -317,34 +331,76 @@ describe("v3 data row offsets", () => {
 		const seen: string[] = [];
 		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files, seen) });
 		const episodes = await dataset.episodes({ limit: 4 });
-		expect(episodes.map(({ data }) => [data.fromRow, data.toRow])).toEqual([
+		expect(episodes.map(({ data }) => [data?.fromRow, data?.toRow])).toEqual([
 			[0, 3],
 			[0, 2],
 			[2, 5],
 			[0, 2],
 		]);
-		for (const episode of episodes) {
-			const path = episode.data.url.split("/resolve/main/")[1];
+		for (const { data, length, index } of episodes) {
+			if (data === undefined) {
+				throw new Error(`episode ${index} has no data range`);
+			}
+			const path = data.url.split("/resolve/main/")[1];
 			const rows = await parquetReadObjects({
 				file: files[path].slice().buffer as ArrayBuffer,
-				rowStart: episode.data.fromRow,
-				rowEnd: episode.data.toRow,
+				rowStart: data.fromRow,
+				rowEnd: data.toRow,
 			});
-			expect(rows).toHaveLength(episode.length);
-			expect(rows.every((row) => Number(row.episode_index) === episode.index)).toBe(true);
+			expect(rows).toHaveLength(length);
+			expect(rows.every((row) => Number(row.episode_index) === index)).toBe(true);
 		}
-		expect(seen.filter((path) => path === dataPath(0, 1))).toHaveLength(1);
+		/// Every file starts on this page, so its first episode's metadata is enough.
+		expect(seen.filter((path) => path.startsWith("data/"))).toEqual([]);
 	});
 
 	it("finds the file start even when earlier episodes and index shards are skipped", async () => {
-		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
-		const [episode] = await dataset.episodes({ offset: 2, limit: 1 });
+		const seen: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files, seen) });
+		const [episode, next] = await dataset.episodes({ offset: 2, limit: 2 });
 		expect(episode.index).toBe(2);
 		expect(episode.data).toEqual({
 			url: dataset.fileUrl(dataPath(0, 1)),
 			fromRow: 2,
 			toRow: 5,
 		});
+		expect(next.data).toEqual({ url: dataset.fileUrl(dataPath(1, 0)), fromRow: 0, toRow: 2 });
+		/// Only the file whose first episode is off the page is opened.
+		expect(seen.filter((path) => path.startsWith("data/"))).toEqual([dataPath(0, 1)]);
+	});
+
+	it("falls back to reading the index column when the footer has no statistics", async () => {
+		const withoutStatistics = {
+			...files,
+			[dataPath(0, 1)]: parquet(
+				[3, 4, 5, 6, 7].map((index) => ({ index, episode_index: index < 5 ? 1 : 2 })),
+				{ statistics: false },
+			),
+		};
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(withoutStatistics) });
+		const [episode] = await dataset.episodes({ offset: 2, limit: 1 });
+		expect(episode.data).toEqual({ url: dataset.fileUrl(dataPath(0, 1)), fromRow: 2, toRow: 5 });
+	});
+
+	it("drops only the row range when a data file cannot be read", async () => {
+		const withoutFile: Record<string, Uint8Array> = { ...files };
+		delete withoutFile[dataPath(0, 1)];
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(withoutFile) });
+		const episodes = await dataset.episodes({ offset: 2, limit: 2 });
+		expect(episodes.map((episode) => episode.index)).toEqual([2, 3]);
+		expect(episodes[0].data).toBeUndefined();
+		expect(episodes[1].data).toEqual({ url: dataset.fileUrl(dataPath(1, 0)), fromRow: 0, toRow: 2 });
+	});
+
+	it("drops the row range when metadata points before the start of the data file", async () => {
+		const shifted = {
+			...files,
+			[dataPath(0, 1)]: parquet([6, 7].map((index) => ({ index, episode_index: 2 }))),
+		};
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(shifted) });
+		const [episode] = await dataset.episodes({ offset: 2, limit: 1 });
+		expect(episode.index).toBe(2);
+		expect(episode.data).toBeUndefined();
 	});
 });
 
@@ -411,7 +467,6 @@ describe("v3 index sharding", () => {
 						"meta/info.json": infoJson,
 						"meta/episodes/chunk-000/file-000.parquet": indexShard,
 						"meta/episodes/chunk-000/file-001.parquet": indexShard,
-						"data/chunk-000/file-000.parquet": parquet(Array.from({ length: 11939 }, (_, index) => ({ index }))),
 					},
 					seen,
 				),
