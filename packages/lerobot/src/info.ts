@@ -1,5 +1,7 @@
 import type { LeRobotCamera, LeRobotCodebaseVersion, LeRobotInfo } from "./types";
 
+import { MAX_PATH_TEMPLATE_LENGTH } from "./paths";
+
 const SUPPORTED_VERSIONS: LeRobotCodebaseVersion[] = ["v2.0", "v2.1", "v3.0"];
 const DEFAULT_CHUNKS_SIZE = 1_000;
 /**
@@ -9,6 +11,14 @@ const DEFAULT_CHUNKS_SIZE = 1_000;
 const MAX_FEATURE_KEY_LENGTH = 200;
 const MAX_ROBOT_TYPE_LENGTH = 100;
 const MAX_CODEC_LENGTH = 32;
+/**
+ * Counts are bounded too: each camera yields a formatted URL per episode, so the per-path cap alone
+ * would not bound a listing. Real datasets have a handful of cameras and joint features.
+ */
+const MAX_CAMERAS = 32;
+const MAX_JOINT_FEATURES = 64;
+/** A feature with more names is dropped rather than truncated, which would mislabel its dimensions. */
+const MAX_JOINT_NAMES = 256;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -78,19 +88,23 @@ function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamer
  */
 function readJointNames(feature: Record<string, unknown>): string[] | undefined {
 	const names = feature.names;
-	const flat = asStringArray(names);
-	if (flat !== undefined) {
-		return flat;
-	}
-	if (isRecord(names)) {
+	let list = asStringArray(names);
+	if (list === undefined && isRecord(names)) {
 		for (const nested of Object.values(names)) {
-			const list = asStringArray(nested);
+			list = asStringArray(nested);
 			if (list !== undefined) {
-				return list;
+				break;
 			}
 		}
 	}
-	return undefined;
+	if (
+		list === undefined ||
+		list.length > MAX_JOINT_NAMES ||
+		list.some((name) => name.length > MAX_FEATURE_KEY_LENGTH)
+	) {
+		return undefined;
+	}
+	return list;
 }
 
 /**
@@ -125,9 +139,9 @@ export function parseInfo(text: string): LeRobotInfo {
 	if (fps === undefined || fps <= 0) {
 		throw new Error("meta/info.json is missing a valid fps");
 	}
-	const dataPath = asNonEmptyString(json.data_path);
+	const dataPath = asNonEmptyString(json.data_path, MAX_PATH_TEMPLATE_LENGTH);
 	if (dataPath === undefined) {
-		throw new Error("meta/info.json is missing data_path");
+		throw new Error("meta/info.json is missing a valid data_path");
 	}
 
 	const cameras: LeRobotCamera[] = [];
@@ -140,10 +154,16 @@ export function parseInfo(text: string): LeRobotInfo {
 				continue;
 			}
 			if (rawFeature.dtype === "video") {
+				if (cameras.length >= MAX_CAMERAS) {
+					continue;
+				}
 				const camera = readCamera(key, rawFeature);
 				if (camera !== undefined) {
 					cameras.push(camera);
 				}
+				continue;
+			}
+			if (joints.length >= MAX_JOINT_FEATURES) {
 				continue;
 			}
 			const names = readJointNames(rawFeature);
@@ -164,7 +184,7 @@ export function parseInfo(text: string): LeRobotInfo {
 		totalTasks: asFiniteNumber(json.total_tasks),
 		chunksSize: asPositiveInteger(json.chunks_size) ?? DEFAULT_CHUNKS_SIZE,
 		dataPath,
-		videoPath: asNonEmptyString(json.video_path),
+		videoPath: asNonEmptyString(json.video_path, MAX_PATH_TEMPLATE_LENGTH),
 		cameras,
 		joints: Object.fromEntries(joints),
 	};

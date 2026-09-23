@@ -122,6 +122,39 @@ describe("parseInfo on hostile input", () => {
 		expect(info.joints).toEqual({});
 	});
 
+	it("keeps only the first cameras and joint features", () => {
+		const features: Record<string, unknown> = {};
+		for (let i = 0; i < 100; i++) {
+			features[`cam${i}`] = { dtype: "video", shape: [480, 640, 3] };
+			features[`joint${i}`] = { dtype: "float32", shape: [1], names: ["a"] };
+		}
+		const info = parseInfo(JSON.stringify({ ...base, features }));
+		expect(info.cameras.map((camera) => camera.key)).toEqual(Array.from({ length: 32 }, (_, i) => `cam${i}`));
+		expect(Object.keys(info.joints)).toEqual(Array.from({ length: 64 }, (_, i) => `joint${i}`));
+	});
+
+	it("drops joint names that are too many or too long", () => {
+		const names = (list: string[]) => ({ dtype: "float32", shape: [list.length], names: list });
+		const info = parseInfo(
+			JSON.stringify({
+				...base,
+				features: {
+					many: names(Array.from({ length: 257 }, (_, i) => `j${i}`)),
+					long: names(["a", "n".repeat(201)]),
+					nested: { dtype: "float32", shape: [257], names: { motors: Array.from({ length: 257 }, (_, i) => `j${i}`) } },
+					ok: names(Array.from({ length: 256 }, (_, i) => `j${i}`)),
+				},
+			}),
+		);
+		expect(Object.keys(info.joints)).toEqual(["ok"]);
+	});
+
+	it("bounds path templates", () => {
+		const long = `videos/${"a".repeat(1_000)}.mp4`;
+		expect(() => parseInfo(JSON.stringify({ ...base, data_path: long }))).toThrow(/data_path/);
+		expect(parseInfo(JSON.stringify({ ...base, video_path: long })).videoPath).toBeUndefined();
+	});
+
 	it("falls back to the default chunk size unless it is a positive integer", () => {
 		for (const chunks_size of [0, -1, 0.5, 1e300]) {
 			expect(parseInfo(JSON.stringify({ ...base, chunks_size })).chunksSize).toBe(1_000);

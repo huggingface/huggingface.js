@@ -2,7 +2,7 @@
 export const MAX_INFO_BYTES = 200_000;
 /** LeRobot templates use widths of 3 and 6; the file is user-controlled so keep expansion bounded. */
 const MAX_INDEX_WIDTH = 16;
-const MAX_PATH_TEMPLATE_LENGTH = 1_000;
+export const MAX_PATH_TEMPLATE_LENGTH = 1_000;
 /**
  * Also bounds the filled-in path: a short template can repeat `{video_key}`, and the feature key it
  * expands to is as long as the author likes.
