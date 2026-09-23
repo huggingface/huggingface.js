@@ -19,7 +19,6 @@ defaults:
   run:
     working-directory: packages/tasks
 
-
 permissions: {}
 
 jobs:

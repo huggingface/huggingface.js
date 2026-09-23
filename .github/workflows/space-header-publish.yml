@@ -19,7 +19,6 @@ defaults:
   run:
     working-directory: packages/space-header
 
-
 permissions: {}
 
 jobs:

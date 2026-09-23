@@ -3,7 +3,6 @@ name: Secret Leaks
 on:
   push:
 
-
 permissions: {}
 
 jobs:
