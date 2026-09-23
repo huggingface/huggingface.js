@@ -7,6 +7,7 @@ import * as FeatherlessAI from "../providers/featherless-ai.js";
 import * as Fireworks from "../providers/fireworks-ai.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
+import * as Humain from "../providers/humain-ai.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
@@ -70,6 +71,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new DeepInfra.DeepInfraConversationalTask(),
 		"feature-extraction": new DeepInfra.DeepInfraFeatureExtractionTask(),
 		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
+		"text-to-image": new DeepInfra.DeepInfraTextToImageTask(),
 		"text-to-speech": new DeepInfra.DeepInfraTextToSpeechTask(),
 	},
 	"fal-ai": {
@@ -126,8 +128,12 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Groq.GroqConversationalTask(),
 		"text-generation": new Groq.GroqTextGenerationTask(),
 	},
+	"humain-ai": {
+		conversational: new Humain.HumainAIConversationalTask(),
+	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
+		"image-text-to-video": new Novita.NovitaImageTextToVideoTask(),
 		"text-generation": new Novita.NovitaTextGenerationTask(),
 		"text-to-video": new Novita.NovitaTextToVideoTask(),
 	},

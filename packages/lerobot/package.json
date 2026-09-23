@@ -1,0 +1,59 @@
+{
+	"name": "@huggingface/lerobot",
+	"packageManager": "pnpm@10.10.0",
+	"version": "0.0.3",
+	"description": "Parser for LeRobot robotics datasets hosted on the Hugging Face Hub",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs"
+		},
+		"./package.json": "./package.json"
+	},
+	"browser": {
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
+	"source": "src/index.ts",
+	"engines": {
+		"node": ">=20"
+	},
+	"files": [
+		"dist",
+		"src",
+		"tsconfig.json"
+	],
+	"keywords": [
+		"huggingface",
+		"hub",
+		"lerobot",
+		"robotics",
+		"dataset"
+	],
+	"author": "Hugging Face",
+	"license": "MIT",
+	"dependencies": {
+		"hyparquet": "^1.25.1"
+	},
+	"devDependencies": {
+		"@types/node": "^20.12.8"
+	},
+	"scripts": {
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
+		"prepublishOnly": "pnpm run build",
+		"build": "tsup && tsc --emitDeclarationOnly --declaration",
+		"test": "vitest run",
+		"check": "tsc"
+	}
+}
