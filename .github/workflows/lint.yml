@@ -47,14 +47,20 @@ jobs:
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
           pnpm install --frozen-lockfile --filter .
-          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+          pnpm install --frozen-lockfile --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]...
+          pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]... build
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
       - name: "Checking lint errors"
         run: |
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] lint:check
+          pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}] lint:check
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
       - name: Check types
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] check
+        run: pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}] check
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
   format:
     permissions:
