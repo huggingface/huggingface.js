@@ -13,7 +13,7 @@
 		}
 
 		const result = await hf.chatCompletion({
-			model: "Qwen/Qwen2.5-7B-Instruct",
+			model: "openai/gpt-oss-20b",
 			messages: [{ role: "user", content: "Can you summarize the Eiffel Tower?" }],
 			max_tokens: 10,
 		});

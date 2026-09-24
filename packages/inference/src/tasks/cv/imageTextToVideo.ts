@@ -11,7 +11,7 @@ export type ImageTextToVideoArgs = BaseArgs & ImageTextToVideoInput;
  * Recommended model: Lightricks/LTX-Video
  */
 export async function imageTextToVideo(args: ImageTextToVideoArgs, options?: Options): Promise<Blob> {
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 	const providerHelper = getProviderHelper(provider, "image-text-to-video");
 	const payload = await providerHelper.preparePayloadAsync(args);
 	const { data: res, requestContext } = await innerRequest<Blob>(payload, providerHelper, {

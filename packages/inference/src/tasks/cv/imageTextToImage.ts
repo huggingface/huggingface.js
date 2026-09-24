@@ -11,7 +11,7 @@ export type ImageTextToImageArgs = BaseArgs & ImageTextToImageInput;
  * Recommended model: black-forest-labs/FLUX.2-dev
  */
 export async function imageTextToImage(args: ImageTextToImageArgs, options?: Options): Promise<Blob> {
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 	const providerHelper = getProviderHelper(provider, "image-text-to-image");
 	const payload = await providerHelper.preparePayloadAsync(args);
 	const { data: res, requestContext } = await innerRequest<Blob>(payload, providerHelper, {

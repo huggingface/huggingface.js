@@ -14,7 +14,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
@@ -33,7 +33,7 @@ jobs:
 
       - run: npm install -g corepack@latest && corepack enable
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: "20"
           cache: "pnpm"
@@ -59,6 +59,7 @@ jobs:
             echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
             exit 0
           fi
+          echo "::add-mask::$token"
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test
@@ -72,7 +73,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
@@ -92,7 +93,7 @@ jobs:
 
       - run: npm install -g corepack@latest && corepack enable
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: "22"
           cache: "pnpm"
@@ -118,6 +119,7 @@ jobs:
             echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
             exit 0
           fi
+          echo "::add-mask::$token"
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test in browser
@@ -131,11 +133,11 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
 
       - run: npm install -g corepack@latest && corepack enable
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: "20"
           cache: "pnpm"
@@ -157,6 +159,7 @@ jobs:
             echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
             exit 0
           fi
+          echo "::add-mask::$token"
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: E2E - start mock npm registry
@@ -196,7 +199,7 @@ jobs:
           pnpm build
           pnpm run test:browser
 
-      - uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@11b63cf76cfcafb4e43f97b6cad24d8e8438f62d # v1.5.2
         with:
           deno-version: vx.x.x
       - name: E2E test - deno import from npm

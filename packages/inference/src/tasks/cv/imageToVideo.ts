@@ -12,7 +12,7 @@ export type ImageToVideoArgs = BaseArgs & ImageToVideoInput;
  * Recommended model: Wan-AI/Wan2.1-I2V-14B-720P
  */
 export async function imageToVideo(args: ImageToVideoArgs, options?: Options): Promise<Blob> {
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 	const providerHelper = getProviderHelper(provider, "image-to-video");
 	const payload = await providerHelper.preparePayloadAsync(args);
 	const { data: res } = await innerRequest<Blob>(payload, providerHelper, {

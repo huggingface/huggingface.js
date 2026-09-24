@@ -27,6 +27,11 @@
 export { Hasher, XofReader } from "./hasher.js";
 export { hash, hashInto, warmupSimd } from "./hash.js";
 
+// Shared-memory one-shot engine (advanced; used by @huggingface/xetchunk-wasm
+// to hash regions of a shared WebAssembly.Memory in place)
+export { getOneShotContext, ensureOneShotCapacity, runOneShotRegion, ONESHOT_RESERVED_END } from "./wasm-oneshot.js";
+export { KEYED_HASH } from "./constants.js";
+
 // Convenience imports
 import { Hasher } from "./hasher.js";
 
@@ -47,7 +52,7 @@ import { Hasher } from "./hasher.js";
  * ```
  */
 export function createKeyed(key: Uint8Array): Hasher {
-  return Hasher.newKeyed(key);
+	return Hasher.newKeyed(key);
 }
 
 /**
@@ -64,7 +69,7 @@ export function createKeyed(key: Uint8Array): Hasher {
  * ```
  */
 export function createDeriveKey(context: string): Hasher {
-  return Hasher.newDeriveKey(context);
+	return Hasher.newDeriveKey(context);
 }
 
 /**
@@ -81,7 +86,7 @@ export function createDeriveKey(context: string): Hasher {
  * ```
  */
 export function createHasher(): Hasher {
-  return new Hasher();
+	return new Hasher();
 }
 
 // Import for default export
@@ -90,17 +95,17 @@ import { hash, hashInto, warmupSimd } from "./hash.js";
 // Pre-warm SIMD in browser environments (non-blocking)
 // This avoids initialization latency on first large hash
 if (typeof globalThis !== "undefined" && typeof globalThis.document !== "undefined") {
-  queueMicrotask(() => {
-    warmupSimd();
-  });
+	queueMicrotask(() => {
+		warmupSimd();
+	});
 }
 
 // Default export for convenience
 export default {
-  hash,
-  hashInto,
-  Hasher,
-  createHasher,
-  createKeyed,
-  createDeriveKey,
+	hash,
+	hashInto,
+	Hasher,
+	createHasher,
+	createKeyed,
+	createDeriveKey,
 };
