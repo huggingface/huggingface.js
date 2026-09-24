@@ -273,6 +273,26 @@ describe("LeRobotDataset (v2.1)", () => {
 		},
 		TIMEOUT,
 	);
+
+	it(
+		"reads an episode's frames from its own parquet file",
+		async () => {
+			const [episode] = await dataset.episodes({ limit: 1 });
+			const frames = await dataset.frames(episode);
+			expect(frames?.length).toBe(episode.length);
+			/// One series per motor, each as long as the episode.
+			expect(frames?.series["observation.state"]).toHaveLength(6);
+			expect(frames?.series["observation.state"][0]).toHaveLength(episode.length);
+			expect(frames?.series["action"]).toHaveLength(6);
+			expect(frames?.names["observation.state"]?.[0]).toBe("shoulder_pan.pos");
+			expect(frames?.timestamps[0]).toBeCloseTo(0, 5);
+			expect(frames?.timestamps[1]).toBeCloseTo(1 / 30, 3);
+			/// Frame columns are scalars, so they are not series.
+			expect(frames?.series["timestamp"]).toBeUndefined();
+			expect(frames?.series["frame_index"]).toBeUndefined();
+		},
+		TIMEOUT,
+	);
 });
 
 describe("LeRobotDataset (v3.0)", () => {
@@ -342,6 +362,25 @@ describe("v2 and v3 agree", () => {
 				episodes.map((episode) => ({ index: episode.index, length: episode.length, tasks: episode.tasks }));
 
 			expect(summary(v21)).toEqual(summary(v30));
+		},
+		TIMEOUT,
+	);
+
+	it(
+		"reads an episode's frames from its slice of a shared parquet file",
+		async () => {
+			const dataset = new LeRobotDataset(REPO_ID, { revision: REV_V30 });
+			const episodes = await dataset.episodes({ offset: 1, limit: 1 });
+			const [episode] = episodes;
+			/// Episode 1 starts partway into the file, so this also covers the row offset.
+			expect(episode.data?.fromRow).toBeGreaterThan(0);
+
+			const frames = await dataset.frames(episode);
+			expect(frames?.length).toBe(episode.length);
+			expect(frames?.series["observation.state"][0]).toHaveLength(episode.length);
+			expect(frames?.names["observation.state"]).toHaveLength(6);
+			/// Timestamps restart at zero for each episode rather than continuing the file's clock.
+			expect(frames?.timestamps[0]).toBeCloseTo(0, 5);
 		},
 		TIMEOUT,
 	);
