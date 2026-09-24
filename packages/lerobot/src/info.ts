@@ -69,9 +69,9 @@ function readCodec(feature: Record<string, unknown>): string | undefined {
 }
 
 /**
- * Prefers the frame size LeRobot read from the encoded video, which `shape` can disagree with. `shape` is
- * `[height, width, channels]`, unless `names` says it is `[channels, height, width]`. Some converters
- * write it that way, and LeRobot itself goes by `names` to tell the two apart.
+ * Prefers the frame size LeRobot read from the encoded video, which `shape` can disagree with. Otherwise
+ * `names` labels the axes of `shape`: usually `[height, width, channels]`, but some converters write
+ * `[channels, height, width]`.
  */
 function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamera | undefined {
 	const codec = readCodec(feature);
@@ -85,10 +85,10 @@ function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamer
 	if (!Array.isArray(shape) || shape.length < 2) {
 		return undefined;
 	}
-	const firstAxis = asStringArray(feature.names)?.[0];
-	const channelsFirst = shape.length === 3 && (firstAxis === "channel" || firstAxis === "channels");
-	const height = asFiniteNumber(shape[channelsFirst ? 1 : 0]);
-	const width = asFiniteNumber(shape[channelsFirst ? 2 : 1]);
+	const names = asStringArray(feature.names);
+	const labeled = names?.length === shape.length && names.includes("height") && names.includes("width");
+	const height = asFiniteNumber(shape[labeled ? names.indexOf("height") : 0]);
+	const width = asFiniteNumber(shape[labeled ? names.indexOf("width") : 1]);
 	if (height === undefined || width === undefined) {
 		return undefined;
 	}
