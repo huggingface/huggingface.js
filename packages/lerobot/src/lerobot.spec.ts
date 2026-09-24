@@ -735,11 +735,13 @@ describe("v3 index columns", () => {
 			[indexPath]: index,
 		});
 		let indexBytes = 0;
+		let indexRequests = 0;
 		const dataset = new LeRobotDataset(REPO_ID, {
 			fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
 				const response = await serve(input, init);
 				if (String(input).endsWith(indexPath)) {
 					indexBytes += (await response.clone().arrayBuffer()).byteLength;
+					indexRequests++;
 				}
 				return response;
 			}) as typeof fetch,
@@ -748,6 +750,8 @@ describe("v3 index columns", () => {
 		const episodes = await dataset.episodes({ limit: 3 });
 		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2]);
 		expect(indexBytes).toBeLessThan(index.byteLength / 2);
+		/// The footer probe, then the six adjacent columns in one request.
+		expect(indexRequests).toBe(2);
 	});
 });
 

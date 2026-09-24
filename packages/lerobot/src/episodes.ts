@@ -1,3 +1,4 @@
+import type { FileMetaData } from "hyparquet";
 import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
@@ -185,6 +186,60 @@ function toRawEpisodeV3(row: Record<string, unknown>, info: LeRobotInfo): RawEpi
 }
 
 /**
+ * Chunks this close together are fetched in one request: a gap costs less to download than another round
+ * trip. Some writers, Polars among them, leave ~100 bytes of column metadata after every chunk.
+ */
+const MAX_COALESCED_GAP_BYTES = 64 * 1024;
+
+/**
+ * hyparquet fetches each projected column chunk on its own. The columns an episode is built from sit
+ * next to each other in LeRobot's index files, so each run of them is fetched in one request instead.
+ */
+function prefetchColumns(
+	file: RandomAccessFile,
+	metadata: FileMetaData,
+	columns: string[],
+	rowStart: number,
+	rowEnd: number,
+): RandomAccessFile {
+	const ranges: [number, number][] = [];
+	let groupStart = 0;
+	for (const group of metadata.row_groups) {
+		const groupEnd = groupStart + Number(group.num_rows);
+		if (groupStart < rowEnd && groupEnd > rowStart) {
+			for (const { meta_data: meta } of group.columns) {
+				if (meta && columns.includes(meta.path_in_schema[0])) {
+					const start = Number(meta.dictionary_page_offset || meta.data_page_offset);
+					ranges.push([start, start + Number(meta.total_compressed_size)]);
+				}
+			}
+		}
+		groupStart = groupEnd;
+	}
+	ranges.sort((a, b) => a[0] - b[0]);
+	const runs: [number, number][] = [];
+	for (const [start, end] of ranges) {
+		const last = runs.at(-1);
+		if (last && start - last[1] <= MAX_COALESCED_GAP_BYTES) {
+			last[1] = Math.max(last[1], end);
+		} else {
+			runs.push([start, end]);
+		}
+	}
+	const buffers = runs.map(([start, end]) => file.slice(start, end));
+	return {
+		byteLength: file.byteLength,
+		async slice(start: number, end = file.byteLength): Promise<ArrayBuffer> {
+			const index = runs.findIndex(([runStart, runEnd]) => runStart <= start && end <= runEnd);
+			if (index < 0) {
+				return file.slice(start, end);
+			}
+			return (await buffers[index]).slice(start - runs[index][0], end - runs[index][0]);
+		},
+	};
+}
+
+/**
  * Reads the v3.0 episode index under `meta/episodes/`.
  *
  * The index is sharded: `chunks_size` files per chunk directory, so a request can span several of
@@ -243,7 +298,13 @@ async function readEpisodesV3(
 			/// hyparquet throws on a column the file lacks; `toRawEpisodeV3` defaults the absent ones.
 			const present = new Set(parquetSchema(metadata).children.map((child) => child.element.name));
 			const columns = wanted.filter((column) => present.has(column));
-			const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd });
+			const rows = await parquetReadObjects({
+				file: prefetchColumns(file, metadata, columns, rowStart, rowEnd),
+				metadata,
+				columns,
+				rowStart,
+				rowEnd,
+			});
 			for (const row of rows) {
 				collected.push(toRawEpisodeV3(row, info));
 			}
