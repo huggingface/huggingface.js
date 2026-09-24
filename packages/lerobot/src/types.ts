@@ -39,6 +39,21 @@ export interface LeRobotEpisodeVideo {
 }
 
 /** Where an episode's frame rows live, for callers that want to chart them. */
+/** An episode's frame rows, read from the parquet file its `data` points at. */
+export interface LeRobotFrames {
+	/** Number of frames read. */
+	length: number;
+	/** Seconds from the start of the episode, one per frame. */
+	timestamps: number[];
+	/**
+	 * Feature key -> one series per component, e.g. `observation.state` -> an array per motor, each
+	 * `length` long. Only columns that hold a numeric array per row are included.
+	 */
+	series: Record<string, number[][]>;
+	/** Feature key -> component names, for the features whose `info.json` entry declares them. */
+	names: Record<string, string[]>;
+}
+
 export interface LeRobotEpisodeData {
 	url: string;
 	/** Inclusive row offset inside `url`, not a dataset-wide frame index. */
