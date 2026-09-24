@@ -97,6 +97,84 @@ describe("parseInfo", () => {
 	});
 });
 
+/**
+ * Camera features from real datasets' `meta/info.json`, trimmed to the keys that decide the frame size. The
+ * expected size is what ffprobe reports for the dataset's first video file.
+ */
+const CAMERA_CASES = [
+	{
+		dataset: "unitreerobotics/Z1_StackBox_Dataset",
+		layout: "channel-first shape",
+		key: "observation.images.cam_high",
+		feature: {
+			shape: [3, 480, 640],
+			names: ["channels", "height", "width"],
+			info: { "video.height": 480, "video.width": 640 },
+		},
+		width: 640,
+		height: 480,
+	},
+	{
+		dataset: "yaak-ai/L2D",
+		layout: "channel-first shape, no video info",
+		key: "observation.images.front_left",
+		feature: { shape: [3, 1080, 1920], names: ["channel", "height", "width"] },
+		width: 1920,
+		height: 1080,
+	},
+	{
+		dataset: "IPEC-COMMUNITY/bc_z_lerobot",
+		layout: "shape a pixel smaller than the video",
+		key: "observation.images.image",
+		feature: {
+			shape: [171, 213, 3],
+			names: ["height", "width", "rgb"],
+			info: { "video.height": 172, "video.width": 214 },
+		},
+		width: 214,
+		height: 172,
+	},
+	{
+		dataset: "simheo/test-branch-18",
+		layout: "names that contradict the shape",
+		key: "observation.images.right_cam0",
+		feature: {
+			shape: [720, 960, 3],
+			names: ["channels", "height", "width"],
+			info: { "video.height": 720, "video.width": 960 },
+		},
+		width: 960,
+		height: 720,
+	},
+	{
+		dataset: "lerobot/aloha_static_coffee",
+		layout: "channel-last shape, no video info",
+		key: "observation.images.cam_high",
+		feature: { shape: [480, 640, 3], names: ["height", "width", "channel"] },
+		width: 640,
+		height: 480,
+	},
+];
+
+describe("camera sizes", () => {
+	for (const { dataset, layout, key, feature, width, height } of CAMERA_CASES) {
+		it(`${dataset} ${key} (${layout})`, () => {
+			const info = parseInfo(
+				JSON.stringify({
+					codebase_version: "v3.0",
+					fps: 30,
+					total_episodes: 1,
+					data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+					features: { [key]: { dtype: "video", ...feature } },
+				}),
+			);
+
+			expect(info.cameras).toHaveLength(1);
+			expect(info.cameras[0]).toMatchObject({ key, width, height });
+		});
+	}
+});
+
 describe("parseInfo on hostile input", () => {
 	const base = {
 		codebase_version: "v3.0",
