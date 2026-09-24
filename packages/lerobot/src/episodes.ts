@@ -198,7 +198,21 @@ async function readEpisodesV3(
 	limit: number,
 	options?: FetchOptions,
 ): Promise<RawEpisode[]> {
-	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
+	const { parquetMetadataAsync, parquetReadObjects, parquetSchema } = await loadHyparquet();
+	/// Only what `toRawEpisodeV3` reads. The index also has per-episode `stats/*` list columns, which
+	/// hyparquet would decode for the whole row group however few rows are asked for.
+	const wanted = [
+		"episode_index",
+		"length",
+		"tasks",
+		"data/chunk_index",
+		"data/file_index",
+		"dataset_from_index",
+		"dataset_to_index",
+		...info.cameras.flatMap((camera) =>
+			["chunk_index", "file_index", "from_timestamp", "to_timestamp"].map((field) => `videos/${camera.key}/${field}`),
+		),
+	];
 	const collected: RawEpisode[] = [];
 	let chunkIndex = 0;
 	let fileIndex = 0;
@@ -221,11 +235,15 @@ async function readEpisodesV3(
 			continue;
 		}
 
-		const rowCount = Number((await parquetMetadataAsync(file)).num_rows);
+		const metadata = await parquetMetadataAsync(file);
+		const rowCount = Number(metadata.num_rows);
 		if (seen + rowCount > offset) {
 			const rowStart = Math.max(0, offset - seen);
 			const rowEnd = Math.min(rowCount, offset + limit - seen);
-			const rows = await parquetReadObjects({ file, rowStart, rowEnd });
+			/// hyparquet throws on a column the file lacks; `toRawEpisodeV3` defaults the absent ones.
+			const present = new Set(parquetSchema(metadata).children.map((child) => child.element.name));
+			const columns = wanted.filter((column) => present.has(column));
+			const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd });
 			for (const row of rows) {
 				collected.push(toRawEpisodeV3(row, info));
 			}
