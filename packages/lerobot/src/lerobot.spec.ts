@@ -702,24 +702,30 @@ describe("v3 index columns", () => {
 			type: "INT64" as const,
 			data: Array.from({ length: rows }, (_, row) => BigInt(value(row))),
 		});
+		const stats = (name: string) => ({
+			name,
+			type: "STRING" as const,
+			data: Array.from({ length: rows }, (_, row) => String(row).padEnd(100_000, "x")),
+			codec: "UNCOMPRESSED" as const,
+			encoding: "PLAIN" as const,
+		});
 		const indexPath = "meta/episodes/chunk-000/file-000.parquet";
-		/// Real indexes also carry per-episode `stats/*` columns, which are most of the file.
+		/// Real indexes also carry per-episode `stats/*` columns, which are most of the file, and can put
+		/// other columns between the ones episodes are built from: yaak-ai/L2D keeps `dataset_to_index`
+		/// after its stats.
 		const index = new Uint8Array(
 			parquetWriteBuffer({
+				rowGroupSize: rows / 2,
 				columnData: [
 					int64("episode_index", (row) => row),
 					int64("length", () => 10),
+					int64("meta/episodes/chunk_index", () => 0),
 					int64("data/chunk_index", () => 0),
 					int64("data/file_index", () => 0),
 					int64("dataset_from_index", (row) => row * 10),
+					stats("stats/observation.state/mean"),
 					int64("dataset_to_index", (row) => row * 10 + 10),
-					{
-						name: "stats/observation.state/mean",
-						type: "STRING",
-						data: Array.from({ length: rows }, (_, row) => String(row).padEnd(100_000, "x")),
-						codec: "UNCOMPRESSED",
-						encoding: "PLAIN",
-					},
+					stats("stats/action/mean"),
 				],
 			}),
 		);
@@ -749,9 +755,44 @@ describe("v3 index columns", () => {
 
 		const episodes = await dataset.episodes({ limit: 3 });
 		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2]);
-		expect(indexBytes).toBeLessThan(index.byteLength / 2);
-		/// The footer probe, then the six adjacent columns in one request.
-		expect(indexRequests).toBe(2);
+		expect(episodes.map((episode) => episode.data?.toRow)).toEqual([10, 20, 30]);
+		expect(indexBytes).toBeLessThan(index.byteLength / 4);
+		/// The tail, then from the first row group only: the columns before the stats, the unread one
+		/// between them included, in one request, and `dataset_to_index` in another.
+		expect(indexRequests).toBe(3);
+	});
+
+	it("reads each camera's video file and segment", async () => {
+		const camera = "observation.images.up";
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: mockFetch({
+				"meta/info.json": encoder.encode(
+					JSON.stringify({
+						codebase_version: "v3.0",
+						fps: 30,
+						total_episodes: 1,
+						data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+						video_path: "videos/{video_key}/chunk-{chunk_index:03d}/file-{file_index:03d}.mp4",
+						features: { [camera]: { dtype: "video", shape: [480, 640, 3] } },
+					}),
+				),
+				"meta/episodes/chunk-000/file-000.parquet": parquet([
+					{
+						episode_index: 0,
+						length: 60,
+						[`videos/${camera}/chunk_index`]: 1,
+						[`videos/${camera}/file_index`]: 2,
+						[`videos/${camera}/from_timestamp`]: 4,
+						[`videos/${camera}/to_timestamp`]: 6,
+					},
+				]),
+			}),
+		});
+
+		const [episode] = await dataset.episodes({ limit: 1 });
+		expect(episode.videos).toEqual([
+			{ cameraKey: camera, url: dataset.fileUrl(`videos/${camera}/chunk-001/file-002.mp4`), fromSec: 4, toSec: 6 },
+		]);
 	});
 });
 

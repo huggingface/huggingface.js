@@ -192,8 +192,8 @@ function toRawEpisodeV3(row: Record<string, unknown>, info: LeRobotInfo): RawEpi
 const MAX_COALESCED_GAP_BYTES = 64 * 1024;
 
 /**
- * hyparquet fetches each projected column chunk on its own. The columns an episode is built from sit
- * next to each other in LeRobot's index files, so each run of them is fetched in one request instead.
+ * hyparquet fetches each projected column chunk on its own. The columns an episode is built from are
+ * mostly next to each other in LeRobot's index files, so each run of them is fetched in one request instead.
  */
 function prefetchColumns(
 	file: RandomAccessFile,
