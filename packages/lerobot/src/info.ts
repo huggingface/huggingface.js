@@ -68,18 +68,48 @@ function readCodec(feature: Record<string, unknown>): string | undefined {
 	return undefined;
 }
 
-/** `shape` is `[height, width, channels]`. */
-function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamera | undefined {
+/** The size LeRobot writes beside the codec, which is unambiguous when the dataset has it. */
+function readVideoSize(feature: Record<string, unknown>): { height: number; width: number } | undefined {
+	for (const key of ["info", "video_info"]) {
+		const block = feature[key];
+		if (!isRecord(block)) {
+			continue;
+		}
+		const height = asFiniteNumber(block["video.height"]);
+		const width = asFiniteNumber(block["video.width"]);
+		if (height !== undefined && width !== undefined) {
+			return { height, width };
+		}
+	}
+	return undefined;
+}
+
+/**
+ * `shape` is `[height, width, channels]` unless the dataset says otherwise in `names`, which is how
+ * LeRobot itself works out the order. Converters that write channel-first, `[3, 480, 640]`, are why
+ * the order cannot simply be assumed.
+ */
+function readShapeSize(feature: Record<string, unknown>): { height: number; width: number } | undefined {
 	const shape = feature.shape;
 	if (!Array.isArray(shape) || shape.length < 2) {
 		return undefined;
 	}
-	const height = asFiniteNumber(shape[0]);
-	const width = asFiniteNumber(shape[1]);
-	if (height === undefined || width === undefined) {
+	const axes = asStringArray(feature.names)?.map((name) => name.toLowerCase());
+	const axisOf = (axis: string, fallback: number) => {
+		const index = axes?.findIndex((name) => name.startsWith(axis)) ?? -1;
+		return index >= 0 ? index : fallback;
+	};
+	const height = asFiniteNumber(shape[axisOf("height", 0)]);
+	const width = asFiniteNumber(shape[axisOf("width", 1)]);
+	return height !== undefined && width !== undefined ? { height, width } : undefined;
+}
+
+function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamera | undefined {
+	const size = readVideoSize(feature) ?? readShapeSize(feature);
+	if (size === undefined) {
 		return undefined;
 	}
-	return { key, height, width, codec: readCodec(feature) };
+	return { key, height: size.height, width: size.width, codec: readCodec(feature) };
 }
 
 /**

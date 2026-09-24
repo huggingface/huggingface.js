@@ -49,6 +49,72 @@ describe("parseInfo", () => {
 		expect(info.joints["observation.state"]).toEqual(["shoulder_pan.pos", "gripper.pos"]);
 	});
 
+	it("reads camera axes in the order `names` gives, not the usual one", () => {
+		const base = {
+			codebase_version: "v3.0",
+			fps: 30,
+			total_episodes: 1,
+			data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+		};
+		/// Converters that write channel-first say so in `names`; taking shape[0] as the height gives
+		/// a camera 3 pixels tall.
+		const channelFirst = parseInfo(
+			JSON.stringify({
+				...base,
+				features: {
+					"observation.images.cam": {
+						dtype: "video",
+						shape: [3, 480, 640],
+						names: ["channels", "height", "width"],
+					},
+				},
+			}),
+		);
+		expect(channelFirst.cameras[0]).toMatchObject({ width: 640, height: 480 });
+
+		const channelLast = parseInfo(
+			JSON.stringify({
+				...base,
+				features: {
+					"observation.images.cam": {
+						dtype: "video",
+						shape: [480, 640, 3],
+						names: ["height", "width", "channels"],
+					},
+				},
+			}),
+		);
+		expect(channelLast.cameras[0]).toMatchObject({ width: 640, height: 480 });
+
+		/// No `names` at all is the common case and keeps the old reading.
+		const unnamed = parseInfo(
+			JSON.stringify({
+				...base,
+				features: { "observation.images.cam": { dtype: "video", shape: [480, 640, 3] } },
+			}),
+		);
+		expect(unnamed.cameras[0]).toMatchObject({ width: 640, height: 480 });
+	});
+
+	it("prefers the size written beside the codec over `shape`", () => {
+		const info = parseInfo(
+			JSON.stringify({
+				codebase_version: "v3.0",
+				fps: 30,
+				total_episodes: 1,
+				data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+				features: {
+					"observation.images.cam": {
+						dtype: "video",
+						shape: [3, 480, 640],
+						info: { "video.codec": "av1", "video.height": 480, "video.width": 640 },
+					},
+				},
+			}),
+		);
+		expect(info.cameras[0]).toMatchObject({ width: 640, height: 480, codec: "av1" });
+	});
+
 	it("reads the codec from `video_info` as well as `info`", () => {
 		const base = {
 			codebase_version: "v3.0",
