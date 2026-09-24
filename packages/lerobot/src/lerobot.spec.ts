@@ -475,7 +475,8 @@ function mockFetch(files: Record<string, Uint8Array>, seen?: string[]): typeof f
 			return new Response(null, { status: 404 });
 		}
 		const range = new Headers(init?.headers).get("Range");
-		const match = range?.match(/^bytes=(-?\d+)-(\d*)$/);
+		/// `bytes=-65536` is a suffix range: the last 65536 bytes.
+		const match = range?.match(/^bytes=(-?\d+)-?(\d*)$/);
 		if (!match) {
 			return new Response(body as BodyInit, { status: 200 });
 		}
@@ -690,6 +691,63 @@ describe("v2 prefix reads are byte-accurate", () => {
 		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 		expect(episodes[9]?.length).toBe(109);
 		expect(episodes[0]?.tasks[0]).toBe(task);
+	});
+});
+
+describe("v3 index columns", () => {
+	it("downloads only the columns episodes are built from", async () => {
+		const rows = 40;
+		const int64 = (name: string, value: (row: number) => number) => ({
+			name,
+			type: "INT64" as const,
+			data: Array.from({ length: rows }, (_, row) => BigInt(value(row))),
+		});
+		const indexPath = "meta/episodes/chunk-000/file-000.parquet";
+		/// Real indexes also carry per-episode `stats/*` columns, which are most of the file.
+		const index = new Uint8Array(
+			parquetWriteBuffer({
+				columnData: [
+					int64("episode_index", (row) => row),
+					int64("length", () => 10),
+					int64("data/chunk_index", () => 0),
+					int64("data/file_index", () => 0),
+					int64("dataset_from_index", (row) => row * 10),
+					int64("dataset_to_index", (row) => row * 10 + 10),
+					{
+						name: "stats/observation.state/mean",
+						type: "STRING",
+						data: Array.from({ length: rows }, (_, row) => String(row).padEnd(100_000, "x")),
+						codec: "UNCOMPRESSED",
+						encoding: "PLAIN",
+					},
+				],
+			}),
+		);
+		const serve = mockFetch({
+			"meta/info.json": encoder.encode(
+				JSON.stringify({
+					codebase_version: "v3.0",
+					fps: 30,
+					total_episodes: rows,
+					data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+				}),
+			),
+			[indexPath]: index,
+		});
+		let indexBytes = 0;
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
+				const response = await serve(input, init);
+				if (String(input).endsWith(indexPath)) {
+					indexBytes += (await response.clone().arrayBuffer()).byteLength;
+				}
+				return response;
+			}) as typeof fetch,
+		});
+
+		const episodes = await dataset.episodes({ limit: 3 });
+		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2]);
+		expect(indexBytes).toBeLessThan(index.byteLength / 2);
 	});
 });
 
