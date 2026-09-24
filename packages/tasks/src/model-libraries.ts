@@ -653,6 +653,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors" OR path_filename:"model_index" OR path_filename:"config" OR path:"modular_model_index.json"`,
 	},
+	mect: {
+	    prettyLabel: "MECT",
+	    repoName: "AntSpeaker",
+	    repoUrl: "https://github.com/ant-research/AntSpeaker",
+	    filter: false,
+	    countDownloads: `path_extension:"pt"`,
+	},
 	hermes: {
 		prettyLabel: "HERMES",
 		repoName: "HERMES",
