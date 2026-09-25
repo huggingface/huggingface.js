@@ -90,6 +90,7 @@ export type * from "./object-detection/inference.js";
 export type * from "./depth-estimation/inference.js";
 export type * from "./question-answering/inference.js";
 export type * from "./sentence-similarity/inference.js";
+export type * from "./text-ranking/inference.js";
 export type * from "./summarization/inference.js";
 export type * from "./table-question-answering/inference.js";
 export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference.js";
