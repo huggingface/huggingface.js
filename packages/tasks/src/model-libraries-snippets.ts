@@ -2394,36 +2394,46 @@ const pipe = await pipeline('${model.pipeline_tag}', '${model.id}');`,
 	];
 };
 
-const peftTask = (peftTaskType?: string) => {
-	switch (peftTaskType) {
-		case "CAUSAL_LM":
-			return "CausalLM";
-		case "SEQ_2_SEQ_LM":
-			return "Seq2SeqLM";
-		case "TOKEN_CLS":
-			return "TokenClassification";
-		case "SEQ_CLS":
-			return "SequenceClassification";
-		default:
-			return undefined;
-	}
+const PEFT_TASK_TYPE_TO_AUTO_CLASS: Record<string, string> = {
+	CAUSAL_LM: "AutoModelForCausalLM",
+	SEQ_2_SEQ_LM: "AutoModelForSeq2SeqLM",
+	TOKEN_CLS: "AutoModelForTokenClassification",
+	SEQ_CLS: "AutoModelForSequenceClassification",
+	QUESTION_ANS: "AutoModelForQuestionAnswering",
+	// transformers has no AutoModelForFeatureExtraction; PEFT's own AutoPeftModelForFeatureExtraction resolves to AutoModel
+	FEATURE_EXTRACTION: "AutoModel",
 };
+
+// PEFT has no speech-specific task type: Whisper-style adapters are tagged SEQ_2_SEQ_LM, but transformers registers
+// Whisper, SpeechT5 and Speech2Text only under AutoModelForSpeechSeq2Seq (SeamlessM4T is under both auto classes).
+// Other audio seq2seq models (Qwen2-Audio, GLM-ASR) stay under AutoModelForSeq2SeqLM, so the base model name is the
+// only safe signal. Matched against Hub repo ids, which are hyphenated (facebook/s2t-small-librispeech-asr,
+// facebook/seamless-m4t-v2-large), not against transformers model_type identifiers.
+const PEFT_SPEECH_SEQ2SEQ_BASE_MODEL = /whisper|speecht5|\bs2t\b|speech[-_]to[-_]text|seamless[-_]m4t/i;
 
 export const peft = (model: ModelData): string[] => {
 	const { base_model_name_or_path: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
-	const pefttask = peftTask(peftTaskType);
-	if (!pefttask) {
+	let autoClass = peftTaskType ? PEFT_TASK_TYPE_TO_AUTO_CLASS[peftTaskType] : undefined;
+	if (!autoClass) {
 		return [`Task type is invalid.`];
 	}
-	if (!peftBaseModel) {
+	// adapter_config.json sometimes omits the base model; the model card's base_model is the next best source
+	const cardBaseModel = Array.isArray(model.cardData?.base_model)
+		? model.cardData.base_model[0]
+		: model.cardData?.base_model;
+	const baseModel = peftBaseModel || cardBaseModel;
+	if (!baseModel) {
 		return [`Base model is not found.`];
+	}
+	if (peftTaskType === "SEQ_2_SEQ_LM" && PEFT_SPEECH_SEQ2SEQ_BASE_MODEL.test(baseModel)) {
+		autoClass = "AutoModelForSpeechSeq2Seq";
 	}
 
 	return [
 		`from peft import PeftModel
-from transformers import AutoModelFor${pefttask}
+from transformers import ${autoClass}
 
-base_model = AutoModelFor${pefttask}.from_pretrained("${escapeStringForJson(peftBaseModel)}")
+base_model = ${autoClass}.from_pretrained("${escapeStringForJson(baseModel)}")
 model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
 };
