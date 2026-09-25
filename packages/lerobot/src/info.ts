@@ -52,8 +52,8 @@ function isSupportedVersion(value: unknown): value is LeRobotCodebaseVersion {
 }
 
 /**
- * LeRobot has written the per-camera video metadata under two different keys across releases:
- * `info` (v2.x and early v3) and `video_info` (later v3). Both carry `video.codec`.
+ * LeRobot writes the per-camera video metadata under `info`. Datasets converted from v1 carry it under
+ * `video_info` instead, with the frame size moved into `shape`.
  */
 function readCodec(feature: Record<string, unknown>): string | undefined {
 	for (const key of ["info", "video_info"]) {
@@ -68,18 +68,31 @@ function readCodec(feature: Record<string, unknown>): string | undefined {
 	return undefined;
 }
 
-/** `shape` is `[height, width, channels]`. */
+/**
+ * Prefers the frame size LeRobot read from the encoded video, which `shape` can disagree with. Otherwise
+ * `names` labels the axes of `shape`: usually `[height, width, channels]`, but some converters write
+ * `[channels, height, width]`.
+ */
 function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamera | undefined {
+	const codec = readCodec(feature);
+	const video = isRecord(feature.info) ? feature.info : {};
+	const videoHeight = asPositiveInteger(video["video.height"]);
+	const videoWidth = asPositiveInteger(video["video.width"]);
+	if (videoHeight !== undefined && videoWidth !== undefined) {
+		return { key, height: videoHeight, width: videoWidth, codec };
+	}
 	const shape = feature.shape;
 	if (!Array.isArray(shape) || shape.length < 2) {
 		return undefined;
 	}
-	const height = asFiniteNumber(shape[0]);
-	const width = asFiniteNumber(shape[1]);
+	const names = asStringArray(feature.names);
+	const labeled = names?.length === shape.length && names.includes("height") && names.includes("width");
+	const height = asFiniteNumber(shape[labeled ? names.indexOf("height") : 0]);
+	const width = asFiniteNumber(shape[labeled ? names.indexOf("width") : 1]);
 	if (height === undefined || width === undefined) {
 		return undefined;
 	}
-	return { key, height, width, codec: readCodec(feature) };
+	return { key, height, width, codec };
 }
 
 /**
