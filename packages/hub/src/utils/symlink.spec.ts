@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { createSymlink } from "./symlink";
 import { readFileSync, writeFileSync } from "node:fs";
-import { lstat, rm } from "node:fs/promises";
+import { lstat, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -21,7 +21,30 @@ vi.mock("node:fs/promises", async (importOriginal) => ({
 	},
 }));
 
+/**
+ * Windows allows symlinks once Developer Mode is on (or with admin rights), so the platform alone
+ * doesn't tell us what createSymlink will do: ask the filesystem instead.
+ */
+async function canCreateSymlinks(): Promise<boolean> {
+	const link = join(tmpdir(), "symlink-support-check");
+	await rm(link, { force: true });
+	try {
+		// The target doesn't need to exist, we only care whether the link itself can be created
+		await symlink("symlink-support-check-target", link);
+		return true;
+	} catch {
+		return false;
+	} finally {
+		await rm(link, { force: true });
+	}
+}
+
 describe("utils/symlink", () => {
+	let symlinksSupported = false;
+	beforeAll(async () => {
+		symlinksSupported = await canCreateSymlinks();
+	});
+
 	it("should create a symlink", async () => {
 		writeFileSync(join(tmpdir(), "test.txt"), "hello world");
 		await createSymlink({
@@ -30,7 +53,7 @@ describe("utils/symlink", () => {
 		});
 
 		const stats = await lstat(join(tmpdir(), "test-symlink.txt"));
-		expect(stats.isSymbolicLink()).toBe(process.platform !== "win32");
+		expect(stats.isSymbolicLink()).toBe(symlinksSupported);
 
 		// Test file content
 		const content = readFileSync(join(tmpdir(), "test-symlink.txt"), "utf8");
@@ -54,7 +77,7 @@ describe("utils/symlink", () => {
 		});
 
 		const stats = await lstat(join(tmpdir(), "test-symlink.txt"));
-		expect(stats.isSymbolicLink()).toBe(process.platform !== "win32");
+		expect(stats.isSymbolicLink()).toBe(symlinksSupported);
 
 		// Test file content
 		const content = readFileSync(join(tmpdir(), "test-symlink.txt"), "utf8");
