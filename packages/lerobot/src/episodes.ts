@@ -221,11 +221,12 @@ async function readEpisodesV3(
 			continue;
 		}
 
-		const rowCount = Number((await parquetMetadataAsync(file)).num_rows);
+		const metadata = await parquetMetadataAsync(file);
+		const rowCount = Number(metadata.num_rows);
 		if (seen + rowCount > offset) {
 			const rowStart = Math.max(0, offset - seen);
 			const rowEnd = Math.min(rowCount, offset + limit - seen);
-			const rows = await parquetReadObjects({ file, rowStart, rowEnd });
+			const rows = await parquetReadObjects({ file, metadata, rowStart, rowEnd });
 			for (const row of rows) {
 				collected.push(toRawEpisodeV3(row, info));
 			}

@@ -77,7 +77,11 @@ export async function fetchTextPrefix(url: string, maxBytes: number, options?: F
 	return { text: new TextDecoder().decode(bytes), byteLength: bytes.byteLength };
 }
 
-const TAIL_PROBE_BYTES = 64 * 1024;
+/**
+ * hyparquet's first footer read is the last 512 KiB (`defaultInitialFetchSize`), so a tail this size serves
+ * it without another request, and holds a small file, such as most episode indexes, whole.
+ */
+const TAIL_PROBE_BYTES = 512 * 1024;
 
 /**
  * Opens a remote file for random access.
