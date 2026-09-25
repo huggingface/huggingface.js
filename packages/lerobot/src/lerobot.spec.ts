@@ -475,7 +475,8 @@ function mockFetch(files: Record<string, Uint8Array>, seen?: string[]): typeof f
 			return new Response(null, { status: 404 });
 		}
 		const range = new Headers(init?.headers).get("Range");
-		const match = range?.match(/^bytes=(-?\d+)-(\d*)$/);
+		/// `bytes=-65536` is a suffix range: the last 65536 bytes.
+		const match = range?.match(/^bytes=(-?\d+)-?(\d*)$/);
 		if (!match) {
 			return new Response(body as BodyInit, { status: 200 });
 		}
@@ -690,6 +691,85 @@ describe("v2 prefix reads are byte-accurate", () => {
 		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 		expect(episodes[9]?.length).toBe(109);
 		expect(episodes[0]?.tasks[0]).toBe(task);
+	});
+});
+
+describe("v3 index requests", () => {
+	const indexPath = "meta/episodes/chunk-000/file-000.parquet";
+	const info = (totalEpisodes: number) =>
+		encoder.encode(
+			JSON.stringify({
+				codebase_version: "v3.0",
+				fps: 30,
+				total_episodes: totalEpisodes,
+				data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+			}),
+		);
+	const index = (rows: number, options: { rowGroupSize?: number; padding?: number }) =>
+		new Uint8Array(
+			parquetWriteBuffer({
+				rowGroupSize: options.rowGroupSize,
+				columnData: [
+					...Object.entries({
+						episode_index: (row: number) => row,
+						length: () => 10,
+						dataset_from_index: (row: number) => row * 10,
+						dataset_to_index: (row: number) => row * 10 + 10,
+					}).map(([name, value]) => ({
+						name,
+						type: "INT64" as const,
+						data: Array.from({ length: rows }, (_, row) => BigInt(value(row))),
+					})),
+					{
+						name: "stats/observation.state/mean",
+						type: "STRING" as const,
+						data: Array.from({ length: rows }, (_, row) => String(row).padEnd(options.padding ?? 1, "x")),
+						codec: "UNCOMPRESSED" as const,
+						encoding: "PLAIN" as const,
+					},
+				],
+			}),
+		);
+	const smallIndex = index(40, { padding: 5_000 });
+	/// One row per row group makes the footer, not the data, most of the file.
+	const largeFooterIndex = index(3_000, { rowGroupSize: 1 });
+
+	it("reads a small index in one request", async () => {
+		expect(smallIndex.byteLength).toBeGreaterThan(64 * 1024);
+		expect(smallIndex.byteLength).toBeLessThan(512 * 1024);
+		const seen: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: mockFetch({ "meta/info.json": info(40), [indexPath]: smallIndex }, seen),
+		});
+
+		const episodes = await dataset.episodes({ limit: 3 });
+		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2]);
+		expect(seen.filter((path) => path === indexPath)).toHaveLength(1);
+	});
+
+	it("fetches a footer larger than the tail once", async () => {
+		const footerLength = new DataView(largeFooterIndex.buffer, largeFooterIndex.byteLength - 8, 4).getUint32(0, true);
+		expect(footerLength).toBeGreaterThan(512 * 1024);
+		const seen: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: mockFetch({ "meta/info.json": info(3_000), [indexPath]: largeFooterIndex }, seen),
+		});
+
+		const [episode] = await dataset.episodes({ limit: 1 });
+		expect(episode.index).toBe(0);
+		/// The tail, the rest of the footer, then the one row group.
+		expect(seen.filter((path) => path === indexPath)).toHaveLength(3);
+	});
+
+	it("still reads when the server ignores Range", async () => {
+		const serve = mockFetch({ "meta/info.json": info(40), [indexPath]: smallIndex });
+		/// Dropping the headers drops Range, so every response is the whole file with a 200.
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: ((input: RequestInfo | URL) => serve(input)) as typeof fetch,
+		});
+
+		const episodes = await dataset.episodes({ limit: 3 });
+		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2]);
 	});
 });
 
