@@ -761,6 +761,20 @@ export const LOCAL_APPS = {
 			return url;
 		},
 	},
+    atlaslab: {
+	    prettyLabel: "Atlas Lab",
+	    docsUrl: "https://trainatlas.dev/docs?category=model-lab&doc=import-hugging-face",
+	    mainTask: "text-generation",
+	    displayOnModelPage: isLlamaCppGgufModel,
+	    deeplink: (model, filepath) => {
+		    const url = new URL("atlaslab://model-lab");
+		    url.searchParams.set("model", model.id);
+		    if (filepath) {
+			    url.searchParams.set("file", filepath);
+		    }
+		    return url;
+	    },
+    },
 	"docker-model-runner": {
 		prettyLabel: "Docker Model Runner",
 		docsUrl: "https://docs.docker.com/ai/model-runner/",
