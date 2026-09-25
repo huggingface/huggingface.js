@@ -505,6 +505,53 @@ function parquet(rows: Record<string, number>[], { statistics = true } = {}): Ui
 	);
 }
 
+describe("frames columns", () => {
+	const files = {
+		"meta/info.json": encoder.encode(
+			JSON.stringify({
+				codebase_version: "v3.0",
+				fps: 10,
+				total_episodes: 1,
+				data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+			}),
+		),
+		"meta/episodes/chunk-000/file-000.parquet": parquet([
+			{
+				episode_index: 0,
+				length: 3,
+				"data/chunk_index": 0,
+				"data/file_index": 0,
+				dataset_from_index: 0,
+				dataset_to_index: 3,
+			},
+		]),
+		"data/chunk-000/file-000.parquet": new Uint8Array(
+			parquetWriteBuffer({
+				columnData: [
+					{ name: "index", type: "INT64", data: [0n, 1n, 2n] },
+					{ name: "frame_index", type: "INT64", data: [0n, 1n, 2n] },
+					{ name: "episode_index", type: "INT64", data: [0n, 0n, 0n] },
+					{ name: "task_index", type: "INT64", data: [0n, 0n, 0n] },
+					{ name: "timestamp", type: "DOUBLE", data: [0, 0.1, 0.2] },
+					{ name: "next.reward", type: "DOUBLE", data: [0, 0.5, 1] },
+					{ name: "next.success", type: "BOOLEAN", data: [false, false, true] },
+				],
+			}),
+		),
+	};
+
+	it("returns scalar and boolean columns as single series, without the bookkeeping ones", async () => {
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
+		const [episode] = await dataset.episodes({ limit: 1 });
+		const frames = await dataset.frames(episode);
+		expect(frames?.timestamps).toEqual([0, 0.1, 0.2]);
+		expect(frames?.series).toEqual({
+			"next.reward": [[0, 0.5, 1]],
+			"next.success": [[0, 0, 1]],
+		});
+	});
+});
+
 describe("v3 data row offsets", () => {
 	const metadata = (index: number, chunk: number, file: number, from: number, to: number) => ({
 		episode_index: index,

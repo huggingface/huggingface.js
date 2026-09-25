@@ -11,8 +11,14 @@ async function loadHyparquet() {
 	return import("hyparquet");
 }
 
+/** LeRobot writes these on every dataset to locate a frame; they are not signals to chart. */
+const BOOKKEEPING_COLUMNS = new Set(["timestamp", "frame_index", "episode_index", "index", "task_index"]);
+
 /** Rows carry `bigint` for integer columns, and `null` wherever the dataset has a gap. */
 function toNumber(value: unknown): number | undefined {
+	if (typeof value === "boolean") {
+		return value ? 1 : 0;
+	}
 	if (typeof value === "number") {
 		return Number.isFinite(value) ? value : undefined;
 	}
@@ -23,15 +29,15 @@ function toNumber(value: unknown): number | undefined {
 }
 
 /**
- * A column holds one series per component when every row is a numeric array of the same width, which
- * is how LeRobot stores `observation.state`, `action` and the rest of the motor features.
+ * Components per row: the array width for `observation.state`, `action` and the rest of the motor
+ * features, 1 for a scalar such as a reward or a success flag. Undefined for anything else.
  */
 function seriesWidth(rows: Record<string, unknown>[], key: string): number | undefined {
 	const first = rows[0]?.[key];
-	if (!Array.isArray(first) || first.length === 0) {
-		return undefined;
+	if (Array.isArray(first)) {
+		return first.length > 0 && toNumber(first[0]) !== undefined ? first.length : undefined;
 	}
-	return toNumber(first[0]) === undefined ? undefined : first.length;
+	return toNumber(first) === undefined ? undefined : 1;
 }
 
 export async function readFrames(
@@ -58,6 +64,9 @@ export async function readFrames(
 
 	const series: Record<string, number[][]> = {};
 	for (const key of Object.keys(rows[0])) {
+		if (BOOKKEEPING_COLUMNS.has(key)) {
+			continue;
+		}
 		const width = seriesWidth(rows, key);
 		if (width === undefined) {
 			continue;
@@ -67,7 +76,7 @@ export async function readFrames(
 		for (const row of rows) {
 			const value = row[key];
 			for (let i = 0; i < width; i++) {
-				components[i].push(toNumber(Array.isArray(value) ? value[i] : undefined) ?? NaN);
+				components[i].push(toNumber(Array.isArray(value) ? value[i] : value) ?? NaN);
 			}
 		}
 		series[key] = components;
