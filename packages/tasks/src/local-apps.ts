@@ -796,6 +796,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
 	},
+	zimmer: {
+		prettyLabel: "Zimmer",
+		docsUrl: "https://zimmerapp.co/docs",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
+		deeplink: (model, filepath) =>
+			new URL(`zimmer://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
