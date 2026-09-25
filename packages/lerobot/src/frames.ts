@@ -1,7 +1,7 @@
 import type { FetchOptions } from "./http";
 import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 
-import { openRemoteFile } from "./http";
+import { openRemoteFile, TAIL_PROBE_BYTES } from "./http";
 
 /**
  * hyparquet is a hard dependency but is still loaded on demand, so a caller that only reads `info()`
@@ -50,7 +50,7 @@ export async function readFrames(
 	}
 	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
 	const file = await openRemoteFile(episode.data.url, options);
-	const metadata = await parquetMetadataAsync(file);
+	const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
 	const rows = (await parquetReadObjects({
 		file,
 		metadata,
