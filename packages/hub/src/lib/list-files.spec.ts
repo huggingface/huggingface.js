@@ -170,4 +170,30 @@ describe("listFiles", () => {
 
 		assert(files.some((file) => file.path === "data/XSUM-EMNLP18-Summary-Data-Original.tar.gz"));
 	});
+
+	it("should URL-encode the revision", async () => {
+		const urls: string[] = [];
+		const cursor = listFiles({
+			repo: {
+				name: "openai-community/gpt2",
+				type: "model",
+			},
+			revision: "refs/pr/1",
+			fetch: async (url) => {
+				urls.push(String(url));
+				return new Response("[]", { headers: { "Content-Type": "application/json" } });
+			},
+		});
+
+		const files: ListFileEntry[] = [];
+
+		for await (const entry of cursor) {
+			files.push(entry);
+		}
+
+		assert.deepStrictEqual(files, []);
+		assert.deepStrictEqual(urls, [
+			"https://huggingface.co/api/models/openai-community/gpt2/tree/refs%2Fpr%2F1?recursive=false&expand=false",
+		]);
+	});
 });
