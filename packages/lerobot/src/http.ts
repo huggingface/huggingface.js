@@ -77,7 +77,11 @@ export async function fetchTextPrefix(url: string, maxBytes: number, options?: F
 	return { text: new TextDecoder().decode(bytes), byteLength: bytes.byteLength };
 }
 
-const TAIL_PROBE_BYTES = 64 * 1024;
+/**
+ * Also the size of the footer read (`initialFetchSize`) wherever a file is opened, so the footer comes
+ * from this tail. 512 KiB holds a small file, such as most episode indexes, whole.
+ */
+export const TAIL_PROBE_BYTES = 512 * 1024;
 
 /**
  * Opens a remote file for random access.

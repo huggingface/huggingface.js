@@ -1,7 +1,7 @@
 import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
-import { fetchRange, fetchTextPrefix, HttpError, openRemoteFile } from "./http";
+import { fetchRange, fetchTextPrefix, HttpError, openRemoteFile, TAIL_PROBE_BYTES } from "./http";
 import { formatPathTemplate } from "./paths";
 
 /** v3 keeps its episode index in parquet under a fixed layout; the path is not templated in info.json. */
@@ -221,11 +221,12 @@ async function readEpisodesV3(
 			continue;
 		}
 
-		const rowCount = Number((await parquetMetadataAsync(file)).num_rows);
+		const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
+		const rowCount = Number(metadata.num_rows);
 		if (seen + rowCount > offset) {
 			const rowStart = Math.max(0, offset - seen);
 			const rowEnd = Math.min(rowCount, offset + limit - seen);
-			const rows = await parquetReadObjects({ file, rowStart, rowEnd });
+			const rows = await parquetReadObjects({ file, metadata, rowStart, rowEnd });
 			for (const row of rows) {
 				collected.push(toRawEpisodeV3(row, info));
 			}
@@ -259,7 +260,7 @@ export async function readEpisodes(
 async function readFileStart(url: string, options?: FetchOptions): Promise<number> {
 	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
 	const file = await openRemoteFile(url, options);
-	const metadata = await parquetMetadataAsync(file);
+	const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
 	const column = metadata.row_groups[0]?.columns.find(
 		(chunk) => chunk.meta_data?.path_in_schema.length === 1 && chunk.meta_data.path_in_schema[0] === "index",
 	);
