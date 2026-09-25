@@ -300,6 +300,60 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(false);
 	});
 
+	it("osaurus deeplink - mlx", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.osaurus;
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model, undefined).href).toBe(
+			"osaurus://open_from_hf?model=mlx-community/Llama-3.2-3B-Instruct-4bit",
+		);
+	});
+
+	it("osaurus deeplink - mlx vision model with file", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.osaurus;
+		const model: ModelData = {
+			id: "OsaurusAI/gemma-4-26B-A4B-it-qat-MXFP4",
+			tags: ["mlx", "safetensors", "mxfp4"],
+			pipeline_tag: "image-text-to-text",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model, "config.json").href).toBe(
+			"osaurus://open_from_hf?model=OsaurusAI/gemma-4-26B-A4B-it-qat-MXFP4&file=config.json",
+		);
+	});
+
+	it("osaurus not shown for gguf-only model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.osaurus;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
+	it("osaurus not shown for unrelated model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.osaurus;
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			tags: ["conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("unsloth tagged model", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS.unsloth;
 		const model: ModelData = {
