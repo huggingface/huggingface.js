@@ -1,3 +1,4 @@
+import * as Badgr from "../providers/badgr.js";
 import * as Baseten from "../providers/baseten.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
@@ -57,6 +58,9 @@ import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from
 import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
+	badgr: {
+		conversational: new Badgr.BadgrConversationalTask(),
+	},
 	baseten: {
 		conversational: new Baseten.BasetenConversationalTask(),
 	},
