@@ -3,6 +3,7 @@ import type { ModelData } from "./model-data.js";
 import {
 	adapters,
 	diffusers,
+	jev_style,
 	keras_hub,
 	llama_cpp_python,
 	multimolecule,
@@ -13,6 +14,16 @@ import {
 } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
+	it.each([
+		["torch", [], `pip install "jev-style[torch]"`],
+		["mlx", ["mlx"], `pip install "jev-style[mlx]"`],
+		["gguf", ["gguf"], "export JEV_SCORE_BIN="],
+	])("jev_style %s", (_name, tags, setup) => {
+		const snippet = jev_style({ id: "user/model", tags, inference: "" } as ModelData);
+		expect(snippet[0]).toContain(setup);
+		expect(snippet[1]).toContain(`JevStyle.from_pretrained("user/model")`);
+	});
+
 	it("llama_cpp_python conversational", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
