@@ -366,4 +366,43 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			{ label: "Releases", url: "https://github.com/bartowski/Llama-3.2-3B-Instruct-GGUF/releases" },
 		]);
 	});
+	it("xyntetik-runner gguf", async () => {
+		const { snippet: snippetFunc, displayOnModelPage } = LOCAL_APPS["xyntetik-runner"];
+		const model: ModelData = {
+			id: "Joakimpalm-Zen/Qwen3-30B-A3B-selective-attnQ8_0-expQ4_0-GGUF",
+			tags: ["gguf", "conversational"],
+			gguf: { total: 585, context_length: 40960 },
+			inference: "",
+		};
+		expect(displayOnModelPage(model)).toBe(true);
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toEqual([
+			`# Fetch (once, sha256-verified, cached) and serve: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080
+runner -hf Joakimpalm-Zen/Qwen3-30B-A3B-selective-attnQ8_0-expQ4_0-GGUF:{{QUANT_TAG}} --serve`,
+			`# Or run one prompt in the terminal:
+runner -hf Joakimpalm-Zen/Qwen3-30B-A3B-selective-attnQ8_0-expQ4_0-GGUF:{{QUANT_TAG}} -p "Hello" -n 64`,
+		]);
+	});
+
+	it("xyntetik-runner with a selected file", async () => {
+		const { snippet: snippetFunc, displayOnModelPage } = LOCAL_APPS["xyntetik-runner"];
+		const model: ModelData = {
+			id: "ibm-granite/granite-4.1-3b-GGUF",
+			tags: ["gguf"],
+			gguf: { total: 363, context_length: 131072 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model, "granite-4.1-3b-Q8_0.gguf");
+
+		expect(snippet[1].content).toEqual([
+			`# Fetch (once, sha256-verified, cached) and serve: OpenAI-, Anthropic- and Responses-compatible API on http://localhost:8080
+./runner -hf ibm-granite/granite-4.1-3b-GGUF:Q8_0 --serve`,
+			`# Or run one prompt in the terminal:
+./runner -hf ibm-granite/granite-4.1-3b-GGUF:Q8_0 -p "Hello" -n 64`,
+		]);
+		expect(displayOnModelPage({ id: "meta-llama/Llama-3.2-3B-Instruct", tags: ["transformers"], inference: "" })).toBe(
+			false,
+		);
+	});
 });
