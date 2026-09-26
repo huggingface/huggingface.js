@@ -48,7 +48,7 @@ jobs:
       - run: git config --global user.email infra+machineuser@huggingface.co
       - run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
+          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${GITHUB_EVENT_INPUTS_NEWVERSION}')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           pnpm --filter doc-internal run fix-cdn-versions
@@ -56,6 +56,8 @@ jobs:
           git commit -m "🔖 @huggingface/tiny-agents $BUMPED_VERSION"
           git tag "tiny-agents-v$BUMPED_VERSION"
           echo "RELEASE_TAG=tiny-agents-v$BUMPED_VERSION" >> $GITHUB_ENV
+        env:
+          GITHUB_EVENT_INPUTS_NEWVERSION: ${{ github.event.inputs.newversion }}
 
       # Add checks for dependencies if needed, similar to hub-publish.yml
       - if: ${{ !github.event.inputs.bypass_deps_check }}
