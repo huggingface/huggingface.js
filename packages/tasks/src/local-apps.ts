@@ -657,7 +657,12 @@ export const LOCAL_APPS = {
 		prettyLabel: "Chaty",
 		docsUrl: "https://chaty.ca",
 		mainTask: "text-generation",
-		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
+		displayOnModelPage: (model) =>
+			isLlamaCppGgufModel(model) ||
+			isMlxModel(model) ||
+			// Text-to-image too: diffusion GGUFs (no context length) and mflux's MLX saves.
+			(model.pipeline_tag === "text-to-image" && model.tags.includes("gguf")) ||
+			model.library_name === "mflux",
 		deeplink: (model, filepath) =>
 			new URL(`https://chaty.ca/use.html?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
 	},
