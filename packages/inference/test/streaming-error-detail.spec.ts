@@ -51,4 +51,21 @@ describe("innerStreamingRequest error handling", () => {
 		const gen = streamGen(mockFetch(400, { error: { message: "Invalid model", type: "invalid_request_error" } }));
 		await expect(gen.next()).rejects.toThrow("Invalid model");
 	});
+
+	it("does not let an object error shadow top-level detail", async () => {
+		const gen = streamGen(
+			mockFetch(422, {
+				error: { message: "Nested error" },
+				detail: "Input validation error: best_of must be > 0",
+			}),
+		);
+		await expect(gen.next()).rejects.toThrow("Input validation error: best_of must be > 0");
+	});
+
+	it("does not let an object error shadow top-level message", async () => {
+		const gen = streamGen(
+			mockFetch(400, { error: { message: "Nested error" }, message: "Invalid request parameters" }),
+		);
+		await expect(gen.next()).rejects.toThrow("Invalid request parameters");
+	});
 });
