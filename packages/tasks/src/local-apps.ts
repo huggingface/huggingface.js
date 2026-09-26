@@ -533,6 +533,22 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 	return `docker model run hf.co/${model.id}${quantTag}`;
 };
 
+const snippetEuLLM = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const command = `eullm run hf.co/${model.id}${getQuantTag(filepath)}`;
+	return [
+		{
+			title: "Install on macOS / Linux",
+			setup: "curl -fsSL https://raw.githubusercontent.com/eullm/eullm/main/installer/install.sh | sh",
+			content: command,
+		},
+		{
+			title: "Install on Windows (PowerShell)",
+			setup: "irm https://raw.githubusercontent.com/eullm/eullm/main/installer/install.ps1 | iex",
+			content: command,
+		},
+	];
+};
+
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
 	const isRyzenAI = model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag));
@@ -774,6 +790,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	eullm: {
+		prettyLabel: "EuLLM",
+		docsUrl: "https://github.com/eullm/eullm",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetEuLLM,
 	},
 	pi: {
 		prettyLabel: "Pi",

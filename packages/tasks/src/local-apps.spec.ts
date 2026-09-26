@@ -262,6 +262,29 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 	});
 
+	it("eullm", async () => {
+		const { snippet: snippetFunc, displayOnModelPage } = LOCAL_APPS["eullm"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(snippet).toHaveLength(2);
+		expect(snippet[0].setup).toContain("installer/install.sh | sh");
+		expect(snippet[1].setup).toContain("installer/install.ps1 | iex");
+		for (const s of snippet) {
+			expect(s.content).toEqual("eullm run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}");
+		}
+		expect(snippetFunc(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf")[0].content).toEqual(
+			"eullm run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M",
+		);
+		expect(displayOnModelPage({ id: "meta-llama/Llama-3.2-3B-Instruct", tags: [], inference: "" })).toBe(false);
+	});
+
 	it("atomic chat deeplink", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS["atomic-chat"];
 		const model: ModelData = {
