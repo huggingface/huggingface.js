@@ -1035,6 +1035,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mlx,
 		filter: true,
 	},
+	mtplx: {
+		prettyLabel: "MTPLX",
+		repoName: "MTPLX",
+		repoUrl: "https://github.com/youssofal/MTPLX",
+		docsUrl: "https://mtplx.com",
+		snippets: snippets.mtplx,
+		filter: false,
+	},
 	"mlx-image": {
 		prettyLabel: "mlx-image",
 		repoName: "mlx-image",
