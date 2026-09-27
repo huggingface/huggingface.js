@@ -97,6 +97,84 @@ describe("parseInfo", () => {
 	});
 });
 
+/**
+ * Camera features from real datasets' `meta/info.json`, trimmed to the keys that decide the frame size. The
+ * expected size is what ffprobe reports for the dataset's first video file.
+ */
+const CAMERA_CASES = [
+	{
+		dataset: "unitreerobotics/Z1_StackBox_Dataset",
+		layout: "channel-first shape",
+		key: "observation.images.cam_high",
+		feature: {
+			shape: [3, 480, 640],
+			names: ["channels", "height", "width"],
+			info: { "video.height": 480, "video.width": 640 },
+		},
+		width: 640,
+		height: 480,
+	},
+	{
+		dataset: "yaak-ai/L2D",
+		layout: "channel-first shape, no video info",
+		key: "observation.images.front_left",
+		feature: { shape: [3, 1080, 1920], names: ["channel", "height", "width"] },
+		width: 1920,
+		height: 1080,
+	},
+	{
+		dataset: "IPEC-COMMUNITY/bc_z_lerobot",
+		layout: "shape a pixel smaller than the video",
+		key: "observation.images.image",
+		feature: {
+			shape: [171, 213, 3],
+			names: ["height", "width", "rgb"],
+			info: { "video.height": 172, "video.width": 214 },
+		},
+		width: 214,
+		height: 172,
+	},
+	{
+		dataset: "simheo/test-branch-18",
+		layout: "names that contradict the shape",
+		key: "observation.images.right_cam0",
+		feature: {
+			shape: [720, 960, 3],
+			names: ["channels", "height", "width"],
+			info: { "video.height": 720, "video.width": 960 },
+		},
+		width: 960,
+		height: 720,
+	},
+	{
+		dataset: "lerobot/aloha_static_coffee",
+		layout: "channel-last shape, no video info",
+		key: "observation.images.cam_high",
+		feature: { shape: [480, 640, 3], names: ["height", "width", "channel"] },
+		width: 640,
+		height: 480,
+	},
+];
+
+describe("camera sizes", () => {
+	for (const { dataset, layout, key, feature, width, height } of CAMERA_CASES) {
+		it(`${dataset} ${key} (${layout})`, () => {
+			const info = parseInfo(
+				JSON.stringify({
+					codebase_version: "v3.0",
+					fps: 30,
+					total_episodes: 1,
+					data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+					features: { [key]: { dtype: "video", ...feature } },
+				}),
+			);
+
+			expect(info.cameras).toHaveLength(1);
+			expect(info.cameras[0]).toMatchObject({ key, width, height });
+		});
+	}
+});
+
 describe("parseInfo on hostile input", () => {
 	const base = {
 		codebase_version: "v3.0",
@@ -273,6 +351,26 @@ describe("LeRobotDataset (v2.1)", () => {
 		},
 		TIMEOUT,
 	);
+
+	it(
+		"reads an episode's frames from its own parquet file",
+		async () => {
+			const [episode] = await dataset.episodes({ limit: 1 });
+			const frames = await dataset.frames(episode);
+			expect(frames?.length).toBe(episode.length);
+			/// One series per motor, each as long as the episode.
+			expect(frames?.series["observation.state"]).toHaveLength(6);
+			expect(frames?.series["observation.state"][0]).toHaveLength(episode.length);
+			expect(frames?.series["action"]).toHaveLength(6);
+			expect(frames?.names["observation.state"]?.[0]).toBe("shoulder_pan.pos");
+			expect(frames?.timestamps[0]).toBeCloseTo(0, 5);
+			expect(frames?.timestamps[1]).toBeCloseTo(1 / 30, 3);
+			/// Frame columns are scalars, so they are not series.
+			expect(frames?.series["timestamp"]).toBeUndefined();
+			expect(frames?.series["frame_index"]).toBeUndefined();
+		},
+		TIMEOUT,
+	);
 });
 
 describe("LeRobotDataset (v3.0)", () => {
@@ -345,6 +443,25 @@ describe("v2 and v3 agree", () => {
 		},
 		TIMEOUT,
 	);
+
+	it(
+		"reads an episode's frames from its slice of a shared parquet file",
+		async () => {
+			const dataset = new LeRobotDataset(REPO_ID, { revision: REV_V30 });
+			const episodes = await dataset.episodes({ offset: 1, limit: 1 });
+			const [episode] = episodes;
+			/// Episode 1 starts partway into the file, so this also covers the row offset.
+			expect(episode.data?.fromRow).toBeGreaterThan(0);
+
+			const frames = await dataset.frames(episode);
+			expect(frames?.length).toBe(episode.length);
+			expect(frames?.series["observation.state"][0]).toHaveLength(episode.length);
+			expect(frames?.names["observation.state"]).toHaveLength(6);
+			/// Timestamps restart at zero for each episode rather than continuing the file's clock.
+			expect(frames?.timestamps[0]).toBeCloseTo(0, 5);
+		},
+		TIMEOUT,
+	);
 });
 
 /** Minimal in-memory origin with Range support, so shard-walking can be exercised deterministically. */
@@ -387,6 +504,53 @@ function parquet(rows: Record<string, number>[], { statistics = true } = {}): Ui
 		}),
 	);
 }
+
+describe("frames columns", () => {
+	const files = {
+		"meta/info.json": encoder.encode(
+			JSON.stringify({
+				codebase_version: "v3.0",
+				fps: 10,
+				total_episodes: 1,
+				data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+			}),
+		),
+		"meta/episodes/chunk-000/file-000.parquet": parquet([
+			{
+				episode_index: 0,
+				length: 3,
+				"data/chunk_index": 0,
+				"data/file_index": 0,
+				dataset_from_index: 0,
+				dataset_to_index: 3,
+			},
+		]),
+		"data/chunk-000/file-000.parquet": new Uint8Array(
+			parquetWriteBuffer({
+				columnData: [
+					{ name: "index", type: "INT64", data: [0n, 1n, 2n] },
+					{ name: "frame_index", type: "INT64", data: [0n, 1n, 2n] },
+					{ name: "episode_index", type: "INT64", data: [0n, 0n, 0n] },
+					{ name: "task_index", type: "INT64", data: [0n, 0n, 0n] },
+					{ name: "timestamp", type: "DOUBLE", data: [0, 0.1, 0.2] },
+					{ name: "next.reward", type: "DOUBLE", data: [0, 0.5, 1] },
+					{ name: "next.success", type: "BOOLEAN", data: [false, false, true] },
+				],
+			}),
+		),
+	};
+
+	it("returns scalar and boolean columns as single series, without the bookkeeping ones", async () => {
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
+		const [episode] = await dataset.episodes({ limit: 1 });
+		const frames = await dataset.frames(episode);
+		expect(frames?.timestamps).toEqual([0, 0.1, 0.2]);
+		expect(frames?.series).toEqual({
+			"next.reward": [[0, 0.5, 1]],
+			"next.success": [[0, 0, 1]],
+		});
+	});
+});
 
 describe("v3 data row offsets", () => {
 	const metadata = (index: number, chunk: number, file: number, from: number, to: number) => ({

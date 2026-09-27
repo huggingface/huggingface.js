@@ -1,7 +1,8 @@
 import type { FetchOptions } from "./http";
-import type { LeRobotEpisode, LeRobotInfo } from "./types";
+import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 
 import { readEpisodes } from "./episodes";
+import { readFrames } from "./frames";
 import { fetchTextPrefix } from "./http";
 import { MAX_INFO_BYTES, resolveUrl } from "./paths";
 import { parseInfo } from "./info";
@@ -67,6 +68,20 @@ export class LeRobotDataset {
 		}
 		return readEpisodes(info, (path) => this.fileUrl(path), offset, limit, this.fetchOptions);
 	}
+
+	/**
+	 * One episode's frame rows, as a series per component. `undefined` when the episode's rows could
+	 * not be located, which is what `episode.data` being absent means.
+	 *
+	 * ```ts
+	 * const [episode] = await dataset.episodes({ limit: 1 });
+	 * const frames = await dataset.frames(episode);
+	 * frames?.series["observation.state"][0]; // shoulder_pan over time
+	 * ```
+	 */
+	async frames(episode: LeRobotEpisode): Promise<LeRobotFrames | undefined> {
+		return readFrames(await this.info(), episode, this.fetchOptions);
+	}
 }
 
 export { parseInfo } from "./info";
@@ -80,5 +95,6 @@ export type {
 	LeRobotEpisode,
 	LeRobotEpisodeData,
 	LeRobotEpisodeVideo,
+	LeRobotFrames,
 	LeRobotInfo,
 } from "./types";
