@@ -667,13 +667,6 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
-	sanctum: {
-		prettyLabel: "Sanctum",
-		docsUrl: "https://sanctum.ai",
-		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
-		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
-	},
 	jellybox: {
 		prettyLabel: "Jellybox",
 		docsUrl: "https://jellybox.com",
