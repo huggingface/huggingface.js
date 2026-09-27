@@ -68,9 +68,27 @@ const ggufQuants = Object.values(GGMLFileQuantizationType).filter((v): v is stri
  * sizeVariation `MOE`.
  */
 const GGUF_QUANT_FILENAME_ALIASES = ["MXFP4"];
+
+// `Q2_K_XL` is `Q2_K` plus a letter size suffix, so the shorter name stays first.
+// `Q4_0_4_4` is not that shape. Longer names are tried first, or the match stops at `Q4_0`.
+function isLetterSizeSuffix(name: string): boolean {
+	return ggufQuants.some((shorter) => {
+		if (!name.startsWith(`${shorter}_`)) {
+			return false;
+		}
+		return /^[A-Z]+$/.test(name.slice(shorter.length + 1));
+	});
+}
+
+const quantNamesBySpecificity = [
+	...ggufQuants.filter((name) => !isLetterSizeSuffix(name)).sort((a, b) => b.length - a.length),
+	...ggufQuants.filter((name) => isLetterSizeSuffix(name)),
+	...GGUF_QUANT_FILENAME_ALIASES,
+];
+
 export const GGUF_QUANT_RE = new RegExp(
 	"(?<prefix>UD-)?" +
-		`(?<quant>${[...ggufQuants, ...GGUF_QUANT_FILENAME_ALIASES].join("|")})` +
+		`(?<quant>${quantNamesBySpecificity.join("|")})` +
 		"(_(?<sizeVariation>[A-Z]+))?",
 );
 export const GGUF_QUANT_RE_GLOBAL = new RegExp(GGUF_QUANT_RE, "g");
