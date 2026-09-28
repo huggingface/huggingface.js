@@ -248,8 +248,26 @@ export async function readEpisodes(
 		info.codebaseVersion === "v3.0"
 			? await readEpisodesV3(toUrl, info, offset, limit, options)
 			: await readEpisodesV2(toUrl("meta/episodes.jsonl"), offset, limit, options);
-	const episodes = raw.map((episode) => buildEpisode(episode, info, toUrl));
-	return info.codebaseVersion === "v3.0" ? toFileRows(episodes, offset, options) : episodes;
+	const built = raw.map((episode) => buildEpisode(episode, info, toUrl));
+	/// toFileRows reads positions (an episode starting a file follows one from another file), so the
+	/// repeats go only after it.
+	const episodes = info.codebaseVersion === "v3.0" ? await toFileRows(built, offset, options) : built;
+	return firstPerIndex(episodes);
+}
+
+/**
+ * Callers look episodes up by index, so an index file that repeats one (a malformed dataset numbering
+ * its rows 0, 1, 2, 0, 1, 2, ...) keeps its first row for it.
+ */
+function firstPerIndex(episodes: LeRobotEpisode[]): LeRobotEpisode[] {
+	const seen = new Set<number>();
+	return episodes.filter((episode) => {
+		if (seen.has(episode.index)) {
+			return false;
+		}
+		seen.add(episode.index);
+		return true;
+	});
 }
 
 /**
