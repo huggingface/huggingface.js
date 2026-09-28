@@ -857,6 +857,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	laya: {
+		prettyLabel: "Laya",
+		repoName: "Laya",
+		repoUrl: "https://github.com/NandhaKishorM/laya",
+		filter: false,
+		countDownloads: `path_filename:"rl_agent_config" AND path_extension:"json"`,
+	},
 	ltx: {
 		prettyLabel: "LTX-2",
 		repoName: "LTX-2",
