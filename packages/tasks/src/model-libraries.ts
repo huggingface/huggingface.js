@@ -1014,6 +1014,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	microduck: {
+		prettyLabel: "Microduck",
+		repoName: "Microduck",
+		repoUrl: "https://github.com/pollen-robotics/microduck_rl",
+		filter: true,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
