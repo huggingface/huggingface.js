@@ -1008,7 +1008,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	microduck: {
 		prettyLabel: "Microduck",
-		repoName: "microduck_rl",
+		repoName: "Microduck",
 		repoUrl: "https://github.com/pollen-robotics/microduck_rl",
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
