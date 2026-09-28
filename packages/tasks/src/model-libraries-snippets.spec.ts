@@ -100,4 +100,60 @@ print(output)`);
 			expect(keras_hub(model as ModelData).join("\n")).toContain("keras_hub.models.TextClassifier.from_preset");
 		});
 	});
+
+	describe("peft", () => {
+		const base = { id: "user/model", tags: [] as string[], inference: "" };
+
+		it("every PEFT task type has a loader", () => {
+			const adapter = (task_type: string) =>
+				({ ...base, config: { peft: { base_model_name_or_path: "org/base", task_type } } }) as ModelData;
+			expect(peft(adapter("FEATURE_EXTRACTION"))[0]).toContain("AutoModel.from_pretrained");
+			expect(peft(adapter("QUESTION_ANS"))[0]).toContain("AutoModelForQuestionAnswering");
+			expect(peft(adapter("CAUSAL_LM"))[0]).toContain("AutoModelForCausalLM");
+			expect(peft(adapter("UNKNOWN"))[0]).toEqual("Task type is invalid.");
+		});
+
+		it("speech seq2seq adapters use the speech auto class", () => {
+			const whisper = peft({
+				...base,
+				config: { peft: { base_model_name_or_path: "openai/whisper-large-v3", task_type: "SEQ_2_SEQ_LM" } },
+			} as ModelData)[0];
+			expect(whisper).toContain("AutoModelForSpeechSeq2Seq");
+			for (const baseId of [
+				"facebook/s2t-small-librispeech-asr",
+				"facebook/seamless-m4t-v2-large",
+				"microsoft/speecht5_asr",
+			]) {
+				expect(
+					peft({
+						...base,
+						config: { peft: { base_model_name_or_path: baseId, task_type: "SEQ_2_SEQ_LM" } },
+					} as ModelData)[0],
+				).toContain("AutoModelForSpeechSeq2Seq");
+			}
+
+			const t5 = peft({
+				...base,
+				config: { peft: { base_model_name_or_path: "google/flan-t5-base", task_type: "SEQ_2_SEQ_LM" } },
+			} as ModelData)[0];
+			expect(t5).toContain("AutoModelForSeq2SeqLM");
+
+			// audio models that transformers registers under the text seq2seq class must not be overridden
+			const qwenAudio = peft({
+				...base,
+				pipeline_tag: "automatic-speech-recognition",
+				config: { peft: { base_model_name_or_path: "Qwen/Qwen2-Audio-7B", task_type: "SEQ_2_SEQ_LM" } },
+			} as ModelData)[0];
+			expect(qwenAudio).toContain("AutoModelForSeq2SeqLM");
+		});
+
+		it("falls back to the model card's base model", () => {
+			const snippet = peft({
+				...base,
+				cardData: { base_model: "org/base" },
+				config: { peft: { task_type: "CAUSAL_LM" } },
+			} as ModelData)[0];
+			expect(snippet).toContain(`"org/base"`);
+		});
+	});
 });
