@@ -41,7 +41,7 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"dependencies": {
-		"hyparquet": "^1.25.1"
+		"hyparquet": "^1.31.2"
 	},
 	"devDependencies": {
 		"@types/node": "^20.12.8",
