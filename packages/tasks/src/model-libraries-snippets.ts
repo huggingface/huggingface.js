@@ -84,9 +84,12 @@ result, message = detector.detect_watermark(watermarked_audio, sr)`;
 
 function get_base_diffusers_model(model: ModelData): string {
 	const baseModel = model.cardData?.base_model;
-	// several base models can be listed (e.g. a LoRA trained for a base and its turbo variant); the first one is used
-	const first = Array.isArray(baseModel) ? baseModel[0] : baseModel;
-	return escapeStringForJson(first?.toString() ?? "fill-in-base-model");
+	// several base models can be listed (e.g. a LoRA trained for a base and its turbo variant). When an original checkpoint
+	// and its Diffusers conversion are both listed (["Wan-AI/Wan2.1-I2V-14B-480P", "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers"]),
+	// only the conversion has a model_index.json that DiffusionPipeline can load; otherwise the first one is used
+	const candidates = Array.isArray(baseModel) ? baseModel : baseModel ? [baseModel] : [];
+	const chosen = candidates.find((id) => id.toLowerCase().endsWith("-diffusers")) ?? candidates[0];
+	return escapeStringForJson(chosen ?? "fill-in-base-model");
 }
 
 function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
@@ -1499,9 +1502,10 @@ pip install -U litert-lm
 
 # 2. Download and run this model locally:
 # See: https://ai.google.dev/edge/litert-lm/cli
-# Pick the .litertlm file to run from this repo's "Files and versions" tab
+# A single .litertlm file in the repo is picked automatically; otherwise the CLI asks which one to run
+# (or pass its name right after the repo id).
 litert-lm run \\
-  --from-huggingface-repo=${model.id} <model-file>.litertlm \\
+  --from-huggingface-repo=${model.id} \\
   --prompt="Write me a poem"`,
 ];
 
@@ -1944,8 +1948,11 @@ model = load("path_to_folder/${escapeStringForJson(modelFile)}")`,
 };
 
 const skopsJobLib = (model: ModelData) => {
-	// repos pushed without skops often still declare their filename in config.json
-	const modelFile = model.config?.sklearn?.model?.file ?? "sklearn_model.joblib";
+	// repos pushed without skops often still declare their filename in config.json; it is only trusted when it names a
+	// pickle, since some hand-written configs carry typos (e.g. "sklean_model.jpblib" next to a real sklearn_model.joblib)
+	const declaredFile = model.config?.sklearn?.model?.file;
+	const modelFile =
+		declaredFile && /\.(joblib|pkl|pickle)$/i.test(declaredFile) ? declaredFile : "sklearn_model.joblib";
 	return [
 		`from huggingface_hub import hf_hub_download
 import joblib
@@ -2162,11 +2169,13 @@ docs_emb = model.encode(documents, is_query=False)`,
 	}
 
 	// Rerankers saved in the CrossEncoder format are often tagged text-classification rather than text-ranking;
-	// their architecture still identifies them (e.g. BAAI/bge-reranker-v2-m3).
+	// their architecture still identifies them (e.g. BAAI/bge-reranker-v2-m3). SetFit models can share that shape but
+	// are bi-encoders with a separate head.
 	const isCrossEncoder =
 		model.tags.includes("cross-encoder") ||
 		model.pipeline_tag == "text-ranking" ||
 		(model.pipeline_tag === "text-classification" &&
+			!model.tags.includes("setfit") &&
 			(model.config?.architectures ?? []).some((arch) => arch.endsWith("ForSequenceClassification")));
 
 	if (isCrossEncoder) {
@@ -2445,7 +2454,6 @@ export const transformers = (model: ModelData): string[] => {
 // Hub tasks that transformers.js exposes under a different pipeline() task name
 const TRANSFORMERS_JS_TASK_ALIASES: Record<string, string> = {
 	"sentence-similarity": "feature-extraction",
-	"text-ranking": "text-classification",
 };
 
 export const transformersJS = (model: ModelData): string[] => {
@@ -2454,6 +2462,29 @@ export const transformersJS = (model: ModelData): string[] => {
 	}
 
 	const libName = "@huggingface/transformers";
+
+	// Rerankers score (query, document) pairs. The text-classification pipeline cannot take pairs and applies a softmax
+	// over their single logit, so every score comes out as 1; the model is called directly instead.
+	if (model.pipeline_tag === "text-ranking") {
+		return [
+			`// npm i ${libName}
+import { AutoTokenizer, AutoModelForSequenceClassification } from '${libName}';
+
+const tokenizer = await AutoTokenizer.from_pretrained('${model.id}');
+const model = await AutoModelForSequenceClassification.from_pretrained('${model.id}');
+
+const query = 'Which planet is known as the Red Planet?';
+const documents = [
+	'Mars, known for its reddish appearance, is often referred to as the Red Planet.',
+	'Venus is often called the twin of Earth because of its similar size and proximity.',
+];
+
+const inputs = tokenizer(new Array(documents.length).fill(query), { text_pair: documents, padding: true, truncation: true });
+const { logits } = await model(inputs);
+console.log(logits.sigmoid().tolist()); // one relevance score per document`,
+		];
+	}
+
 	const task = TRANSFORMERS_JS_TASK_ALIASES[model.pipeline_tag] ?? model.pipeline_tag;
 
 	return [
@@ -2478,9 +2509,29 @@ const PEFT_TASK_TYPE_TO_AUTO_CLASS: Record<string, string> = {
 // PEFT has no speech-specific task type: Whisper-style adapters are tagged SEQ_2_SEQ_LM, but transformers registers
 // Whisper, SpeechT5 and Speech2Text only under AutoModelForSpeechSeq2Seq (SeamlessM4T is under both auto classes).
 // Other audio seq2seq models (Qwen2-Audio, GLM-ASR) stay under AutoModelForSeq2SeqLM, so the base model name is the
-// only safe signal. Matched against Hub repo ids, which are hyphenated (facebook/s2t-small-librispeech-asr,
+// main signal. Matched against Hub repo ids, which are hyphenated (facebook/s2t-small-librispeech-asr,
 // facebook/seamless-m4t-v2-large), not against transformers model_type identifiers.
-const PEFT_SPEECH_SEQ2SEQ_BASE_MODEL = /whisper|speecht5|\bs2t\b|speech[-_]to[-_]text|seamless[-_]m4t/i;
+const PEFT_SPEECH_TO_TEXT_BASE_MODEL = /whisper|\bs2t\b|speech[-_]to[-_]text/i;
+// SeamlessM4T also has a text-to-text head under AutoModelForSeq2SeqLM, which text translation adapters need; most
+// SeamlessM4T adapters on the Hub are speech ones, so the speech class stays the default when no text task is declared.
+const PEFT_SEAMLESS_M4T_BASE_MODEL = /seamless[-_]m4t/i;
+const PEFT_TEXT_TASKS = ["translation", "text2text-generation", "summarization"];
+// SpeechT5 checkpoints are overwhelmingly text-to-speech fine-tunes (often without "tts" in their name), for which
+// AutoModelForSpeechSeq2Seq silently loads the speech-to-text head: only ASR bases or adapters get the speech class.
+const PEFT_SPEECHT5_BASE_MODEL = /speecht5/i;
+
+const peftUsesSpeechSeq2Seq = (model: ModelData, baseModel: string): boolean => {
+	if (PEFT_SPEECH_TO_TEXT_BASE_MODEL.test(baseModel)) {
+		return true;
+	}
+	if (PEFT_SEAMLESS_M4T_BASE_MODEL.test(baseModel)) {
+		return !PEFT_TEXT_TASKS.some((task) => model.pipeline_tag === task || model.tags.includes(task));
+	}
+	if (PEFT_SPEECHT5_BASE_MODEL.test(baseModel)) {
+		return /(?:^|[^a-z])asr(?:[^a-z]|$)/i.test(baseModel) || model.pipeline_tag === "automatic-speech-recognition";
+	}
+	return false;
+};
 
 export const peft = (model: ModelData): string[] => {
 	const { base_model_name_or_path: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
@@ -2496,7 +2547,7 @@ export const peft = (model: ModelData): string[] => {
 	if (!baseModel) {
 		return [`Base model is not found.`];
 	}
-	if (peftTaskType === "SEQ_2_SEQ_LM" && PEFT_SPEECH_SEQ2SEQ_BASE_MODEL.test(baseModel)) {
+	if (peftTaskType === "SEQ_2_SEQ_LM" && peftUsesSpeechSeq2Seq(model, baseModel)) {
 		autoClass = "AutoModelForSpeechSeq2Seq";
 	}
 
@@ -2685,8 +2736,14 @@ torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
 export const ultralytics = (model: ModelData): string[] => {
-	// the YOLOv10 fork ships its own `YOLOv10` class with a `from_pretrained` helper
-	if (model.tags.includes("yolov10")) {
+	// the YOLOv10 fork (library "yolov10") ships its own `YOLOv10` class with a `from_pretrained` helper. Mainline
+	// ultralytics repos often list "yolov10" among their version tags (e.g. Ultralytics/YOLOv8), so the library decides;
+	// the tag is only a fallback when the library is unknown.
+	const isYolov10Fork =
+		model.library_name !== undefined
+			? model.library_name === "yolov10"
+			: model.tags.includes("yolov10") && !model.tags.includes("ultralytics");
+	if (isYolov10Fork) {
 		return [
 			`from ultralytics import YOLOv10
 
@@ -2860,10 +2917,11 @@ output = generate(model, processor, formatted_prompt, image)
 print(output)`,
 ];
 
+// create_model() takes a name from the mlx-image registry, not a repo id; the weights live in "mlx-vision/<name>-mlxim"
 export const mlxim = (model: ModelData): string[] => [
 	`from mlxim.model import create_model
 
-model = create_model("${model.id}")`,
+model = create_model("${nameWithoutNamespace(model.id).replace(/-mlxim$/, "")}")`,
 ];
 
 export const mlx = (model: ModelData): string[] => {
