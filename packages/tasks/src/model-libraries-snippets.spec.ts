@@ -3,7 +3,6 @@ import type { ModelData } from "./model-data.js";
 import {
 	adapters,
 	diffusers,
-	jev_style,
 	keras_hub,
 	llama_cpp_python,
 	multimolecule,
