@@ -352,6 +352,39 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("Qwable-v1-35B-A3B-MXFP4_MOE.gguf")).toEqual("MXFP4_MOE");
 	});
 
+	it("parse ik_llama.cpp quant labels", async () => {
+		// these names contain shorter known names (Q2_K in IQ2_KS, IQ4_K in IQ4_KT, IQ4_KS in IQ4_KSS)
+		const ikQuants = [
+			"IQ1_KT",
+			"IQ2_K",
+			"IQ2_KL",
+			"IQ2_KS",
+			"IQ2_KT",
+			"IQ3_K",
+			"IQ3_KL",
+			"IQ3_KS",
+			"IQ3_KT",
+			"IQ4_K",
+			"IQ4_KS",
+			"IQ4_KSS",
+			"IQ4_KT",
+			"IQ5_K",
+			"IQ5_KS",
+			"IQ6_K",
+			"IQ2_K_R4",
+			"IQ3_K_R4",
+			"IQ4_K_R4",
+			"IQ5_K_R4",
+			"IQ4_KS_R4",
+			"IQ5_KS_R4",
+		];
+		for (const quant of ikQuants) {
+			expect(parseGGUFQuantLabel(`Qwen3.5-122B-A10B-${quant}.gguf`)).toEqual(quant);
+		}
+		expect(parseGGUFQuantLabel("Qwen3.5-122B-A10B-smol-IQ2_KS.gguf")).toEqual("IQ2_KS");
+		expect(parseGGUFQuantLabel("IQ4_KT/Qwen3.8-Flash-Next-IQ4_KT-00001-of-00002.gguf")).toEqual("IQ4_KT");
+	});
+
 	it("parse quant label groups", async () => {
 		const groups = (fname: string) => {
 			const { prefix, quant, sizeVariation } = parseGGUFQuantLabel(fname)?.match(GGUF_QUANT_RE)?.groups ?? {};
@@ -375,6 +408,11 @@ describe("gguf", () => {
 		expect(groups("Codestral-22B-v0.1-Q4_1_SOME_F16.gguf")).toEqual({
 			prefix: undefined,
 			quant: "Q4_1_SOME_F16",
+			sizeVariation: undefined,
+		});
+		expect(groups("Qwen3.5-122B-A10B-IQ4_KSS.gguf")).toEqual({
+			prefix: undefined,
+			quant: "IQ4_KSS",
 			sizeVariation: undefined,
 		});
 	});
