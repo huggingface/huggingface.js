@@ -2426,6 +2426,71 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 
+		describe.concurrent(
+		"Scitix",
+		() => {
+			const client = new InferenceClient(env.HF_INFERWAY_KEY ?? "dummy");
+			const hfModelId = "XiaomiMiMo/MiMo-V2.6-Flash-RL";
+			const providerModelId = "scitix/mimo-v2.6-flash";
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["scitix"] = {
+				[hfModelId]: {
+					provider: "scitix",
+					hfModelId,
+					providerId: providerModelId,
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const response = await client.chatCompletion({
+					model: hfModelId,
+					provider: "scitix",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+				});
+
+				expect(response.choices[0]?.message.content).toBeTruthy();
+				expect(response.usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: hfModelId,
+					provider: "scitix",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let content = "";
+				let usage: ChatCompletionStreamOutput["usage"];
+
+				for await (const chunk of stream) {
+					content += chunk.choices[0]?.delta.content ?? "";
+					if (chunk.usage) {
+						usage = chunk.usage;
+					}
+				}
+
+				expect(content).toBeTruthy();
+				expect(usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+		},
+		TIMEOUT,
+	);
+
 	describe.concurrent(
 		"PublicAI",
 		() => {
