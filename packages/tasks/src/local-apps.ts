@@ -120,6 +120,45 @@ function isMlxModel(model: ModelData) {
 }
 
 /**
+ * gbx-lm implements these vision-language architectures itself. Any other
+ * image-text-to-text MLX checkpoint is an mlx-vlm conversion it does not load.
+ */
+const GBX_LM_VISION_MODEL_TYPES = new Set([
+	"qwen3_vl",
+	"qwen3_vl_moe",
+	"qwen3_5",
+	"qwen3_5_moe",
+	"qwen4_exp",
+	"glm5_next",
+	"deepseek_v41",
+]);
+
+/**
+ * The environment variable that turns on the draft head (for speculative
+ * decoding) that GreenBitAI's gbx-lm builds of each architecture carry in `mtp/`.
+ */
+const GBX_LM_DRAFT_HEAD_SWITCH: Record<string, string> = {
+	deepseek_v41: "GBX_DEEPSEEK_MTP",
+	glm5_next: "GBX_GLM53_MTP",
+	qwen4_exp: "GBX_QWEN4_MTP",
+	qwen3_5: "GBX_QWEN35_MTP",
+	qwen3_5_moe: "GBX_QWEN35_MTP",
+};
+
+function isGbxLmModel(model: ModelData): boolean {
+	if (model.tags.includes("gbx-lm")) {
+		return true;
+	}
+	if (!model.id.startsWith("mlx-community/") || !isMlxModel(model)) {
+		return false;
+	}
+	return (
+		model.pipeline_tag === "text-generation" ||
+		(model.pipeline_tag === "image-text-to-text" && GBX_LM_VISION_MODEL_TYPES.has(model.config?.model_type ?? ""))
+	);
+}
+
+/**
  * Returns the model's chat template string, coalescing across sources:
  * GGUF metadata > chat_template_jinja file > tokenizer_config.json
  */
@@ -571,6 +610,42 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetGbxLm = (model: ModelData): LocalAppSnippet[] => {
+	// Only a build tagged gbx-lm ships a draft head; other checkpoints run without one.
+	const draftHead = model.tags.includes("gbx-lm")
+		? GBX_LM_DRAFT_HEAD_SWITCH[model.config?.model_type ?? ""]
+		: undefined;
+	return [
+		{
+			title: "Install gbx-lm and start the server",
+			setup: [
+				"# Install the signed binary (Apple Silicon, macOS 15+):",
+				"curl -fL https://github.com/GreenBitAI/gbx-lm/releases/latest/download/gbx_lm-darwin-arm64.tar.gz | tar -xzf - gbx_lm",
+				"mkdir -p ~/.local/bin && mv gbx_lm ~/.local/bin/",
+			].join("\n"),
+			content: [
+				draftHead
+					? "# Start an OpenAI-compatible server on port 11688, with the model's draft head on:"
+					: "# Start an OpenAI-compatible server on port 11688:",
+				`${draftHead ? `${draftHead}=on ` : ""}~/.local/bin/gbx_lm --model "${model.id}"`,
+			].join("\n"),
+		},
+		{
+			title: "Call the server",
+			content: [
+				'curl -X POST "http://localhost:11688/v1/chat/completions" \\',
+				'  -H "Content-Type: application/json" \\',
+				"  --data '{",
+				`    "model": "${model.id}",`,
+				'    "messages": [',
+				'      {"role": "user", "content": "Hello"}',
+				"    ]",
+				"  }'",
+			].join("\n"),
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -788,6 +863,14 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	"gbx-lm": {
+		prettyLabel: "gbx-lm",
+		docsUrl: "https://github.com/GreenBitAI/gbx-lm",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isGbxLmModel,
+		snippet: snippetGbxLm,
 	},
 } satisfies Record<string, LocalApp>;
 
