@@ -667,6 +667,16 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
+	sunstone: {
+		prettyLabel: "Sunstone",
+		docsUrl: "https://marketplace.visualstudio.com/items?itemName=sunstonenorth.sunstone",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model, filepath) =>
+			new URL(
+				`vscode://sunstonenorth.sunstone/hf?model=${model.id}${filepath ? `&file=${encodeURIComponent(filepath)}` : ""}`,
+			),
+	},
 	jellybox: {
 		prettyLabel: "Jellybox",
 		docsUrl: "https://jellybox.com",
