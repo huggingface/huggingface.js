@@ -14,6 +14,7 @@ import {
 	kimi_audio,
 	litert_lm,
 	llama_cpp_python,
+	microduck,
 	mlAgents,
 	mlxim,
 	multimolecule,
@@ -87,6 +88,29 @@ output = llm(
 print(output)`);
 	});
 
+	describe("microduck", () => {
+		it("uses an explicit slot tag even when the repo name and other tags suggest walking", () => {
+			const model: ModelData = {
+				id: "user/microduck-walk",
+				tags: ["microduck", "walk", "microduck-slot:stand", "microduck-slot:stand"],
+				inference: "",
+			};
+
+			expect(microduck(model)).toEqual(["sudo robotctl policy load stand user/microduck-walk"]);
+		});
+
+		it.each([
+			{ scenario: "missing slot tags", tags: ["microduck", "walk"] },
+			{ scenario: "unsupported slot tags", tags: ["microduck-slot:bow"] },
+			{ scenario: "conflicting slot tags", tags: ["microduck-slot:walk", "microduck-slot:stand"] },
+		])("requires a slot choice for $scenario", ({ tags }) => {
+			const snippet = microduck({ id: "user/microduck-walk", tags, inference: "" }).join("\n");
+
+			expect(snippet).toContain("# Replace SLOT with the slot specified in the model card");
+			expect(snippet).toContain("sudo robotctl policy load SLOT user/microduck-walk");
+		});
+	});
+
 	// a repo owner can put anything in config.json / the model card, so every interpolated value
 	// must either be escaped (string literals) or rejected (bare identifiers)
 	describe("repo-controlled values are not injectable", () => {
@@ -96,6 +120,7 @@ print(output)`);
 			["adapters", adapters, { config: { adapter_transformers: { model_name: PAYLOAD } } }],
 			["diffusers", diffusers, { tags: ["lora"], cardData: { base_model: PAYLOAD, instance_prompt: PAYLOAD } }],
 			["keras_hub", keras_hub, { config: { keras_hub: { tasks: [PAYLOAD, "TextClassifier"] } } }],
+			["microduck", microduck, { tags: [`microduck-slot:${PAYLOAD}`] }],
 			["paddlenlp", paddlenlp, { config: { architectures: [PAYLOAD] } }],
 			["peft", peft, { config: { peft: { base_model_name_or_path: PAYLOAD, task_type: "CAUSAL_LM" } } }],
 			["multimolecule", multimolecule, { widgetData: [{ text: PAYLOAD }] }],
