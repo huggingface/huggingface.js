@@ -5,6 +5,7 @@ import {
 	diffusers,
 	keras_hub,
 	llama_cpp_python,
+	mtplx,
 	multimolecule,
 	paddlenlp,
 	peft,
@@ -99,5 +100,24 @@ print(output)`);
 			};
 			expect(keras_hub(model as ModelData).join("\n")).toContain("keras_hub.models.TextClassifier.from_preset");
 		});
+	});
+
+	it("mtplx", async () => {
+		const model: ModelData = {
+			id: "Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed",
+			pipeline_tag: "text-generation",
+			tags: ["mlx", "mtplx", "conversational"],
+			inference: "",
+		};
+		const snippet = mtplx(model);
+
+		expect(snippet.join("\n")).toEqual(`# Install MTPLX with Homebrew, or download the Mac app from https://mtplx.com
+brew install youssofal/mtplx/mtplx
+
+# Download the pack if needed and start a chat in the terminal
+mtplx start cli --model "Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed" --download
+
+# Or serve an OpenAI and Anthropic compatible API on http://127.0.0.1:8000
+mtplx serve --model "Youssofal/Qwen3.8-27B-MTPLX-Optimized-Speed" --download`);
 	});
 });
