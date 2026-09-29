@@ -144,6 +144,10 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		txt: "1-bit quantization with fp16 block scale. Each block has 128 weights, where 0 represents -block_scale and 1 represents +block_scale.",
 		src_url: "https://github.com/ggml-org/llama.cpp/pull/21273",
 	},
+	[GGMLQuantizationType.Q2_0]: {
+		txt: "2-bit quantization with fp16 block scale. Each block has 64 weights, where {0, 1, 2, 3} represents {-1, 0, +1, +2} * block_scale, resulting in 2.25 bits-per-weight.",
+		src_url: "https://github.com/ggml-org/llama.cpp/pull/24448",
+	},
 };
 
 const QK_K = 256;
@@ -161,7 +165,7 @@ export const GGML_QUANT_SIZES = {
 	[GGMLQuantizationType.Q5_0]: calcBPW(32, 2 + 4 + 16),
 	[GGMLQuantizationType.Q5_1]: calcBPW(32, 2 + 2 + 4 + 16),
 	[GGMLQuantizationType.Q8_0]: calcBPW(32, 2 + 32),
-	[GGMLQuantizationType.Q8_1]: calcBPW(32, 4 + 4 + 32),
+	[GGMLQuantizationType.Q8_1]: calcBPW(32, 2 + 2 + 32),
 	[GGMLQuantizationType.Q2_K]: calcBPW(256, 2 + 2 + QK_K / 16 + QK_K / 4),
 	[GGMLQuantizationType.Q3_K]: calcBPW(256, 2 + QK_K / 4 + QK_K / 8 + 12),
 	[GGMLQuantizationType.Q4_K]: calcBPW(256, 2 + 2 + QK_K / 2 + 12),
@@ -188,4 +192,5 @@ export const GGML_QUANT_SIZES = {
 	[GGMLQuantizationType.MXFP4]: calcBPW(32, 1 + 16),
 	[GGMLQuantizationType.NVFP4]: calcBPW(64, 4 + 32),
 	[GGMLQuantizationType.Q1_0]: calcBPW(128, 2 + 16),
+	[GGMLQuantizationType.Q2_0]: calcBPW(64, 2 + 16),
 };

@@ -91,7 +91,7 @@ export async function* textGenerationStream(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options,
 ): AsyncGenerator<TextGenerationStreamOutput> {
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 	const providerHelper = getProviderHelper(provider, "text-generation");
 	yield* innerStreamingRequest<TextGenerationStreamOutput>(args, providerHelper, {
 		...options,

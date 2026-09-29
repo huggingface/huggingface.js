@@ -18,6 +18,7 @@ export default defineConfig({
 			"src/utils/shardParser.spec.ts",
 			// Because vi.mock is not supported in browser mode
 			"src/utils/uploadShards.spec.ts",
+			"src/utils/sha256-abort.spec.ts",
 		],
 	},
 });

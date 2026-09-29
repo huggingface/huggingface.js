@@ -7,10 +7,8 @@ const INFERENCE_PROVIDERS = [
 	"fal-ai",
 	"fireworks-ai",
 	"hf-inference",
-	"hyperbolic",
 	"ovhcloud",
 	"replicate",
-	"sambanova",
 	"together",
 ] as const;
 

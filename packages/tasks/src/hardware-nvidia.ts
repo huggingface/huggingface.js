@@ -115,6 +115,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 3_999,
 		power: 140,
 		releaseYear: 2025,
+		aliases: ["DGX Spark"],
 	},
 	"RTX PRO 6000 WS": {
 		tflops: 126,

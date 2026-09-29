@@ -2,6 +2,7 @@ import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { WebBlob } from "../utils/WebBlob";
 import { XetBlob } from "../utils/XetBlob";
+import type { ParallelDownloadOptions } from "../utils/XetBlob";
 import type { XetReadToken } from "../utils/XetBlob";
 import type { FileDownloadInfoOutput } from "./file-download-info";
 import { fileDownloadInfo } from "./file-download-info";
@@ -43,6 +44,15 @@ export async function downloadFile(
 		 * Can save an http request if provided
 		 */
 		downloadInfo?: FileDownloadInfoOutput;
+		/**
+		 * For xet files, fetch data with multiple parallel requests, with adaptive
+		 * concurrency and a bounded memory budget. Ignored for non-xet downloads.
+		 *
+		 * Pass `false` to download serially, or an object to tune the ceiling/budget.
+		 *
+		 * @default true
+		 */
+		parallelDownloads?: boolean | ParallelDownloadOptions;
 	} & Partial<CredentialsParams>,
 ): Promise<Blob | null> {
 	const accessToken = checkCredentials(params);
@@ -67,10 +77,12 @@ export async function downloadFile(
 		return new XetBlob({
 			refreshUrl: info.xet.refreshUrl.href,
 			reconstructionUrl: info.xet.reconstructionUrl.href,
+			hash: info.xet.hash,
 			fetch: params.fetch,
 			accessToken,
 			size: info.size,
 			readToken: typeof params.xet === "object" ? params.xet.readToken : undefined,
+			parallelDownloads: params.parallelDownloads,
 		});
 	}
 

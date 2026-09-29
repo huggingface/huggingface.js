@@ -1,11 +1,19 @@
-import { assert, it, describe } from "vitest";
+import { assert, expect, it, describe } from "vitest";
 import {
 	parseSafetensorsMetadata,
 	parseSafetensorsShardFilename,
 	globMatch,
 	isQuantizedTensor,
 	matchesCompressedTensorsTarget,
+	computeNumOfParamsByDtypeSingleFile,
+	getQuantizationMultiplier,
+	validateTensorEntry,
+	parseTotalParameters,
+	assertSafeShardFilename,
+	encodeShardFilename,
+	SafetensorParseError,
 } from "./parse-safetensors-metadata";
+import type { Dtype, MlxQuantizationConfig, TensorInfo, SafetensorsFileHeader } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -102,6 +110,37 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.filepaths, ["unet/diffusion_pytorch_model.safetensors"]);
 	});
 
+	it("resolves diffusers weights from the unet/ subfolder via the library hint (no path given)", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "CompVis/stable-diffusion-v1-4",
+			computeParametersCount: true,
+			library: "diffusers",
+			revision: "133a221b8aa7292a167afc5127cb63fb5005638b",
+		});
+
+		assert(!parse.sharded);
+		assert.deepStrictEqual(parse.filepaths, ["unet/diffusion_pytorch_model.safetensors"]);
+		assert.deepStrictEqual(parse.parameterCount, { F32: 859_520_964 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 859_520_964);
+	});
+
+	it("resolves sharded diffusers weights from the transformer/ subfolder via the library hint", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "Qwen/Qwen-Image",
+			computeParametersCount: true,
+			library: "diffusers",
+			revision: "75e0b4be04f60ec59a75f475837eced720f823b6",
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(parse.filepaths[0], "transformer/diffusion_pytorch_model.safetensors.index.json");
+		assert.ok(parse.filepaths.includes("transformer/diffusion_pytorch_model-00001-of-00009.safetensors"));
+		assert.strictEqual(parse.filepaths.length, 10); // 1 index + 9 shards
+		// Qwen-Image's diffusion transformer is ~20.4B params
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 20_430_401_088 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 20_430_401_088);
+	});
+
 	it("fetch info for sharded with file path", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "Alignment-Lab-AI/ALAI-gemma-7b",
@@ -152,6 +191,361 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.parameterTotal, 109_482_240);
 	});
 
+	describe("malformed headers (crafted parameter counts)", () => {
+		/**
+		 * Builds the bytes of a minimal safetensors file from a JSON header plus a data buffer,
+		 * and a fetch that serves it (including the `Range: bytes=0-0` probe `WebBlob.create`
+		 * uses to learn the file size).
+		 */
+		const fetchForFile = (
+			header: Record<string, unknown>,
+			dataBytes = 0,
+			config?: Record<string, unknown>,
+		): typeof fetch => {
+			const headerBytes = new TextEncoder().encode(JSON.stringify(header));
+			const file = new Uint8Array(8 + headerBytes.length + dataBytes);
+			new DataView(file.buffer).setBigUint64(0, BigInt(headerBytes.length), true);
+			file.set(headerBytes, 8);
+			const configFile = config ? new TextEncoder().encode(JSON.stringify(config)) : undefined;
+			return (async (input: RequestInfo | URL, init?: RequestInit) => {
+				const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+				const resource = url.endsWith(".safetensors") ? file : url.endsWith("config.json") ? configFile : undefined;
+				if (!resource) {
+					// The sharded index, existence probes... — `downloadFile` treats a 404 as "not
+					// found" only when the Hub's X-Error-Code says so.
+					return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
+				}
+				const range = new Headers(init?.headers).get("range");
+				if (range?.startsWith("bytes=")) {
+					const [start, endRaw] = range.slice("bytes=".length).split("-");
+					const startByte = Number(start);
+					const endByte = endRaw === "" ? resource.length - 1 : Math.min(Number(endRaw), resource.length - 1);
+					return new Response(resource.slice(startByte, endByte + 1), {
+						status: 206,
+						headers: {
+							"content-range": `bytes ${startByte}-${endByte}/${resource.length}`,
+							etag: '"hermetic-test-file"',
+						},
+					});
+				}
+				return new Response(resource, { status: 200, headers: { etag: '"hermetic-test-file"' } });
+			}) as typeof fetch;
+		};
+
+		it("rejects absurd tensor dims (the 1.8e308-param single-file PoC shape)", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt" },
+					"model.qmoe.experts": {
+						dtype: "F4",
+						shape: [4611686018427387904, 4611686018427387904, 4294967296],
+						data_offsets: [0, 4],
+					},
+					"model.qmoe.router": { dtype: "F4", shape: [24, 1024, 962], data_offsets: [4, 8] },
+				},
+				8,
+			);
+
+			const err = await parseSafetensorsMetadata({
+				repo: "some-user/fake-huge-model",
+				computeParametersCount: true,
+				fetch,
+			}).catch((err: unknown) => err);
+
+			assert(err instanceof SafetensorParseError);
+			assert.strictEqual(err.name, "SafetensorParseError");
+			assert.match(err.message, /exceeds the maximum allowed/);
+		});
+
+		it("rejects plausible dims whose data_offsets exceed the file size (the fake 16T shard shape)", async () => {
+			// 673-byte shard claiming 10 tensors of [65536, 65536] F4 spanning 2GB each.
+			const fetch = fetchForFile(
+				Object.fromEntries([
+					["__metadata__", { format: "pt" }],
+					...Array.from({ length: 10 }, (_, i) => [
+						`model.experts.${i}.w`,
+						{ dtype: "F4", shape: [65536, 65536], data_offsets: [i * 2147483648, (i + 1) * 2147483648] },
+					]),
+				]),
+				0,
+			);
+
+			await expect(
+				parseSafetensorsMetadata({
+					repo: "some-user/fake-16t-model",
+					computeParametersCount: true,
+					fetch,
+				}),
+			).rejects.toThrow(/exceeds the file size/);
+		});
+
+		it("caps a self-reported total_parameters above the computed count", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", total_parameters: "999000000000" },
+					weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] },
+				},
+				800,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/inflated-metadata-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { F32: 200 });
+			assert.strictEqual(parse.parameterTotal, 200);
+		});
+
+		it("keeps trusting a well-formed file and its metadata shortcut", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", total_parameters: "200" },
+					weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] },
+				},
+				800,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/well-formed-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { F32: 200 });
+			assert.strictEqual(parse.parameterTotal, 200);
+		});
+
+		it.each([
+			{
+				location: "quantization_config",
+				config: { quantization_config: { quant_method: "fp8", expert_dtype: "fp4" } },
+			},
+			{
+				location: "text_config.quantization_config",
+				config: { text_config: { quantization_config: { quant_method: "fp8", expert_dtype: "fp4" } } },
+			},
+			{
+				location: "the model config",
+				config: { expert_dtype: "fp4", quantization_config: { quant_method: "fp8" } },
+			},
+			{
+				location: "text_config",
+				config: { text_config: { expert_dtype: "fp4", quantization_config: { quant_method: "fp8" } } },
+			},
+		])("reads expert_dtype from $location when counting packed weights", async ({ config }) => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", total_parameters: "30" },
+					"model.layers.0.mlp.experts.0.up_proj.weight": {
+						dtype: "I8",
+						shape: [2, 4],
+						data_offsets: [0, 8],
+					},
+					"model.layers.0.self_attn.q_proj.weight": {
+						dtype: "F8_E4M3",
+						shape: [2, 4],
+						data_offsets: [8, 16],
+					},
+					"model.layers.0.mlp.experts.0.up_proj.weight_scale_inv": {
+						dtype: "F8_E8M0",
+						shape: [1],
+						data_offsets: [16, 17],
+					},
+					"model.engram.embedding.weight": { dtype: "I8", shape: [2, 2], data_offsets: [17, 21] },
+					"model.norm.weight": { dtype: "BF16", shape: [2], data_offsets: [21, 25] },
+				},
+				25,
+				config,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/fp8-model-with-fp4-experts",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			// Only the packed experts expand: 8 bytes hold 16 FP4 parameters. The Engram
+			// embedding and attention retain their original counts, and block scales are excluded.
+			assert.deepStrictEqual(parse.parameterCount, { I8: 20, F8_E4M3: 8, BF16: 2 });
+			assert.strictEqual(parse.parameterTotal, 30);
+		});
+
+		it("reads store_dtype from quantization_config when counting packed U8 experts", async () => {
+			// MiMo-V2.6: `quant_method: "fp8"` for the dense layers, but the routed experts are
+			// `store_dtype: "mxfp4"` — two weights per U8 byte, with U8 `weight_scale` blocks beside them.
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", total_parameters: "30" },
+					"model.layers.1.mlp.experts.0.gate_proj.weight": { dtype: "U8", shape: [2, 4], data_offsets: [0, 8] },
+					"model.layers.1.mlp.experts.0.gate_proj.weight_scale": { dtype: "U8", shape: [2, 1], data_offsets: [8, 10] },
+					"model.layers.0.mlp.gate_proj.weight": { dtype: "F8_E4M3", shape: [2, 4], data_offsets: [10, 18] },
+					"model.layers.0.mlp.gate_proj.weight_scale_inv": { dtype: "F32", shape: [1], data_offsets: [18, 22] },
+					"model.layers.1.self_attn.o_proj.weight": { dtype: "BF16", shape: [2, 2], data_offsets: [22, 30] },
+					"model.layers.1.mlp.gate.e_score_correction_bias": { dtype: "F32", shape: [2], data_offsets: [30, 38] },
+				},
+				38,
+				{
+					quantization_config: {
+						activation_scheme: "dynamic",
+						fmt: "e4m3",
+						mxfp4_block_size: 32,
+						quant_method: "fp8",
+						store_dtype: "mxfp4",
+						weight_block_size: [128, 128],
+					},
+				},
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/fp8-model-with-mxfp4-experts",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			// Only the packed experts expand: 8 bytes hold 16 MXFP4 parameters. The dense fp8 layer and
+			// attention keep their counts, the router bias is a real F32 parameter, and both kinds of
+			// block scales are excluded.
+			assert.deepStrictEqual(parse.parameterCount, { U8: 16, F8_E4M3: 8, BF16: 4, F32: 2 });
+			assert.strictEqual(parse.parameterTotal, 30);
+		});
+
+		it("honors total_parameters for packed MLX weights without weakening the metadata cap", async () => {
+			const quantization = { group_size: 64, bits: 8, mode: "affine" };
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "mlx", total_parameters: "210" },
+					"quantized.weight": { dtype: "U32", shape: [10, 5], data_offsets: [0, 200] },
+					"quantized.scales": { dtype: "BF16", shape: [10, 2], data_offsets: [200, 240] },
+					"quantized.biases": { dtype: "BF16", shape: [10, 2], data_offsets: [240, 280] },
+					"norm.weight": { dtype: "BF16", shape: [10], data_offsets: [280, 300] },
+				},
+				300,
+				{ quantization, quantization_config: quantization },
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/packed-mlx-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			// 50 packed U32 containers hold 200 8-bit weights. Plural scales/biases are
+			// quantization state; the BF16 norm remains a real parameter.
+			assert.deepStrictEqual(parse.parameterCount, { U32: 200, BF16: 10 });
+			assert.strictEqual(parse.parameterTotal, 210);
+		});
+
+		it("caps inflated total_parameters at the MLX-aware logical count", async () => {
+			const quantization = { group_size: 64, bits: 8, mode: "affine" };
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "mlx", total_parameters: "999000000000" },
+					"quantized.weight": { dtype: "U32", shape: [10, 5], data_offsets: [0, 200] },
+					"quantized.scales": { dtype: "BF16", shape: [10, 2], data_offsets: [200, 240] },
+					"quantized.biases": { dtype: "BF16", shape: [10, 2], data_offsets: [240, 280] },
+					"norm.weight": { dtype: "BF16", shape: [10], data_offsets: [280, 300] },
+				},
+				300,
+				{ quantization, quantization_config: quantization },
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/inflated-packed-mlx-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { U32: 200, BF16: 10 });
+			assert.strictEqual(parse.parameterTotal, 210);
+		});
+
+		it("does not relabel another top-level quantizer as MLX", async () => {
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt" },
+					"quantized.qweight": { dtype: "I32", shape: [10], data_offsets: [0, 40] },
+					"quantized.scales": { dtype: "F16", shape: [2], data_offsets: [40, 44] },
+				},
+				44,
+				{
+					quantization: { quant_method: "gptq", bits: 2, group_size: 64, mode: "affine" },
+					quantization_config: { quant_method: "gptq", bits: 4 },
+				},
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/gptq-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { I32: 80 });
+		});
+
+		it("accepts valid per-module MLX overrides when the top-level tuple is only a placeholder", async () => {
+			const quantization = {
+				group_size: 16,
+				bits: 4,
+				mode: "affine",
+				nvfp4_layer: { group_size: 16, bits: 4, mode: "nvfp4" },
+				affine_layer: { group_size: 64, bits: 8, mode: "affine" },
+			};
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "mlx" },
+					"nvfp4_layer.weight": { dtype: "U32", shape: [12], data_offsets: [0, 48] },
+					"nvfp4_layer.scales": { dtype: "U8", shape: [3], data_offsets: [48, 51] },
+					"affine_layer.weight": { dtype: "U32", shape: [24], data_offsets: [51, 147] },
+					"affine_layer.scales": { dtype: "BF16", shape: [3], data_offsets: [147, 153] },
+					"affine_layer.biases": { dtype: "BF16", shape: [3], data_offsets: [153, 159] },
+				},
+				159,
+				{ quantization, quantization_config: quantization },
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/mixed-mlx-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.deepStrictEqual(parse.parameterCount, { U32: 192 });
+		});
+
+		it("skips the offsets check (rather than guessing) when the file size is unknown", () => {
+			// A custom fetch whose returned blob doesn't report a size leaves the total unknown;
+			// validation must not block the parse on a guess in that case.
+			expect(() =>
+				validateTensorEntry(
+					"model.safetensors",
+					"model.experts.0.w",
+					{ dtype: "F4", shape: [65536, 65536], data_offsets: [0, 2147483648] },
+					undefined,
+				),
+			).not.toThrow();
+		});
+
+		it("parseTotalParameters only caps at the computed count", () => {
+			// inflated -> capped; honest -> untouched; missing computed count -> taken as-is
+			assert.strictEqual(parseTotalParameters("999000000000", 200), 200);
+			assert.strictEqual(parseTotalParameters("200", 200), 200);
+			assert.strictEqual(parseTotalParameters(150, 200), 150);
+			assert.strictEqual(parseTotalParameters("999000000000", undefined), 999000000000);
+			assert.strictEqual(parseTotalParameters("not-a-number", 200), undefined);
+			assert.strictEqual(parseTotalParameters(undefined, 200), undefined);
+		});
+	});
+
 	it("should detect sharded safetensors filename", async () => {
 		const safetensorsFilename = "model_00005-of-00072.safetensors"; // https://huggingface.co/bigscience/bloom/blob/4d8e28c67403974b0f17a4ac5992e4ba0b0dbb6f/model_00005-of-00072.safetensors
 		const safetensorsShardFileInfo = parseSafetensorsShardFilename(safetensorsFilename);
@@ -172,68 +566,194 @@ describe("parseSafetensorsMetadata", () => {
 		assert.strictEqual(safetensorsShardFileInfo?.total, "000163");
 	});
 
-	it("should support sub-byte data types", async () => {
-		const newDataTypes: Array<"F4" | "F6_E2M3" | "F6_E3M2" | "E8M0"> = ["F4", "F6_E2M3", "F6_E3M2", "E8M0"];
+	describe("sub-byte data types", () => {
+		const tensor = (dtype: Dtype, shape: number[]): TensorInfo => ({ dtype, shape, data_offsets: [0, 0] });
+		/// `__metadata__` is always present in a real header and must never be counted as a tensor.
+		const header = (tensors: Record<string, TensorInfo>): SafetensorsFileHeader => {
+			const built: SafetensorsFileHeader = { ...tensors };
+			built.__metadata__ = { format: "pt" };
+			return built;
+		};
 
-		for (const dtype of newDataTypes) {
-			const tensorInfo = {
-				dtype,
-				shape: [1, 2],
-				data_offsets: [0, 1] as [number, number],
-			};
+		it("counts sub-byte weight dtypes at face value", () => {
+			// These hold weights directly rather than being packed into an integer container, so one
+			// element is one parameter.
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				header({
+					tensor_f4: tensor("F4", [10, 20]),
+					tensor_fp4: tensor("FP4", [100, 200]),
+					tensor_f6_e2m3: tensor("F6_E2M3", [5, 10]),
+					tensor_f6_e3m2: tensor("F6_E3M2", [8, 12]),
+				}),
+			);
 
-			assert.ok(typeof tensorInfo.dtype === "string");
-			assert.ok(["F4", "F6_E2M3", "F6_E3M2", "E8M0"].includes(tensorInfo.dtype));
-		}
+			assert.deepStrictEqual(parameterCount, { F4: 200, FP4: 20_000, F6_E2M3: 50, F6_E3M2: 96 });
+		});
+
+		it("never counts exponent-only dtypes, even with no quantization_config", () => {
+			// E8M0 / UE8 / F8_E8M0 exist solely to hold MX-style block scales, so they are never
+			// parameters — and a model can ship them without declaring a quantization_config at all.
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				header({
+					weights: tensor("F4", [10, 20]),
+					scales_e8m0: tensor("E8M0", [4, 6]),
+					scales_ue8: tensor("UE8", [50, 100]),
+					scales_f8_e8m0: tensor("F8_E8M0", [7, 8]),
+				}),
+			);
+
+			assert.deepStrictEqual(parameterCount, { F4: 200 });
+		});
+
+		it("skips scalar tensors", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				header({
+					scalar: tensor("F32", []),
+					real: tensor("F32", [3, 4]),
+				}),
+			);
+
+			assert.deepStrictEqual(parameterCount, { F32: 12 });
+		});
 	});
 
-	it("should handle parameter counting with sub-byte data types", () => {
-		const mockHeader = {
-			tensor_f4: {
-				dtype: "F4" as const,
-				shape: [10, 20],
-				data_offsets: [0, 100] as [number, number],
-			},
-			tensor_f6_e2m3: {
-				dtype: "F6_E2M3" as const,
-				shape: [5, 10],
-				data_offsets: [100, 150] as [number, number],
-			},
-			tensor_f6_e3m2: {
-				dtype: "F6_E3M2" as const,
-				shape: [8, 12],
-				data_offsets: [150, 246] as [number, number],
-			},
-			tensor_e8m0: {
-				dtype: "E8M0" as const,
-				shape: [4, 6],
-				data_offsets: [246, 270] as [number, number],
-			},
-			__metadata__: { format: "pt" },
-		};
+	describe("MLX packed weights", () => {
+		const tensor = (dtype: Dtype, shape: number[]): TensorInfo => ({ dtype, shape, data_offsets: [0, 0] });
 
-		const computeNumOfParamsByDtypeSingleFile = (header: typeof mockHeader) => {
-			const counter: Partial<Record<string, number>> = {};
-			const tensors = Object.fromEntries(Object.entries(header).filter(([key]) => key !== "__metadata__"));
+		for (const [bits, storedElements] of [
+			[4, 12],
+			[6, 18],
+			[8, 24],
+		] as const) {
+			it(`reports the same logical count for ${bits}-bit U32 weights`, () => {
+				const parameterCount = computeNumOfParamsByDtypeSingleFile(
+					{
+						"quantized.weight": tensor("U32", [storedElements]),
+						"quantized.scales": tensor("BF16", [3]),
+						"quantized.biases": tensor("BF16", [3]),
+						"quantized.bias": tensor("BF16", [2]),
+						"dense.weight": tensor("BF16", [5]),
+					},
+					{ quant_method: "mlx", mode: "affine", bits, group_size: 64 },
+				);
 
-			for (const [, v] of Object.entries(tensors) as [
-				string,
-				{ dtype: string; shape: number[]; data_offsets: [number, number] },
-			][]) {
-				if (v.shape.length === 0) {
-					continue;
-				}
-				counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a: number, b: number) => a * b);
-			}
-			return counter;
-		};
+				// Singular `.bias` is learned; only MLX's plural `.biases` is quantization state.
+				assert.deepStrictEqual(parameterCount, { U32: 96, BF16: 7 });
+			});
+		}
 
-		const parameterCount = computeNumOfParamsByDtypeSingleFile(mockHeader);
+		it("uses per-module bit widths and leaves explicitly unquantized modules alone", () => {
+			const quantConfig = {
+				quant_method: "mlx",
+				mode: "affine",
+				bits: 8,
+				group_size: 64,
+				four_bit: { bits: 4 },
+				dense: false,
+			};
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"four_bit.weight": tensor("U32", [12]),
+					"four_bit.scales": tensor("BF16", [1]),
+					"four_bit.biases": tensor("BF16", [1]),
+					"dense.weight": tensor("U32", [12]),
+				},
+				quantConfig,
+			);
 
-		assert.strictEqual(parameterCount.F4, 200);
-		assert.strictEqual(parameterCount.F6_E2M3, 50);
-		assert.strictEqual(parameterCount.F6_E3M2, 96);
-		assert.strictEqual(parameterCount.E8M0, 24);
+			assert.deepStrictEqual(parameterCount, { U32: 108 });
+		});
+
+		it("applies MLX defaults independently inside partial per-module overrides", () => {
+			const quantConfig: MlxQuantizationConfig = {
+				quant_method: "mlx",
+				mode: "affine",
+				bits: 8,
+				group_size: 64,
+				partial_affine: { group_size: 32 },
+				partial_mxfp4: { mode: "mxfp4" },
+			};
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"partial_affine.weight": tensor("U32", [12]),
+					"partial_affine.scales": tensor("BF16", [1]),
+					"partial_affine.biases": tensor("BF16", [1]),
+					"partial_mxfp4.weight": tensor("U32", [12]),
+					"partial_mxfp4.scales": tensor("U8", [1]),
+				},
+				quantConfig,
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 192 });
+		});
+
+		it("does not trust explicit overrides without their serialized quantization state", () => {
+			const quantConfig: MlxQuantizationConfig = {
+				quant_method: "mlx",
+				mode: "affine",
+				bits: 4,
+				group_size: 64,
+				quantized: { bits: 4 },
+			};
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{ "quantized.weight": tensor("U32", [12]) },
+				quantConfig,
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 12 });
+		});
+
+		it("keeps orphan plural tensors that do not belong to a packed module", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"quantized.weight": tensor("U32", [12]),
+					"quantized.scales": tensor("BF16", [3]),
+					"quantized.biases": tensor("BF16", [3]),
+					"learned.scales": tensor("BF16", [4]),
+					"learned.biases": tensor("BF16", [5]),
+				},
+				{ quant_method: "mlx", mode: "affine", bits: 4, group_size: 64 },
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 96, BF16: 9 });
+		});
+
+		it("only treats plural biases as affine quantization state", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"quantized.weight": tensor("U32", [12]),
+					"quantized.scales": tensor("U8", [3]),
+					"quantized.biases": tensor("BF16", [4]),
+				},
+				{ quant_method: "mlx", mode: "mxfp4", bits: 4, group_size: 32 },
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 96, BF16: 4 });
+		});
+
+		it("does not inflate weights for unsupported bit widths", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"quantized.weight": tensor("U32", [12]),
+					"quantized.scales": tensor("BF16", [3]),
+				},
+				{ quant_method: "mlx", mode: "affine", bits: 1, group_size: 64 },
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 12, BF16: 3 });
+		});
+
+		it("ignores malformed non-string modes", () => {
+			const parameterCount = computeNumOfParamsByDtypeSingleFile(
+				{
+					"quantized.weight": tensor("U32", [12]),
+					"quantized.scales": tensor("BF16", [3]),
+				},
+				{ quant_method: "mlx", mode: 1 as unknown as string, bits: 4, group_size: 64 },
+			);
+
+			assert.deepStrictEqual(parameterCount, { U32: 12, BF16: 3 });
+		});
 	});
 
 	it("fetch info for GPTQ quantized 8B model", async () => {
@@ -275,61 +795,197 @@ describe("parseSafetensorsMetadata", () => {
 
 		const totalParams = parse.parameterTotal || sum(Object.values(parse.parameterCount));
 
-		assert.strictEqual(totalParams, 21_511_953_984); // 21.5B
-
-		assert.ok(parse.parameterCount.BF16 && parse.parameterCount.U8);
+		// 20.9B, matching OpenAI's published figure. Previously 21_511_953_984, which counted the
+		// 597_196_800 `..._scales` UE8M0 block exponents as parameters (+2.86%).
+		assert.strictEqual(totalParams, 20_914_757_184);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 1_804_459_584, U8: 19_110_297_600 });
 
 		assert.strictEqual(Object.keys(parse.headers).length, 3);
 	});
 
-	it("should support FP4 and UE8 data types in type system", () => {
-		const newDataTypes: Array<"FP4" | "UE8"> = ["FP4", "UE8"];
+	it("excludes mxfp4 block scales stored as `..._scales` (openai/gpt-oss-120b)", async () => {
+		// gpt-oss joins the scales suffix with an underscore rather than a dot, so it slips past the
+		// dotted auxiliary-suffix list. Counting the 3_583_180_800 U8 scales reported 120_412_337_472
+		// (120.4B) for a model OpenAI documents as 116.8B / "117B".
+		const parse = await parseSafetensorsMetadata({
+			repo: "openai/gpt-oss-120b",
+			revision: "b5c939de8f754692c1647ca79fbf85e8c1e70f8a",
+			computeParametersCount: true,
+		});
 
-		for (const dtype of newDataTypes) {
-			const tensorInfo = {
-				dtype,
-				shape: [1, 2],
-				data_offsets: [0, 1] as [number, number],
-			};
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 15);
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 2_167_371_072,
+			U8: 114_661_785_600, // 57_330_892_800 packed bytes x 2, scales excluded
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 116_829_156_672);
+	});
 
-			assert.ok(typeof tensorInfo.dtype === "string");
-			assert.ok(["FP4", "UE8"].includes(tensorInfo.dtype));
-		}
+	it("excludes bitsandbytes double-quantization state (unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit)", async () => {
+		// `absmax` shares the weights' U8 container, so it was counted *and* doubled by the 4-bit
+		// packing factor — the same double error `weight_shape` had. Reported 8_248_929_342 for a
+		// model whose true size is Llama-3.1-8B's 8_030_261_248 (+2.72%).
+		const parse = await parseSafetensorsMetadata({
+			repo: "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit",
+			revision: "f15c379fb32bb402fa06a7ae9aecb1febf4b79ec",
+			computeParametersCount: true,
+		});
 
-		const mockHeader = {
-			tensor_fp4: {
-				dtype: "FP4" as const,
-				shape: [100, 200],
-				data_offsets: [0, 5000] as [number, number],
-			},
-			tensor_ue8: {
-				dtype: "UE8" as const,
-				shape: [50, 100],
-				data_offsets: [5000, 10000] as [number, number],
-			},
-			__metadata__: { format: "pt" },
-		};
+		assert(!parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 1_050_939_392,
+			U8: 6_979_321_856, // 3_489_660_928 packed bytes x 2
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 8_030_261_248);
+		// the nested quant state (`nested_absmax` / `nested_quant_map` / `quant_map`) was the whole
+		// of the previously reported F32 count, so the dtype drops out entirely
+		assert.strictEqual(parse.parameterCount.F32, undefined);
+	});
 
-		const computeNumOfParamsByDtypeSingleFile = (header: typeof mockHeader) => {
-			const counter: Partial<Record<string, number>> = {};
-			const tensors = Object.fromEntries(Object.entries(header).filter(([key]) => key !== "__metadata__"));
+	it("excludes compressed-tensors `weight_g_idx` actorder indices (RedHatAI/Llama-3.3-70B-Instruct-quantized.w4a16)", async () => {
+		// `actorder: "group"` makes the pack-quantized compressor emit one I32 permutation index per
+		// input column. Being an integer container it was counted *and* multiplied by the packing
+		// factor: 6_225_920 indices x 8 = 49_807_360 phantom parameters.
+		const parse = await parseSafetensorsMetadata({
+			repo: "RedHatAI/Llama-3.3-70B-Instruct-quantized.w4a16",
+			revision: "7177921dd02c6436cc78d40861f497df2f575201",
+			computeParametersCount: true,
+		});
 
-			for (const [, v] of Object.entries(tensors) as [
-				string,
-				{ dtype: string; shape: number[]; data_offsets: [number, number] },
-			][]) {
-				if (v.shape.length === 0) {
-					continue;
-				}
-				counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a: number, b: number) => a * b);
-			}
-			return counter;
-		};
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 8);
+		assert.deepStrictEqual(parse.parameterCount, {
+			I32: 68_451_041_280,
+			BF16: 2_102_665_216,
+		});
+		// exactly the unquantized meta-llama/Llama-3.3-70B-Instruct parameter count
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 70_553_706_496);
+		// `weight_shape` is `torch.tensor(shape)`, i.e. I64 here rather than I32 — also excluded
+		assert.strictEqual(parse.parameterCount.I64, undefined);
+	});
 
-		const parameterCount = computeNumOfParamsByDtypeSingleFile(mockHeader);
+	describe("getQuantizationMultiplier", () => {
+		const EXPERT = "model.layers.0.ffn.experts.3.w1.weight";
 
-		assert.strictEqual(parameterCount.FP4, 20000);
-		assert.strictEqual(parameterCount.UE8, 5000);
+		describe("fp8 with expert_dtype", () => {
+			const fp8 = { quant_method: "fp8" };
+
+			it("packs routed experts at the declared expert width", () => {
+				// DeepSeek-V4-Pro: fp8 attention, fp4 experts packed two-per-byte in I8
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, "fp4"), 2);
+			});
+
+			it("reads the expert width from quantization_config for direct callers", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", { ...fp8, expert_dtype: "fp4" }), 2);
+			});
+
+			it("prefers the quantizer's expert width over the legacy model-level fallback", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", { ...fp8, expert_dtype: "fp8" }, "fp4"), 1);
+			});
+
+			it.each([4, {}, null])("ignores a malformed expert_dtype (%j)", (expertDtype) => {
+				// Config is parsed from untrusted JSON, which may not match the TypeScript interface.
+				assert.strictEqual(
+					getQuantizationMultiplier(EXPERT, "I8", { ...fp8, expert_dtype: expertDtype as unknown as string }),
+					1,
+				);
+			});
+
+			it("leaves shared experts alone — they're dense, not routed", () => {
+				const shared = "model.layers.0.ffn.shared_experts.w1.weight";
+				assert.strictEqual(getQuantizationMultiplier(shared, "I8", fp8, "fp4"), 1);
+			});
+
+			it("does not apply the expert width to non-expert integer tensors", () => {
+				// The bug this guards: `expert_dtype` used to apply to every integer container, so a
+				// routing table or other bookkeeping was inflated by the packing factor — 8x for I32.
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.ffn.gate.tid2eid", "I32", fp8, "fp4"), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.attn.wkv.weight", "I8", fp8, "fp4"), 1);
+			});
+
+			it("leaves fp8 experts unpacked — one value per byte", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "F8_E4M3", fp8, "fp4"), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, "fp8"), 1);
+			});
+
+			it("is a no-op without expert_dtype", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", fp8, undefined), 1);
+			});
+		});
+
+		describe("fp8 with store_dtype", () => {
+			// MiMo-V2.6 spells the packed-expert declaration `store_dtype` and uses U8 containers.
+			const mimo = { quant_method: "fp8", store_dtype: "mxfp4" };
+
+			it("packs routed experts two-per-byte in either 8-bit container", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", mimo), 2);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", mimo), 2);
+			});
+
+			it("leaves everything that is not a packed routed expert alone", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "F8_E4M3", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "BF16", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.mlp.gate_proj.weight", "U8", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.ffn.shared_experts.w1.weight", "U8", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.self_attn.qkv_proj.weight", "F8_E4M3", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.mlp.gate.tid2eid", "I32", mimo), 1);
+			});
+
+			it("is a no-op for a store_dtype that isn't sub-byte", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, store_dtype: "fp8" }), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, store_dtype: "bf16" }), 1);
+			});
+
+			it("defers to an explicit expert_dtype, in the quantizer or at the model level", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, expert_dtype: "fp8" }), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", mimo, "fp8"), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, expert_dtype: "fp4" }), 2);
+			});
+
+			it.each([4, {}, null])("ignores a malformed store_dtype (%j)", (storeDtype) => {
+				assert.strictEqual(
+					getQuantizationMultiplier(EXPERT, "U8", { ...mimo, store_dtype: storeDtype as unknown as string }),
+					1,
+				);
+			});
+		});
+
+		describe("compressed-tensors packing factor", () => {
+			const packed = (numBits: number) => ({
+				quant_method: "compressed-tensors",
+				format: "pack-quantized",
+				config_groups: { group_0: { weights: { num_bits: numBits } } },
+			});
+			const name = "model.layers.0.mlp.down_proj.weight_packed";
+
+			it("packs 4-bit eight-per-I32 and two-per-U8", () => {
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(4)), 8);
+				assert.strictEqual(getQuantizationMultiplier(name, "U8", packed(4)), 2);
+			});
+
+			it("packs 2-bit sixteen-per-I32", () => {
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(2)), 16);
+			});
+
+			it("uses the exact ratio for widths that don't divide the container", () => {
+				// Dense cross-element packing: 32 values occupy exactly num_bits I32 words, so an I32
+				// holds 32/3 values. Flooring to 10 undercounts a 3-bit model by 6%.
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(3)), 32 / 3);
+				assert.strictEqual(getQuantizationMultiplier(name, "I32", packed(5)), 32 / 5);
+			});
+
+			it("does not pack when the width fills the container", () => {
+				assert.strictEqual(getQuantizationMultiplier(name, "I8", packed(8)), 1);
+			});
+		});
+
+		it("ignores fp6, which is stored in native F6_* dtypes rather than packed", () => {
+			// A 6-bit width in an 8-bit container has no reference implementation, so claiming any
+			// packing for it would be a guess.
+			assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { quant_method: "fp8" }, "fp6"), 1);
+			assert.strictEqual(getQuantizationMultiplier(EXPERT, "F6_E2M3", { quant_method: "fp8" }, "fp6"), 1);
+		});
 	});
 
 	describe("globMatch", () => {
@@ -413,6 +1069,17 @@ describe("parseSafetensorsMetadata", () => {
 			assert.strictEqual(isQuantizedTensor("model.embed_tokens.weight", config), true);
 		});
 
+		it("honours the compressed-tensors `ignore` list", () => {
+			const quantConfig = {
+				quant_method: "compressed-tensors",
+				format: "mxfp4-pack-quantized",
+				ignore: ["re:.*self_attn.*", "re:.*lm_head.*"],
+			};
+			assert.strictEqual(isQuantizedTensor("model.layers.0.self_attn.q_proj.weight", quantConfig), false);
+			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", quantConfig), false);
+			assert.strictEqual(isQuantizedTensor("model.layers.0.mlp.experts.0.weight", quantConfig), true);
+		});
+
 		it("multiple exclusion patterns", () => {
 			const config = makeConfig(["lm_head", "embed_tokens"]);
 			assert.strictEqual(isQuantizedTensor("model.lm_head.weight", config), false);
@@ -471,7 +1138,159 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert(parse.sharded);
 		assert.strictEqual(Object.keys(parse.headers).length, 64);
-		assert.deepStrictEqual(parse.parameterCount, { F32: 23_040, I32: 1_014_687_129_600, BF16: 43_902_267_888 });
-		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 1_058_589_420_528);
+		// `weight_scale` (BF16, group_size 32 -> ~31.7B of them) and `weight_shape` (I32 bookkeeping)
+		// are quantization metadata, not parameters, so they are excluded — as GPTQ/AWQ `scales`
+		// already were. This lowers the previously reported total by ~3%.
+		assert.deepStrictEqual(parse.parameterCount, { F32: 23_040, I32: 1_014_686_023_680, BF16: 12_193_329_648 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 1_026_879_376_368);
+	});
+
+	it("counts mxfp4-pack-quantized compressed-tensors weights packed in U8 (moonshotai/Kimi-K3)", async () => {
+		// compressed-tensors + `format: "mxfp4-pack-quantized"`, 4-bit weights two-per-byte in U8.
+		// Previously the U8 weights got multiplier 1 and the U8 `weight_scale` tensors were counted,
+		// reporting 1.50T instead of 2.78T.
+		const parse = await parseSafetensorsMetadata({
+			repo: "moonshotai/Kimi-K3",
+			revision: "9f62e4e9fffbd0a83ddd60e1c209d828994b3569",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 96);
+		assert.deepStrictEqual(parse.parameterCount, {
+			F32: 11_122_432,
+			BF16: 57_179_884_544,
+			U8: 2_722_740_830_208, // 1_361_370_415_104 packed bytes x 2
+		});
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 2_779_931_837_184);
+	});
+
+	it("counts fp4 experts declared via expert_dtype outside quantization_config (deepseek-ai/DeepSeek-V4-Pro)", async () => {
+		// `quant_method: "fp8"` for attention, but `expert_dtype: "fp4"` for the experts, which are
+		// packed two-per-byte in I8 and dominate the count. Previously reported 0.86T instead of 1.60T,
+		// because the I8 experts got multiplier 1 and the F8_E8M0 block scales were counted as params.
+		const parse = await parseSafetensorsMetadata({
+			repo: "deepseek-ai/DeepSeek-V4-Pro",
+			revision: "b5968e9190ef611bbf34a7229255be88a0e937c1",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 2_816_899_328,
+			I64: 2_327_040,
+			F32: 87_776_414,
+			F8_E4M3: 23_169_335_296, // fp8 weights: one value per byte, no packing
+			I8: 1_572_763_336_704, // 786_381_668_352 packed bytes x 2
+		});
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 1_598_839_674_782);
+		// the F8_E8M0 block scales (49_150_268_416) must not appear at all
+		assert.strictEqual(parse.parameterCount["F8_E8M0"], undefined);
+	});
+
+	it("counts fp4 experts declared inside quantization_config (deepseek-ai/DeepSeek-V4.1-Flash)", async () => {
+		// V4.1 moved expert_dtype into quantization_config. Ignoring it counted the packed I8
+		// expert weights once per byte, reporting 484.620B instead of 763.205B for the checkpoint.
+		// The card's 552B is the backbone (551.566B), excluding Engram (196.929B), DSpark
+		// draft weights (14.225B), and the vision encoder/projector (0.485B).
+		const parse = await parseSafetensorsMetadata({
+			repo: "deepseek-ai/DeepSeek-V4.1-Flash",
+			revision: "df42c109f1defefcbfcedbe7d905718a12266e40",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 48);
+		assert.deepStrictEqual(
+			parse.headers["model-00003-of-00048.safetensors"]["layers.0.ffn.experts.0.w1.weight"].shape,
+			[2304, 2560],
+		);
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 1_976_441_856,
+			F32: 42_307_282,
+			F8_E4M3: 204_015_223_296,
+			I8: 557_171_343_360, // 278_585_671_680 packed bytes x 2
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 763_205_315_794);
+	});
+
+	it("counts mxfp4 experts declared as store_dtype (XiaomiMiMo/MiMo-V2.6-Flash-RL)", async () => {
+		// `quant_method: "fp8"` with `store_dtype: "mxfp4"`: the routed experts are packed two per U8
+		// byte. Counting them once per byte reported 159.359B for a 309B model. The corrected total is
+		// exactly what this parser counts for XiaomiMiMo/MiMo-V2.5, the same weights stored as unpacked
+		// fp8: its F8_E4M3 count equals the F8_E4M3 plus unpacked U8 counts here.
+		const parse = await parseSafetensorsMetadata({
+			repo: "XiaomiMiMo/MiMo-V2.6-Flash-RL",
+			revision: "3b38d063180c3e4aed9691fdc735f3d10b266ee4",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 65);
+		// hidden_size 4096 packed into 2048 bytes per row
+		assert.deepStrictEqual(
+			parse.headers["model_pp0_ep0_shard0.safetensors"]["model.layers.1.mlp.experts.0.gate_proj.weight"].shape,
+			[2048, 2048],
+		);
+		assert.deepStrictEqual(parse.parameterCount, {
+			F32: 12_032,
+			BF16: 4_101_308_032,
+			F8_E4M3: 3_859_808_256,
+			U8: 302_795_194_368, // 151_397_597_184 packed bytes x 2
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 310_756_322_688);
+	});
+});
+
+describe("assertSafeShardFilename", () => {
+	it("accepts plain relative filenames", () => {
+		for (const filename of [
+			"model-00001-of-00002.safetensors",
+			"unet/diffusion_pytorch_model.safetensors",
+			"sub.dir/model..safetensors",
+			"model with spaces.safetensors",
+		]) {
+			expect(() => assertSafeShardFilename(filename)).not.toThrow();
+		}
+	});
+
+	it("rejects literal traversal and absolute / remote paths", () => {
+		for (const filename of [
+			"",
+			"../victim/private/resolve/main/model.safetensors",
+			"./model.safetensors",
+			"/etc/passwd",
+			"https://evil.example/model.safetensors",
+			"//evil.example/model.safetensors",
+			"..\\model.safetensors",
+		]) {
+			expect(() => assertSafeShardFilename(filename)).toThrow(SafetensorParseError);
+		}
+	});
+
+	it("rejects percent-encoded dot segments, which the URL parser normalizes after the check", () => {
+		for (const filename of [
+			"%2e%2e/%2e%2e/victim/private/resolve/main/model.safetensors",
+			"%2E%2E/model.safetensors",
+			".%2e/model.safetensors",
+			"%2e/model.safetensors",
+			"%252e%252e/model.safetensors",
+			"https%3A%2F%2Fevil.example/model.safetensors",
+		]) {
+			expect(() => assertSafeShardFilename(filename)).toThrow(SafetensorParseError);
+		}
+	});
+
+	it("really would have escaped the repo without the check", () => {
+		const evil = "%2e%2e/%2e%2e/%2e%2e/%2e%2e/victim/private/resolve/main/model.safetensors";
+		expect(new URL(`https://hub.example/org/mine/resolve/main/${evil}`).href).toBe(
+			"https://hub.example/victim/private/resolve/main/model.safetensors",
+		);
+		expect(() => assertSafeShardFilename(evil)).toThrow(SafetensorParseError);
+	});
+
+	it("encodes each path segment separately", () => {
+		expect(encodeShardFilename("unet/model 1.safetensors")).toBe("unet/model%201.safetensors");
+		expect(encodeShardFilename("model-00001-of-00002.safetensors")).toBe("model-00001-of-00002.safetensors");
 	});
 });

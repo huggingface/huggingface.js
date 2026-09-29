@@ -66,7 +66,7 @@ export class FileBlob extends Blob {
 	 */
 	override slice(start = 0, end = this.size): FileBlob {
 		if (start < 0 || end < 0) {
-			new TypeError("Unsupported negative start/end on FileBlob.slice");
+			throw new TypeError("Unsupported negative start/end on FileBlob.slice");
 		}
 
 		const slice = new FileBlob(this.path, this.start + start, Math.min(this.start + end, this.end));

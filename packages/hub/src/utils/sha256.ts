@@ -100,10 +100,14 @@ export async function* sha256(
 				// Define handlers to allow removal
 				let messageHandler: (event: MessageEvent) => void;
 				let errorHandler: (event: ErrorEvent) => void;
+				let abortListener: (() => void) | undefined;
 
 				const cleanup = () => {
 					worker.removeEventListener("message", messageHandler);
 					worker.removeEventListener("error", errorHandler);
+					if (abortListener) {
+						opts?.abortSignal?.removeEventListener("abort", abortListener);
+					}
 				};
 
 				return yield* eventToGenerator<number, string>((yieldCallback, returnCallback, rejectCallback) => {
@@ -146,12 +150,11 @@ export async function* sha256(
 							return;
 						}
 
-						const abortListener = () => {
+						abortListener = () => {
 							cleanup();
 							destroyWorker(worker);
 
 							rejectCallback(opts.abortSignal?.reason ?? new DOMException("Aborted", "AbortError"));
-							opts.abortSignal?.removeEventListener("abort", abortListener);
 						};
 
 						opts.abortSignal.addEventListener("abort", abortListener);

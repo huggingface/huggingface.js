@@ -188,6 +188,7 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 	colorFrom: string;
 	colorTo: string;
 	createdAt: string;
+	disabled?: boolean;
 	emoji: string;
 	id: string;
 	isLikedByUser: boolean;

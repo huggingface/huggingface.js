@@ -130,6 +130,12 @@ export const AGENT_HARNESSES = {
 		description: "Nous Research's self-improving, multi-provider terminal AI agent.",
 		envVars: { HERMES_SESSION_ID: "*" },
 	},
+	hi: {
+		prettyLabel: "hi",
+		repoUrl: "https://github.com/PipeNetwork/hi",
+		docsUrl: "https://github.com/PipeNetwork/hi#readme",
+		description: "Rust terminal coding agent with verification-in-the-loop.",
+	},
 	"kilo-code": {
 		prettyLabel: "Kilo Code",
 		repoUrl: "https://github.com/Kilo-Org/kilocode",
@@ -149,6 +155,12 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://openclaw.ai",
 		description: "Open-source, self-hosted personal AI assistant that runs on your own devices.",
 		envVars: { OPENCLAW_SHELL: "*" },
+	},
+	"sandbase-harness": {
+		prettyLabel: "SandBase Harness",
+		repoUrl: "https://github.com/sandbaseai/sandbase-harness",
+		docsUrl: "https://github.com/sandbaseai/sandbase-harness/blob/main/docs/installation.md",
+		description: "Local-first, self-hosted runtime for persistent AI agent sessions and MCP tools.",
 	},
 	opencode: {
 		prettyLabel: "opencode",
@@ -176,12 +188,13 @@ export const AGENT_HARNESSES = {
 		description: "AI-powered IDE from ByteDance.",
 		envVars: { TRAE_AI_SHELL_ID: "*" },
 	},
-	warp: {
-		prettyLabel: "Warp",
-		repoUrl: "https://github.com/warpdotdev/Warp",
-		docsUrl: "https://docs.warp.dev",
-		description: "AI-powered terminal with an agentic Agent Mode.",
-		envVars: { TERM_PROGRAM: "WarpTerminal" },
+	vtcode: {
+		prettyLabel: "VTCode",
+		repoUrl: "https://github.com/vinhnx/VTCode",
+		description: "Rust coding agent with multi-provider LLM support, OS-native sandboxing, and extensible skills",
+		envVars: {
+			VTCODE: "1",
+		},
 	},
 	zed: {
 		prettyLabel: "Zed",

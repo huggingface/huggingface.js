@@ -8,14 +8,13 @@ import {
 	deleteBranch,
 	deleteRepo,
 	downloadFile,
-	downloadFileToCacheDir,
 	getJob,
 	listJobHardware,
 	listJobs,
+	listFiles,
 	listModels,
 	repoExists,
 	runJob,
-	snapshotDownload,
 	streamJobLogs,
 	uploadFilesWithProgress,
 	whoAmI,
@@ -23,11 +22,12 @@ import {
 } from "./src";
 import { pathToFileURL } from "node:url";
 import { createWriteStream } from "node:fs";
-import { stat, unlink } from "node:fs/promises";
+import { mkdir, stat, unlink } from "node:fs/promises";
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 import { pipeline } from "node:stream/promises";
-import { basename, join } from "node:path";
+import { basename, dirname, join } from "node:path";
+import { globMatch } from "./src/lib/parse-safetensors-metadata";
 import { HUB_URL } from "./src/consts";
 import { version } from "./package.json";
 import type { CommitProgressEvent } from "./src/lib/commit";
@@ -278,140 +278,61 @@ const commands = {
 		] as const,
 	} satisfies SingleCommand,
 	download: {
-		description: "Download files or repositories from the Hub",
-		subcommands: {
-			file: {
-				description: "Download a single file to a local path",
-				args: [
-					{
-						name: "repo-name" as const,
-						description:
-							"The name of the repo to download from. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
-						positional: true,
-						required: true,
-					},
-					{
-						name: "path-in-repo" as const,
-						description: "The path of the file inside the repo to download",
-						positional: true,
-						required: true,
-					},
-					{
-						name: "local-path" as const,
-						description: "The local path to save the file to. Defaults to the file's basename in the current directory",
-						positional: true,
-					},
-					{
-						name: "repo-type" as const,
-						enum: ["dataset", "model", "space"],
-						description:
-							"The type of repo to download from. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
-					},
-					{
-						name: "revision" as const,
-						description: "The revision to download from. Defaults to the main branch",
-						default: "main",
-					},
-					{
-						name: "quiet" as const,
-						short: "q",
-						description: "Suppress all output",
-						boolean: true,
-					},
-					{
-						name: "token" as const,
-						description:
-							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
-						default: process.env.HF_TOKEN,
-					},
-				] as const,
+		description: "Download files from a repo on the Hub",
+		args: [
+			{
+				name: "repo-name" as const,
+				description:
+					"The name of the repo to download from. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+				positional: true,
+				required: true,
 			},
-			cache: {
-				description: "Download a single file into the local Hugging Face cache directory",
-				args: [
-					{
-						name: "repo-name" as const,
-						description:
-							"The name of the repo to download from. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
-						positional: true,
-						required: true,
-					},
-					{
-						name: "path-in-repo" as const,
-						description: "The path of the file inside the repo to download",
-						positional: true,
-						required: true,
-					},
-					{
-						name: "cache-dir" as const,
-						description: "The cache directory to download into. Defaults to the Hugging Face cache directory",
-					},
-					{
-						name: "repo-type" as const,
-						enum: ["dataset", "model", "space"],
-						description:
-							"The type of repo to download from. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
-					},
-					{
-						name: "revision" as const,
-						description: "The revision to download from. Defaults to the main branch",
-						default: "main",
-					},
-					{
-						name: "quiet" as const,
-						short: "q",
-						description: "Suppress all output",
-						boolean: true,
-					},
-					{
-						name: "token" as const,
-						description:
-							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
-						default: process.env.HF_TOKEN,
-					},
-				] as const,
+			{
+				name: "filenames" as const,
+				description: "Files to download from the repo. Defaults to the whole repo",
+				positional: true,
+				multiple: true,
 			},
-			snapshot: {
-				description: "Download an entire repository into the local Hugging Face cache directory",
-				args: [
-					{
-						name: "repo-name" as const,
-						description:
-							"The name of the repo to download. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
-						positional: true,
-						required: true,
-					},
-					{
-						name: "cache-dir" as const,
-						description: "The cache directory to download into. Defaults to the Hugging Face cache directory",
-					},
-					{
-						name: "repo-type" as const,
-						enum: ["dataset", "model", "space"],
-						description:
-							"The type of repo to download. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
-					},
-					{
-						name: "revision" as const,
-						description: "The revision to download. Defaults to the main branch",
-						default: "main",
-					},
-					{
-						name: "quiet" as const,
-						short: "q",
-						description: "Suppress all output",
-						boolean: true,
-					},
-					{
-						name: "token" as const,
-						description:
-							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
-						default: process.env.HF_TOKEN,
-					},
-				] as const,
+			{
+				name: "repo-type" as const,
+				enum: ["dataset", "model", "space"],
+				description:
+					"The type of repo to download from. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
 			},
-		},
-	} satisfies CommandGroup,
+			{
+				name: "revision" as const,
+				description: "The revision to download from. Defaults to the main branch",
+				default: "main",
+			},
+			{
+				name: "include" as const,
+				description: "Glob patterns of files to download. Ignored if filenames are given",
+				multiple: true,
+			},
+			{
+				name: "exclude" as const,
+				description: "Glob patterns of files to skip. Ignored if filenames are given",
+				multiple: true,
+			},
+			{
+				name: "local-dir" as const,
+				description: "The directory to download files to. Defaults to the current working directory",
+				default: ".",
+			},
+			{
+				name: "quiet" as const,
+				short: "q",
+				description: "Suppress all output",
+				boolean: true,
+			},
+			{
+				name: "token" as const,
+				description:
+					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+				default: process.env.HF_TOKEN,
+			},
+		] as const,
+	},
 	branch: {
 		description: "Manage repository branches",
 		subcommands: {
@@ -843,135 +764,70 @@ async function run() {
 			break;
 		}
 		case "download": {
-			const downloadCommandGroup = commands.download;
-			const currentSubCommandName = subCommandName as keyof typeof downloadCommandGroup.subcommands | undefined;
-
-			// Check if --help is in subcommand position (e.g., "hfjs download --help")
-			if (subCommandName === "--help" || subCommandName === "-h") {
-				console.log(listSubcommands("download", downloadCommandGroup));
-				break;
-			}
-
-			// Check if --help is in args position (e.g., "hfjs download file --help")
+			const cmdDef = commands.download;
 			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
-				if (currentSubCommandName && downloadCommandGroup.subcommands[currentSubCommandName]) {
-					console.log(detailedUsageForSubcommand("download", currentSubCommandName));
-				} else {
-					console.log(listSubcommands("download", downloadCommandGroup));
-				}
+				console.log(detailedUsageForCommand("download"));
 				break;
 			}
+			const parsedArgs = advParseArgs(cliArgs, cmdDef.args, "download");
+			const { repoName, filenames, repoType, revision, include, exclude, localDir, token, quiet } = parsedArgs;
 
-			if (!currentSubCommandName || !downloadCommandGroup.subcommands[currentSubCommandName]) {
-				console.error(`Error: Missing or invalid subcommand for 'download'.`);
-				console.log(listSubcommands("download", downloadCommandGroup));
-				process.exitCode = 1;
-				break;
-			}
-
-			const subCmdDef = downloadCommandGroup.subcommands[currentSubCommandName];
+			const repo = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
 			const hubUrl = process.env.HF_ENDPOINT ?? HUB_URL;
 
-			switch (currentSubCommandName) {
-				case "file": {
-					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "download file");
-					const { repoName, pathInRepo, localPath, repoType, revision, token, quiet } = parsedArgs;
-
-					const repo = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
-
-					const blob = await downloadFile({
-						repo,
-						path: pathInRepo,
-						revision,
-						accessToken: token,
-						hubUrl,
-						xet: true,
-					});
-
-					if (!blob) {
-						console.error(`Error: File '${pathInRepo}' not found in repo '${repoName}'.`);
-						process.exitCode = 1;
-						break;
+			const paths: string[] = filenames ?? [];
+			if (!paths.length) {
+				for await (const entry of listFiles({ repo, revision, recursive: true, accessToken: token, hubUrl })) {
+					if (entry.type !== "file") {
+						continue;
 					}
-
-					const destination = localPath ?? basename(pathInRepo);
-
-					const cliProgress = quiet ? null : await import("cli-progress").catch(() => null);
-					const bar =
-						cliProgress && blob.size
-							? new cliProgress.SingleBar(
-									{
-										clearOnComplete: false,
-										hideCursor: true,
-										format: " {bar} | {filename} | {percentage}%",
-										barCompleteChar: "\u2588",
-										barIncompleteChar: "\u2591",
-									},
-									cliProgress.Presets.shades_grey,
-								)
-							: null;
-					bar?.start(blob.size, 0, { filename: basename(destination) });
-
-					try {
-						await streamBlobToFile(blob, destination, (bytesWritten) => bar?.update(bytesWritten));
-					} finally {
-						bar?.stop();
+					if (include?.length && !include.some((pattern) => globMatch(pattern, entry.path))) {
+						continue;
 					}
-
-					if (!quiet) {
-						console.log(`\u2705 Downloaded to ${destination}`);
+					if (exclude?.some((pattern) => globMatch(pattern, entry.path))) {
+						continue;
 					}
-					break;
+					paths.push(entry.path);
 				}
-				case "cache": {
-					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "download cache");
-					const { repoName, pathInRepo, cacheDir, repoType, revision, token, quiet } = parsedArgs;
+			}
 
-					const repo = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
+			const cliProgress = quiet ? null : await import("cli-progress").catch(() => null);
 
-					const cachedPath = await downloadFileToCacheDir({
-						repo,
-						path: pathInRepo,
-						revision,
-						cacheDir,
-						accessToken: token,
-						hubUrl,
-					});
-
-					if (!quiet) {
-						console.log(`\u2705 Cached at ${cachedPath}`);
-					}
-					break;
-				}
-				case "snapshot": {
-					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, "download snapshot");
-					const { repoName, cacheDir, repoType, revision, token, quiet } = parsedArgs;
-
-					const repo = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
-
-					if (!quiet) {
-						console.log(`\u2b07\ufe0f  Downloading repo '${repoName}'...`);
-					}
-
-					const snapshotPath = await snapshotDownload({
-						repo,
-						revision,
-						cacheDir,
-						accessToken: token,
-						hubUrl,
-					});
-
-					if (!quiet) {
-						console.log(`\u2705 Downloaded repo to ${snapshotPath}`);
-					}
-					break;
-				}
-				default:
-					// Should be caught by the check above
-					console.error(`Error: Unknown subcommand '${currentSubCommandName}' for 'download'.`);
-					console.log(listSubcommands("download", downloadCommandGroup));
+			for (const path of paths) {
+				const blob = await downloadFile({ repo, path, revision, accessToken: token, hubUrl, xet: true });
+				if (!blob) {
+					console.error(`Error: File '${path}' not found in repo '${repoName}'.`);
 					process.exitCode = 1;
 					break;
+				}
+
+				const destination = join(localDir, path);
+				await mkdir(dirname(destination), { recursive: true });
+
+				const bar =
+					cliProgress && blob.size
+						? new cliProgress.SingleBar(
+								{
+									clearOnComplete: false,
+									hideCursor: true,
+									format: " {bar} | {filename} | {percentage}%",
+									barCompleteChar: "█",
+									barIncompleteChar: "░",
+								},
+								cliProgress.Presets.shades_grey,
+							)
+						: null;
+				bar?.start(blob.size, 0, { filename: path });
+
+				try {
+					await streamBlobToFile(blob, destination, (bytesWritten) => bar?.update(bytesWritten));
+				} finally {
+					bar?.stop();
+				}
+			}
+
+			if (!quiet && !process.exitCode) {
+				console.log(`✅ Downloaded ${paths.length} file(s) to ${localDir}`);
 			}
 			break;
 		}

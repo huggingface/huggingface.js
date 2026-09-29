@@ -9,9 +9,12 @@ jobs:
   node:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      id-token: write # needed to mint the OIDC token exchanged for a short-lived HF token (trusted publishers)
+      contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
@@ -30,7 +33,7 @@ jobs:
 
       - run: npm install -g corepack@latest && corepack enable
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: "20"
           cache: "pnpm"
@@ -40,17 +43,37 @@ jobs:
           pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
           pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
 
+      - name: Install the hf CLI
+        run: |
+          curl -LsSf https://hf.co/cli/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Exchange OIDC token for a short-lived HF token (trusted publisher)
+        env:
+          HF_OIDC_RESOURCE: coyotte508 # HF username whose user-publisher is configured under https://huggingface.co/settings/authentication#ci-cd-access
+        run: |
+          # Validate the token shape before writing it to GITHUB_ENV: a single-line "hf_..." value
+          # cannot smuggle extra KEY=VALUE lines into the env file, whatever the CLI outputs.
+          token="$(hf auth token)" || { echo "::warning::OIDC token exchange failed, tests will run unauthenticated"; exit 0; }
+          if ! [[ "$token" =~ ^hf_[A-Za-z0-9._-]+$ ]]; then
+            echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
+            exit 0
+          fi
+          echo "::add-mask::$token"
+          echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
+
       - name: Test
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      id-token: write # needed to mint the OIDC token exchanged for a short-lived HF token (trusted publishers)
+      contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
@@ -70,7 +93,7 @@ jobs:
 
       - run: npm install -g corepack@latest && corepack enable
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: "22"
           cache: "pnpm"
@@ -80,25 +103,64 @@ jobs:
           pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
           pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
 
+      - name: Install the hf CLI
+        run: |
+          curl -LsSf https://hf.co/cli/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Exchange OIDC token for a short-lived HF token (trusted publisher)
+        env:
+          HF_OIDC_RESOURCE: coyotte508 # HF username whose user-publisher is configured under https://huggingface.co/settings/authentication#ci-cd-access
+        run: |
+          # Validate the token shape before writing it to GITHUB_ENV: a single-line "hf_..." value
+          # cannot smuggle extra KEY=VALUE lines into the env file, whatever the CLI outputs.
+          token="$(hf auth token)" || { echo "::warning::OIDC token exchange failed, tests will run unauthenticated"; exit 0; }
+          if ! [[ "$token" =~ ^hf_[A-Za-z0-9._-]+$ ]]; then
+            echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
+            exit 0
+          fi
+          echo "::add-mask::$token"
+          echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
+
       - name: Test in browser
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      id-token: write # needed to mint the OIDC token exchanged for a short-lived HF token (trusted publishers)
+      contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
 
       - run: npm install -g corepack@latest && corepack enable
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: "20"
           cache: "pnpm"
           cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install the hf CLI
+        run: |
+          curl -LsSf https://hf.co/cli/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Exchange OIDC token for a short-lived HF token (trusted publisher)
+        env:
+          HF_OIDC_RESOURCE: coyotte508 # HF username whose user-publisher is configured under https://huggingface.co/settings/authentication#ci-cd-access
+        run: |
+          # Validate the token shape before writing it to GITHUB_ENV: a single-line "hf_..." value
+          # cannot smuggle extra KEY=VALUE lines into the env file, whatever the CLI outputs.
+          token="$(hf auth token)" || { echo "::warning::OIDC token exchange failed, tests will run unauthenticated"; exit 0; }
+          if ! [[ "$token" =~ ^hf_[A-Za-z0-9._-]+$ ]]; then
+            echo "::warning::Unexpected token format from OIDC exchange, ignoring it"
+            exit 0
+          fi
+          echo "::add-mask::$token"
+          echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: E2E - start mock npm registry
         run: |
@@ -127,9 +189,8 @@ jobs:
         working-directory: e2e/ts
         run: |
           pnpm i --ignore-workspace --registry http://localhost:4874/
-          pnpm start
-        env:
-          token: ${{ secrets.HF_TOKEN }}
+          # shell expands $HF_TOKEN here (an env: map would pass the literal string "$HF_TOKEN")
+          token="$HF_TOKEN" pnpm start
 
       - name: E2E test - svelte app build
         working-directory: e2e/svelte
@@ -138,7 +199,7 @@ jobs:
           pnpm build
           pnpm run test:browser
 
-      - uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@11b63cf76cfcafb4e43f97b6cad24d8e8438f62d # v1.5.2
         with:
           deno-version: vx.x.x
       - name: E2E test - deno import from npm
@@ -146,4 +207,3 @@ jobs:
         run: deno run --allow-read --allow-net --allow-env=HF_TOKEN index.ts
         env:
           NPM_CONFIG_REGISTRY: http://localhost:4874/
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}

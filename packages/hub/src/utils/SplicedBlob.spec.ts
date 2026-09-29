@@ -50,6 +50,13 @@ describe("SplicedBlob", () => {
 				"Invalid start/end positions for SplicedBlob",
 			);
 		});
+
+		it("should accept a single operation object (not wrapped in an array)", () => {
+			const splicedBlob = SplicedBlob.create(originalBlob, { insert: insertBlob, start: 5, end: 5 });
+			expect(splicedBlob).toBeInstanceOf(SplicedBlob);
+			expect(splicedBlob.size).toBe(13);
+			expect(splicedBlob.spliceOperations).toHaveLength(1);
+		});
 	});
 
 	describe("size and type", () => {

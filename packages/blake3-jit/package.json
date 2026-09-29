@@ -23,7 +23,9 @@
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
-		"prepare": "tshy"
+		"prepare": "tshy",
+		"test": "vitest run",
+		"bench": "node test/bench.js"
 	},
 	"tshy": {
 		"exports": {

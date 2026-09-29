@@ -14,12 +14,16 @@ function nameWithoutNamespace(modelId: string): string {
 
 const escapeStringForJson = (str: string): string => JSON.stringify(str).slice(1, -1); // slice is needed to remove surrounding quotes added by JSON.stringify
 
+const isValidIdentifier = (str: string): boolean => /^[A-Za-z_]\w*$/.test(str);
+
 //#region snippets
 
 export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
 
-model = AutoAdapterModel.from_pretrained("${model.config?.adapter_transformers?.model_name}")
+model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
+		model.config?.adapter_transformers?.model_name ?? "fill-in-model-name",
+	)}")
 model.load_adapter("${model.id}", set_active=True)`,
 ];
 
@@ -79,7 +83,7 @@ result, message = detector.detect_watermark(watermarked_audio, sr)`;
 };
 
 function get_base_diffusers_model(model: ModelData): string {
-	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
+	return escapeStringForJson(model.cardData?.base_model?.toString() ?? "fill-in-base-model");
 }
 
 function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
@@ -241,6 +245,31 @@ predictions = regressor.predict(X_test)
 r2 = r2_score(y_test, predictions)
 print("R² Score:", r2)`;
 	return [installSnippet, classificationSnippet, regressionsSnippet];
+};
+
+export const cortiq = (model: ModelData): string[] => {
+	const setup = `# one Rust binary, no additional dependencies
+cargo install cortiq-cli   # or a prebuilt binary from github.com/infosave2007/cmf/releases
+hf download ${model.id} --include "*.cmf" --local-dir .
+ls *.cmf                   # some repos ship more than one quantization`;
+	if (model.pipeline_tag === "text-to-image") {
+		return [setup, `cortiq imagine FILE.cmf --prompt "a red fox in a snowy forest" --out fox.ppm`];
+	}
+	if (model.pipeline_tag === "text-to-video") {
+		return [setup, `cortiq animate FILE.cmf --prompt "a corgi in a chef hat flipping a pancake" --out clip.avi`];
+	}
+	if (model.pipeline_tag === "text-to-audio") {
+		return [
+			setup,
+			`cortiq music FILE.cmf --prompt "dream pop, warm analog synths, brushed drums" \\
+  --lyrics "[verse] the tide came in and took the map" --seconds 20 --out song.wav`,
+		];
+	}
+	return [
+		setup,
+		`cortiq run FILE.cmf --prompt "What is the capital of France?"`,
+		`cortiq serve FILE.cmf --port 8080   # OpenAI-compatible server`,
+	];
 };
 
 export const cxr_foundation = (): string[] => [
@@ -748,6 +777,92 @@ export const flair = (model: ModelData): string[] => [
 tagger = SequenceTagger.load("${model.id}")`,
 ];
 
+export const flexray = (model: ModelData): string[] => [
+	`pip install flexray`,
+	`from fxr.inference import FleXraySegmenter
+
+segmenter = FleXraySegmenter.from_pretrained("${model.id}")
+prediction = segmenter.predict("image.png", threshold=0.5)
+masks = prediction.masks`,
+];
+
+export const flextab = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/flextab`;
+
+	const classificationSnippet = `# Run a classification task
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+from flextab import FlexTabClassifier
+
+# Load sample data
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize a classifier, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+clf = FlexTabClassifier(max_context_size=8192, bagging=8)
+
+clf.fit(X_train, y_train)
+
+# Predict probabilities
+prediction_probabilities = clf.predict_proba(X_test)
+# Predict labels
+predictions = clf.predict(X_test)
+print("Accuracy", accuracy_score(y_test, predictions))`;
+
+	const regressionsSnippet = `# Run a regression task
+from sklearn.datasets import fetch_openml
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from flextab import FlexTabRegressor
+
+# Load sample data
+df = fetch_openml(data_id=531, as_frame=True)
+X = df.data
+y = df.target.astype(float)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize the regressor, 8k context and 8-fold bagging gives best performance, reduce if running out of memory
+regressor = FlexTabRegressor(max_context_size=8192, bagging=8)
+
+regressor.fit(X_train, y_train)
+
+# Predict on the test set
+predictions = regressor.predict(X_test)
+
+r2 = r2_score(y_test, predictions)
+print("R² Score:", r2)`;
+
+	const matchingSnippet = `# Run a matching task
+from sklearn.metrics import accuracy_score, roc_auc_score
+
+from flextab import FlexTabMatcher
+from flextab.utils.test_utils import load_febrl4
+
+left_train, left_test, right_train, right_test, y_train, y_test = load_febrl4()
+
+matcher = FlexTabMatcher(max_context_size=8192, bagging=1)
+matcher.fit(left_train, right_train, y_train)
+predictions = matcher.predict(left_test, right_test)
+print(f'Accuracy {accuracy_score(y_test, predictions):.2%}')
+# Probabilities (e.g. for thresholding or AUROC):
+# probas = matcher.predict_proba_matching(left_test, right_test)
+# print(f'AUROC {roc_auc_score(y_test, probas[:, 1]):.2%}')`;
+	return [installSnippet, classificationSnippet, regressionsSnippet, matchingSnippet];
+};
+
+export const gaussianformer = (model: ModelData): string[] => [
+	`# Install from https://github.com/SVLwoof/gaussianformer
+
+from gaussianformer.pipelines.rendering_pipeline import GaussianFormerRenderingPipeline
+
+pipeline = GaussianFormerRenderingPipeline.from_pretrained("${model.id}")`,
+];
+
 export const gliner = (model: ModelData): string[] => [
 	`from gliner import GLiNER
 
@@ -801,6 +916,30 @@ pipeline = Pipeline(
     ])`,
 ];
 
+export const jev_style = (model: ModelData): string[] => {
+	let setup = `pip install "jev-style[torch]"`;
+	if (model.tags.includes("mlx")) {
+		setup = `# Apple silicon
+pip install "jev-style[mlx]"`;
+	} else if (model.tags.includes("gguf")) {
+		setup = `pip install jev-style
+# GGUF builds score through llama.cpp: build the jev-score binary once
+hf download ${model.id} build_jev_score.sh jev_score.cpp --local-dir jev-score
+export JEV_SCORE_BIN=$(sh jev-score/build_jev_score.sh /path/to/llama.cpp | tail -n 1)`;
+	}
+	return [
+		setup,
+		`from jev_style import JevStyle, noul, choice
+
+js = JevStyle.from_pretrained("${model.id}")
+out = js.decide("I was charged twice for one order.", {
+    "billing": noul("This message is about billing."),
+    "team": choice("Which team should handle it?", ["billing", "shipping", "tech"]),
+})
+print(out["answers"]["team"]["choice"])`,
+	];
+};
+
 export const keras = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
@@ -809,6 +948,21 @@ os.environ["KERAS_BACKEND"] = "jax"
 import keras
 
 model = keras.saving.load_model("hf://${model.id}")
+`,
+];
+
+export const zeromodels = (model: ModelData): string[] => [
+	`# pip install -U zeromodels
+# ZeroModels is pure Keras 3, so pick a backend: "jax", "torch" or "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "jax"
+
+from zeromodels import AutoZModel
+
+# AutoZModel reads the repo's model_type and loads the matching class.
+# For a task head use the matching loader, e.g. AutoZMImageClassify / AutoZMDetect /
+# AutoZMSemanticSegment / AutoZMTextGenerate (see zeromodels.auto).
+model = AutoZModel.from_weights("${model.id}")
 `,
 ];
 
@@ -888,7 +1042,8 @@ backbone = keras_hub.models.Backbone.from_preset("hf://${modelId}")
 
 export const keras_hub = (model: ModelData): string[] => {
 	const modelId = model.id;
-	const tasks = model.config?.keras_hub?.tasks ?? [];
+	// interpolated as a Python class name, so a non-identifier is treated as absent
+	const tasks = (model.config?.keras_hub?.tasks ?? []).filter(isValidIdentifier);
 
 	const snippets: string[] = [];
 
@@ -961,6 +1116,290 @@ audio = m.generate("This high quality TTS model works without a GPU")
 import soundfile as sf
 sf.write('output.wav', audio, 24000)`,
 ];
+
+/**
+ * Detect LTX-2.5 (split weights + Gemma 4 TE file) vs LTX-2.3
+ * (monolith checkpoint + separate Gemma 3 root). Prefer explicit tags / ids /
+ * base_model refs; fall back to 2.3 for unmarked legacy cards.
+ */
+function _isLtx25Model(model: ModelData): boolean {
+	const refs: string[] = [model.id, ...(model.tags ?? [])];
+	const base = model.cardData?.base_model;
+	if (Array.isArray(base)) {
+		refs.push(...base);
+	} else if (base) {
+		refs.push(base);
+	}
+	return refs.some((ref) => /ltx[-_]?2\.5/i.test(ref));
+}
+
+const _LTX_I2V_HINT = `# For image-to-video, add: --image path/to/image.jpg 0 0.8`;
+const _LTX_GEMMA3_ROOT = "models/gemma-3-12b";
+const _LTX_DEFAULT_PROMPT = "A beautiful sunset over the ocean";
+
+function _ltxInstall(is25: boolean): string {
+	// natten is only needed for the LTX-2.5 diffusion VAE (skipped automatically on Windows/macOS).
+	return `# Install the LTX-2 pipelines
+git clone https://github.com/Lightricks/LTX-2.git
+cd LTX-2
+uv sync ${is25 ? "--extra natten" : "--frozen"}`;
+}
+
+function _ltxRun(
+	module: string,
+	args: string[],
+	comment: string,
+	options?: { hint?: boolean; footer?: string },
+): string {
+	const body = `uv run python -m ltx_pipelines.${module} \\\n    ${args.join(" \\\n    ")}`;
+	const parts = [`# ${comment}`, body];
+	if (options?.footer) {
+		parts.push(options.footer);
+	}
+	if (options?.hint) {
+		parts.push(_LTX_I2V_HINT);
+	}
+	return parts.join("\n");
+}
+
+interface Ltx25SplitPaths {
+	transformer: string;
+	textEncoder: string;
+	videoVae: string;
+	audioVae: string;
+	spatialUpsampler: string;
+	temporalUpsampler?: string;
+}
+
+const _LTX_DETAILING_LORA_REPO = "Lightricks/LTX-2.5-22b-IC-LoRA-Pixel-Spatial-Upscaler";
+const _LTX_DETAILING_LORA_FILE = "ltx-2.5-22b-ic-lora-pixel-spatial-upscaler-x2-1.0.safetensors";
+
+function _ltx25SplitArgs(paths: Ltx25SplitPaths): string[] {
+	const args = [
+		`--transformer-path ${paths.transformer}`,
+		`--text-encoder-path ${paths.textEncoder}`,
+		`--video-vae-path ${paths.videoVae}`,
+		`--audio-vae-path ${paths.audioVae}`,
+		`--spatial-upsampler-path ${paths.spatialUpsampler}`,
+	];
+	if (paths.temporalUpsampler) {
+		args.push(`--temporal-upsampler-path ${paths.temporalUpsampler}`);
+	}
+	return args;
+}
+
+function _ltx25RepoPaths(localDir: string): { distilled: Ltx25SplitPaths; dfr: Ltx25SplitPaths } {
+	const shared = {
+		transformer: `${localDir}/diffusion_models/<distilled-transformer>.safetensors`,
+		textEncoder: `${localDir}/text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors`,
+		videoVae: `${localDir}/vae/<video-vae>.safetensors`,
+		audioVae: `${localDir}/vae/<audio-vae>.safetensors`,
+		spatialUpsampler: `${localDir}/latent_upscale_models/<spatial-upsampler>.safetensors`,
+	};
+	return {
+		distilled: shared,
+		// DFR runs on the distilled transformer; detailing IC-LoRA is required separately.
+		dfr: {
+			...shared,
+			temporalUpsampler: `${localDir}/latent_upscale_models/<temporal-upsampler>.safetensors`,
+		},
+	};
+}
+
+function _ltx25BasePlaceholderPaths(): Ltx25SplitPaths {
+	return {
+		transformer: "path/to/distilled-transformer.safetensors",
+		textEncoder: "path/to/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors",
+		videoVae: "path/to/video-vae.safetensors",
+		audioVae: "path/to/audio-vae.safetensors",
+		spatialUpsampler: "path/to/spatial-upsampler.safetensors",
+	};
+}
+
+function _ltx25Download(modelId: string, localDir: string, kind: "base" | "adapter"): string {
+	if (kind === "adapter") {
+		return `# Download the adapter weights from this repo
+# (base components come from Lightricks/LTX-2.5 — see Files and versions)
+hf download ${modelId} --local-dir ${localDir}`;
+	}
+	const detailingDir = `models/${_LTX_DETAILING_LORA_REPO.split("/")[1]}`;
+	return `# Download weights from this repo
+# Substitute filenames from this repo's "Files and versions" if they differ
+hf download ${modelId} \\
+    diffusion_models/<distilled-transformer>.safetensors \\
+    text_encoders/gemma4-12b-with-proj-ltx-2.5-bf16.safetensors \\
+    vae/<video-vae>.safetensors \\
+    vae/<audio-vae>.safetensors \\
+    latent_upscale_models/<spatial-upsampler>.safetensors \\
+    latent_upscale_models/<temporal-upsampler>.safetensors \\
+    --local-dir ${localDir}
+# DFR requires the detailing IC-LoRA (separate repo; strength is fixed at 0.5)
+hf download ${_LTX_DETAILING_LORA_REPO} --local-dir ${detailingDir}`;
+}
+
+function _ltx23Download(modelId: string, localDir: string): string {
+	return `# Download the weights from this repo, plus the Gemma text encoder
+hf download ${modelId} --local-dir ${localDir}
+hf download google/gemma-3-12b-it-qat-q4_0-unquantized --local-dir ${_LTX_GEMMA3_ROOT}`;
+}
+
+function _ltx25Snippets(model: ModelData, localDir: string, tags: string[]): string[] {
+	const install = _ltxInstall(true);
+	const loraArg = `--lora ${localDir}/<weights>.safetensors 1.0`;
+	const basePaths = _ltx25BasePlaceholderPaths();
+
+	if (tags.includes("ic-lora")) {
+		return [
+			install,
+			_ltx25Download(model.id, localDir, "adapter"),
+			_ltxRun(
+				"ic_lora",
+				[
+					..._ltx25SplitArgs(basePaths),
+					loraArg,
+					"--video-conditioning reference.mp4 1.0",
+					`--prompt "your prompt here"`,
+					"--output-path output.mp4",
+				],
+				"Video-to-video with the IC-LoRA (runs on the distilled LTX-2.5 base)",
+			),
+		];
+	}
+
+	if (tags.includes("lora")) {
+		return [
+			install,
+			_ltx25Download(model.id, localDir, "adapter"),
+			_ltxRun(
+				"distilled",
+				[..._ltx25SplitArgs(basePaths), loraArg, `--prompt "your prompt here"`, "--output-path output.mp4"],
+				"Text/image-to-video with the LoRA on the distilled LTX-2.5 pipeline",
+				{ hint: true },
+			),
+		];
+	}
+
+	const { distilled, dfr } = _ltx25RepoPaths(localDir);
+	const detailingDir = `models/${_LTX_DETAILING_LORA_REPO.split("/")[1]}`;
+	return [
+		install,
+		_ltx25Download(model.id, localDir, "base"),
+		_ltxRun(
+			"distilled",
+			[
+				..._ltx25SplitArgs(distilled),
+				"--num-frames 121",
+				`--prompt "${_LTX_DEFAULT_PROMPT}"`,
+				"--output-path output.mp4",
+			],
+			"Distilled LTX-2.5 pipeline (fast)",
+			{ hint: true },
+		),
+		_ltxRun(
+			"dfr_pipeline",
+			[
+				..._ltx25SplitArgs(dfr),
+				`--detailing-lora ${detailingDir}/${_LTX_DETAILING_LORA_FILE}`,
+				"--spatial-upscalings 1",
+				"--temporal-upscalings 1",
+				"--height 1088",
+				"--width 1920",
+				"--num-frames 121",
+				`--prompt "${_LTX_DEFAULT_PROMPT}"`,
+				"--output-path output.mp4",
+			],
+			"DFR pipeline (higher detail fidelity; optional temporal 2x/4x)",
+			{
+				footer: "# For 4K: --spatial-upscalings 2 --width 3840 --height 2176",
+				hint: true,
+			},
+		),
+	];
+}
+
+function _ltx23Snippets(model: ModelData, localDir: string, tags: string[]): string[] {
+	const install = _ltxInstall(false);
+	const download = _ltx23Download(model.id, localDir);
+	const loraArg = `--lora ${localDir}/<weights>.safetensors 1.0`;
+	const gemma = `--gemma-root ${_LTX_GEMMA3_ROOT}`;
+
+	if (tags.includes("ic-lora")) {
+		return [
+			install,
+			download,
+			_ltxRun(
+				"ic_lora",
+				[
+					"--distilled-checkpoint-path path/to/distilled_checkpoint.safetensors",
+					"--spatial-upsampler-path path/to/spatial_upsampler.safetensors",
+					gemma,
+					loraArg,
+					"--video-conditioning reference.mp4 1.0",
+					`--prompt "your prompt here"`,
+					"--output-path output.mp4",
+				],
+				"Video-to-video with the IC-LoRA (runs on the distilled base model)",
+			),
+		];
+	}
+
+	if (tags.includes("lora")) {
+		return [
+			install,
+			download,
+			_ltxRun(
+				"ti2vid_two_stages_hq",
+				[
+					"--checkpoint-path path/to/checkpoint.safetensors",
+					"--distilled-lora path/to/distilled_lora.safetensors 0.8",
+					"--spatial-upsampler-path path/to/spatial_upsampler.safetensors",
+					gemma,
+					loraArg,
+					`--prompt "your prompt here"`,
+					"--output-path output.mp4",
+				],
+				"Text/image-to-video with the LoRA on the HQ two-stage base pipeline",
+				{ hint: true },
+			),
+		];
+	}
+
+	return [
+		install,
+		download,
+		_ltxRun(
+			"distilled",
+			[
+				`--distilled-checkpoint-path ${localDir}/<distilled-checkpoint>.safetensors`,
+				`--spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors`,
+				gemma,
+				`--prompt "${_LTX_DEFAULT_PROMPT}"`,
+				"--output-path output.mp4",
+			],
+			"Fast pipeline (distilled model, no distilled LoRA needed)",
+			{ hint: true },
+		),
+		_ltxRun(
+			"ti2vid_two_stages_hq",
+			[
+				`--checkpoint-path ${localDir}/<checkpoint>.safetensors`,
+				`--distilled-lora ${localDir}/<distilled-lora>.safetensors 0.8`,
+				`--spatial-upsampler-path ${localDir}/<spatial-upsampler>.safetensors`,
+				gemma,
+				`--prompt "${_LTX_DEFAULT_PROMPT}"`,
+				"--output-path output.mp4",
+			],
+			"HQ pipeline (two-stage, higher quality)",
+			{ hint: true },
+		),
+	];
+}
+
+export const ltx = (model: ModelData): string[] => {
+	const localDir = `models/${nameWithoutNamespace(model.id)}`;
+	const tags = model.tags ?? [];
+	return _isLtx25Model(model) ? _ltx25Snippets(model, localDir, tags) : _ltx23Snippets(model, localDir, tags);
+};
 
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
@@ -1074,13 +1513,12 @@ export const litert_lm = (model: ModelData): string[] => [
 
 # To try LiteRT-LM, the easiest way is to use our CLI tool.
 # 1. Install the LiteRT-LM CLI tool:
-pip install litert-lm
+pip install -U litert-lm
 
 # 2. Download and run this model locally:
 # See: https://ai.google.dev/edge/litert-lm/cli
 litert-lm run \\
   --from-huggingface-repo=${model.id} \\
-  model.litertlm \\
   --prompt="Write me a poem"`,
 ];
 
@@ -1116,6 +1554,20 @@ from matanyone import InferenceCore
 processor = InferenceCore("${model.id}")`,
 ];
 
+export const memra = (model: ModelData): string[] => [
+	`# memra serves NVIDIA Blackwell workstation and consumer cards (sm_120a), with a
+# compile-gated Hopper lane. Prebuilt binaries need Linux x86_64 and driver 580+,
+# and no CUDA toolkit.
+curl -fsSL https://raw.githubusercontent.com/avifenesh/memra/main/tools/install.sh | sh`,
+
+	`# One chat-templated generation. In a repo with several GGUF files, append
+# :<substring> to choose one, for example hf:${model.id}:Q4_K_M
+MEMRA_CHAT=1 run-gen hf:${model.id} --prompt "Explain KV caches in one sentence."`,
+
+	`# Or an OpenAI-compatible server on 127.0.0.1:8080.
+MEMRA_MODELS="model=hf:${model.id}" memra-server`,
+];
+
 export const mesh_anything = (): string[] => [
 	`# Install from https://github.com/buaacyw/MeshAnything.git
 
@@ -1128,7 +1580,7 @@ model = MeshAnything(args)`,
 
 export const multimolecule = (model: ModelData): string[] => {
 	const widgetExample = model.widgetData?.[0] as WidgetExampleTextInput | undefined;
-	const exampleText = widgetExample?.text;
+	const exampleText = escapeStringForJson(widgetExample?.text ?? "");
 	const maskToken = model.mask_token ?? "<mask>";
 	const sequence = exampleText?.replace(maskToken, "A");
 
@@ -1183,9 +1635,29 @@ model, preprocess_train, preprocess_val = open_clip.create_model_and_transforms(
 tokenizer = open_clip.get_tokenizer('hf-hub:${model.id}')`,
 ];
 
+export const openasr = (model: ModelData): string[] => {
+	// OpenASR's local model registry keys packs by their short id (the final path segment
+	// of the Hub repo id, e.g. "xasr-zh-en" for "OpenASR/xasr-zh-en"), not the full
+	// "org/repo" reference, so the CLI commands below use that short id.
+	const modelId = model.id.split("/").pop() ?? model.id;
+	return [
+		`# Install the openasr CLI: https://github.com/QuintinShaw/openasr/releases
+openasr pull ${modelId}
+openasr transcribe audio.wav --model ${modelId}`,
+	];
+};
+
+export const opendde = (): string[] => [
+	`# pip install 'opendde[gpu]'
+# Checkpoints are fetched from the Hub into $OPENDDE_ROOT_DIR (default ~/.cache/opendde)
+opendde doctor
+opendde pred -i examples/input.json -o ./output -n opendde_v1`,
+];
+
 export const paddlenlp = (model: ModelData): string[] => {
-	if (model.config?.architectures?.[0]) {
-		const architecture = model.config.architectures[0];
+	const architecture = model.config?.architectures?.[0];
+	// interpolated as a Python class name, so a non-identifier is treated as absent
+	if (architecture && isValidIdentifier(architecture)) {
 		return [
 			[
 				`from paddlenlp.transformers import AutoTokenizer, ${architecture}`,
@@ -1374,6 +1846,28 @@ from renderformer import RenderFormerRenderingPipeline
 pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
 ];
 
+export const routee_powertrain = (model: ModelData): string[] => [
+	`# pip install routee.powertrain
+import pandas as pd
+import routee.powertrain as pt
+from routee.powertrain.registry import HFRegistry
+
+registry = HFRegistry(repo_id="${model.id}")
+
+# find a vehicle: filter by make, model, year, powertrain type, features, ...
+pt.query_available_models(make="tesla", model="model 3", registry=registry)
+
+# load one by its id: "<make>/<vehicle_slug>/<year>/<config_slug>"
+model = pt.load_model("tesla/model_3_bev/2022/rf_c3326385", registry=registry)
+
+links = pd.DataFrame({
+    "distance": [0.1, 0.2],  # miles
+    "speed_mph": [30, 55],
+    "grade_percent": [-2.0, 1.0],
+})
+model.predict(links)`,
+];
+
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
 	`from tensorflow_tts.inference import AutoProcessor, TFAutoModel
 
@@ -1443,7 +1937,7 @@ const skopsPickle = (model: ModelData, modelFile: string) => {
 from skops.hub_utils import download
 download("${model.id}", "path_to_folder")
 model = joblib.load(
-	"${modelFile}"
+	"${escapeStringForJson(modelFile)}"
 )
 # only load pickle files from sources you trust
 # read more about it here https://skops.readthedocs.io/en/stable/persistence.html`,
@@ -1457,7 +1951,7 @@ from skops.io import load
 download("${model.id}", "path_to_folder")
 # make sure model file is in skops format
 # if model is a pickle file, make sure it's from a source you trust
-model = load("path_to_folder/${modelFile}")`,
+model = load("path_to_folder/${escapeStringForJson(modelFile)}")`,
 	];
 };
 
@@ -1593,6 +2087,65 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 		return [widgetExample.source_sentence, ...widgetExample.sentences];
 	}
 }
+
+export const aneforge = (model: ModelData): string[] => {
+	const header = "# Run this model on the Apple Neural Engine, without CoreML.";
+	if (model.pipeline_tag === "text-generation") {
+		return [
+			`${header}
+import aneforge as af
+from transformers import AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained("${model.id}")
+model = af.load_llm("${model.id}")            # prefill + resident-KV-cache decode on the ANE
+ids = tok.encode("The Neural Engine is")
+print(tok.decode(model.generate(ids, max_new_tokens=20)))`,
+		];
+	}
+	if (model.pipeline_tag === "zero-shot-image-classification" || model.tags.includes("clip")) {
+		return [
+			`${header}
+import aneforge as af
+
+clip = af.load_clip("${model.id}")
+labels = clip.classify(image, ["a photo of a cat", "a photo of a dog"])  # image: a PIL.Image; zero-shot (label, prob)`,
+		];
+	}
+	if (model.tags.includes("resnet")) {
+		return [
+			`${header}
+import aneforge as af
+
+net = af.load_resnet("${model.id}")             # BatchNorm folded into the preceding conv at load
+logits = net(pixels)                          # pixels: a preprocessed [1, 3, 224, 224] float32 batch -> [1, 1000]`,
+		];
+	}
+	if (model.pipeline_tag === "image-classification") {
+		return [
+			`${header}
+import aneforge as af
+
+vit = af.load_vit("${model.id}")
+labels = vit.classify(image)                  # image: a PIL.Image; returns top-k (label, logit)`,
+		];
+	}
+	if (model.pipeline_tag === "automatic-speech-recognition") {
+		return [
+			`${header}
+import aneforge as af
+
+asr = af.load_whisper("${model.id}")
+text = asr.transcribe(audio)                  # audio: a 16 kHz mono float32 waveform`,
+		];
+	}
+	return [
+		`# Run this model's encoder on the Apple Neural Engine, without CoreML.
+from aneforge.sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("${model.id}")
+embeddings = model.encode(["Hello from the Neural Engine"], normalize_embeddings=True)`,
+	];
+};
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
@@ -1735,11 +2288,18 @@ const hasChatTemplate = (model: ModelData): boolean =>
 	model.config?.processor_config?.chat_template !== undefined ||
 	model.config?.chat_template_jinja !== undefined;
 
+// interpolated as a Python class name (and into RegExps in pruna_transformers), so a non-identifier is treated as absent
+const autoModelClass = (model: ModelData): string | undefined => {
+	const autoModel = model.transformersInfo?.auto_model;
+	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
+};
+
 export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
+	const auto_model = autoModelClass(model) ?? "AutoModel";
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
 	const autoSnippet = [];
@@ -1752,10 +2312,10 @@ export const transformers = (model: ModelData): string[] => {
 					: "processor";
 		autoSnippet.push(
 			"# Load model directly",
-			`from transformers import ${info.processor}, ${info.auto_model}`,
+			`from transformers import ${info.processor}, ${auto_model}`,
 			"",
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
+			`model = ${auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 		if (model.tags.includes("conversational") && hasChatTemplate(model)) {
 			if (model.tags.includes("image-text-to-text")) {
@@ -1791,8 +2351,8 @@ export const transformers = (model: ModelData): string[] => {
 	} else {
 		autoSnippet.push(
 			"# Load model directly",
-			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', dtype="auto")',
+			`from transformers import ${auto_model}`,
+			`model = ${auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', device_map="auto")',
 		);
 	}
 
@@ -1895,7 +2455,7 @@ export const peft = (model: ModelData): string[] => {
 		`from peft import PeftModel
 from transformers import AutoModelFor${pefttask}
 
-base_model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
+base_model = AutoModelFor${pefttask}.from_pretrained("${escapeStringForJson(peftBaseModel)}")
 model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
 };
@@ -2107,6 +2667,43 @@ from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
+export const nobg = (model: ModelData): string[] => {
+	const installSnippet = `pip install nobg`;
+	// we check model tags and if it supports prompts we show an example for it, else we show the default example without prompts
+	const predictCall = model.tags.includes("promptable")
+		? `cutout = model.predict(processor, "image.jpg", "prompt")`
+		: `cutout = model.predict(processor, "image.jpg")`;
+	// snippet using the predict method
+	const predictSnippet = `# Option 1: use via the predict method
+
+from nobg import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("${model.id}").eval()
+processor = AutoProcessor.from_pretrained("${model.id}")
+
+${predictCall}`;
+	// snippet using the model and processor directly
+	const manualSnippet = `# Option 2: use the model and processor directly
+
+import torch
+from loadimg import load_img
+from nobg import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("${model.id}").eval()
+processor = AutoProcessor.from_pretrained("${model.id}")
+
+image = load_img("image.jpg").convert("RGB")
+inputs = processor(image, return_tensors="pt")
+
+with torch.no_grad():
+    outputs = model(pixel_values=inputs["pixel_values"])
+
+alpha = processor.post_process_alpha_matting(outputs, target_sizes=[(image.height, image.width)])[0]
+processor.cutout(image, alpha).save("output.png")`;
+
+	return [installSnippet, predictSnippet, manualSnippet];
+};
+
 export const supertonic = (): string[] => [
 	`from supertonic import TTS
 
@@ -2231,6 +2828,29 @@ export const model2vec = (model: ModelData): string[] => [
 model = StaticModel.from_pretrained("${model.id}")`,
 ];
 
+export const mobilint = (model: ModelData): string[] => {
+	const modelName = nameWithoutNamespace(model.id);
+	return [
+		`# pip install mblt-model-zoo
+from mblt_model_zoo.vision import MBLT_Engine
+
+model = MBLT_Engine(
+    model_cls="${modelName}",
+    model_type="DEFAULT",
+    model_path="",
+    core_mode="global8",
+)
+
+try:
+    image = model.preprocess("path/to/image.jpg")
+    output = model(image)
+    result = model.postprocess(output)
+finally:
+    model.dispose()
+`,
+	];
+};
+
 export const pruna = (model: ModelData): string[] => {
 	let snippets: string[];
 
@@ -2281,7 +2901,7 @@ const pruna_diffusers = (model: ModelData): string[] => {
 };
 
 const pruna_transformers = (model: ModelData): string[] => {
-	const info = model.transformersInfo;
+	const auto_model = autoModelClass(model);
 	const transformersSnippets = transformers(model);
 
 	// Replace pipeline with PrunaModel
@@ -2292,13 +2912,13 @@ const pruna_transformers = (model: ModelData): string[] => {
 	);
 
 	// Additional cleanup if auto_model info is available
-	if (info?.auto_model) {
+	if (auto_model) {
 		processedSnippets = processedSnippets.map((snippet) =>
 			snippet
-				.replace(new RegExp(`from transformers import ${info.auto_model}\n?`, "g"), "")
-				.replace(new RegExp(`${info.auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
-				.replace(new RegExp(`^.*from.*import.*(, *${info.auto_model})+.*$`, "gm"), (line) =>
-					line.replace(new RegExp(`, *${info.auto_model}`, "g"), ""),
+				.replace(new RegExp(`from transformers import ${auto_model}\n?`, "g"), "")
+				.replace(new RegExp(`${auto_model}.from_pretrained`, "g"), "PrunaModel.from_pretrained")
+				.replace(new RegExp(`^.*from.*import.*(, *${auto_model})+.*$`, "gm"), (line) =>
+					line.replace(new RegExp(`, *${auto_model}`, "g"), ""),
 				),
 		);
 	}

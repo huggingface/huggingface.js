@@ -25,4 +25,10 @@ describe("language", () => {
 	it("should return null for an invalid language code", () => {
 		expect(language("invalid")).toBeNull();
 	});
+
+	it("should return null for names inherited from Object.prototype", () => {
+		for (const code of ["toString", "constructor", "valueOf", "hasOwnProperty", "__proto__"]) {
+			expect(language(code)).toBeNull();
+		}
+	});
 });

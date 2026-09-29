@@ -37,7 +37,7 @@ import {
 	type TextToVideoTaskHelper,
 	type ImageToVideoTaskHelper,
 } from "./providerHelper.js";
-import { HF_HUB_URL } from "../config.js";
+import { HF_HUB_URL, HF_ROUTER_URL } from "../config.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { AudioToAudioArgs, AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import {
@@ -221,6 +221,24 @@ function buildLoraPath(modelId: ModelId, adapterWeightsPath: string): string {
 	return `${HF_HUB_URL}/${modelId}/resolve/main/${adapterWeightsPath}`;
 }
 
+/**
+ * Some fal apps expose the image+text variant one path segment deeper than the text-only one
+ * (e.g. `fal-ai/flux-2` and `fal-ai/flux-2/edit`). When the mapping points at the deeper endpoint,
+ * an image-less call drops the last segment to reach the text-only one.
+ *
+ * Only valid when calling fal directly: when routing through huggingface.co, the URL path *is* the
+ * provider model id the router resolves the mapping from, so rewriting it makes the model
+ * unresolvable ("Model not supported by provider fal-ai").
+ */
+function dropEndpointSegmentOnDirectCalls(url: string): string {
+	const urlObj = new URL(url);
+	if (urlObj.origin === HF_ROUTER_URL) {
+		return url;
+	}
+	urlObj.pathname = urlObj.pathname.split("/").slice(0, -1).join("/");
+	return urlObj.toString();
+}
+
 export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageTaskHelper {
 	task: InferenceTask;
 
@@ -368,12 +386,7 @@ export class FalAIImageTextToImageTask extends FalAIImageToImageTask implements 
 			...omit(args, ["inputs", "parameters"]),
 			...(args.parameters as Record<string, unknown>),
 			prompt: args.parameters?.prompt,
-			urlTransform: (url) => {
-				const urlObj = new URL(url);
-				// Strip last path segment: fal-ai/flux-2/edit => fal-ai/flux-2
-				urlObj.pathname = urlObj.pathname.split("/").slice(0, -1).join("/");
-				return urlObj.toString();
-			},
+			urlTransform: dropEndpointSegmentOnDirectCalls,
 		} as RequestArgs;
 	}
 }
@@ -386,11 +399,22 @@ export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoT
 	}
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
+		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			prompt: params.args.inputs,
 		};
+
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			payload.loras = [
+				{
+					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
+					scale: 1,
+				},
+			];
+		}
+
+		return payload;
 	}
 
 	override async getResponse(
@@ -434,12 +458,21 @@ export class FalAIImageToVideoTask extends FalAiQueueTask implements ImageToVide
 
 	/** Synchronous case – caller already gave us base64 or a URL */
 	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
+		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			// args.inputs is expected to be a base64 data URI or an URL
 			image_url: params.args.image_url,
 		};
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			payload.loras = [
+				{
+					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
+					scale: 1,
+				},
+			];
+		}
+		return payload;
 	}
 
 	/** Asynchronous helper – caller gave us a Blob */
@@ -502,11 +535,7 @@ export class FalAIImageTextToVideoTask extends FalAIImageToVideoTask implements 
 			...omit(args, ["inputs", "parameters"]),
 			...(args.parameters as Record<string, unknown>),
 			prompt: args.parameters?.prompt,
-			urlTransform: (url) => {
-				const urlObj = new URL(url);
-				urlObj.pathname = urlObj.pathname.split("/").slice(0, -1).join("/");
-				return urlObj.toString();
-			},
+			urlTransform: dropEndpointSegmentOnDirectCalls,
 		} as RequestArgs;
 	}
 }

@@ -154,11 +154,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
 		/// Hacky: hard-code conversational templates here
 		let task = model.pipeline_tag as InferenceTask;
-		if (
-			model.pipeline_tag &&
-			["text-generation", "image-text-to-text"].includes(model.pipeline_tag) &&
-			model.tags.includes("conversational")
-		) {
+		if (model.pipeline_tag && ["text-generation", "image-text-to-text"].includes(model.pipeline_tag)) {
 			templateName = opts?.streaming ? "conversationalStream" : "conversational";
 			inputPreparationFn = prepareConversationalInput;
 			task = "conversational";

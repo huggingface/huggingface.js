@@ -80,4 +80,11 @@ describe("WebBlob", () => {
 		const streamText = await new Response(slice.stream()).text();
 		expect(streamText).toBe(expectedText);
 	});
+
+	it("should throw a TypeError on negative start/end", () => {
+		const webBlob = new WebBlob(resourceUrl, 0, 100, "text/plain", true, fetch);
+
+		expect(() => webBlob.slice(-5)).toThrow(TypeError);
+		expect(() => webBlob.slice(0, -1)).toThrow(TypeError);
+	});
 });

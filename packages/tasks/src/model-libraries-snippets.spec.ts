@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type { ModelData } from "./model-data.js";
-import { llama_cpp_python } from "./model-libraries-snippets.js";
+import {
+	adapters,
+	diffusers,
+	keras_hub,
+	llama_cpp_python,
+	multimolecule,
+	paddlenlp,
+	peft,
+	sklearn,
+	transformers,
+} from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
 	it("llama_cpp_python conversational", async () => {
@@ -54,5 +64,40 @@ output = llm(
 	echo=True
 )
 print(output)`);
+	});
+
+	// a repo owner can put anything in config.json / the model card, so every interpolated value
+	// must either be escaped (string literals) or rejected (bare identifiers)
+	describe("repo-controlled values are not injectable", () => {
+		const PAYLOAD = `")\nimport os; os.system("id`;
+
+		it.each([
+			["adapters", adapters, { config: { adapter_transformers: { model_name: PAYLOAD } } }],
+			["diffusers", diffusers, { tags: ["lora"], cardData: { base_model: PAYLOAD, instance_prompt: PAYLOAD } }],
+			["keras_hub", keras_hub, { config: { keras_hub: { tasks: [PAYLOAD, "TextClassifier"] } } }],
+			["paddlenlp", paddlenlp, { config: { architectures: [PAYLOAD] } }],
+			["peft", peft, { config: { peft: { base_model_name_or_path: PAYLOAD, task_type: "CAUSAL_LM" } } }],
+			["multimolecule", multimolecule, { widgetData: [{ text: PAYLOAD }] }],
+			["transformers", transformers, { transformersInfo: { auto_model: PAYLOAD, processor: "AutoTokenizer" } }],
+			[
+				"sklearn",
+				sklearn,
+				{ tags: ["skops"], config: { sklearn: { model: { file: PAYLOAD }, model_format: "pickle" } } },
+			],
+		])("%s", (_name, snippetFn, model) => {
+			const snippet = snippetFn({ id: "user/model", tags: [], inference: "", ...model } as ModelData).join("\n");
+
+			expect(snippet).not.toContain(PAYLOAD);
+		});
+
+		it("keras_hub keeps the valid task next to a rejected one", () => {
+			const model = {
+				id: "user/model",
+				tags: [],
+				inference: "",
+				config: { keras_hub: { tasks: [PAYLOAD, "TextClassifier"] } },
+			};
+			expect(keras_hub(model as ModelData).join("\n")).toContain("keras_hub.models.TextClassifier.from_preset");
+		});
 	});
 });
