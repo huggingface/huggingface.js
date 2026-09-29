@@ -334,7 +334,8 @@ model = DepthAnythingV2(encoder="${encoder}", features=${features}, out_channels
 # load the weights
 filepath = hf_hub_download(repo_id="${model.id}", filename="depth_anything_v2_${encoder}.pth", repo_type="model")
 state_dict = torch.load(filepath, map_location="cpu")
-model.load_state_dict(state_dict).eval()
+model.load_state_dict(state_dict)
+model.eval()
 
 raw_img = cv2.imread("your/image/path")
 depth = model.infer_image(raw_img) # HxW raw depth map in numpy
@@ -687,17 +688,19 @@ image, _ = pipeline.generate_image(
 };
 
 export const cartesia_pytorch = (model: ModelData): string[] => [
-	`# pip install --no-binary :all: cartesia-pytorch
-from cartesia_pytorch import ReneLMHeadModel
+	`# The cartesia-pytorch package on PyPI ships no code: clone the repo and put its cartesia-pytorch folder on PYTHONPATH
+# (it needs an Ampere or newer CUDA GPU, torch 2.4, mamba-ssm 2.2.2 and flash-attn 2.6.3)
+# git clone https://github.com/cartesia-ai/edge && export PYTHONPATH="$PWD/edge/cartesia-pytorch:$PYTHONPATH"
+from cartesia_pytorch.Rene import ReneLMHeadModel
 from transformers import AutoTokenizer
 
-model = ReneLMHeadModel.from_pretrained("${model.id}")
+model = ReneLMHeadModel.from_pretrained("${model.id}").half().cuda()
 tokenizer = AutoTokenizer.from_pretrained("allenai/OLMo-1B-hf")
 
 in_message = ["Rene Descartes was"]
 inputs = tokenizer(in_message, return_tensors="pt")
 
-outputs = model.generate(inputs.input_ids, max_length=50, top_k=100, top_p=0.99)
+outputs = model.generate(inputs.input_ids.cuda(), max_length=50, top_k=100, top_p=0.99)
 out_message = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
 
 print(out_message)`,
@@ -875,9 +878,9 @@ for entity in entities:
 ];
 
 export const gliner2 = (model: ModelData): string[] => [
-	`from gliner2 import GLiNER2
+	`from gliner2 import AutoExtractor
 
-extractor = GLiNER2.from_pretrained("${model.id}")
+extractor = AutoExtractor.from_pretrained("${model.id}")
 
 # Extract entities
 text = "Apple CEO Tim Cook announced iPhone 15 in Cupertino yesterday."
@@ -1059,7 +1062,7 @@ kernel = get_kernel("${model.id}", version=1)`,
 
 export const kimi_audio = (model: ModelData): string[] => [
 	`# Example usage for KimiAudio
-# pip install git+https://github.com/MoonshotAI/Kimi-Audio.git
+# pip install git+https://github.com/MoonshotAI/Kimi-Audio.git "transformers<5"
 
 import soundfile as sf
 from kimia_infer.api.kimia import KimiAudio
@@ -1923,36 +1926,10 @@ seed_story_cfg = OmegaConf.load(seed_story_cfg_path)
 seed_story = hydra.utils.instantiate(seed_story_cfg, llm=llm) `,
 ];
 
-const skopsPickle = (model: ModelData, modelFile: string) => {
-	return [
-		`import joblib
-from skops.hub_utils import download
-download("${model.id}", "path_to_folder")
-model = joblib.load(
-	"${escapeStringForJson(modelFile)}"
-)
-# only load pickle files from sources you trust
-# read more about it here https://skops.readthedocs.io/en/stable/persistence.html`,
-	];
-};
+const SKLEARN_PICKLE_FILE = /\.(joblib|pkl|pickle)$/i;
 
-const skopsFormat = (model: ModelData, modelFile: string) => {
-	return [
-		`from skops.hub_utils import download
-from skops.io import load
-download("${model.id}", "path_to_folder")
-# make sure model file is in skops format
-# if model is a pickle file, make sure it's from a source you trust
-model = load("path_to_folder/${escapeStringForJson(modelFile)}")`,
-	];
-};
-
-const skopsJobLib = (model: ModelData) => {
-	// repos pushed without skops often still declare their filename in config.json; it is only trusted when it names a
-	// pickle, since some hand-written configs carry typos (e.g. "sklean_model.jpblib" next to a real sklearn_model.joblib)
-	const declaredFile = model.config?.sklearn?.model?.file;
-	const modelFile =
-		declaredFile && /\.(joblib|pkl|pickle)$/i.test(declaredFile) ? declaredFile : "sklearn_model.joblib";
+// skops.hub_utils was removed in skops 0.12, so files are downloaded with huggingface_hub
+const sklearnPickle = (model: ModelData, modelFile: string) => {
 	return [
 		`from huggingface_hub import hf_hub_download
 import joblib
@@ -1964,21 +1941,34 @@ model = joblib.load(
 	];
 };
 
+const skopsFormat = (model: ModelData, modelFile: string) => {
+	return [
+		`from huggingface_hub import hf_hub_download
+from skops.io import load
+# make sure model file is in skops format
+# if model is a pickle file, make sure it's from a source you trust
+model = load(hf_hub_download("${model.id}", "${escapeStringForJson(modelFile)}"))`,
+	];
+};
+
 export const sklearn = (model: ModelData): string[] => {
+	const declaredFile = model.config?.sklearn?.model?.file;
 	if (model.tags.includes("skops")) {
-		const skopsmodelFile = model.config?.sklearn?.model?.file;
-		const skopssaveFormat = model.config?.sklearn?.model_format;
-		if (!skopsmodelFile) {
+		if (!declaredFile) {
 			return [`# ⚠️ Model filename not specified in config.json`];
 		}
-		if (skopssaveFormat === "pickle") {
-			return skopsPickle(model, skopsmodelFile);
-		} else {
-			return skopsFormat(model, skopsmodelFile);
+		// some skops repos declare no model_format for a pickled file (e.g. julien-c/skops-digits), which skops.io cannot read
+		if (model.config?.sklearn?.model_format === "pickle" || SKLEARN_PICKLE_FILE.test(declaredFile)) {
+			return sklearnPickle(model, declaredFile);
 		}
-	} else {
-		return skopsJobLib(model);
+		return skopsFormat(model, declaredFile);
 	}
+	// repos pushed without skops often still declare their filename in config.json; it is only trusted when it names a
+	// pickle, since some hand-written configs carry typos (e.g. "sklean_model.jpblib" next to a real sklearn_model.joblib)
+	return sklearnPickle(
+		model,
+		declaredFile && SKLEARN_PICKLE_FILE.test(declaredFile) ? declaredFile : "sklearn_model.joblib",
+	);
 };
 
 export const stable_audio_tools = (model: ModelData): string[] => [
@@ -2045,7 +2035,7 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
     state = predictor.init_state(<your_video>)
 
     # add new prompts and instantly get the output on the same frame
-    frame_idx, object_ids, masks = predictor.add_new_points(state, <your_prompts>):
+    frame_idx, object_ids, masks = predictor.add_new_points(state, <your_prompts>)
 
     # propagate the prompts to get masklets throughout the video
     for frame_idx, object_ids, masks in predictor.propagate_in_video(state):
@@ -2067,11 +2057,18 @@ output = inference(image, mask)`,
 ];
 
 export const sam_3d_body = (model: ModelData): string[] => [
-	`from notebook.utils import setup_sam_3d_body
+	`import cv2
+import numpy as np
+from notebook.utils import setup_sam_3d_body
+from tools.vis_utils import visualize_sample_together
 
 estimator = setup_sam_3d_body("${model.id}")
-outputs = estimator.process_one_image(image)
-rend_img = visualize_sample_together(image, outputs, estimator.faces)`,
+
+img_bgr = cv2.imread("path/to/image.jpg")
+outputs = estimator.process_one_image(cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB))
+
+rend_img = visualize_sample_together(img_bgr, outputs, estimator.faces)
+cv2.imwrite("output.jpg", rend_img.astype(np.uint8))`,
 ];
 
 export const sampleFactory = (model: ModelData): string[] => [
@@ -2707,8 +2704,7 @@ export const vui = (): string[] => [
 
 import torchaudio
 
-from vui.inference import render
-from vui.model import Vui
+from vui.legacy import Vui, render
 
 model = Vui.from_pretrained().cuda()
 waveform = render(
@@ -2716,7 +2712,7 @@ waveform = render(
     "Hey, here is some random stuff, usually something quite long as the shorter the text the less likely the model can cope!",
 )
 print(waveform.shape)
-torchaudio.save("out.opus", waveform[0], 22050)
+torchaudio.save("out.wav", waveform[0], 22050)
 `,
 ];
 
@@ -2744,10 +2740,23 @@ export const ultralytics = (model: ModelData): string[] => {
 		model.library_name === "yolov10" ||
 		(model.tags.includes("yolov10") && (!model.tags.includes("ultralytics") || model.tags.includes("safetensors")));
 	if (isYolov10Fork) {
-		return [
-			`from ultralytics import YOLOv10
+		// from_pretrained reads the model.safetensors that fork pushes ship; older fork repos only ship .pt weights
+		if (model.tags.includes("safetensors")) {
+			return [
+				`from ultralytics import YOLOv10
 
 model = YOLOv10.from_pretrained("${model.id}")
+source = 'http://images.cocodataset.org/val2017/000000039769.jpg'
+model.predict(source=source, save=True)`,
+			];
+		}
+		return [
+			`from huggingface_hub import hf_hub_download
+from ultralytics import YOLOv10
+
+# pick the weights file from this repo's "Files and versions" tab
+weights = hf_hub_download("${model.id}", "<weights>.pt")
+model = YOLOv10(weights)
 source = 'http://images.cocodataset.org/val2017/000000039769.jpg'
 model.predict(source=source, save=True)`,
 		];

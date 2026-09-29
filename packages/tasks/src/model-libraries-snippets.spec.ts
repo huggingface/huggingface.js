@@ -3,6 +3,7 @@ import type { ModelData } from "./model-data.js";
 import {
 	adapters,
 	cartesia_pytorch,
+	depth_anything_v2,
 	describe_anything,
 	diffusers,
 	diffusionkit,
@@ -10,6 +11,7 @@ import {
 	indextts,
 	keras_hub,
 	kernels,
+	kimi_audio,
 	litert_lm,
 	llama_cpp_python,
 	mlAgents,
@@ -322,10 +324,19 @@ print(output)`);
 
 		it("ultralytics: mainline loads weights with YOLO(), the yolov10 fork keeps its own loader", () => {
 			expect(ultralytics(base as ModelData)[0]).toContain("model = YOLO(weights)");
-			expect(ultralytics({ ...base, tags: ["yolov10"] } as ModelData)[0]).toContain("YOLOv10.from_pretrained");
-			expect(ultralytics({ ...base, library_name: "yolov10", tags: ["yolov10"] } as ModelData)[0]).toContain(
+			expect(ultralytics({ ...base, tags: ["yolov10", "safetensors"] } as ModelData)[0]).toContain(
 				"YOLOv10.from_pretrained",
 			);
+			expect(
+				ultralytics({ ...base, library_name: "yolov10", tags: ["yolov10", "safetensors"] } as ModelData)[0],
+			).toContain("YOLOv10.from_pretrained");
+		});
+
+		it("ultralytics: yolov10 fork repos that only ship .pt weights load them with YOLOv10()", () => {
+			// e.g. kadirnar/Yolov10: from_pretrained needs the config.json and model.safetensors of a fork push
+			const [snippet] = ultralytics({ ...base, library_name: "yolov10", tags: ["yolov10"] } as ModelData);
+			expect(snippet).toContain("model = YOLOv10(weights)");
+			expect(snippet).not.toContain("from_pretrained");
 		});
 
 		it("ultralytics: mainline repos listing a yolov10 tag stay on the mainline loader", () => {
@@ -369,6 +380,25 @@ print(output)`);
 			).toContain(`"sklearn_model.joblib"`);
 		});
 
+		it("sklearn: skops repos download with huggingface_hub", () => {
+			// skops.hub_utils was removed in skops 0.12
+			const skops = (sklearnConfig: Record<string, unknown>) =>
+				sklearn({ ...base, tags: ["skops"], config: { sklearn: sklearnConfig } } as ModelData)[0];
+
+			const skopsFile = skops({ model: { file: "model.skops" }, model_format: "skops" });
+			expect(skopsFile).toContain(`model = load(hf_hub_download("user/model", "model.skops"))`);
+			expect(skopsFile).not.toContain("hub_utils");
+
+			const pickled = skops({ model: { file: "model.pkl" }, model_format: "pickle" });
+			expect(pickled).toContain(`joblib.load(\n\thf_hub_download("user/model", "model.pkl")`);
+			expect(pickled).not.toContain("hub_utils");
+
+			// a pickled file without a declared model_format (e.g. julien-c/skops-digits) is not read with skops.io
+			const undeclared = skops({ model: { file: "sklearn_model.joblib" } });
+			expect(undeclared).toContain("joblib.load(");
+			expect(undeclared).not.toContain("skops.io");
+		});
+
 		it("speechbrain: speaker verification compares two recordings", () => {
 			const [snippet] = speechbrain({
 				...base,
@@ -402,10 +432,22 @@ print(output)`);
 			expect(mlAgents(base as ModelData)[0]).toContain(`--local-dir="./downloads"`);
 			expect(timm(base as ModelData)[0]).toContain(`"hf-hub:user/model"`);
 			expect(kernels(base as ModelData)[0]).toContain(`get_kernel("user/model", version=1)`);
-			expect(gliner2(base as ModelData)[0]).toContain("extractor = GLiNER2.from_pretrained");
+			expect(gliner2(base as ModelData)[0]).toContain("extractor = AutoExtractor.from_pretrained");
 			expect(cartesia_pytorch(base as ModelData)[0].trimEnd()).toMatch(/print\(out_message\)$/);
-			expect(vui()[0]).toContain("from vui.model import Vui\n");
+			expect(vui()[0]).toContain("from vui.legacy import Vui, render\n");
 			expect(phantom_wan(base as ModelData)[0]).toContain('Image.open("path/to/image.jpg")');
+		});
+
+		it("templates run as pasted", () => {
+			expect(sam2(base as ModelData)[1]).toContain("predictor.add_new_points(state, <your_prompts>)\n");
+			expect(depth_anything_v2(base as ModelData)[0]).toContain("model.load_state_dict(state_dict)\nmodel.eval()");
+			const [sam3dBody] = sam_3d_body(base as ModelData);
+			expect(sam3dBody).toContain("from tools.vis_utils import visualize_sample_together");
+			expect(sam3dBody).toContain('img_bgr = cv2.imread("path/to/image.jpg")');
+			expect(kimi_audio(base as ModelData)[0]).toContain(`"transformers<5"`);
+			const [cartesia] = cartesia_pytorch(base as ModelData);
+			expect(cartesia).toContain("from cartesia_pytorch.Rene import ReneLMHeadModel");
+			expect(cartesia).toContain(`.from_pretrained("user/model").half().cuda()`);
 		});
 	});
 });
