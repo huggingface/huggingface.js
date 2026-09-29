@@ -2194,12 +2194,18 @@ print(scores)`,
 		];
 	}
 
-	// sentence-transformers tags SparseEncoder repos (SPLADE & co) with "sparse-encoder" when pushing them
-	if (model.tags.includes("sparse-encoder")) {
+	// sentence-transformers tags SparseEncoder repos (SPLADE & co) with "sparse-encoder" and MultiVectorEncoder repos
+	// (ColBERT & co) with "multi-vector" when pushing them; both encode queries and documents separately
+	const retrievalEncoder = model.tags.includes("sparse-encoder")
+		? "SparseEncoder"
+		: model.tags.includes("multi-vector")
+			? "MultiVectorEncoder"
+			: undefined;
+	if (retrievalEncoder) {
 		return [
-			`from sentence_transformers import SparseEncoder
+			`from sentence_transformers import ${retrievalEncoder}
 
-model = SparseEncoder("${model.id}"${remote_code_snippet})
+model = ${retrievalEncoder}("${model.id}"${remote_code_snippet})
 
 queries = ["Which planet is known as the Red Planet?"]
 documents = [
@@ -2504,7 +2510,8 @@ const PEFT_TASK_TYPE_TO_AUTO_CLASS: Record<string, string> = {
 };
 
 // PEFT has no speech-specific task type: Whisper-style adapters are tagged SEQ_2_SEQ_LM, but transformers registers
-// Whisper, SpeechT5 and Speech2Text only under AutoModelForSpeechSeq2Seq (SeamlessM4T is under both auto classes).
+// Whisper and Speech2Text only under AutoModelForSpeechSeq2Seq (SeamlessM4T is under both seq2seq auto classes, SpeechT5
+// under the speech-to-text and text-to-spectrogram ones).
 // Other audio seq2seq models (Qwen2-Audio, GLM-ASR) stay under AutoModelForSeq2SeqLM, so the base model name is the
 // main signal. Matched against Hub repo ids, which are hyphenated (facebook/s2t-small-librispeech-asr,
 // facebook/seamless-m4t-v2-large), not against transformers model_type identifiers.
@@ -2513,21 +2520,27 @@ const PEFT_SPEECH_TO_TEXT_BASE_MODEL = /whisper|\bs2t\b|speech[-_]to[-_]text/i;
 // SeamlessM4T adapters on the Hub are speech ones, so the speech class stays the default when no text task is declared.
 const PEFT_SEAMLESS_M4T_BASE_MODEL = /seamless[-_]m4t/i;
 const PEFT_TEXT_TASKS = ["translation", "text2text-generation", "summarization"];
-// SpeechT5 checkpoints are overwhelmingly text-to-speech fine-tunes (often without "tts" in their name), for which
-// AutoModelForSpeechSeq2Seq silently loads the speech-to-text head: only ASR bases or adapters get the speech class.
+// SpeechT5 checkpoints are overwhelmingly text-to-speech fine-tunes (often without "tts" in their name), which load
+// with AutoModelForTextToSpectrogram; AutoModelForSpeechSeq2Seq would silently load the speech-to-text head, so only
+// ASR bases or adapters get it.
 const PEFT_SPEECHT5_BASE_MODEL = /speecht5/i;
 
-const peftUsesSpeechSeq2Seq = (model: ModelData, baseModel: string): boolean => {
+const declaresTask = (model: ModelData, task: string): boolean =>
+	model.pipeline_tag === task || model.tags.includes(task);
+
+// the auto class a SEQ_2_SEQ_LM adapter needs when its base is a speech model, undefined for text seq2seq bases
+const peftSpeechAutoClass = (model: ModelData, baseModel: string): string | undefined => {
 	if (PEFT_SPEECH_TO_TEXT_BASE_MODEL.test(baseModel)) {
-		return true;
+		return "AutoModelForSpeechSeq2Seq";
 	}
 	if (PEFT_SEAMLESS_M4T_BASE_MODEL.test(baseModel)) {
-		return !PEFT_TEXT_TASKS.some((task) => model.pipeline_tag === task || model.tags.includes(task));
+		return PEFT_TEXT_TASKS.some((task) => declaresTask(model, task)) ? undefined : "AutoModelForSpeechSeq2Seq";
 	}
 	if (PEFT_SPEECHT5_BASE_MODEL.test(baseModel)) {
-		return /(?:^|[^a-z])asr(?:[^a-z]|$)/i.test(baseModel) || model.pipeline_tag === "automatic-speech-recognition";
+		const isAsr = /(?:^|[^a-z])asr(?:[^a-z]|$)/i.test(baseModel) || declaresTask(model, "automatic-speech-recognition");
+		return isAsr ? "AutoModelForSpeechSeq2Seq" : "AutoModelForTextToSpectrogram";
 	}
-	return false;
+	return undefined;
 };
 
 export const peft = (model: ModelData): string[] => {
@@ -2544,8 +2557,21 @@ export const peft = (model: ModelData): string[] => {
 	if (!baseModel) {
 		return [`Base model is not found.`];
 	}
-	if (peftTaskType === "SEQ_2_SEQ_LM" && peftUsesSpeechSeq2Seq(model, baseModel)) {
-		autoClass = "AutoModelForSpeechSeq2Seq";
+	if (peftTaskType === "SEQ_2_SEQ_LM") {
+		autoClass = peftSpeechAutoClass(model, baseModel) ?? autoClass;
+	}
+
+	if (autoClass === "AutoModelForTextToSpectrogram") {
+		return [
+			`from peft import PeftConfig, PeftModel
+from transformers import AutoModelForTextToSpectrogram
+
+base_model = AutoModelForTextToSpectrogram.from_pretrained("${escapeStringForJson(baseModel)}")
+# PEFT's seq2seq wrapper needs generate(), which SpeechT5's text-to-speech model lacks: load the adapter without its task type
+config = PeftConfig.from_pretrained("${model.id}")
+config.task_type = None
+model = PeftModel.from_pretrained(base_model, "${model.id}", config=config)`,
+		];
 	}
 
 	return [

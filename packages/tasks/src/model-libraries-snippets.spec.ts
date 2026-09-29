@@ -185,6 +185,13 @@ print(output)`);
 			expect(snippet).toContain("encode_query(");
 		});
 
+		it("sentence-transformers: multi-vector encoders use MultiVectorEncoder", () => {
+			// e.g. answerdotai/answerai-colbert-small-v1, tagged multi-vector by the library on push
+			const [snippet] = sentenceTransformers({ ...base, tags: ["multi-vector"] } as ModelData);
+			expect(snippet).toContain(`MultiVectorEncoder("user/model")`);
+			expect(snippet).toContain("encode_document(");
+		});
+
 		it("diffusers: prefixed pipeline class tags reach the dedicated branches", () => {
 			const inpainting = diffusers({ ...base, tags: ["diffusers:StableDiffusionInpaintPipeline"] } as ModelData);
 			expect(inpainting.join("\n")).toContain("AutoPipelineForInpainting");
@@ -304,13 +311,20 @@ print(output)`);
 				"AutoModelForSpeechSeq2Seq",
 			);
 
-			// SpeechT5 text-to-speech bases must not silently load the speech-to-text head
-			expect(adapter("microsoft/speecht5_tts")).not.toContain("AutoModelForSpeechSeq2Seq");
-			expect(adapter("user/speecht5_finetuned_voxpopuli_nl")).not.toContain("AutoModelForSpeechSeq2Seq");
+			// SpeechT5 text-to-speech bases load the text-to-spectrogram head, not the speech-to-text one
+			// e.g. Solo448/SpeechT5-Unified-TTS-PEFT; PEFT's seq2seq wrapper cannot wrap it, so the task type is dropped
+			const tts = adapter("microsoft/speecht5_tts");
+			expect(tts).toContain(`AutoModelForTextToSpectrogram.from_pretrained("microsoft/speecht5_tts")`);
+			expect(tts).toContain("config.task_type = None");
+			expect(adapter("user/speecht5_finetuned_voxpopuli_nl")).toContain("AutoModelForTextToSpectrogram");
 			expect(adapter("user/speecht5_tts_basrah_dialect")).not.toContain("AutoModelForSpeechSeq2Seq");
 			expect(
 				adapter("user/speecht5_finetuned_librispeech", { pipeline_tag: "automatic-speech-recognition" }),
 			).toContain("AutoModelForSpeechSeq2Seq");
+			// the ASR task can also come from the tags alone
+			expect(adapter("user/speecht5_finetuned_librispeech", { tags: ["automatic-speech-recognition"] })).toContain(
+				"AutoModelForSpeechSeq2Seq",
+			);
 		});
 
 		it("peft: falls back to the model card's base model", () => {
