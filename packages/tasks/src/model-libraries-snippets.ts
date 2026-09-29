@@ -1578,6 +1578,19 @@ from MeshAnything.models.meshanything import MeshAnything
 model = MeshAnything(args)`,
 ];
 
+export const microduck = (model: ModelData): string[] => {
+	// Model-card tag convention: tags: [microduck-slot:stand].
+	const slots = ["walk", "stand", "sitstand", "ground_pick", "kick_left", "kick_right", "roulade"];
+	const matchingSlots = slots.filter((slot) => model.tags.includes(`microduck-slot:${slot}`));
+	const slot = matchingSlots.length === 1 ? matchingSlots[0] : "SLOT";
+	const prefix =
+		matchingSlots.length === 1
+			? ""
+			: `# Replace SLOT with the slot specified in the model card (${slots.join(", ")}).\n`;
+
+	return [`${prefix}sudo robotctl policy load ${slot} ${model.id}`];
+};
+
 export const multimolecule = (model: ModelData): string[] => {
 	const widgetExample = model.widgetData?.[0] as WidgetExampleTextInput | undefined;
 	const exampleText = escapeStringForJson(widgetExample?.text ?? "");

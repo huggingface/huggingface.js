@@ -1033,6 +1033,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Microduck",
 		repoName: "Microduck",
 		repoUrl: "https://github.com/pollen-robotics/microduck_rl",
+		snippets: snippets.microduck,
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
 	},
