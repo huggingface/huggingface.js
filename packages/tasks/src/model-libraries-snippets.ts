@@ -908,6 +908,30 @@ pipeline = Pipeline(
     ])`,
 ];
 
+export const jev_style = (model: ModelData): string[] => {
+	let setup = `pip install "jev-style[torch]"`;
+	if (model.tags.includes("mlx")) {
+		setup = `# Apple silicon
+pip install "jev-style[mlx]"`;
+	} else if (model.tags.includes("gguf")) {
+		setup = `pip install jev-style
+# GGUF builds score through llama.cpp: build the jev-score binary once
+hf download ${model.id} build_jev_score.sh jev_score.cpp --local-dir jev-score
+export JEV_SCORE_BIN=$(sh jev-score/build_jev_score.sh /path/to/llama.cpp | tail -n 1)`;
+	}
+	return [
+		setup,
+		`from jev_style import JevStyle, noul, choice
+
+js = JevStyle.from_pretrained("${model.id}")
+out = js.decide("I was charged twice for one order.", {
+    "billing": noul("This message is about billing."),
+    "team": choice("Which team should handle it?", ["billing", "shipping", "tech"]),
+})
+print(out["answers"]["team"]["choice"])`,
+	];
+};
+
 export const keras = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "torch", "tensorflow".
 import os

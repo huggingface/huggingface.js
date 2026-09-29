@@ -552,6 +552,65 @@ describe("frames columns", () => {
 	});
 });
 
+describe("episode count and repeated indexes", () => {
+	const metadata = (index: number, from: number) => ({
+		episode_index: index,
+		length: 2,
+		"data/chunk_index": 0,
+		"data/file_index": 0,
+		dataset_from_index: from,
+		dataset_to_index: from + 2,
+	});
+	const info = (totalEpisodes: number) =>
+		encoder.encode(
+			JSON.stringify({
+				codebase_version: "v3.0",
+				fps: 30,
+				total_episodes: totalEpisodes,
+				data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+			}),
+		);
+	const indexFile = (chunk: number, file: number) =>
+		`meta/episodes/chunk-${String(chunk).padStart(3, "0")}/file-${String(file).padStart(3, "0")}.parquet`;
+
+	it("stops at info.json's episode count, before a stale index file", async () => {
+		/// Re-uploaded with 2 episodes over an older, larger dataset: the old second index file remains.
+		const files = {
+			"meta/info.json": info(2),
+			[indexFile(0, 0)]: parquet([metadata(0, 0), metadata(1, 2)]),
+			[indexFile(0, 1)]: parquet([metadata(0, 0), metadata(1, 2), metadata(2, 4)]),
+		};
+		const seen: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files, seen) });
+		const episodes = await dataset.episodes({ limit: 10 });
+		expect(episodes.map((episode) => episode.index)).toEqual([0, 1]);
+		expect(seen).not.toContain(indexFile(0, 1));
+		expect(await dataset.episodes({ offset: 2, limit: 10 })).toEqual([]);
+	});
+
+	it("keeps the first row of an index repeated within an index file", async () => {
+		const files = {
+			"meta/info.json": info(6),
+			[indexFile(0, 0)]: parquet([0, 1, 2, 0, 1, 2].map((index, row) => metadata(index, row * 2))),
+		};
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
+		const episodes = await dataset.episodes({ limit: 6 });
+		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2]);
+		/// The first occurrence, not a later one.
+		expect(episodes.map((episode) => episode.data?.fromRow)).toEqual([0, 2, 4]);
+	});
+
+	it("changes nothing for a well-formed dataset", async () => {
+		const files = {
+			"meta/info.json": info(3),
+			[indexFile(0, 0)]: parquet([0, 1, 2].map((index) => metadata(index, index * 2))),
+		};
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
+		expect((await dataset.episodes({ limit: 10 })).map((episode) => episode.index)).toEqual([0, 1, 2]);
+		expect((await dataset.episodes({ offset: 1, limit: 1 })).map((episode) => episode.index)).toEqual([1]);
+	});
+});
+
 describe("v3 data row offsets", () => {
 	const metadata = (index: number, chunk: number, file: number, from: number, to: number) => ({
 		episode_index: index,
@@ -711,12 +770,16 @@ describe("v3 index sharding", () => {
 		"walks into later shards when the range spans them",
 		async () => {
 			const seen: string[] = [];
-			/// The same 50-episode shard served twice, so the index looks like two shards.
+			/// The same 50-episode shard served twice, so the index looks like two shards; info.json is told
+			/// there are 100 episodes to match, since reads stop at its count.
+			const twoShardInfo = encoder.encode(
+				JSON.stringify({ ...JSON.parse(new TextDecoder().decode(infoJson)), total_episodes: 100 }),
+			);
 			const dataset = new LeRobotDataset(REPO_ID, {
 				revision: REV_V30,
 				fetch: mockFetch(
 					{
-						"meta/info.json": infoJson,
+						"meta/info.json": twoShardInfo,
 						"meta/episodes/chunk-000/file-000.parquet": indexShard,
 						"meta/episodes/chunk-000/file-001.parquet": indexShard,
 					},

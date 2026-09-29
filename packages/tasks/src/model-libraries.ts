@@ -767,6 +767,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	"jev-style": {
+		prettyLabel: "jev-style",
+		repoName: "jev-style",
+		repoUrl: "https://github.com/lawrence3699/jev-style",
+		snippets: snippets.jev_style,
+		filter: false,
+		countDownloads: `path_extension:"gguf" OR (path_filename:"config" AND path_extension:"json")`,
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
@@ -1005,6 +1013,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/filipstrand/mflux",
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	microduck: {
+		prettyLabel: "Microduck",
+		repoName: "Microduck",
+		repoUrl: "https://github.com/pollen-robotics/microduck_rl",
+		filter: true,
+		countDownloads: `path_extension:"onnx"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
