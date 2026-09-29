@@ -569,6 +569,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"tar"`,
 	},
+	gaussianformer: {
+		prettyLabel: "GaussianFormer",
+		repoName: "GaussianFormer",
+		repoUrl: "https://github.com/SVLwoof/gaussianformer",
+		snippets: snippets.gaussianformer,
+		filter: false,
+		countDownloads: `path:"config.json"`,
+	},
 	"gemma.cpp": {
 		prettyLabel: "gemma.cpp",
 		repoName: "gemma.cpp",
