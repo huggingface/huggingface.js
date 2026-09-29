@@ -855,6 +855,14 @@ print(f'Accuracy {accuracy_score(y_test, predictions):.2%}')
 	return [installSnippet, classificationSnippet, regressionsSnippet, matchingSnippet];
 };
 
+export const gaussianformer = (model: ModelData): string[] => [
+	`# Install from https://github.com/SVLwoof/gaussianformer
+
+from gaussianformer.pipelines.rendering_pipeline import GaussianFormerRenderingPipeline
+
+pipeline = GaussianFormerRenderingPipeline.from_pretrained("${model.id}")`,
+];
+
 export const gliner = (model: ModelData): string[] => [
 	`from gliner import GLiNER
 
