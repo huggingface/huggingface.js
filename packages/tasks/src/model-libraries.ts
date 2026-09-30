@@ -569,6 +569,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"tar"`,
 	},
+	gaussianformer: {
+		prettyLabel: "GaussianFormer",
+		repoName: "GaussianFormer",
+		repoUrl: "https://github.com/SVLwoof/gaussianformer",
+		snippets: snippets.gaussianformer,
+		filter: false,
+		countDownloads: `path:"config.json"`,
+	},
 	"gemma.cpp": {
 		prettyLabel: "gemma.cpp",
 		repoName: "gemma.cpp",
@@ -857,6 +865,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	laya: {
+		prettyLabel: "Laya",
+		repoName: "Laya",
+		repoUrl: "https://github.com/NandhaKishorM/laya",
+		filter: false,
+		countDownloads: `path:"rl_agent_config.json"`,
+	},
 	ltx: {
 		prettyLabel: "LTX-2",
 		repoName: "LTX-2",
@@ -1017,7 +1032,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	microduck: {
 		prettyLabel: "Microduck",
 		repoName: "Microduck",
-		repoUrl: "https://github.com/pollen-robotics/microduck_rl",
+		repoUrl: "https://github.com/pollen-robotics/microduck",
+		snippets: snippets.microduck,
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
 	},
