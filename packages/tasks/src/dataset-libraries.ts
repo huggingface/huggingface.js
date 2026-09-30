@@ -123,7 +123,7 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "LeRobot",
 		repoName: "lerobot",
 		repoUrl: "https://github.com/huggingface/lerobot",
-		docsUrl: "https://huggingface.co/docs/lerobot/lerobot-dataset-v3",
+		docsUrl: "https://huggingface.co/docs/lerobot/",
 	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
