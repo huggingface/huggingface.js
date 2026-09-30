@@ -22,7 +22,7 @@ Action recognition is the task of identifying when a person in an image/video is
 
 ## Task Variants
 
-You can contribute variants of this task [here](https://github.com/huggingface/hub-docs/blob/main/tasks/src/zero-shot-image-classification/about.md).
+You can contribute variants of this task [here](https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/src/tasks/zero-shot-image-classification/about.md).
 
 ## Inference
 
