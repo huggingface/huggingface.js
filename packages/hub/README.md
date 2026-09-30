@@ -134,8 +134,6 @@ npx @huggingface/hub download coyotte508/test-model config.json README.md --loca
 # Download an entire repo, optionally filtered with --include / --exclude
 npx @huggingface/hub download coyotte508/test-model --local-dir ./test-model
 npx @huggingface/hub download --repo-type dataset coyotte508/test-dataset --include "*.json"
-# Download a kernel
-npx @huggingface/hub download kernels/kernels-community/activation --local-dir ./activation
 
 npx @huggingface/hub --help
 npx @huggingface/hub upload --help
