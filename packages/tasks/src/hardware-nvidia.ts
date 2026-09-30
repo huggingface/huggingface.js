@@ -999,7 +999,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		releaseYear: 2016,
 	},
 	"Jetson T5000": {
-		tflops: 258.5,  // half the sparse fp16 figure
+		tflops: 258.5, // half the sparse fp16 figure
 		memory: [128],
 		computeCapability: 11.0,
 		msrp: 3_499,
