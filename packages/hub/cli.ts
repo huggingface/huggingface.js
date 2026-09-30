@@ -22,12 +22,13 @@ import {
 } from "./src";
 import { pathToFileURL } from "node:url";
 import { createWriteStream } from "node:fs";
-import { mkdir, stat, unlink } from "node:fs/promises";
+import { mkdir, rename, stat, unlink } from "node:fs/promises";
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 import { pipeline } from "node:stream/promises";
 import { basename, dirname, join } from "node:path";
 import { globMatch } from "./src/lib/parse-safetensors-metadata";
+import { validateRelativeFilename } from "./src/utils/validateRelativeFilename";
 import { HUB_URL } from "./src/consts";
 import { version } from "./package.json";
 import type { CommitProgressEvent } from "./src/lib/commit";
@@ -37,7 +38,7 @@ import type { MultiBar, SingleBar } from "cli-progress";
  * Stream a (potentially lazy) Blob to a local file path.
  *
  * @param onProgress called after each chunk with the cumulative number of bytes written so far.
- * On error, the partially written file is removed so no truncated file is left behind.
+ * Writes to `<filePath>.incomplete` and renames on success, so a failed transfer never touches an existing file.
  */
 async function streamBlobToFile(
 	blob: Blob,
@@ -54,10 +55,12 @@ async function streamBlobToFile(
 		});
 	}
 
+	const incompletePath = `${filePath}.incomplete`;
 	try {
-		await pipeline(source, createWriteStream(filePath));
+		await pipeline(source, createWriteStream(incompletePath));
+		await rename(incompletePath, filePath);
 	} catch (error) {
-		await unlink(filePath).catch(() => {});
+		await unlink(incompletePath).catch(() => {});
 		throw error;
 	}
 }
@@ -790,6 +793,8 @@ async function run() {
 					paths.push(entry.path);
 				}
 			}
+
+			paths.forEach(validateRelativeFilename);
 
 			const cliProgress = quiet ? null : await import("cli-progress").catch(() => null);
 
