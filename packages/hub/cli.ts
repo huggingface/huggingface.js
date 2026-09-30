@@ -16,6 +16,7 @@ import {
 	repoExists,
 	runJob,
 	streamJobLogs,
+	uploadFile,
 	uploadFilesWithProgress,
 	whoAmI,
 	type SpaceHardwareFlavor,
@@ -28,6 +29,7 @@ import type { ReadableStream } from "node:stream/web";
 import { pipeline } from "node:stream/promises";
 import { basename, dirname, join } from "node:path";
 import { globMatch } from "./src/lib/parse-safetensors-metadata";
+import { parseBucketUri } from "./src/utils/parseBucketUri";
 import { validateRelativeFilename } from "./src/utils/validateRelativeFilename";
 import { HUB_URL } from "./src/consts";
 import { version } from "./package.json";
@@ -63,6 +65,14 @@ async function streamBlobToFile(
 		await unlink(incompletePath).catch(() => {});
 		throw error;
 	}
+}
+
+async function readStdin(): Promise<Buffer> {
+	const chunks: Buffer[] = [];
+	for await (const chunk of process.stdin) {
+		chunks.push(chunk as Buffer);
+	}
+	return Buffer.concat(chunks);
 }
 
 // Progress bar manager for handling multiple file uploads
@@ -485,6 +495,40 @@ const commands = {
 		description: "Print the version of the CLI",
 		args: [] as const,
 	} satisfies SingleCommand,
+	buckets: {
+		description: "Manage files in buckets",
+		subcommands: {
+			cp: {
+				description: "Copy a file to or from a bucket, using hf://buckets/namespace/name[/path] URIs",
+				args: [
+					{
+						name: "src" as const,
+						description: "Source: a local file, a bucket URI, or - for stdin (upload only)",
+						positional: true,
+						required: true,
+					},
+					{
+						name: "dst" as const,
+						description:
+							"Destination: a local path, a bucket URI, or - for stdout. Defaults to the current directory when downloading. A trailing / means a directory",
+						positional: true,
+					},
+					{
+						name: "quiet" as const,
+						short: "q",
+						description: "Suppress all output",
+						boolean: true,
+					},
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+		},
+	} satisfies CommandGroup,
 	jobs: {
 		description: "Manage jobs on the Hub",
 		subcommands: {
@@ -833,6 +877,108 @@ async function run() {
 
 			if (!quiet && !process.exitCode) {
 				console.log(`✅ Downloaded ${paths.length} file(s) to ${localDir}`);
+			}
+			break;
+		}
+		case "buckets": {
+			const bucketsCommandGroup = commands.buckets;
+			const currentSubCommandName = subCommandName as keyof typeof bucketsCommandGroup.subcommands | undefined;
+
+			if (subCommandName === "--help" || subCommandName === "-h") {
+				console.log(listSubcommands("buckets", bucketsCommandGroup));
+				break;
+			}
+
+			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
+				if (currentSubCommandName && bucketsCommandGroup.subcommands[currentSubCommandName]) {
+					console.log(detailedUsageForSubcommand("buckets", currentSubCommandName));
+				} else {
+					console.log(listSubcommands("buckets", bucketsCommandGroup));
+				}
+				break;
+			}
+
+			if (!currentSubCommandName || !bucketsCommandGroup.subcommands[currentSubCommandName]) {
+				console.error(`Error: Missing or invalid subcommand for 'buckets'.`);
+				console.log(listSubcommands("buckets", bucketsCommandGroup));
+				process.exitCode = 1;
+				break;
+			}
+
+			const parsedArgs = advParseArgs(cliArgs, bucketsCommandGroup.subcommands.cp.args, "buckets cp");
+			const { src, dst, quiet, token } = parsedArgs;
+			const hubUrl = process.env.HF_ENDPOINT ?? HUB_URL;
+
+			const srcBucket = parseBucketUri(src);
+			const dstBucket = dst ? parseBucketUri(dst) : undefined;
+
+			if (srcBucket && dstBucket) {
+				throw new Error("Copying between buckets is not supported");
+			}
+			if (!srcBucket && !dstBucket) {
+				throw new Error(
+					"Either the source or the destination must be a bucket URI (hf://buckets/namespace/name[/path])",
+				);
+			}
+
+			if (dstBucket) {
+				const isStdin = src === "-";
+				if (!isStdin && !(await stat(src)).isFile()) {
+					throw new Error(`'${src}' is not a file. Use 'hfjs upload' to upload a directory`);
+				}
+				if (isStdin && (!dstBucket.path || dstBucket.path.endsWith("/"))) {
+					throw new Error("Uploading from stdin requires a destination file path in the bucket");
+				}
+
+				const path =
+					!dstBucket.path || dstBucket.path.endsWith("/") ? `${dstBucket.path}${basename(src)}` : dstBucket.path;
+				const repo = { type: "bucket" as const, name: dstBucket.bucket };
+
+				if (!(await repoExists({ repo, accessToken: token, hubUrl }))) {
+					if (!quiet) {
+						console.log(`Bucket ${dstBucket.bucket} does not exist. Creating it...`);
+					}
+					await createRepo({ repo, accessToken: token, hubUrl });
+				}
+
+				const content = isStdin ? new Blob([await readStdin()]) : pathToFileURL(src);
+				await uploadFile({ repo, file: { path, content }, accessToken: token, hubUrl, useXet: true });
+
+				if (!quiet) {
+					console.log(`✅ Uploaded ${isStdin ? "stdin" : src} to hf://buckets/${dstBucket.bucket}/${path}`);
+				}
+			} else if (srcBucket) {
+				if (!srcBucket.path || srcBucket.path.endsWith("/")) {
+					throw new Error("Source must point to a file in the bucket (hf://buckets/namespace/name/path/to/file)");
+				}
+
+				const blob = await downloadFile({
+					repo: { type: "bucket", name: srcBucket.bucket },
+					path: srcBucket.path,
+					accessToken: token,
+					hubUrl,
+					xet: true,
+				});
+				if (!blob) {
+					console.error(`Error: File '${srcBucket.path}' not found in bucket '${srcBucket.bucket}'.`);
+					process.exitCode = 1;
+					break;
+				}
+
+				if (dst === "-") {
+					await pipeline(Readable.fromWeb(blob.stream() as ReadableStream), process.stdout, { end: false });
+					break;
+				}
+
+				const fileName = basename(srcBucket.path);
+				const isDirectory = !dst || dst.endsWith("/") || (await stat(dst).catch(() => null))?.isDirectory();
+				const destination = isDirectory ? join(dst ?? ".", fileName) : dst;
+				await mkdir(dirname(destination), { recursive: true });
+				await streamBlobToFile(blob, destination);
+
+				if (!quiet) {
+					console.log(`✅ Downloaded ${src} to ${destination}`);
+				}
 			}
 			break;
 		}

@@ -135,6 +135,10 @@ npx @huggingface/hub download coyotte508/test-model config.json README.md --loca
 npx @huggingface/hub download coyotte508/test-model --local-dir ./test-model
 npx @huggingface/hub download --repo-type dataset coyotte508/test-dataset --include "*.json"
 
+# Copy a file to or from a bucket
+npx @huggingface/hub buckets cp ./config.json hf://buckets/coyotte508/test-bucket/configs/
+npx @huggingface/hub buckets cp hf://buckets/coyotte508/test-bucket/configs/config.json ./local/
+
 npx @huggingface/hub --help
 npx @huggingface/hub upload --help
 npx @huggingface/hub download --help
