@@ -210,6 +210,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"boltzgen1_diverse.ckpt"`,
 	},
+	bongard: {
+		prettyLabel: "Bongard",
+		repoName: "Bongard",
+		repoUrl: "https://github.com/AgentBull/bongard",
+		filter: false,
+		countDownloads: `path:"bundle.json"`,
+	},
 	cancertathomev2: {
 		prettyLabel: "Cancer@HomeV2",
 		repoName: "Cancer@HomeV2",
