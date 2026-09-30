@@ -16,64 +16,21 @@ import {
 	repoExists,
 	runJob,
 	streamJobLogs,
-	uploadFile,
 	uploadFilesWithProgress,
 	whoAmI,
 	type SpaceHardwareFlavor,
 } from "./src";
 import { pathToFileURL } from "node:url";
-import { createWriteStream } from "node:fs";
-import { mkdir, rename, stat, unlink } from "node:fs/promises";
-import { Readable } from "node:stream";
-import type { ReadableStream } from "node:stream/web";
-import { pipeline } from "node:stream/promises";
+import { mkdir, stat } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { globMatch } from "./src/lib/parse-safetensors-metadata";
-import { parseBucketUri } from "./src/utils/parseBucketUri";
+import { bucketsCp, bucketsLs, bucketsRm, bucketsSync } from "./src/cli/buckets";
+import { streamBlobToFile } from "./src/cli/fs";
 import { validateRelativeFilename } from "./src/utils/validateRelativeFilename";
 import { HUB_URL } from "./src/consts";
 import { version } from "./package.json";
 import type { CommitProgressEvent } from "./src/lib/commit";
 import type { MultiBar, SingleBar } from "cli-progress";
-
-/**
- * Stream a (potentially lazy) Blob to a local file path.
- *
- * @param onProgress called after each chunk with the cumulative number of bytes written so far.
- * Writes to `<filePath>.incomplete` and renames on success, so a failed transfer never touches an existing file.
- */
-async function streamBlobToFile(
-	blob: Blob,
-	filePath: string,
-	onProgress?: (bytesWritten: number) => void,
-): Promise<void> {
-	let bytesWritten = 0;
-	const source = Readable.fromWeb(blob.stream() as ReadableStream);
-
-	if (onProgress) {
-		source.on("data", (chunk: Buffer) => {
-			bytesWritten += chunk.byteLength;
-			onProgress(bytesWritten);
-		});
-	}
-
-	const incompletePath = `${filePath}.incomplete`;
-	try {
-		await pipeline(source, createWriteStream(incompletePath));
-		await rename(incompletePath, filePath);
-	} catch (error) {
-		await unlink(incompletePath).catch(() => {});
-		throw error;
-	}
-}
-
-async function readStdin(): Promise<Buffer> {
-	const chunks: Buffer[] = [];
-	for await (const chunk of process.stdin) {
-		chunks.push(chunk as Buffer);
-	}
-	return Buffer.concat(chunks);
-}
 
 // Progress bar manager for handling multiple file uploads
 class UploadProgressManager {
@@ -527,6 +484,176 @@ const commands = {
 					},
 				] as const,
 			},
+			ls: {
+				description: "List buckets, or files in a bucket",
+				args: [
+					{
+						name: "argument" as const,
+						description:
+							"Namespace to list buckets of (defaults to your own), or bucket (hf://buckets/namespace/name[/prefix] or namespace/name[/prefix]) to list files of",
+						positional: true,
+					},
+					{
+						name: "human-readable" as const,
+						short: "h",
+						description: "Show sizes in human readable format",
+						boolean: true,
+					},
+					{
+						name: "tree" as const,
+						description: "List files in tree format (only for listing files)",
+						boolean: true,
+					},
+					{
+						name: "recursive" as const,
+						short: "R",
+						description: "List files recursively (only for listing files)",
+						boolean: true,
+					},
+					{
+						name: "search" as const,
+						description: "Search query (only for listing buckets)",
+					},
+					{
+						name: "quiet" as const,
+						short: "q",
+						description: "Only print bucket ids or file paths",
+						boolean: true,
+					},
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+			rm: {
+				description: "Remove files from a bucket",
+				args: [
+					{
+						name: "argument" as const,
+						description:
+							"Bucket path: hf://buckets/namespace/name/path or namespace/name/path. With --recursive, namespace/name also targets all files",
+						positional: true,
+						required: true,
+					},
+					{
+						name: "recursive" as const,
+						short: "R",
+						description: "Remove files recursively under the given prefix",
+						boolean: true,
+					},
+					{
+						name: "yes" as const,
+						short: "y",
+						description: "Skip confirmation prompt",
+						boolean: true,
+					},
+					{
+						name: "dry-run" as const,
+						description: "Preview what would be removed without removing anything",
+						boolean: true,
+					},
+					{
+						name: "include" as const,
+						description: "Only remove files matching these glob patterns. Requires --recursive",
+						multiple: true,
+					},
+					{
+						name: "exclude" as const,
+						description: "Skip files matching these glob patterns. Requires --recursive",
+						multiple: true,
+					},
+					{
+						name: "quiet" as const,
+						short: "q",
+						description: "Suppress all output",
+						boolean: true,
+					},
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+			sync: {
+				description: "Sync files between a local directory and a bucket",
+				args: [
+					{
+						name: "source" as const,
+						description: "Source: a local directory or hf://buckets/namespace/name[/prefix]",
+						positional: true,
+						required: true,
+					},
+					{
+						name: "dest" as const,
+						description: "Destination: a local directory or hf://buckets/namespace/name[/prefix]",
+						positional: true,
+						required: true,
+					},
+					{
+						name: "delete" as const,
+						description: "Delete destination files not present in source",
+						boolean: true,
+					},
+					{
+						name: "ignore-times" as const,
+						description: "Skip files based only on size, ignoring modification times",
+						boolean: true,
+					},
+					{
+						name: "ignore-sizes" as const,
+						description: "Skip files based only on modification times, ignoring sizes",
+						boolean: true,
+					},
+					{
+						name: "dry-run" as const,
+						description: "Print the sync plan to stdout as JSONL without executing it",
+						boolean: true,
+					},
+					{
+						name: "include" as const,
+						description: "Only sync files matching these glob patterns",
+						multiple: true,
+					},
+					{
+						name: "exclude" as const,
+						description: "Skip files matching these glob patterns",
+						multiple: true,
+					},
+					{
+						name: "existing" as const,
+						description: "Skip creating new files on the receiver (only update existing files)",
+						boolean: true,
+					},
+					{
+						name: "ignore-existing" as const,
+						description: "Skip updating files that already exist on the receiver",
+						boolean: true,
+					},
+					{
+						name: "verbose" as const,
+						short: "v",
+						description: "Print the action and reason for every file",
+						boolean: true,
+					},
+					{
+						name: "quiet" as const,
+						short: "q",
+						description: "Suppress all output",
+						boolean: true,
+					},
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
 		},
 	} satisfies CommandGroup,
 	jobs: {
@@ -905,80 +1032,33 @@ async function run() {
 				break;
 			}
 
-			const parsedArgs = advParseArgs(cliArgs, bucketsCommandGroup.subcommands.cp.args, "buckets cp");
-			const { src, dst, quiet, token } = parsedArgs;
 			const hubUrl = process.env.HF_ENDPOINT ?? HUB_URL;
 
-			const srcBucket = parseBucketUri(src);
-			const dstBucket = dst ? parseBucketUri(dst) : undefined;
-
-			if (srcBucket && dstBucket) {
-				throw new Error("Copying between buckets is not supported");
-			}
-			if (!srcBucket && !dstBucket) {
-				throw new Error(
-					"Either the source or the destination must be a bucket URI (hf://buckets/namespace/name[/path])",
-				);
-			}
-
-			if (dstBucket) {
-				const isStdin = src === "-";
-				if (!isStdin && !(await stat(src)).isFile()) {
-					throw new Error(`'${src}' is not a file. Use 'hfjs upload' to upload a directory`);
-				}
-				if (isStdin && (!dstBucket.path || dstBucket.path.endsWith("/"))) {
-					throw new Error("Uploading from stdin requires a destination file path in the bucket");
-				}
-
-				const path =
-					!dstBucket.path || dstBucket.path.endsWith("/") ? `${dstBucket.path}${basename(src)}` : dstBucket.path;
-				const repo = { type: "bucket" as const, name: dstBucket.bucket };
-
-				if (!(await repoExists({ repo, accessToken: token, hubUrl }))) {
-					if (!quiet) {
-						console.log(`Bucket ${dstBucket.bucket} does not exist. Creating it...`);
-					}
-					await createRepo({ repo, accessToken: token, hubUrl });
-				}
-
-				const content = isStdin ? new Blob([await readStdin()]) : pathToFileURL(src);
-				await uploadFile({ repo, file: { path, content }, accessToken: token, hubUrl, useXet: true });
-
-				if (!quiet) {
-					console.log(`✅ Uploaded ${isStdin ? "stdin" : src} to hf://buckets/${dstBucket.bucket}/${path}`);
-				}
-			} else if (srcBucket) {
-				if (!srcBucket.path || srcBucket.path.endsWith("/")) {
-					throw new Error("Source must point to a file in the bucket (hf://buckets/namespace/name/path/to/file)");
-				}
-
-				const blob = await downloadFile({
-					repo: { type: "bucket", name: srcBucket.bucket },
-					path: srcBucket.path,
-					accessToken: token,
-					hubUrl,
-					xet: true,
-				});
-				if (!blob) {
-					console.error(`Error: File '${srcBucket.path}' not found in bucket '${srcBucket.bucket}'.`);
-					process.exitCode = 1;
+			switch (currentSubCommandName) {
+				case "cp":
+					await bucketsCp({
+						...advParseArgs(cliArgs, bucketsCommandGroup.subcommands.cp.args, "buckets cp"),
+						hubUrl,
+					});
 					break;
-				}
-
-				if (dst === "-") {
-					await pipeline(Readable.fromWeb(blob.stream() as ReadableStream), process.stdout, { end: false });
+				case "ls":
+					await bucketsLs({
+						...advParseArgs(cliArgs, bucketsCommandGroup.subcommands.ls.args, "buckets ls"),
+						hubUrl,
+					});
 					break;
-				}
-
-				const fileName = basename(srcBucket.path);
-				const isDirectory = !dst || dst.endsWith("/") || (await stat(dst).catch(() => null))?.isDirectory();
-				const destination = isDirectory ? join(dst ?? ".", fileName) : dst;
-				await mkdir(dirname(destination), { recursive: true });
-				await streamBlobToFile(blob, destination);
-
-				if (!quiet) {
-					console.log(`✅ Downloaded ${src} to ${destination}`);
-				}
+				case "rm":
+					await bucketsRm({
+						...advParseArgs(cliArgs, bucketsCommandGroup.subcommands.rm.args, "buckets rm"),
+						hubUrl,
+					});
+					break;
+				case "sync":
+					await bucketsSync({
+						...advParseArgs(cliArgs, bucketsCommandGroup.subcommands.sync.args, "buckets sync"),
+						hubUrl,
+					});
+					break;
 			}
 			break;
 		}
