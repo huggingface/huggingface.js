@@ -25,6 +25,12 @@ export interface ListFileEntry {
 	 */
 	xetHash?: string;
 	/**
+	 * Modification time of the file, as set by the uploader.
+	 *
+	 * Only available for bucket repos.
+	 */
+	mtime?: string;
+	/**
 	 * Only fetched if `expand` is set to `true` in the `listFiles` call.
 	 *
 	 * Not available for bucket repos, use {@link uploadedAt} instead.

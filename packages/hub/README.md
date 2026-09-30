@@ -135,16 +135,19 @@ npx @huggingface/hub download coyotte508/test-model config.json README.md --loca
 npx @huggingface/hub download coyotte508/test-model --local-dir ./test-model
 npx @huggingface/hub download --repo-type dataset coyotte508/test-dataset --include "*.json"
 
-# Copy files or directories to or from a bucket (a trailing / copies the directory contents only)
+# Copy files or directories to, from and between buckets (a trailing / copies the directory contents only)
 npx @huggingface/hub buckets cp ./config.json hf://buckets/coyotte508/test-bucket/configs/
 npx @huggingface/hub buckets cp ./data hf://buckets/coyotte508/test-bucket/
 npx @huggingface/hub buckets cp hf://buckets/coyotte508/test-bucket/configs/config.json ./local/
 npx @huggingface/hub buckets cp hf://buckets/coyotte508/test-bucket/data ./local/
-# List buckets or files, remove files, and sync a directory
+npx @huggingface/hub buckets cp hf://buckets/coyotte508/test-bucket/data hf://buckets/coyotte508/other-bucket/
+npx @huggingface/hub buckets cp hf://datasets/coyotte508/test-dataset/ hf://buckets/coyotte508/test-bucket/dataset/
+# List buckets or files, remove files, and sync a directory (plan files are compatible with `hf buckets sync`)
 npx @huggingface/hub buckets ls coyotte508
 npx @huggingface/hub buckets ls coyotte508/test-bucket --recursive --human-readable
 npx @huggingface/hub buckets rm coyotte508/test-bucket/configs --recursive --dry-run
-npx @huggingface/hub buckets sync ./data hf://buckets/coyotte508/test-bucket/data --delete
+npx @huggingface/hub buckets sync ./data hf://buckets/coyotte508/test-bucket/data --delete --plan plan.jsonl
+npx @huggingface/hub buckets sync --apply plan.jsonl
 
 npx @huggingface/hub --help
 npx @huggingface/hub upload --help

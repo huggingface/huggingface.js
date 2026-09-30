@@ -46,6 +46,10 @@ export interface CommitFile {
 	operation: "addOrUpdate";
 	path: string;
 	content: ContentSource;
+	/**
+	 * Modification time of the file, in milliseconds since the epoch. Only used when uploading to a bucket.
+	 */
+	mtime?: number;
 	// forceLfs?: boolean
 }
 
@@ -852,6 +856,10 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 				}
 			})();
 
+			const mtimes = new Map(
+				operations.flatMap((operation) => (operation.mtime !== undefined ? [[operation.path, operation.mtime]] : [])),
+			);
+
 			const xetParams: XetTokenParams = {
 				sessionId: crypto.randomUUID(),
 				refreshWriteTokenUrl: `${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/xet-write-token`,
@@ -905,6 +913,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 								type: "addFile",
 								path,
 								xetHash,
+								mtime: mtimes.get(path),
 							}),
 						)
 						.join("\n"),

@@ -1,182 +1,246 @@
-import { mkdir, readdir, stat, unlink, utimes } from "node:fs/promises";
-import { createInterface } from "node:readline/promises";
-import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { mkdir, stat } from "node:fs/promises";
+import { basename, dirname, join, resolve, relative, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { ReadableStream } from "node:stream/web";
 import { createApiError } from "../error";
+import { copyFiles, type CopyFilesEntry } from "../lib/copy-files";
 import { deleteFiles } from "../lib/delete-files";
 import { downloadFile } from "../lib/download-file";
 import { fileExists } from "../lib/file-exists";
-import type { ListFileEntry } from "../lib/list-files";
 import { listFiles } from "../lib/list-files";
-import { globMatch } from "../lib/parse-safetensors-metadata";
-import { uploadFile } from "../lib/upload-file";
+import { pathsInfo } from "../lib/paths-info";
 import { uploadFiles } from "../lib/upload-files";
 import { whoAmI } from "../lib/who-am-i";
-import { parseBucketUri, type BucketUri } from "../utils/parseBucketUri";
+import { isHfUri, parseHfUri, type HfUri } from "../utils/parseHfUri";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
-import { validateRelativeFilename } from "../utils/validateRelativeFilename";
+import {
+	FilterMatcher,
+	confirm,
+	formatSize,
+	joinRemote,
+	listRemote,
+	repoOf,
+	statLocal,
+	stripSlashes,
+	walkLocal,
+	type CommonOptions,
+} from "./bucket-utils";
 import { readStdin, streamBlobToFile } from "./fs";
 
-interface CommonOptions {
-	token: string;
-	hubUrl: string;
-	quiet?: boolean;
-}
+export { bucketsSync } from "./bucket-sync";
 
-const SYNC_TIME_WINDOW_MS = 1000;
-const DELETE_BATCH_SIZE = 1000;
-
-const repoOf = (bucket: string) => ({ type: "bucket" as const, name: bucket });
+const BATCH_SIZE = 1000;
 
 /** Accepts `hf://buckets/ns/name[/path]` as well as the bare `ns/name[/path]` form. */
-function parseBucketRef(ref: string): BucketUri {
-	const parsed = parseBucketUri(ref.startsWith("hf://") ? ref : `hf://buckets/${ref}`);
-	return parsed as BucketUri;
-}
-
-const stripSlashes = (path: string) => path.replace(/^\/+|\/+$/g, "");
-const joinRemote = (...parts: string[]) => parts.map(stripSlashes).filter(Boolean).join("/");
-
-async function listRemote(
-	bucket: string,
-	prefix: string,
-	opts: CommonOptions & { recursive: boolean; expand?: boolean },
-): Promise<ListFileEntry[]> {
-	const entries: ListFileEntry[] = [];
-	for await (const entry of listFiles({
-		repo: repoOf(bucket),
-		path: stripSlashes(prefix) || undefined,
-		recursive: opts.recursive,
-		expand: opts.expand,
-		accessToken: opts.token,
-		hubUrl: opts.hubUrl,
-	})) {
-		entries.push(entry);
+function parseBucketRef(ref: string): HfUri {
+	const uri = parseHfUri(ref.startsWith("hf://") ? ref : `hf://buckets/${ref}`);
+	if (uri.type !== "bucket") {
+		throw new TypeError(`Invalid bucket path: ${ref}. Must be a bucket URI (hf://buckets/...).`);
 	}
-	return entries;
+	return uri;
 }
 
-async function walkLocal(dir: string): Promise<Array<{ rel: string; abs: string }>> {
-	const files: Array<{ rel: string; abs: string }> = [];
-	const walk = async (current: string) => {
-		for (const entry of await readdir(current, { withFileTypes: true })) {
-			const abs = join(current, entry.name);
-			if (entry.isDirectory()) {
-				await walk(abs);
-			} else if (entry.isFile()) {
-				files.push({ rel: relative(dir, abs).split(sep).join("/"), abs });
-			}
+/** Port of `_resolve_copy_target_path` from huggingface_hub. */
+function resolveCopyTargetPath(args: {
+	srcFilePath: string;
+	srcRootPath?: string;
+	isSingleFile: boolean;
+	destinationPath: string;
+	destinationIsDirectory: boolean;
+	destinationExistsAsDirectory: boolean;
+	mergeContents: boolean;
+}): string {
+	const { srcFilePath, srcRootPath, destinationPath } = args;
+	const fileName = srcFilePath.split("/").at(-1) as string;
+	if (args.isSingleFile) {
+		if (destinationPath === "") {
+			return fileName;
 		}
-	};
-	await walk(dir);
-	return files;
+		return args.destinationIsDirectory ? `${destinationPath.replace(/\/+$/, "")}/${fileName}` : destinationPath;
+	}
+
+	let relPath: string;
+	if (srcRootPath === undefined) {
+		relPath = srcFilePath;
+	} else if (srcFilePath.startsWith(`${srcRootPath}/`)) {
+		relPath = srcFilePath.slice(srcRootPath.length + 1);
+	} else if (srcFilePath === srcRootPath) {
+		relPath = fileName;
+	} else {
+		throw new Error(`Unexpected source path while copying folder: '${srcFilePath}'.`);
+	}
+	if (!relPath) {
+		throw new Error("Cannot copy an empty relative path.");
+	}
+
+	// Without a trailing slash on the source, nest the source folder inside an existing destination directory
+	if (args.destinationExistsAsDirectory && srcRootPath !== undefined && !args.mergeContents) {
+		relPath = `${srcRootPath.split("/").at(-1)}/${relPath}`;
+	}
+	return destinationPath === "" ? relPath : `${destinationPath.replace(/\/+$/, "")}/${relPath}`;
 }
 
-function makeFilter(include?: string[], exclude?: string[]) {
-	return (path: string) =>
-		(!include?.length || include.some((pattern) => globMatch(pattern, path))) &&
-		!exclude?.some((pattern) => globMatch(pattern, path));
-}
+/** Port of `HfApi.copy_files` for bucket destinations: server-side copy from a bucket or a repo. */
+async function copyToBucket(source: string, destination: string, opts: CommonOptions): Promise<void> {
+	const src = parseHfUri(source);
+	const dst = parseHfUri(destination);
+	const mergeContents = source.endsWith("/");
+	const auth = { accessToken: opts.token, hubUrl: opts.hubUrl };
+	const destRepo = repoOf(dst.id);
+	const srcRepo = src.type === "bucket" ? repoOf(src.id) : { type: src.type, name: src.id };
 
-async function confirm(message: string): Promise<boolean> {
-	const rl = createInterface({ input: process.stdin, output: process.stdout });
-	try {
-		return /^y(es)?$/i.test((await rl.question(`${message} [y/N] `)).trim());
-	} finally {
-		rl.close();
+	let destinationIsDirectory = false;
+	let destinationExistsAsDirectory = false;
+	if (dst.path === "") {
+		destinationIsDirectory = true;
+		destinationExistsAsDirectory = true;
+	} else if (!(await fileExists({ repo: destRepo, path: dst.path, ...auth }))) {
+		destinationExistsAsDirectory = (await listRemote(dst.id, dst.path, { ...opts, recursive: false })).length > 0;
+		destinationIsDirectory = destinationExistsAsDirectory || destination.endsWith("/");
 	}
-}
 
-function formatSize(size: number, humanReadable?: boolean): string {
-	if (!humanReadable) {
-		return String(size);
-	}
-	const units = ["B", "K", "M", "G", "T"];
-	let value = size;
-	let unit = 0;
-	while (value >= 1024 && unit < units.length - 1) {
-		value /= 1024;
-		unit++;
-	}
-	return unit === 0 ? `${value}B` : `${value.toFixed(1)}${units[unit]}`;
-}
+	const targetPath = (srcFilePath: string, srcRootPath: string | undefined, isSingleFile: boolean) =>
+		resolveCopyTargetPath({
+			srcFilePath,
+			srcRootPath,
+			isSingleFile,
+			destinationPath: dst.path,
+			destinationIsDirectory,
+			destinationExistsAsDirectory,
+			mergeContents,
+		});
 
-async function downloadBucketFile(
-	bucket: string,
-	path: string,
-	destination: string,
-	opts: CommonOptions,
-	mtime?: Date,
-): Promise<boolean> {
-	const blob = await downloadFile({
-		repo: repoOf(bucket),
-		path,
-		accessToken: opts.token,
-		hubUrl: opts.hubUrl,
-		xet: true,
-	});
-	if (!blob) {
-		return false;
+	const sourceIsFile =
+		src.path !== "" &&
+		(src.type === "bucket"
+			? await fileExists({ repo: srcRepo, path: src.path, ...auth })
+			: (await pathsInfo({ repo: srcRepo, paths: [src.path], revision: src.revision, ...auth })).some(
+					(info) => info.type === "file",
+				));
+
+	const files: CopyFilesEntry[] = [];
+	const addFile = (path: string, destinationPath: string) =>
+		files.push({ source: { repo: srcRepo, path, revision: src.revision }, destinationPath });
+
+	if (sourceIsFile) {
+		addFile(src.path, targetPath(src.path, undefined, true));
+	} else {
+		for await (const entry of listFiles({
+			repo: srcRepo,
+			path: src.path || undefined,
+			recursive: true,
+			revision: src.revision,
+			...auth,
+		})) {
+			if (entry.type !== "file") {
+				continue;
+			}
+			if (src.type !== "bucket" && entry.path.split("/").at(-1) === ".gitattributes") {
+				continue;
+			}
+			if (src.path && !(entry.path === src.path || entry.path.startsWith(`${src.path}/`))) {
+				continue;
+			}
+			addFile(entry.path, targetPath(entry.path, src.path || undefined, false));
+		}
 	}
-	await mkdir(dirname(destination), { recursive: true });
-	await streamBlobToFile(blob, destination);
-	if (mtime) {
-		await utimes(destination, mtime, mtime);
+
+	if (!files.length) {
+		throw new Error(`No files found at '${source}' in ${src.type} '${src.id}'.`);
 	}
-	return true;
+
+	for (let i = 0; i < files.length; i += BATCH_SIZE) {
+		await copyFiles({ destination: destRepo, files: files.slice(i, i + BATCH_SIZE), ...auth });
+	}
 }
 
 export async function bucketsCp(args: CommonOptions & { src: string; dst?: string }): Promise<void> {
 	const { src, dst, quiet } = args;
-	const srcBucket = parseBucketUri(src);
-	const dstBucket = dst ? parseBucketUri(dst) : undefined;
 
-	if (srcBucket && dstBucket) {
-		throw new Error("Copying between buckets is not supported");
+	const srcIsHf = isHfUri(src);
+	const dstIsHf = !!dst && isHfUri(dst);
+	const srcUri = srcIsHf ? parseHfUri(src) : undefined;
+	const dstUri = dstIsHf ? parseHfUri(dst) : undefined;
+	const srcBucket = srcUri?.type === "bucket" ? srcUri : undefined;
+	const dstBucket = dstUri?.type === "bucket" ? dstUri : undefined;
+
+	if (srcUri && dstUri) {
+		if (!dstBucket) {
+			throw new Error(
+				srcBucket ? "Bucket-to-repo copy is not supported." : "Copying to repos is not supported, only to buckets.",
+			);
+		}
+		await copyToBucket(src, dst as string, args);
+		if (!quiet) {
+			console.log(`Copied ${src} to ${dst}`);
+		}
+		return;
 	}
-	if (!srcBucket && !dstBucket) {
-		throw new Error("Either the source or the destination must be a bucket URI (hf://buckets/namespace/name[/path])");
+
+	const isStdin = src === "-";
+	if (!srcBucket && !dstBucket && !isStdin) {
+		throw new Error(
+			dst === undefined
+				? "Missing destination. Provide a bucket path as DST."
+				: "One of SRC or DST must be a bucket path (hf://buckets/...).",
+		);
+	}
+	if (isStdin && !dstBucket) {
+		throw new Error("Stdin upload requires a bucket destination.");
+	}
+	if (dst === "-" && !srcBucket) {
+		throw new Error("Cannot pipe to stdout for uploads.");
 	}
 
 	if (dstBucket) {
-		const isStdin = src === "-";
-		const destIsDir = !dstBucket.path || dstBucket.path.endsWith("/");
+		const destIsDir = !dstBucket.path || (dst as string).endsWith("/");
 		if (isStdin && destIsDir) {
-			throw new Error("Uploading from stdin requires a destination file path in the bucket");
+			throw new Error("Stdin upload requires a full destination path including filename.");
 		}
-		const repo = repoOf(dstBucket.bucket);
+		const repo = repoOf(dstBucket.id);
+		const auth = { accessToken: args.token, hubUrl: args.hubUrl };
 
-		if (!isStdin && (await stat(src)).isDirectory()) {
+		if (!isStdin && (await stat(src).catch(() => null))?.isDirectory()) {
 			// `dir` nests the directory under the destination, `dir/` copies its contents only
 			const root = resolve(src);
 			const prefix = src.endsWith("/") || src.endsWith(sep) ? "" : basename(root);
-			const files = await walkLocal(root);
-			await uploadFiles({
-				repo,
-				files: files.map((file) => ({
+			const files = await Promise.all(
+				(await walkLocal(root)).map(async (file) => ({
 					path: joinRemote(dstBucket.path, prefix, file.rel),
 					content: pathToFileURL(file.abs),
+					mtime: Math.trunc((await statLocal(file.abs))?.mtime ?? Date.now()),
 				})),
-				accessToken: args.token,
-				hubUrl: args.hubUrl,
-				useXet: true,
-			});
+			);
+			for (let i = 0; i < files.length; i += BATCH_SIZE) {
+				await uploadFiles({ repo, files: files.slice(i, i + BATCH_SIZE), ...auth, useXet: true });
+			}
 			if (!quiet) {
 				console.log(
-					`✅ Uploaded ${files.length} file(s) from ${src} to hf://buckets/${dstBucket.bucket}/${joinRemote(dstBucket.path, prefix)}`,
+					`Uploaded ${files.length} file(s) from ${src} to hf://buckets/${dstBucket.id}/${joinRemote(dstBucket.path, prefix)}`,
 				);
 			}
 			return;
 		}
 
 		const path = destIsDir ? joinRemote(dstBucket.path, basename(src)) : dstBucket.path;
-		const content = isStdin ? new Blob([await readStdin()]) : pathToFileURL(src);
-		await uploadFile({ repo, file: { path, content }, accessToken: args.token, hubUrl: args.hubUrl, useXet: true });
+		let content: Blob | URL;
+		let mtime: number;
+		if (isStdin) {
+			content = new Blob([await readStdin()]);
+			mtime = Date.now();
+		} else {
+			const info = await statLocal(src);
+			if (!info) {
+				throw new Error(`Source file not found: ${src}`);
+			}
+			content = pathToFileURL(src);
+			mtime = Math.trunc(info.mtime);
+		}
+		await uploadFiles({ repo, files: [{ path, content, mtime }], ...auth, useXet: true });
 		if (!quiet) {
-			console.log(`✅ Uploaded ${isStdin ? "stdin" : src} to hf://buckets/${dstBucket.bucket}/${path}`);
+			console.log(`Uploaded ${isStdin ? "stdin" : src} to hf://buckets/${dstBucket.id}/${path}`);
 		}
 		return;
 	}
@@ -185,12 +249,12 @@ export async function bucketsCp(args: CommonOptions & { src: string; dst?: strin
 		return;
 	}
 
-	const remotePath = stripSlashes(srcBucket.path);
-	const wantsDirectory = !remotePath || srcBucket.path.endsWith("/");
+	const remotePath = srcBucket.path;
+	const wantsDirectory = !remotePath || src.endsWith("/");
 
 	if (!wantsDirectory) {
 		const blob = await downloadFile({
-			repo: repoOf(srcBucket.bucket),
+			repo: repoOf(srcBucket.id),
 			path: remotePath,
 			accessToken: args.token,
 			hubUrl: args.hubUrl,
@@ -202,43 +266,51 @@ export async function bucketsCp(args: CommonOptions & { src: string; dst?: strin
 				return;
 			}
 			const isDirectory = !dst || dst.endsWith("/") || (await stat(dst).catch(() => null))?.isDirectory();
-			const destination = isDirectory ? join(dst ?? ".", basename(remotePath)) : dst;
+			const destination = isDirectory ? join(dst ?? ".", basename(remotePath)) : (dst as string);
 			await mkdir(dirname(destination), { recursive: true });
 			await streamBlobToFile(blob, destination);
 			if (!quiet) {
-				console.log(`✅ Downloaded ${src} to ${destination}`);
+				console.log(`Downloaded ${src} to ${destination}`);
 			}
 			return;
 		}
 	}
 
-	const entries = (await listRemote(srcBucket.bucket, remotePath, { ...args, recursive: true })).filter(
+	const entries = (await listRemote(srcBucket.id, remotePath, { ...args, recursive: true })).filter(
 		(entry) => entry.type === "file",
 	);
 	if (!entries.length) {
-		console.error(`Error: '${remotePath}' not found in bucket '${srcBucket.bucket}'.`);
+		console.error(`Error: '${remotePath}' not found in bucket '${srcBucket.id}'.`);
 		process.exitCode = 1;
 		return;
 	}
-
 	if (dst === "-") {
 		throw new Error("Cannot copy a directory to stdout");
 	}
 
 	// `dir` nests the directory under the destination, `dir/` (or the bucket root) copies its contents only
-	const nest = wantsDirectory ? "" : basename(remotePath);
-	const root = join(dst ?? ".", nest);
+	const root = join(dst ?? ".", wantsDirectory ? "" : basename(remotePath));
 	const base = remotePath ? `${remotePath}/` : "";
 	for (const entry of entries) {
-		const rel = entry.path.slice(base.length);
-		const destination = resolve(root, rel);
+		const destination = resolve(root, entry.path.slice(base.length));
 		if (relative(resolve(root), destination).startsWith("..")) {
 			throw new Error(`Refusing to write outside of ${root}: ${entry.path}`);
 		}
-		await downloadBucketFile(srcBucket.bucket, entry.path, destination, args);
+		const blob = await downloadFile({
+			repo: repoOf(srcBucket.id),
+			path: entry.path,
+			accessToken: args.token,
+			hubUrl: args.hubUrl,
+			xet: true,
+		});
+		if (!blob) {
+			throw new Error(`File '${entry.path}' not found in bucket '${srcBucket.id}'.`);
+		}
+		await mkdir(dirname(destination), { recursive: true });
+		await streamBlobToFile(blob, destination);
 	}
 	if (!quiet) {
-		console.log(`✅ Downloaded ${entries.length} file(s) from ${src} to ${root}`);
+		console.log(`Downloaded ${entries.length} file(s) from ${src} to ${root}`);
 	}
 }
 
@@ -316,8 +388,8 @@ export async function bucketsLs(
 		return;
 	}
 
-	const { bucket, path } = parseBucketRef(ref as string);
-	const entries = await listRemote(bucket, path, { ...args, recursive: !!(args.recursive || args.tree), expand: true });
+	const { id: bucket, path } = parseBucketRef(ref as string);
+	const entries = await listRemote(bucket, path, { ...args, recursive: !!(args.recursive || args.tree) });
 
 	if (args.tree) {
 		const prefix = stripSlashes(path);
@@ -347,7 +419,7 @@ export async function bucketsLs(
 		console.log(
 			[
 				isDir ? "".padStart(10) : formatSize(entry.size, args.humanReadable).padStart(10),
-				(entry.uploadedAt ?? "").slice(0, 19).padEnd(19),
+				(entry.mtime ?? entry.uploadedAt ?? "").slice(0, 19).padEnd(19),
 				isDir ? `${entry.path}/` : entry.path,
 			].join("  "),
 		);
@@ -364,226 +436,68 @@ export async function bucketsRm(
 		exclude?: string[];
 	},
 ): Promise<void> {
-	const { bucket, path } = parseBucketRef(args.argument);
-	const prefix = stripSlashes(path);
+	const { id: bucket, path: prefix } = parseBucketRef(args.argument);
 	const repo = repoOf(bucket);
+	const auth = { accessToken: args.token, hubUrl: args.hubUrl };
 
-	if ((args.include?.length || args.exclude?.length) && !args.recursive) {
-		throw new Error("--include and --exclude require --recursive");
-	}
-
-	let paths: string[];
-	if (args.recursive) {
-		const matches = makeFilter(args.include, args.exclude);
-		const base = prefix ? `${prefix}/` : "";
-		paths = (await listRemote(bucket, prefix, { ...args, recursive: true }))
-			.filter((entry) => entry.type === "file" && matches(entry.path.slice(base.length)))
-			.map((entry) => entry.path);
-	} else {
-		if (!prefix) {
-			throw new Error("Specify a file path, or use --recursive to remove all files in the bucket");
-		}
-		if (!(await fileExists({ repo, path: prefix, accessToken: args.token, hubUrl: args.hubUrl }))) {
-			throw new Error(`File '${prefix}' not found in bucket '${bucket}'. Use --recursive to remove a directory`);
-		}
-		paths = [prefix];
-	}
-
-	if (!paths.length) {
-		if (!args.quiet) {
-			console.log("Nothing to remove.");
-		}
-		return;
-	}
-
-	if (args.dryRun) {
-		paths.forEach((path) => console.log(`would remove ${path}`));
-		return;
-	}
-
-	if (!args.yes && !(await confirm(`Remove ${paths.length} file(s) from ${bucket}?`))) {
-		console.log("Aborted.");
-		process.exitCode = 1;
-		return;
-	}
-
-	for (let i = 0; i < paths.length; i += DELETE_BATCH_SIZE) {
-		await deleteFiles({
-			repo,
-			paths: paths.slice(i, i + DELETE_BATCH_SIZE),
-			accessToken: args.token,
-			hubUrl: args.hubUrl,
-		});
-	}
-	if (!args.quiet) {
-		console.log(`✅ Removed ${paths.length} file(s) from ${bucket}`);
-	}
-}
-
-interface SyncFile {
-	size: number;
-	mtime: number;
-}
-
-interface SyncOperation {
-	action: "upload" | "download" | "delete" | "skip";
-	path: string;
-	size: number;
-	reason: string;
-}
-
-function compareForSync(
-	source: SyncFile,
-	dest: SyncFile,
-	opts: { ignoreSizes?: boolean; ignoreTimes?: boolean },
-): { transfer: boolean; reason: string } {
-	const sourceNewer = source.mtime - dest.mtime > SYNC_TIME_WINDOW_MS;
-	const sizeDiffers = source.size !== dest.size;
-	if (opts.ignoreSizes) {
-		return { transfer: sourceNewer, reason: sourceNewer ? "source newer" : "not newer" };
-	}
-	if (opts.ignoreTimes) {
-		return { transfer: sizeDiffers, reason: sizeDiffers ? "size differs" : "same size" };
-	}
-	if (sizeDiffers || sourceNewer) {
-		return { transfer: true, reason: sizeDiffers ? "size differs" : "source newer" };
-	}
-	return { transfer: false, reason: "identical" };
-}
-
-export async function bucketsSync(
-	args: CommonOptions & {
-		source: string;
-		dest: string;
-		delete?: boolean;
-		ignoreTimes?: boolean;
-		ignoreSizes?: boolean;
-		dryRun?: boolean;
-		include?: string[];
-		exclude?: string[];
-		existing?: boolean;
-		ignoreExisting?: boolean;
-		verbose?: boolean;
-	},
-): Promise<void> {
-	const srcBucket = parseBucketUri(args.source);
-	const dstBucket = parseBucketUri(args.dest);
-	if (!!srcBucket === !!dstBucket) {
-		throw new Error("Exactly one of source and destination must be a bucket URI (hf://buckets/namespace/name[/path])");
-	}
-	if (args.existing && args.ignoreExisting) {
-		throw new Error("--existing and --ignore-existing cannot be used together");
-	}
-
-	const upload = !!dstBucket;
-	const remote = (dstBucket ?? srcBucket) as BucketUri;
-	const remotePrefix = stripSlashes(remote.path);
-	const localDir = resolve(upload ? args.source : args.dest);
-	const matches = makeFilter(args.include, args.exclude);
-
-	if (upload && !(await stat(localDir).catch(() => null))?.isDirectory()) {
-		throw new Error(`'${args.source}' is not a directory`);
-	}
-
-	const localFiles = new Map<string, SyncFile>();
-	if ((await stat(localDir).catch(() => null))?.isDirectory()) {
-		for (const file of await walkLocal(localDir)) {
-			if (matches(file.rel)) {
-				const info = await stat(file.abs);
-				localFiles.set(file.rel, { size: info.size, mtime: info.mtimeMs });
-			}
-		}
-	}
-
-	const base = remotePrefix ? `${remotePrefix}/` : "";
-	const remoteFiles = new Map<string, SyncFile>();
-	for (const entry of await listRemote(remote.bucket, remotePrefix, { ...args, recursive: true, expand: true })) {
-		const rel = entry.path.slice(base.length);
-		if (entry.type === "file" && matches(rel)) {
-			validateRelativeFilename(rel);
-			remoteFiles.set(rel, { size: entry.size, mtime: entry.uploadedAt ? Date.parse(entry.uploadedAt) : 0 });
-		}
-	}
-
-	const [sourceFiles, destFiles] = upload ? [localFiles, remoteFiles] : [remoteFiles, localFiles];
-	const action = upload ? "upload" : "download";
-	const plan: SyncOperation[] = [];
-
-	for (const [path, source] of [...sourceFiles].sort(([a], [b]) => a.localeCompare(b))) {
-		const dest = destFiles.get(path);
-		if (!dest) {
-			plan.push(
-				args.existing
-					? { action: "skip", path, size: source.size, reason: "new file (--existing)" }
-					: { action, path, size: source.size, reason: "new file" },
-			);
-		} else if (args.ignoreExisting) {
-			plan.push({ action: "skip", path, size: source.size, reason: "exists on receiver (--ignore-existing)" });
-		} else {
-			const { transfer, reason } = compareForSync(source, dest, args);
-			plan.push({ action: transfer ? action : "skip", path, size: source.size, reason });
-		}
-	}
-	if (args.delete) {
-		for (const [path, dest] of [...destFiles].sort(([a], [b]) => a.localeCompare(b))) {
-			if (!sourceFiles.has(path)) {
-				plan.push({ action: "delete", path, size: dest.size, reason: "not in source (--delete)" });
-			}
-		}
-	}
-
-	if (args.dryRun) {
-		plan.forEach((op) => console.log(JSON.stringify(op)));
-		return;
-	}
-
-	if (args.verbose && !args.quiet) {
-		plan.forEach((op) => console.log(`${op.action.padEnd(8)} ${op.path} (${op.reason})`));
-	}
-
-	const toTransfer = plan.filter((op) => op.action === action);
-	const toDelete = plan.filter((op) => op.action === "delete");
-
-	if (upload) {
-		if (toTransfer.length) {
-			await uploadFiles({
-				repo: repoOf(remote.bucket),
-				files: toTransfer.map((op) => ({
-					path: joinRemote(remotePrefix, op.path),
-					content: pathToFileURL(join(localDir, op.path)),
-				})),
-				accessToken: args.token,
-				hubUrl: args.hubUrl,
-				useXet: true,
-			});
-		}
-		for (let i = 0; i < toDelete.length; i += DELETE_BATCH_SIZE) {
-			await deleteFiles({
-				repo: repoOf(remote.bucket),
-				paths: toDelete.slice(i, i + DELETE_BATCH_SIZE).map((op) => joinRemote(remotePrefix, op.path)),
-				accessToken: args.token,
-				hubUrl: args.hubUrl,
-			});
-		}
-	} else {
-		for (const op of toTransfer) {
-			const mtime = new Date(remoteFiles.get(op.path)?.mtime ?? Date.now());
-			await downloadBucketFile(
-				remote.bucket,
-				joinRemote(remotePrefix, op.path),
-				resolve(localDir, op.path),
-				args,
-				mtime,
-			);
-		}
-		for (const op of toDelete) {
-			await unlink(resolve(localDir, op.path));
-		}
-	}
-
-	if (!args.quiet) {
-		console.log(
-			`✅ Synced: ${toTransfer.length} ${upload ? "uploaded" : "downloaded"}, ${toDelete.length} deleted, ${plan.length - toTransfer.length - toDelete.length} skipped`,
+	if (prefix === "" && !args.recursive) {
+		throw new Error(
+			`No file path specified. To remove files, provide a path (e.g. '${bucket}/FILE') or use --recursive to remove all files. To delete the entire bucket, use \`hf buckets delete ${bucket}\`.`,
 		);
+	}
+	if ((args.include?.length || args.exclude?.length) && !args.recursive) {
+		throw new Error("--include and --exclude require --recursive.");
+	}
+
+	if (!args.recursive) {
+		if (args.dryRun) {
+			console.log(`delete: hf://buckets/${bucket}/${prefix}`);
+			console.log("(dry run) 1 file would be removed.");
+			return;
+		}
+		if (!args.yes && !(await confirm(`Remove '${prefix}' from '${bucket}'?`))) {
+			console.log("Aborted.");
+			process.exitCode = 1;
+			return;
+		}
+		await deleteFiles({ repo, paths: [prefix], ...auth });
+		if (!args.quiet) {
+			console.log(`File removed: ${prefix}`);
+		}
+		return;
+	}
+
+	const matcher = new FilterMatcher(args.include, args.exclude);
+	const files = (await listRemote(bucket, prefix, { ...args, recursive: true })).filter(
+		(entry) => entry.type === "file" && matcher.matches(entry.path),
+	);
+	if (!files.length) {
+		console.log("No files to remove.");
+		return;
+	}
+
+	const label = `${files.length} file(s) totaling ${formatSize(
+		files.reduce((total, file) => total + file.size, 0),
+		true,
+	)}`;
+	if (args.dryRun) {
+		files.forEach((file) => console.log(`delete: hf://buckets/${bucket}/${file.path}`));
+		console.log(`(dry run) ${label} would be removed.`);
+		return;
+	}
+	if (!args.yes) {
+		console.log(files.map((file) => `  ${file.path}`).join("\n"));
+		if (!(await confirm(`Remove ${label} from '${bucket}'?`))) {
+			console.log("Aborted.");
+			process.exitCode = 1;
+			return;
+		}
+	}
+
+	for (let i = 0; i < files.length; i += BATCH_SIZE) {
+		await deleteFiles({ repo, paths: files.slice(i, i + BATCH_SIZE).map((file) => file.path), ...auth });
+	}
+	if (!args.quiet) {
+		console.log(`Removed ${label} from '${bucket}'`);
 	}
 }

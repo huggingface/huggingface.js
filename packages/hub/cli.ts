@@ -456,11 +456,11 @@ const commands = {
 		description: "Manage files in buckets",
 		subcommands: {
 			cp: {
-				description: "Copy a file to or from a bucket, using hf://buckets/namespace/name[/path] URIs",
+				description: "Copy files to or from buckets, using hf:// URIs",
 				args: [
 					{
 						name: "src" as const,
-						description: "Source: a local file, a bucket URI, or - for stdin (upload only)",
+						description: "Source: a local file or directory, any hf:// URI (model, dataset, bucket), or - for stdin",
 						positional: true,
 						required: true,
 					},
@@ -584,15 +584,13 @@ const commands = {
 				args: [
 					{
 						name: "source" as const,
-						description: "Source: a local directory or hf://buckets/namespace/name[/prefix]",
+						description: "Source: a local directory or hf://buckets/namespace/name[/prefix]. Not needed with --apply",
 						positional: true,
-						required: true,
 					},
 					{
 						name: "dest" as const,
 						description: "Destination: a local directory or hf://buckets/namespace/name[/prefix]",
 						positional: true,
-						required: true,
 					},
 					{
 						name: "delete" as const,
@@ -623,6 +621,19 @@ const commands = {
 						name: "exclude" as const,
 						description: "Skip files matching these glob patterns",
 						multiple: true,
+					},
+					{
+						name: "filter-from" as const,
+						description:
+							"Read include/exclude rules from a file: '+ pattern' includes, '- pattern' excludes, '#' starts a comment",
+					},
+					{
+						name: "plan" as const,
+						description: "Save the sync plan to a JSONL file for review instead of executing it",
+					},
+					{
+						name: "apply" as const,
+						description: "Apply a previously saved plan file",
 					},
 					{
 						name: "existing" as const,

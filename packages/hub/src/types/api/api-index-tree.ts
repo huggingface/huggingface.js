@@ -14,6 +14,8 @@ export interface ApiIndexTreeEntry {
 	 * that have been migrated to xet.
 	 */
 	xetHash?: string;
+	/** Modification time of the file, set by the uploader. Only for bucket file entries. */
+	mtime?: string;
 	lastCommit?: {
 		date: string;
 		id: string;

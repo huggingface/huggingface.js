@@ -6,7 +6,7 @@ import type { CommitEditFileParams } from "./upload-file";
 export function uploadFiles(
 	params: {
 		repo: CommitParams["repo"];
-		files: Array<URL | File | { path: string; content: ContentSource } | CommitEditFileParams>;
+		files: Array<URL | File | { path: string; content: ContentSource; mtime?: number } | CommitEditFileParams>;
 		commitTitle?: CommitParams["title"];
 		commitDescription?: CommitParams["description"];
 		hubUrl?: CommitParams["hubUrl"];
@@ -37,6 +37,7 @@ export function uploadFiles(
 			operation: "addOrUpdate",
 			path,
 			content: "content" in file ? file.content : file,
+			...("mtime" in file && file.mtime !== undefined && { mtime: file.mtime }),
 		};
 	});
 
