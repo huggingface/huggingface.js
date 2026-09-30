@@ -286,7 +286,7 @@ const commands = {
 			{
 				name: "repo-name" as const,
 				description:
-					"The name of the repo to download from. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+					"The name of the repo to download from. You can also prefix the repo name with the type, e.g. datasets/username/repo-name or kernels/username/repo-name",
 				positional: true,
 				required: true,
 			},
@@ -298,7 +298,7 @@ const commands = {
 			},
 			{
 				name: "repo-type" as const,
-				enum: ["dataset", "model", "space"],
+				enum: ["dataset", "model", "space", "kernel"],
 				description:
 					"The type of repo to download from. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
 			},
@@ -775,7 +775,7 @@ async function run() {
 			const parsedArgs = advParseArgs(cliArgs, cmdDef.args, "download");
 			const { repoName, filenames, repoType, revision, include, exclude, localDir, token, quiet } = parsedArgs;
 
-			const repo = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
+			const repo = repoType ? { type: repoType as "model" | "dataset" | "space" | "kernel", name: repoName } : repoName;
 			const hubUrl = process.env.HF_ENDPOINT ?? HUB_URL;
 
 			const paths: string[] = filenames ?? [];
