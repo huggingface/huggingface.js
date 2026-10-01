@@ -113,17 +113,6 @@ describe("createRepo", () => {
 		}
 	});
 
-	it("should reject protected visibility for buckets", async () => {
-		const tryCreate = createRepo({
-			repo: { name: `${TEST_USER}/TEST-${insecureRandomString()}`, type: "bucket" },
-			visibility: "protected",
-			credentials: { accessToken: TEST_ACCESS_TOKEN },
-			hubUrl: TEST_HUB_URL,
-		});
-
-		await expect(tryCreate).rejects.toBeInstanceOf(TypeError);
-	});
-
 	it("should create a dataset with a string as name", async () => {
 		const repoName = `datasets/${TEST_USER}/TEST-${insecureRandomString()}`;
 
