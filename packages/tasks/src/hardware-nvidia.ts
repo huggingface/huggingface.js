@@ -970,7 +970,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		tflops: 28.75,
 		memory: [24],
 		computeCapability: 7.5,
-		msrp: 4_000, // OEM-only, never had public MSRP; estimated street price
+		msrp: 4_000,
 		power: 250,
 		releaseYear: 2019,
 	},
