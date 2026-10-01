@@ -878,7 +878,7 @@ export const gaussianformer = (model: ModelData): string[] => [
 from gaussianformer import GaussianFormerRenderingPipeline, load_ply
 
 pipeline = GaussianFormerRenderingPipeline.from_pretrained("${model.id}").to("cuda")
-gaussians = load_ply("object.ply")[None]  # 3D Gaussian Splatting PLY -> [1, N, 14]`,
+gaussians = load_ply("object.ply")  # 3D Gaussian Splatting PLY -> [N, 14]`,
 ];
 
 export const gliner = (model: ModelData): string[] => [
