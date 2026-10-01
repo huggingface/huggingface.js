@@ -1,7 +1,7 @@
 import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
-import { fetchRange, fetchTextPrefix, HttpError, openRemoteFile } from "./http";
+import { fetchRange, fetchTextPrefix, HttpError, openRemoteFile, TAIL_PROBE_BYTES } from "./http";
 import { formatPathTemplate } from "./paths";
 
 /** v3 keeps its episode index in parquet under a fixed layout; the path is not templated in info.json. */
@@ -198,7 +198,21 @@ async function readEpisodesV3(
 	limit: number,
 	options?: FetchOptions,
 ): Promise<RawEpisode[]> {
-	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
+	const { parquetMetadataAsync, parquetReadObjects, parquetSchema } = await loadHyparquet();
+	/// Only what `toRawEpisodeV3` reads. The index also has per-episode `stats/*` list columns, which
+	/// hyparquet would decode for the whole row group however few rows are asked for.
+	const wanted = [
+		"episode_index",
+		"length",
+		"tasks",
+		"data/chunk_index",
+		"data/file_index",
+		"dataset_from_index",
+		"dataset_to_index",
+		...info.cameras.flatMap((camera) =>
+			["chunk_index", "file_index", "from_timestamp", "to_timestamp"].map((field) => `videos/${camera.key}/${field}`),
+		),
+	];
 	const collected: RawEpisode[] = [];
 	let chunkIndex = 0;
 	let fileIndex = 0;
@@ -221,11 +235,15 @@ async function readEpisodesV3(
 			continue;
 		}
 
-		const rowCount = Number((await parquetMetadataAsync(file)).num_rows);
+		const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
+		const rowCount = Number(metadata.num_rows);
 		if (seen + rowCount > offset) {
 			const rowStart = Math.max(0, offset - seen);
 			const rowEnd = Math.min(rowCount, offset + limit - seen);
-			const rows = await parquetReadObjects({ file, rowStart, rowEnd });
+			/// hyparquet throws on a column the file lacks; `toRawEpisodeV3` defaults the absent ones.
+			const present = new Set(parquetSchema(metadata).children.map((child) => child.element.name));
+			const columns = wanted.filter((column) => present.has(column));
+			const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd });
 			for (const row of rows) {
 				collected.push(toRawEpisodeV3(row, info));
 			}
@@ -248,8 +266,26 @@ export async function readEpisodes(
 		info.codebaseVersion === "v3.0"
 			? await readEpisodesV3(toUrl, info, offset, limit, options)
 			: await readEpisodesV2(toUrl("meta/episodes.jsonl"), offset, limit, options);
-	const episodes = raw.map((episode) => buildEpisode(episode, info, toUrl));
-	return info.codebaseVersion === "v3.0" ? toFileRows(episodes, offset, options) : episodes;
+	const built = raw.map((episode) => buildEpisode(episode, info, toUrl));
+	/// toFileRows reads positions (an episode starting a file follows one from another file), so the
+	/// repeats go only after it.
+	const episodes = info.codebaseVersion === "v3.0" ? await toFileRows(built, offset, options) : built;
+	return firstPerIndex(episodes);
+}
+
+/**
+ * Callers look episodes up by index, so an index file that repeats one (a malformed dataset numbering
+ * its rows 0, 1, 2, 0, 1, 2, ...) keeps its first row for it.
+ */
+function firstPerIndex(episodes: LeRobotEpisode[]): LeRobotEpisode[] {
+	const seen = new Set<number>();
+	return episodes.filter((episode) => {
+		if (seen.has(episode.index)) {
+			return false;
+		}
+		seen.add(episode.index);
+		return true;
+	});
 }
 
 /**
@@ -259,7 +295,7 @@ export async function readEpisodes(
 async function readFileStart(url: string, options?: FetchOptions): Promise<number> {
 	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
 	const file = await openRemoteFile(url, options);
-	const metadata = await parquetMetadataAsync(file);
+	const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
 	const column = metadata.row_groups[0]?.columns.find(
 		(chunk) => chunk.meta_data?.path_in_schema.length === 1 && chunk.meta_data.path_in_schema[0] === "index",
 	);

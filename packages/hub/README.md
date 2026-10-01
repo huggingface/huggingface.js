@@ -117,7 +117,7 @@ await hub.deleteRepo({ repo, accessToken: "hf_..." });
 
 ## CLI usage
 
-You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo.
+You can use `@huggingface/hub` in CLI mode to upload and download files and folders to/from your repo.
 
 ```console
 npx @huggingface/hub upload coyotte508/test-model .
@@ -128,8 +128,16 @@ npx @huggingface/hub upload --repo-type dataset coyotte508/test-dataset .
 npx @huggingface/hub branch create coyotte508/test-model release --empty
 npx @huggingface/hub upload coyotte508/test-model . --revision release
 
+# Download files to the current directory (or --local-dir)
+npx @huggingface/hub download coyotte508/test-model config.json
+npx @huggingface/hub download coyotte508/test-model config.json README.md --local-dir ./test-model
+# Download an entire repo, optionally filtered with --include / --exclude
+npx @huggingface/hub download coyotte508/test-model --local-dir ./test-model
+npx @huggingface/hub download --repo-type dataset coyotte508/test-dataset --include "*.json"
+
 npx @huggingface/hub --help
 npx @huggingface/hub upload --help
+npx @huggingface/hub download --help
 ```
 
 You can also install globally with `npm install -g @huggingface/hub`. Then you can do:
@@ -140,10 +148,14 @@ hfjs upload coyotte508/test-model .
 hfjs branch create --repo-type dataset coyotte508/test-dataset release --empty
 hfjs upload --repo-type dataset coyotte508/test-dataset . --revision release
 
+hfjs download coyotte508/test-model config.json
+hfjs download coyotte508/test-model --local-dir ./test-model
+
 hfjs --help
 hfjs  upload --help
 
 hfjs help jobs
+hfjs download --help
 ```
 
 ## OAuth Login
