@@ -247,37 +247,15 @@ export async function* createXorbs(
 			// Prime the chunk cache with the original file's dedup info (one query on its first
 			// chunk returns the whole shard, ie the chunk => xorb mapping of the original file),
 			// so unchanged window bytes dedup against the original xorbs instead of re-uploading.
-			if (rangeEditPlan !== undefined) {
-				await loadDedupInfoToCache(
-					(fileSource.content as SplicedBlob).originalBlob.slice(0, MAX_CHUNK_SIZE),
-					remoteXorbHashes,
-					params,
-					chunkCache,
-					computeHmacHex,
-					{
-						maxChunks: 1,
-						isAtBeginning: true,
-					},
-				);
-			}
-
-			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
+			//
+			// Only the first chunk's bytes are needed: for a XetBlob the slice is fetched with a
+			// range-scoped CAS reconstruction, so only that chunk's byte range is downloaded,
+			// not the whole xorb.
 			if (
-				rangeEditPlan === undefined &&
 				fileSource.content instanceof SplicedBlob &&
-				fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE
+				(rangeEditPlan !== undefined || fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE)
 			) {
-				await loadDedupInfoToCache(
-					fileSource.content.originalBlob.slice(0, MAX_CHUNK_SIZE),
-					remoteXorbHashes,
-					params,
-					chunkCache,
-					computeHmacHex,
-					{
-						maxChunks: 1,
-						isAtBeginning: true,
-					},
-				);
+				await loadFirstChunkDedupInfo(fileSource.content, remoteXorbHashes, params, chunkCache);
 			}
 			let bytesSinceRemoteDedup = Infinity;
 			let bytesSinceLastProgressEvent = 0;
@@ -453,6 +431,9 @@ export async function* createXorbs(
 					dedupNextChunk = true;
 					const startIndex = fileChunks.length;
 
+					// The window's segments are XetBlob slices: the CAS reconstruction request is
+					// range-scoped, so only the window's chunk byte ranges are fetched, not the
+					// whole xorb.
 					for (const segment of windowSegments(window, originalBlob)) {
 						yield* pumpBlob(chunker, segment);
 					}
@@ -788,6 +769,35 @@ const buildFileRepresentation = (
 
 	return representation;
 };
+
+/**
+ * Prime the chunk cache with the original file's dedup info (one query on its first chunk
+ * returns the whole shard, ie the chunk => xorb mapping of the original file), so unchanged
+ * bytes of a splice/edit dedup against the file's existing xorbs instead of being
+ * re-uploaded.
+ *
+ * Only the first chunk's bytes are needed; for a {@link XetBlob} the slice is fetched with
+ * a range-scoped CAS reconstruction, so only that chunk's byte range is downloaded rather
+ * than the whole xorb.
+ */
+async function loadFirstChunkDedupInfo(
+	content: SplicedBlob,
+	remoteXorbHashes: string[],
+	params: XetWriteTokenParams,
+	chunkCache: ChunkCache,
+): Promise<void> {
+	await loadDedupInfoToCache(
+		content.originalBlob.slice(0, MAX_CHUNK_SIZE),
+		remoteXorbHashes,
+		params,
+		chunkCache,
+		computeHmacHex,
+		{
+			maxChunks: 1,
+			isAtBeginning: true,
+		},
+	);
+}
 
 /**
  * Helper to load dedup info for blob contents into cache.

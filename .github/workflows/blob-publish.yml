@@ -19,16 +19,17 @@ defaults:
   run:
     working-directory: packages/blob
 
-permissions:
-  contents: write
-  id-token: write
-  packages: write
+permissions: {}
 
 jobs:
   version_and_release:
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           # Needed to push the tag and the commit on the main branch, otherwise we get:
           # > Run git push --follow-tags
@@ -36,7 +37,7 @@ jobs:
           # remote: error: Changes must be made through a pull request. Required status check "lint" is expected.
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
       - run: npm install -g corepack@latest && corepack enable
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "24"
           cache: "pnpm"
@@ -58,7 +59,7 @@ jobs:
 
       - run: pnpm publish --no-git-checks .
       # hack - reuse actions/setup-node@v4 just to set a new registry
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "24"
           registry-url: "https://npm.pkg.github.com"
@@ -67,7 +68,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Update Doc"
-        uses: peter-evans/repository-dispatch@v2
+        uses: peter-evans/repository-dispatch@bf47d102fdb849e755b0b0023ea3e81a44b6f570 # v2.1.2
         with:
           event-type: doc-build
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
