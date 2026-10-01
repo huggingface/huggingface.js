@@ -742,6 +742,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 215,
 		releaseYear: 2018,
 	},
+	"RTX 2080 SUPER": {
+		tflops: 22.3,
+		memory: [8],
+		computeCapability: 7.5,
+		msrp: 699,
+		power: 250,
+		releaseYear: 2019,
+	},
 	"RTX 2070": {
 		tflops: 14.93,
 		memory: [8],
@@ -958,6 +966,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 70,
 		releaseYear: 2018,
 	},
+	T40: {
+		tflops: 28.75,
+		memory: [24],
+		computeCapability: 7.5,
+		msrp: 4_000, // OEM-only, never had public MSRP; estimated street price
+		power: 250,
+		releaseYear: 2019,
+	},
 	T10: {
 		tflops: 20.0,
 		memory: [16],
@@ -973,6 +989,30 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 10_000,
 		power: 300,
 		releaseYear: 2017,
+	},
+	"Quadro RTX 8000": {
+		tflops: 32.63,
+		memory: [48],
+		computeCapability: 7.5,
+		msrp: 9_800,
+		power: 295,
+		releaseYear: 2018,
+	},
+	"Quadro RTX 6000": {
+		tflops: 32.63,
+		memory: [24],
+		computeCapability: 7.5,
+		msrp: 6_300,
+		power: 295,
+		releaseYear: 2018,
+	},
+	"Quadro RTX 5000": {
+		tflops: 22.3,
+		memory: [16],
+		computeCapability: 7.5,
+		msrp: 2_300,
+		power: 265,
+		releaseYear: 2018,
 	},
 	"Quadro P6000": {
 		tflops: 12.63, // float32 (GPU does not support native float16)
