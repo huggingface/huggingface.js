@@ -109,6 +109,55 @@ print(output)`);
 			expect(snippet).toContain("# Replace SLOT with the slot specified in the model card");
 			expect(snippet).toContain("sudo robotctl policy load SLOT user/microduck-walk");
 		});
+
+		it("adds an episodic policy as a skill", () => {
+			const model: ModelData = {
+				id: "user/microduck-polite-bow",
+				tags: ["microduck", "microduck-kind:episodic", "microduck-name:polite-bow"],
+				inference: "",
+			};
+
+			expect(microduck(model)).toEqual([
+				"sudo robotctl policy add polite-bow user/microduck-polite-bow\nrobotctl robot do polite-bow",
+			]);
+		});
+
+		it("adds a perpetual policy with an unwind as a held skill", () => {
+			const model: ModelData = {
+				id: "user/microduck-flamingo",
+				tags: ["microduck", "microduck-kind:perpetual", "microduck-name:flamingo", "microduck-hold"],
+				inference: "",
+			};
+
+			expect(microduck(model)).toEqual([
+				"sudo robotctl policy add flamingo user/microduck-flamingo --hold <seconds>\nrobotctl robot do flamingo",
+			]);
+		});
+
+		it("loads a perpetual gait into its slot", () => {
+			const model: ModelData = {
+				id: "user/microduck-step-up",
+				tags: ["microduck", "microduck-kind:perpetual", "microduck-name:step-up", "microduck-slot:walk"],
+				inference: "",
+			};
+
+			expect(microduck(model)).toEqual(["sudo robotctl policy load walk user/microduck-step-up"]);
+		});
+
+		it.each([
+			{ scenario: "a missing name", tags: ["microduck-kind:episodic"] },
+			{ scenario: "a name that is not a bare word", tags: ["microduck-kind:episodic", "microduck-name:a;id"] },
+			{ scenario: "conflicting names", tags: ["microduck-kind:episodic", "microduck-name:a", "microduck-name:b"] },
+			{
+				scenario: "conflicting kinds",
+				tags: ["microduck-kind:episodic", "microduck-kind:perpetual", "microduck-name:a"],
+			},
+			{ scenario: "a hold without a perpetual kind", tags: ["microduck-name:a", "microduck-hold"] },
+		])("falls back to a slot for $scenario", ({ tags }) => {
+			const snippet = microduck({ id: "user/microduck-a", tags, inference: "" }).join("\n");
+
+			expect(snippet).toContain("sudo robotctl policy load SLOT user/microduck-a");
+		});
 	});
 
 	// a repo owner can put anything in config.json / the model card, so every interpolated value
@@ -121,6 +170,7 @@ print(output)`);
 			["diffusers", diffusers, { tags: ["lora"], cardData: { base_model: PAYLOAD, instance_prompt: PAYLOAD } }],
 			["keras_hub", keras_hub, { config: { keras_hub: { tasks: [PAYLOAD, "TextClassifier"] } } }],
 			["microduck", microduck, { tags: [`microduck-slot:${PAYLOAD}`] }],
+			["microduck name", microduck, { tags: ["microduck-kind:episodic", `microduck-name:${PAYLOAD}`] }],
 			["paddlenlp", paddlenlp, { config: { architectures: [PAYLOAD] } }],
 			["peft", peft, { config: { peft: { base_model_name_or_path: PAYLOAD, task_type: "CAUSAL_LM" } } }],
 			["multimolecule", multimolecule, { widgetData: [{ text: PAYLOAD }] }],
