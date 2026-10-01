@@ -11,6 +11,8 @@ export async function createRepo(
 		repo: RepoDesignation;
 		/**
 		 * If unset, will follow the organization's default setting. (typically public, except for some Enterprise organizations)
+		 *
+		 * "protected" is not supported for buckets
 		 */
 		visibility?: "public" | "private" | "protected";
 		/**
@@ -47,12 +49,17 @@ export async function createRepo(
 		);
 	}
 
+	if (repoId.type === "bucket" && visibility === "protected") {
+		throw new TypeError(`"protected" visibility is not supported for buckets.`);
+	}
+
 	const res =
 		repoId.type === "bucket"
 			? await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/buckets/${namespace}/${repoName}`, {
 					method: "POST",
 					body: JSON.stringify({
-						visibility,
+						// The bucket endpoint only understands `private`, and silently ignores `visibility`
+						private: visibility === undefined ? undefined : visibility === "private",
 						resourceGroupId: params.resourceGroupId,
 					}),
 					headers: {

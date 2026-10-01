@@ -82,6 +82,48 @@ describe("createRepo", () => {
 		});
 	});
 
+	it.each([
+		{ label: "private: true", opts: { private: true }, expectedPrivate: true },
+		{ label: 'visibility: "private"', opts: { visibility: "private" as const }, expectedPrivate: true },
+		{ label: "private: false", opts: { private: false }, expectedPrivate: false },
+		{ label: 'visibility: "public"', opts: { visibility: "public" as const }, expectedPrivate: false },
+	])("should create a bucket with $label", async ({ opts, expectedPrivate }) => {
+		const bucketName = `${TEST_USER}/TEST-${insecureRandomString()}`;
+
+		try {
+			await createRepo({
+				accessToken: TEST_ACCESS_TOKEN,
+				hubUrl: TEST_HUB_URL,
+				repo: { name: bucketName, type: "bucket" },
+				...opts,
+			});
+
+			const res = await fetch(`${TEST_HUB_URL}/api/buckets/${bucketName}`, {
+				headers: { Authorization: `Bearer ${TEST_ACCESS_TOKEN}` },
+			});
+			assert(res.ok);
+			const info: { private: boolean } = await res.json();
+			expect(info.private).toBe(expectedPrivate);
+		} finally {
+			await deleteRepo({
+				repo: { name: bucketName, type: "bucket" },
+				hubUrl: TEST_HUB_URL,
+				credentials: { accessToken: TEST_ACCESS_TOKEN },
+			});
+		}
+	});
+
+	it("should reject protected visibility for buckets", async () => {
+		const tryCreate = createRepo({
+			repo: { name: `${TEST_USER}/TEST-${insecureRandomString()}`, type: "bucket" },
+			visibility: "protected",
+			credentials: { accessToken: TEST_ACCESS_TOKEN },
+			hubUrl: TEST_HUB_URL,
+		});
+
+		await expect(tryCreate).rejects.toBeInstanceOf(TypeError);
+	});
+
 	it("should create a dataset with a string as name", async () => {
 		const repoName = `datasets/${TEST_USER}/TEST-${insecureRandomString()}`;
 
