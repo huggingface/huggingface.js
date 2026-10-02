@@ -583,6 +583,23 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
  * Ping the HF team if we can help with anything!
  */
 export const LOCAL_APPS = {
+	boollm: {
+		prettyLabel: "Boollm",
+		docsUrl: "https://boollm.com/support",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			model.pipeline_tag === "text-generation" &&
+			isLlamaCppGgufModel(model) &&
+			["llama", "qwen2"].includes(model.gguf?.architecture ?? ""),
+		deeplink: (model, filepath) => {
+			const url = new URL("boollm://open_from_hf");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
+	},
 	"llama.cpp": {
 		prettyLabel: "llama.cpp",
 		docsUrl: "https://github.com/ggerganov/llama.cpp",
