@@ -2536,4 +2536,70 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT,
 	);
+
+	describe.concurrent(
+		"ZeroGPU",
+		() => {
+			const client = new InferenceClient(env.HF_ZEROGPU_KEY ?? "dummy");
+			const hfModelId = "openai/gpt-oss-120b";
+			const providerModelId = "openai/gpt-oss-120b";
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["zerogpu"] = {
+				[hfModelId]: {
+					provider: "zerogpu",
+					hfModelId,
+					providerId: providerModelId,
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const response = await client.chatCompletion({
+					model: hfModelId,
+					provider: "zerogpu",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+				});
+
+				expect(response.choices[0]?.message.content).toBeTruthy();
+				expect(response.usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: hfModelId,
+					provider: "zerogpu",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+					stream: true,
+					stream_options: { include_usage: true },
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let content = "";
+				let usage: ChatCompletionStreamOutput["usage"];
+
+				for await (const chunk of stream) {
+					content += chunk.choices[0]?.delta.content ?? "";
+					if (chunk.usage) {
+						usage = chunk.usage;
+					}
+				}
+
+				expect(content).toBeTruthy();
+				expect(usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+		},
+		TIMEOUT,
+	);
 });
