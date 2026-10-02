@@ -61,7 +61,10 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	models: [
-		{ description: "A text-generation model trained to follow instructions.", id: "google/gemma-2-2b-it" },
+		{
+			description: "Powerful text generation model with strong reasoning and coding capabilities.",
+			id: "zai-org/GLM-5.2",
+		},
 		{
 			description: "Powerful text generation model for coding.",
 			id: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
@@ -70,10 +73,7 @@ const taskData: TaskDataCustom = {
 			description: "Great text generation model with top-notch tool calling capabilities.",
 			id: "openai/gpt-oss-120b",
 		},
-		{
-			description: "Powerful text generation model.",
-			id: "zai-org/GLM-4.5",
-		},
+		{ description: "A text-generation model trained to follow instructions.", id: "google/gemma-2-2b-it" },
 		{
 			description: "A powerful small model with reasoning capabilities.",
 			id: "Qwen/Qwen3-4B-Thinking-2507",
