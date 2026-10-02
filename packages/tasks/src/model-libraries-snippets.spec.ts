@@ -89,74 +89,63 @@ print(output)`);
 	});
 
 	describe("microduck", () => {
-		it("uses an explicit slot tag even when the repo name and other tags suggest walking", () => {
+		const withManifest = (manifest: NonNullable<ModelData["config"]>["microduck"]): ModelData => ({
+			id: "user/microduck-a",
+			tags: ["microduck"],
+			inference: "",
+			config: { microduck: manifest },
+		});
+
+		it("loads the manifest slot even when the repo name and tags suggest walking", () => {
 			const model: ModelData = {
 				id: "user/microduck-walk",
-				tags: ["microduck", "walk", "microduck-slot:stand", "microduck-slot:stand"],
+				tags: ["microduck", "walk"],
 				inference: "",
+				config: { microduck: { slot: "stand" } },
 			};
 
 			expect(microduck(model)).toEqual(["sudo robotctl policy load stand user/microduck-walk"]);
 		});
 
 		it.each([
-			{ scenario: "missing slot tags", tags: ["microduck", "walk"] },
-			{ scenario: "unsupported slot tags", tags: ["microduck-slot:bow"] },
-			{ scenario: "conflicting slot tags", tags: ["microduck-slot:walk", "microduck-slot:stand"] },
-		])("requires a slot choice for $scenario", ({ tags }) => {
-			const snippet = microduck({ id: "user/microduck-walk", tags, inference: "" }).join("\n");
+			{ scenario: "a missing manifest", model: { id: "user/microduck-a", tags: ["microduck"], inference: "" } },
+			{ scenario: "a missing slot", model: withManifest({ name: "a" }) },
+			{ scenario: "an unsupported slot", model: withManifest({ slot: "bow" }) },
+		])("requires a slot choice for $scenario", ({ model }) => {
+			const snippet = microduck(model).join("\n");
 
 			expect(snippet).toContain("# Replace SLOT with the slot specified in the model card");
-			expect(snippet).toContain("sudo robotctl policy load SLOT user/microduck-walk");
+			expect(snippet).toContain("sudo robotctl policy load SLOT user/microduck-a");
 		});
 
 		it("adds an episodic policy as a skill", () => {
-			const model: ModelData = {
-				id: "user/microduck-polite-bow",
-				tags: ["microduck", "microduck-kind:episodic", "microduck-name:polite-bow"],
-				inference: "",
-			};
-
-			expect(microduck(model)).toEqual([
-				"sudo robotctl policy add polite-bow user/microduck-polite-bow\nrobotctl robot do polite-bow",
+			expect(microduck(withManifest({ name: "polite-bow", kind: "episodic" }))).toEqual([
+				"sudo robotctl policy add polite-bow user/microduck-a\nrobotctl robot do polite-bow",
 			]);
 		});
 
 		it("adds a perpetual policy with an unwind as a held skill", () => {
-			const model: ModelData = {
-				id: "user/microduck-flamingo",
-				tags: ["microduck", "microduck-kind:perpetual", "microduck-name:flamingo", "microduck-hold"],
-				inference: "",
-			};
-
-			expect(microduck(model)).toEqual([
-				"sudo robotctl policy add flamingo user/microduck-flamingo --hold <seconds>\nrobotctl robot do flamingo",
+			expect(microduck(withManifest({ name: "flamingo", kind: "perpetual", unwind_s: 0.5 }))).toEqual([
+				"sudo robotctl policy add flamingo user/microduck-a --hold <seconds>\nrobotctl robot do flamingo",
 			]);
 		});
 
 		it("loads a perpetual gait into its slot", () => {
-			const model: ModelData = {
-				id: "user/microduck-step-up",
-				tags: ["microduck", "microduck-kind:perpetual", "microduck-name:step-up", "microduck-slot:walk"],
-				inference: "",
-			};
-
-			expect(microduck(model)).toEqual(["sudo robotctl policy load walk user/microduck-step-up"]);
+			expect(microduck(withManifest({ name: "step-up", kind: "perpetual", slot: "walk" }))).toEqual([
+				"sudo robotctl policy load walk user/microduck-a",
+			]);
 		});
 
 		it.each([
-			{ scenario: "a missing name", tags: ["microduck-kind:episodic"] },
-			{ scenario: "a name that is not a bare word", tags: ["microduck-kind:episodic", "microduck-name:a;id"] },
-			{ scenario: "conflicting names", tags: ["microduck-kind:episodic", "microduck-name:a", "microduck-name:b"] },
-			{
-				scenario: "conflicting kinds",
-				tags: ["microduck-kind:episodic", "microduck-kind:perpetual", "microduck-name:a"],
-			},
-			{ scenario: "a hold without a perpetual kind", tags: ["microduck-name:a", "microduck-hold"] },
-		])("falls back to a slot for $scenario", ({ tags }) => {
-			const snippet = microduck({ id: "user/microduck-a", tags, inference: "" }).join("\n");
+			{ scenario: "a missing name", manifest: { kind: "episodic" } },
+			{ scenario: "a name that is not a bare word", manifest: { kind: "episodic", name: "Kick (right foot)" } },
+			{ scenario: "an unknown kind", manifest: { kind: "locomotion", name: "a" } },
+			{ scenario: "an unwind without a perpetual kind", manifest: { name: "a", unwind_s: 0.5 } },
+			{ scenario: "a perpetual kind with a null unwind", manifest: { kind: "perpetual", name: "a", unwind_s: null } },
+		])("falls back to a slot for $scenario", ({ manifest }) => {
+			const snippet = microduck(withManifest({ ...manifest, slot: "kick_right" })).join("\n");
 
-			expect(snippet).toContain("sudo robotctl policy load SLOT user/microduck-a");
+			expect(snippet).toBe("sudo robotctl policy load kick_right user/microduck-a");
 		});
 	});
 
@@ -169,8 +158,8 @@ print(output)`);
 			["adapters", adapters, { config: { adapter_transformers: { model_name: PAYLOAD } } }],
 			["diffusers", diffusers, { tags: ["lora"], cardData: { base_model: PAYLOAD, instance_prompt: PAYLOAD } }],
 			["keras_hub", keras_hub, { config: { keras_hub: { tasks: [PAYLOAD, "TextClassifier"] } } }],
-			["microduck", microduck, { tags: [`microduck-slot:${PAYLOAD}`] }],
-			["microduck name", microduck, { tags: ["microduck-kind:episodic", `microduck-name:${PAYLOAD}`] }],
+			["microduck", microduck, { config: { microduck: { slot: PAYLOAD } } }],
+			["microduck name", microduck, { config: { microduck: { kind: "episodic", name: PAYLOAD } } }],
 			["paddlenlp", paddlenlp, { config: { architectures: [PAYLOAD] } }],
 			["peft", peft, { config: { peft: { base_model_name_or_path: PAYLOAD, task_type: "CAUSAL_LM" } } }],
 			["multimolecule", multimolecule, { widgetData: [{ text: PAYLOAD }] }],

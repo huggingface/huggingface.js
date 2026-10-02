@@ -1611,33 +1611,25 @@ model = MeshAnything(args)`,
 ];
 
 export const microduck = (model: ModelData): string[] => {
-	// Model-card tag convention, written by `uv run publish` in pollen-robotics/microduck_rl from the policy manifest:
-	// tags: [microduck-kind:episodic, microduck-name:polite-bow, microduck-slot:stand, microduck-hold].
-	const tagValues = (key: string) =>
-		model.tags.filter((tag) => tag.startsWith(`microduck-${key}:`)).map((tag) => tag.slice(`microduck-${key}:`.length));
-	const kinds = tagValues("kind");
-	const kind = kinds.length === 1 ? kinds[0] : undefined;
+	// Subset of the policy manifest (manifest.json), written by `uv run publish` in pollen-robotics/microduck_rl.
+	const manifest = model.config?.microduck;
 	// The name is interpolated into a shell command, so only bare words are accepted.
-	const names = tagValues("name").filter((name) => /^[A-Za-z0-9][\w.-]*$/.test(name));
-	const name = names.length === 1 ? names[0] : undefined;
+	const name =
+		typeof manifest?.name === "string" && /^[A-Za-z0-9][\w.-]*$/.test(manifest.name) ? manifest.name : undefined;
 
 	// An episodic policy, or a perpetual one with an unwind (a held pose), is a skill run on demand rather than a slot's gait.
-	if (name && kind === "episodic") {
+	if (name && manifest?.kind === "episodic") {
 		return [`sudo robotctl policy add ${name} ${model.id}\nrobotctl robot do ${name}`];
 	}
-	if (name && kind === "perpetual" && model.tags.includes("microduck-hold")) {
+	if (name && manifest?.kind === "perpetual" && typeof manifest.unwind_s === "number") {
 		return [`sudo robotctl policy add ${name} ${model.id} --hold <seconds>\nrobotctl robot do ${name}`];
 	}
 
 	const slots = ["walk", "stand", "sitstand", "ground_pick", "kick_left", "kick_right", "roulade"];
-	const matchingSlots = slots.filter((slot) => model.tags.includes(`microduck-slot:${slot}`));
-	const slot = matchingSlots.length === 1 ? matchingSlots[0] : "SLOT";
-	const prefix =
-		matchingSlots.length === 1
-			? ""
-			: `# Replace SLOT with the slot specified in the model card (${slots.join(", ")}).\n`;
+	const slot = slots.find((slot) => slot === manifest?.slot);
+	const prefix = slot ? "" : `# Replace SLOT with the slot specified in the model card (${slots.join(", ")}).\n`;
 
-	return [`${prefix}sudo robotctl policy load ${slot} ${model.id}`];
+	return [`${prefix}sudo robotctl policy load ${slot ?? "SLOT"} ${model.id}`];
 };
 
 export const multimolecule = (model: ModelData): string[] => {
