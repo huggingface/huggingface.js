@@ -1,3 +1,5 @@
+import fs from "node:fs";
+
 const image = fs.readFileSync("cat.png");
 
 async function query(data) {
