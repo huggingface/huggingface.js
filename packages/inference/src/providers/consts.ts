@@ -35,6 +35,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	ovhcloud: {},
 	replicate: {},
 	scaleway: {},
+	thecomputefactory: {},
 	together: {},
 	wavespeed: {},
 	"zai-org": {},
