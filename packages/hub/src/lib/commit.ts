@@ -344,7 +344,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			const shas = yield* eventToGenerator<
 				{ event: "fileProgress"; state: "hashing"; path: string; progress: number },
 				string[]
-			>((yieldCallback, returnCallback, rejectCallack) => {
+			>((yieldCallback, returnCallback, rejectCallback) => {
 				return promisesQueue(
 					operations.map((op) => async () => {
 						const iterator = sha256(op.content, { useWebWorker: params.useWebWorkers, abortSignal: abortSignal });
@@ -360,7 +360,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						return sha;
 					}),
 					CONCURRENT_SHAS,
-				).then(returnCallback, rejectCallack);
+				).then(returnCallback, rejectCallback);
 			});
 
 			abortSignal?.throwIfAborted();
