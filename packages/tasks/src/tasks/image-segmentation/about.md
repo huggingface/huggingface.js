@@ -30,10 +30,17 @@ Panoptic Segmentation is the Image Segmentation task that segments the image bot
 
 You can infer with Image Segmentation models using the `image-segmentation` pipeline. You need to install [timm](https://github.com/rwightman/pytorch-image-models) first.
 
-```python
+```bash
 !pip install timm
-model = pipeline("image-segmentation")
-model("cat.png")
+```
+
+```python
+from transformers import pipeline
+
+model = pipeline(task="image-segmentation", model="facebook/detr-resnet-50-panoptic")
+result = model(IMAGE_PATH)
+result
+
 #[{'label': 'cat',
 #  'mask': mask_code,
 #  'score': 0.999}
