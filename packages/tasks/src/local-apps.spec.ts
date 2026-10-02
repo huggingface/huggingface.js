@@ -262,6 +262,29 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 	});
 
+	it("kronk", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.kronk;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf");
+
+		expect(snippet[0].setup).toBe("brew install ardanlabs/kronk/kronk");
+		expect(snippet[1].setup).toBe("go install github.com/ardanlabs/kronk/cmd/kronk@latest");
+		expect(snippet[0].content).toBe(
+			"# Install the native inference libraries:\nkronk libs --local\n" +
+				"# Download the model from Hugging Face:\n" +
+				"kronk model pull bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M --local\n" +
+				"# Start a local OpenAI-compatible server in the background:\nkronk server start --detach\n" +
+				"# List the model IDs available from the server:\nkronk model list\n" +
+				"# Launch OpenCode with a model ID from the list:\nkronk launch opencode <MODEL_ID>",
+		);
+		expect(snippet[1].content).toBe(snippet[0].content);
+	});
+
 	it("atomic chat deeplink", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS["atomic-chat"];
 		const model: ModelData = {
