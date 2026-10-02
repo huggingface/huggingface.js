@@ -68,6 +68,17 @@ const inputsTextGeneration = (model: ModelDataMinimal): ChatCompletionInputMessa
 const inputsFillMask = (model: ModelDataMinimal) =>
 	JSON.stringify(`The answer to the universe is ${model.mask_token}.`);
 
+const inputsTextRanking = () =>
+	`{
+    "query": "Which planet is known as the Red Planet?",
+    "texts": [
+        "Venus is often called Earth's twin because of its similar size and proximity.",
+        "Mars, known for its reddish appearance, is often referred to as the Red Planet.",
+        "Jupiter, the largest planet in our solar system, has a prominent red spot.",
+        "Saturn, famous for its rings, is sometimes mistaken for the Red Planet."
+    ]
+}`;
+
 const inputsSentenceSimilarity = () =>
 	`{
     "source_sentence": "That is a happy person",
@@ -146,6 +157,7 @@ const modelInputSnippets: {
 	"object-detection": inputsObjectDetection,
 	"question-answering": inputsQuestionAnswering,
 	"sentence-similarity": inputsSentenceSimilarity,
+	"text-ranking": inputsTextRanking,
 	summarization: inputsSummarization,
 	"table-question-answering": inputsTableQuestionAnswering,
 	"tabular-regression": inputsTabularPrediction,
