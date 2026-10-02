@@ -135,6 +135,110 @@ function getChatTemplate(model: ModelData): string | undefined {
 	return undefined;
 }
 
+function isLociModel(model: ModelData): boolean {
+	if (
+		(model.pipeline_tag && !["text-generation", "image-text-to-text"].includes(model.pipeline_tag)) ||
+		model.config?.peft ||
+		model.config?.adapter_transformers ||
+		model.config?.diffusers ||
+		model.config?.architectures?.some((architecture) =>
+			/embedding|ranking|classification|maskedlm/i.test(architecture),
+		) ||
+		model.tags.some((tag) => ["peft", "sentence-transformers", "text-embeddings-inference", "diffusers"].includes(tag))
+	) {
+		return false;
+	}
+	if (model.gguf || model.tags.includes("gguf") || model.library_name === "gguf") {
+		return !/bert|embed|clip|t5encoder/i.test(model.gguf?.architecture ?? "");
+	}
+	if (isMlxModel(model)) {
+		// Model types implemented by Loci's pinned MLX language and vision runtimes.
+		// The app checks missing metadata, tokenizers, processors and native execution.
+		return (
+			!model.config?.model_type ||
+			[
+				"acereason",
+				"afmoe",
+				"apertus",
+				"baichuan_m1",
+				"bailing_moe",
+				"bitnet",
+				"cohere",
+				"deepseek_v2",
+				"deepseek_v3",
+				"ernie4_5",
+				"exaone4",
+				"falcon_h1",
+				"fastvlm",
+				"gemma",
+				"gemma2",
+				"gemma3",
+				"gemma3_text",
+				"gemma3n",
+				"gemma4",
+				"gemma4_text",
+				"gemma4_unified",
+				"glm4",
+				"glm4_moe",
+				"glm4_moe_lite",
+				"glm_ocr",
+				"gpt_oss",
+				"granite",
+				"granitemoehybrid",
+				"helium",
+				"hunyuan_v1_dense",
+				"idefics3",
+				"internlm2",
+				"jamba",
+				"lfm2",
+				"lfm2-vl",
+				"lfm2_moe",
+				"lfm2_vl",
+				"lille-130m",
+				"llama",
+				"llava_qwen2",
+				"mamba2",
+				"mimo",
+				"mimo_v2_flash",
+				"minicpm",
+				"minimax",
+				"mistral",
+				"mistral3",
+				"mixtral",
+				"muse_glimmer",
+				"nanbeige",
+				"nanochat",
+				"nemotron_h",
+				"nemotron_labs_diffusion",
+				"olmo2",
+				"olmo3",
+				"olmoe",
+				"openelm",
+				"paligemma",
+				"phi",
+				"phi3",
+				"phimoe",
+				"pixtral",
+				"qwen2",
+				"qwen2_5_vl",
+				"qwen2_vl",
+				"qwen3",
+				"qwen3_5",
+				"qwen3_5_moe",
+				"qwen3_5_text",
+				"qwen3_moe",
+				"qwen3_next",
+				"qwen3_vl",
+				"qwen3_vl_moe",
+				"smollm3",
+				"smolvlm",
+				"starcoder2",
+			].includes(model.config.model_type)
+		);
+	}
+	return model.library_name === "litert-lm" || model.tags.includes("litert-lm");
+}
+
 function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
@@ -638,6 +742,21 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
+	},
+	loci: {
+		prettyLabel: "Loci",
+		docsUrl: "https://askloci.ai/",
+		mainTask: "text-generation",
+		// The app verifies the selected files, runtime compatibility and device fit before importing.
+		displayOnModelPage: isLociModel,
+		deeplink: (model, filepath) => {
+			const url = new URL("loci://open_from_hf");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
 	},
 	localai: {
 		prettyLabel: "LocalAI",
