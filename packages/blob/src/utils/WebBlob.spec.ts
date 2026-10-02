@@ -8,10 +8,14 @@ describe("WebBlob", () => {
 	let contentType: string;
 
 	beforeAll(async () => {
-		const response = await fetch(resourceUrl, { method: "HEAD" });
-		size = Number(response.headers.get("content-length"));
+		// Compute the reference size from the response body itself; in browsers
+		// `Content-Length` is not reliably exposed when the response is gzipped
+		// on the fly by CloudFront.
+		const response = await fetch(resourceUrl);
+		const blob = await response.blob();
+		size = blob.size;
+		fullText = await blob.text();
 		contentType = response.headers.get("content-type") || "";
-		fullText = await (await fetch(resourceUrl)).text();
 	});
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {
@@ -79,6 +83,48 @@ describe("WebBlob", () => {
 
 		const streamText = await new Response(slice.stream()).text();
 		expect(streamText).toBe(expectedText);
+	});
+
+	it("should learn size from Content-Range when HEAD omits Content-Length", async () => {
+		const body = "abcdefghijklmnopqrstuvwxyz";
+		const url = new URL("https://example.com/model.json");
+		const fetchMock = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+			const range = new Headers(init?.headers).get("range");
+
+			if (init?.method === "HEAD") {
+				return new Response(null, {
+					status: 200,
+					headers: {
+						"accept-ranges": "bytes",
+						"content-type": "text/plain",
+					},
+				});
+			}
+
+			if (range?.startsWith("bytes=")) {
+				const [start, endRaw] = range.slice("bytes=".length).split("-");
+				const startByte = Number(start);
+				const endByte = Math.min(Number(endRaw), body.length - 1);
+				return new Response(body.slice(startByte, endByte + 1), {
+					status: 206,
+					headers: {
+						"content-type": "text/plain",
+						"content-range": `bytes ${startByte}-${endByte}/${body.length}`,
+					},
+				});
+			}
+
+			return new Response(body, {
+				status: 200,
+				headers: { "content-type": "text/plain" },
+			});
+		}) as typeof fetch;
+
+		const webBlob = await WebBlob.create(url, { cacheBelow: 0, fetch: fetchMock });
+
+		expect(webBlob).toBeInstanceOf(WebBlob);
+		expect(webBlob.size).toBe(body.length);
+		expect(await webBlob.slice(10, 22).text()).toBe(body.slice(10, 22));
 	});
 
 	it("should throw a TypeError on negative start/end", () => {
