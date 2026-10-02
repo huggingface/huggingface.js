@@ -28,6 +28,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	groq: {},
 	"hf-inference": {},
 	"humain-ai": {},
+	janction: {},
 	novita: {},
 	nscale: {},
 	openai: {},
