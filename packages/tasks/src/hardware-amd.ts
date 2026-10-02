@@ -280,7 +280,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		tflops: 44.46,
 		memory: [32],
 		gfxVersion: "gfx1030",
-		msrp: 5_600,
+		msrp: 6_000,
 		power: 300,
 		releaseYear: 2021,
 	},
