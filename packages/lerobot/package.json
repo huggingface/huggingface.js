@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/lerobot",
 	"packageManager": "pnpm@10.10.0",
-	"version": "0.0.8",
+	"version": "0.0.11",
 	"description": "Parser for LeRobot robotics datasets hosted on the Hugging Face Hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -41,7 +41,7 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"dependencies": {
-		"hyparquet": "^1.25.1"
+		"hyparquet": "^1.31.2"
 	},
 	"devDependencies": {
 		"@types/node": "^20.12.8",
