@@ -2077,6 +2077,98 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
+		"BaliLLM",
+		() => {
+			const client = new InferenceClient(env.HF_BALILLM_KEY ?? "dummy");
+			const hfModelId = "deepseek-ai/DeepSeek-V4-Pro-0813";
+			const providerModelId = "deepseek-v4-pro-0813";
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["balillm"] = {
+				[hfModelId]: {
+					provider: "balillm",
+					hfModelId,
+					providerId: providerModelId,
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const response = await client.chatCompletion({
+					model: hfModelId,
+					provider: "balillm",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+				});
+
+				expect(response.choices[0]?.message.content).toBeTruthy();
+				expect(response.usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: hfModelId,
+					provider: "balillm",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let content = "";
+				let usage: ChatCompletionStreamOutput["usage"];
+
+				for await (const chunk of stream) {
+					content += chunk.choices[0]?.delta.content ?? "";
+					if (chunk.usage) {
+						usage = chunk.usage;
+					}
+				}
+
+				expect(content).toBeTruthy();
+				expect(usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+
+			it("chatCompletion with tools", async () => {
+				const response = await client.chatCompletion({
+					model: hfModelId,
+					provider: "balillm",
+					messages: [{ role: "user", content: "What is the weather in Denpasar? Use the tool." }],
+					tools: [
+						{
+							type: "function",
+							function: {
+								name: "get_weather",
+								description: "Get the current weather for a city",
+								parameters: {
+									type: "object",
+									properties: { city: { type: "string" } },
+									required: ["city"],
+								},
+							},
+						},
+					],
+					tool_choice: "auto",
+				});
+
+				const toolCalls = response.choices[0]?.message.tool_calls;
+				expect(toolCalls?.length).toBeGreaterThan(0);
+				expect(toolCalls?.[0]?.function.name).toBe("get_weather");
+			});
+		},
+		TIMEOUT,
+	);
+
+	describe.concurrent(
 		"ZAI",
 		() => {
 			const client = new InferenceClient(env.HF_ZAI_KEY ?? "dummy");
