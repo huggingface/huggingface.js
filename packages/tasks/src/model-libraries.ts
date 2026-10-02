@@ -58,6 +58,15 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	"aadya-neural": {
+		prettyLabel: "aadya-neural",
+		repoName: "aadya",
+		repoUrl: "https://github.com/manasdutta04/aadya",
+		docsUrl: "https://github.com/manasdutta04/aadya/blob/main/train/README.md",
+		snippets: snippets.aadyaNeural,
+		filter: false,
+		countDownloads: `path:"model.safetensors" OR path:"pytorch_model.bin"`,
+	},
 	acestep: {
 		prettyLabel: "ACE-Step",
 		repoName: "ACE-Step",
