@@ -106,6 +106,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.araclip,
 	},
+	asimov: {
+		prettyLabel: "Asimov",
+		repoName: "Asimov",
+		repoUrl: "https://github.com/menloresearch/humanoid-policy-viewer",
+		snippets: snippets.asimov,
+		filter: false,
+		countDownloads: `path:"env.yaml"`,
+	},
 	"aviation-ner": {
 		prettyLabel: "Aviation NER",
 		repoName: "Aviation NER",

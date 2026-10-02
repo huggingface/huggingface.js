@@ -56,6 +56,14 @@ export const araclip = (model: ModelData): string[] => [
 model = AraClip.from_pretrained("${model.id}")`,
 ];
 
+export const asimov = (model: ModelData): string[] => [
+	`# Run the policy in a browser simulation of the Asimov 1 humanoid (no GPU needed)
+git clone https://github.com/menloresearch/humanoid-policy-viewer
+cd humanoid-policy-viewer
+npm install
+npm run hf ${model.id}`,
+];
+
 export const asteroid = (model: ModelData): string[] => [
 	`from asteroid.models import BaseModel
 
