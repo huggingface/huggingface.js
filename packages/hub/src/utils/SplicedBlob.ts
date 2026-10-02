@@ -155,7 +155,23 @@ export class SplicedBlob extends Blob {
 			}
 		}
 
-		return new Blob(resultSegments);
+		if (resultSegments.length === 0) {
+			return new Blob([]);
+		}
+
+		const [firstSegment, ...remainingSegments] = resultSegments;
+		if (remainingSegments.length === 0) {
+			return firstSegment;
+		}
+
+		return SplicedBlob.create(
+			firstSegment,
+			remainingSegments.map((insert) => ({
+				insert,
+				start: firstSegment.size,
+				end: firstSegment.size,
+			})),
+		);
 	}
 
 	get firstSpliceIndex(): number {
