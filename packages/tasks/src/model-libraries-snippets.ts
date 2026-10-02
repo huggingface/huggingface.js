@@ -1611,7 +1611,6 @@ model = MeshAnything(args)`,
 ];
 
 export const microduck = (model: ModelData): string[] => {
-	// Subset of the policy manifest (manifest.json), written by `uv run publish` in pollen-robotics/microduck_rl.
 	const manifest = model.config?.microduck;
 	// The name is interpolated into a shell command, so only bare words are accepted.
 	const name =
