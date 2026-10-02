@@ -7,6 +7,7 @@ import * as FeatherlessAI from "../providers/featherless-ai.js";
 import * as Fireworks from "../providers/fireworks-ai.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
+import * as Nagame from "../providers/nagame.js";
 import * as Humain from "../providers/humain-ai.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
@@ -127,6 +128,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	groq: {
 		conversational: new Groq.GroqConversationalTask(),
 		"text-generation": new Groq.GroqTextGenerationTask(),
+	},
+	nagame: {
+		conversational: new Nagame.NagameConversationalTask(),
 	},
 	"humain-ai": {
 		conversational: new Humain.HumainAIConversationalTask(),
