@@ -300,6 +300,39 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(false);
 	});
 
+	it("sunstone deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.sunstone;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model, undefined).href).toBe(
+			"vscode://sunstonenorth.sunstone/hf?model=bartowski/Llama-3.2-3B-Instruct-GGUF",
+		);
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf").href).toBe(
+			"vscode://sunstonenorth.sunstone/hf?model=bartowski/Llama-3.2-3B-Instruct-GGUF&file=Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+		);
+		expect(deeplink(model, "Q4_K_M/Llama-3.2-3B-Instruct-Q4_K_M-00001-of-00002.gguf").href).toBe(
+			"vscode://sunstonenorth.sunstone/hf?model=bartowski/Llama-3.2-3B-Instruct-GGUF&file=Q4_K_M%2FLlama-3.2-3B-Instruct-Q4_K_M-00001-of-00002.gguf",
+		);
+	});
+
+	it("sunstone not shown for unrelated model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.sunstone;
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			tags: ["conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("unsloth tagged model", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS.unsloth;
 		const model: ModelData = {
