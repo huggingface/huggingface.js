@@ -531,10 +531,14 @@ export class TogetherTextToSpeechTask extends TaskProviderHelper implements Text
 	preparePayload(params: BodyParams): Record<string, unknown> {
 		const userParams = (params.args.parameters as Record<string, unknown> | undefined) ?? {};
 		// Together's /v1/audio/speech requires a `voice` field. Voices are model-specific
-		// (Kokoro accepts `af_*`, Orpheus uses different names, etc.), so we only default
-		// when the target model is Kokoro — the only TTS model currently registered.
-		const isKokoro = params.model.toLowerCase().includes("kokoro");
-		const voice = userParams.voice ?? (isKokoro ? "af_alloy" : undefined);
+		// (Kokoro accepts `af_*`, Orpheus uses different names, etc.), so we default per model.
+		const model = params.model.toLowerCase();
+		const defaultVoice = model.includes("kokoro")
+			? "af_alloy"
+			: model.includes("orpheus")
+				? "tara"
+				: undefined;
+		const voice = userParams.voice ?? defaultVoice;
 
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
