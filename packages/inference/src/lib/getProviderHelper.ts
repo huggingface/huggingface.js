@@ -26,6 +26,7 @@ import type {
 	ImageToImageTaskHelper,
 	ImageToTextTaskHelper,
 	ImageToVideoTaskHelper,
+	VideoToVideoTaskHelper,
 	ImageTextToImageTaskHelper,
 	ImageTextToVideoTaskHelper,
 	ObjectDetectionTaskHelper,
@@ -181,6 +182,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"image-to-video": new Wavespeed.WavespeedAIImageToVideoTask(),
 		"image-text-to-image": new Wavespeed.WavespeedAIImageTextToImageTask(),
 		"image-text-to-video": new Wavespeed.WavespeedAIImageTextToVideoTask(),
+		"video-to-video": new Wavespeed.WavespeedAIVideoToVideoTask(),
 	},
 	"zai-org": {
 		conversational: new Zai.ZaiConversationalTask(),
@@ -280,6 +282,10 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "image-to-video",
 ): ImageToVideoTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
+	task: "video-to-video",
+): VideoToVideoTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "image-text-to-image",

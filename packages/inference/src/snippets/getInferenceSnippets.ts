@@ -97,6 +97,7 @@ const HF_PYTHON_METHODS: Partial<Record<WidgetType, string>> = {
 	"image-segmentation": "image_segmentation",
 	"image-to-image": "image_to_image",
 	"image-to-video": "image_to_video",
+	"video-to-video": "video_to_video",
 	"image-to-text": "image_to_text",
 	"image-text-to-image": "image_text_to_image",
 	"image-text-to-video": "image_text_to_video",
@@ -342,6 +343,11 @@ const prepareImageToImageInput = (model: ModelDataMinimal): object => {
 	return { inputs: data.image, parameters: { prompt: data.prompt } };
 };
 
+const prepareVideoToVideoInput = (model: ModelDataMinimal): object => {
+	const data = JSON.parse(getModelInputSnippet(model) as string);
+	return { inputs: data.video, parameters: { prompt: data.prompt } };
+};
+
 const prepareConversationalInput = (
 	model: ModelDataMinimal,
 	opts?: {
@@ -395,6 +401,7 @@ const snippets: Partial<
 	"image-to-image": snippetGenerator("imageToImage", prepareImageToImageInput),
 	"image-to-text": snippetGenerator("basicImage"),
 	"image-to-video": snippetGenerator("imageToVideo", prepareImageToImageInput),
+	"video-to-video": snippetGenerator("videoToVideo", prepareVideoToVideoInput),
 	"object-detection": snippetGenerator("basicImage"),
 	"question-answering": snippetGenerator("questionAnswering", prepareQuestionAnsweringInput),
 	"sentence-similarity": snippetGenerator("basic"),
