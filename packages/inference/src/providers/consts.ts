@@ -34,6 +34,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	publicai: {},
 	ovhcloud: {},
 	replicate: {},
+	ruvilab: {},
 	scaleway: {},
 	together: {},
 	wavespeed: {},
