@@ -1293,4 +1293,33 @@ describe("assertSafeShardFilename", () => {
 		expect(encodeShardFilename("unet/model 1.safetensors")).toBe("unet/model%201.safetensors");
 		expect(encodeShardFilename("model-00001-of-00002.safetensors")).toBe("model-00001-of-00002.safetensors");
 	});
+
+	it("requests shards with their path encoded exactly once", async () => {
+		const index = new TextEncoder().encode(
+			JSON.stringify({ weight_map: { "model.embed.weight": "sub dir/model 1.safetensors" } }),
+		);
+		const urls: string[] = [];
+		const fetchIndex = (async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+			urls.push(url);
+			if (!url.endsWith(".index.json")) {
+				return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
+			}
+			const range = new Headers(init?.headers).get("range");
+			const [start, end] = (range ?? `bytes=0-${index.length - 1}`).slice("bytes=".length).split("-").map(Number);
+			const last = Math.min(end, index.length - 1);
+			return new Response(index.slice(start, last + 1), {
+				status: 206,
+				headers: { "content-range": `bytes ${start}-${last}/${index.length}`, etag: '"hermetic-test-file"' },
+			});
+		}) as typeof fetch;
+
+		await parseSafetensorsMetadata({
+			repo: "some-user/some-model",
+			path: "model.safetensors.index.json",
+			fetch: fetchIndex,
+		}).catch(() => undefined);
+
+		assert.include(urls, "https://huggingface.co/some-user/some-model/resolve/main/sub%20dir/model%201.safetensors");
+	});
 });
