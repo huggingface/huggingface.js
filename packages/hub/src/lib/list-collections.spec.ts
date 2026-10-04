@@ -51,6 +51,7 @@ describe("listCollections", () => {
 						gated: false,
 						id: "huggingfacejs/tasks",
 						isBenchmark: false,
+						isEnvironment: false,
 						isLikedByUser: false,
 						isTraces: false,
 						lastModified: expect.any(String),

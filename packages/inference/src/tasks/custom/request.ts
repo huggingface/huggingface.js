@@ -19,7 +19,7 @@ export async function request<T>(
 	logger.warn(
 		"The request method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead.",
 	);
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 	const providerHelper = getProviderHelper(provider, options?.task);
 	const result = await innerRequest<T>(args, providerHelper, options);
 	return result.data;

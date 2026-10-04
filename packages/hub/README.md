@@ -82,24 +82,27 @@ for await (const progressEvent of await hub.uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
-// Edit a file by adding prefix & suffix
-await commit({
+// Edit a file in place, without downloading/uploading its unchanged data
+const file = await hub.downloadFile({ repo, path: "myfile.bin", accessToken: "hf_..." });
+await hub.uploadFile({
   repo,
   accessToken: "hf_...",
-  operations: [{
-    type: "edit",
-    originalContent: originalFile,
+  file: {
+    path: "myfile.bin",
+    originalContent: file,
     edits: [{
+      // Replace bytes [0, 4)
       start: 0,
-      end: 0,
-      content: new Blob(["prefix"])
+      end: 4,
+      content: new Blob(["new prefix"])
     }, {
-      start: originalFile.length,
-      end: originalFile.length,
+      // Append at the end
+      start: file.size,
+      end: file.size,
       content: new Blob(["suffix"])
     }]
-  }]
-})
+  }
+});
 
 await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
@@ -114,7 +117,7 @@ await hub.deleteRepo({ repo, accessToken: "hf_..." });
 
 ## CLI usage
 
-You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo. 
+You can use `@huggingface/hub` in CLI mode to upload and download files and folders to/from your repo.
 
 ```console
 npx @huggingface/hub upload coyotte508/test-model .
@@ -125,8 +128,16 @@ npx @huggingface/hub upload --repo-type dataset coyotte508/test-dataset .
 npx @huggingface/hub branch create coyotte508/test-model release --empty
 npx @huggingface/hub upload coyotte508/test-model . --revision release
 
+# Download files to the current directory (or --local-dir)
+npx @huggingface/hub download coyotte508/test-model config.json
+npx @huggingface/hub download coyotte508/test-model config.json README.md --local-dir ./test-model
+# Download an entire repo, optionally filtered with --include / --exclude
+npx @huggingface/hub download coyotte508/test-model --local-dir ./test-model
+npx @huggingface/hub download --repo-type dataset coyotte508/test-dataset --include "*.json"
+
 npx @huggingface/hub --help
 npx @huggingface/hub upload --help
+npx @huggingface/hub download --help
 ```
 
 You can also install globally with `npm install -g @huggingface/hub`. Then you can do:
@@ -137,10 +148,14 @@ hfjs upload coyotte508/test-model .
 hfjs branch create --repo-type dataset coyotte508/test-dataset release --empty
 hfjs upload --repo-type dataset coyotte508/test-dataset . --revision release
 
+hfjs download coyotte508/test-model config.json
+hfjs download coyotte508/test-model --local-dir ./test-model
+
 hfjs --help
 hfjs  upload --help
 
 hfjs help jobs
+hfjs download --help
 ```
 
 ## OAuth Login
@@ -222,6 +237,8 @@ When uploading large files, you may want to run the `commit` calls inside a work
 Remote resources and local files should be passed as `URL` whenever it's possible so they can be lazy loaded in chunks to reduce RAM usage. Passing a `File` inside the browser's context is fine, because it natively behaves as a `Blob`.
 
 Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
+
+To edit an existing file, prefer an `edit` commit operation with the blob returned by `downloadFile` as `originalContent`: only the edited regions are downloaded, re-chunked and hashed. For repeated appends to the same file, pass a shared `rangeEditCache: new Map()` to the `commit` calls to also skip the storage-metadata round-trips.
 
 ## Dependencies
 

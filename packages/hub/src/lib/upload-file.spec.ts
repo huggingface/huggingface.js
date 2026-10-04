@@ -96,4 +96,57 @@ describe("uploadFile", () => {
 			});
 		}
 	});
+
+	it("should edit a file via an `edits` param", async () => {
+		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
+		const repo = { type: "model", name: repoName } satisfies RepoId;
+
+		try {
+			await createRepo({
+				accessToken: TEST_ACCESS_TOKEN,
+				repo,
+				hubUrl: TEST_HUB_URL,
+			});
+
+			await uploadFile({
+				accessToken: TEST_ACCESS_TOKEN,
+				repo,
+				file: { content: new Blob(["Hello, World!"]), path: "file1" },
+				hubUrl: TEST_HUB_URL,
+			});
+
+			const original = await downloadFile({
+				accessToken: TEST_ACCESS_TOKEN,
+				repo,
+				path: "file1",
+				hubUrl: TEST_HUB_URL,
+			});
+			assert(original);
+
+			await uploadFile({
+				accessToken: TEST_ACCESS_TOKEN,
+				repo,
+				file: {
+					path: "file1",
+					originalContent: original,
+					edits: [{ content: new Blob(["Beautiful "]), start: 7, end: 7 }],
+				},
+				hubUrl: TEST_HUB_URL,
+			});
+
+			const content = await downloadFile({
+				repo,
+				path: "file1",
+				hubUrl: TEST_HUB_URL,
+			});
+
+			assert.strictEqual(await content?.text(), "Hello, Beautiful World!");
+		} finally {
+			await deleteRepo({
+				repo,
+				accessToken: TEST_ACCESS_TOKEN,
+				hubUrl: TEST_HUB_URL,
+			});
+		}
+	});
 });

@@ -167,4 +167,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"MMMU is a new benchmark designed to evaluate multimodal models on massive multi-discipline tasks demanding college-level subject knowledge and deliberate reasoning.",
 		url: "https://mmmu-benchmark.github.io/",
 	},
+	extractbench: {
+		name: "extractbench",
+		description:
+			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
+		url: "https://github.com/run-llama/ExtractBench",
+	},
 } as const;

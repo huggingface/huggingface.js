@@ -41,30 +41,26 @@ const inputsTextClassification = () => `"I like you. I love you"`;
 
 const inputsTokenClassification = () => `"My name is Sarah Jessica Parker but you can call me Jessica"`;
 
-const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionInputMessage[] => {
-	if (model.tags.includes("conversational")) {
-		return model.pipeline_tag === "text-generation"
-			? [{ role: "user", content: "What is the capital of France?" }]
-			: [
-					{
-						role: "user",
-						content: [
-							{
-								type: "text",
-								text: "Describe this image in one sentence.",
+const inputsTextGeneration = (model: ModelDataMinimal): ChatCompletionInputMessage[] =>
+	model.pipeline_tag === "text-generation"
+		? [{ role: "user", content: "What is the capital of France?" }]
+		: [
+				{
+					role: "user",
+					content: [
+						{
+							type: "text",
+							text: "Describe this image in one sentence.",
+						},
+						{
+							type: "image_url",
+							image_url: {
+								url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
 							},
-							{
-								type: "image_url",
-								image_url: {
-									url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
-								},
-							},
-						],
-					},
-				];
-	}
-	return `"Can you please let us know more details about your "`;
-};
+						},
+					],
+				},
+			];
 
 // `mask_token` is author-controlled (tokenizer/config.json); build the string then
 // JSON.stringify it so quotes/backslashes are escaped into a valid string literal
