@@ -2012,6 +2012,65 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 	describe.concurrent(
+		"Lanseq",
+		() => {
+			const client = new InferenceClient(env.HF_LANSEQ_KEY ?? "dummy");
+			const hfModelId = "Qwen/Qwen3.8-27B";
+			const providerModelId = "qwen3.8-27b-int4";
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["lanseq"] = {
+				[hfModelId]: {
+					provider: "lanseq",
+					hfModelId,
+					providerId: providerModelId,
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const response = await client.chatCompletion({
+					model: hfModelId,
+					provider: "lanseq",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+				});
+				expect(response.choices[0]?.message.content).toBeTruthy();
+				expect(response.usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: hfModelId,
+					provider: "lanseq",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let content = "";
+				let usage: ChatCompletionStreamOutput["usage"];
+				for await (const chunk of stream) {
+					content += chunk.choices[0]?.delta.content ?? "";
+					if (chunk.usage) usage = chunk.usage;
+				}
+				expect(content).toBeTruthy();
+				expect(usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+		},
+		TIMEOUT,
+	);
+
+	describe.concurrent(
 		"HUMAIN",
 		() => {
 			const client = new InferenceClient(env.HF_HUMAIN_KEY ?? "dummy");
