@@ -90,7 +90,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	groq: "groq",
 	"hf-inference": "hf-inference",
 	"humain-ai": "humain-ai",
-	lanseq: "Lanseq",
+	lanseq: "Lanseqcloud",
 	novita: "novita",
 	nscale: "nscale",
 	openai: "openai",
