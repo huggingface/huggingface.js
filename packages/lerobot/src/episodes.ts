@@ -1,7 +1,7 @@
 import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
-import { fetchRange, fetchTextPrefix, HttpError, openRemoteFile, TAIL_PROBE_BYTES } from "./http";
+import { fetchRange, HttpError, openRemoteFile, TAIL_PROBE_BYTES } from "./http";
 import { formatPathTemplate } from "./paths";
 
 /** v3 keeps its episode index in parquet under a fixed layout; the path is not templated in info.json. */
@@ -11,9 +11,8 @@ export function episodesMetadataPath(chunkIndex: number, fileIndex: number): str
 	return `meta/episodes/chunk-${chunk}/file-${file}.parquet`;
 }
 
-/** Enough for ~10 episodes of `meta/episodes.jsonl`; grown geometrically when it is not. */
-const JSONL_INITIAL_PREFIX_BYTES = 8 * 1024;
-const JSONL_MAX_PREFIX_BYTES = 4 * 1024 * 1024;
+/** Enough for ~10 episodes of `meta/episodes.jsonl`, the page most callers ask for first. */
+const JSONL_FIRST_READ_BYTES = 8 * 1024;
 /** Bounds the shard walk so a pathological `offset` cannot loop forever (CWE-835). */
 const MAX_INDEX_FILES = 64;
 
@@ -95,8 +94,9 @@ function buildEpisode(raw: RawEpisode, info: LeRobotInfo, toUrl: (path: string) 
 /**
  * Reads `meta/episodes.jsonl` (v2.0 / v2.1).
  *
- * Only a prefix of the file is fetched: the largest published LeRobot datasets have a 40 MB+ index,
- * and the first handful of episodes live in its first kilobyte.
+ * The file is read from its start up to the last requested line, each read continuing where the
+ * previous one stopped: the largest published LeRobot datasets have an index of nearly 100 MB, and
+ * the first handful of episodes live in its first kilobyte.
  */
 async function readEpisodesV2(
 	url: string,
@@ -105,19 +105,36 @@ async function readEpisodesV2(
 	options?: FetchOptions,
 ): Promise<RawEpisode[]> {
 	const wanted = offset + limit;
-	let prefixBytes = JSONL_INITIAL_PREFIX_BYTES;
+	const episodes: RawEpisode[] = [];
+	const decoder = new TextDecoder();
+	/// The line the previous read cut in half.
+	let carry = "";
+	let position = 0;
+	let readTo = 0;
+	let total: number | undefined;
+	let size = JSONL_FIRST_READ_BYTES;
 
 	for (;;) {
-		const { text, byteLength } = await fetchTextPrefix(url, prefixBytes, options);
-		/// `byteLength`, not `text.length`: a UTF-8 string is shorter than its byte count for any
-		/// non-ASCII task description, which would otherwise look like end-of-file.
-		const reachedEof = byteLength < prefixBytes;
-		const lines = text.split("\n");
-		/// A prefix read almost always cuts the final line in half, so drop it unless we reached EOF.
-		const complete = reachedEof ? lines : lines.slice(0, -1);
-		const parsed: RawEpisode[] = [];
+		const end = Math.min(readTo + size, total ?? Infinity) - 1;
+		let bytes: Uint8Array = new Uint8Array(0);
+		try {
+			const result = await fetchRange(url, readTo, end, options);
+			bytes = result.bytes;
+			total = result.total ?? total;
+		} catch (error) {
+			/// Without Content-Range, a file that ends exactly where the previous read did answers 416 here.
+			if (!(error instanceof HttpError) || error.status !== 416 || readTo === 0) {
+				throw error;
+			}
+		}
+		/// Short is the end of the file; longer is a server that ignored Range and sent all of it.
+		const eof = bytes.byteLength !== end - readTo + 1 || (total !== undefined && readTo + bytes.byteLength >= total);
+		readTo += bytes.byteLength;
+		/// `stream` holds back a multi-byte character the read cut, until the next read completes it.
+		const lines = (carry + decoder.decode(bytes, { stream: !eof })).split("\n");
+		carry = eof ? "" : (lines.pop() ?? "");
 
-		for (const line of complete) {
+		for (const line of lines) {
 			if (line.trim().length === 0) {
 				continue;
 			}
@@ -137,13 +154,22 @@ async function readEpisodesV2(
 			if (index === undefined || length === undefined) {
 				continue;
 			}
-			parsed.push({ index, length, tasks: toTasks(record.tasks) });
+			if (position >= offset) {
+				episodes.push({ index, length, tasks: toTasks(record.tasks) });
+			}
+			position++;
+			if (position >= wanted) {
+				return episodes;
+			}
 		}
 
-		if (parsed.length >= wanted || reachedEof || prefixBytes >= JSONL_MAX_PREFIX_BYTES) {
-			return parsed.slice(offset, wanted);
+		if (eof) {
+			return episodes;
 		}
-		prefixBytes = Math.min(prefixBytes * 4, JSONL_MAX_PREFIX_BYTES);
+		/// Sized from the bytes per line so far, so a deep page or a whole listing usually takes one more
+		/// read. Never less than what has been read, so lines that get longer further in still cost only
+		/// a logarithmic number of reads.
+		size = Math.max(readTo, Math.ceil(((wanted - position) * readTo * 1.25) / Math.max(1, position)));
 	}
 }
 
