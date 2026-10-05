@@ -13,6 +13,11 @@ export function episodesMetadataPath(chunkIndex: number, fileIndex: number): str
 
 /** Enough for ~10 episodes of `meta/episodes.jsonl`, the page most callers ask for first. */
 const JSONL_FIRST_READ_BYTES = 8 * 1024;
+/**
+ * One read's bytes, text and lines are all in memory at once, so the largest indexes (near 100 MB) are
+ * read in a few requests rather than held whole.
+ */
+const JSONL_MAX_READ_BYTES = 16 * 1024 * 1024;
 /** Bounds the shard walk so a pathological `offset` cannot loop forever (CWE-835). */
 const MAX_INDEX_FILES = 64;
 
@@ -116,6 +121,7 @@ async function readEpisodesV2(
 
 	for (;;) {
 		const end = Math.min(readTo + size, total ?? Infinity) - 1;
+		const requested = end - readTo + 1;
 		let bytes: Uint8Array = new Uint8Array(0);
 		try {
 			const result = await fetchRange(url, readTo, end, options);
@@ -127,9 +133,16 @@ async function readEpisodesV2(
 				throw error;
 			}
 		}
-		/// Short is the end of the file; longer is a server that ignored Range and sent all of it.
-		const eof = bytes.byteLength !== end - readTo + 1 || (total !== undefined && readTo + bytes.byteLength >= total);
+		/// Longer than asked for is a server that ignored Range and sent the whole file, from its first byte.
+		const ignoredRange = bytes.byteLength > requested;
+		if (ignoredRange) {
+			bytes = bytes.subarray(readTo);
+		}
 		readTo += bytes.byteLength;
+		/// Once Content-Range has given the size, a short read is not the end, since a server may cap how
+		/// much one response carries. An empty one still is, so a misbehaving server cannot loop forever.
+		const eof =
+			ignoredRange || bytes.byteLength === 0 || (total === undefined ? bytes.byteLength < requested : readTo >= total);
 		/// `stream` holds back a multi-byte character the read cut, until the next read completes it.
 		const lines = (carry + decoder.decode(bytes, { stream: !eof })).split("\n");
 		carry = eof ? "" : (lines.pop() ?? "");
@@ -167,9 +180,12 @@ async function readEpisodesV2(
 			return episodes;
 		}
 		/// Sized from the bytes per line so far, so a deep page or a whole listing usually takes one more
-		/// read. Never less than what has been read, so lines that get longer further in still cost only
-		/// a logarithmic number of reads.
-		size = Math.max(readTo, Math.ceil(((wanted - position) * readTo * 1.25) / Math.max(1, position)));
+		/// read below the cap. Never less than what has been read, so lines that get longer further in
+		/// still cost only a logarithmic number of reads.
+		size = Math.min(
+			JSONL_MAX_READ_BYTES,
+			Math.max(readTo, Math.ceil(((wanted - position) * readTo * 1.25) / Math.max(1, position))),
+		);
 	}
 }
 

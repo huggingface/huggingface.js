@@ -835,6 +835,25 @@ describe("v2 index reads", () => {
 		expect(expectForward(ranges)).toBe(large.byteLength);
 	});
 
+	it("reads a large index at most 16 MiB at a time", async () => {
+		const count = 18_000;
+		const bytes = jsonl(Array.from({ length: count }, (_, index) => line(index, "x".repeat(1_000))));
+		expect(bytes.byteLength).toBeGreaterThan(16 * 1024 * 1024);
+		const ranges: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: serve({ "meta/info.json": info(count), "meta/episodes.jsonl": bytes }, ranges),
+		});
+
+		const [last] = await dataset.episodes({ offset: count - 1, limit: 1 });
+		expect(last?.index).toBe(count - 1);
+		expect(expectForward(ranges)).toBe(bytes.byteLength);
+		const sizes = ranges.map((range) => {
+			const [start, end] = range.replace("bytes=", "").split("-").map(Number);
+			return end - start + 1;
+		});
+		expect(Math.max(...sizes)).toBe(16 * 1024 * 1024);
+	});
+
 	it("decodes a character split between two reads", async () => {
 		/// The first read ends on the first byte of the two-byte "é".
 		const prefix = line(0, "").indexOf('""') + 1;
@@ -853,19 +872,22 @@ describe("v2 index reads", () => {
 	});
 
 	it("stops at the end of a file read exactly to its last byte, without Content-Range", async () => {
-		const lines = Array.from({ length: 100 }, (_, index) => line(index));
-		const filler = 8192 - jsonl([...lines, line(100, "")]).byteLength;
-		const bytes = jsonl([...lines, line(100, "x".repeat(filler))]);
-		expect(bytes.byteLength).toBe(8192);
-		const ranges: string[] = [];
-		/// info.json counting more episodes than the file has makes the reader look past its end.
-		const dataset = new LeRobotDataset(REPO_ID, {
-			fetch: serve({ "meta/info.json": info(200), "meta/episodes.jsonl": bytes }, ranges, { contentRange: false }),
-		});
+		/// Without a trailing newline, the last line is held back as cut off until the read past the end.
+		for (const newline of ["\n", ""]) {
+			const lines = Array.from({ length: 100 }, (_, index) => line(index));
+			const file = (last: string) => encoder.encode([...lines, last].join("\n") + newline);
+			const bytes = file(line(100, "x".repeat(8192 - file(line(100, "")).byteLength)));
+			expect(bytes.byteLength).toBe(8192);
+			const ranges: string[] = [];
+			/// info.json counting more episodes than the file has makes the reader look past its end.
+			const dataset = new LeRobotDataset(REPO_ID, {
+				fetch: serve({ "meta/info.json": info(200), "meta/episodes.jsonl": bytes }, ranges, { contentRange: false }),
+			});
 
-		const episodes = await dataset.episodes({ limit: 200 });
-		expect(episodes).toHaveLength(101);
-		expect(ranges[1]).toMatch(/^bytes=8192-/);
+			const episodes = await dataset.episodes({ limit: 200 });
+			expect(episodes.map((episode) => episode.index)).toEqual(Array.from({ length: 101 }, (_, index) => index));
+			expect(ranges[1]).toMatch(/^bytes=8192-/);
+		}
 	});
 
 	it("reads the whole file at once when the server ignores Range", async () => {
@@ -885,6 +907,37 @@ describe("v2 index reads", () => {
 		expect(episodes).toHaveLength(200);
 		/// info.json, then the index once.
 		expect(requests).toBe(2);
+	});
+
+	it("skips the bytes already read when a later read ignores Range", async () => {
+		const origin = mockFetch({ "meta/info.json": info(total), "meta/episodes.jsonl": large });
+		/// Honors the first read only, like a cache that holds the start of the file and answers anything
+		/// else with all of it.
+		const fetch = ((input: RequestInfo | URL, init?: RequestInit) =>
+			new Headers(init?.headers).get("Range")?.startsWith("bytes=0-")
+				? origin(input, init)
+				: origin(input)) as typeof globalThis.fetch;
+		const dataset = new LeRobotDataset(REPO_ID, { fetch });
+
+		const page = await dataset.episodes({ offset: 1_500, limit: 10 });
+		expect(page.map((episode) => episode.index)).toEqual(Array.from({ length: 10 }, (_, index) => 1_500 + index));
+		const episodes = await dataset.episodes({ limit: total });
+		expect(episodes.map((episode) => episode.index)).toEqual(Array.from({ length: total }, (_, index) => index));
+	});
+
+	it("keeps reading after a short read until the size Content-Range gave", async () => {
+		const bytes = jsonl(Array.from({ length: 2_000 }, (_, index) => line(index)));
+		const origin = mockFetch({ "meta/info.json": info(2_000), "meta/episodes.jsonl": bytes });
+		/// Sends at most 16 KiB per response, whatever the Range asks for.
+		const fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+			const [, start, end] = new Headers(init?.headers).get("Range")?.match(/^bytes=(\d+)-(\d+)$/) ?? [];
+			const capped = Math.min(Number(end), Number(start) + 16 * 1024 - 1);
+			return origin(input, start === undefined ? init : { headers: { Range: `bytes=${start}-${capped}` } });
+		}) as typeof globalThis.fetch;
+		const dataset = new LeRobotDataset(REPO_ID, { fetch });
+
+		const episodes = await dataset.episodes({ limit: 2_000 });
+		expect(episodes.map((episode) => episode.index)).toEqual(Array.from({ length: 2_000 }, (_, index) => index));
 	});
 
 	it("skips blank and malformed lines without counting them as positions", async () => {
