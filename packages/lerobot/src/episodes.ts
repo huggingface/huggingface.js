@@ -18,6 +18,14 @@ const JSONL_FIRST_READ_BYTES = 8 * 1024;
  * read in a few requests rather than held whole.
  */
 const JSONL_MAX_READ_BYTES = 16 * 1024 * 1024;
+/**
+ * The file is user-controlled and nothing in it bounds how far a listing reads (a line only counts once
+ * it parses, and `total_episodes` comes from the same author), so reading stops here: well above the
+ * largest published index, 97 MB. A listing that needs more throws rather than coming back short.
+ */
+const JSONL_MAX_BYTES = 256 * 1024 * 1024;
+/** Real lines are under a kilobyte; a file without line breaks would otherwise be held whole. */
+const JSONL_MAX_LINE_LENGTH = 1024 * 1024;
 /** Bounds the shard walk so a pathological `offset` cannot loop forever (CWE-835). */
 const MAX_INDEX_FILES = 64;
 
@@ -117,32 +125,35 @@ async function readEpisodesV2(
 	let position = 0;
 	let readTo = 0;
 	let total: number | undefined;
-	let size = JSONL_FIRST_READ_BYTES;
+	/// Where the next read ends, exclusive.
+	let stop = JSONL_FIRST_READ_BYTES;
 
 	for (;;) {
-		const end = Math.min(readTo + size, total ?? Infinity) - 1;
+		const end = Math.min(stop, total ?? Infinity) - 1;
 		const requested = end - readTo + 1;
 		let bytes: Uint8Array = new Uint8Array(0);
+		let whole = false;
 		try {
 			const result = await fetchRange(url, readTo, end, options);
 			bytes = result.bytes;
 			total = result.total ?? total;
+			whole = !result.partial;
 		} catch (error) {
 			/// Without Content-Range, a file that ends exactly where the previous read did answers 416 here.
 			if (!(error instanceof HttpError) || error.status !== 416 || readTo === 0) {
 				throw error;
 			}
 		}
-		/// Longer than asked for is a server that ignored Range and sent the whole file, from its first byte.
-		const ignoredRange = bytes.byteLength > requested;
-		if (ignoredRange) {
+		/// A 200 is a server that ignored Range and sent the whole file, from its first byte. Its length
+		/// cannot tell: a file exactly as long as the first read asked for would be read, and counted, twice.
+		if (whole) {
 			bytes = bytes.subarray(readTo);
 		}
 		readTo += bytes.byteLength;
 		/// Once Content-Range has given the size, a short read is not the end, since a server may cap how
 		/// much one response carries. An empty one still is, so a misbehaving server cannot loop forever.
 		const eof =
-			ignoredRange || bytes.byteLength === 0 || (total === undefined ? bytes.byteLength < requested : readTo >= total);
+			whole || bytes.byteLength === 0 || (total === undefined ? bytes.byteLength < requested : readTo >= total);
 		/// `stream` holds back a multi-byte character the read cut, until the next read completes it.
 		const lines = (carry + decoder.decode(bytes, { stream: !eof })).split("\n");
 		carry = eof ? "" : (lines.pop() ?? "");
@@ -179,13 +190,23 @@ async function readEpisodesV2(
 		if (eof) {
 			return episodes;
 		}
-		/// Sized from the bytes per line so far, so a deep page or a whole listing usually takes one more
-		/// read below the cap. Never less than what has been read, so lines that get longer further in
-		/// still cost only a logarithmic number of reads.
-		size = Math.min(
-			JSONL_MAX_READ_BYTES,
-			Math.max(readTo, Math.ceil(((wanted - position) * readTo * 1.25) / Math.max(1, position))),
-		);
+		if (carry.length > JSONL_MAX_LINE_LENGTH) {
+			throw new Error(`${url} has a line longer than ${JSONL_MAX_LINE_LENGTH} characters`);
+		}
+		if (readTo >= JSONL_MAX_BYTES) {
+			throw new Error(`Stopped reading ${url} at ${JSONL_MAX_BYTES} bytes, before the episodes asked for`);
+		}
+		/// Sized from the bytes per line so far, so a deep page or a whole listing usually takes one or two
+		/// more reads up to 16 MiB, then one per 16 MiB. Never less than what has been read, so lines that
+		/// get longer further in still cost only a logarithmic number of reads.
+		const target = readTo + Math.max(readTo, Math.ceil(((wanted - position) * readTo * 1.25) / Math.max(1, position)));
+		/// Ends rounded up to 8 KiB times a power of 2, and past 16 MiB to whole 16 MiB blocks, so calls
+		/// for nearby pages send the same ranges and a caller's range cache can answer them.
+		stop = JSONL_FIRST_READ_BYTES;
+		while (stop < target) {
+			stop *= 2;
+		}
+		stop = Math.min(stop, (Math.floor(readTo / JSONL_MAX_READ_BYTES) + 1) * JSONL_MAX_READ_BYTES);
 	}
 }
 

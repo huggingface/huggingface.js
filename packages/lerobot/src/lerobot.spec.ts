@@ -827,7 +827,8 @@ describe("v2 index reads", () => {
 		ranges.length = 0;
 		const page = await dataset.episodes({ offset: 3_000, limit: 10 });
 		expect(page.map((episode) => episode.index)).toEqual(Array.from({ length: 10 }, (_, index) => 3_000 + index));
-		expect(expectForward(ranges)).toBeLessThan(large.byteLength / 10);
+		/// 512 KiB of the 4.9 MB file.
+		expect(ranges).toEqual(["bytes=0-8191", "bytes=8192-524287"]);
 
 		ranges.length = 0;
 		const [last] = await dataset.episodes({ offset: total - 1, limit: 1 });
@@ -835,7 +836,7 @@ describe("v2 index reads", () => {
 		expect(expectForward(ranges)).toBe(large.byteLength);
 	});
 
-	it("reads a large index at most 16 MiB at a time", async () => {
+	it("reads a large index in 16 MiB blocks", async () => {
 		const count = 18_000;
 		const bytes = jsonl(Array.from({ length: count }, (_, index) => line(index, "x".repeat(1_000))));
 		expect(bytes.byteLength).toBeGreaterThan(16 * 1024 * 1024);
@@ -846,12 +847,23 @@ describe("v2 index reads", () => {
 
 		const [last] = await dataset.episodes({ offset: count - 1, limit: 1 });
 		expect(last?.index).toBe(count - 1);
-		expect(expectForward(ranges)).toBe(bytes.byteLength);
-		const sizes = ranges.map((range) => {
-			const [start, end] = range.replace("bytes=", "").split("-").map(Number);
-			return end - start + 1;
+		expect(ranges).toEqual(["bytes=0-8191", "bytes=8192-16777215", `bytes=16777216-${bytes.byteLength - 1}`]);
+	});
+
+	it("asks for the same ranges for nearby pages, so a range cache can answer them", async () => {
+		const ranges: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: serve({ "meta/info.json": info(total), "meta/episodes.jsonl": large }, ranges),
 		});
-		expect(Math.max(...sizes)).toBe(16 * 1024 * 1024);
+
+		const pages: string[][] = [];
+		for (const offset of [2_900, 3_000, 3_100]) {
+			ranges.length = 0;
+			await dataset.episodes({ offset, limit: 10 });
+			pages.push([...ranges]);
+		}
+		expect(pages[1]).toEqual(pages[0]);
+		expect(pages[2]).toEqual(pages[0]);
 	});
 
 	it("decodes a character split between two reads", async () => {
@@ -871,13 +883,19 @@ describe("v2 index reads", () => {
 		expect(ranges.length).toBe(2);
 	});
 
+	/** 101 episodes in exactly the bytes of the first read. */
+	function firstReadLong(newline: string): Uint8Array {
+		const lines = Array.from({ length: 100 }, (_, index) => line(index));
+		const file = (last: string) => encoder.encode([...lines, last].join("\n") + newline);
+		const bytes = file(line(100, "x".repeat(8192 - file(line(100, "")).byteLength)));
+		expect(bytes.byteLength).toBe(8192);
+		return bytes;
+	}
+
 	it("stops at the end of a file read exactly to its last byte, without Content-Range", async () => {
 		/// Without a trailing newline, the last line is held back as cut off until the read past the end.
 		for (const newline of ["\n", ""]) {
-			const lines = Array.from({ length: 100 }, (_, index) => line(index));
-			const file = (last: string) => encoder.encode([...lines, last].join("\n") + newline);
-			const bytes = file(line(100, "x".repeat(8192 - file(line(100, "")).byteLength)));
-			expect(bytes.byteLength).toBe(8192);
+			const bytes = firstReadLong(newline);
 			const ranges: string[] = [];
 			/// info.json counting more episodes than the file has makes the reader look past its end.
 			const dataset = new LeRobotDataset(REPO_ID, {
@@ -907,6 +925,25 @@ describe("v2 index reads", () => {
 		expect(episodes).toHaveLength(200);
 		/// info.json, then the index once.
 		expect(requests).toBe(2);
+	});
+
+	it("reads a file exactly as long as the first read once when the server ignores Range", async () => {
+		for (const newline of ["\n", ""]) {
+			/// One more episode than the file has, so only end-of-file can stop the reader.
+			const origin = mockFetch({ "meta/info.json": info(200), "meta/episodes.jsonl": firstReadLong(newline) });
+			let reads = 0;
+			const dataset = new LeRobotDataset(REPO_ID, {
+				fetch: ((input: RequestInfo | URL) => {
+					reads += String(input).endsWith("/meta/episodes.jsonl") ? 1 : 0;
+					return origin(input);
+				}) as typeof fetch,
+			});
+
+			const episodes = await dataset.episodes({ limit: 200 });
+			expect(episodes.map((episode) => episode.index)).toEqual(Array.from({ length: 101 }, (_, index) => index));
+			expect(await dataset.episodes({ offset: 150, limit: 10 })).toEqual([]);
+			expect(reads).toBe(2);
+		}
 	});
 
 	it("skips the bytes already read when a later read ignores Range", async () => {
@@ -948,6 +985,67 @@ describe("v2 index reads", () => {
 
 		expect((await dataset.episodes({ limit: 10 })).map((episode) => episode.index)).toEqual([0, 2]);
 		expect((await dataset.episodes({ offset: 1, limit: 1 })).map((episode) => episode.index)).toEqual([2]);
+	});
+
+	it("throws on a line too long to be an episode, before reading the rest of the file", async () => {
+		/// No line break at all, as in a file with CR-only line endings.
+		const bytes = new Uint8Array(40 * 1024 * 1024).fill(0x78);
+		for (const limit of [10, 1_000_000]) {
+			const origin = mockFetch({ "meta/info.json": info(1_000_000), "meta/episodes.jsonl": bytes });
+			let read = 0;
+			const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+				const response = await origin(input, init);
+				if (String(input).endsWith("/meta/episodes.jsonl")) {
+					read += (await response.clone().arrayBuffer()).byteLength;
+				}
+				return response;
+			}) as typeof globalThis.fetch;
+			const dataset = new LeRobotDataset(REPO_ID, { fetch });
+
+			await expect(dataset.episodes({ limit })).rejects.toThrow(/has a line longer than 1048576 characters/);
+			expect(read).toBeLessThanOrEqual(16 * 1024 * 1024);
+		}
+	});
+
+	it("throws past 256 MiB of an index whose lines are not episodes, rather than reading on", async () => {
+		/// Lines without `length` count for nothing, so neither the page nor the episode count stops the reader.
+		const unit = encoder.encode(JSON.stringify({ episode_index: 0, tasks: ["x".repeat(1_000)] }) + "\n");
+		const tiled = new Uint8Array(16 * 1024 * 1024 + unit.byteLength);
+		for (let at = 0; at < tiled.byteLength; at += unit.byteLength) {
+			tiled.set(unit.subarray(0, tiled.byteLength - at), at);
+		}
+		const size = 300 * 1024 * 1024;
+		const origin = mockFetch({ "meta/info.json": info(1_000_000) });
+		let read = 0;
+		/// Serves the 300 MiB file from 16 MiB of its repeating lines, as no read is larger.
+		const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+			if (!String(input).endsWith("/meta/episodes.jsonl")) {
+				return origin(input, init);
+			}
+			const [, start, end] = (new Headers(init?.headers).get("Range") ?? "").match(/^bytes=(\d+)-(\d+)$/) ?? [];
+			const first = Number(start);
+			const last = Math.min(Number(end), size - 1);
+			const body = tiled.slice(first % unit.byteLength, (first % unit.byteLength) + last - first + 1);
+			read += body.byteLength;
+			return new Response(body, { status: 206, headers: { "content-range": `bytes ${first}-${last}/${size}` } });
+		}) as typeof globalThis.fetch;
+		const dataset = new LeRobotDataset(REPO_ID, { fetch });
+
+		await expect(dataset.episodes({ limit: 10 })).rejects.toThrow(/at 268435456 bytes/);
+		expect(read).toBe(256 * 1024 * 1024);
+	});
+
+	it("floors a fractional offset or limit, and returns nothing for NaN without reading the index", async () => {
+		const ranges: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: serve({ "meta/info.json": info(total), "meta/episodes.jsonl": large }, ranges),
+		});
+
+		expect((await dataset.episodes({ offset: 2.5, limit: 2.5 })).map((episode) => episode.index)).toEqual([2, 3]);
+		ranges.length = 0;
+		expect(await dataset.episodes({ limit: NaN })).toEqual([]);
+		expect(await dataset.episodes({ offset: NaN })).toEqual([]);
+		expect(ranges).toEqual([]);
 	});
 });
 
