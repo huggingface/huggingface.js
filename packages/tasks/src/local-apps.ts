@@ -662,7 +662,7 @@ export const LOCAL_APPS = {
 	},
 	atlara: {
 		prettyLabel: "Atlara",
-		docsUrl: "https://atlara.ai",
+		docsUrl: "https://atlara.ai/hugging-face/",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`atlara://model?id=${encodeURIComponent(model.id)}`),
