@@ -5,6 +5,18 @@ import type { EventSourceMessage } from "../vendor/fetch-event-source/parse.js";
 import { getLines, getMessages } from "../vendor/fetch-event-source/parse.js";
 import { InferenceClientProviderApiError } from "../errors.js";
 import type { JsonObject } from "../vendor/type-fest/basic.js";
+import { delay } from "./delay.js";
+
+const MAX_RETRIES_ON_503 = 3;
+
+/**
+ * Delay before retrying a 503: the server's `Retry-After` (in seconds) when present, exponential backoff otherwise
+ */
+function retryDelayMs(response: Response, attempt: number): number {
+	const retryAfter = response.headers.get("Retry-After");
+	const retryAfterMs = retryAfter === null ? NaN : Number(retryAfter) * 1000;
+	return Number.isFinite(retryAfterMs) ? retryAfterMs : 1000 * 2 ** attempt;
+}
 
 export interface ResponseWrapper<T> {
 	data: T;
@@ -47,13 +59,17 @@ export async function innerRequest<T>(
 	},
 ): Promise<ResponseWrapper<T>> {
 	const { url, info } = await makeRequestOptions(args, providerHelper, options);
-	const response = await (options?.fetch ?? fetch)(url, info);
+	let response = await (options?.fetch ?? fetch)(url, info);
+	for (
+		let attempt = 0;
+		options?.retry_on_error !== false && response.status === 503 && attempt < MAX_RETRIES_ON_503;
+		attempt++
+	) {
+		await delay(retryDelayMs(response, attempt), options?.signal);
+		response = await (options?.fetch ?? fetch)(url, info);
+	}
 
 	const requestContext: ResponseWrapper<T>["requestContext"] = { url, info };
-
-	if (options?.retry_on_error !== false && response.status === 503) {
-		return innerRequest(args, providerHelper, options);
-	}
 
 	if (!response.ok) {
 		const contentType = response.headers.get("Content-Type");
@@ -133,11 +149,16 @@ export async function* innerStreamingRequest<T>(
 	},
 ): AsyncGenerator<T> {
 	const { url, info } = await makeRequestOptions({ ...args, stream: true }, providerHelper, options);
-	const response = await (options?.fetch ?? fetch)(url, info);
-
-	if (options?.retry_on_error !== false && response.status === 503) {
-		return yield* innerStreamingRequest(args, providerHelper, options);
+	let response = await (options?.fetch ?? fetch)(url, info);
+	for (
+		let attempt = 0;
+		options?.retry_on_error !== false && response.status === 503 && attempt < MAX_RETRIES_ON_503;
+		attempt++
+	) {
+		await delay(retryDelayMs(response, attempt), options?.signal);
+		response = await (options?.fetch ?? fetch)(url, info);
 	}
+
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 			const output = await response.json();
