@@ -65,6 +65,9 @@ export class LeRobotDataset {
 	 * Episodes in index order, normalized so v2 and v3 datasets look the same. Never more than
 	 * `info.totalEpisodes`, and an episode index repeated within one call is returned once, as its first
 	 * occurrence.
+	 *
+	 * Rejects when a `v3.0` index needs more files to reach the page than there are episodes up to its
+	 * end (only empty index files do that), or more than 10,000 files.
 	 */
 	async episodes(options?: ListEpisodesOptions): Promise<LeRobotEpisode[]> {
 		const info = await this.info();

@@ -261,15 +261,17 @@ async function readEpisodesV3(
 		file + 1 < info.chunksSize ? { chunk, file: file + 1 } : { chunk: chunk + 1, file: 0 };
 
 	const collected: RawEpisode[] = [];
-	/// episodes() caps the page at info.totalEpisodes, so this also stops the walk there.
 	const end = offset + limit;
+	/// LeRobot writes no empty index file, so `end` files hold the page. Without this bound, a server
+	/// answering every path with an empty file would cost one request per file up to MAX_INDEX_FILES.
+	const maxFiles = Math.min(MAX_INDEX_FILES, end);
 	let next = { chunk: 0, file: 0 };
 	let seen = 0;
 
 	for (let position = 0; seen < end; position++) {
-		if (position >= MAX_INDEX_FILES) {
+		if (position >= maxFiles) {
 			throw new Error(
-				`Reading episodes up to ${end - 1} needs more than ${MAX_INDEX_FILES} index files under ${toUrl("meta/episodes")}`,
+				`Reading episodes up to ${end - 1} needs more than ${maxFiles} index files under ${toUrl("meta/episodes")}, and those hold ${seen} episodes`,
 			);
 		}
 		const known = shards[position];
@@ -279,14 +281,10 @@ async function readEpisodesV3(
 			continue;
 		}
 
-		let { chunk: chunkIndex, file: fileIndex } = known ?? next;
-		let opened = await take(chunkIndex, fileIndex);
-		/// A chunk can hold fewer files than info.json's `chunks_size` says.
-		if (opened === undefined && fileIndex > 0) {
-			chunkIndex++;
-			fileIndex = 0;
-			opened = await take(chunkIndex, fileIndex);
-		}
+		const { chunk: chunkIndex, file: fileIndex } = known ?? next;
+		/// LeRobot fills each chunk with `chunks_size` files, so a missing file ends the index. Trying the next
+		/// chunk instead would turn a transient 404 into a wrong position that `shards` keeps.
+		const opened = await take(chunkIndex, fileIndex);
 		if (opened === undefined) {
 			break;
 		}
@@ -300,8 +298,8 @@ async function readEpisodesV3(
 		next = nextFile(chunkIndex, fileIndex);
 
 		if (seen < end) {
-			/// Rather than one round trip per file, request the next few at once. Their count is estimated
-			/// from this file's rows, so a page ending in the next file requests nothing past it.
+			/// Rather than one round trip per file, request the next few at once: as many as the page needs if
+			/// they hold as many rows as this file. When they hold more, the last few go unused.
 			const ahead = Math.min(INDEX_FILES_AHEAD, Math.ceil((end - seen) / Math.max(rowCount, 1)));
 			let upcoming = next;
 			for (let i = 0; i < ahead; i++) {
