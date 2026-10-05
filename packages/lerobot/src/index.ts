@@ -1,3 +1,4 @@
+import type { IndexShard } from "./episodes";
 import type { FetchOptions } from "./http";
 import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 
@@ -35,6 +36,8 @@ export class LeRobotDataset {
 	private readonly revision: string;
 	private readonly fetchOptions: FetchOptions;
 	private infoPromise?: Promise<LeRobotInfo>;
+	/** v3 index files walked so far, kept for the lifetime of this instance like `info()`. */
+	private readonly indexShards: IndexShard[] = [];
 
 	constructor(
 		public readonly repoId: string,
@@ -75,7 +78,7 @@ export class LeRobotDataset {
 		if (limit === 0) {
 			return [];
 		}
-		return readEpisodes(info, (path) => this.fileUrl(path), offset, limit, this.fetchOptions);
+		return readEpisodes(info, (path) => this.fileUrl(path), offset, limit, this.indexShards, this.fetchOptions);
 	}
 
 	/**
