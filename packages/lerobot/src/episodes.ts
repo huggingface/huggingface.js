@@ -2,6 +2,7 @@ import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
 import { fetchRange, fetchTextPrefix, HttpError, openRemoteFile, TAIL_PROBE_BYTES } from "./http";
+import { loadParquet } from "./parquet";
 import { formatPathTemplate } from "./paths";
 
 /** v3 keeps its episode index in parquet under a fixed layout; the path is not templated in info.json. */
@@ -147,14 +148,6 @@ async function readEpisodesV2(
 	}
 }
 
-/**
- * hyparquet is a hard dependency but is still loaded on demand: callers that only need `info()` or a
- * v2 dataset never pay for the parquet reader.
- */
-async function loadHyparquet() {
-	return import("hyparquet");
-}
-
 function toRawEpisodeV3(row: Record<string, unknown>, info: LeRobotInfo): RawEpisode {
 	const index = toNumber(row.episode_index) ?? 0;
 	const length = toNumber(row.length) ?? 0;
@@ -198,7 +191,7 @@ async function readEpisodesV3(
 	limit: number,
 	options?: FetchOptions,
 ): Promise<RawEpisode[]> {
-	const { parquetMetadataAsync, parquetReadObjects, parquetSchema } = await loadHyparquet();
+	const { compressors, parquetMetadataAsync, parquetReadObjects, parquetSchema } = await loadParquet();
 	/// Only what `toRawEpisodeV3` reads. The index also has per-episode `stats/*` list columns, which
 	/// hyparquet would decode for the whole row group however few rows are asked for.
 	const wanted = [
@@ -243,7 +236,7 @@ async function readEpisodesV3(
 			/// hyparquet throws on a column the file lacks; `toRawEpisodeV3` defaults the absent ones.
 			const present = new Set(parquetSchema(metadata).children.map((child) => child.element.name));
 			const columns = wanted.filter((column) => present.has(column));
-			const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd });
+			const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd, compressors });
 			for (const row of rows) {
 				collected.push(toRawEpisodeV3(row, info));
 			}
@@ -293,7 +286,7 @@ function firstPerIndex(episodes: LeRobotEpisode[]): LeRobotEpisode[] {
  * column itself is not downloaded; data files are written in `index` order, so the minimum is row 0.
  */
 async function readFileStart(url: string, options?: FetchOptions): Promise<number> {
-	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
+	const { compressors, parquetMetadataAsync, parquetReadObjects } = await loadParquet();
 	const file = await openRemoteFile(url, options);
 	const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
 	const column = metadata.row_groups[0]?.columns.find(
@@ -301,7 +294,7 @@ async function readFileStart(url: string, options?: FetchOptions): Promise<numbe
 	);
 	let start = toNumber(column?.meta_data?.statistics?.min_value);
 	if (start === undefined) {
-		const [first] = await parquetReadObjects({ file, metadata, columns: ["index"], rowEnd: 1 });
+		const [first] = await parquetReadObjects({ file, metadata, columns: ["index"], rowEnd: 1, compressors });
 		start = toNumber(first?.index);
 	}
 	if (start === undefined || !Number.isSafeInteger(start) || start < 0) {

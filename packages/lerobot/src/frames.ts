@@ -2,14 +2,7 @@ import type { FetchOptions } from "./http";
 import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 
 import { openRemoteFile, TAIL_PROBE_BYTES } from "./http";
-
-/**
- * hyparquet is a hard dependency but is still loaded on demand, so a caller that only reads `info()`
- * never pays for the parquet reader.
- */
-async function loadHyparquet() {
-	return import("hyparquet");
-}
+import { loadParquet } from "./parquet";
 
 /** LeRobot writes these on every dataset to locate a frame; they are not signals to chart. */
 const BOOKKEEPING_COLUMNS = new Set(["timestamp", "frame_index", "episode_index", "index", "task_index"]);
@@ -48,7 +41,7 @@ export async function readFrames(
 	if (!episode.data) {
 		return undefined;
 	}
-	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
+	const { compressors, parquetMetadataAsync, parquetReadObjects } = await loadParquet();
 	const file = await openRemoteFile(episode.data.url, options);
 	const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
 	const rows = (await parquetReadObjects({
@@ -56,6 +49,7 @@ export async function readFrames(
 		metadata,
 		rowStart: episode.data.fromRow,
 		rowEnd: episode.data.toRow,
+		compressors,
 	})) as Record<string, unknown>[];
 
 	if (rows.length === 0) {
