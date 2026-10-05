@@ -86,7 +86,7 @@ export interface ModelData {
 			/**
 			 * seconds the daemon unwinds a perpetual policy before handing back to the gait
 			 */
-			unwind_s?: number | null;
+			unwind_s?: number;
 		};
 	};
 	/**

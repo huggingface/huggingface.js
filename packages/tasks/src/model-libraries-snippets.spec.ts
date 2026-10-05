@@ -141,7 +141,6 @@ print(output)`);
 			{ scenario: "a name that is not a bare word", manifest: { kind: "episodic", name: "Kick (right foot)" } },
 			{ scenario: "an unknown kind", manifest: { kind: "locomotion", name: "a" } },
 			{ scenario: "an unwind without a perpetual kind", manifest: { name: "a", unwind_s: 0.5 } },
-			{ scenario: "a perpetual kind with a null unwind", manifest: { kind: "perpetual", name: "a", unwind_s: null } },
 		])("falls back to a slot for $scenario", ({ manifest }) => {
 			const snippet = microduck(withManifest({ ...manifest, slot: "kick_right" })).join("\n");
 
