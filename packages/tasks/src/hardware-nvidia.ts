@@ -878,6 +878,31 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 75,
 		releaseYear: 2016,
 	},
+	"GT 730": {
+		// Kepler GK208B only (DDR3 64-bit or GDDR5 64-bit); the Fermi GF108 GT 730 (96 cores, CC 2.1) is not covered
+		tflops: 0.69, // float32 (GPU does not support native float16)
+		memory: [1, 2, 4],
+		computeCapability: 3.5,
+		msrp: 70,
+		power: 25,
+		releaseYear: 2014,
+	},
+	"GT 710": {
+		tflops: 0.37, // float32 (GPU does not support native float16)
+		memory: [1, 2],
+		computeCapability: 3.5,
+		msrp: 40,
+		power: 19,
+		releaseYear: 2014,
+	},
+	"GT 430": {
+		tflops: 0.27, // float32 (GPU does not support native float16)
+		memory: [1, 2, 4],
+		computeCapability: 2.1,
+		msrp: 79,
+		power: 49,
+		releaseYear: 2010,
+	},
 	"RTX Titan": {
 		tflops: 32.62,
 		memory: [24],
