@@ -2382,32 +2382,32 @@ describe.skip("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_CORVEX_KEY ?? "dummy");
 
-			HARDCODED_MODEL_INFERENCE_MAPPING["corvex"] = {
-				"zai-org/GLM-5.2-FP8": {
-					provider: "corvex",
-					hfModelId: "zai-org/GLM-5.2-FP8",
-					providerId: "zai-org/GLM-5.2-FP8",
-					status: "live",
-					task: "conversational",
-				},
-			};
+			const models = ["zai-org/GLM-5.3", "deepseek-ai/DeepSeek-V4-Flash-0731"];
+			HARDCODED_MODEL_INFERENCE_MAPPING["corvex"] = Object.fromEntries(
+				models.map((model) => [
+					model,
+					{ provider: "corvex", hfModelId: model, providerId: model, status: "live", task: "conversational" },
+				]),
+			);
 
-			it("chatCompletion", async () => {
+			it.each(models)("chatCompletion %s", async (model) => {
 				const res = await client.chatCompletion({
-					model: "zai-org/GLM-5.2-FP8",
+					model,
 					provider: "corvex",
+					max_tokens: 4096,
+					reasoning_effort: "low",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
 				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
+				expect(res.choices.length).toBeGreaterThan(0);
+				expect(res.choices[0].message?.content).toContain("two");
 			});
 
-			it("chatCompletion stream", async () => {
+			it.each(models)("chatCompletion stream %s", async (model) => {
 				const stream = client.chatCompletionStream({
-					model: "zai-org/GLM-5.2-FP8",
+					model,
 					provider: "corvex",
+					max_tokens: 4096,
+					reasoning_effort: "low",
 					messages: [{ role: "user", content: "Say 'this is a test'" }],
 					stream: true,
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;

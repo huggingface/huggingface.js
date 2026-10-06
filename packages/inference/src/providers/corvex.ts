@@ -1,9 +1,9 @@
 /**
- * See the registered mapping of HF model ID => Corvex model ID here:
+ * See the mapping of HF model ID => Corvex model ID here:
  *
  * https://huggingface.co/api/partners/corvex/models
  *
- * This is a publicly available mapping.
+ * Model availability and routing are managed through this mapping.
  *
  * If you want to try to run inference for a new model locally before it's registered on huggingface.co,
  * you can add it to the dictionary "HARDCODED_MODEL_INFERENCE_MAPPING" in consts.ts, for dev purposes.
