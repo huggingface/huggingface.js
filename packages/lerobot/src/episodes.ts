@@ -2,7 +2,7 @@ import type { FileMetaData } from "hyparquet";
 import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
-import { fetchRange, fetchTextPrefix, HttpError, openRemoteFile, TAIL_PROBE_BYTES } from "./http";
+import { fetchRange, HttpError, openRemoteFile, TAIL_PROBE_BYTES } from "./http";
 import { formatPathTemplate } from "./paths";
 
 /** v3 keeps its episode index in parquet under a fixed layout; the path is not templated in info.json. */
@@ -12,9 +12,21 @@ export function episodesMetadataPath(chunkIndex: number, fileIndex: number): str
 	return `meta/episodes/chunk-${chunk}/file-${file}.parquet`;
 }
 
-/** Enough for ~10 episodes of `meta/episodes.jsonl`; grown geometrically when it is not. */
-const JSONL_INITIAL_PREFIX_BYTES = 8 * 1024;
-const JSONL_MAX_PREFIX_BYTES = 4 * 1024 * 1024;
+/** Enough for ~10 episodes of `meta/episodes.jsonl`, the page most callers ask for first. */
+const JSONL_FIRST_READ_BYTES = 8 * 1024;
+/**
+ * One read's bytes, text and lines are all in memory at once, so the largest indexes (near 100 MB) are
+ * read in a few requests rather than held whole.
+ */
+const JSONL_MAX_READ_BYTES = 16 * 1024 * 1024;
+/**
+ * The file is user-controlled and nothing in it bounds how far a listing reads (a line only counts once
+ * it parses, and `total_episodes` comes from the same author), so reading stops here: well above the
+ * largest published index, 97 MB. A listing that needs more throws rather than coming back short.
+ */
+const JSONL_MAX_BYTES = 256 * 1024 * 1024;
+/** Real lines are under a kilobyte; a file without line breaks would otherwise be held whole. */
+const JSONL_MAX_LINE_LENGTH = 1024 * 1024;
 /**
  * Bounds the shard walk so a server that keeps answering cannot loop it forever (CWE-835). LeRobot starts
  * a new index file on every resumed recording, so real indexes reach a thousand files or more.
@@ -108,8 +120,9 @@ function buildEpisode(raw: RawEpisode, info: LeRobotInfo, toUrl: (path: string) 
 /**
  * Reads `meta/episodes.jsonl` (v2.0 / v2.1).
  *
- * Only a prefix of the file is fetched: the largest published LeRobot datasets have a 40 MB+ index,
- * and the first handful of episodes live in its first kilobyte.
+ * The file is read from its start up to the last requested line, each read continuing where the
+ * previous one stopped: the largest published LeRobot datasets have an index of nearly 100 MB, and
+ * the first handful of episodes live in its first kilobyte.
  */
 async function readEpisodesV2(
 	url: string,
@@ -118,19 +131,47 @@ async function readEpisodesV2(
 	options?: FetchOptions,
 ): Promise<RawEpisode[]> {
 	const wanted = offset + limit;
-	let prefixBytes = JSONL_INITIAL_PREFIX_BYTES;
+	const episodes: RawEpisode[] = [];
+	const decoder = new TextDecoder();
+	/// The line the previous read cut in half.
+	let carry = "";
+	let position = 0;
+	let readTo = 0;
+	let total: number | undefined;
+	/// Where the next read ends, exclusive.
+	let stop = JSONL_FIRST_READ_BYTES;
 
 	for (;;) {
-		const { text, byteLength } = await fetchTextPrefix(url, prefixBytes, options);
-		/// `byteLength`, not `text.length`: a UTF-8 string is shorter than its byte count for any
-		/// non-ASCII task description, which would otherwise look like end-of-file.
-		const reachedEof = byteLength < prefixBytes;
-		const lines = text.split("\n");
-		/// A prefix read almost always cuts the final line in half, so drop it unless we reached EOF.
-		const complete = reachedEof ? lines : lines.slice(0, -1);
-		const parsed: RawEpisode[] = [];
+		const end = Math.min(stop, total ?? Infinity) - 1;
+		const requested = end - readTo + 1;
+		let bytes: Uint8Array = new Uint8Array(0);
+		let whole = false;
+		try {
+			const result = await fetchRange(url, readTo, end, options);
+			bytes = result.bytes;
+			total = result.total ?? total;
+			whole = !result.partial;
+		} catch (error) {
+			/// Without Content-Range, a file that ends exactly where the previous read did answers 416 here.
+			if (!(error instanceof HttpError) || error.status !== 416 || readTo === 0) {
+				throw error;
+			}
+		}
+		/// A 200 is a server that ignored Range and sent the whole file, from its first byte. Its length
+		/// cannot tell: a file exactly as long as the first read asked for would be read, and counted, twice.
+		if (whole) {
+			bytes = bytes.subarray(readTo);
+		}
+		readTo += bytes.byteLength;
+		/// Once Content-Range has given the size, a short read is not the end, since a server may cap how
+		/// much one response carries. An empty one still is, so a misbehaving server cannot loop forever.
+		const eof =
+			whole || bytes.byteLength === 0 || (total === undefined ? bytes.byteLength < requested : readTo >= total);
+		/// `stream` holds back a multi-byte character the read cut, until the next read completes it.
+		const lines = (carry + decoder.decode(bytes, { stream: !eof })).split("\n");
+		carry = eof ? "" : (lines.pop() ?? "");
 
-		for (const line of complete) {
+		for (const line of lines) {
 			if (line.trim().length === 0) {
 				continue;
 			}
@@ -150,13 +191,35 @@ async function readEpisodesV2(
 			if (index === undefined || length === undefined) {
 				continue;
 			}
-			parsed.push({ index, length, tasks: toTasks(record.tasks) });
+			if (position >= offset) {
+				episodes.push({ index, length, tasks: toTasks(record.tasks) });
+			}
+			position++;
+			if (position >= wanted) {
+				return episodes;
+			}
 		}
 
-		if (parsed.length >= wanted || reachedEof || prefixBytes >= JSONL_MAX_PREFIX_BYTES) {
-			return parsed.slice(offset, wanted);
+		if (eof) {
+			return episodes;
 		}
-		prefixBytes = Math.min(prefixBytes * 4, JSONL_MAX_PREFIX_BYTES);
+		if (carry.length > JSONL_MAX_LINE_LENGTH) {
+			throw new Error(`${url} has a line longer than ${JSONL_MAX_LINE_LENGTH} characters`);
+		}
+		if (readTo >= JSONL_MAX_BYTES) {
+			throw new Error(`Stopped reading ${url} at ${JSONL_MAX_BYTES} bytes, before the episodes asked for`);
+		}
+		/// Sized from the bytes per line so far, so a deep page or a whole listing usually takes one or two
+		/// more reads up to 16 MiB, then one per 16 MiB. Never less than what has been read, so lines that
+		/// get longer further in still cost only a logarithmic number of reads.
+		const target = readTo + Math.max(readTo, Math.ceil(((wanted - position) * readTo * 1.25) / Math.max(1, position)));
+		/// Ends rounded up to 8 KiB times a power of 2, and past 16 MiB to whole 16 MiB blocks, so calls
+		/// for nearby pages send the same ranges and a caller's range cache can answer them.
+		stop = JSONL_FIRST_READ_BYTES;
+		while (stop < target) {
+			stop *= 2;
+		}
+		stop = Math.min(stop, (Math.floor(readTo / JSONL_MAX_READ_BYTES) + 1) * JSONL_MAX_READ_BYTES);
 	}
 }
 

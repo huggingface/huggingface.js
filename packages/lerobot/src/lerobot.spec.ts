@@ -481,6 +481,10 @@ function mockFetch(files: Record<string, Uint8Array>, seen?: string[]): typeof f
 			return new Response(body as BodyInit, { status: 200 });
 		}
 		const first = Number(match[1]);
+		/// Like the Hub, a range starting at the end of the file cannot be satisfied.
+		if (first >= body.byteLength) {
+			return new Response(null, { status: 416 });
+		}
 		const start = first < 0 ? Math.max(0, body.byteLength + first) : first;
 		const end = match[2] === "" ? body.byteLength - 1 : Math.min(Number(match[2]), body.byteLength - 1);
 		const slice = body.slice(start, end + 1);
@@ -750,6 +754,298 @@ describe("v2 prefix reads are byte-accurate", () => {
 		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 		expect(episodes[9]?.length).toBe(109);
 		expect(episodes[0]?.tasks[0]).toBe(task);
+	});
+});
+
+describe("v2 index reads", () => {
+	const info = (totalEpisodes: number) =>
+		encoder.encode(
+			JSON.stringify({
+				codebase_version: "v2.1",
+				fps: 30,
+				total_episodes: totalEpisodes,
+				chunks_size: 1000,
+				data_path: "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet",
+			}),
+		);
+	const jsonl = (lines: string[]) => encoder.encode(lines.join("\n") + "\n");
+	const line = (index: number, task = "put the red cube in the box") =>
+		JSON.stringify({ episode_index: index, tasks: [task], length: 100 + (index % 50) });
+	/// Larger than the 4 MiB the reader used to stop at, returning nothing past it.
+	const total = 64_000;
+	const large = jsonl(Array.from({ length: total }, (_, index) => line(index)));
+
+	/** Serves `files` and records the Range of every index read. */
+	function serve(files: Record<string, Uint8Array>, ranges: string[], { contentRange = true } = {}): typeof fetch {
+		const origin = mockFetch(files);
+		return (async (input: RequestInfo | URL, init?: RequestInit) => {
+			if (String(input).endsWith("/meta/episodes.jsonl")) {
+				ranges.push(new Headers(init?.headers).get("Range") ?? "");
+			}
+			const response = await origin(input, init);
+			return contentRange ? response : new Response(response.body, { status: response.status });
+		}) as typeof fetch;
+	}
+
+	/** Each read starts where the previous one ended, so no byte is fetched twice. */
+	function expectForward(ranges: string[]): number {
+		let next = 0;
+		for (const range of ranges) {
+			const [start, end] = range.replace("bytes=", "").split("-").map(Number);
+			expect(start).toBe(next);
+			next = end + 1;
+		}
+		return next;
+	}
+
+	it("returns every episode of an index larger than 4 MiB, reading each byte once", async () => {
+		expect(large.byteLength).toBeGreaterThan(4 * 1024 * 1024);
+		const ranges: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: serve({ "meta/info.json": info(total), "meta/episodes.jsonl": large }, ranges),
+		});
+
+		const episodes = await dataset.episodes({ limit: total });
+		expect(episodes).toHaveLength(total);
+		expect(episodes.at(-1)?.index).toBe(total - 1);
+		expect(ranges[0]).toBe("bytes=0-8191");
+		expect(expectForward(ranges)).toBe(large.byteLength);
+		expect(ranges.length).toBeLessThanOrEqual(3);
+	});
+
+	it("reads forward to a deep page and stops after it", async () => {
+		const ranges: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: serve({ "meta/info.json": info(total), "meta/episodes.jsonl": large }, ranges),
+		});
+
+		expect((await dataset.episodes({ limit: 10 })).map((episode) => episode.index)).toEqual(
+			Array.from({ length: 10 }, (_, index) => index),
+		);
+		expect(ranges).toEqual(["bytes=0-8191"]);
+
+		ranges.length = 0;
+		const page = await dataset.episodes({ offset: 3_000, limit: 10 });
+		expect(page.map((episode) => episode.index)).toEqual(Array.from({ length: 10 }, (_, index) => 3_000 + index));
+		/// 512 KiB of the 4.9 MB file.
+		expect(ranges).toEqual(["bytes=0-8191", "bytes=8192-524287"]);
+
+		ranges.length = 0;
+		const [last] = await dataset.episodes({ offset: total - 1, limit: 1 });
+		expect(last?.index).toBe(total - 1);
+		expect(expectForward(ranges)).toBe(large.byteLength);
+	});
+
+	it("reads a large index in 16 MiB blocks", async () => {
+		const count = 18_000;
+		const bytes = jsonl(Array.from({ length: count }, (_, index) => line(index, "x".repeat(1_000))));
+		expect(bytes.byteLength).toBeGreaterThan(16 * 1024 * 1024);
+		const ranges: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: serve({ "meta/info.json": info(count), "meta/episodes.jsonl": bytes }, ranges),
+		});
+
+		const [last] = await dataset.episodes({ offset: count - 1, limit: 1 });
+		expect(last?.index).toBe(count - 1);
+		expect(ranges).toEqual(["bytes=0-8191", "bytes=8192-16777215", `bytes=16777216-${bytes.byteLength - 1}`]);
+	});
+
+	it("asks for the same ranges for nearby pages, so a range cache can answer them", async () => {
+		const ranges: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: serve({ "meta/info.json": info(total), "meta/episodes.jsonl": large }, ranges),
+		});
+
+		const pages: string[][] = [];
+		for (const offset of [2_900, 3_000, 3_100]) {
+			ranges.length = 0;
+			await dataset.episodes({ offset, limit: 10 });
+			pages.push([...ranges]);
+		}
+		expect(pages[1]).toEqual(pages[0]);
+		expect(pages[2]).toEqual(pages[0]);
+	});
+
+	it("decodes a character split between two reads", async () => {
+		/// The first read ends on the first byte of the two-byte "é".
+		const prefix = line(0, "").indexOf('""') + 1;
+		const task = "a".repeat(8191 - prefix) + "é";
+		const bytes = jsonl([line(0, task), line(1), line(2)]);
+		expect(bytes[8191]).toBe(0xc3);
+		const ranges: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: serve({ "meta/info.json": info(3), "meta/episodes.jsonl": bytes }, ranges),
+		});
+
+		const episodes = await dataset.episodes({ limit: 3 });
+		expect(episodes.map((episode) => episode.index)).toEqual([0, 1, 2]);
+		expect(episodes[0]?.tasks).toEqual([task]);
+		expect(ranges.length).toBe(2);
+	});
+
+	/** 101 episodes in exactly the bytes of the first read. */
+	function firstReadLong(newline: string): Uint8Array {
+		const lines = Array.from({ length: 100 }, (_, index) => line(index));
+		const file = (last: string) => encoder.encode([...lines, last].join("\n") + newline);
+		const bytes = file(line(100, "x".repeat(8192 - file(line(100, "")).byteLength)));
+		expect(bytes.byteLength).toBe(8192);
+		return bytes;
+	}
+
+	it("stops at the end of a file read exactly to its last byte, without Content-Range", async () => {
+		/// Without a trailing newline, the last line is held back as cut off until the read past the end.
+		for (const newline of ["\n", ""]) {
+			const bytes = firstReadLong(newline);
+			const ranges: string[] = [];
+			/// info.json counting more episodes than the file has makes the reader look past its end.
+			const dataset = new LeRobotDataset(REPO_ID, {
+				fetch: serve({ "meta/info.json": info(200), "meta/episodes.jsonl": bytes }, ranges, { contentRange: false }),
+			});
+
+			const episodes = await dataset.episodes({ limit: 200 });
+			expect(episodes.map((episode) => episode.index)).toEqual(Array.from({ length: 101 }, (_, index) => index));
+			expect(ranges[1]).toMatch(/^bytes=8192-/);
+		}
+	});
+
+	it("reads the whole file at once when the server ignores Range", async () => {
+		const bytes = jsonl(Array.from({ length: 200 }, (_, index) => line(index)));
+		expect(bytes.byteLength).toBeGreaterThan(8192);
+		/// One more episode than the file has, so only end-of-file can stop the reader.
+		const origin = mockFetch({ "meta/info.json": info(201), "meta/episodes.jsonl": bytes });
+		let requests = 0;
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: ((input: RequestInfo | URL) => {
+				requests++;
+				return origin(input);
+			}) as typeof fetch,
+		});
+
+		const episodes = await dataset.episodes({ limit: 201 });
+		expect(episodes).toHaveLength(200);
+		/// info.json, then the index once.
+		expect(requests).toBe(2);
+	});
+
+	it("reads a file exactly as long as the first read once when the server ignores Range", async () => {
+		for (const newline of ["\n", ""]) {
+			/// One more episode than the file has, so only end-of-file can stop the reader.
+			const origin = mockFetch({ "meta/info.json": info(200), "meta/episodes.jsonl": firstReadLong(newline) });
+			let reads = 0;
+			const dataset = new LeRobotDataset(REPO_ID, {
+				fetch: ((input: RequestInfo | URL) => {
+					reads += String(input).endsWith("/meta/episodes.jsonl") ? 1 : 0;
+					return origin(input);
+				}) as typeof fetch,
+			});
+
+			const episodes = await dataset.episodes({ limit: 200 });
+			expect(episodes.map((episode) => episode.index)).toEqual(Array.from({ length: 101 }, (_, index) => index));
+			expect(await dataset.episodes({ offset: 150, limit: 10 })).toEqual([]);
+			expect(reads).toBe(2);
+		}
+	});
+
+	it("skips the bytes already read when a later read ignores Range", async () => {
+		const origin = mockFetch({ "meta/info.json": info(total), "meta/episodes.jsonl": large });
+		/// Honors the first read only, like a cache that holds the start of the file and answers anything
+		/// else with all of it.
+		const fetch = ((input: RequestInfo | URL, init?: RequestInit) =>
+			new Headers(init?.headers).get("Range")?.startsWith("bytes=0-")
+				? origin(input, init)
+				: origin(input)) as typeof globalThis.fetch;
+		const dataset = new LeRobotDataset(REPO_ID, { fetch });
+
+		const page = await dataset.episodes({ offset: 1_500, limit: 10 });
+		expect(page.map((episode) => episode.index)).toEqual(Array.from({ length: 10 }, (_, index) => 1_500 + index));
+		const episodes = await dataset.episodes({ limit: total });
+		expect(episodes.map((episode) => episode.index)).toEqual(Array.from({ length: total }, (_, index) => index));
+	});
+
+	it("keeps reading after a short read until the size Content-Range gave", async () => {
+		const bytes = jsonl(Array.from({ length: 2_000 }, (_, index) => line(index)));
+		const origin = mockFetch({ "meta/info.json": info(2_000), "meta/episodes.jsonl": bytes });
+		/// Sends at most 16 KiB per response, whatever the Range asks for.
+		const fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+			const [, start, end] = new Headers(init?.headers).get("Range")?.match(/^bytes=(\d+)-(\d+)$/) ?? [];
+			const capped = Math.min(Number(end), Number(start) + 16 * 1024 - 1);
+			return origin(input, start === undefined ? init : { headers: { Range: `bytes=${start}-${capped}` } });
+		}) as typeof globalThis.fetch;
+		const dataset = new LeRobotDataset(REPO_ID, { fetch });
+
+		const episodes = await dataset.episodes({ limit: 2_000 });
+		expect(episodes.map((episode) => episode.index)).toEqual(Array.from({ length: 2_000 }, (_, index) => index));
+	});
+
+	it("skips blank and malformed lines without counting them as positions", async () => {
+		const bytes = jsonl(["", line(0), "not json", "42", JSON.stringify({ episode_index: 1 }), "   ", line(2)]);
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: mockFetch({ "meta/info.json": info(10), "meta/episodes.jsonl": bytes }),
+		});
+
+		expect((await dataset.episodes({ limit: 10 })).map((episode) => episode.index)).toEqual([0, 2]);
+		expect((await dataset.episodes({ offset: 1, limit: 1 })).map((episode) => episode.index)).toEqual([2]);
+	});
+
+	it("throws on a line too long to be an episode, before reading the rest of the file", async () => {
+		/// No line break at all, as in a file with CR-only line endings.
+		const bytes = new Uint8Array(40 * 1024 * 1024).fill(0x78);
+		for (const limit of [10, 1_000_000]) {
+			const origin = mockFetch({ "meta/info.json": info(1_000_000), "meta/episodes.jsonl": bytes });
+			let read = 0;
+			const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+				const response = await origin(input, init);
+				if (String(input).endsWith("/meta/episodes.jsonl")) {
+					read += (await response.clone().arrayBuffer()).byteLength;
+				}
+				return response;
+			}) as typeof globalThis.fetch;
+			const dataset = new LeRobotDataset(REPO_ID, { fetch });
+
+			await expect(dataset.episodes({ limit })).rejects.toThrow(/has a line longer than 1048576 characters/);
+			expect(read).toBeLessThanOrEqual(16 * 1024 * 1024);
+		}
+	});
+
+	it("throws past 256 MiB of an index whose lines are not episodes, rather than reading on", async () => {
+		/// Lines without `length` count for nothing, so neither the page nor the episode count stops the reader.
+		const unit = encoder.encode(JSON.stringify({ episode_index: 0, tasks: ["x".repeat(1_000)] }) + "\n");
+		const tiled = new Uint8Array(16 * 1024 * 1024 + unit.byteLength);
+		for (let at = 0; at < tiled.byteLength; at += unit.byteLength) {
+			tiled.set(unit.subarray(0, tiled.byteLength - at), at);
+		}
+		const size = 300 * 1024 * 1024;
+		const origin = mockFetch({ "meta/info.json": info(1_000_000) });
+		let read = 0;
+		/// Serves the 300 MiB file from 16 MiB of its repeating lines, as no read is larger.
+		const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+			if (!String(input).endsWith("/meta/episodes.jsonl")) {
+				return origin(input, init);
+			}
+			const [, start, end] = (new Headers(init?.headers).get("Range") ?? "").match(/^bytes=(\d+)-(\d+)$/) ?? [];
+			const first = Number(start);
+			const last = Math.min(Number(end), size - 1);
+			const body = tiled.slice(first % unit.byteLength, (first % unit.byteLength) + last - first + 1);
+			read += body.byteLength;
+			return new Response(body, { status: 206, headers: { "content-range": `bytes ${first}-${last}/${size}` } });
+		}) as typeof globalThis.fetch;
+		const dataset = new LeRobotDataset(REPO_ID, { fetch });
+
+		await expect(dataset.episodes({ limit: 10 })).rejects.toThrow(/at 268435456 bytes/);
+		expect(read).toBe(256 * 1024 * 1024);
+	});
+
+	it("floors a fractional offset or limit, and returns nothing for NaN without reading the index", async () => {
+		const ranges: string[] = [];
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: serve({ "meta/info.json": info(total), "meta/episodes.jsonl": large }, ranges),
+		});
+
+		expect((await dataset.episodes({ offset: 2.5, limit: 2.5 })).map((episode) => episode.index)).toEqual([2, 3]);
+		ranges.length = 0;
+		expect(await dataset.episodes({ limit: NaN })).toEqual([]);
+		expect(await dataset.episodes({ offset: NaN })).toEqual([]);
+		expect(ranges).toEqual([]);
 	});
 });
 
