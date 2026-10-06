@@ -1,4 +1,4 @@
-import type { FileMetaData } from "hyparquet";
+import type { FileMetaData, RowGroup } from "hyparquet";
 import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
@@ -40,6 +40,8 @@ export interface IndexShard {
 	chunk: number;
 	file: number;
 	rows: number;
+	/** Largest `episode_index` in the file, when its footer has statistics for every row group. */
+	lastIndex?: number;
 }
 
 function toNumber(value: unknown): number | undefined {
@@ -122,13 +124,15 @@ function buildEpisode(raw: RawEpisode, info: LeRobotInfo, toUrl: (path: string) 
  *
  * The file is read from its start up to the last requested line, each read continuing where the
  * previous one stopped: the largest published LeRobot datasets have an index of nearly 100 MB, and
- * the first handful of episodes live in its first kilobyte.
+ * the first handful of episodes live in its first kilobyte. `until` ends the read early, once a line
+ * satisfies it.
  */
 async function readEpisodesV2(
 	url: string,
 	offset: number,
 	limit: number,
 	options?: FetchOptions,
+	until?: (episode: RawEpisode) => boolean,
 ): Promise<RawEpisode[]> {
 	const wanted = offset + limit;
 	const episodes: RawEpisode[] = [];
@@ -191,11 +195,12 @@ async function readEpisodesV2(
 			if (index === undefined || length === undefined) {
 				continue;
 			}
+			const episode = { index, length, tasks: toTasks(record.tasks) };
 			if (position >= offset) {
-				episodes.push({ index, length, tasks: toTasks(record.tasks) });
+				episodes.push(episode);
 			}
 			position++;
-			if (position >= wanted) {
+			if (position >= wanted || until?.(episode)) {
 				return episodes;
 			}
 		}
@@ -260,37 +265,58 @@ function toRawEpisodeV3(row: Record<string, unknown>, info: LeRobotInfo): RawEpi
 	};
 }
 
+/** Statistics of a top-level column in one row group, as written in the parquet footer. */
+function columnStatistics(group: RowGroup | undefined, name: string) {
+	return group?.columns.find(
+		(chunk) => chunk.meta_data?.path_in_schema.length === 1 && chunk.meta_data.path_in_schema[0] === name,
+	)?.meta_data?.statistics;
+}
+
+function lastEpisodeIndex(metadata: FileMetaData): number | undefined {
+	/// An empty file holds no episode, so a lookup can pass it over like one whose episodes all come before.
+	let last = -1;
+	for (const group of metadata.row_groups) {
+		const max = toNumber(columnStatistics(group, "episode_index")?.max_value);
+		if (max === undefined) {
+			return undefined;
+		}
+		last = Math.max(last, max);
+	}
+	return last;
+}
+
+/** Where a walk of the index files stops, and which files it needs; `seen` counts the rows before `shard`. */
+interface IndexWalk {
+	/** Rows to walk, counted from the start of the first index file. */
+	end: number;
+	/** Whether a file an earlier walk found can be passed over without a request. */
+	skip(shard: IndexShard, seen: number): boolean;
+	/** Rows the walk may still need past a file, which sizes the requests made ahead of it. */
+	rowsAfter(shard: IndexShard, seen: number): number;
+}
+
+interface IndexFile {
+	file: RandomAccessFile;
+	metadata: FileMetaData;
+	/** Rows in the index files before this one. */
+	seen: number;
+}
+
 /**
- * Reads the v3.0 episode index under `meta/episodes/`.
+ * Opens the v3.0 episode index files under `meta/episodes/` in order, until `walk.end` rows or the first
+ * missing file.
  *
  * The index is sharded: `chunks_size` files per chunk directory, so a request can span several of
- * them. Files are walked in order, skipping whole shards that fall before `offset` using only their
- * parquet footer, and stopping at the first missing shard. `shards` remembers the files already
- * walked, so a later call skips them without a request.
+ * them. `shards` remembers the files already walked, so a later walk skips them without a request.
  */
-async function readEpisodesV3(
+async function* walkIndexFiles(
 	toUrl: (path: string) => string,
 	info: LeRobotInfo,
-	offset: number,
-	limit: number,
 	shards: IndexShard[],
+	walk: IndexWalk,
 	options?: FetchOptions,
-): Promise<RawEpisode[]> {
-	const { parquetMetadataAsync, parquetReadObjects, parquetSchema } = await loadHyparquet();
-	/// Only what `toRawEpisodeV3` reads. The index also has per-episode `stats/*` list columns, which
-	/// hyparquet would decode for the whole row group however few rows are asked for.
-	const wanted = [
-		"episode_index",
-		"length",
-		"tasks",
-		"data/chunk_index",
-		"data/file_index",
-		"dataset_from_index",
-		"dataset_to_index",
-		...info.cameras.flatMap((camera) =>
-			["chunk_index", "file_index", "from_timestamp", "to_timestamp"].map((field) => `videos/${camera.key}/${field}`),
-		),
-	];
+): AsyncGenerator<IndexFile> {
+	const { parquetMetadataAsync } = await loadHyparquet();
 	/// Files requested ahead of the walk, until it takes them; a long walk holds only those few.
 	const opening = new Map<string, Promise<{ file: RandomAccessFile; metadata: FileMetaData } | undefined>>();
 	const open = (chunk: number, file: number) => {
@@ -323,9 +349,8 @@ async function readEpisodesV3(
 	const nextFile = (chunk: number, file: number) =>
 		file + 1 < info.chunksSize ? { chunk, file: file + 1 } : { chunk: chunk + 1, file: 0 };
 
-	const collected: RawEpisode[] = [];
-	const end = offset + limit;
-	/// LeRobot writes no empty index file, so `end` files hold the page. Without this bound, a server
+	const { end } = walk;
+	/// LeRobot writes no empty index file, so `end` files hold the rows walked. Without this bound, a server
 	/// answering every path with an empty file would cost one request per file up to MAX_INDEX_FILES.
 	const maxFiles = Math.min(MAX_INDEX_FILES, end);
 	let next = { chunk: 0, file: 0 };
@@ -338,7 +363,7 @@ async function readEpisodesV3(
 			);
 		}
 		const known = shards[position];
-		if (known !== undefined && seen + known.rows <= offset) {
+		if (known !== undefined && walk.skip(known, seen)) {
 			seen += known.rows;
 			next = nextFile(known.chunk, known.file);
 			continue;
@@ -349,39 +374,156 @@ async function readEpisodesV3(
 		/// chunk instead would turn a transient 404 into a wrong position that `shards` keeps.
 		const opened = await take(chunkIndex, fileIndex);
 		if (opened === undefined) {
-			break;
+			return;
 		}
 
-		const { file, metadata } = opened;
-		const rowCount = Number(metadata.num_rows);
-		shards[position] = { chunk: chunkIndex, file: fileIndex, rows: rowCount };
-		const rowStart = Math.max(0, offset - seen);
-		const rowEnd = Math.min(rowCount, end - seen);
-		seen += rowCount;
+		const shard: IndexShard = {
+			chunk: chunkIndex,
+			file: fileIndex,
+			rows: Number(opened.metadata.num_rows),
+			lastIndex: lastEpisodeIndex(opened.metadata),
+		};
+		shards[position] = shard;
 		next = nextFile(chunkIndex, fileIndex);
 
-		if (seen < end) {
-			/// Rather than one round trip per file, request the next few at once: as many as the page needs if
-			/// they hold as many rows as this file. When they hold more, the last few go unused.
-			const ahead = Math.min(INDEX_FILES_AHEAD, Math.ceil((end - seen) / Math.max(rowCount, 1)));
-			let upcoming = next;
-			for (let i = 0; i < ahead; i++) {
-				open(upcoming.chunk, upcoming.file);
-				upcoming = nextFile(upcoming.chunk, upcoming.file);
-			}
+		/// Rather than one round trip per file, request the next few at once: as many as the walk needs if
+		/// they hold as many rows as this file. When they hold more, the last few go unused.
+		const ahead = Math.min(INDEX_FILES_AHEAD, Math.ceil(walk.rowsAfter(shard, seen) / Math.max(shard.rows, 1)));
+		let upcoming = next;
+		for (let i = 0; i < ahead; i++) {
+			open(upcoming.chunk, upcoming.file);
+			upcoming = nextFile(upcoming.chunk, upcoming.file);
 		}
+		yield { ...opened, seen };
+		seen += shard.rows;
+	}
+}
+
+/** Rows `[rowStart, rowEnd)` of one index file. */
+async function readIndexRows(
+	info: LeRobotInfo,
+	{ file, metadata }: IndexFile,
+	rowStart: number,
+	rowEnd: number,
+): Promise<RawEpisode[]> {
+	const { parquetReadObjects, parquetSchema } = await loadHyparquet();
+	/// Only what `toRawEpisodeV3` reads. The index also has per-episode `stats/*` list columns, which
+	/// hyparquet would decode for the whole row group however few rows are asked for.
+	const wanted = [
+		"episode_index",
+		"length",
+		"tasks",
+		"data/chunk_index",
+		"data/file_index",
+		"dataset_from_index",
+		"dataset_to_index",
+		...info.cameras.flatMap((camera) =>
+			["chunk_index", "file_index", "from_timestamp", "to_timestamp"].map((field) => `videos/${camera.key}/${field}`),
+		),
+	];
+	/// hyparquet throws on a column the file lacks; `toRawEpisodeV3` defaults the absent ones.
+	const present = new Set(parquetSchema(metadata).children.map((child) => child.element.name));
+	const columns = wanted.filter((column) => present.has(column));
+	const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd });
+	return rows.map((row) => toRawEpisodeV3(row, info));
+}
+
+/** Reads rows `[offset, offset + limit)` of the v3.0 episode index, passing over the files before `offset`. */
+async function readEpisodesV3(
+	toUrl: (path: string) => string,
+	info: LeRobotInfo,
+	offset: number,
+	limit: number,
+	shards: IndexShard[],
+	options?: FetchOptions,
+): Promise<RawEpisode[]> {
+	const end = offset + limit;
+	const walk: IndexWalk = {
+		end,
+		skip: (shard, seen) => seen + shard.rows <= offset,
+		rowsAfter: (shard, seen) => end - seen - shard.rows,
+	};
+	const collected: RawEpisode[] = [];
+	for await (const indexFile of walkIndexFiles(toUrl, info, shards, walk, options)) {
+		const rowStart = Math.max(0, offset - indexFile.seen);
+		const rowEnd = Math.min(Number(indexFile.metadata.num_rows), end - indexFile.seen);
 		if (rowStart < rowEnd) {
-			/// hyparquet throws on a column the file lacks; `toRawEpisodeV3` defaults the absent ones.
-			const present = new Set(parquetSchema(metadata).children.map((child) => child.element.name));
-			const columns = wanted.filter((column) => present.has(column));
-			const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd });
-			for (const row of rows) {
-				collected.push(toRawEpisodeV3(row, info));
+			for (const episode of await readIndexRows(info, indexFile, rowStart, rowEnd)) {
+				collected.push(episode);
 			}
 		}
 	}
-
 	return collected;
+}
+
+/**
+ * Finds the row of the v3.0 episode index whose `episode_index` is `index`, among its first `end` rows.
+ *
+ * Files and row groups whose footer statistics leave `index` out are passed over. In a row group that
+ * may hold it, row `index - min` is tried first, which is where it is when the group numbers its
+ * episodes without gaps; otherwise only the group's `episode_index` column is read to find it.
+ */
+async function findEpisodeV3(
+	toUrl: (path: string) => string,
+	info: LeRobotInfo,
+	index: number,
+	end: number,
+	shards: IndexShard[],
+	options?: FetchOptions,
+): Promise<{ raw: RawEpisode; position: number } | undefined> {
+	const { parquetReadObjects } = await loadHyparquet();
+	const walk: IndexWalk = {
+		end,
+		skip: (shard) => shard.lastIndex !== undefined && shard.lastIndex < index,
+		/// Indexes ascend, so episode `index` is at most `index - lastIndex` rows past a file.
+		rowsAfter: (shard, seen) =>
+			Math.min(end - seen - shard.rows, shard.lastIndex === undefined ? Infinity : index - shard.lastIndex),
+	};
+	for await (const indexFile of walkIndexFiles(toUrl, info, shards, walk, options)) {
+		const { file, metadata, seen } = indexFile;
+		const readRow = async (row: number) => {
+			const [raw] = await readIndexRows(info, indexFile, row, row + 1);
+			return { raw, position: seen + row };
+		};
+		let groupEnd = 0;
+		for (const group of metadata.row_groups) {
+			const groupStart = groupEnd;
+			groupEnd += Number(group.num_rows);
+			const rowEnd = Math.min(groupEnd, end - seen);
+			if (groupStart >= rowEnd) {
+				break;
+			}
+			const statistics = columnStatistics(group, "episode_index");
+			const min = toNumber(statistics?.min_value);
+			const max = toNumber(statistics?.max_value);
+			if (max !== undefined && max < index) {
+				continue;
+			}
+			if (min !== undefined && min > index) {
+				return undefined;
+			}
+			/// Without statistics, where it is when the whole index numbers episodes from 0 without gaps.
+			const guess = min === undefined ? index - seen : groupStart + index - min;
+			if (guess >= groupStart && guess < rowEnd) {
+				const found = await readRow(guess);
+				if (found.raw.index === index) {
+					return found;
+				}
+			}
+			const indexes = (
+				await parquetReadObjects({ file, metadata, columns: ["episode_index"], rowStart: groupStart, rowEnd })
+			).map((row) => toNumber(row.episode_index));
+			const row = indexes.indexOf(index);
+			if (row !== -1) {
+				return readRow(groupStart + row);
+			}
+			/// Indexes ascend, so a row past `index` means no row holds it.
+			if (indexes.some((value) => value !== undefined && value > index)) {
+				return undefined;
+			}
+		}
+	}
+	return undefined;
 }
 
 export async function readEpisodes(
@@ -401,6 +543,40 @@ export async function readEpisodes(
 	/// repeats go only after it.
 	const episodes = info.codebaseVersion === "v3.0" ? await toFileRows(built, offset, options) : built;
 	return firstPerIndex(episodes);
+}
+
+/** The episode whose `episode_index` is `index`, or undefined when none of the first `info.totalEpisodes` has it. */
+export async function readEpisode(
+	info: LeRobotInfo,
+	toUrl: (path: string) => string,
+	index: number,
+	indexShards: IndexShard[],
+	options?: FetchOptions,
+): Promise<LeRobotEpisode | undefined> {
+	/// LeRobot numbers episodes in ascending order, so episode `index` is at most at position `index`.
+	/// Positions past info.json's count are a stale index file's, as in `episodes()`.
+	const end = Math.min(index + 1, info.totalEpisodes);
+	if (end <= 0) {
+		return undefined;
+	}
+	if (info.codebaseVersion !== "v3.0") {
+		/// A line at or past `index` ends the search, found or not.
+		const lines = await readEpisodesV2(
+			toUrl("meta/episodes.jsonl"),
+			0,
+			end,
+			options,
+			(episode) => episode.index >= index,
+		);
+		const raw = lines.find((episode) => episode.index === index);
+		return raw === undefined ? undefined : buildEpisode(raw, info, toUrl);
+	}
+	const found = await findEpisodeV3(toUrl, info, index, end, indexShards, options);
+	if (found === undefined) {
+		return undefined;
+	}
+	const [episode] = await toFileRows([buildEpisode(found.raw, info, toUrl)], found.position, options);
+	return episode;
 }
 
 /**
@@ -426,10 +602,7 @@ async function readFileStart(url: string, options?: FetchOptions): Promise<numbe
 	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
 	const file = await openRemoteFile(url, options);
 	const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
-	const column = metadata.row_groups[0]?.columns.find(
-		(chunk) => chunk.meta_data?.path_in_schema.length === 1 && chunk.meta_data.path_in_schema[0] === "index",
-	);
-	let start = toNumber(column?.meta_data?.statistics?.min_value);
+	let start = toNumber(columnStatistics(metadata.row_groups[0], "index")?.min_value);
 	if (start === undefined) {
 		const [first] = await parquetReadObjects({ file, metadata, columns: ["index"], rowEnd: 1 });
 		start = toNumber(first?.index);

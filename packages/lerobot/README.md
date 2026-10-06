@@ -54,7 +54,15 @@ const episodes = await dataset.episodes({ limit: 10 });
 //   },
 //   ...
 // ]
+
+const episode = await dataset.episode(42);
+// The episode whose `index` is 42, or undefined when there is none
 ```
+
+`offset` counts positions in the index, which match episode indexes only when a dataset numbers its
+episodes 0, 1, 2, ... Some start at 10 or skip deleted episodes, so use `episode(index)` to open a
+given episode. On a dataset numbered 0, 1, 2, ... it costs the same as
+`episodes({ offset: index, limit: 1 })`.
 
 `videos[].fromSec` / `toSec` are the episode's offsets inside `url`. On `v3.0` several episodes share
 one file, so seek to `fromSec` and stop at `toSec`; on `v2.x` each episode has its own file and the
@@ -67,7 +75,7 @@ partway through a data file, listing episodes also reads that file's parquet foo
 starts. `data` is absent when that file cannot be read or disagrees with the episode metadata.
 
 Keep one `LeRobotDataset` while paging through episodes: like `info()`, it remembers the `v3.0` index
-files it has walked, so a later page goes straight to the file that holds it.
+files it has walked, so a later page or `episode()` lookup goes straight to the file that holds it.
 
 ### Pinning a revision
 

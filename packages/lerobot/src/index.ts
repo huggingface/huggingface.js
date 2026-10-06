@@ -2,7 +2,7 @@ import type { IndexShard } from "./episodes";
 import type { FetchOptions } from "./http";
 import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 
-import { readEpisodes } from "./episodes";
+import { readEpisode, readEpisodes } from "./episodes";
 import { readFrames } from "./frames";
 import { fetchTextPrefix } from "./http";
 import { MAX_INFO_BYTES, resolveUrl } from "./paths";
@@ -18,6 +18,7 @@ export interface LeRobotDatasetOptions extends FetchOptions {
 }
 
 export interface ListEpisodesOptions {
+	/** Position in the index, which is not the `episode_index` once a dataset skips one; see `episode()`. */
 	offset?: number;
 	limit?: number;
 }
@@ -86,6 +87,20 @@ export class LeRobotDataset {
 			return [];
 		}
 		return readEpisodes(info, (path) => this.fileUrl(path), offset, limit, this.indexShards, this.fetchOptions);
+	}
+
+	/**
+	 * The episode whose `episode_index` is `index`, or `undefined` when there is none. Unlike
+	 * `episodes({ offset })`, which counts positions, this finds it in a dataset numbered from 10 or with
+	 * gaps. When episodes are numbered 0, 1, 2, ... it costs the same as `episodes({ offset: index, limit: 1 })`.
+	 *
+	 * Rejects in the same cases as `episodes()`.
+	 */
+	async episode(index: number): Promise<LeRobotEpisode | undefined> {
+		if (!Number.isSafeInteger(index) || index < 0) {
+			return undefined;
+		}
+		return readEpisode(await this.info(), (path) => this.fileUrl(path), index, this.indexShards, this.fetchOptions);
 	}
 
 	/**
