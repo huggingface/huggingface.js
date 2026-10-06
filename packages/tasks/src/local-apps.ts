@@ -139,6 +139,18 @@ function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
 
+/**
+ * Decision models are excluded: they are non-causal too, so the Hub also tags them `feature-extraction`.
+ */
+function isEmbeddingModel(model: ModelData): boolean {
+	return (
+		!model.tags.includes("decision-model") &&
+		(model.tags.includes("feature-extraction") ||
+			model.pipeline_tag === "feature-extraction" ||
+			model.pipeline_tag === "sentence-similarity")
+	);
+}
+
 function isToolCallingLocalAgentModel(model: ModelData): boolean {
 	return (
 		(isLlamaCppGgufModel(model) || isMlxModel(model)) &&
@@ -159,27 +171,36 @@ function getQuantTag(filepath?: string): string {
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const isEmbedding = isEmbeddingModel(model);
 	const serverCommand = (binary: string) => {
-		const snippet = [
-			"# Start a local OpenAI-compatible server with a web UI:",
-			`${binary} -hf ${model.id}${getQuantTag(filepath)}`,
-		];
+		const snippet = isEmbedding
+			? ["# Start a local embeddings server:", `${binary} -hf ${model.id}${getQuantTag(filepath)} --embeddings`]
+			: [
+					"# Start a local OpenAI-compatible server with a web UI:",
+					`${binary} -hf ${model.id}${getQuantTag(filepath)}`,
+				];
 		return snippet.join("\n");
 	};
 	const cliCommand = (binary: string) => {
 		const snippet = ["# Run inference directly in the terminal:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
 		return snippet.join("\n");
 	};
+	// Embedding models don't generate text, so the server is queried instead of running the CLI
+	const embeddingsRequest = `# Then, from another terminal, get embeddings:
+curl -X POST "http://localhost:8080/v1/embeddings" \\
+	-H "Content-Type: application/json" \\
+	--data '{"input": ["Hello world", "How are you?"]}'`;
+	const runCommand = (cliBinary: string) => (isEmbedding ? embeddingsRequest : cliCommand(cliBinary));
 	return [
 		{
 			title: "Install (macOS, Linux)",
 			setup: "curl -LsSf https://llama.app/install.sh | sh",
-			content: [serverCommand("llama serve"), cliCommand("llama cli")],
+			content: [serverCommand("llama serve"), runCommand("llama cli")],
 		},
 		{
 			title: "Install from WinGet (Windows)",
 			setup: "winget install llama.cpp",
-			content: [serverCommand("llama serve"), cliCommand("llama cli")],
+			content: [serverCommand("llama serve"), runCommand("llama cli")],
 		},
 		{
 			title: "Use pre-built binary",
@@ -188,7 +209,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"# Download pre-built binary from:",
 				"# https://github.com/ggerganov/llama.cpp/releases",
 			].join("\n"),
-			content: [serverCommand("./llama-server"), cliCommand("./llama-cli")],
+			content: [serverCommand("./llama-server"), runCommand("./llama-cli")],
 		},
 		{
 			title: "Build from source code",
@@ -198,12 +219,17 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"cmake -B build",
 				"cmake --build build -j --target llama-server llama-cli",
 			].join("\n"),
-			content: [serverCommand("./build/bin/llama-server"), cliCommand("./build/bin/llama-cli")],
+			content: [serverCommand("./build/bin/llama-server"), runCommand("./build/bin/llama-cli")],
 		},
-		{
-			title: "Use Docker",
-			content: snippetDockerModelRunner(model, filepath),
-		},
+		// `docker model run` starts a chat session, which embedding models don't support
+		...(isEmbedding
+			? []
+			: [
+					{
+						title: "Use Docker",
+						content: snippetDockerModelRunner(model, filepath),
+					},
+				]),
 	];
 };
 
