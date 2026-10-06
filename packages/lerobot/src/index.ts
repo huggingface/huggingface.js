@@ -62,17 +62,21 @@ export class LeRobotDataset {
 	 * Episodes in index order, normalized so v2 and v3 datasets look the same. Never more than
 	 * `info.totalEpisodes`, and an episode index repeated within one call is returned once, as its first
 	 * occurrence.
+	 *
+	 * On v2.x the index is a JSON Lines file read from its start, so a deep `offset` downloads every line
+	 * before it, and throws if that is more than 256 MiB.
 	 */
 	async episodes(options?: ListEpisodesOptions): Promise<LeRobotEpisode[]> {
 		const info = await this.info();
-		const offset = Math.max(0, options?.offset ?? 0);
+		const offset = Math.max(0, Math.floor(options?.offset ?? 0));
 		/// info.json is authoritative. A repo re-uploaded with fewer episodes can keep a stale index file
 		/// after the current one, numbered from 0 again; reading past the count would return it.
 		const limit = Math.min(
-			Math.max(0, options?.limit ?? DEFAULT_EPISODE_LIMIT),
+			Math.max(0, Math.floor(options?.limit ?? DEFAULT_EPISODE_LIMIT)),
 			Math.max(0, info.totalEpisodes - offset),
 		);
-		if (limit === 0) {
+		/// Not `=== 0`: a NaN offset or limit makes `limit` NaN, which would read the whole v2 index.
+		if (!(limit > 0)) {
 			return [];
 		}
 		return readEpisodes(info, (path) => this.fileUrl(path), offset, limit, this.fetchOptions);

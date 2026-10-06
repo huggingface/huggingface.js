@@ -18,6 +18,16 @@ const isValidIdentifier = (str: string): boolean => /^[A-Za-z_]\w*$/.test(str);
 
 //#region snippets
 
+export const aadyaNeural = (model: ModelData): string[] => [
+	`# Install from https://github.com/manasdutta04/aadya (train extras: torch)
+from huggingface_hub import snapshot_download
+from aadya_neural.torch_forecaster import AadyaM1Forecaster
+
+weights = snapshot_download("${model.id}")
+model = AadyaM1Forecaster(weights)
+pmf = model.forecast([28, 30, 27], elapsed=0)`,
+];
+
 export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
 
@@ -54,6 +64,14 @@ export const araclip = (model: ModelData): string[] => [
 	`from araclip import AraClip
 
 model = AraClip.from_pretrained("${model.id}")`,
+];
+
+export const asimov = (model: ModelData): string[] => [
+	`# Run the policy in a browser simulation of the Asimov 1 humanoid (no GPU needed)
+git clone https://github.com/menloresearch/humanoid-policy-viewer
+cd humanoid-policy-viewer
+npm install
+npm run hf ${model.id}`,
 ];
 
 export const asteroid = (model: ModelData): string[] => [
