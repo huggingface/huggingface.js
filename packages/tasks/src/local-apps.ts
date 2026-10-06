@@ -139,9 +139,6 @@ function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
 
-/**
- * Decision models are excluded: they are non-causal too, so the Hub also tags them `feature-extraction`.
- */
 function isEmbeddingModel(model: ModelData): boolean {
 	return (
 		!model.tags.includes("decision-model") &&
