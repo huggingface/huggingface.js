@@ -66,6 +66,9 @@ both are row offsets inside `data.url`, not indexes across the dataset. For v3, 
 partway through a data file, listing episodes also reads that file's parquet footer to find where it
 starts. `data` is absent when that file cannot be read or disagrees with the episode metadata.
 
+Keep one `LeRobotDataset` while paging through episodes: like `info()`, it remembers the `v3.0` index
+files it has walked, so a later page goes straight to the file that holds it.
+
 ### Pinning a revision
 
 Pass a commit sha whenever the result is stored or cached anywhere, so a later push cannot change what

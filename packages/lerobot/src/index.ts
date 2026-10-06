@@ -1,3 +1,4 @@
+import type { IndexShard } from "./episodes";
 import type { FetchOptions } from "./http";
 import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 
@@ -35,6 +36,8 @@ export class LeRobotDataset {
 	private readonly revision: string;
 	private readonly fetchOptions: FetchOptions;
 	private infoPromise?: Promise<LeRobotInfo>;
+	/** v3 index files walked so far, kept for the lifetime of this instance like `info()`. */
+	private readonly indexShards: IndexShard[] = [];
 
 	constructor(
 		public readonly repoId: string,
@@ -63,6 +66,9 @@ export class LeRobotDataset {
 	 * `info.totalEpisodes`, and an episode index repeated within one call is returned once, as its first
 	 * occurrence.
 	 *
+	 * Rejects when a `v3.0` index needs more files to reach the page than there are episodes up to its
+	 * end (only empty index files do that), or more than 10,000 files.
+	 *
 	 * On v2.x the index is a JSON Lines file read from its start, so a deep `offset` downloads every line
 	 * before it, and throws if that is more than 256 MiB.
 	 */
@@ -79,7 +85,7 @@ export class LeRobotDataset {
 		if (!(limit > 0)) {
 			return [];
 		}
-		return readEpisodes(info, (path) => this.fileUrl(path), offset, limit, this.fetchOptions);
+		return readEpisodes(info, (path) => this.fileUrl(path), offset, limit, this.indexShards, this.fetchOptions);
 	}
 
 	/**

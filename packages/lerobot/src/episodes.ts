@@ -1,3 +1,4 @@
+import type { FileMetaData } from "hyparquet";
 import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
@@ -26,8 +27,20 @@ const JSONL_MAX_READ_BYTES = 16 * 1024 * 1024;
 const JSONL_MAX_BYTES = 256 * 1024 * 1024;
 /** Real lines are under a kilobyte; a file without line breaks would otherwise be held whole. */
 const JSONL_MAX_LINE_LENGTH = 1024 * 1024;
-/** Bounds the shard walk so a pathological `offset` cannot loop forever (CWE-835). */
-const MAX_INDEX_FILES = 64;
+/**
+ * Bounds the shard walk so a server that keeps answering cannot loop it forever (CWE-835). LeRobot starts
+ * a new index file on every resumed recording, so real indexes reach a thousand files or more.
+ */
+const MAX_INDEX_FILES = 10_000;
+/** Index files requested ahead of the walk when the page lies further on; a browser's HTTP/1.1 limit per host. */
+const INDEX_FILES_AHEAD = 6;
+
+/** An index file found by an earlier walk, so a later one can skip it without a request. */
+export interface IndexShard {
+	chunk: number;
+	file: number;
+	rows: number;
+}
 
 function toNumber(value: unknown): number | undefined {
 	if (typeof value === "bigint") {
@@ -252,13 +265,15 @@ function toRawEpisodeV3(row: Record<string, unknown>, info: LeRobotInfo): RawEpi
  *
  * The index is sharded: `chunks_size` files per chunk directory, so a request can span several of
  * them. Files are walked in order, skipping whole shards that fall before `offset` using only their
- * parquet footer, and stopping at the first missing shard.
+ * parquet footer, and stopping at the first missing shard. `shards` remembers the files already
+ * walked, so a later call skips them without a request.
  */
 async function readEpisodesV3(
 	toUrl: (path: string) => string,
 	info: LeRobotInfo,
 	offset: number,
 	limit: number,
+	shards: IndexShard[],
 	options?: FetchOptions,
 ): Promise<RawEpisode[]> {
 	const { parquetMetadataAsync, parquetReadObjects, parquetSchema } = await loadHyparquet();
@@ -276,33 +291,86 @@ async function readEpisodesV3(
 			["chunk_index", "file_index", "from_timestamp", "to_timestamp"].map((field) => `videos/${camera.key}/${field}`),
 		),
 	];
+	/// Files requested ahead of the walk, until it takes them; a long walk holds only those few.
+	const opening = new Map<string, Promise<{ file: RandomAccessFile; metadata: FileMetaData } | undefined>>();
+	const open = (chunk: number, file: number) => {
+		const path = episodesMetadataPath(chunk, file);
+		let opened = opening.get(path);
+		if (opened === undefined) {
+			opened = openRemoteFile(toUrl(path), options).then(
+				async (remote) => ({
+					file: remote,
+					metadata: await parquetMetadataAsync(remote, { initialFetchSize: TAIL_PROBE_BYTES }),
+				}),
+				(error: unknown) => {
+					if (error instanceof HttpError && error.status === 404) {
+						return undefined;
+					}
+					throw error;
+				},
+			);
+			/// A file requested ahead may never be taken; its failure matters only once it is.
+			opened.catch(() => {});
+			opening.set(path, opened);
+		}
+		return opened;
+	};
+	const take = (chunk: number, file: number) => {
+		const opened = open(chunk, file);
+		opening.delete(episodesMetadataPath(chunk, file));
+		return opened;
+	};
+	const nextFile = (chunk: number, file: number) =>
+		file + 1 < info.chunksSize ? { chunk, file: file + 1 } : { chunk: chunk + 1, file: 0 };
+
 	const collected: RawEpisode[] = [];
-	let chunkIndex = 0;
-	let fileIndex = 0;
+	const end = offset + limit;
+	/// LeRobot writes no empty index file, so `end` files hold the page. Without this bound, a server
+	/// answering every path with an empty file would cost one request per file up to MAX_INDEX_FILES.
+	const maxFiles = Math.min(MAX_INDEX_FILES, end);
+	let next = { chunk: 0, file: 0 };
 	let seen = 0;
 
-	for (let visited = 0; visited < MAX_INDEX_FILES && collected.length < limit; visited++) {
-		let file: RandomAccessFile;
-		try {
-			file = await openRemoteFile(toUrl(episodesMetadataPath(chunkIndex, fileIndex)), options);
-		} catch (error) {
-			if (!(error instanceof HttpError) || error.status !== 404) {
-				throw error;
-			}
-			/// Files run out within a chunk before the chunk itself runs out.
-			if (fileIndex === 0) {
-				break;
-			}
-			chunkIndex++;
-			fileIndex = 0;
+	for (let position = 0; seen < end; position++) {
+		if (position >= maxFiles) {
+			throw new Error(
+				`Reading episodes up to ${end - 1} needs more than ${maxFiles} index files under ${toUrl("meta/episodes")}, and those hold ${seen} episodes`,
+			);
+		}
+		const known = shards[position];
+		if (known !== undefined && seen + known.rows <= offset) {
+			seen += known.rows;
+			next = nextFile(known.chunk, known.file);
 			continue;
 		}
 
-		const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
+		const { chunk: chunkIndex, file: fileIndex } = known ?? next;
+		/// LeRobot fills each chunk with `chunks_size` files, so a missing file ends the index. Trying the next
+		/// chunk instead would turn a transient 404 into a wrong position that `shards` keeps.
+		const opened = await take(chunkIndex, fileIndex);
+		if (opened === undefined) {
+			break;
+		}
+
+		const { file, metadata } = opened;
 		const rowCount = Number(metadata.num_rows);
-		if (seen + rowCount > offset) {
-			const rowStart = Math.max(0, offset - seen);
-			const rowEnd = Math.min(rowCount, offset + limit - seen);
+		shards[position] = { chunk: chunkIndex, file: fileIndex, rows: rowCount };
+		const rowStart = Math.max(0, offset - seen);
+		const rowEnd = Math.min(rowCount, end - seen);
+		seen += rowCount;
+		next = nextFile(chunkIndex, fileIndex);
+
+		if (seen < end) {
+			/// Rather than one round trip per file, request the next few at once: as many as the page needs if
+			/// they hold as many rows as this file. When they hold more, the last few go unused.
+			const ahead = Math.min(INDEX_FILES_AHEAD, Math.ceil((end - seen) / Math.max(rowCount, 1)));
+			let upcoming = next;
+			for (let i = 0; i < ahead; i++) {
+				open(upcoming.chunk, upcoming.file);
+				upcoming = nextFile(upcoming.chunk, upcoming.file);
+			}
+		}
+		if (rowStart < rowEnd) {
 			/// hyparquet throws on a column the file lacks; `toRawEpisodeV3` defaults the absent ones.
 			const present = new Set(parquetSchema(metadata).children.map((child) => child.element.name));
 			const columns = wanted.filter((column) => present.has(column));
@@ -311,8 +379,6 @@ async function readEpisodesV3(
 				collected.push(toRawEpisodeV3(row, info));
 			}
 		}
-		seen += rowCount;
-		fileIndex++;
 	}
 
 	return collected;
@@ -323,11 +389,12 @@ export async function readEpisodes(
 	toUrl: (path: string) => string,
 	offset: number,
 	limit: number,
+	indexShards: IndexShard[],
 	options?: FetchOptions,
 ): Promise<LeRobotEpisode[]> {
 	const raw =
 		info.codebaseVersion === "v3.0"
-			? await readEpisodesV3(toUrl, info, offset, limit, options)
+			? await readEpisodesV3(toUrl, info, offset, limit, indexShards, options)
 			: await readEpisodesV2(toUrl("meta/episodes.jsonl"), offset, limit, options);
 	const built = raw.map((episode) => buildEpisode(episode, info, toUrl));
 	/// toFileRows reads positions (an episode starting a file follows one from another file), so the
