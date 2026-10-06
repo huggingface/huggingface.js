@@ -6646,6 +6646,100 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("First and last filters", () => {
+		const messages = [
+			{ role: "user", content: "hi" },
+			{ role: "assistant", content: "hello" },
+		];
+
+		// Expected values are what Python jinja2 3.1.6 renders: an empty list yields an undefined value.
+		it.each([
+			{ name: "first of an empty list", source: `[{{ x | first }}]`, context: { x: [] }, expected: "[]" },
+			{ name: "last of an empty list", source: `[{{ x | last }}]`, context: { x: [] }, expected: "[]" },
+			{ name: "first of an empty literal", source: `[{{ [] | first }}]|[{{ [] | last }}]`, expected: "[]|[]" },
+			{
+				name: "defined test",
+				source: `{{ [] | first is defined }}|{{ [] | last is defined }}|{{ [1] | first is defined }}`,
+				expected: "false|false|true",
+			},
+			{
+				name: "none and undefined tests",
+				source: `{{ [] | first is none }}|{{ [] | first is undefined }}|{{ [none] | first is none }}`,
+				expected: "false|true|true",
+			},
+			{
+				name: "default filter",
+				source: `{{ [] | first | default('d') }}|{{ [] | last | default('d') }}|{{ [1] | first | default('d') }}`,
+				expected: "d|d|1",
+			},
+			{
+				name: "default filter with boolean",
+				source: `{{ [] | first | default('x', true) }}`,
+				expected: "x",
+			},
+			{
+				name: "if truthiness of first",
+				source: `{% if x | first %}yes{% else %}no{% endif %}`,
+				context: { x: [] },
+				expected: "no",
+			},
+			{
+				name: "if truthiness of last",
+				source: `{% if x | last %}yes{% else %}no{% endif %}`,
+				context: { x: [] },
+				expected: "no",
+			},
+			{
+				name: "not truthiness",
+				source: `{% if not x | first %}empty{% else %}full{% endif %}`,
+				context: { x: [] },
+				expected: "empty",
+			},
+			{
+				name: "or fallback",
+				source: `{{ [] | first or 'fallback' }}|{{ [] | last or 'fallback' }}`,
+				expected: "fallback|fallback",
+			},
+			{
+				name: "first after a selectattr that matches nothing",
+				source: `[{{ m | selectattr('role', 'equalto', 'system') | list | first }}]`,
+				context: { m: messages },
+				expected: "[]",
+			},
+			{
+				name: "last after a selectattr that matches nothing",
+				source: `[{{ m | selectattr('role', 'equalto', 'system') | list | last }}]`,
+				context: { m: messages },
+				expected: "[]",
+			},
+			{
+				name: "if truthiness after a selectattr that matches nothing",
+				source: `{% if m | selectattr('role', 'equalto', 'system') | list | first %}sys{% else %}nosys{% endif %}`,
+				context: { m: messages },
+				expected: "nosys",
+			},
+			{
+				name: "first after a map over an empty list",
+				source: `[{{ m | map(attribute='role') | list | first }}]`,
+				context: { m: [] },
+				expected: "[]",
+			},
+			{
+				name: "non-empty lists are unchanged",
+				source: `{{ [1, 2, 3] | first }}|{{ [1, 2, 3] | last }}|{{ [7] | first }}|{{ [7] | last }}|{{ [0] | first }}`,
+				expected: "1|3|7|7|0",
+			},
+			{
+				name: "first and last of a non-empty selectattr",
+				source: `{{ (m | selectattr('role', 'equalto', 'user') | list | first).content }}|{{ (m | rejectattr('role', 'equalto', 'user') | list | last).content }}`,
+				context: { m: messages },
+				expected: "hi|hello",
+			},
+		])("matches Python for $name", ({ source, context, expected }) => {
+			expect(new Template(source).render(context ?? {})).toBe(expected);
+		});
+	});
+
 	describe("Exponentiation", () => {
 		it("supports boolean operands", () => {
 			const template = new Template(
