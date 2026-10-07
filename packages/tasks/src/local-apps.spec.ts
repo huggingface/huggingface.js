@@ -300,6 +300,72 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(false);
 	});
 
+	it("hfl gguf", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS["hfl"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(snippet[0].setup).toEqual(
+			"# Install HFL and llama.cpp's llama-server\npip install hfl\nhfl install llama-server",
+		);
+		expect(snippet[0].content).toEqual(
+			"# Downloads the model on first use\nhfl run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}",
+		);
+		expect(snippet[1].content).toEqual(
+			"# Listens on http://localhost:11434\nhfl serve --model hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}",
+		);
+	});
+
+	it("hfl gguf - chosen file", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["hfl"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf");
+
+		expect(snippet[0].content).toEqual(
+			"# Downloads the model on first use\nhfl run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M",
+		);
+	});
+
+	it("hfl - mlx", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS["hfl"];
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(snippet[0].setup).toEqual('# Install HFL (Apple Silicon)\npip install "hfl[mlx]"');
+		expect(snippet[0].content).toEqual(
+			"# Downloads the model on first use\nhfl run hf.co/mlx-community/Llama-3.2-3B-Instruct-4bit",
+		);
+	});
+
+	it("hfl not shown for unrelated model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["hfl"];
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			tags: ["conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("unsloth tagged model", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS.unsloth;
 		const model: ModelData = {
