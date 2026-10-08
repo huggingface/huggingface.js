@@ -9,6 +9,7 @@ packages:
   - packages/tasks
   - packages/tasks-gen
   - packages/gguf
+  - packages/lerobot
   - packages/jinja
   - packages/space-header
   - packages/ollama-utils
