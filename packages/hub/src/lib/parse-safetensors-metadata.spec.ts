@@ -201,10 +201,11 @@ describe("parseSafetensorsMetadata", () => {
 			header: Record<string, unknown>,
 			dataBytes = 0,
 			config?: Record<string, unknown>,
+			declaredHeaderLength?: number,
 		): typeof fetch => {
 			const headerBytes = new TextEncoder().encode(JSON.stringify(header));
 			const file = new Uint8Array(8 + headerBytes.length + dataBytes);
-			new DataView(file.buffer).setBigUint64(0, BigInt(headerBytes.length), true);
+			new DataView(file.buffer).setBigUint64(0, BigInt(declaredHeaderLength ?? headerBytes.length), true);
 			file.set(headerBytes, 8);
 			const configFile = config ? new TextEncoder().encode(JSON.stringify(config)) : undefined;
 			return (async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -219,6 +220,9 @@ describe("parseSafetensorsMetadata", () => {
 				if (range?.startsWith("bytes=")) {
 					const [start, endRaw] = range.slice("bytes=".length).split("-");
 					const startByte = Number(start);
+					if (startByte >= resource.length) {
+						return new Response(null, { status: 416 });
+					}
 					const endByte = endRaw === "" ? resource.length - 1 : Math.min(Number(endRaw), resource.length - 1);
 					return new Response(resource.slice(startByte, endByte + 1), {
 						status: 206,
@@ -277,6 +281,43 @@ describe("parseSafetensorsMetadata", () => {
 					fetch,
 				}),
 			).rejects.toThrow(/exceeds the file size/);
+		});
+
+		it("reads a header larger than the speculative first read", async () => {
+			const padding = "x".repeat(300_000);
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", padding },
+					weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] },
+				},
+				800,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/large-header-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.strictEqual(parse.header.__metadata__?.padding, padding);
+			assert.deepStrictEqual(parse.parameterCount, { F32: 200 });
+		});
+
+		it("rejects a header length pointing past the end of a small file", async () => {
+			const fetch = fetchForFile(
+				{ weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] } },
+				800,
+				undefined,
+				10_000,
+			);
+
+			await expect(
+				parseSafetensorsMetadata({
+					repo: "some-user/truncated-header-model",
+					fetch,
+				}),
+			).rejects.toThrow(SafetensorParseError);
 		});
 
 		it("caps a self-reported total_parameters above the computed count", async () => {
