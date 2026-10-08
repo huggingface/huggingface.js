@@ -367,14 +367,11 @@ async function parseSingleFile(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
-): Promise<{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined }> {
+): Promise<SafetensorsFileHeader> {
 	return parseHeaderFromBlob(path, await downloadFile({ ...params, path }));
 }
 
-async function parseHeaderFromBlob(
-	path: string,
-	blob: Blob | null,
-): Promise<{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined }> {
+async function parseHeaderFromBlob(path: string, blob: Blob | null): Promise<SafetensorsFileHeader> {
 	if (!blob) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
 	}
@@ -393,14 +390,22 @@ async function parseHeaderFromBlob(
 	}
 
 	const headerEnd = 8 + Number(lengthOfHeader);
-	const headerBlob =
-		headerEnd <= prefix.byteLength
-			? new Blob([prefix.subarray(8, headerEnd)])
-			: new Blob([prefix.subarray(8), await blob.slice(prefix.byteLength, headerEnd).arrayBuffer()]);
+	let headerBytes = prefix.subarray(8, headerEnd);
+	if (headerEnd > prefix.byteLength) {
+		if (headerEnd > blob.size) {
+			throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
+		}
+		headerBytes = new Uint8Array(headerEnd - 8);
+		headerBytes.set(prefix.subarray(8));
+		headerBytes.set(
+			new Uint8Array(await blob.slice(prefix.byteLength, headerEnd).arrayBuffer()),
+			prefix.byteLength - 8,
+		);
+	}
 
 	let header: SafetensorsFileHeader;
 	try {
-		header = JSON.parse(await headerBlob.text());
+		header = JSON.parse(new TextDecoder().decode(headerBytes));
 	} catch (err) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
 	}
@@ -413,7 +418,7 @@ async function parseHeaderFromBlob(
 		validateTensorEntry(path, tensorName, info, fileSizeBytes);
 	}
 
-	return { header, fileSizeBytes };
+	return header;
 }
 
 async function parseShardedIndex(
@@ -559,10 +564,15 @@ async function fetchAllHeaders(
 	const paths = filenames.map((filename) => pathPrefix + filename);
 	// Only the first shard goes through the per-file resolve probe: it gives us the xet refresh URL,
 	// shared by the whole repo. The other shards' xet hashes come from batched paths-info calls.
-	const [firstBlob, otherInfos] = await Promise.all([
-		downloadFile({ ...params, path: paths[0] }),
-		Promise.all(chunk(paths.slice(1), PATHS_INFO_BATCH_SIZE).map((batch) => pathsInfo({ ...params, paths: batch }))),
-	]);
+	const firstBlob = await downloadFile({ ...params, path: paths[0] });
+	const firstXetBlob = firstBlob instanceof XetBlob ? firstBlob : undefined;
+	const otherInfos = firstXetBlob
+		? await Promise.all(
+				chunk(paths.slice(1), PATHS_INFO_BATCH_SIZE).map((batch) =>
+					pathsInfo({ ...params, paths: batch }).catch(() => []),
+				),
+			)
+		: [];
 	const infoByPath = new Map(otherInfos.flat().map((info) => [info.path, info]));
 
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
@@ -573,16 +583,16 @@ async function fetchAllHeaders(
 				const blob =
 					i === 0
 						? firstBlob
-						: firstBlob instanceof XetBlob && info?.xetHash
+						: firstXetBlob && info?.xetHash
 							? new XetBlob({
-									fetch: firstBlob.fetch,
-									refreshUrl: firstBlob.refreshUrl,
-									accessToken: firstBlob.accessToken,
+									fetch: firstXetBlob.fetch,
+									refreshUrl: firstXetBlob.refreshUrl,
+									accessToken: firstXetBlob.accessToken,
 									hash: info.xetHash,
 									size: info.size,
 								})
 							: await downloadFile({ ...params, path });
-				return [filename, (await parseHeaderFromBlob(path, blob)).header] satisfies [string, SafetensorsFileHeader];
+				return [filename, await parseHeaderFromBlob(path, blob)] satisfies [string, SafetensorsFileHeader];
 			}),
 			PARALLEL_DOWNLOADS,
 		),
@@ -747,7 +757,7 @@ export async function parseSafetensorsMetadata(
 	}
 
 	if (location && !location.sharded) {
-		const { header } = await parseSingleFile(location.path, params);
+		const header = await parseSingleFile(location.path, params);
 		const paramStats = params.computeParametersCount
 			? (() => {
 					const parameterCount = computeNumOfParamsByDtypeSingleFile(header, quantConfig, expertDtype);
