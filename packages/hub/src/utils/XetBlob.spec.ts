@@ -1584,7 +1584,9 @@ describe("hasH2Fetch", () => {
 	});
 
 	it("reads the current runtime by default", () => {
-		expect(hasH2Fetch(undefined, false)).toBe(hasH2Fetch(process.versions, false));
+		expect(hasH2Fetch(undefined, false)).toBe(
+			hasH2Fetch(typeof process !== "undefined" ? process.versions : undefined, false),
+		);
 	});
 });
 
