@@ -107,6 +107,11 @@ export interface WidgetExampleSentenceSimilarityInput<
 	sentences: string[];
 }
 
+export interface WidgetExampleTextRankingInput<TOutput = WidgetExampleOutput> extends WidgetExampleBase<TOutput> {
+	query: string;
+	texts: string[];
+}
+
 //#endregion
 
 export type WidgetExample<TOutput = WidgetExampleOutput> =
@@ -121,7 +126,8 @@ export type WidgetExample<TOutput = WidgetExampleOutput> =
 	| WidgetExampleStructuredDataInput<TOutput>
 	| WidgetExampleTableDataInput<TOutput>
 	| WidgetExampleZeroShotTextInput<TOutput>
-	| WidgetExampleSentenceSimilarityInput<TOutput>;
+	| WidgetExampleSentenceSimilarityInput<TOutput>
+	| WidgetExampleTextRankingInput<TOutput>;
 
 type KeysOfUnion<T> = T extends unknown ? keyof T : never;
 
