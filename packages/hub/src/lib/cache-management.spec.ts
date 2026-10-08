@@ -107,10 +107,10 @@ describe("scanCachedRepo", () => {
 });
 
 describe("scanRefsDir", () => {
-	test("should read refs in subfolders", async () => {
+	test("should read refs in subfolders and skip ignored files", async () => {
 		mockDirs({
-			"/fake/refs": { main: "file", pr: "dir" },
-			[join("/fake/refs", "pr")]: { "1": "file" },
+			"/fake/refs": { main: "file", pr: "dir", ".DS_Store": "file" },
+			[join("/fake/refs", "pr")]: { "1": "file", ".DS_Store": "file" },
 		});
 		vi.mocked(readFile).mockImplementation((async (path: string) =>
 			path === join("/fake/refs", "main") ? "aaa" : "bbb") as unknown as typeof readFile);

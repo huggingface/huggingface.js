@@ -220,6 +220,10 @@ export async function scanRefsDir(
 ): Promise<void> {
 	const refFiles = await readdir(refsPath, { withFileTypes: true });
 	for (const refFile of refFiles) {
+		if (FILES_TO_IGNORE.includes(refFile.name)) {
+			continue;
+		}
+
 		const refFilePath = join(refsPath, refFile.name);
 		const refName = refPrefix + refFile.name;
 		if (refFile.isDirectory()) {
