@@ -8,6 +8,9 @@ import { promisesQueue } from "../utils/promisesQueue";
 import type { SetRequired } from "../vendor/type-fest/set-required";
 import { parseSafetensorsIndexStream } from "./parse-safetensors-index";
 import { sum } from "../utils/sum";
+import { chunk } from "../utils/chunk";
+import { XetBlob } from "../utils/XetBlob";
+import { pathsInfo } from "./paths-info";
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
@@ -42,6 +45,9 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 }
 
 const PARALLEL_DOWNLOADS = 20;
+const PATHS_INFO_BATCH_SIZE = 1_000;
+/// Covers the header of almost all shards (typically a few KB to ~100KB), larger ones need a second read
+const HEADER_SPECULATIVE_READ_LENGTH = 100_000;
 const MAX_HEADER_LENGTH = 25_000_000; // 25MB
 const MAX_CONFIG_LENGTH = 10_000_000; // 10MB — config.json is typically small; cap to avoid large memory use
 const MAX_SHARD_COUNT = 10_000; // well above any real sharded model; blocks crafted index with millions of entries
@@ -362,14 +368,20 @@ async function parseSingleFile(
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
 ): Promise<{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined }> {
-	const blob = await downloadFile({ ...params, path });
+	return parseHeaderFromBlob(path, await downloadFile({ ...params, path }));
+}
 
+async function parseHeaderFromBlob(
+	path: string,
+	blob: Blob | null,
+): Promise<{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined }> {
 	if (!blob) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
 	}
 
-	const bufLengthOfHeaderLE = await blob.slice(0, 8).arrayBuffer();
-	const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
+	// Read the length and (usually) the whole header in a single request
+	const prefix = new Uint8Array(await blob.slice(0, HEADER_SPECULATIVE_READ_LENGTH).arrayBuffer());
+	const lengthOfHeader = new DataView(prefix.buffer).getBigUint64(0, true);
 	// ^little-endian
 	if (lengthOfHeader <= 0) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
@@ -380,9 +392,15 @@ async function parseSingleFile(
 		);
 	}
 
+	const headerEnd = 8 + Number(lengthOfHeader);
+	const headerBlob =
+		headerEnd <= prefix.byteLength
+			? new Blob([prefix.subarray(8, headerEnd)])
+			: new Blob([prefix.subarray(8), await blob.slice(prefix.byteLength, headerEnd).arrayBuffer()]);
+
 	let header: SafetensorsFileHeader;
 	try {
-		header = JSON.parse(await blob.slice(8, 8 + Number(lengthOfHeader)).text());
+		header = JSON.parse(await headerBlob.text());
 	} catch (err) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
 	}
@@ -535,19 +553,39 @@ async function fetchAllHeaders(
 	for (const filename of filenames) {
 		assertSafeShardFilename(filename);
 	}
+	if (!filenames.length) {
+		return {};
+	}
+	const paths = filenames.map((filename) => pathPrefix + filename);
+	// Only the first shard goes through the per-file resolve probe: it gives us the xet refresh URL,
+	// shared by the whole repo. The other shards' xet hashes come from batched paths-info calls.
+	const [firstBlob, otherInfos] = await Promise.all([
+		downloadFile({ ...params, path: paths[0] }),
+		Promise.all(chunk(paths.slice(1), PATHS_INFO_BATCH_SIZE).map((batch) => pathsInfo({ ...params, paths: batch }))),
+	]);
+	const infoByPath = new Map(otherInfos.flat().map((info) => [info.path, info]));
+
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
-		(
-			await promisesQueue(
-				filenames.map(
-					(filename) => async () =>
-						[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [
-							string,
-							{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined },
-						],
-				),
-				PARALLEL_DOWNLOADS,
-			)
-		).map(([filename, { header }]) => [filename, header]),
+		await promisesQueue(
+			filenames.map((filename, i) => async () => {
+				const path = paths[i];
+				const info = infoByPath.get(path);
+				const blob =
+					i === 0
+						? firstBlob
+						: firstBlob instanceof XetBlob && info?.xetHash
+							? new XetBlob({
+									fetch: firstBlob.fetch,
+									refreshUrl: firstBlob.refreshUrl,
+									accessToken: firstBlob.accessToken,
+									hash: info.xetHash,
+									size: info.size,
+								})
+							: await downloadFile({ ...params, path });
+				return [filename, (await parseHeaderFromBlob(path, blob)).header] satisfies [string, SafetensorsFileHeader];
+			}),
+			PARALLEL_DOWNLOADS,
+		),
 	);
 	return shardedMap;
 }

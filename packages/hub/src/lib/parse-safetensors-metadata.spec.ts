@@ -279,6 +279,27 @@ describe("parseSafetensorsMetadata", () => {
 			).rejects.toThrow(/exceeds the file size/);
 		});
 
+		it("reads a header larger than the speculative first read", async () => {
+			const padding = "x".repeat(300_000);
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", padding },
+					weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] },
+				},
+				800,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/large-header-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.strictEqual(parse.header.__metadata__?.padding, padding);
+			assert.deepStrictEqual(parse.parameterCount, { F32: 200 });
+		});
+
 		it("caps a self-reported total_parameters above the computed count", async () => {
 			const fetch = fetchForFile(
 				{
