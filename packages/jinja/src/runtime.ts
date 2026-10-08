@@ -29,7 +29,7 @@ import type {
 	KeywordSpreadExpression,
 } from "./ast";
 import { Statement } from "./ast";
-import { range, replace, slice, strftime_now, titleCase } from "./utils";
+import { capitalizeFirst, range, replace, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| IntegerValue
@@ -142,7 +142,7 @@ export class StringValue extends RuntimeValue<string> {
 			[
 				"capitalize",
 				new FunctionValue(() => {
-					return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
+					return new StringValue(capitalizeFirst(this.value));
 				}),
 			],
 			["length", new IntegerValue(this.value.length)],
