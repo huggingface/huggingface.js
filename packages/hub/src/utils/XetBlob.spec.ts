@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReconstructionInfo } from "./XetBlob";
 import { bg4_regroup_bytes, bg4_split_bytes, hasH2Fetch, withHttp1, XetBlob, type Dispatcher } from "./XetBlob";
 import { combineUint8Arrays } from "./combineUint8Arrays";
@@ -239,6 +239,29 @@ describe("XetBlob", () => {
 			return { wholeText, xorbData, reconstructionInfo };
 		}
 
+		// The bandwidth-pacer tests below compare throughput between controller ticks. On real
+		// timers, machine load makes those samples noisier than the controller's 5% keep margin, so
+		// they run on a virtual clock where the pacer and the controller advance in lockstep.
+		function useVirtualClock() {
+			vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval"] });
+		}
+
+		async function runOnVirtualClock<T>(promise: Promise<T>): Promise<T> {
+			let settled = false;
+			promise.then(
+				() => (settled = true),
+				() => (settled = true),
+			);
+			while (!settled) {
+				await vi.advanceTimersByTimeAsync(1);
+			}
+			return promise;
+		}
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
 		function makeFetch(
 			fixture: ReturnType<typeof makeParallelFixture>,
 			opts?: { gate?: Promise<void>; onXorbRequest?: (i: number) => void; failIndex?: number },
@@ -318,6 +341,7 @@ describe("XetBlob", () => {
 		});
 
 		it("settles back to serial on a bandwidth-capped link", async () => {
+			useVirtualClock();
 			// Simulate a saturated link: a shared pacer caps aggregate throughput no matter how
 			// many streams are open, so extra connections never improve the byte rate and the
 			// controller should spend most of the download at concurrency 1.
@@ -354,7 +378,7 @@ describe("XetBlob", () => {
 				},
 			});
 
-			expect(await blob.text()).toBe(fixture.wholeText);
+			expect(await runOnVirtualClock(blob.text())).toBe(fixture.wholeText);
 			const history = (stat?.targetHistory ?? []) as number[];
 			expect(history.length).toBeGreaterThan(10);
 			// Probes are allowed (that's how the plateau is found), but the controller must
@@ -366,6 +390,7 @@ describe("XetBlob", () => {
 		});
 
 		it("walks back down after a zero-rate climb (stalled start)", async () => {
+			useVirtualClock();
 			// Responses stall long enough for the zero-rate heuristic to climb several levels
 			// without measuring them, then stream on a bandwidth-capped link. The controller
 			// must re-measure the skipped levels on the way down instead of being stuck at the
@@ -405,7 +430,7 @@ describe("XetBlob", () => {
 				},
 			});
 
-			expect(await blob.text()).toBe(fixture.wholeText);
+			expect(await runOnVirtualClock(blob.text())).toBe(fixture.wholeText);
 			const history = (stat?.targetHistory ?? []) as number[];
 			expect(Math.max(...history)).toBeGreaterThanOrEqual(3); // the stall climbed
 			expect(history[history.length - 1]).toBeLessThan(Math.max(...history)); // …and came back down
@@ -1559,7 +1584,9 @@ describe("hasH2Fetch", () => {
 	});
 
 	it("reads the current runtime by default", () => {
-		expect(hasH2Fetch(undefined, false)).toBe(hasH2Fetch(process.versions, false));
+		expect(hasH2Fetch(undefined, false)).toBe(
+			hasH2Fetch(typeof process !== "undefined" ? process.versions : undefined, false),
+		);
 	});
 });
 
