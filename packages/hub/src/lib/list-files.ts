@@ -79,7 +79,7 @@ export async function* listFiles(
 	const revision = repoId.type === "bucket" ? undefined : params.revision || "main";
 	let url: string | undefined = `${params.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}/tree${
 		revision ? `/${encodeURIComponent(revision)}` : ""
-	}${params.path ? "/" + params.path : ""}?recursive=${!!params.recursive}&expand=${!!params.expand}`;
+	}${params.path ? "/" + params.path.split("/").map(encodeURIComponent).join("/") : ""}?recursive=${!!params.recursive}&expand=${!!params.expand}`;
 
 	while (url) {
 		const res: Response = await (params.fetch ?? fetch)(url, {

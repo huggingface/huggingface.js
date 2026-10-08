@@ -540,7 +540,7 @@ async function fetchAllHeaders(
 			await promisesQueue(
 				filenames.map(
 					(filename) => async () =>
-						[filename, await parseSingleFile(pathPrefix + encodeShardFilename(filename), params)] satisfies [
+						[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [
 							string,
 							{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined },
 						],
