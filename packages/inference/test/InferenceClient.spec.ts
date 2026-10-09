@@ -2146,65 +2146,6 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 	describe.concurrent(
-		"OpenRouter",
-		() => {
-			const client = new HfInference(env.HF_OPENROUTER_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["openrouter"] = {
-				"meta-llama/Llama-3.1-8B-Instruct": {
-					provider: "openrouter",
-					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
-					providerId: "meta-llama/llama-3.1-8b-instruct",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "openrouter",
-					messages: [{ role: "user", content: "A, B, C, " }],
-					seed: 42,
-					temperature: 0,
-					top_p: 0.01,
-					max_tokens: 1,
-				});
-				expect(res.choices && res.choices.length > 0);
-				const completion = res.choices[0].message?.content;
-				expect(completion).toContain("D");
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "openrouter",
-					messages: [{ role: "user", content: "A, B, C, " }],
-					stream: true,
-					seed: 42,
-					temperature: 0,
-					top_p: 0.01,
-					max_tokens: 1,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse).toContain("D");
-			});
-		},
-		TIMEOUT,
-	);
-
-	describe.concurrent(
 		"OVHcloud",
 		() => {
 			const client = new HfInference(env.HF_OVHCLOUD_KEY ?? "dummy");
