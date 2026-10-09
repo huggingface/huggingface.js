@@ -45,6 +45,30 @@ export enum GGMLFileQuantizationType {
 	Q1_0 = 40,
 	Q2_0 = 41,
 
+	// quants from ik_llama.cpp, with the llama_ftype values of its include/llama.h
+	IQ2_K = 138,
+	IQ3_K = 139,
+	IQ4_K = 140,
+	IQ5_K = 141,
+	IQ6_K = 142,
+	IQ4_KS = 145,
+	IQ3_KL = 146,
+	IQ2_KS = 147,
+	IQ4_KSS = 148,
+	IQ5_KS = 150,
+	IQ2_KT = 151,
+	IQ3_KT = 152,
+	IQ4_KT = 153,
+	IQ3_KS = 154,
+	IQ2_KL = 155,
+	IQ1_KT = 156,
+	IQ2_K_R4 = 338,
+	IQ3_K_R4 = 339,
+	IQ4_K_R4 = 340,
+	IQ5_K_R4 = 341,
+	IQ4_KS_R4 = 345,
+	IQ5_KS_R4 = 350,
+
 	// custom quants used by unsloth
 	// they are not officially a scheme enum value in GGUF, but only here for naming
 	Q2_K_XL = 1000,
@@ -68,9 +92,27 @@ const ggufQuants = Object.values(GGMLFileQuantizationType).filter((v): v is stri
  * sizeVariation `MOE`.
  */
 const GGUF_QUANT_FILENAME_ALIASES = ["MXFP4"];
+
+// `Q2_K_XL` is `Q2_K` plus a letter size suffix, so the shorter name stays first.
+// `Q4_0_4_4` is not that shape. Longer names are tried first, or the match stops at `Q4_0`.
+function isLetterSizeSuffix(name: string): boolean {
+	return ggufQuants.some((shorter) => {
+		if (!name.startsWith(`${shorter}_`)) {
+			return false;
+		}
+		return /^[A-Z]+$/.test(name.slice(shorter.length + 1));
+	});
+}
+
+const quantNamesBySpecificity = [
+	...ggufQuants.filter((name) => !isLetterSizeSuffix(name)).sort((a, b) => b.length - a.length),
+	...ggufQuants.filter((name) => isLetterSizeSuffix(name)),
+	...GGUF_QUANT_FILENAME_ALIASES,
+];
+
 export const GGUF_QUANT_RE = new RegExp(
 	"(?<prefix>UD-)?" +
-		`(?<quant>${[...ggufQuants, ...GGUF_QUANT_FILENAME_ALIASES].join("|")})` +
+		`(?<quant>${quantNamesBySpecificity.join("|")})` +
 		"(_(?<sizeVariation>[A-Z]+))?",
 );
 export const GGUF_QUANT_RE_GLOBAL = new RegExp(GGUF_QUANT_RE, "g");
@@ -92,12 +134,17 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 
 	// 6-bit quantizations
 	GGMLFileQuantizationType.Q6_K_XL,
+	GGMLFileQuantizationType.IQ6_K,
 	GGMLFileQuantizationType.Q6_K,
 
 	// 5-bit quantizations
 	GGMLFileQuantizationType.Q5_K_XL,
 	GGMLFileQuantizationType.Q5_K_M,
 	GGMLFileQuantizationType.Q5_K_S,
+	GGMLFileQuantizationType.IQ5_K,
+	GGMLFileQuantizationType.IQ5_K_R4,
+	GGMLFileQuantizationType.IQ5_KS,
+	GGMLFileQuantizationType.IQ5_KS_R4,
 	GGMLFileQuantizationType.Q5_0,
 	GGMLFileQuantizationType.Q5_1,
 
@@ -105,8 +152,14 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	GGMLFileQuantizationType.Q4_K_XL,
 	GGMLFileQuantizationType.Q4_K_M,
 	GGMLFileQuantizationType.Q4_K_S,
+	GGMLFileQuantizationType.IQ4_K,
+	GGMLFileQuantizationType.IQ4_K_R4,
 	GGMLFileQuantizationType.IQ4_NL,
 	GGMLFileQuantizationType.IQ4_XS,
+	GGMLFileQuantizationType.IQ4_KS,
+	GGMLFileQuantizationType.IQ4_KS_R4,
+	GGMLFileQuantizationType.IQ4_KSS,
+	GGMLFileQuantizationType.IQ4_KT,
 	GGMLFileQuantizationType.Q4_0_4_4,
 	GGMLFileQuantizationType.Q4_0_4_8,
 	GGMLFileQuantizationType.Q4_0_8_8,
@@ -120,12 +173,17 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 
 	// 3-bit quantizations
 	GGMLFileQuantizationType.Q3_K_XL,
+	GGMLFileQuantizationType.IQ3_KL,
 	GGMLFileQuantizationType.Q3_K_L,
 	GGMLFileQuantizationType.Q3_K_M,
 	GGMLFileQuantizationType.Q3_K_S,
 	GGMLFileQuantizationType.IQ3_M,
+	GGMLFileQuantizationType.IQ3_K,
+	GGMLFileQuantizationType.IQ3_K_R4,
 	GGMLFileQuantizationType.IQ3_S,
 	GGMLFileQuantizationType.IQ3_XS,
+	GGMLFileQuantizationType.IQ3_KS,
+	GGMLFileQuantizationType.IQ3_KT,
 	GGMLFileQuantizationType.IQ3_XXS,
 
 	// 2-bit quantizations
@@ -133,12 +191,18 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	GGMLFileQuantizationType.Q2_K,
 	GGMLFileQuantizationType.Q2_K_S,
 	GGMLFileQuantizationType.IQ2_M,
+	GGMLFileQuantizationType.IQ2_KL,
 	GGMLFileQuantizationType.IQ2_S,
+	GGMLFileQuantizationType.IQ2_K,
+	GGMLFileQuantizationType.IQ2_K_R4,
 	GGMLFileQuantizationType.IQ2_XS,
+	GGMLFileQuantizationType.IQ2_KS,
+	GGMLFileQuantizationType.IQ2_KT,
 	GGMLFileQuantizationType.IQ2_XXS,
 	GGMLFileQuantizationType.Q2_0,
 
 	// 1-bit quantizations
+	GGMLFileQuantizationType.IQ1_KT,
 	GGMLFileQuantizationType.IQ1_S,
 	GGMLFileQuantizationType.IQ1_M,
 	GGMLFileQuantizationType.TQ1_0,
