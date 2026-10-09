@@ -789,6 +789,20 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
 	},
+	brimkern: {
+		prettyLabel: "Brimkern",
+		docsUrl: "https://brimkern.com/docs/models",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || model.library_name === "brimkern",
+		deeplink: (model, filepath) => {
+			const url = new URL("https://brimkern.com/chat");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
