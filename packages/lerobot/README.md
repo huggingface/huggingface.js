@@ -20,8 +20,9 @@ npm install @huggingface/lerobot
 ```
 
 [hyparquet](https://github.com/hyparam/hyparquet) comes with it, and is used to read the `v3.0`
-episode index. It is imported on demand, so callers that only need `info()` or a `v2` dataset never
-load it.
+episode index and the frame data. [fzstd](https://github.com/101arrowz/fzstd) adds ZSTD alongside
+hyparquet's built-in SNAPPY. Both are imported on demand, so callers that only need `info()` or a `v2`
+episode listing never load them.
 
 ## Usage
 

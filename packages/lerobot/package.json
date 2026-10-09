@@ -41,6 +41,7 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"dependencies": {
+		"fzstd": "0.1.1",
 		"hyparquet": "^1.31.2"
 	},
 	"devDependencies": {

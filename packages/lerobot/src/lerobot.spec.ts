@@ -510,10 +510,33 @@ function mockFetch(files: Record<string, Uint8Array>, seen?: string[]): typeof f
 
 const encoder = new TextEncoder();
 
-function parquet(rows: Record<string, number>[], { statistics = true } = {}): Uint8Array {
+/**
+ * Stores `input` as two zstd frames of raw blocks, so a ZSTD fixture needs no encoder (Node 20 has
+ * none). Two frames because nothing stops a writer from emitting several per page.
+ */
+function zstdFrames(input: Uint8Array): Uint8Array {
+	const half = input.length >> 1;
+	const frames = [input.subarray(0, half), input.subarray(half)].map((part) => {
+		const frame = new Uint8Array(12 + part.length);
+		const view = new DataView(frame.buffer);
+		view.setUint32(0, 0xfd2fb528, true);
+		/// Single segment with a 4-byte content size, so no window descriptor follows.
+		frame[4] = 0xa0;
+		view.setUint32(5, part.length, true);
+		/// One raw block flagged last; fixture pages stay far below the 128 KiB block limit.
+		const header = (part.length << 3) | 1;
+		frame.set([header & 0xff, (header >> 8) & 0xff, header >> 16, ...part], 9);
+		return frame;
+	});
+	return new Uint8Array([...frames[0], ...frames[1]]);
+}
+
+function parquet(rows: Record<string, number>[], { statistics = true, zstd = false } = {}): Uint8Array {
 	return new Uint8Array(
 		parquetWriteBuffer({
 			statistics,
+			codec: zstd ? "ZSTD" : "SNAPPY",
+			compressors: { ZSTD: zstdFrames },
 			columnData: Object.keys(rows[0]).map((name) => ({
 				name,
 				type: "INT64" as const,
@@ -730,6 +753,45 @@ describe("v3 data row offsets", () => {
 		const [episode] = await dataset.episodes({ offset: 2, limit: 1 });
 		expect(episode.index).toBe(2);
 		expect(episode.data).toBeUndefined();
+	});
+});
+
+describe("ZSTD-compressed parquet", () => {
+	const indexPath = "meta/episodes/chunk-000/file-000.parquet";
+	const dataPath = "data/chunk-000/file-000.parquet";
+	const files = {
+		"meta/info.json": encoder.encode(
+			JSON.stringify({
+				codebase_version: "v3.0",
+				fps: 10,
+				total_episodes: 2,
+				data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+			}),
+		),
+		[indexPath]: parquet(
+			[
+				{ episode_index: 0, length: 2, dataset_from_index: 0, dataset_to_index: 2 },
+				{ episode_index: 1, length: 3, dataset_from_index: 2, dataset_to_index: 5 },
+			],
+			{ zstd: true },
+		),
+		/// No statistics, so finding where the file starts has to decode its `index` column too.
+		[dataPath]: parquet(
+			[0, 1, 2, 3, 4].map((index) => ({ index, episode_index: index < 2 ? 0 : 1, "next.reward": index * 10 })),
+			{ zstd: true, statistics: false },
+		),
+	};
+
+	it("is not decoded by hyparquet alone", async () => {
+		await expect(parquetReadObjects({ file: files[indexPath].slice().buffer as ArrayBuffer })).rejects.toThrow(/ZSTD/);
+	});
+
+	it("reads a ZSTD episode index and data file", async () => {
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
+		const [episode] = await dataset.episodes({ offset: 1, limit: 1 });
+		expect(episode.data).toEqual({ url: dataset.fileUrl(dataPath), fromRow: 2, toRow: 5 });
+		const frames = await dataset.frames(episode);
+		expect(frames?.series).toEqual({ "next.reward": [[20, 30, 40]] });
 	});
 });
 

@@ -3,6 +3,7 @@ import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
 import { fetchRange, HttpError, openRemoteFile, TAIL_PROBE_BYTES } from "./http";
+import { loadParquet } from "./parquet";
 import { formatPathTemplate } from "./paths";
 
 /** v3 keeps its episode index in parquet under a fixed layout; the path is not templated in info.json. */
@@ -228,14 +229,6 @@ async function readEpisodesV2(
 	}
 }
 
-/**
- * hyparquet is a hard dependency but is still loaded on demand: callers that only need `info()` or a
- * v2 dataset never pay for the parquet reader.
- */
-async function loadHyparquet() {
-	return import("hyparquet");
-}
-
 function toRawEpisodeV3(row: Record<string, unknown>, info: LeRobotInfo): RawEpisode {
 	const index = toNumber(row.episode_index) ?? 0;
 	const length = toNumber(row.length) ?? 0;
@@ -316,7 +309,7 @@ async function* walkIndexFiles(
 	walk: IndexWalk,
 	options?: FetchOptions,
 ): AsyncGenerator<IndexFile> {
-	const { parquetMetadataAsync } = await loadHyparquet();
+	const { parquetMetadataAsync } = await loadParquet();
 	/// Files requested ahead of the walk, until it takes them; a long walk holds only those few.
 	const opening = new Map<string, Promise<{ file: RandomAccessFile; metadata: FileMetaData } | undefined>>();
 	const open = (chunk: number, file: number) => {
@@ -406,7 +399,7 @@ async function readIndexRows(
 	rowStart: number,
 	rowEnd: number,
 ): Promise<RawEpisode[]> {
-	const { parquetReadObjects, parquetSchema } = await loadHyparquet();
+	const { compressors, parquetReadObjects, parquetSchema } = await loadParquet();
 	/// Only what `toRawEpisodeV3` reads. The index also has per-episode `stats/*` list columns, which
 	/// hyparquet would decode for the whole row group however few rows are asked for.
 	const wanted = [
@@ -424,7 +417,7 @@ async function readIndexRows(
 	/// hyparquet throws on a column the file lacks; `toRawEpisodeV3` defaults the absent ones.
 	const present = new Set(parquetSchema(metadata).children.map((child) => child.element.name));
 	const columns = wanted.filter((column) => present.has(column));
-	const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd });
+	const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd, compressors });
 	return rows.map((row) => toRawEpisodeV3(row, info));
 }
 
@@ -471,7 +464,7 @@ async function findEpisodeV3(
 	shards: IndexShard[],
 	options?: FetchOptions,
 ): Promise<{ raw: RawEpisode; position: number } | undefined> {
-	const { parquetReadObjects } = await loadHyparquet();
+	const { compressors, parquetReadObjects } = await loadParquet();
 	const walk: IndexWalk = {
 		end,
 		skip: (shard) => shard.lastIndex !== undefined && shard.lastIndex < index,
@@ -511,7 +504,14 @@ async function findEpisodeV3(
 				}
 			}
 			const indexes = (
-				await parquetReadObjects({ file, metadata, columns: ["episode_index"], rowStart: groupStart, rowEnd })
+				await parquetReadObjects({
+					file,
+					metadata,
+					columns: ["episode_index"],
+					rowStart: groupStart,
+					rowEnd,
+					compressors,
+				})
 			).map((row) => toNumber(row.episode_index));
 			const row = indexes.indexOf(index);
 			if (row !== -1) {
@@ -599,12 +599,12 @@ function firstPerIndex(episodes: LeRobotEpisode[]): LeRobotEpisode[] {
  * column itself is not downloaded; data files are written in `index` order, so the minimum is row 0.
  */
 async function readFileStart(url: string, options?: FetchOptions): Promise<number> {
-	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
+	const { compressors, parquetMetadataAsync, parquetReadObjects } = await loadParquet();
 	const file = await openRemoteFile(url, options);
 	const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
 	let start = toNumber(columnStatistics(metadata.row_groups[0], "index")?.min_value);
 	if (start === undefined) {
-		const [first] = await parquetReadObjects({ file, metadata, columns: ["index"], rowEnd: 1 });
+		const [first] = await parquetReadObjects({ file, metadata, columns: ["index"], rowEnd: 1, compressors });
 		start = toNumber(first?.index);
 	}
 	if (start === undefined || !Number.isSafeInteger(start) || start < 0) {

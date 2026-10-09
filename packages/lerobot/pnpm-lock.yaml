@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      fzstd:
+        specifier: 0.1.1
+        version: 0.1.1
       hyparquet:
         specifier: ^1.31.2
         version: 1.31.2
@@ -23,6 +26,9 @@ packages:
 
   '@types/node@20.19.43':
     resolution: {integrity: sha512-6oYBAi5ikg4Pl+kGsoYtawUMBT2zZMCvPNF7pVLnHZfd1zf38DRiWn/gT01RYCdUqkv7Fhr+C9ot4/tb+2sVvA==}
+
+  fzstd@0.1.1:
+    resolution: {integrity: sha512-dkuVSOKKwh3eas5VkJy1AW1vFpet8TA/fGmVA5krThl8YcOVE/8ZIoEA1+U1vEn5ckxxhLirSdY837azmbaNHA==}
 
   hyparquet-writer@0.16.10:
     resolution: {integrity: sha512-53fpiA57kdJ2V7X97/VSAzHr8rb8Z2cr126T1pTL9TapZNOP/wNJqFh+jc7dRwwg9TpVMYeRNDMb+r5oiLqwjg==}
@@ -41,6 +47,8 @@ snapshots:
   '@types/node@20.19.43':
     dependencies:
       undici-types: 6.21.0
+
+  fzstd@0.1.1: {}
 
   hyparquet-writer@0.16.10:
     dependencies:
