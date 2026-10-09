@@ -37,6 +37,38 @@ llama cli -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`,
 		]);
 	});
 
+	it("llama.cpp embedding", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
+		const model: ModelData = {
+			id: "ggml-org/embeddinggemma-300M-GGUF",
+			tags: ["feature-extraction"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toEqual([
+			`# Start a local embeddings server:
+llama serve -hf ggml-org/embeddinggemma-300M-GGUF:{{QUANT_TAG}} --embeddings`,
+			`# Then, from another terminal, get embeddings:
+curl -X POST "http://localhost:8080/v1/embeddings" \\
+	-H "Content-Type: application/json" \\
+	--data '{"input": ["Hello world", "How are you?"]}'`,
+		]);
+		expect(snippet.map((s) => s.title)).not.toContain("Use Docker");
+	});
+
+	it("llama.cpp decision model is not treated as an embedding model", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
+		const model: ModelData = {
+			id: "ggml-org/Julia-1-GGUF",
+			tags: ["feature-extraction", "decision-model"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content[0]).not.toContain("--embeddings");
+	});
+
 	it("vLLM conversational llm", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["vllm"];
 		const model: ModelData = {
