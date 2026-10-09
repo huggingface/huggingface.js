@@ -45,6 +45,7 @@ export interface Options {
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
+	"alphash",
 	"baseten",
 	"cerebras",
 	"cohere",
@@ -80,6 +81,7 @@ export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
  * Whenever possible, InferenceProvider should == org namespace
  */
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
+	alphash: "alphash",
 	baseten: "baseten",
 	cerebras: "cerebras",
 	cohere: "CohereLabs",
