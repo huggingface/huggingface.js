@@ -533,6 +533,27 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 	return `docker model run hf.co/${model.id}${quantTag}`;
 };
 
+const snippetHfl = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const mlx = isMlxModel(model);
+	// Only GGUF repos take a quant tag; an MLX repo is one model.
+	const ref = `hf.co/${model.id}${mlx ? "" : getQuantTag(filepath)}`;
+	const setup = mlx
+		? ["# Install HFL (Apple Silicon)", 'pip install "hfl[mlx]"'].join("\n")
+		: ["# Install HFL and llama.cpp's llama-server", "pip install hfl", "hfl install llama-server"].join("\n");
+	return [
+		{
+			title: "Chat in the terminal",
+			setup,
+			content: ["# Downloads the model on first use", `hfl run ${ref}`].join("\n"),
+		},
+		{
+			title: "Serve OpenAI-, Ollama- and Anthropic-compatible APIs",
+			setup,
+			content: ["# Listens on http://localhost:11434", `hfl serve --model ${ref}`].join("\n"),
+		},
+	];
+};
+
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const modelName = model.id.includes("/") ? model.id.split("/")[1] : model.id;
 	const isRyzenAI = model.tags.some((tag) => ["ryzenai-npu", "ryzenai-hybrid"].includes(tag));
@@ -788,6 +809,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	hfl: {
+		prettyLabel: "HFL",
+		docsUrl: "https://github.com/ggalancs/hfl",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
+		snippet: snippetHfl,
 	},
 } satisfies Record<string, LocalApp>;
 
