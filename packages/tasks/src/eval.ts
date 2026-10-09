@@ -173,4 +173,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
 		url: "https://github.com/run-llama/ExtractBench",
 	},
+	puredocbench: {
+		name: "puredocbench",
+		description:
+			"PureDocBench evaluates document parsing accuracy and robustness on source-traceable documents across clean, digitally degraded, and real-degraded image tracks.",
+		url: "https://github.com/zhihengli-casia/PureDocBench",
+	},
 } as const;
