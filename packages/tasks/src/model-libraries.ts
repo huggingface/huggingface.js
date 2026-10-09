@@ -1418,6 +1418,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+		countDownloads: `path_filename:"cfg" AND path_extension:"json"`,
 	},
 	"scail-2": {
 		prettyLabel: "SCAIL-2",
