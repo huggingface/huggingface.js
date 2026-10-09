@@ -285,6 +285,9 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 					);
 				}
 			} catch (error) {
+				if (error instanceof InferenceClientProviderOutputError) {
+					throw error;
+				}
 				throw new InferenceClientProviderOutputError(
 					"Received malformed response from Novita text-to-video API: failed to parse task result",
 				);
