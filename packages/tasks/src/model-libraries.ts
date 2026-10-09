@@ -58,6 +58,15 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	"aadya-neural": {
+		prettyLabel: "aadya-neural",
+		repoName: "aadya",
+		repoUrl: "https://github.com/manasdutta04/aadya",
+		docsUrl: "https://github.com/manasdutta04/aadya/blob/main/train/README.md",
+		snippets: snippets.aadyaNeural,
+		filter: false,
+		countDownloads: `path:"model.safetensors" OR path:"pytorch_model.bin"`,
+	},
 	acestep: {
 		prettyLabel: "ACE-Step",
 		repoName: "ACE-Step",
@@ -105,6 +114,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://huggingface.co/Arabic-Clip/araclip",
 		filter: false,
 		snippets: snippets.araclip,
+	},
+	asimov: {
+		prettyLabel: "Asimov",
+		repoName: "Asimov",
+		repoUrl: "https://github.com/menloresearch/humanoid-policy-viewer",
+		snippets: snippets.asimov,
+		filter: false,
+		countDownloads: `path:"env.yaml"`,
 	},
 	"aviation-ner": {
 		prettyLabel: "Aviation NER",
@@ -462,6 +479,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "docTR",
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
+	},
+	drinkme: {
+		prettyLabel: "drinkme",
+		repoName: "drinkme",
+		repoUrl: "https://github.com/ninachaubal/drinkme",
+		docsUrl: "https://drinkme.petrichor.wtf",
+		filter: false,
+		countDownloads: `path_filename:"source-identity" AND path_extension:"json"`,
 	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",

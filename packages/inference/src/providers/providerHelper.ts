@@ -27,6 +27,8 @@ import type {
 	QuestionAnsweringOutput,
 	SentenceSimilarityInput,
 	SentenceSimilarityOutput,
+	TextRankingInput,
+	TextRankingOutput,
 	SummarizationInput,
 	SummarizationOutput,
 	TableQuestionAnsweringInput,
@@ -282,6 +284,11 @@ export interface FillMaskTaskHelper {
 export interface ZeroShotClassificationTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ZeroShotClassificationOutput>;
 	preparePayload(params: BodyParams<ZeroShotClassificationInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface TextRankingTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<TextRankingOutput>;
+	preparePayload(params: BodyParams<TextRankingInput & BaseArgs>): Record<string, unknown>;
 }
 
 export interface SentenceSimilarityTaskHelper {
