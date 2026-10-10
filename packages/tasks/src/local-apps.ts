@@ -660,6 +660,15 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model) => new URL(`atomic-chat://models/huggingface/${model.id}`),
 	},
+	osaurus: {
+		prettyLabel: "Osaurus",
+		docsUrl: "https://docs.osaurus.ai/models",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isMlxModel,
+		deeplink: (model, filepath) =>
+			new URL(`osaurus://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
+	},
 	backyard: {
 		prettyLabel: "Backyard AI",
 		docsUrl: "https://backyard.ai",
