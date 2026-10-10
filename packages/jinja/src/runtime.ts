@@ -112,6 +112,27 @@ export class FloatValue extends RuntimeValue<number> {
 export class StringValue extends RuntimeValue<string> {
 	override type = "StringValue";
 	private _builtins?: Map<string, AnyRuntimeValue>;
+	private strip(chars: AnyRuntimeValue | undefined, side: "both" | "left" | "right"): StringValue {
+		if (chars === undefined || chars instanceof NullValue) {
+			return new StringValue(
+				side === "left" ? this.value.trimStart() : side === "right" ? this.value.trimEnd() : this.value.trim(),
+			);
+		}
+		if (!(chars instanceof StringValue)) {
+			throw new Error("chars argument must be a string or null");
+		}
+		const characters = new Set(chars.value);
+		const value = Array.from(this.value);
+		let start = 0;
+		let end = value.length;
+		while (side !== "right" && start < end && characters.has(value[start])) {
+			start++;
+		}
+		while (side !== "left" && end > start && characters.has(value[end - 1])) {
+			end--;
+		}
+		return new StringValue(value.slice(start, end).join(""));
+	}
 
 	override get builtins(): Map<string, AnyRuntimeValue> {
 		return (this._builtins ??= new Map<string, AnyRuntimeValue>([
@@ -127,12 +148,7 @@ export class StringValue extends RuntimeValue<string> {
 					return new StringValue(this.value.toLowerCase());
 				}),
 			],
-			[
-				"strip",
-				new FunctionValue(() => {
-					return new StringValue(this.value.trim());
-				}),
-			],
+			["strip", new FunctionValue((args) => this.strip(args[0], "both"))],
 			[
 				"title",
 				new FunctionValue(() => {
@@ -146,18 +162,8 @@ export class StringValue extends RuntimeValue<string> {
 				}),
 			],
 			["length", new IntegerValue(this.value.length)],
-			[
-				"rstrip",
-				new FunctionValue(() => {
-					return new StringValue(this.value.trimEnd());
-				}),
-			],
-			[
-				"lstrip",
-				new FunctionValue(() => {
-					return new StringValue(this.value.trimStart());
-				}),
-			],
+			["rstrip", new FunctionValue((args) => this.strip(args[0], "right"))],
+			["lstrip", new FunctionValue((args) => this.strip(args[0], "left"))],
 			[
 				"startswith",
 				new FunctionValue((args) => {
