@@ -1629,16 +1629,24 @@ model = MeshAnything(args)`,
 ];
 
 export const microduck = (model: ModelData): string[] => {
-	// Model-card tag convention: tags: [microduck-slot:stand].
-	const slots = ["walk", "stand", "sitstand", "ground_pick", "kick_left", "kick_right", "roulade"];
-	const matchingSlots = slots.filter((slot) => model.tags.includes(`microduck-slot:${slot}`));
-	const slot = matchingSlots.length === 1 ? matchingSlots[0] : "SLOT";
-	const prefix =
-		matchingSlots.length === 1
-			? ""
-			: `# Replace SLOT with the slot specified in the model card (${slots.join(", ")}).\n`;
+	const manifest = model.config?.microduck;
+	// The name is interpolated into a shell command, so only bare words are accepted.
+	const name =
+		typeof manifest?.name === "string" && /^[A-Za-z0-9][\w.-]*$/.test(manifest.name) ? manifest.name : undefined;
 
-	return [`${prefix}sudo robotctl policy load ${slot} ${model.id}`];
+	// An episodic policy, or a perpetual one with an unwind (a held pose), is a skill run on demand rather than a slot's gait.
+	if (name && manifest?.kind === "episodic") {
+		return [`sudo robotctl policy add ${name} ${model.id}\nrobotctl robot do ${name}`];
+	}
+	if (name && manifest?.kind === "perpetual" && typeof manifest.unwind_s === "number") {
+		return [`sudo robotctl policy add ${name} ${model.id} --hold <seconds>\nrobotctl robot do ${name}`];
+	}
+
+	const slots = ["walk", "stand", "sitstand", "ground_pick", "kick_left", "kick_right", "roulade"];
+	const slot = slots.find((slot) => slot === manifest?.slot);
+	const prefix = slot ? "" : `# Replace SLOT with the slot specified in the model card (${slots.join(", ")}).\n`;
+
+	return [`${prefix}sudo robotctl policy load ${slot ?? "SLOT"} ${model.id}`];
 };
 
 export const multimolecule = (model: ModelData): string[] => {
