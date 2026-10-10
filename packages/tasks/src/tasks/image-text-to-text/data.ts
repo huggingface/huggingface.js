@@ -43,12 +43,16 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Small and efficient yet powerful vision language model.",
-			id: "HuggingFaceTB/SmolVLM-Instruct",
+			description: "Google's Gemma 4 vision-language model for multimodal chat.",
+			id: "google/gemma-4-31B-it",
 		},
 		{
 			description: "Cutting-edge reasoning vision language model.",
-			id: "zai-org/GLM-4.5V",
+			id: "zai-org/GLM-4.6V",
+		},
+		{
+			description: "Small and efficient yet powerful vision language model.",
+			id: "HuggingFaceTB/SmolVLM-Instruct",
 		},
 		{
 			description: "Cutting-edge small vision language model to convert documents to text.",
@@ -79,7 +83,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision-language models, or VLMs. The difference from image-to-text models is that these models take an additional text input, not restricting the model to certain use cases like image captioning, and may also be trained to accept a conversation as input.",
-	widgetModels: ["zai-org/GLM-4.5V"],
+	widgetModels: ["google/gemma-4-31B-it"],
 	youtubeId: "IoGaGfU1CIg",
 };
 
