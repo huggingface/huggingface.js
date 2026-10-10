@@ -1419,6 +1419,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.saelens,
 		filter: false,
 	},
+	sage: {
+		prettyLabel: "SAGE",
+		repoName: "SAGE",
+		repoUrl: "https://github.com/francescobrigante/SAGE",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
+	},
 	"scail-2": {
 		prettyLabel: "SCAIL-2",
 		repoName: "SCAIL-2",
