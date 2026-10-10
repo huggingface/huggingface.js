@@ -366,4 +366,128 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			{ label: "Releases", url: "https://github.com/bartowski/Llama-3.2-3B-Instruct-GGUF/releases" },
 		]);
 	});
+
+	it("gbx-lm - GreenBitAI build turns its draft head on", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS["gbx-lm"];
+		const model: ModelData = {
+			id: "GreenBitAI/Qwen3.8-Flash-Next-4bit-paged",
+			tags: ["mlx", "gbx-lm", "conversational"],
+			pipeline_tag: "image-text-to-text",
+			config: { model_type: "qwen4_exp" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(snippet[0].setup).toContain(
+			"curl -fL https://github.com/GreenBitAI/gbx-lm/releases/latest/download/gbx_lm-darwin-arm64.tar.gz | tar -xzf - gbx_lm",
+		);
+		expect(snippet[0].content).toContain(
+			'GBX_QWEN4_MTP=on ~/.local/bin/gbx_lm --model "GreenBitAI/Qwen3.8-Flash-Next-4bit-paged"',
+		);
+		expect(snippet[0].setup).not.toContain("rm -rf");
+		expect(snippet[1].content).toContain("http://localhost:11688/v1/chat/completions");
+		expect(snippet[1].content).toContain('"model": "GreenBitAI/Qwen3.8-Flash-Next-4bit-paged"');
+	});
+
+	it("gbx-lm - each architecture gets its own draft head switch", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["gbx-lm"];
+		const switches: Record<string, string> = {
+			deepseek_v41: "GBX_DEEPSEEK_MTP=on",
+			glm5_next: "GBX_GLM53_MTP=on",
+			qwen4_exp: "GBX_QWEN4_MTP=on",
+			qwen3_5: "GBX_QWEN35_MTP=on",
+			qwen3_5_moe: "GBX_QWEN35_MTP=on",
+		};
+		for (const [modelType, expected] of Object.entries(switches)) {
+			const model: ModelData = {
+				id: "GreenBitAI/some-build",
+				tags: ["mlx", "gbx-lm"],
+				config: { model_type: modelType },
+				inference: "",
+			};
+			expect(snippetFunc(model)[0].content).toContain(expected);
+		}
+	});
+
+	it("gbx-lm - tagged build of another architecture runs without a draft head", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["gbx-lm"];
+		const model: ModelData = {
+			id: "GreenBitAI/some-build",
+			tags: ["mlx", "gbx-lm"],
+			config: { model_type: "llama" },
+			inference: "",
+		};
+		const content = snippetFunc(model)[0].content;
+
+		expect(content).not.toContain("=on");
+		expect(content).toContain('~/.local/bin/gbx_lm --model "GreenBitAI/some-build"');
+	});
+
+	it("gbx-lm - mlx-community text model, without a draft head", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS["gbx-lm"];
+		const model: ModelData = {
+			id: "mlx-community/Qwen3-0.6B-4bit",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			config: { model_type: "qwen3" },
+			inference: "",
+		};
+		const content = snippetFunc(model)[0].content;
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(content).not.toContain("=on");
+		expect(content).toContain('~/.local/bin/gbx_lm --model "mlx-community/Qwen3-0.6B-4bit"');
+
+		// An architecture that has a switch still gets none outside a gbx-lm build: the head is in its mtp/.
+		const moe: ModelData = {
+			id: "mlx-community/Qwen3.6-35B-A3B-4bit",
+			tags: ["mlx"],
+			pipeline_tag: "image-text-to-text",
+			config: { model_type: "qwen3_5_moe" },
+			inference: "",
+		};
+		expect(displayOnModelPage(moe)).toBe(true);
+		expect(snippetFunc(moe)[0].content).not.toContain("=on");
+	});
+
+	it("gbx-lm - mlx-community vision model only for architectures gbx-lm implements", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["gbx-lm"];
+		const vision = (modelType: string): ModelData => ({
+			id: "mlx-community/some-vlm-4bit",
+			tags: ["mlx"],
+			pipeline_tag: "image-text-to-text",
+			config: { model_type: modelType },
+			inference: "",
+		});
+
+		expect(displayOnModelPage(vision("qwen3_vl"))).toBe(true);
+		expect(displayOnModelPage(vision("qwen2_5_vl"))).toBe(false);
+	});
+
+	it("gbx-lm not shown for other models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["gbx-lm"];
+		const others: ModelData[] = [
+			// an MLX checkpoint published outside mlx-community
+			{ id: "lmstudio-community/Qwen3-8B-MLX-4bit", tags: ["mlx"], pipeline_tag: "text-generation", inference: "" },
+			// mlx-community, but not a text model
+			{
+				id: "mlx-community/whisper-large-v3-turbo",
+				tags: ["mlx"],
+				pipeline_tag: "automatic-speech-recognition",
+				inference: "",
+			},
+			// GGUF
+			{
+				id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+				tags: ["conversational"],
+				gguf: { total: 1, context_length: 4096 },
+				inference: "",
+			},
+		];
+
+		for (const model of others) {
+			expect(displayOnModelPage(model)).toBe(false);
+		}
+	});
 });
