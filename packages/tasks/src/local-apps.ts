@@ -107,6 +107,14 @@ function isVllmModel(model: ModelData): boolean {
 	);
 }
 
+/**
+ * GPU serving engines (vLLM, SGLang, TGI) cannot load MLX quantized weights, and serving a repo that
+ * only ships GGUF files fails with "Cannot find any model weights" (vLLM moved GGUF to a plugin in v0.24)
+ */
+function hasServingEngineWeights(model: ModelData): boolean {
+	return !isMlxModel(model) && !(model.tags.includes("gguf") && !model.safetensors);
+}
+
 function isDockerModelRunnerModel(model: ModelData): boolean {
 	return isLlamaCppGgufModel(model) || isVllmModel(model);
 }
@@ -147,6 +155,13 @@ function isToolCallingLocalAgentModel(model: ModelData): boolean {
 	);
 }
 
+/**
+ * Hermes Agent refuses to run models with a context window under 64K tokens
+ */
+function isHermesAgentModel(model: ModelData): boolean {
+	return isToolCallingLocalAgentModel(model) && (!model.gguf?.context_length || model.gguf.context_length >= 64000);
+}
+
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -179,21 +194,22 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 		{
 			title: "Install from WinGet (Windows)",
 			setup: "winget install llama.cpp",
-			content: [serverCommand("llama serve"), cliCommand("llama cli")],
+			content: [serverCommand("llama-server"), cliCommand("llama-cli")],
 		},
 		{
 			title: "Use pre-built binary",
 			setup: [
 				// prettier-ignore
 				"# Download pre-built binary from:",
-				"# https://github.com/ggerganov/llama.cpp/releases",
+				"# https://github.com/ggml-org/llama.cpp/releases",
 			].join("\n"),
 			content: [serverCommand("./llama-server"), cliCommand("./llama-cli")],
 		},
 		{
 			title: "Build from source code",
 			setup: [
-				"git clone https://github.com/ggerganov/llama.cpp.git",
+				"# -hf downloads need the OpenSSL development files (libssl-dev on Debian/Ubuntu)",
+				"git clone https://github.com/ggml-org/llama.cpp.git",
 				"cd llama.cpp",
 				"cmake -B build",
 				"cmake --build build -j --target llama-server llama-cli",
@@ -239,11 +255,9 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 			setup: [
 				// prettier-ignore
 				"# Pull the image:",
-				"docker pull localai/localai:latest-cpu",
+				"docker pull localai/localai:latest",
 			].join("\n"),
-			content: command(
-				"docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu",
-			),
+			content: command("docker run -p 8080:8080 --name localai -v $PWD/models:/models localai/localai:latest"),
 		},
 	];
 };
@@ -251,22 +265,12 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 
-	const isMistral = model.tags.includes("mistral-common");
-	const mistralFlags = isMistral
-		? " --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"
-		: "";
-
-	const setup = isMistral
-		? [
-				"# Install vLLM from pip:",
-				"pip install vllm",
-				"# Install mistral-common:",
-				"pip install --upgrade mistral-common",
-			].join("\n")
-		: ["# Install vLLM from pip:", "pip install vllm"].join("\n");
+	// No Mistral-specific flags: vLLM detects the Mistral format from the repo files, and forcing it fails
+	// on mistral-common repos that only ship Transformers weights (e.g. mistralai/Mistral-7B-Instruct-v0.2)
+	const setup = ["# Install vLLM from pip:", "pip install vllm"].join("\n");
 
 	const serverCommand = `# Start the vLLM server:
-vllm serve "${model.id}"${mistralFlags}`;
+vllm serve "${model.id}"`;
 
 	const runCommandInstruct = `# Call the server using curl (OpenAI-compatible API):
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
@@ -358,17 +362,30 @@ curl -X POST "http://localhost:30000/v1/completions" \\
 	];
 };
 const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
-	const runCommand = [
-		"# Call the server using curl:",
-		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
-		`	-H "Content-Type: application/json" \\`,
-		`	--data '{`,
-		`		"model": "${model.id}",`,
-		`		"messages": [`,
-		`			{"role": "user", "content": "What is the capital of France?"}`,
-		`		]`,
-		`	}'`,
-	];
+	// TGI answers /v1/chat/completions with "template not found" when the model has no chat template
+	const runCommand = model.tags.includes("conversational")
+		? [
+				"# Call the server using curl:",
+				`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+				`	-H "Content-Type: application/json" \\`,
+				`	--data '{`,
+				`		"model": "${model.id}",`,
+				`		"messages": [`,
+				`			{"role": "user", "content": "What is the capital of France?"}`,
+				`		]`,
+				`	}'`,
+			]
+		: [
+				"# Call the server using curl:",
+				`curl -X POST "http://localhost:8000/v1/completions" \\`,
+				`	-H "Content-Type: application/json" \\`,
+				`	--data '{`,
+				`		"model": "${model.id}",`,
+				`		"prompt": "Once upon a time,",`,
+				`		"max_tokens": 512,`,
+				`		"temperature": 0.5`,
+				`	}'`,
+			];
 	return [
 		{
 			title: "Use Docker images",
@@ -376,7 +393,7 @@ const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 				"# Deploy with docker on Linux:",
 				`docker run --gpus all \\`,
 				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
-				` 	-e HF_TOKEN="<secret>" \\`,
+				`	-e HF_TOKEN="<secret>" \\`,
 				`	-p 8000:80 \\`,
 				`	ghcr.io/huggingface/text-generation-inference:latest \\`,
 				`	--model-id ${model.id}`,
@@ -389,7 +406,7 @@ const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	const openaiCurl = [
 		"# Calling the OpenAI-compatible server with curl",
-		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`curl -X POST "http://localhost:8080/v1/chat/completions" \\`,
 		`   -H "Content-Type: application/json" \\`,
 		`   --data '{`,
 		`     "model": "${model.id}",`,
@@ -431,19 +448,21 @@ const getLocalServerStep = (model: ModelData, filepath?: string): LocalAppSnippe
 		: {
 				title: "Start the llama.cpp server",
 				setup: "# Install llama.cpp:\nbrew install llama.cpp",
-				content: `# Start a local OpenAI-compatible server:\nllama serve -hf ${model.id}${getQuantTag(filepath)}`,
+				// The agents are configured for port 8080, which llama.cpp has announced it will stop using as its default
+				content: `# Start a local OpenAI-compatible server:\nllama serve -hf ${model.id}${getQuantTag(filepath)} --port 8080`,
 			};
 };
 
 const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const isMLX = isMlxModel(model);
+	const providerId = isMLX ? "mlx-lm" : "llama-cpp";
 	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
 	const serverStep = getLocalServerStep(model, filepath);
 
 	const modelsJson = JSON.stringify(
 		{
 			providers: {
-				[isMLX ? "mlx-lm" : "llama-cpp"]: {
+				[providerId]: {
 					baseUrl: "http://localhost:8080/v1",
 					api: "openai-completions",
 					apiKey: "none",
@@ -464,7 +483,8 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 		},
 		{
 			title: "Run Pi",
-			content: "# Start Pi in your project directory:\npi",
+			// Without --provider, Pi prefers any other provider it has credentials for (e.g. Hugging Face via HF_TOKEN)
+			content: `# Start Pi in your project directory:\npi --provider ${providerId} --model "${modelId}"`,
 		},
 	];
 };
@@ -478,9 +498,8 @@ const snippetHermesAgent = (model: ModelData, filepath?: string): LocalAppSnippe
 		{
 			title: "Configure Hermes",
 			setup: [
-				"# Install Hermes:",
-				"curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash",
-				"hermes setup",
+				"# Install Hermes (the local server is configured below, so skip the setup wizard):",
+				"curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --non-interactive",
 			].join("\n"),
 			content: [
 				"# Point Hermes at the local server:",
@@ -585,7 +604,7 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 export const LOCAL_APPS = {
 	"llama.cpp": {
 		prettyLabel: "llama.cpp",
-		docsUrl: "https://github.com/ggerganov/llama.cpp",
+		docsUrl: "https://github.com/ggml-org/llama.cpp",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
@@ -601,7 +620,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "vLLM",
 		docsUrl: "https://docs.vllm.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isVllmModel,
+		displayOnModelPage: (model) => isVllmModel(model) && hasServingEngineWeights(model),
 		snippet: snippetVllm,
 	},
 	sglang: {
@@ -614,7 +633,8 @@ export const LOCAL_APPS = {
 				isAqlmModel(model) ||
 				isMarlinModel(model) ||
 				isTransformersModel(model)) &&
-			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text") &&
+			hasServingEngineWeights(model),
 		snippet: snippetSglang,
 	},
 	"mlx-lm": {
@@ -628,7 +648,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "TGI",
 		docsUrl: "https://huggingface.co/docs/text-generation-inference/",
 		mainTask: "text-generation",
-		displayOnModelPage: isTgiModel,
+		displayOnModelPage: (model) => isTgiModel(model) && hasServingEngineWeights(model),
 		snippet: snippetTgi,
 	},
 	lmstudio: {
@@ -660,13 +680,6 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model) => new URL(`atomic-chat://models/huggingface/${model.id}`),
 	},
-	backyard: {
-		prettyLabel: "Backyard AI",
-		docsUrl: "https://backyard.ai",
-		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
-		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
-	},
 	jellybox: {
 		prettyLabel: "Jellybox",
 		docsUrl: "https://jellybox.com",
@@ -688,7 +701,7 @@ export const LOCAL_APPS = {
 	},
 	msty: {
 		prettyLabel: "Msty",
-		docsUrl: "https://msty.app",
+		docsUrl: "https://msty.ai",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`msty://models/search/hf/${model.id}`),
@@ -779,7 +792,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Hermes Agent",
 		docsUrl: "https://hermes-agent.nousresearch.com/",
 		mainTask: "text-generation",
-		displayOnModelPage: isToolCallingLocalAgentModel,
+		displayOnModelPage: isHermesAgentModel,
 		snippet: snippetHermesAgent,
 	},
 	openclaw: {
