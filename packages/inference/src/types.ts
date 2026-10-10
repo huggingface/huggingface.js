@@ -15,7 +15,7 @@ export interface Logger {
 
 export interface Options {
 	/**
-	 * (Default: true) Boolean. If a request 503s, the request will be retried with the same parameters.
+	 * (Default: true) Boolean. If a request 503s, the request will be retried with the same parameters, up to 3 times. Each retry waits for the server's `Retry-After` delay, or 1s, 2s then 4s when there is none.
 	 */
 	retry_on_error?: boolean;
 
