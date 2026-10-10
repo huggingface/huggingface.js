@@ -117,6 +117,18 @@ function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
 	}
 }
 
+export const basedecision = (model: ModelData): string[] => [
+	`from basedecision import load_from_hub
+
+model = load_from_hub("${model.id}")
+result = model.choose(
+    context="Please refund my purchase.",
+    question="What does the customer request?",
+    options=["Refund", "Delivery status", "Change address"],
+)
+print(result.answer)`,
+];
+
 export const ben2 = (model: ModelData): string[] => [
 	`import requests
 from PIL import Image
