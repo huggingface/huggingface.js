@@ -750,7 +750,8 @@ export const LOCAL_APPS = {
 		// The app verifies the selected files, runtime compatibility and device fit before importing.
 		displayOnModelPage: isLociModel,
 		deeplink: (model, filepath) => {
-			const url = new URL("loci://open_from_hf");
+			// The page opens Loci where it is installed and offers the download where it is not.
+			const url = new URL("https://askloci.ai/hf/");
 			url.searchParams.set("model", model.id);
 			if (filepath) {
 				url.searchParams.set("file", filepath);
