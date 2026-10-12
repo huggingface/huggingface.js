@@ -480,6 +480,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	drinkme: {
+		prettyLabel: "drinkme",
+		repoName: "drinkme",
+		repoUrl: "https://github.com/ninachaubal/drinkme",
+		docsUrl: "https://drinkme.petrichor.wtf",
+		filter: false,
+		countDownloads: `path_filename:"source-identity" AND path_extension:"json"`,
+	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",

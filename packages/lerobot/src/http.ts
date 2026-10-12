@@ -14,6 +14,8 @@ export interface RangeResult {
 	bytes: Uint8Array;
 	/** Total size of the file, parsed from `Content-Range`. Absent when the server does not report it. */
 	total?: number;
+	/** `false` when the server ignored `Range` and answered 200 with the whole file. */
+	partial: boolean;
 }
 
 /** `bytes 68464-72559/72560` — the trailing total is free information on every range response. */
@@ -59,6 +61,7 @@ export async function fetchRange(
 	return {
 		bytes: new Uint8Array(await response.arrayBuffer()),
 		total: parseTotalFromContentRange(response.headers.get("content-range")),
+		partial: response.status === 206,
 	};
 }
 
