@@ -54,6 +54,7 @@ Currently, we support the following providers:
 - [Humain AI](https://node.humain.com/)
 - [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
+- [OpenRouter](https://openrouter.ai)
 - [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
 - [Public AI](https://publicai.co)
 - [Replicate](https://replicate.com)
@@ -91,6 +92,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [HF Inference supported models](https://huggingface.co/api/partners/hf-inference/models)
 - [Humain AI supported models](https://huggingface.co/api/partners/humain-ai/models)
 - [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
+- [OpenRouter supported models](https://huggingface.co/api/partners/openrouter/models)
 - [OVHcloud supported models](https://huggingface.co/api/partners/ovhcloud/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Scaleway supported models](https://huggingface.co/api/partners/scaleway/models)
@@ -418,6 +420,25 @@ await hf.sentenceSimilarity({
       'That is a happy dog',
       'That is a very happy person',
       'Today is a sunny day'
+    ]
+  }
+})
+```
+
+#### Text Ranking
+
+Rank documents by their relevance to a query.
+
+```typescript
+await hf.textRanking({
+  model: 'cross-encoder/ettin-reranker-68m-v1',
+  inputs: {
+    query: 'Which planet is known as the Red Planet?',
+    texts: [
+      "Venus is often called Earth's twin because of its similar size and proximity.",
+      'Mars, known for its reddish appearance, is often referred to as the Red Planet.',
+      'Jupiter, the largest planet in our solar system, has a prominent red spot.',
+      'Saturn, famous for its rings, is sometimes mistaken for the Red Planet.'
     ]
   }
 })
