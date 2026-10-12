@@ -2406,19 +2406,21 @@ const hasChatTemplate = (model: ModelData): boolean =>
 // reports transformersInfo as { auto_model: "AutoModel" } and drops the image processor.
 // The timm wrapper still loads through the same Auto classes as a native vision model.
 const transformersSnippetInfo = (model: ModelData): TransformersInfo | undefined => {
-	if (model.library_name === "timm" && model.pipeline_tag === "image-classification") {
-		return {
-			...model.transformersInfo,
-			auto_model: "AutoModelForImageClassification",
-			processor: "AutoImageProcessor",
-		};
-	}
-	if (model.library_name === "timm" && model.pipeline_tag === "image-feature-extraction") {
-		return {
-			...model.transformersInfo,
-			auto_model: "AutoModel",
-			processor: "AutoImageProcessor",
-		};
+	if (model.library_name === "timm") {
+		if (model.pipeline_tag === "image-classification") {
+			return {
+				...model.transformersInfo,
+				auto_model: "AutoModelForImageClassification",
+				processor: "AutoImageProcessor",
+			};
+		}
+		if (model.pipeline_tag === "image-feature-extraction") {
+			return {
+				...model.transformersInfo,
+				auto_model: "AutoModel",
+				processor: "AutoImageProcessor",
+			};
+		}
 	}
 	return model.transformersInfo;
 };
