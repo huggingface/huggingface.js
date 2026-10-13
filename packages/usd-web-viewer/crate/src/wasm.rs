@@ -2,9 +2,12 @@
 
 use std::sync::Mutex;
 
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
-use crate::extract::Read;
+use crate::extract::{Geometry, Group, Instance, Read, Warning};
+use crate::material::Material;
+use crate::ser::finite;
 use crate::{Composed, Loader, Scene, resolver};
 
 /// The message of the last panic. With `panic = "abort"` a panic traps as a
@@ -36,6 +39,72 @@ fn js_error(e: impl std::error::Error) -> JsError {
         source = cause.source();
     }
     JsError::new(&message)
+}
+
+/// What [`UsdScene::meta`] returns: everything but the triangle data.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SceneMeta<'a> {
+    up_axis: &'a str,
+    #[serde(serialize_with = "finite")]
+    meters_per_unit: f64,
+    /// World bounds, min then max, flattened.
+    #[serde(skip_serializing_if = "Option::is_none", serialize_with = "finite")]
+    bounds: Option<[f64; 6]>,
+    warnings: &'a [Warning],
+    geometry_count: usize,
+    instances: &'a [Instance],
+    materials: &'a [Material],
+}
+
+impl<'a> SceneMeta<'a> {
+    fn new(scene: &'a Scene) -> Self {
+        Self {
+            up_axis: &scene.up_axis,
+            meters_per_unit: scene.meters_per_unit,
+            bounds: scene
+                .bounds
+                .map(|[a, b]| [a[0], a[1], a[2], b[0], b[1], b[2]]),
+            warnings: &scene.warnings,
+            geometry_count: scene.sources.len(),
+            instances: &scene.instances,
+            materials: &scene.materials,
+        }
+    }
+}
+
+/// What [`UsdScene::read`] returns for a geometry: everything but the bulk
+/// arrays.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct GeometryMeta<'a> {
+    vertices: usize,
+    max_index: u32,
+    has_colors: bool,
+    /// Local bounds, min then max, flattened.
+    #[serde(serialize_with = "finite")]
+    bounds: [f32; 6],
+    uv_sets: Vec<&'a str>,
+    groups: &'a [Group],
+}
+
+impl<'a> GeometryMeta<'a> {
+    fn new(g: &'a Geometry) -> Self {
+        let [a, b] = g.bounds;
+        Self {
+            vertices: g.positions.len() / 3,
+            max_index: g.indices.iter().max().copied().unwrap_or(0),
+            has_colors: !g.colors.is_empty(),
+            bounds: [a[0], a[1], a[2], b[0], b[1], b[2]],
+            uv_sets: g.uvs.iter().map(|(name, _)| name.as_str()).collect(),
+            groups: &g.groups,
+        }
+    }
+}
+
+/// As JSON. Serializing these structs to a string cannot fail.
+fn json(value: &impl Serialize) -> String {
+    serde_json::to_string(value).expect("JSON serialization")
 }
 
 #[wasm_bindgen]
@@ -106,7 +175,7 @@ impl UsdLoader {
 #[wasm_bindgen]
 pub struct UsdScene {
     scene: Scene,
-    current: Option<crate::extract::Geometry>,
+    current: Option<Geometry>,
     packages: resolver::Store,
 }
 
@@ -114,7 +183,7 @@ pub struct UsdScene {
 impl UsdScene {
     /// Everything but the triangle data, as JSON.
     pub fn meta(&self) -> String {
-        crate::json::scene_meta(&self.scene)
+        json(&SceneMeta::new(&self.scene))
     }
 
     /// Reads geometry `index` and returns its metadata as JSON, or `None` when
@@ -129,17 +198,15 @@ impl UsdScene {
                 .map_err(js_error)?
             {
                 Read::Geometry(geometry) => {
-                    let json = crate::json::geometry_meta(&geometry);
+                    let meta = json(&GeometryMeta::new(&geometry));
                     self.current = Some(geometry);
-                    Some(json)
+                    Some(meta)
                 }
                 Read::Nothing => None,
-                Read::OverBudget { path, triangles } => {
-                    let mut json = format!("{{\"overBudget\":{triangles},\"path\":");
-                    crate::json::string(&mut json, &path);
-                    json.push('}');
-                    Some(json)
-                }
+                Read::OverBudget { path, triangles } => Some(format!(
+                    "{{\"overBudget\":{triangles},\"path\":{}}}",
+                    json(&path)
+                )),
             },
         )
     }
@@ -210,7 +277,7 @@ impl UsdScene {
         }
     }
 
-    fn geometry(&mut self) -> Result<&mut crate::extract::Geometry, JsError> {
+    fn geometry(&mut self) -> Result<&mut Geometry, JsError> {
         self.current
             .as_mut()
             .ok_or_else(|| JsError::new("no geometry to read: call read() first"))

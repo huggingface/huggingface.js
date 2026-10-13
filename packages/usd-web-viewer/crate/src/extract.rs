@@ -8,9 +8,11 @@ use openusd::sdf::{self, Value};
 use openusd::usd::{self, PrimPredicate, Stage};
 use openusd_schemas::geom::XformCache;
 use openusd_schemas::shade::MaterialBindingAPI;
+use serde::{Serialize, Serializer};
 
 use crate::implicit;
 use crate::material::{self, Material};
+use crate::ser::{as_map, finite};
 
 /// Everything a renderer needs from a stage. [`plan`] fills in all but the
 /// triangle data, which [`Scene::read_geometry`] reads one mesh at a time from
@@ -34,6 +36,7 @@ pub struct Scene {
 }
 
 /// Something the viewer could not show faithfully.
+#[derive(Serialize)]
 pub struct Warning {
     /// `prim-unsupported`, `material-fallback`, `instance-limit` or
     /// `composition` (the page adds layer, texture, `triangle-limit` and
@@ -41,6 +44,7 @@ pub struct Warning {
     pub code: &'static str,
     pub message: String,
     /// An example prim or material path, when there is one.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub path: Option<String>,
 }
 
@@ -98,15 +102,29 @@ pub struct Group {
     pub subset: Option<String>,
 }
 
+/// `[start, count]`, or `[start, count, subset]`.
+impl Serialize for Group {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        match &self.subset {
+            Some(subset) => (self.start, self.count, subset).serialize(s),
+            None => (self.start, self.count).serialize(s),
+        }
+    }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Instance {
     pub path: String,
     pub geometry: u32,
     /// Local-to-world, row-major with row vectors (USD); the same 16 numbers
     /// are a column-major matrix for three.js.
+    #[serde(serialize_with = "finite")]
     pub matrix: [f64; 16],
     /// The mesh's own material, and the materials its `GeomSubset`s bind (by
     /// subset name): a geometry group takes its subset's, else the mesh's.
     pub material: u32,
+    #[serde(serialize_with = "as_map")]
     pub subsets: Vec<(String, u32)>,
     pub double_sided: bool,
 }

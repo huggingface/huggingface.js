@@ -10,50 +10,81 @@ use std::collections::HashMap;
 
 use openusd::sdf::{self, Value};
 use openusd::usd::Stage;
+use serde::{Serialize, Serializer};
 
-#[derive(Clone, Debug, PartialEq)]
+use crate::ser::{as_map, finite};
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Material {
     pub path: String,
     /// `preview`, `omnipbr`, `gltf-pbr`, `displayColor` or `fallback`.
     pub kind: &'static str,
+    #[serde(serialize_with = "finite")]
     pub color: [f32; 3],
+    #[serde(serialize_with = "finite")]
     pub opacity: f32,
+    #[serde(serialize_with = "finite")]
     pub roughness: f32,
+    #[serde(serialize_with = "finite")]
     pub metallic: f32,
+    #[serde(serialize_with = "finite")]
     pub emissive: [f32; 3],
     /// `opacityThreshold`: above zero, opacity is a cutout mask.
+    #[serde(serialize_with = "finite")]
     pub opacity_threshold: f32,
     /// Textured inputs, by `UsdPreviewSurface` input name (`diffuseColor`,
     /// `roughness`, `normal`, ...).
+    #[serde(serialize_with = "as_map")]
     pub maps: Vec<(&'static str, Texture)>,
     /// The diffuse color comes from this primvar of the bound mesh
     /// (`UsdPrimvarReader_float3`, usually `displayColor`).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub color_primvar: Option<String>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Texture {
     /// Virtual path of the image file.
     pub path: String,
     /// The `UsdUVTexture` output read: `rgb`, `r`, `g`, `b` or `a`.
     pub channel: String,
     /// `value = texel * scale + bias`, per channel (`UsdUVTexture`).
+    #[serde(serialize_with = "finite")]
     pub scale: [f32; 4],
+    #[serde(serialize_with = "finite")]
     pub bias: [f32; 4],
     /// What the input shows when the image cannot be read: its own value
     /// (authored or the shader's default), as for an input with no texture.
+    #[serde(skip_serializing_if = "Option::is_none", serialize_with = "finite")]
     pub value: Option<[f32; 3]>,
     /// `sourceColorSpace`: `raw`, `sRGB` or `auto` (unset).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub color_space: Option<String>,
     /// `primvars:<name>` the texture is sampled with, when it says.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub uv_set: Option<String>,
     /// UV transform from `UsdTransform2d` / MDL texture scale, when authored:
     /// `st' = rotate(st * uv_scale) + uv_translation`, rotation in degrees.
+    #[serde(serialize_with = "finite")]
     pub uv_scale: [f32; 2],
+    #[serde(serialize_with = "finite")]
     pub uv_rotation: f32,
+    #[serde(serialize_with = "finite")]
     pub uv_translation: [f32; 2],
     /// `wrapS` / `wrapT` tokens, when authored.
+    #[serde(flatten, serialize_with = "wrap")]
     pub wrap: [Option<String>; 2],
+}
+
+/// `wrap` as `wrapS` and `wrapT` keys, each only when authored.
+fn wrap<S: Serializer>(wrap: &[Option<String>; 2], s: S) -> Result<S::Ok, S::Error> {
+    let authored = ["wrapS", "wrapT"]
+        .into_iter()
+        .zip(wrap)
+        .filter_map(|(key, value)| Some((key, value.as_ref()?)));
+    s.collect_map(authored)
 }
 
 impl Texture {

@@ -14,7 +14,6 @@ use openusd::{sdf, usd};
 pub mod deps;
 pub mod extract;
 mod implicit;
-pub mod json;
 pub mod material;
 pub mod resolver;
 #[cfg(target_arch = "wasm32")]
@@ -193,5 +192,75 @@ mod tests {
             !messages.iter().any(|m| m.contains("malformed")),
             "{messages:?}"
         );
+    }
+}
+
+/// Helpers for serializing the scene's metadata to JSON.
+pub(crate) mod ser {
+    use serde::{Serialize, Serializer};
+
+    /// Writes NaN and ±Infinity as 0: JSON has no such numbers.
+    pub fn finite<T: Finite + Serialize, S: Serializer>(v: &T, s: S) -> Result<S::Ok, S::Error> {
+        v.finite().serialize(s)
+    }
+
+    pub trait Finite {
+        fn finite(&self) -> Self;
+    }
+
+    impl Finite for f32 {
+        fn finite(&self) -> Self {
+            if self.is_finite() { *self } else { 0.0 }
+        }
+    }
+
+    impl Finite for f64 {
+        fn finite(&self) -> Self {
+            if self.is_finite() { *self } else { 0.0 }
+        }
+    }
+
+    impl<T: Finite, const N: usize> Finite for [T; N] {
+        fn finite(&self) -> Self {
+            self.each_ref().map(T::finite)
+        }
+    }
+
+    impl<T: Finite> Finite for Option<T> {
+        fn finite(&self) -> Self {
+            self.as_ref().map(T::finite)
+        }
+    }
+
+    /// Name-value pairs as a JSON object.
+    pub fn as_map<K: Serialize, V: Serialize, S: Serializer>(
+        pairs: &[(K, V)],
+        s: S,
+    ) -> Result<S::Ok, S::Error> {
+        s.collect_map(pairs.iter().map(|(k, v)| (k, v)))
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use crate::material::Material;
+
+        #[test]
+        fn numbers_json_cannot_hold_are_written_as_zero() {
+            let material = Material {
+                path: "/M".to_owned(),
+                kind: "preview",
+                color: [f32::NAN, f32::INFINITY, 0.5],
+                opacity: f32::NEG_INFINITY,
+                roughness: 0.5,
+                metallic: 0.0,
+                emissive: [0.0; 3],
+                opacity_threshold: 0.0,
+                maps: Vec::new(),
+                color_primvar: None,
+            };
+            let json: serde_json::Value = serde_json::to_value(&material).unwrap();
+            assert_eq!(json["color"], serde_json::json!([0.0, 0.0, 0.5]));
+            assert_eq!(json["opacity"], serde_json::json!(0.0));
+        }
     }
 }
