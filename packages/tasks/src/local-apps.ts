@@ -608,10 +608,21 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 export const LOCAL_APPS = {
 	"llama.cpp": {
 		prettyLabel: "llama.cpp",
-		docsUrl: "https://github.com/ggerganov/llama.cpp",
+		docsUrl: "https://github.com/ggml-org/llama.cpp",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
+	},
+	"llama-app": {
+		prettyLabel: "Llama",
+		docsUrl: "https://github.com/ggml-org/Llama-macOS",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model, filepath?: string) => {
+			const quantLabel = filepath ? parseGGUFQuantLabel(filepath) : undefined;
+			return new URL(`llama://install?repo=${model.id}${quantLabel ? `&quant=${quantLabel}` : ""}`);
+		},
 	},
 	"node-llama-cpp": {
 		prettyLabel: "node-llama-cpp",
