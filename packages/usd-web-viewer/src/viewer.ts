@@ -19,6 +19,10 @@ export function createViewer(target: HTMLElement | HTMLCanvasElement, options: V
 	const ownsCanvas = !(target instanceof HTMLCanvasElement);
 	const canvas = ownsCanvas ? target.appendChild(document.createElement("canvas")) : (target as HTMLCanvasElement);
 	const container = ownsCanvas ? target : canvas.parentElement;
+	// An inline canvas sits on the text baseline, growing an auto-height container on every resize.
+	if (ownsCanvas) {
+		canvas.style.display = "block";
+	}
 	let renderer: THREE.WebGLRenderer;
 	try {
 		renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
