@@ -585,7 +585,7 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 export const LOCAL_APPS = {
 	"llama.cpp": {
 		prettyLabel: "llama.cpp",
-		docsUrl: "https://github.com/ggerganov/llama.cpp",
+		docsUrl: "https://github.com/ggml-org/llama.cpp",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
