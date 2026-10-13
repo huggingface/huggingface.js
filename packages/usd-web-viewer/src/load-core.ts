@@ -548,9 +548,23 @@ export function localUrl(key: string): string {
 	return `${LOCAL}///${localKey(key).split("/").map(encodeURIComponent).join("/")}`;
 }
 
-/** The `files` key a `local:` URL names. */
-export function keyOfLocalUrl(url: string): string {
-	return decodeURIComponent(new URL(url).pathname.slice(1));
+/** The `files` key a `local:` URL names; one that is not valid percent-encoding names none. */
+export function keyOfLocalUrl(url: string): string | undefined {
+	try {
+		return decodeURIComponent(new URL(url).pathname.slice(1));
+	} catch (error) {
+		if (error instanceof URIError) {
+			return undefined;
+		}
+		throw error;
+	}
+}
+
+/** A `local:` request, answered from `files`: a key it does not hold reads as a 404. */
+export function localResponse(files: ReadonlyMap<string, Blob> | undefined, url: string): Response {
+	const key = keyOfLocalUrl(url);
+	const file = key === undefined ? undefined : files?.get(key);
+	return file ? new Response(file) : new Response(null, { status: 404 });
 }
 
 /**
@@ -565,8 +579,7 @@ export function requestFor(rootUrl: string, files?: ReadonlyMap<string, Blob>): 
 	return async (url) => {
 		const { protocol } = new URL(url);
 		if (protocol === LOCAL && rootUrl.startsWith(LOCAL)) {
-			const file = files?.get(keyOfLocalUrl(url));
-			return file ? new Response(file) : new Response(null, { status: 404 });
+			return localResponse(files, url);
 		}
 		if (url !== rootUrl && protocol !== "http:" && protocol !== "https:") {
 			throw new TypeError(`only http(s) URLs are fetched: ${url}`);

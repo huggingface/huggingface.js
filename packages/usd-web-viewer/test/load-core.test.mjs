@@ -10,6 +10,8 @@ import {
 	fetchLimited,
 	imageInfo,
 	loadFailure,
+	localResponse,
+	localUrl,
 	readGeometries,
 	takePackagedTextures,
 	textureJobs,
@@ -452,6 +454,23 @@ def "A" (
 		scene.free();
 		assert.deepEqual(fetched(s).sort(), expected.sort(), what);
 	}
+});
+
+test("a local path that is not valid percent-encoding is a missing layer, not a failed load", async () => {
+	const files = new Map([
+		["pkg/root.usda", new Blob([sublayers("./bad%.usda", "./good.usda")])],
+		["pkg/good.usda", new Blob([`#usda 1.0\n${QUAD}`])],
+	]);
+	const { scene, stats } = await composeStage({
+		UsdLoader,
+		fetchBytes: (url, budget) => fetchLimited(url, budget, { fetchFn: async (target) => localResponse(files, target) }),
+		rootUrl: localUrl("pkg/root.usda"),
+	});
+	scene.free();
+	assert.deepEqual(
+		stats.warnings.map((w) => [w.code, w.path]),
+		[["layer-missing", "local:///pkg/bad%.usda"]],
+	);
 });
 
 test("relative layers resolve against the requested URL, not where it redirected", async () => {
