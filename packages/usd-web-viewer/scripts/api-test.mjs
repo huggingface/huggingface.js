@@ -362,7 +362,7 @@ test("loads sharing one caller signal leave no listener on it once complete", as
 	assert.deepEqual(live, [0, 0, 0]);
 });
 
-test("a lost WebGL context drops the stage and calls onContextLost; once restored, onContextRestored reloads the last stage that loaded", async () => {
+test("a lost WebGL context drops the stage and calls onContextLost; once restored, onContextRestored reloads the last stage shown", async () => {
 	const out = await page.evaluate(
 		async ([module, url]) => {
 			const { createViewer } = await import(module);

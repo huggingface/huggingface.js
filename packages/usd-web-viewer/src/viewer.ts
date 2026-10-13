@@ -102,7 +102,7 @@ export function createViewer(container: HTMLElement, options: ViewerOptions = {}
 	let current: LoadResult | null = null;
 	// The load in flight; a newer load or dispose aborts it.
 	let pending: AbortController | null = null;
-	// The latest successful load's arguments, to load again after a lost context.
+	// The arguments of the load last shown, to load again after a lost context.
 	let last: [string, LoadOptions] | null = null;
 	const clear = () => {
 		if (!current) {
@@ -167,6 +167,8 @@ export function createViewer(container: HTMLElement, options: ViewerOptions = {}
 				clear();
 				streaming = root;
 				scene.add(root);
+				// The caller's signal belongs to this load: a reload after a lost context must not inherit it once aborted.
+				last = [url, { ...loadOptions, signal: undefined }];
 				if (!meta.bounds) {
 					return;
 				}
@@ -197,8 +199,6 @@ export function createViewer(container: HTMLElement, options: ViewerOptions = {}
 					throw new UsdLoadError("aborted", "superseded by a newer load", { url });
 				}
 				current = result;
-				// The caller's signal belongs to this load: a reload after a lost context must not inherit it once aborted.
-				last = [url, { ...loadOptions, signal: undefined }];
 				if (!streaming) {
 					scene.add(result.root);
 				}

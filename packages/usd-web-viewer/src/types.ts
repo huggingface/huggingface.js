@@ -140,7 +140,7 @@ export interface ViewerOptions {
 	background?: THREE.ColorRepresentation | undefined;
 	/** The WebGL context was lost: the stage is gone (its geometry lived only on the GPU) and any load in flight aborted. */
 	onContextLost?: (() => void) | undefined;
-	/** The context is back: `reload` loads the latest URL again with the same options (null if nothing was loaded). */
+	/** The context is back: `reload` loads the last model shown again, with the same options (null if none was shown). */
 	onContextRestored?: ((reload: Promise<LoadResult> | null) => void) | undefined;
 }
 
