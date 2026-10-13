@@ -47,12 +47,8 @@ llama cli -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`,
 		const snippet = snippetFunc(model);
 
 		expect(snippet[0].content).toEqual([
-			`# Start a local embeddings server:
+			`# Start a local OpenAI-compatible embeddings server:
 llama serve -hf ggml-org/embeddinggemma-300M-GGUF:{{QUANT_TAG}} --embeddings`,
-			`# Then, from another terminal, get embeddings:
-curl -X POST "http://localhost:8080/v1/embeddings" \\
-	-H "Content-Type: application/json" \\
-	--data '{"input": ["Hello world", "How are you?"]}'`,
 		]);
 		expect(snippet.map((s) => s.title)).not.toContain("Use Docker");
 	});

@@ -171,7 +171,10 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	const isEmbedding = isEmbeddingModel(model);
 	const serverCommand = (binary: string) => {
 		const snippet = isEmbedding
-			? ["# Start a local embeddings server:", `${binary} -hf ${model.id}${getQuantTag(filepath)} --embeddings`]
+			? [
+					"# Start a local OpenAI-compatible embeddings server:",
+					`${binary} -hf ${model.id}${getQuantTag(filepath)} --embeddings`,
+				]
 			: [
 					"# Start a local OpenAI-compatible server with a web UI:",
 					`${binary} -hf ${model.id}${getQuantTag(filepath)}`,
@@ -182,22 +185,19 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 		const snippet = ["# Run inference directly in the terminal:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
 		return snippet.join("\n");
 	};
-	// Embedding models don't generate text, so the server is queried instead of running the CLI
-	const embeddingsRequest = `# Then, from another terminal, get embeddings:
-curl -X POST "http://localhost:8080/v1/embeddings" \\
-	-H "Content-Type: application/json" \\
-	--data '{"input": ["Hello world", "How are you?"]}'`;
-	const runCommand = (cliBinary: string) => (isEmbedding ? embeddingsRequest : cliCommand(cliBinary));
+	// Embedding models don't generate text, so there is no CLI command for them
+	const commands = (serverBinary: string, cliBinary: string) =>
+		isEmbedding ? [serverCommand(serverBinary)] : [serverCommand(serverBinary), cliCommand(cliBinary)];
 	return [
 		{
 			title: "Install (macOS, Linux)",
 			setup: "curl -LsSf https://llama.app/install.sh | sh",
-			content: [serverCommand("llama serve"), runCommand("llama cli")],
+			content: commands("llama serve", "llama cli"),
 		},
 		{
 			title: "Install from WinGet (Windows)",
 			setup: "winget install llama.cpp",
-			content: [serverCommand("llama serve"), runCommand("llama cli")],
+			content: commands("llama serve", "llama cli"),
 		},
 		{
 			title: "Use pre-built binary",
@@ -206,7 +206,7 @@ curl -X POST "http://localhost:8080/v1/embeddings" \\
 				"# Download pre-built binary from:",
 				"# https://github.com/ggerganov/llama.cpp/releases",
 			].join("\n"),
-			content: [serverCommand("./llama-server"), runCommand("./llama-cli")],
+			content: commands("./llama-server", "./llama-cli"),
 		},
 		{
 			title: "Build from source code",
@@ -216,7 +216,7 @@ curl -X POST "http://localhost:8080/v1/embeddings" \\
 				"cmake -B build",
 				"cmake --build build -j --target llama-server llama-cli",
 			].join("\n"),
-			content: [serverCommand("./build/bin/llama-server"), runCommand("./build/bin/llama-cli")],
+			content: commands("./build/bin/llama-server", "./build/bin/llama-cli"),
 		},
 		// `docker model run` starts a chat session, which embedding models don't support
 		...(isEmbedding
