@@ -48,7 +48,7 @@ fn the_instance_cap_leaves_out_whole_prototype_copies() {
             .filter(|i| i.path.starts_with(&prefix))
             .count()
     };
-    // 7 instances fit 3 copies of the 2 meshes, not 4 of A and 3 of B.
+    // 7 instances fit 3 copies of the 2 meshes, not 5 of A and 2 of B.
     assert_eq!((count("A"), count("B")), (3, 3));
     assert_eq!(scene.instances.len(), 6);
     assert!(
