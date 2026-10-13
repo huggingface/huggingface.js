@@ -190,6 +190,186 @@ test("abort rejects with an aborted UsdLoadError, before or during the load", as
 	assert.deepEqual(outcomes, ["UsdLoadError:aborted", "UsdLoadError:aborted"]);
 });
 
+test("lifecycle: a newer load wins; stopping a load stops all of it, while WASM compiles and as meshes stream in", async () => {
+	let held;
+	await page.context().route("**/__hang.wasm", (route) => (held = route));
+	const out = await page.evaluate(
+		async ([module, shapes, textured]) => {
+			const settle = (promise) =>
+				Promise.race([
+					promise.then(
+						() => "resolved",
+						(e) => e.code,
+					),
+					new Promise((resolve) => setTimeout(() => resolve("hung"), 3000)),
+				]);
+			// A fresh copy of the module, its WASM compile never finishing.
+			const fresh = await import(`${module}?compiling`);
+			const compiling = new AbortController();
+			const whileCompiling = fresh.loadUsd(shapes, { signal: compiling.signal, wasmUrl: "/__hang.wasm" });
+			const compilingOutcome = settle(whileCompiling);
+			setTimeout(() => compiling.abort(), 50);
+
+			const { createViewer } = await import(module);
+			const host = document.body.appendChild(document.createElement("div"));
+			host.style.cssText = "width:200px;height:150px";
+			const viewer = createViewer(host);
+			const shown = () => viewer.scene.children.filter((c) => c.name === "usd").length;
+
+			// Overlapping loads: the older is discarded.
+			const first = viewer.load(shapes).then(
+				() => "resolved",
+				(e) => e.code,
+			);
+			const second = await viewer.load(textured);
+			const overlapping = {
+				first: await first,
+				shown: shown(),
+				secondShown: viewer.scene.children.includes(second.root),
+			};
+
+			let streaming;
+			const streamed = new Promise((resolve) => (streaming = resolve));
+			const cleared = viewer.load(shapes, {
+				textures: "none",
+				onProgress: (p) => p.stage === "geometry" && streaming(),
+			});
+			await streamed;
+			const before = shown();
+			viewer.clear();
+			const afterClear = shown();
+			const outcomes = { compiling: await compilingOutcome, cleared: await settle(cleared) };
+			await new Promise((resolve) => setTimeout(resolve, 300));
+			const later = shown();
+			viewer.dispose();
+			viewer.dispose();
+			const canvasRemoved = !host.querySelector("canvas");
+			host.remove();
+			return { overlapping, outcomes, shown: [before, afterClear, later], canvasRemoved };
+		},
+		[MODULE, SHAPES, TEXTURED],
+	);
+	await held?.abort();
+	await page.context().unroute("**/__hang.wasm");
+	assert.deepEqual(
+		out,
+		{
+			overlapping: { first: "aborted", shown: 1, secondShown: true },
+			outcomes: { compiling: "aborted", cleared: "aborted" },
+			shown: [1, 0, 0],
+			canvasRemoved: true,
+		},
+		JSON.stringify(out),
+	);
+});
+
+test("framing drops the orbit and pan still easing out, so the camera stays where it was framed", async () => {
+	const out = await page.evaluate(
+		async ([module, url]) => {
+			const { createViewer } = await import(module);
+			const frames = (n) =>
+				new Promise((resolve) => {
+					const step = () => (n-- > 0 ? requestAnimationFrame(step) : resolve());
+					step();
+				});
+			const host = document.body.appendChild(document.createElement("div"));
+			host.style.cssText = "width:200px;height:150px";
+			const viewer = createViewer(host);
+			await viewer.load(url, { textures: "none" });
+			await frames(5);
+			const pose = () => [...viewer.camera.position.toArray(), ...viewer.controls.target.toArray()];
+			const framed = pose();
+			// An orbit and a pan let go of just before framing again.
+			viewer.controls.rotateLeft(0.5);
+			viewer.controls.pan(40, 0);
+			viewer.frame();
+			await frames(60);
+			const after = pose();
+			viewer.dispose();
+			host.remove();
+			return Math.max(...after.map((v, i) => Math.abs(v - framed[i])));
+		},
+		[MODULE, TEXTURED],
+	);
+	assert.ok(out < 1e-6, `the camera drifted ${out} from its framed pose`);
+});
+
+test("loads sharing one caller signal leave no listener on it once complete", async () => {
+	const live = await page.evaluate(
+		async ([module, url]) => {
+			const { createViewer } = await import(module);
+			const host = document.body.appendChild(document.createElement("div"));
+			host.style.cssText = "width:200px;height:150px";
+			const viewer = createViewer(host);
+			// The abort listeners on the caller's signal, gone once removed or once their own signal aborts.
+			const { signal } = new AbortController();
+			const listeners = new Set();
+			const add = signal.addEventListener.bind(signal);
+			const remove = signal.removeEventListener.bind(signal);
+			signal.addEventListener = (type, listener, options) => {
+				listeners.add(listener);
+				options?.signal?.addEventListener("abort", () => listeners.delete(listener), { once: true });
+				add(type, listener, options);
+			};
+			signal.removeEventListener = (type, listener, options) => {
+				listeners.delete(listener);
+				remove(type, listener, options);
+			};
+			const live = [];
+			for (let i = 0; i < 3; i++) {
+				const result = await viewer.load(url, { textures: "none", signal });
+				await result.complete;
+				await new Promise((resolve) => setTimeout(resolve));
+				live.push(listeners.size);
+			}
+			viewer.dispose();
+			host.remove();
+			return live;
+		},
+		[MODULE, TEXTURED],
+	);
+	assert.deepEqual(live, [0, 0, 0]);
+});
+
+test("a lost WebGL context drops the stage and calls onContextLost; once restored, onContextRestored gets the reload", async () => {
+	const out = await page.evaluate(
+		async ([module, url]) => {
+			const { createViewer } = await import(module);
+			const until = async (predicate) => {
+				for (let i = 0; i < 500 && !predicate(); i++) await new Promise((resolve) => setTimeout(resolve, 20));
+			};
+			const host = document.body.appendChild(document.createElement("div"));
+			host.style.cssText = "width:200px;height:150px";
+			const events = [];
+			let reload;
+			const viewer = createViewer(host, {
+				onContextLost: () => events.push("lost"),
+				onContextRestored: (promise) => (
+					events.push(promise ? "restored with a reload" : "restored"), (reload = promise)
+				),
+			});
+			await viewer.load(url, { textures: "none" });
+			const lose = viewer.renderer.getContext().getExtension("WEBGL_lose_context");
+			lose.loseContext();
+			await until(() => events.includes("lost"));
+			const lost = { stage: !!viewer.scene.getObjectByName("usd") };
+			lose.restoreContext();
+			await until(() => events.length === 2);
+			const again = await reload;
+			const restored = { triangles: again.info.triangles, shown: viewer.scene.children.includes(again.root) };
+			viewer.dispose();
+			host.remove();
+			return { events, lost, restored };
+		},
+		[MODULE, SHAPES],
+	);
+	assert.deepEqual(out, {
+		events: ["lost", "restored with a reload"],
+		lost: { stage: false },
+		restored: { triangles: 3304, shown: true },
+	});
+});
+
 /** Loads `root` from `files` (`{ key: text, or '/fixtures/…' to copy a served file }`) with `options`, logging only the requests made during the load. */
 async function loadFiles(root, files, options = {}) {
 	const sources = Object.fromEntries(

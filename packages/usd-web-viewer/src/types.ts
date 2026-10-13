@@ -1,5 +1,6 @@
 // The public types; `index` re-exports them.
 import type * as THREE from "three";
+import type { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 /** `preview` (default): base color up to `maxTextureSize`, roughness / metallic / occlusion / opacity / emissive maps up to 512 px, no normal maps. `full`: every map, normals included, up to `maxTextureSize`. `none`: no textures. */
 export type TextureMode = "none" | "preview" | "full";
@@ -133,3 +134,41 @@ export interface LoadResult {
 
 /** A `compose` error whose message starts with `scene too large to load` ran out of WebAssembly memory (4 GiB at most). */
 export type UsdLoadErrorCode = "aborted" | "fetch" | "compose" | "worker" | "webgl";
+
+export interface ViewerOptions {
+	/** Canvas background. Default: transparent. */
+	background?: THREE.ColorRepresentation | undefined;
+	/** The WebGL context was lost: the stage is gone (its geometry lived only on the GPU) and any load in flight aborted. */
+	onContextLost?: (() => void) | undefined;
+	/** The context is back: `reload` loads the latest URL again with the same options (null if nothing was loaded). */
+	onContextRestored?: ((reload: Promise<LoadResult> | null) => void) | undefined;
+}
+
+export interface ToBlobOptions {
+	type?: "image/png" | "image/webp" | undefined;
+	quality?: number | undefined;
+	width?: number | undefined;
+	height?: number | undefined;
+}
+
+export interface Viewer {
+	readonly renderer: THREE.WebGLRenderer;
+	readonly scene: THREE.Scene;
+	readonly camera: THREE.PerspectiveCamera;
+	readonly controls: OrbitControls;
+	/** Loads a stage, replacing the current one once its geometry shows. A newer load aborts this one. */
+	load(url: string, options?: LoadOptions): Promise<LoadResult>;
+	/**
+	 * Renders a fresh frame and encodes it, e.g. for a thumbnail: `type` `image/png` (default) or `image/webp` (PNG where the browser
+	 * cannot encode WebP, as Safari), `quality` 0–1 for WebP, and an optional size in pixels (giving one keeps the aspect ratio;
+	 * default: the canvas's). Rejects when the viewer is disposed or its WebGL context is lost.
+	 */
+	toBlob(options?: ToBlobOptions): Promise<Blob>;
+	/** Removes and frees the current stage, and aborts any load in flight. */
+	clear(): void;
+	/** Points the camera at `object`, by default the current stage. */
+	frame(object?: THREE.Object3D): void;
+	requestRender(): void;
+	/** Frees the renderer, the GPU context, the current stage and any load in flight. Safe to call twice. */
+	dispose(): void;
+}
