@@ -1,0 +1,31 @@
+---
+source: crate/tests/fixtures.rs
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/mdl_modules.usda
+---
+upAxis Y, metersPerUnit 0.01
+prims 9, meshes 3, triangles 3
+
+instances:
+  /ClearCoat: geometry 0, material 0
+    at (0, 0, 0), world (0, 0, 0)..(1, 1, 0)
+  /Gltf: geometry 1, material 1
+    at (0, 0, 0), world (2, 0, 0)..(3, 1, 0)
+  /Custom: geometry 2, material 2
+    at (0, 0, 0), world (4, 0, 0)..(5, 1, 0)
+
+geometries:
+  0 /ClearCoat: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+  1 /Gltf: 1 triangles (all outward), 3 vertices, bounds (2, 0, 0)..(3, 1, 0)
+    normals (0, 0, 1) x3
+  2 /Custom: 1 triangles (all outward), 3 vertices, bounds (4, 0, 0)..(5, 1, 0)
+    normals (0, 0, 1) x3
+
+materials:
+  0 /ClearCoatMat omnipbr: color (0.8, 0.1, 0.1), opacity 1, roughness 0.5, metallic 0
+  1 /GltfMat gltf-pbr: color (0.1, 0.8, 0.1), opacity 1, roughness 1, metallic 1
+  2 /CustomMat fallback: color (0.7, 0.7, 0.7), opacity 1, roughness 0.5, metallic 0
+
+warnings:
+  material-fallback: 1 material(s) have no UsdPreviewSurface or supported MDL material and show as grey (/CustomMat)

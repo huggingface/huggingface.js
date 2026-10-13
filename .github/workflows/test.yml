@@ -31,6 +31,23 @@ jobs:
             echo "SINCE=$(git merge-base $BASE_REF ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
+      # usd-web-viewer's tests build its Rust crate: cache cargo's output when they run.
+      - name: "Checking whether usd-web-viewer changed"
+        id: usd
+        run: |
+          if git diff --quiet ${{ steps.since.outputs.SINCE }} ${{ github.sha }} -- packages/usd-web-viewer
+          then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        if: steps.usd.outputs.changed == 'true'
+        with:
+          workspaces: packages/usd-web-viewer
+          # PR runs restore main's cache but don't save their own, which would evict it.
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
       - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1

@@ -1,0 +1,49 @@
+#usda 1.0
+(
+    upAxis = "Y"
+)
+
+# A quad whose texture reads primvar `custom` (all (1, 1): the image's top-right
+# texel, green) rather than `st` (all (0, 0): bottom-left, red).
+def Mesh "Quad" (
+    prepend apiSchemas = ["MaterialBindingAPI"]
+)
+{
+    int[] faceVertexCounts = [4]
+    int[] faceVertexIndices = [0, 1, 2, 3]
+    point3f[] points = [(-1, -1, 0), (1, -1, 0), (1, 1, 0), (-1, 1, 0)]
+    texCoord2f[] primvars:st = [(0, 0), (0, 0), (0, 0), (0, 0)] (interpolation = "vertex")
+    texCoord2f[] primvars:custom = [(0.99, 0.99), (0.99, 0.99), (0.99, 0.99), (0.99, 0.99)] (interpolation = "vertex")
+    rel material:binding = </Mat>
+}
+
+def Material "Mat"
+{
+    token outputs:surface.connect = </Mat/Surface.outputs:surface>
+
+    def Shader "Surface"
+    {
+        uniform token info:id = "UsdPreviewSurface"
+        color3f inputs:diffuseColor = (0, 0, 0)
+        color3f inputs:emissiveColor.connect = </Mat/Tex.outputs:rgb>
+        float inputs:roughness = 1
+        token outputs:surface
+    }
+
+    def Shader "Tex"
+    {
+        uniform token info:id = "UsdUVTexture"
+        asset inputs:file = @quadrants.png@
+        token inputs:wrapS = "clamp"
+        token inputs:wrapT = "clamp"
+        float2 inputs:st.connect = </Mat/Reader.outputs:result>
+        float3 outputs:rgb
+    }
+
+    def Shader "Reader"
+    {
+        uniform token info:id = "UsdPrimvarReader_float2"
+        string inputs:varname = "custom"
+        float2 outputs:result
+    }
+}

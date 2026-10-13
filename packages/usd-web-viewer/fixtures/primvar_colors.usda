@@ -1,0 +1,21 @@
+#usda 1.0
+def Mesh "Tri" (prepend apiSchemas = ["MaterialBindingAPI"]) {
+int[] faceVertexCounts = [3]
+int[] faceVertexIndices = [0,1,2]
+point3f[] points = [(0,0,0),(1,0,0),(0,1,0)]
+color3f[] primvars:tint = [(1,0,0),(0,1,0),(0,0,1)] (interpolation = "vertex")
+rel material:binding = </Mat>
+}
+def Material "Mat" {
+token outputs:surface.connect = </Mat/P.outputs:surface>
+def Shader "P" {
+uniform token info:id = "UsdPreviewSurface"
+color3f inputs:diffuseColor.connect = </Mat/Reader.outputs:result>
+token outputs:surface
+}
+def Shader "Reader" {
+uniform token info:id = "UsdPrimvarReader_float3"
+string inputs:varname = "tint"
+float3 outputs:result
+}
+}

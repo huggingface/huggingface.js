@@ -19,3 +19,4 @@ packages:
   - packages/xetchunk-wasm
   - packages/gearhash-jit
   - packages/splitmix64-wasm
+  - packages/usd-web-viewer

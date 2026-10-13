@@ -1,0 +1,19 @@
+#usda 1.0
+
+# Per-vertex displayColor becomes a color attribute (the material stays white);
+# a constant one tints the material instead.
+def Mesh "Vertex"
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    color3f[] primvars:displayColor = [(1, 0, 0), (0, 1, 0), (0, 0, 1)] (interpolation = "vertex")
+}
+
+def Mesh "Constant"
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    color3f[] primvars:displayColor = [(0.5, 0.25, 1)]
+}

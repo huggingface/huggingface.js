@@ -1,0 +1,20 @@
+#usda 1.0
+
+def Xform "World"
+{
+    def Xform "robot" (
+        prepend references = @./parts/robot.usda@
+    )
+    {
+    }
+
+    # The same robot as an instance itself: its links are instances inside it.
+    def Xform "instanced_robot" (
+        instanceable = true
+        prepend references = @./parts/robot.usda@
+    )
+    {
+        double3 xformOp:translate = (4, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}

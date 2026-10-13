@@ -1,0 +1,36 @@
+#usda 1.0
+def Mesh "Tri" (prepend apiSchemas = ["MaterialBindingAPI"]) {
+int[] faceVertexCounts = [3]
+int[] faceVertexIndices = [0,1,2]
+point3f[] points = [(0,0,0),(1,0,0),(0,1,0)]
+color3f[] primvars:displayColor = [(1,0,0),(0,1,0),(0,0,1)] (interpolation = "vertex")
+rel material:binding = </Base>
+def GeomSubset "Part" (prepend apiSchemas = ["MaterialBindingAPI"]) {
+uniform token elementType = "face"
+uniform token familyName = "materialBind"
+int[] indices = [0]
+rel material:binding = </Mat>
+}
+}
+def Material "Mat" {
+token outputs:surface.connect = </Mat/P.outputs:surface>
+def Shader "P" {
+uniform token info:id = "UsdPreviewSurface"
+color3f inputs:diffuseColor.connect = </Mat/Reader.outputs:result>
+token outputs:surface
+}
+def Shader "Reader" {
+uniform token info:id = "UsdPrimvarReader_float3"
+string inputs:varname = "displayColor"
+float3 outputs:result
+}
+}
+
+def Material "Base" {
+token outputs:surface.connect = </Base/P.outputs:surface>
+def Shader "P" {
+uniform token info:id = "UsdPreviewSurface"
+color3f inputs:diffuseColor = (0.5,0.5,0.5)
+token outputs:surface
+}
+}

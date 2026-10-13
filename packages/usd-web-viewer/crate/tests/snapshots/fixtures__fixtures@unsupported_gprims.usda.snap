@@ -1,0 +1,19 @@
+---
+source: crate/tests/fixtures.rs
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/unsupported_gprims.usda
+---
+upAxis Y, metersPerUnit 0.01
+prims 7, meshes 0, triangles 0
+
+instances:
+
+geometries:
+
+materials:
+
+warnings:
+  prim-unsupported: 1 BasisCurves prim(s) not drawn (unsupported type) (/Hair)
+  prim-unsupported: 1 ParticleField3DGaussianSplat prim(s) not drawn (unsupported type) (/Splat)
+  prim-unsupported: 1 TetMesh prim(s) not drawn (unsupported type) (/Tet)
+  prim-unsupported: 1 Volume prim(s) not drawn (unsupported type) (/NuRec)

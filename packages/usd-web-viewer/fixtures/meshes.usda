@@ -1,0 +1,55 @@
+#usda 1.0
+
+# Two quads side by side, the second a hole: two triangles drawn.
+def Mesh "Hole"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (2, 0, 0), (0, 1, 0), (1, 1, 0), (2, 1, 0)]
+    int[] holeIndices = [1]
+}
+
+# A primvar without interpolation is constant: every vertex reads its one value.
+def Mesh "ConstantUv"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (2, 0, 0), (0, 1, 0), (1, 1, 0), (2, 1, 0)]
+    texCoord2f[] primvars:st = [(0.25, 0.75)]
+}
+
+# Two quads folded 90 degrees along x = 1, one facing +Z, the other +X.
+# Polygonal without normals: faceted, the shared edge split.
+def Mesh "Faceted"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (1, 0, -1), (0, 1, 0), (1, 1, 0), (1, 1, -1)]
+    uniform token subdivisionScheme = "none"
+}
+
+# A subdivision surface (the schema fallback) without normals: smooth, points shared.
+def Mesh "Smooth"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (1, 0, -1), (0, 1, 0), (1, 1, 0), (1, 1, -1)]
+}
+
+# A normals primvar without interpolation is constant.
+def Mesh "ConstantNormals"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (1, 0, -1), (0, 1, 0), (1, 1, 0), (1, 1, -1)]
+    normal3f[] primvars:normals = [(0, 1, 0)]
+}
+
+# The normals attribute without interpolation is per vertex.
+def Mesh "VertexNormals"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (2, 0, 0), (0, 1, 0), (1, 1, 0), (2, 1, 0)]
+    normal3f[] normals = [(0, 0, 1), (0, 1, 0), (0, 0, 1), (0, 0, 1), (0, 1, 0), (0, 0, 1)]
+}
