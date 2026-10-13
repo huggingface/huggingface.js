@@ -191,4 +191,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"Cyclotron is a training and evaluation framework for humanoid robot control policies that runs Hub-hosted models and benchmarks in pinned simulation-based evaluation harnesses and records the provenance of every score.",
 		url: "https://github.com/menloresearch/cyclotron",
 	},
+	sparc: {
+		name: "sparc",
+		description:
+			"SPaRC (Spatial Pathfinding Reasoning Challenge) is a benchmark of 2D grid pathfinding puzzles that tests spatial and symbolic reasoning. A path counts as correct only if it exactly matches one of the puzzle's stored solutions.",
+		url: "https://github.com/lkaesberg/SPaRC",
+	},
 } as const;
