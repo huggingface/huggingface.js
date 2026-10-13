@@ -1,7 +1,8 @@
-//! The fixture corpus: every `fixtures/*.usd*` file is composed as the
+//! The fixture corpus: every `fixtures/*.usda` file is composed as the
 //! browser composes it, and a normalised summary of what a viewer would draw
 //! is compared with its snapshot in `snapshots/`. Review changes with
-//! `cargo insta review`.
+//! `cargo insta review`. The binary fixtures are exports of `.usda` ones
+//! (`scripts/binary-fixtures.py`), so each must draw the same as its source.
 
 mod common;
 
@@ -13,19 +14,45 @@ use usd_wasm::material::{Material, Texture};
 
 #[test]
 fn fixtures() {
-    let dir = std::fs::canonicalize(concat!(env!("CARGO_MANIFEST_DIR"), "/../fixtures"))
-        .expect("fixtures directory");
-    let dir = format!("{}/", dir.display());
-    insta::glob!("../../fixtures", "*.usd*", |path| {
-        let root = path.to_string_lossy().into_owned();
-        let loaded = common::compose(&root, |p| std::fs::read(p).ok())
-            .unwrap_or_else(|e| panic!("{root}: {e}"));
-        let mut out = summary(&loaded.scene);
-        for path in &loaded.missing {
-            writeln!(out, "missing layer: {path}").unwrap();
-        }
+    let dir = fixtures_dir();
+    insta::glob!("../../fixtures", "*.usda", |path| {
+        let out = composed(&path.to_string_lossy());
         insta::assert_snapshot!(out.replace(&dir, ""));
     });
+}
+
+#[test]
+fn binary_fixtures_match_their_usda_source() {
+    let dir = fixtures_dir();
+    let draw = |name: &str| composed(&format!("{dir}{name}")).replace(&dir, "");
+
+    assert_eq!(draw("implicit_gprims.usdc"), draw("implicit_gprims.usda"));
+
+    // The package holds the texture itself, so the one thing that differs is
+    // the texture path: inside the package rather than beside the layer.
+    assert_eq!(
+        draw("uv_set.usdz").replace("uv_set.usdz[0/quadrants.png]", "quadrants.png"),
+        draw("uv_set.usda")
+    );
+}
+
+/// The fixtures directory, with a trailing slash, to strip from summaries.
+fn fixtures_dir() -> String {
+    let dir = std::fs::canonicalize(concat!(env!("CARGO_MANIFEST_DIR"), "/../fixtures"))
+        .expect("fixtures directory");
+    format!("{}/", dir.display())
+}
+
+/// The summary of `root` composed as the browser composes it, with the layers
+/// that could not be read.
+fn composed(root: &str) -> String {
+    let loaded =
+        common::compose(root, |p| std::fs::read(p).ok()).unwrap_or_else(|e| panic!("{root}: {e}"));
+    let mut out = summary(&loaded.scene);
+    for path in &loaded.missing {
+        writeln!(out, "missing layer: {path}").unwrap();
+    }
+    out
 }
 
 /// What a viewer draws, in a stable, readable form: numbers rounded to 1e-3.
