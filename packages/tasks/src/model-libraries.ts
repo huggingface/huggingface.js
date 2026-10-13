@@ -1411,7 +1411,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.saelens,
 		filter: false,
 	},
-	sage: {
+	"sage-music": {
 		prettyLabel: "SAGE",
 		repoName: "SAGE",
 		repoUrl: "https://github.com/francescobrigante/SAGE",
