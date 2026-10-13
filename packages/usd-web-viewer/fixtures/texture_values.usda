@@ -1,0 +1,60 @@
+#usda 1.0
+
+# What a textured input shows when its image cannot be read (a texture's
+# `value`): its authored value or the schema default for UsdPreviewSurface,
+# the diffuse constant for OmniPBR. Never the texture's fallback, which is for
+# a texture node with no image.
+def Mesh "Preview" (prepend apiSchemas = ["MaterialBindingAPI"])
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    rel material:binding = </PreviewMat>
+}
+
+def Material "PreviewMat"
+{
+    token outputs:surface.connect = </PreviewMat/Surface.outputs:surface>
+
+    def Shader "Surface"
+    {
+        uniform token info:id = "UsdPreviewSurface"
+        color3f inputs:diffuseColor = (0, 0, 1)
+        color3f inputs:diffuseColor.connect = </PreviewMat/Tex.outputs:rgb>
+        float inputs:roughness.connect = </PreviewMat/Tex.outputs:g>
+        float inputs:occlusion.connect = </PreviewMat/Tex.outputs:r>
+        token outputs:surface
+    }
+
+    def Shader "Tex"
+    {
+        uniform token info:id = "UsdUVTexture"
+        asset inputs:file = @missing.png@
+        float4 inputs:fallback = (1, 0, 0, 1)
+        float3 outputs:rgb
+        float outputs:r
+        float outputs:g
+    }
+}
+
+def Mesh "OmniPBR" (prepend apiSchemas = ["MaterialBindingAPI"])
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    rel material:binding = </OmniPBRMat>
+}
+
+def Material "OmniPBRMat"
+{
+    token outputs:mdl:surface.connect = </OmniPBRMat/Shader.outputs:out>
+
+    def Shader "Shader"
+    {
+        uniform asset info:mdl:sourceAsset = @OmniPBR.mdl@
+        color3f inputs:diffuse_color_constant = (0.3, 0.4, 0.5)
+        color3f inputs:diffuse_tint = (1, 1, 1)
+        asset inputs:diffuse_texture = @missing.png@
+        token outputs:out
+    }
+}

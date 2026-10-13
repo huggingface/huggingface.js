@@ -1,0 +1,21 @@
+---
+source: crate/tests/fixtures.rs
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/subset_colors.usda
+---
+upAxis Y, metersPerUnit 0.01
+prims 7, meshes 1, triangles 1
+
+instances:
+  /Tri: geometry 0, material 1
+    at (0, 0, 0), world (0, 0, 0)..(1, 1, 0)
+
+geometries:
+  0 /Tri: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+    colors (1, 0, 0), (0, 1, 0), (0, 0, 1)
+    groups 0+3 Part
+
+materials:
+  0 /Base preview: color (0.5, 0.5, 0.5), opacity 1, roughness 0.5, metallic 0
+  1 /Mat preview: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0, color from primvar displayColor

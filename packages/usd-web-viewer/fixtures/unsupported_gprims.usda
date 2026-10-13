@@ -1,0 +1,11 @@
+#usda 1.0
+
+# Every visible gprim type not drawn is reported, once per type; hidden ones
+# and prims that are not gprims are not.
+def ParticleField3DGaussianSplat "Splat" {}
+def Volume "NuRec" {}
+def TetMesh "Tet" {}
+def BasisCurves "Hair" {}
+def Points "Hidden" { token visibility = "invisible" }
+def Points "Guide" { uniform token purpose = "guide" }
+def Xform "NotAGprim" {}

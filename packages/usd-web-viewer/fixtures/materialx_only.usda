@@ -1,0 +1,26 @@
+#usda 1.0
+
+# A material with only a MaterialX surface: shown grey, with a warning naming
+# it. MaterialX documents are never fetched: a reference to one is reported
+# unresolved.
+def Mesh "Tri" (prepend apiSchemas = ["MaterialBindingAPI"])
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    rel material:binding = </Mat>
+}
+
+def Material "Mat"
+{
+    token outputs:mtlx:surface.connect = </Mat/Surface.outputs:out>
+
+    def Shader "Surface"
+    {
+        uniform token info:id = "ND_standard_surface_surfaceshader"
+        color3f inputs:base_color = (1, 0, 0)
+        token outputs:out
+    }
+}
+
+def "Library" (references = @./library.mtlx@) {}
