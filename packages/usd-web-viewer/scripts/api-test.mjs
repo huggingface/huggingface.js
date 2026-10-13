@@ -348,7 +348,10 @@ test("a lost WebGL context drops the stage and calls onContextLost; once restore
 					events.push(promise ? "restored with a reload" : "restored"), (reload = promise)
 				),
 			});
-			await viewer.load(url, { textures: "none" });
+			// Aborting the first load's signal after it finished must not stop the reload.
+			const first = new AbortController();
+			await viewer.load(url, { textures: "none", signal: first.signal });
+			first.abort();
 			const lose = viewer.renderer.getContext().getExtension("WEBGL_lose_context");
 			lose.loseContext();
 			await until(() => events.includes("lost"));

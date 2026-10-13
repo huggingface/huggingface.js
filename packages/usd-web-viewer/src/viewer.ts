@@ -141,7 +141,8 @@ export function createViewer(target: HTMLElement | HTMLCanvasElement, options: V
 			if (disposed) {
 				throw new UsdLoadError("aborted", "the viewer was disposed", { url });
 			}
-			last = [url, loadOptions];
+			// The caller's signal belongs to this load: a reload after a lost context must not inherit it once aborted.
+			last = [url, { ...loadOptions, signal: undefined }];
 			pending?.abort();
 			const controller = (pending = new AbortController());
 			const { signal: callerSignal } = loadOptions;
