@@ -513,7 +513,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	ensomi: {
 		prettyLabel: "ensomi",
-		repoName: "ensomi-model",
+		repoName: "ensomi",
 		repoUrl: "https://github.com/ensomi-labs/ensomi-model",
 		filter: false,
 		countDownloads: `(path_filename:"ensomi-package" AND path_extension:"json") OR path:"checkpoint.pt"`,
