@@ -13,8 +13,6 @@ instances:
 geometries:
   0 /I/A: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
     normals (0, 0, 1) x3
-  1 /I/B: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
-    normals (0, 0, 1) x3
 
 materials:
   0 (unbound) displayColor: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0, color from primvar displayColor
