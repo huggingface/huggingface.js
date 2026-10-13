@@ -13,23 +13,17 @@ import type { LoadOptions, LoadProgress, LoadResult, Viewer, ViewerOptions } fro
  * on-demand rendering around {@link loadUsd}. The canvas is transparent unless
  * a `background` is given. Throws a `webgl` UsdLoadError without WebGL.
  *
- * @param target  a canvas, or a container to append one to
+ * @param container  the element to show the viewer in: it gets a canvas filling it
  */
-export function createViewer(target: HTMLElement | HTMLCanvasElement, options: ViewerOptions = {}): Viewer {
-	const ownsCanvas = !(target instanceof HTMLCanvasElement);
-	const canvas = ownsCanvas ? target.appendChild(document.createElement("canvas")) : (target as HTMLCanvasElement);
-	const container = ownsCanvas ? target : canvas.parentElement;
+export function createViewer(container: HTMLElement, options: ViewerOptions = {}): Viewer {
+	const canvas = container.appendChild(document.createElement("canvas"));
 	// An inline canvas sits on the text baseline, growing an auto-height container on every resize.
-	if (ownsCanvas) {
-		canvas.style.display = "block";
-	}
+	canvas.style.display = "block";
 	let renderer: THREE.WebGLRenderer;
 	try {
 		renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 	} catch (error) {
-		if (ownsCanvas) {
-			canvas.remove();
-		}
+		canvas.remove();
 		throw new UsdLoadError("webgl", `WebGL is not available: ${(error as Error).message}`, { cause: error });
 	}
 	renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -90,15 +84,19 @@ export function createViewer(target: HTMLElement | HTMLCanvasElement, options: V
 	controls.addEventListener("change", requestRender);
 
 	const resize = () => {
-		const width = container?.clientWidth || canvas.clientWidth || 800;
-		const height = container?.clientHeight || canvas.clientHeight || 600;
-		renderer.setSize(width, height, ownsCanvas);
+		// The content box: sized with its padding, a padded container would grow with each resize.
+		const style = getComputedStyle(container);
+		const width =
+			Math.max(0, container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)) || 800;
+		const height =
+			Math.max(0, container.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)) || 600;
+		renderer.setSize(width, height);
 		camera.aspect = width / height;
 		camera.updateProjectionMatrix();
 		requestRender();
 	};
 	const observer = new ResizeObserver(resize);
-	observer.observe(container || canvas);
+	observer.observe(container);
 	resize();
 
 	let current: LoadResult | null = null;
@@ -288,9 +286,7 @@ export function createViewer(target: HTMLElement | HTMLCanvasElement, options: V
 			scene.environment?.dispose();
 			renderer.dispose();
 			renderer.forceContextLoss();
-			if (ownsCanvas) {
-				canvas.remove();
-			}
+			canvas.remove();
 		},
 	};
 	return viewer;

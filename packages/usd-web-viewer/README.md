@@ -13,7 +13,7 @@ A ready-made viewer (renderer, lighting, orbit controls):
 ```js
 import { createViewer } from '@huggingface/usd-web-viewer';
 
-const viewer = createViewer(document.getElementById('viewer')); // a canvas, or a container for one
+const viewer = createViewer(document.getElementById('viewer')); // a container element
 const { info } = await viewer.load(
   'https://huggingface.co/datasets/Robotiq-Official/simready-assets/resolve/main/Robotiq_2F_85/simready_usd/Robotiq_2F_85.usda',
 );

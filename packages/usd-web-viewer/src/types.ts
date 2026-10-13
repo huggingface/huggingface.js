@@ -169,6 +169,6 @@ export interface Viewer {
 	/** Points the camera at `object`, by default the current stage. */
 	frame(object?: THREE.Object3D): void;
 	requestRender(): void;
-	/** Frees the renderer, the GPU context, the current stage and any load in flight. Safe to call twice. */
+	/** Frees the renderer, the GPU context, the current stage and any load in flight, and removes the canvas. Safe to call twice. */
 	dispose(): void;
 }

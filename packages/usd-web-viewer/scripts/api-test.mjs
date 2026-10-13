@@ -263,6 +263,37 @@ test("lifecycle: a newer load wins; stopping a load stops all of it, while WASM 
 	);
 });
 
+test("createViewer fits its canvas to the container's content box, so a padded auto-height container keeps its height", async () => {
+	const out = await page.evaluate(async (module) => {
+		const { createViewer } = await import(module);
+		const sizes = [];
+		for (const style of ["width:400px;padding:8px", "width:400px;height:300px;padding:8px"]) {
+			const host = document.body.appendChild(document.createElement("div"));
+			host.style.cssText = style;
+			const viewer = createViewer(host);
+			const canvas = host.querySelector("canvas");
+			const size = () => [canvas.clientWidth, canvas.clientHeight, host.clientHeight];
+			await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+			const first = size();
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			sizes.push([first, size()]);
+			viewer.dispose();
+			host.remove();
+		}
+		return sizes;
+	}, MODULE);
+	assert.deepEqual(out, [
+		[
+			[400, 150, 166],
+			[400, 150, 166],
+		],
+		[
+			[400, 300, 316],
+			[400, 300, 316],
+		],
+	]);
+});
+
 test("framing drops the orbit and pan still easing out, so the camera stays where it was framed", async () => {
 	const out = await page.evaluate(
 		async ([module, url]) => {
