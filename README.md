@@ -61,6 +61,7 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
 - [@huggingface/dduf](packages/dduf/README.md): Similar package for DDUF (DDUF Diffusers Unified Format)
 - [@huggingface/lerobot](packages/lerobot/README.md): A parser for LeRobot robotics datasets, reading v2.x and v3.0 layouts over ranged HTTP requests.
+- [@huggingface/usd-web-viewer](packages/usd-web-viewer/README.md): An OpenUSD viewer for the web: composes `.usd`, `.usda`, `.usdc` and `.usdz` files in WebAssembly and renders them with three.js.
 - [@huggingface/tasks](packages/tasks/README.md): The definition files and source-of-truth for the Hub's main primitives like pipeline tasks, model libraries, etc.
 - [@huggingface/jinja](packages/jinja/README.md): A minimalistic JS implementation of the Jinja templating engine, to be used for ML chat templates.
 - [@huggingface/space-header](packages/space-header/README.md): Use the Space `mini_header` outside Hugging Face

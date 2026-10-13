@@ -1,9 +1,12 @@
 {
 	"name": "@huggingface/usd-web-viewer",
 	"version": "0.1.0",
-	"private": true,
 	"description": "OpenUSD viewer for the web: pure-Rust USD composition (openusd) in WASM, rendered with three.js",
 	"license": "MIT",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
 	"type": "module",
 	"tshy": {
 		"dialects": [
