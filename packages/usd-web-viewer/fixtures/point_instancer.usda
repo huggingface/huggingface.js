@@ -2,8 +2,9 @@
 
 # Prototypes drawn at each instance: positions, orientations and scales under
 # a translated parent, the prototype's own transform kept, invisibleIds left
-# out. Instance 1, scaled by 2 and turned 90 degrees about Z, puts the
-# prototype's (0, 5) offset at (-10, 0).
+# out. Instance 1, at (2, 0), scaled by 2 and turned 90 degrees about Z, puts
+# the prototype's (0, 5) offset at (-10, 0) from it: roughly (-8, 0), not
+# exactly, as `quath` orientations are half precision.
 def Xform "W"
 {
     double3 xformOp:translate = (0, 0, 10)

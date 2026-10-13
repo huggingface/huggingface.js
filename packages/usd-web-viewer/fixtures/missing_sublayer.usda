@@ -3,6 +3,8 @@
     subLayers = [@./missing.usda@]
 )
 
+# A sublayer that cannot be read: the root layer's triangle is still drawn,
+# with a composition warning and the missing layer reported.
 def Mesh "Tri"
 {
     int[] faceVertexCounts = [3]

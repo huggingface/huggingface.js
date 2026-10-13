@@ -1,4 +1,8 @@
 #usda 1.0
+
+# Two quads sharing one material whose texture reads primvar `custom`: both
+# show the image's top-right texel (green), whether or not the mesh also has
+# `st`.
 def Mesh "WithSt" (
     prepend apiSchemas = ["MaterialBindingAPI"]
 )
