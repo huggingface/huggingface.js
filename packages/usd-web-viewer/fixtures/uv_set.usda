@@ -3,8 +3,9 @@
     upAxis = "Y"
 )
 
-# A quad whose texture reads primvar `custom` (all (1, 1): the image's top-right
-# texel, green) rather than `st` (all (0, 0): bottom-left, red).
+# Two quads sharing one material whose texture reads primvar `custom` (all
+# (1, 1): the image's top-right texel, green) rather than `st` (all (0, 0):
+# bottom-left, red): /Quad has both primvars, /OnlyCustom has no `st`.
 def Mesh "Quad" (
     prepend apiSchemas = ["MaterialBindingAPI"]
 )
@@ -13,6 +14,17 @@ def Mesh "Quad" (
     int[] faceVertexIndices = [0, 1, 2, 3]
     point3f[] points = [(-1, -1, 0), (1, -1, 0), (1, 1, 0), (-1, 1, 0)]
     texCoord2f[] primvars:st = [(0, 0), (0, 0), (0, 0), (0, 0)] (interpolation = "vertex")
+    texCoord2f[] primvars:custom = [(0.99, 0.99), (0.99, 0.99), (0.99, 0.99), (0.99, 0.99)] (interpolation = "vertex")
+    rel material:binding = </Mat>
+}
+
+def Mesh "OnlyCustom" (
+    prepend apiSchemas = ["MaterialBindingAPI"]
+)
+{
+    int[] faceVertexCounts = [4]
+    int[] faceVertexIndices = [0, 1, 2, 3]
+    point3f[] points = [(-1, -1, 0), (1, -1, 0), (1, 1, 0), (-1, 1, 0)]
     texCoord2f[] primvars:custom = [(0.99, 0.99), (0.99, 0.99), (0.99, 0.99), (0.99, 0.99)] (interpolation = "vertex")
     rel material:binding = </Mat>
 }

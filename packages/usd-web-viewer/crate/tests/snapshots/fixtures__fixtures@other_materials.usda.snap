@@ -1,10 +1,10 @@
 ---
 source: crate/tests/fixtures.rs
 expression: "out.replace(&dir, \"\")"
-input_file: fixtures/mdl_modules.usda
+input_file: fixtures/other_materials.usda
 ---
 upAxis Y, metersPerUnit 0.01
-prims 9, meshes 3, triangles 3
+prims 16, meshes 5, triangles 5
 
 instances:
   /ClearCoat: geometry 0, material 0
@@ -13,6 +13,10 @@ instances:
     at (0, 0, 0), world (2, 0, 0)..(3, 1, 0)
   /Custom: geometry 2, material 2
     at (0, 0, 0), world (4, 0, 0)..(5, 1, 0)
+  /MaterialX: geometry 3, material 3
+    at (0, 0, 0), world (6, 0, 0)..(7, 1, 0)
+  /GltfDouble: geometry 4, material 4
+    at (0, 0, 0), world (8, 0, 0)..(9, 1, 0)
 
 geometries:
   0 /ClearCoat: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
@@ -21,11 +25,18 @@ geometries:
     normals (0, 0, 1) x3
   2 /Custom: 1 triangles (all outward), 3 vertices, bounds (4, 0, 0)..(5, 1, 0)
     normals (0, 0, 1) x3
+  3 /MaterialX: 1 triangles (all outward), 3 vertices, bounds (6, 0, 0)..(7, 1, 0)
+    normals (0, 0, 1) x3
+  4 /GltfDouble: 1 triangles (all outward), 3 vertices, bounds (8, 0, 0)..(9, 1, 0)
+    normals (0, 0, 1) x3
 
 materials:
   0 /ClearCoatMat omnipbr: color (0.8, 0.1, 0.1), opacity 1, roughness 0.5, metallic 0
   1 /GltfMat gltf-pbr: color (0.1, 0.8, 0.1), opacity 1, roughness 1, metallic 1
   2 /CustomMat fallback: color (0.7, 0.7, 0.7), opacity 1, roughness 0.5, metallic 0
+  3 /MaterialXMat fallback: color (0.7, 0.7, 0.7), opacity 1, roughness 0.5, metallic 0
+  4 /GltfDoubleMat gltf-pbr: color (0.8, 0.8, 0.1), opacity 0.5, roughness 1, metallic 1
 
 warnings:
-  material-fallback: 1 material(s) have no UsdPreviewSurface or supported MDL material and show as grey (/CustomMat)
+  material-fallback: 2 material(s) have no UsdPreviewSurface or supported MDL material and show as grey (/CustomMat)
+  composition: unresolved Reference layer @library.mtlx@ at /Library
