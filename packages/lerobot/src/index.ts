@@ -1,7 +1,8 @@
+import type { IndexShard } from "./episodes";
 import type { FetchOptions } from "./http";
 import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 
-import { readEpisodes } from "./episodes";
+import { readEpisode, readEpisodes } from "./episodes";
 import { readFrames } from "./frames";
 import { fetchTextPrefix } from "./http";
 import { MAX_INFO_BYTES, resolveUrl } from "./paths";
@@ -17,6 +18,7 @@ export interface LeRobotDatasetOptions extends FetchOptions {
 }
 
 export interface ListEpisodesOptions {
+	/** Position in the index, which is not the `episode_index` once a dataset skips one; see `episode()`. */
 	offset?: number;
 	limit?: number;
 }
@@ -35,6 +37,8 @@ export class LeRobotDataset {
 	private readonly revision: string;
 	private readonly fetchOptions: FetchOptions;
 	private infoPromise?: Promise<LeRobotInfo>;
+	/** v3 index files walked so far, kept for the lifetime of this instance like `info()`. */
+	private readonly indexShards: IndexShard[] = [];
 
 	constructor(
 		public readonly repoId: string,
@@ -62,20 +66,41 @@ export class LeRobotDataset {
 	 * Episodes in index order, normalized so v2 and v3 datasets look the same. Never more than
 	 * `info.totalEpisodes`, and an episode index repeated within one call is returned once, as its first
 	 * occurrence.
+	 *
+	 * Rejects when a `v3.0` index needs more files to reach the page than there are episodes up to its
+	 * end (only empty index files do that), or more than 10,000 files.
+	 *
+	 * On v2.x the index is a JSON Lines file read from its start, so a deep `offset` downloads every line
+	 * before it, and throws if that is more than 256 MiB.
 	 */
 	async episodes(options?: ListEpisodesOptions): Promise<LeRobotEpisode[]> {
 		const info = await this.info();
-		const offset = Math.max(0, options?.offset ?? 0);
+		const offset = Math.max(0, Math.floor(options?.offset ?? 0));
 		/// info.json is authoritative. A repo re-uploaded with fewer episodes can keep a stale index file
 		/// after the current one, numbered from 0 again; reading past the count would return it.
 		const limit = Math.min(
-			Math.max(0, options?.limit ?? DEFAULT_EPISODE_LIMIT),
+			Math.max(0, Math.floor(options?.limit ?? DEFAULT_EPISODE_LIMIT)),
 			Math.max(0, info.totalEpisodes - offset),
 		);
-		if (limit === 0) {
+		/// Not `=== 0`: a NaN offset or limit makes `limit` NaN, which would read the whole v2 index.
+		if (!(limit > 0)) {
 			return [];
 		}
-		return readEpisodes(info, (path) => this.fileUrl(path), offset, limit, this.fetchOptions);
+		return readEpisodes(info, (path) => this.fileUrl(path), offset, limit, this.indexShards, this.fetchOptions);
+	}
+
+	/**
+	 * The episode whose `episode_index` is `index`, or `undefined` when there is none. Unlike
+	 * `episodes({ offset })`, which counts positions, this finds it in a dataset numbered from 10 or with
+	 * gaps. When episodes are numbered 0, 1, 2, ... it costs the same as `episodes({ offset: index, limit: 1 })`.
+	 *
+	 * Rejects in the same cases as `episodes()`.
+	 */
+	async episode(index: number): Promise<LeRobotEpisode | undefined> {
+		if (!Number.isSafeInteger(index) || index < 0) {
+			return undefined;
+		}
+		return readEpisode(await this.info(), (path) => this.fileUrl(path), index, this.indexShards, this.fetchOptions);
 	}
 
 	/**

@@ -11,6 +11,7 @@ import * as Humain from "../providers/humain-ai.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
+import * as OpenRouter from "../providers/openrouter.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
 import type {
@@ -31,6 +32,7 @@ import type {
 	ObjectDetectionTaskHelper,
 	QuestionAnsweringTaskHelper,
 	SentenceSimilarityTaskHelper,
+	TextRankingTaskHelper,
 	SummarizationTaskHelper,
 	TableQuestionAnsweringTaskHelper,
 	TabularClassificationTaskHelper,
@@ -111,6 +113,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"zero-shot-classification": new HFInference.HFInferenceZeroShotClassificationTask(),
 		"image-to-image": new HFInference.HFInferenceImageToImageTask(),
 		"sentence-similarity": new HFInference.HFInferenceSentenceSimilarityTask(),
+		"text-ranking": new HFInference.HFInferenceTextRankingTask(),
 		"table-question-answering": new HFInference.HFInferenceTableQuestionAnsweringTask(),
 		"tabular-classification": new HFInference.HFInferenceTabularClassificationTask(),
 		"text-to-speech": new HFInference.HFInferenceTextToSpeechTask(),
@@ -143,6 +146,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
+	},
+	openrouter: {
+		conversational: new OpenRouter.OpenRouterConversationalTask(),
 	},
 	ovhcloud: {
 		conversational: new OvhCloud.OvhCloudConversationalTask(),
@@ -288,6 +294,10 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "image-text-to-video",
 ): ImageTextToVideoTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
+	task: "text-ranking",
+): TextRankingTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "sentence-similarity",

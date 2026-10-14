@@ -299,6 +299,17 @@ const TEST_CASES: {
 		providers: ["fal-ai"],
 	},
 	{
+		testName: "text-ranking",
+		task: "text-ranking",
+		model: {
+			id: "cross-encoder/ettin-reranker-68m-v1",
+			pipeline_tag: "text-ranking",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+	},
+	{
 		testName: "feature-extraction",
 		task: "feature-extraction",
 		model: {
