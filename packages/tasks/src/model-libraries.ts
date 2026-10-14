@@ -1773,6 +1773,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt" OR path_extension:"pth"`,
 	},
+	"torch-pointcloud": {
+		prettyLabel: "torch-pointcloud",
+		repoName: "torch-pointcloud",
+		repoUrl: "https://github.com/arthurdjn/pytorch-pointcloud",
+		docsUrl: "https://pytorch-pointcloud.org/",
+		snippets: snippets.torch_pointcloud,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
 	transformers: {
 		prettyLabel: "Transformers",
 		repoName: "🤗/transformers",
