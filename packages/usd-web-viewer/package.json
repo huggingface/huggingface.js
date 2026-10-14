@@ -1,0 +1,26 @@
+{
+	"name": "@huggingface/usd-web-viewer",
+	"version": "0.1.0",
+	"private": true,
+	"description": "OpenUSD viewer for the web: pure-Rust USD composition (openusd) in WASM, rendered with three.js",
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"build:wasm": "bash scripts/build-wasm.sh",
+		"test": "cargo test --locked && cargo clippy --locked -- -D warnings && pnpm run build:wasm && git diff --exit-code -- wasm/usd_wasm.d.ts && vitest run",
+		"licenses": "node scripts/third-party-licenses.mjs",
+		"lint": "cargo fmt",
+		"lint:check": "cargo fmt --check",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
+		"prepack": "pnpm run build:wasm && pnpm run licenses"
+	},
+	"devDependencies": {
+		"binaryen": "^132.0.0",
+		"oxfmt": "^0.26.0",
+		"vitest": "^4.1.11"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}
