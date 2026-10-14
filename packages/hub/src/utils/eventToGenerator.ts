@@ -2,7 +2,7 @@ export async function* eventToGenerator<YieldType, ReturnType>(
 	cb: (
 		yieldCallback: (y: YieldType) => void,
 		returnCallback: (r: ReturnType) => void,
-		rejectCallack: (reason: unknown) => void,
+		rejectCallback: (reason: unknown) => void,
 	) => unknown,
 ): AsyncGenerator<YieldType, ReturnType> {
 	const promises: Array<{
