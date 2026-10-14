@@ -1,7 +1,7 @@
 // Browser checks for what only a browser shows: the real Worker and fetch
 // (credentials, abort), createImageBitmap limits and rendering. Serves
 // the package (its build and the fixtures) itself, logging each request.
-// usage: npm run build && npm run test:browser
+// usage: npm run build && npm run test:e2e
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import fs from "node:fs";
