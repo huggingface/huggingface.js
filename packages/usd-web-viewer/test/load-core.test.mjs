@@ -611,6 +611,30 @@ test("unused preloads give their bytes back before a needed layer would fail max
 	assert.deepEqual([stats.layers, stats.layerBytes, stats.warnings], [3, 1000, []]);
 });
 
+test("preloads do not count toward maxLayers, so a listing longer than maxLayers still loads the layers needed", async () => {
+	const files = {
+		"https://h/p/root.usda": sublayers("./part.usda", "./mat.usda"),
+		"https://h/p/part.usda": `#usda 1.0\n${QUAD}`,
+		"https://h/p/mat.usda": `#usda 1.0\n${QUAD.replace('"M"', '"Mat"')}`,
+	};
+	const unused = ["u1", "u2", "u3", "u4", "u5"].map((name) => `https://h/p/${name}.usda`);
+	for (const url of unused) files[url] = "#usda 1.0";
+	const s = server(files, { delayMs: 5 });
+	// The unused files come first, so preloads alone would fill the quota.
+	const listed = [...unused, "https://h/p/root.usda", "https://h/p/part.usda", "https://h/p/mat.usda"];
+	const { scene, stats } = await composeStage({
+		UsdLoader,
+		fetchBytes: s.fetchBytes,
+		rootUrl: "https://h/p/root.usda",
+		maxLayers: 3,
+		preload: Promise.resolve({ layers: listed.map((url) => ({ url, size: 10 })), eager: true }),
+	});
+	scene.free();
+	assert.deepEqual([stats.layers, stats.warnings], [3, []]);
+	// Only maxLayers preloads start.
+	assert.equal(fetched(s).filter((url) => unused.includes(url)).length, 3);
+});
+
 test("pinHubRevision pins a Hub root to the commit its branch points at", async () => {
 	const SHA = "a".repeat(40);
 	const requested = [];

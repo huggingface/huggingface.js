@@ -127,8 +127,10 @@ export async function composeStage({
 	// bytes are charged as they arrive, and stay charged once used.
 	const preloaded = new Map<string, Preloaded>();
 	let composed = false;
-	// Every distinct layer URL requested, preloads included, for maxLayers.
+	// Every distinct layer URL composition asked for, for maxLayers. Preloads
+	// are a guess, so they do not count; at most maxLayers of them start.
 	const requested = new Set<string>();
+	let preloads = 0;
 	const startPreload = (layers: PackageLayers["layers"]) => {
 		let bytes = 0;
 		for (const { url, size } of layers) {
@@ -137,13 +139,13 @@ export async function composeStage({
 			if (composed || bytes > maxLayerBytes) {
 				break;
 			}
-			if (requested.has(key)) {
+			if (requested.has(key) || preloaded.has(key)) {
 				continue;
 			}
-			if (requested.size >= maxLayers) {
+			if (preloads >= maxLayers) {
 				break;
 			}
-			requested.add(key);
+			preloads++;
 			const entry: Preloaded = { started: false, charged: 0 };
 			preloaded.set(key, entry);
 			// Unused once composed: the next chunk cancels the body.
