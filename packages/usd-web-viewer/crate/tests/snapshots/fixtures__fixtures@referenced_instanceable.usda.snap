@@ -1,0 +1,29 @@
+---
+source: crate/tests/fixtures.rs
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/referenced_instanceable.usda
+---
+upAxis Y, metersPerUnit 0.01
+prims 13, meshes 4, triangles 4
+
+instances:
+  /World/robot/base/mesh: geometry 0, material 1
+    at (0, 0, 0), world (0, 0, 0)..(1, 1, 0)
+  /World/robot/arm/hand/mesh: geometry 1, material 1
+    at (0, 0, 2), world (0, 0, 2)..(1, 1, 2)
+  /World/instanced_robot/base/mesh: geometry 2, material 1
+    at (4, 0, 0), world (4, 0, 0)..(5, 1, 0)
+  /World/instanced_robot/arm/hand/mesh: geometry 1, material 1
+    at (4, 0, 2), world (4, 0, 2)..(5, 1, 2)
+
+geometries:
+  0 /World/robot/base/mesh: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+  1 /__Prototype_0/mesh: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+  2 /__Prototype_1/base/mesh: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+
+materials:
+  0 (unbound) displayColor: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0, color from primvar displayColor
+  1 (unbound) fallback: color (0.7, 0.7, 0.7), opacity 1, roughness 0.5, metallic 0

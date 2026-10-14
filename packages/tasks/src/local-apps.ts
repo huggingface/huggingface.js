@@ -200,23 +200,14 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			content: commands("llama serve", "llama cli"),
 		},
 		{
-			title: "Use pre-built binary",
-			setup: [
-				// prettier-ignore
-				"# Download pre-built binary from:",
-				"# https://github.com/ggerganov/llama.cpp/releases",
-			].join("\n"),
-			content: commands("./llama-server", "./llama-cli"),
-		},
-		{
 			title: "Build from source code",
 			setup: [
-				"git clone https://github.com/ggerganov/llama.cpp.git",
+				"git clone https://github.com/ggml-org/llama.cpp.git",
 				"cd llama.cpp",
 				"cmake -B build",
-				"cmake --build build -j --target llama-server llama-cli",
+				"cmake --build build -j --target llama-app",
 			].join("\n"),
-			content: commands("./build/bin/llama-server", "./build/bin/llama-cli"),
+			content: commands("./build/bin/llama serve", "./build/bin/llama cli"),
 		},
 		// `docker model run` starts a chat session, which embedding models don't support
 		...(isEmbedding
