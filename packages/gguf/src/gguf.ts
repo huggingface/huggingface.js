@@ -94,6 +94,8 @@ const HTTP_CHUNK_SIZE = 2 * 10 ** 6; /// 2MB
 const HTTP_DATA_LEEWAY = 5 * 10 ** 5; /// 500kb
 const HTTP_TOTAL_MAX_SIZE = 50 * 10 ** 6; /// 50MB
 
+const textDecoder = new TextDecoder();
+
 /**
  * Internal stateful instance to fetch ranges of HTTP data when needed
  */
@@ -127,10 +129,8 @@ class RangeView {
 		},
 	) {
 		this.chunk = 0;
-		/// TODO(fix typing)
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		this.buffer = new ArrayBuffer(0, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
+		// Not resizable: TextDecoder rejects views on resizable buffers in Chrome and WebKit
+		this.buffer = new ArrayBuffer(0);
 		this.dataView = new DataView(this.buffer);
 	}
 	/**
@@ -161,27 +161,15 @@ class RangeView {
 	 * Append new data into the buffer
 	 */
 	appendBuffer(buf: Uint8Array) {
-		/// TODO(fix typing)
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		if (ArrayBuffer.prototype.resize) {
-			/// TODO(fix typing)
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			this.buffer.resize((this.chunk + 1) * HTTP_CHUNK_SIZE);
-			new Uint8Array(this.buffer).set(buf, this.chunk * HTTP_CHUNK_SIZE);
-		} else {
-			// If the browser does not support ArrayBuffer.resize, we fallback to this polyfill version
-			/// TODO(fix typing)
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			const newBuffer = new ArrayBuffer((this.chunk + 1) * HTTP_CHUNK_SIZE, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
-			const arrView = new Uint8Array(newBuffer);
-			arrView.set(new Uint8Array(this.buffer));
-			arrView.set(buf, this.chunk * HTTP_CHUNK_SIZE);
-			this.buffer = newBuffer;
-			this.dataView = new DataView(this.buffer);
+		const newSize = (this.chunk + 1) * HTTP_CHUNK_SIZE;
+		if (newSize > HTTP_TOTAL_MAX_SIZE) {
+			throw new Error(`GGUF header exceeds the ${HTTP_TOTAL_MAX_SIZE} bytes limit`);
 		}
+		const newBuffer = new Uint8Array(newSize);
+		newBuffer.set(new Uint8Array(this.buffer));
+		newBuffer.set(buf, this.chunk * HTTP_CHUNK_SIZE);
+		this.buffer = newBuffer.buffer;
+		this.dataView = new DataView(this.buffer);
 	}
 	/**
 	 * Check whether we need to fetch a new chunk
@@ -276,7 +264,7 @@ function readString(view: DataView, offset: number, version: Version, littleEndi
 		throw new Error(`String length ${length.value} exceeds maximum allowed (${MAX_STRING_LENGTH})`);
 	}
 	const off = length.length;
-	const value = new TextDecoder().decode(view.buffer.slice(offset + off, offset + off + Number(length.value)));
+	const value = textDecoder.decode(new Uint8Array(view.buffer, view.byteOffset + offset + off, Number(length.value)));
 	return { value, length: off + Number(length.value) };
 }
 
