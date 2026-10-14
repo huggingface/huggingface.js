@@ -6,7 +6,9 @@ import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
 import type { SetRequired } from "../vendor/type-fest/set-required";
-import { parseSafetensorsIndexStream } from "./parse-safetensors-index";
+import { MAX_WEIGHT_MAP_ENTRIES, parseSafetensorsIndexStream } from "./parse-safetensors-index";
+import { HUB_URL } from "../consts";
+import { checkCredentials } from "../utils/checkCredentials";
 import { sum } from "../utils/sum";
 import { chunk } from "../utils/chunk";
 import { XetBlob } from "../utils/XetBlob";
@@ -601,6 +603,51 @@ async function fetchAllHeaders(
 }
 
 /**
+ * The Hub serves the headers of every shard of a sharded model on `main` in a single request.
+ *
+ * Returns undefined when it can't (other revisions, endpoint unavailable...), to fall back to fetching each shard header.
+ */
+async function fetchShardedHeadersFromHub(
+	path: string,
+	params: {
+		repo: RepoDesignation;
+		revision?: string;
+		hubUrl?: string;
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>,
+): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } | undefined> {
+	const repoId = toRepoId(params.repo);
+	if (params.revision && params.revision !== "main") {
+		return undefined;
+	}
+	const accessToken = checkCredentials(params);
+	try {
+		const res = await (params.fetch ?? fetch)(
+			`${params.hubUrl ?? HUB_URL}/api/models/${repoId.name}/safetensors-metadata/${encodeShardFilename(path)}`,
+			{ headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {} },
+		);
+		if (!res.ok) {
+			return undefined;
+		}
+		const { index, headers }: { index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } = await res.json();
+		// The response leaves out the index's weight_map, which repeats the tensor names of the shard headers
+		const weightMap = Object.fromEntries(
+			Object.entries(headers).flatMap(([filename, header]) =>
+				Object.keys(header)
+					.filter((name) => name !== "__metadata__")
+					.map((name) => [name, filename]),
+			),
+		);
+		return {
+			index: Object.keys(weightMap).length <= MAX_WEIGHT_MAP_ENTRIES ? { ...index, weight_map: weightMap } : index,
+			headers,
+		};
+	} catch {
+		return undefined;
+	}
+}
+
+/**
  * Reads the `total_parameters` shortcut from the header/index metadata. It's self-reported and
  * the Hub displays it verbatim, bypassing the header validation above — so cap it at the
  * computed count when we have one (a no-op for well-formed files, where the two agree).
@@ -779,8 +826,11 @@ export async function parseSafetensorsMetadata(
 		};
 	} else if (location) {
 		const path = location.path;
-		const { index, shardFilenames } = await parseShardedIndex(path, params);
-		const shardedMap = await fetchAllHeaders(path, shardFilenames, params);
+		const fromHub = await fetchShardedHeadersFromHub(path, params);
+		const { index, shardFilenames } = fromHub
+			? { index: fromHub.index, shardFilenames: Object.keys(fromHub.headers) }
+			: await parseShardedIndex(path, params);
+		const shardedMap = fromHub?.headers ?? (await fetchAllHeaders(path, shardFilenames, params));
 		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 
 		const paramStats = params.computeParametersCount
