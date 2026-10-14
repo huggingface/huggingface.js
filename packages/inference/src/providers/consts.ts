@@ -34,6 +34,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	openrouter: {},
 	publicai: {},
 	ovhcloud: {},
+	regoloai: {},
 	replicate: {},
 	scaleway: {},
 	together: {},
