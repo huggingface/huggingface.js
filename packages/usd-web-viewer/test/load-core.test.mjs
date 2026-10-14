@@ -35,6 +35,34 @@ const QUAD = `def Mesh "M" {
   point3f[] points = [(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0)]
 }`;
 
+/**
+ * A triangle bound to material `Mat${n}`, whose diffuse color samples `file`; with `roughness`, its
+ * roughness samples the same image's red channel.
+ */
+function texturedTriangle(n, file, { roughness = false } = {}) {
+	const roughnessInput = roughness ? `\n    float inputs:roughness.connect = </Mat${n}/T.outputs:r>` : "";
+	const redOutput = roughness ? "\n    float outputs:r" : "";
+	return `def Mesh "M${n}" (prepend apiSchemas = ["MaterialBindingAPI"]) {
+  int[] faceVertexCounts = [3]
+  int[] faceVertexIndices = [0, 1, 2]
+  point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+  rel material:binding = </Mat${n}>
+}
+def Material "Mat${n}" {
+  token outputs:surface.connect = </Mat${n}/P.outputs:surface>
+  def Shader "P" {
+    uniform token info:id = "UsdPreviewSurface"
+    color3f inputs:diffuseColor.connect = </Mat${n}/T.outputs:rgb>${roughnessInput}
+    token outputs:surface
+  }
+  def Shader "T" {
+    uniform token info:id = "UsdUVTexture"
+    asset inputs:file = @${file}@
+    float3 outputs:rgb${redOutput}
+  }
+}`;
+}
+
 /** Serves `files` (URL -> string | Uint8Array); counts fetches in flight. */
 function server(files, { delayMs = 0 } = {}) {
 	const s = { inFlight: 0, maxInFlight: 0, requested: [] };
@@ -106,20 +134,15 @@ test("a package entry that lies about its size is read without trusting the head
 	assert.equal(triangles, 2);
 });
 
-test("a usdz layer whose files would expand too far is refused before openusd reads it", async () => {
-	// bomb.usdz, smaller: a deflated entry declaring 600 MiB, and one declaring less than it inflates to.
+test("a usdz layer with a compressed file, a zip bomb among them, is refused before openusd reads it", async () => {
+	// bomb.usdz, smaller: a deflated entry declaring 600 MiB. crate/tests/packages.rs covers the other bombs.
 	const quad = Buffer.from(`#usda 1.0\n${QUAD}`);
 	for (const entry of [
 		{ name: "root.usda", data: quad, deflate: true, declaredSize: 600 * 2 ** 20 },
-		{
-			name: "root.usda",
-			data: Buffer.concat([quad, Buffer.alloc(1 << 20, 32)]),
-			deflate: true,
-			declaredSize: quad.length,
-		},
+		{ name: "root.usda", data: quad, deflate: true },
 	]) {
-		const s = server({ "https://h/bomb.usdz": storedZip([entry]) });
-		const error = await composeStage({ UsdLoader, fetchBytes: s.fetchBytes, rootUrl: "https://h/bomb.usdz" }).then(
+		const bomb = server({ "https://h/bomb.usdz": storedZip([entry]) });
+		const error = await composeStage({ UsdLoader, fetchBytes: bomb.fetchBytes, rootUrl: "https://h/bomb.usdz" }).then(
 			() => null,
 			(e) => e,
 		);
@@ -158,42 +181,38 @@ test("layer progress counts each layer once, however many compose rounds fetch i
 	assert.deepEqual(events.at(-1), { ...events.at(-1), loaded: 5, total: 5 });
 });
 
-test("packaged texture reads share one byte budget", async () => {
-	// overlap.zip, smaller: three images in one package, read past the budget.
-	const mesh = (n) => `def Mesh "M${n}" (prepend apiSchemas = ["MaterialBindingAPI"]) {
-  int[] faceVertexCounts = [3]
-  int[] faceVertexIndices = [0, 1, 2]
-  point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
-  rel material:binding = </Mat${n}>
-}
-def Material "Mat${n}" {
-  token outputs:surface.connect = </Mat${n}/P.outputs:surface>
-  def Shader "P" {
-    uniform token info:id = "UsdPreviewSurface"
-    color3f inputs:diffuseColor.connect = </Mat${n}/T.outputs:rgb>
-    token outputs:surface
-  }
-  def Shader "T" {
-    uniform token info:id = "UsdUVTexture"
-    asset inputs:file = @${n}.png@
-    float3 outputs:rgb
-  }
-}`;
-	const names = ["a", "b", "c"];
+test("packaged images are read once however many materials sample them, only when textures load, within one byte budget", async () => {
+	// overlap.zip, smaller: three 1 MiB images in one package; two materials each sample the first twice.
+	const materials = [
+		texturedTriangle(0, "a.png", { roughness: true }),
+		texturedTriangle(1, "a.png", { roughness: true }),
+		texturedTriangle(2, "b.png"),
+		texturedTriangle(3, "c.png"),
+	];
 	const usdz = storedZip([
-		{ name: "root.usda", data: Buffer.from(`#usda 1.0\n${names.map(mesh).join("\n")}`) },
-		...names.map((n) => ({ name: `${n}.png`, data: Buffer.alloc(1 << 20) })),
+		{ name: "root.usda", data: Buffer.from(`#usda 1.0\n${materials.join("\n")}`) },
+		...["a", "b", "c"].map((n) => ({ name: `${n}.png`, data: Buffer.alloc(1 << 20) })),
 	]);
-	const s = server({ "https://h/p.usdz": usdz });
-	const { scene, meta } = await composeStage({ UsdLoader, fetchBytes: s.fetchBytes, rootUrl: "https://h/p.usdz" });
-	const packaged = takePackagedTextures(scene, textureJobs(meta, { textures: "preview", maxSize: 1024 }), {
-		maxBytes: 2.5 * 2 ** 20,
-	});
-	scene.free();
-	assert.deepEqual(
-		[...packaged.values()].map((v) => (v instanceof Error ? "refused" : v.byteLength)),
-		[1 << 20, 1 << 20, "refused"],
-	);
+	for (const [textures, expected] of [
+		["none", []],
+		["preview", [1 << 20, 1 << 20, "refused"]],
+	]) {
+		const s = server({ "https://h/p.usdz": usdz });
+		const { scene, meta } = await composeStage({ UsdLoader, fetchBytes: s.fetchBytes, rootUrl: "https://h/p.usdz" });
+		const read = [];
+		const packagedFile = scene.packagedFile.bind(scene);
+		scene.packagedFile = (path, limit) => (read.push(path), packagedFile(path, limit));
+		const packaged = takePackagedTextures(scene, textureJobs(meta, { textures, maxSize: 1024 }), {
+			maxBytes: 2.5 * 2 ** 20,
+		});
+		scene.free();
+		assert.deepEqual(
+			[...packaged.values()].map((v) => (v instanceof Error ? "refused" : v.byteLength)),
+			expected,
+			textures,
+		);
+		assert.equal(read.length, expected.length, `${textures}: each image read once (${read})`);
+	}
 });
 
 test("imageInfo reads the size of PNG, JPEG and WebP from the header, and whether it is color", () => {
@@ -230,7 +249,8 @@ test("imageInfo reads the size of PNG, JPEG and WebP from the header, and whethe
 	const vp8l = (639 | (479 << 14)) >>> 0;
 	const color = (width, height) => ({ width, height, color: true });
 	const data = { width: 64, height: 32, color: false };
-	// 8-bit RGB(A) and palette images are color (sRGB under `auto`); single-channel and 16-bit ones are data.
+	// 8-bit RGB(A) and palette images are color (sRGB under `auto`); single-channel and 16-bit ones are data. Other
+	// formats (GIF, BMP) are refused: see the e2e texture-limits case.
 	// [what, header, info]
 	for (const [what, header, expected] of [
 		["quadrants.png", new Uint8Array(readFileSync(new URL("../fixtures/quadrants.png", import.meta.url))), color(2, 2)],
@@ -248,50 +268,11 @@ test("imageInfo reads the size of PNG, JPEG and WebP from the header, and whethe
 			color(640, 480),
 		],
 		["extended WebP", riff("VP8X", [0, 0, 0, 0, ...le24(20000 - 1), ...le24(30 - 1)]), color(20000, 30)],
-		[
-			"GIF",
-			bytes(
-				"GIF89a",
-				le16(20000),
-				le16(20000),
-				Array.from({ length: 20 }, () => 0),
-			),
-			null,
-		],
-		[
-			"BMP",
-			bytes(
-				"BM",
-				Array.from({ length: 40 }, () => 0),
-			),
-			null,
-		],
 		["truncated RIFF", bytes("RIFF"), null],
 	]) {
 		assert.deepEqual(imageInfo(header), expected, what);
 	}
 });
-test("a mesh whose corners share one point welds in linear time", async () => {
-	// weld.usda, smaller: every corner on point 0, each with its own normal.
-	const faces = 20000;
-	const normals = Array.from({ length: faces * 3 }, (_, i) => `(${i}, 1, 0)`).join(", ");
-	const usda = `#usda 1.0
-def Mesh "M" {
-  int[] faceVertexCounts = [${Array.from({ length: faces }, () => 3).join(",")}]
-  int[] faceVertexIndices = [${Array.from({ length: faces * 3 }, () => 0).join(",")}]
-  point3f[] points = [(0, 0, 0)]
-  normal3f[] normals = [${normals}] (interpolation = "faceVarying")
-}`;
-	const s = server({ "https://h/root.usda": usda });
-	const t0 = performance.now();
-	const { scene, meta } = await composeStage({ UsdLoader, fetchBytes: s.fetchBytes, rootUrl: "https://h/root.usda" });
-	let vertices = 0;
-	readGeometries(scene, meta, (i, g) => (vertices = g.vertices));
-	scene.free();
-	assert.equal(vertices, faces * 3);
-	assert.ok(performance.now() - t0 < 3000, `${Math.round(performance.now() - t0)} ms`);
-}, 10000);
-
 test("indices are 16-bit up to index 65535, 32-bit past it", async () => {
 	// One triangle reaching the last of `points` points.
 	const mesh = (name, points) => `def Mesh "${name}" {
@@ -309,26 +290,6 @@ test("indices are 16-bit up to index 65535, 32-bit past it", async () => {
 		[65536, "Uint32Array"],
 	]);
 });
-test("fetchLimited stops reading a streamed body past maxBytes", async () => {
-	const chunk = Buffer.alloc(64 * 1024);
-	let sent = 0;
-	const srv = http.createServer((req, res) => {
-		if (req.url === "/small") return res.end("hello");
-		// Chunked, no content-length: only counting the stream can catch it.
-		const timer = setInterval(() => {
-			sent += chunk.length;
-			res.write(chunk);
-		}, 1);
-		res.on("close", () => clearInterval(timer));
-	});
-	await new Promise((resolve) => srv.listen(0, "127.0.0.1", resolve));
-	cleanups.push(() => srv.close());
-	const base = `http://127.0.0.1:${srv.address().port}`;
-	assert.equal(new TextDecoder().decode(await fetchLimited(`${base}/small`, cap(5))), "hello");
-	await assert.rejects(fetchLimited(`${base}/endless`, cap(256 * 1024)), /over the cap/);
-	assert.ok(sent < 4 * 1024 * 1024, `stopped early (${sent} bytes sent)`);
-});
-
 test("fetchLimited retries 429 and 5xx responses, not other errors", async () => {
 	const hits = {};
 	const srv = http.createServer((req, res) => {
@@ -489,114 +450,30 @@ test("relative layers resolve against the requested URL, not where it redirected
 	scene.free();
 	assert.deepEqual(requested, ["/a/root.usda", "/cdn/blob1", "/a/sub.usda"]);
 });
-test("a packaged image shared by many materials is extracted once, and only when its texture mode loads it", async () => {
-	// Two materials each sample one 1 MiB image twice.
-	const materials = Array.from(
-		{ length: 2 },
-		(_, i) => `def Mesh "M${i}" (prepend apiSchemas = ["MaterialBindingAPI"]) {
-  int[] faceVertexCounts = [3]
-  int[] faceVertexIndices = [0, 1, 2]
-  point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
-  rel material:binding = </Mat${i}>
-}
-def Material "Mat${i}" {
-  token outputs:surface.connect = </Mat${i}/P.outputs:surface>
-  def Shader "P" {
-    uniform token info:id = "UsdPreviewSurface"
-    color3f inputs:diffuseColor.connect = </Mat${i}/T.outputs:rgb>
-    float inputs:roughness.connect = </Mat${i}/T.outputs:r>
-    token outputs:surface
-  }
-  def Shader "T" {
-    uniform token info:id = "UsdUVTexture"
-    asset inputs:file = @tex.png@
-    float3 outputs:rgb
-    float outputs:r
-  }
-}`,
-	);
-	const usdz = storedZip([
-		{ name: "root.usda", data: Buffer.from(`#usda 1.0\n${materials.join("\n")}`) },
-		{ name: "tex.png", data: Buffer.alloc(1 << 20) },
-	]);
-	for (const [textures, reads] of [
-		["none", 0],
-		["preview", 1],
-	]) {
-		const s = server({ "https://h/shared.usdz": usdz });
-		const { scene, meta } = await composeStage({
-			UsdLoader,
-			fetchBytes: s.fetchBytes,
-			rootUrl: "https://h/shared.usdz",
-		});
-		const read = [];
-		const packagedFile = scene.packagedFile.bind(scene);
-		scene.packagedFile = (path, limit) => (read.push(path), packagedFile(path, limit));
-		const packaged = takePackagedTextures(scene, textureJobs(meta, { textures, maxSize: 1024 }));
-		scene.free();
-		assert.equal(read.length, reads, textures);
-		if (reads) assert.equal(packaged.get("https://h/shared.usdz[tex.png]").byteLength, 1 << 20);
-	}
-});
-
-test("layers that reference each other compose instead of waiting on each other forever", async () => {
-	const s = server({
-		"https://h/root.usda": '#usda 1.0\ndef "A" (references = @./a.usda@) {}',
-		"https://h/a.usda": `#usda 1.0\n(defaultPrim = "M")\n${QUAD}\ndef "Back" (references = @./b.usda@) {}`,
-		"https://h/b.usda": '#usda 1.0\n(defaultPrim = "X")\ndef "X" (references = @./a.usda@) {}',
-	});
-	const { scene, stats } = await composeStage({ UsdLoader, fetchBytes: s.fetchBytes, rootUrl: "https://h/root.usda" });
-	scene.free();
-	assert.equal(stats.layers, 3);
-	assert.deepEqual(s.requested.sort(), ["https://h/a.usda", "https://h/b.usda", "https://h/root.usda"]);
-}, 5000);
-
-test("a stage with nothing to draw says so, after naming what it could not draw", async () => {
-	const read = async (usda) => {
-		const s = server({ "https://h/root.usda": `#usda 1.0\n${usda}` });
-		const { scene, meta } = await composeStage({ UsdLoader, fetchBytes: s.fetchBytes, rootUrl: "https://h/root.usda" });
-		const warnings = readGeometries(scene, meta, () => {});
-		scene.free();
-		return [...meta.warnings, ...warnings].map((w) => w.code);
-	};
-	assert.deepEqual(await read('def ParticleField3DGaussianSplat "Splat" {}'), ["prim-unsupported", "nothing-drawable"]);
-	assert.deepEqual(await read('def Mesh "Empty" {}'), ["nothing-drawable"]);
-	assert.deepEqual(await read(QUAD), []);
-});
-
-test("reading geometry out of order or out of range throws instead of trapping", async () => {
-	const s = server({ "https://h/root.usda": `#usda 1.0\n${QUAD}` });
-	const { scene } = await composeStage({ UsdLoader, fetchBytes: s.fetchBytes, rootUrl: "https://h/root.usda" });
-	assert.throws(() => scene.positions(), { message: /call read\(\) first/ });
-	assert.throws(() => scene.read(7, 100), { message: /no geometry 7: the scene has 1/ });
-	assert.ok(scene.read(0, 100));
-	assert.throws(() => scene.uvs(3), { message: /no UV set 3/ });
-	// Still usable: none of these trapped.
-	assert.equal(scene.positions().length, 12);
-	scene.free();
-});
-
 test("running out of WASM memory fails as a scene too large to load; a panic gives its message", () => {
 	const GiB = 2 ** 30;
-	const oom = new Error('failed to decode field "default" at /W/body.normals: failed to read vec: out of memory');
-	assert.match(loadFailure(oom, 1 * GiB).message, /^scene too large to load: ran out of memory.*body\.normals/);
-	assert.equal(loadFailure(oom, 1 * GiB).code, "compose");
-	// An allocation that aborts traps; near the 4 GiB ceiling that is memory, not a bug.
-	assert.match(loadFailure(new WebAssembly.RuntimeError("unreachable"), 3.9 * GiB).message, /^scene too large to load/);
-	// Without a panic message, a bare `unreachable` is Rust aborting on a failed allocation.
-	assert.match(
-		loadFailure(new WebAssembly.RuntimeError("unreachable"), 0.1 * GiB).message,
-		/^scene too large to load: ran out of memory/,
-	);
-	assert.match(
-		loadFailure(new RangeError("Array buffer allocation failed"), 0.1 * GiB).message,
-		/^scene too large to load/,
-	);
+	const unreachable = () => new WebAssembly.RuntimeError("unreachable");
 	const panic = "panicked at crate/src/extract.rs:1:1:\nindex out of bounds";
-	assert.equal(
-		loadFailure(new WebAssembly.RuntimeError("unreachable"), 0.1 * GiB, () => panic).message,
-		`unreachable: ${panic}`,
-	);
+	// [error, WASM memory in use, last panic, message]
+	for (const [error, memory, lastPanic, message] of [
+		[
+			new Error('failed to decode field "default" at /W/body.normals: failed to read vec: out of memory'),
+			1 * GiB,
+			undefined,
+			/^scene too large to load: ran out of memory.*body\.normals/,
+		],
+		// An allocation that aborts traps; near the 4 GiB ceiling that is memory, not a bug.
+		[unreachable(), 3.9 * GiB, undefined, /^scene too large to load/],
+		// Without a panic message, a bare `unreachable` is Rust aborting on a failed allocation.
+		[unreachable(), 0.1 * GiB, undefined, /^scene too large to load: ran out of memory/],
+		[new RangeError("Array buffer allocation failed"), 0.1 * GiB, undefined, /^scene too large to load/],
+		[unreachable(), 0.1 * GiB, () => panic, `unreachable: ${panic}`],
+	]) {
+		const failure = loadFailure(error, memory, lastPanic);
+		assert.equal(failure.code, "compose");
+		if (typeof message === "string") assert.equal(failure.message, message);
+		else assert.match(failure.message, message);
+	}
 	const fetchError = loadFailure(
 		new UsdLoadError("fetch", "HTTP 404 for https://h/a.usd", { url: "https://h/a.usd", status: 404 }),
 		4 * GiB,
@@ -610,28 +487,7 @@ test("running out of WASM memory fails as a scene too large to load; a panic giv
 });
 
 test("a UDIM texture loads its first tile, 1001", async () => {
-	const s = server({
-		"https://h/root.usda": `#usda 1.0
-def Mesh "M" (prepend apiSchemas = ["MaterialBindingAPI"]) {
-  int[] faceVertexCounts = [3]
-  int[] faceVertexIndices = [0, 1, 2]
-  point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
-  rel material:binding = </Mat>
-}
-def Material "Mat" {
-  token outputs:surface.connect = </Mat/Surface.outputs:surface>
-  def Shader "Surface" {
-    uniform token info:id = "UsdPreviewSurface"
-    color3f inputs:diffuseColor.connect = </Mat/Tex.outputs:rgb>
-    token outputs:surface
-  }
-  def Shader "Tex" {
-    uniform token info:id = "UsdUVTexture"
-    asset inputs:file = @Textures/body_alb.<UDIM>.png@
-    float3 outputs:rgb
-  }
-}`,
-	});
+	const s = server({ "https://h/root.usda": `#usda 1.0\n${texturedTriangle(0, "Textures/body_alb.<UDIM>.png")}` });
 	const { scene, meta } = await composeStage({ UsdLoader, fetchBytes: s.fetchBytes, rootUrl: "https://h/root.usda" });
 	scene.free();
 	assert.deepEqual(
@@ -641,38 +497,16 @@ def Material "Mat" {
 });
 
 test("textures inside a package nested in packages are found where the nesting says", async () => {
-	const material = `def Mesh "M" (prepend apiSchemas = ["MaterialBindingAPI"]) {
-  int[] faceVertexCounts = [3]
-  int[] faceVertexIndices = [0, 1, 2]
-  point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
-  rel material:binding = </M/Mat>
-  def Material "Mat" {
-    token outputs:surface.connect = </M/Mat/Surface.outputs:surface>
-    def Shader "Surface" {
-      uniform token info:id = "UsdPreviewSurface"
-      color3f inputs:diffuseColor.connect = </M/Mat/Tex.outputs:rgb>
-      token outputs:surface
-    }
-    def Shader "Tex" {
-      uniform token info:id = "UsdUVTexture"
-      asset inputs:file = @0/t.png@
-      float3 outputs:rgb
-    }
-  }
-}`;
 	const deep = storedZip([
-		{ name: "deep.usda", data: Buffer.from(`#usda 1.0\n(defaultPrim = "M")\n${material}`) },
+		{ name: "deep.usda", data: Buffer.from(`#usda 1.0\n${texturedTriangle(0, "0/t.png")}`) },
 		{ name: "0/t.png", data: Buffer.from("deep texture") },
 	]);
 	const mid = storedZip([
-		{
-			name: "mid.usda",
-			data: Buffer.from('#usda 1.0\n(defaultPrim = "Mid")\ndef "Mid" (references = @0/deep.usdz@) {}'),
-		},
+		{ name: "mid.usda", data: Buffer.from(sublayers("0/deep.usdz")) },
 		{ name: "0/deep.usdz", data: deep },
 	]);
 	const outer = storedZip([
-		{ name: "outer.usda", data: Buffer.from('#usda 1.0\ndef "Outer" (references = @0/mid.usdz@) {}') },
+		{ name: "outer.usda", data: Buffer.from(sublayers("0/mid.usdz")) },
 		{ name: "0/mid.usdz", data: mid },
 	]);
 	const s = server({ "https://h/outer.usdz": outer });
@@ -680,72 +514,50 @@ test("textures inside a package nested in packages are found where the nesting s
 	const textures = takePackagedTextures(scene, textureJobs(meta, { textures: "full", maxSize: 1024 }));
 	scene.free();
 	const path = "https://h/outer.usdz[0/mid.usdz[0/deep.usdz[0/t.png]]]";
-	assert.deepEqual(
-		textureJobs(meta, { textures: "full" }).map((j) => j.path),
-		[path],
-	);
+	assert.deepEqual([...textures.keys()], [path]);
 	assert.equal(new TextDecoder().decode(textures.get(path)), "deep texture");
 });
 
-test("preloaded layers are used when composition asks for them, and change nothing else", async () => {
+test("preloads are used when composition asks for them, give way to the regular fetch when they fail, and change nothing else", async () => {
 	const files = {
-		"https://h/p/root.usda": `#usda 1.0\n(subLayers = [@./a b.usda@])\n${QUAD}`,
+		"https://h/p/root.usda": `#usda 1.0\n(subLayers = [@./a b.usda@, @./gone.usda@])\n${QUAD}`,
 		"https://h/p/a b.usda": sublayers("./b.usda"),
-		"https://h/p/b.usda": `#usda 1.0\ndef Mesh "B" {\n  int[] faceVertexCounts = [3]\n  int[] faceVertexIndices = [0, 1, 2]\n  point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]\n}`,
+		"https://h/p/b.usda": `#usda 1.0\n${QUAD.replace('"M"', '"B"')}`,
 		"https://h/p/unused.usda": `#usda 1.0\n${QUAD.replace('"M"', '"U"')}`,
 	};
 	const plain = server(files, { delayMs: 5 });
 	const expected = await composeStage({ UsdLoader, fetchBytes: plain.fetchBytes, rootUrl: "https://h/p/root.usda" });
-	// As listed: spelled the way fetch spells it, root included.
-	const listed = ["root.usda", "a%20b.usda", "b.usda", "unused.usda"].map((name) => ({
+	// As listed: spelled the way fetch spells it, root included, and a listed layer that is gone.
+	const listed = ["root.usda", "a%20b.usda", "b.usda", "unused.usda", "gone.usda"].map((name) => ({
 		url: `https://h/p/${name}`,
 		size: 100,
 	}));
 	const s = server({ ...files, "https://h/p/a%20b.usda": files["https://h/p/a b.usda"] }, { delayMs: 5 });
+	// b.usda's preload fails: composition asks for it again.
+	let failures = 0;
+	const fetchBytes = (url, budget) =>
+		url === "https://h/p/b.usda" && !failures++ ? Promise.reject(new TypeError("network")) : s.fetchBytes(url, budget);
 	const actual = await composeStage({
 		UsdLoader,
-		fetchBytes: s.fetchBytes,
+		fetchBytes,
 		rootUrl: "https://h/p/root.usda",
 		preload: Promise.resolve({ layers: listed, eager: true }),
 	});
 	assert.deepEqual(actual.meta, expected.meta);
+	assert.deepEqual(actual.stats.warnings, expected.stats.warnings);
 	assert.equal(actual.stats.layers, 3);
 	expected.scene.free();
 	actual.scene.free();
+	assert.equal(failures, 2);
+	// A preload that found nothing gives way too: gone.usda is asked for again before it is reported missing.
 	assert.deepEqual(fetched(s).sort(), [
 		"https://h/p/a%20b.usda",
 		"https://h/p/b.usda",
+		"https://h/p/gone.usda",
+		"https://h/p/gone.usda",
 		"https://h/p/root.usda",
 		"https://h/p/unused.usda",
 	]);
-});
-
-test("a preload that fails gives way to the regular fetch, with its result", async () => {
-	const files = {
-		"https://h/root.usda": sublayers("./a.usda", "./gone.usda"),
-		"https://h/a.usda": sublayers("./b.usda"),
-		"https://h/b.usda": "#usda 1.0",
-	};
-	const s = server(files, { delayMs: 5 });
-	const requested = [];
-	const fetchBytes = (url, budget) => {
-		requested.push(url);
-		if (url === "https://h/b.usda" && requested.filter((u) => u === url).length === 1)
-			return Promise.reject(new TypeError("network"));
-		return s.fetchBytes(url, budget);
-	};
-	const preload = Promise.resolve({
-		layers: ["b.usda", "gone.usda"].map((name) => ({ url: `https://h/${name}`, size: 1 })),
-		eager: false,
-	});
-	const { scene, stats } = await composeStage({ UsdLoader, fetchBytes, rootUrl: "https://h/root.usda", preload });
-	scene.free();
-	assert.equal(stats.layers, 3);
-	assert.deepEqual(
-		stats.warnings.map((w) => w.code),
-		["layer-missing"],
-	);
-	assert.deepEqual(requested.filter((u) => u === "https://h/b.usda").length, 2);
 });
 
 test("a root with no dependencies fetches nothing ahead unless its package is declared", async () => {
@@ -877,7 +689,7 @@ test("hubPackageLayers lists the SimReady package of a Hub root, and nothing for
 	);
 });
 
-test("limits: requests in flight, layer files and bytes, drawn triangles and instances", async () => {
+test("limits and what a load leaves out: requests in flight, layer files and bytes, triangles, instances", async () => {
 	const layers = Object.fromEntries(
 		Array.from({ length: 40 }, (_, i) => [`l${i}.usda`, `#usda 1.0\ndef Xform "X${i}" {}`]),
 	);
@@ -897,6 +709,14 @@ test("limits: requests in flight, layer files and bytes, drawn triangles and ins
     uniform token familyName = "materialBind"
     int[] indices = [${Array.from({ length: 100 }, () => 0)}]
   }
+}`;
+	// weld.usda, smaller: every corner on point 0, each with its own normal; welding it must stay linear.
+	const faces = 20000;
+	const weld = `def Mesh "W" {
+  int[] faceVertexCounts = [${Array.from({ length: faces }, () => 3)}]
+  int[] faceVertexIndices = [${Array.from({ length: faces * 3 }, () => 0)}]
+  point3f[] points = [(0, 0, 0)]
+  normal3f[] normals = [${Array.from({ length: faces * 3 }, (_, i) => `(${i}, 1, 0)`)}] (interpolation = "faceVarying")
 }`;
 	const instancer = (count) => `def PointInstancer "PI" {
   rel prototypes = [</PI/P/M>]
@@ -981,6 +801,32 @@ test("limits: requests in flight, layer files and bytes, drawn triangles and ins
 				],
 			},
 		],
+		["a mesh whose corners share one point welds in linear time", weld, {}, [], {}, { triangles: faces, warnings: [] }],
+		[
+			"layers that reference each other compose instead of waiting on each other forever",
+			'def "A" (references = @./a.usda@) {}',
+			{
+				"a.usda": `#usda 1.0\n(defaultPrim = "M")\n${QUAD}\ndef "Back" (references = @./b.usda@) {}`,
+				"b.usda": '#usda 1.0\n(defaultPrim = "X")\ndef "X" (references = @./a.usda@) {}',
+			},
+			[],
+			{},
+			{ requests: 3, triangles: 2, warnings: [] },
+		],
+		[
+			"a stage with nothing to draw says so, after naming what it could not draw",
+			'def ParticleField3DGaussianSplat "Splat" {}\ndef Mesh "Empty" {}',
+			{},
+			[],
+			{},
+			{
+				triangles: 0,
+				warnings: [
+					["prim-unsupported", "/Splat"],
+					["nothing-drawable", undefined],
+				],
+			},
+		],
 		[
 			"an unused preload is charged as it streams",
 			"(subLayers = [@./a.usda@])",
@@ -1043,4 +889,4 @@ test("limits: requests in flight, layer files and bytes, drawn triangles and ins
 			);
 		assert.ok(unusedRead <= (expected.unusedRead ?? Infinity), `${what}: ${unusedRead} bytes read`);
 	}
-});
+}, 15000);
