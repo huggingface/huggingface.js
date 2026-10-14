@@ -40,8 +40,10 @@ jobs:
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
           pnpm install --frozen-lockfile --filter .
-          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+          pnpm install --frozen-lockfile --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]...
+          pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]... build
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
       - name: Install the hf CLI
         run: |
@@ -63,7 +65,9 @@ jobs:
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
+        run: pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}] test
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
   browser:
     runs-on: ubuntu-latest
@@ -81,12 +85,13 @@ jobs:
         id: since
         env:
           PR_REF: ${{  github.event.pull_request.head.ref }}
+          GITHUB_EVENT_PULL_REQUEST_BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
           if [ -z $PR_REF ]
           then
             echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
+            echo "SINCE=$(git merge-base origin/${GITHUB_EVENT_PULL_REQUEST_BASE_REF} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
       - run: google-chrome --version
@@ -100,8 +105,10 @@ jobs:
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
           pnpm install --frozen-lockfile --filter .
-          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+          pnpm install --frozen-lockfile --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]...
+          pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]... build
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
       - name: Install the hf CLI
         run: |
@@ -123,7 +130,9 @@ jobs:
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test in browser
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
+        run: pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}] test:browser
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
   e2e:
     runs-on: ubuntu-latest
