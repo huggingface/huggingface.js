@@ -127,9 +127,7 @@ class RangeView {
 		},
 	) {
 		this.chunk = 0;
-		/// TODO(fix typing)
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
+		// @ts-expect-error -- ArrayBuffer.resize / maxByteLength not in ES2022 lib types
 		this.buffer = new ArrayBuffer(0, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
 		this.dataView = new DataView(this.buffer);
 	}
@@ -161,20 +159,14 @@ class RangeView {
 	 * Append new data into the buffer
 	 */
 	appendBuffer(buf: Uint8Array) {
-		/// TODO(fix typing)
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
+		// @ts-expect-error -- ArrayBuffer.resize not in ES2022 lib types
 		if (ArrayBuffer.prototype.resize) {
-			/// TODO(fix typing)
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
+			// @ts-expect-error -- ArrayBuffer.resize not in ES2022 lib types
 			this.buffer.resize((this.chunk + 1) * HTTP_CHUNK_SIZE);
 			new Uint8Array(this.buffer).set(buf, this.chunk * HTTP_CHUNK_SIZE);
 		} else {
 			// If the browser does not support ArrayBuffer.resize, we fallback to this polyfill version
-			/// TODO(fix typing)
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
+			// @ts-expect-error -- ArrayBuffer maxByteLength not in ES2022 lib types
 			const newBuffer = new ArrayBuffer((this.chunk + 1) * HTTP_CHUNK_SIZE, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
 			const arrView = new Uint8Array(newBuffer);
 			arrView.set(new Uint8Array(this.buffer));
