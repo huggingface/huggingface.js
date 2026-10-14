@@ -45,6 +45,13 @@ export enum GGMLFileQuantizationType {
 	Q1_0 = 40,
 	Q2_0 = 41,
 
+	// custom quants used by Prism ML's llama.cpp fork (https://github.com/PrismML-Eng/llama.cpp)
+	// these are the real `general.file_type` values the fork writes: group-128 variants of Q2_0 and
+	// TQ1_0 (one fp16 scale per 128 weights instead of per 64/256), so they are distinct containers,
+	// not aliases of the upstream types
+	PQ2_0 = 128,
+	PTQ1_0 = 129,
+
 	// custom quants used by unsloth
 	// they are not officially a scheme enum value in GGUF, but only here for naming
 	Q2_K_XL = 1000,
@@ -53,6 +60,10 @@ export enum GGMLFileQuantizationType {
 	Q5_K_XL = 1003,
 	Q6_K_XL = 1004,
 	Q8_K_XL = 1005,
+
+	// Scion's per-row n-gram table container (ggml type 146 in the same fork)
+	// a tensor type that shows up in filenames, not a gguf file-type value; named here like the unsloth _XL names
+	Q4X160 = 1006,
 }
 
 const ggufQuants = Object.values(GGMLFileQuantizationType).filter((v): v is string => typeof v === "string");
@@ -117,6 +128,7 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	GGMLFileQuantizationType.Q4_3,
 	GGMLFileQuantizationType.MXFP4_MOE,
 	GGMLFileQuantizationType.NVFP4,
+	GGMLFileQuantizationType.Q4X160,
 
 	// 3-bit quantizations
 	GGMLFileQuantizationType.Q3_K_XL,
@@ -137,11 +149,13 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	GGMLFileQuantizationType.IQ2_XS,
 	GGMLFileQuantizationType.IQ2_XXS,
 	GGMLFileQuantizationType.Q2_0,
+	GGMLFileQuantizationType.PQ2_0,
 
 	// 1-bit quantizations
 	GGMLFileQuantizationType.IQ1_S,
 	GGMLFileQuantizationType.IQ1_M,
 	GGMLFileQuantizationType.TQ1_0,
+	GGMLFileQuantizationType.PTQ1_0,
 	GGMLFileQuantizationType.TQ2_0,
 	GGMLFileQuantizationType.Q1_0,
 ];

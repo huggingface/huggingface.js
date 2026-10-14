@@ -346,6 +346,11 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("gpt-oss-20b-MXFP4.gguf")).toEqual("MXFP4");
 		expect(parseGGUFQuantLabel("gpt-oss-120b-MXFP4.gguf")).toEqual("MXFP4");
 		expect(parseGGUFQuantLabel("Qwable-v1-35B-A3B-MXFP4_MOE.gguf")).toEqual("MXFP4_MOE");
+		// Prism ML's llama.cpp fork: group-128 variants of Q2_0/TQ1_0 and its per-row PLE table container.
+		// These must not fall back to the upstream Q2_0/TQ1_0 substrings inside them.
+		expect(parseGGUFQuantLabel("Scion-35B-A3B-PQ2_0-corr.gguf")).toEqual("PQ2_0");
+		expect(parseGGUFQuantLabel("Scion-FlashNext-176B-A6B-PTQ1_0.gguf")).toEqual("PTQ1_0");
+		expect(parseGGUFQuantLabel("Scion-FlashNext-176B-A6B-Q6_K-Q4X160.gguf")).toEqual("Q4X160"); // last label wins
 	});
 
 	it("parse quant label groups", async () => {
@@ -363,6 +368,16 @@ describe("gguf", () => {
 			sizeVariation: undefined,
 		});
 		expect(groups("gpt-oss-20b-MXFP4.gguf")).toEqual({ prefix: undefined, quant: "MXFP4", sizeVariation: undefined });
+		expect(groups("Scion-35B-A3B-PQ2_0-corr.gguf")).toEqual({
+			prefix: undefined,
+			quant: "PQ2_0",
+			sizeVariation: undefined,
+		});
+		expect(groups("Scion-FlashNext-176B-A6B-Q6_K-Q4X160.gguf")).toEqual({
+			prefix: undefined,
+			quant: "Q4X160",
+			sizeVariation: undefined,
+		});
 	});
 
 	it("calculate tensor data offset", async () => {
