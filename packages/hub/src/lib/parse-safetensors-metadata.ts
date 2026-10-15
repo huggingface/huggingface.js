@@ -603,35 +603,43 @@ async function fetchAllHeaders(
 }
 
 /**
- * The Hub serves the headers of every shard of a sharded model on `main` in a single request.
+ * Get the headers of every shard of a sharded model on `main` from the Hub in a single request, instead of
+ * {@link parseSafetensorsMetadata} fetching each shard header. Hugging Face Hub only.
  *
- * Returns undefined when it can't (other revisions, endpoint unavailable...), to fall back to fetching each shard header.
+ * Returns undefined when the Hub can't serve them (revisions other than `main`, files it can't parse...).
  */
-async function fetchShardedHeadersFromHub(
-	path: string,
+export async function fetchShardedHeadersFromHub(
 	params: {
 		repo: RepoDesignation;
+		/**
+		 * Path of the safetensors index file inside `repo`
+		 *
+		 * @default "model.safetensors.index.json"
+		 */
+		path?: string;
 		revision?: string;
 		hubUrl?: string;
-		useSafetensorsMetadataEndpoint?: boolean;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
 ): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } | undefined> {
 	const repoId = toRepoId(params.repo);
-	if (params.useSafetensorsMetadataEndpoint === false || (params.revision && params.revision !== "main")) {
+	if (params.revision && params.revision !== "main") {
 		return undefined;
 	}
 	const accessToken = checkCredentials(params);
 	try {
 		const res = await (params.fetch ?? fetch)(
-			`${params.hubUrl ?? HUB_URL}/api/models/${repoId.name}/safetensors-metadata/${encodeShardFilename(path)}`,
+			`${params.hubUrl ?? HUB_URL}/api/models/${repoId.name}/safetensors-metadata/${encodeShardFilename(params.path ?? SAFETENSORS_INDEX_FILE)}`,
 			{ headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {} },
 		);
 		if (!res.ok) {
 			return undefined;
 		}
 		const { index, headers }: { index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } = await res.json();
-		// Same guards as when fetching each shard header: a failing check falls back to that path, which then throws
+		// Same guards as when parseSafetensorsMetadata fetches each shard header
 		if (Object.keys(headers).length > MAX_SHARD_COUNT) {
 			return undefined;
 		}
@@ -727,13 +735,6 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
-		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
-		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
-		 *
-		 * @default true
-		 */
-		useSafetensorsMetadataEndpoint?: boolean;
-		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -761,13 +762,6 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
-		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
-		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
-		 *
-		 * @default true
-		 */
-		useSafetensorsMetadataEndpoint?: boolean;
-		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -781,7 +775,6 @@ export async function parseSafetensorsMetadata(
 		library?: string;
 		hubUrl?: string;
 		revision?: string;
-		useSafetensorsMetadataEndpoint?: boolean;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
@@ -852,11 +845,8 @@ export async function parseSafetensorsMetadata(
 		};
 	} else if (location) {
 		const path = location.path;
-		const fromHub = await fetchShardedHeadersFromHub(path, params);
-		const { index, shardFilenames } = fromHub
-			? { index: fromHub.index, shardFilenames: Object.keys(fromHub.headers) }
-			: await parseShardedIndex(path, params);
-		const shardedMap = fromHub?.headers ?? (await fetchAllHeaders(path, shardFilenames, params));
+		const { index, shardFilenames } = await parseShardedIndex(path, params);
+		const shardedMap = await fetchAllHeaders(path, shardFilenames, params);
 		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 
 		const paramStats = params.computeParametersCount
