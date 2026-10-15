@@ -27,3 +27,7 @@
 # Ownership for the ollama-utils Package
 
 /packages/ollama-utils @ngxson
+
+# Ownership for the usd-web-viewer Package
+
+/packages/usd-web-viewer/ @cfahlgren1
