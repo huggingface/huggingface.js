@@ -72,7 +72,7 @@ print(output)`);
 		const model: ModelData = {
 			id: "MiniMaxAI/MiniMax-Music3",
 			pipeline_tag: "text-to-audio",
-			tags: ["minimax_music3"],
+			tags: ["diffusers", "text-to-audio", "minimax_music3"],
 			inference: "",
 		};
 		const snippet = diffusers(model).join("\n");
