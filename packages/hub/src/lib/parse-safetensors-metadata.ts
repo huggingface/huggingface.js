@@ -613,11 +613,12 @@ async function fetchShardedHeadersFromHub(
 		repo: RepoDesignation;
 		revision?: string;
 		hubUrl?: string;
+		useSafetensorsMetadataEndpoint?: boolean;
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
 ): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } | undefined> {
 	const repoId = toRepoId(params.repo);
-	if (params.revision && params.revision !== "main") {
+	if (params.useSafetensorsMetadataEndpoint === false || (params.revision && params.revision !== "main")) {
 		return undefined;
 	}
 	const accessToken = checkCredentials(params);
@@ -726,6 +727,13 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
+		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
+		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
+		 *
+		 * @default true
+		 */
+		useSafetensorsMetadataEndpoint?: boolean;
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -753,6 +761,13 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
+		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
+		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
+		 *
+		 * @default true
+		 */
+		useSafetensorsMetadataEndpoint?: boolean;
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -766,6 +781,7 @@ export async function parseSafetensorsMetadata(
 		library?: string;
 		hubUrl?: string;
 		revision?: string;
+		useSafetensorsMetadataEndpoint?: boolean;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */

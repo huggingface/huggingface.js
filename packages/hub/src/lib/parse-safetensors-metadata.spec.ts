@@ -111,6 +111,23 @@ describe("parseSafetensorsMetadata", () => {
 		assert.ok(urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
 	});
 
+	it("never requests the one-request endpoint when it's disabled", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			useSafetensorsMetadataEndpoint: false,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert.ok(!urls.some((url) => url.includes("/safetensors-metadata/")));
+	});
+
 	it("fetch info for single-file with multiple dtypes", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",
