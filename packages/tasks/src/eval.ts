@@ -173,4 +173,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
 		url: "https://github.com/run-llama/ExtractBench",
 	},
+	"sra-bench": {
+   	name: "sra-bench",
+   	description:
+   		"SRA Stablecoin Risk Bench evaluates models as risk gates for stablecoin payments (approve, hold or reject) and as adjudicators of payment disputes across the settlement-finality boundary, with safety-weighted scoring of unsafe approvals, impossible remedies and wrongful refunds.",
+   	url: "https://github.com/sriram1983007-dev/sra-riskgate/tree/main/eval",
+  },
 } as const;
