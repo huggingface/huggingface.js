@@ -4,10 +4,7 @@ import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 
 import { openRemoteFile, TAIL_PROBE_BYTES } from "./http";
 
-/**
- * hyparquet is a hard dependency but is still loaded on demand, so a caller that only reads `info()`
- * never pays for the parquet reader.
- */
+/** Loaded on demand, so `info()` alone never pulls in the parquet reader. */
 async function loadHyparquet() {
 	return import("hyparquet");
 }
@@ -22,10 +19,8 @@ function isNumberLeaf(node: SchemaTree | undefined): boolean {
 }
 
 /**
- * The columns a series can come from (a number, or a list of numbers) among `features`, plus
- * `timestamp`. hyparquet decodes a nested column for its whole row group whatever rows are asked for,
- * so reading the others only to drop them can exhaust the heap: `language_*` annotations on a 900k-row
- * group take over 8 GB.
+ * Number and list-of-number columns among `features`, plus `timestamp`. hyparquet decodes a nested
+ * column for its whole row group, so reading the others can exhaust the heap (`language_*` columns).
  */
 function framesColumns(schema: SchemaTree, features?: string[]): string[] {
 	return schema.children
@@ -44,10 +39,7 @@ function framesColumns(schema: SchemaTree, features?: string[]): string[] {
 		.map((column) => column.element.name);
 }
 
-/**
- * Compressed bytes of `columns` in the row groups holding rows `[rowStart, rowEnd)`. Without a page
- * index, which LeRobot does not write, hyparquet fetches those column chunks whole.
- */
+/** Compressed size of `columns` in the row groups holding `[rowStart, rowEnd)`, fetched whole without a page index. */
 function columnBytes(metadata: FileMetaData, columns: string[], rowStart: number, rowEnd: number): number {
 	const wanted = new Set(columns);
 	let bytes = 0;
@@ -81,10 +73,7 @@ function toNumber(value: unknown): number | undefined {
 	return undefined;
 }
 
-/**
- * Components per row: the array width for `observation.state`, `action` and the rest of the motor
- * features, 1 for a scalar such as a reward or a success flag. Undefined for anything else.
- */
+/** Components per row: the array width, 1 for a scalar, undefined for anything else. */
 function seriesWidth(rows: Record<string, unknown>[], key: string): number | undefined {
 	const first = rows[0]?.[key];
 	if (Array.isArray(first)) {
@@ -132,7 +121,6 @@ export async function readFrames(
 		if (width === undefined) {
 			continue;
 		}
-		/// One array per component rather than one per row: a chart plots a component over time.
 		const components: number[][] = Array.from({ length: width }, () => []);
 		for (const row of rows) {
 			const value = row[key];
@@ -143,8 +131,7 @@ export async function readFrames(
 		series[key] = components;
 	}
 
-	/// `timestamp` is seconds from the start of the episode on both layouts; the frame index is the
-	/// fallback for a dataset that omits it.
+	/// Episode-relative on both layouts; the frame index is the fallback.
 	const timestamps = rows.map((row, index) => toNumber(row.timestamp) ?? (info.fps > 0 ? index / info.fps : index));
 
 	return {
