@@ -236,6 +236,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 132,
 		releaseYear: 2021,
 	},
+	"RX 6400": {
+		tflops: 7.13,
+		memory: [4],
+		gfxVersion: "gfx1034",
+		msrp: 159,
+		power: 53,
+		releaseYear: 2022,
+	},
 	"RX 5700 XT": {
 		tflops: 19.51,
 		memory: [8],
@@ -307,6 +315,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		msrp: 1_900,
 		power: 250,
 		releaseYear: 2020,
+	},
+	"Radeon Pro WX 2100": {
+		tflops: 1.25,
+		memory: [2],
+		gfxVersion: "gfx803",
+		msrp: 149,
+		power: 35,
+		releaseYear: 2017,
 	},
 	"Radeon 610M": {
 		tflops: 0.97,
