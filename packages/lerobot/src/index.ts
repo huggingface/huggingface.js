@@ -23,6 +23,16 @@ export interface ListEpisodesOptions {
 	limit?: number;
 }
 
+export interface ReadFramesOptions {
+	/** Only these features, such as `["observation.state", "action"]`. Every numeric one by default. */
+	features?: string[];
+	/**
+	 * Resolve `undefined` rather than download more than this. A data file is usually one row group
+	 * read whole, so the cost follows the size of the file, not of the episode.
+	 */
+	maxBytes?: number;
+}
+
 /**
  * A LeRobot dataset on the Hub, read over ranged HTTP requests.
  *
@@ -105,7 +115,8 @@ export class LeRobotDataset {
 
 	/**
 	 * One episode's frame rows, as a series per component. `undefined` when the episode's rows could
-	 * not be located, which is what `episode.data` being absent means.
+	 * not be located, which is what `episode.data` being absent means, or would cost more than
+	 * `maxBytes`.
 	 *
 	 * ```ts
 	 * const [episode] = await dataset.episodes({ limit: 1 });
@@ -113,8 +124,8 @@ export class LeRobotDataset {
 	 * frames?.series["observation.state"][0]; // shoulder_pan over time
 	 * ```
 	 */
-	async frames(episode: LeRobotEpisode): Promise<LeRobotFrames | undefined> {
-		return readFrames(await this.info(), episode, this.fetchOptions);
+	async frames(episode: LeRobotEpisode, options?: ReadFramesOptions): Promise<LeRobotFrames | undefined> {
+		return readFrames(await this.info(), episode, this.fetchOptions, options?.features, options?.maxBytes);
 	}
 }
 
