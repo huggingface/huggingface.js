@@ -5,6 +5,7 @@ import {
 	cartesia_pytorch,
 	depth_anything_v2,
 	describe_anything,
+	dew,
 	diffusers,
 	diffusionkit,
 	gliner2,
@@ -148,6 +149,23 @@ print(output)`);
 	});
 
 	describe("snippets stay runnable for the common repo shapes", () => {
+		it("dew: each supported task calls its own interface, and any other only loads", () => {
+			const snippet = (pipeline_tag?: string) =>
+				dew({ id: "dewml/model", tags: [], inference: "", pipeline_tag } as ModelData).join("\n");
+			const images = snippet("text-to-image");
+			expect(images).toContain('pipe = dew.pipeline("dewml/model")');
+			expect(images).toContain(".host().images");
+			const text = snippet("text-generation");
+			expect(text).toContain('task = dew.pipeline("dewml/model")');
+			expect(text).toContain("print(generation.text[0])");
+			const decision = snippet("text-classification");
+			expect(decision).toContain('decide = dew.pipeline("dewml/model")');
+			expect(decision).toContain('print(answers["department"].choice)');
+			for (const other of ["image-text-to-text", undefined]) {
+				expect(snippet(other).trimEnd().endsWith('task = dew.pipeline("dewml/model")')).toBe(true);
+			}
+		});
+
 		const base = { id: "user/model", tags: [] as string[], inference: "" };
 
 		it("transformers: the chat example needs a chat template, not only the conversational tag", () => {
