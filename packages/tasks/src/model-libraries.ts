@@ -163,6 +163,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
 	},
+	basedecision: {
+		prettyLabel: "BaseDecision",
+		repoName: "BaseDecision",
+		repoUrl: "https://github.com/hrudayaditya/BaseDecision",
+		docsUrl: "https://github.com/hrudayaditya/BaseDecision/blob/main/docs/API.md",
+		snippets: snippets.basedecision,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
 	bboxmaskpose: {
 		prettyLabel: "BBoxMaskPose",
 		repoName: "BBoxMaskPose",
