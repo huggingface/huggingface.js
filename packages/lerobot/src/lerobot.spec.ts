@@ -568,6 +568,24 @@ describe("frames columns", () => {
 			"next.success": [[0, 0, 1]],
 		});
 	});
+
+	it("does not decode columns that cannot be a series", async () => {
+		/// Labelled GZIP, which hyparquet cannot decompress, so decoding it at all would throw.
+		const data = parquetWriteBuffer({
+			compressors: { GZIP: (bytes) => bytes },
+			columnData: [
+				{ name: "timestamp", type: "DOUBLE", data: [0, 0.1, 0.2] },
+				{ name: "next.reward", type: "DOUBLE", data: [0, 0.5, 1] },
+				{ name: "language_persistent", type: "STRING", data: ["a", "b", "c"], codec: "GZIP" },
+			],
+		});
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: mockFetch({ ...files, "data/chunk-000/file-000.parquet": new Uint8Array(data) }),
+		});
+		const [episode] = await dataset.episodes({ limit: 1 });
+		const frames = await dataset.frames(episode);
+		expect(frames?.series).toEqual({ "next.reward": [[0, 0.5, 1]] });
+	});
 });
 
 describe("episode count and repeated indexes", () => {

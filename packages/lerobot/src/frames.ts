@@ -1,3 +1,4 @@
+import type { SchemaTree } from "hyparquet";
 import type { FetchOptions } from "./http";
 import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 
@@ -13,6 +14,30 @@ async function loadHyparquet() {
 
 /** LeRobot writes these on every dataset to locate a frame; they are not signals to chart. */
 const BOOKKEEPING_COLUMNS = new Set(["timestamp", "frame_index", "episode_index", "index", "task_index"]);
+
+const NUMBER_TYPES = new Set(["BOOLEAN", "INT32", "INT64", "FLOAT", "DOUBLE"]);
+
+function isNumberLeaf(node: SchemaTree | undefined): boolean {
+	return node !== undefined && node.children.length === 0 && NUMBER_TYPES.has(node.element.type ?? "");
+}
+
+/**
+ * The columns a series can come from (a number, or a list of numbers), plus `timestamp`. hyparquet
+ * decodes a nested column for its whole row group whatever rows are asked for, so reading the others
+ * only to drop them can exhaust the heap: `language_*` annotations on a 900k-row group take over 8 GB.
+ */
+function framesColumns(schema: SchemaTree): string[] {
+	return schema.children
+		.filter((column) => {
+			const [child] = column.children;
+			const isSeries =
+				isNumberLeaf(column) ||
+				(column.children.length === 1 &&
+					(isNumberLeaf(child) || (child.children.length === 1 && isNumberLeaf(child.children[0]))));
+			return isSeries && (column.element.name === "timestamp" || !BOOKKEEPING_COLUMNS.has(column.element.name));
+		})
+		.map((column) => column.element.name);
+}
 
 /** Rows carry `bigint` for integer columns, and `null` wherever the dataset has a gap. */
 function toNumber(value: unknown): number | undefined {
@@ -48,12 +73,13 @@ export async function readFrames(
 	if (!episode.data) {
 		return undefined;
 	}
-	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
+	const { parquetMetadataAsync, parquetReadObjects, parquetSchema } = await loadHyparquet();
 	const file = await openRemoteFile(episode.data.url, options);
 	const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
 	const rows = (await parquetReadObjects({
 		file,
 		metadata,
+		columns: framesColumns(parquetSchema(metadata)),
 		rowStart: episode.data.fromRow,
 		rowEnd: episode.data.toRow,
 	})) as Record<string, unknown>[];
