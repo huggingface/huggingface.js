@@ -13,8 +13,12 @@ defaults:
   run:
     working-directory: packages/tasks-gen
 
+permissions: {}
+
 jobs:
   pull_request:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       # Setup

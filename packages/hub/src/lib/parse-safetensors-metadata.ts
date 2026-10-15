@@ -6,8 +6,13 @@ import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
 import type { SetRequired } from "../vendor/type-fest/set-required";
-import { parseSafetensorsIndexStream } from "./parse-safetensors-index";
+import { MAX_WEIGHT_MAP_ENTRIES, parseSafetensorsIndexStream } from "./parse-safetensors-index";
+import { HUB_URL } from "../consts";
+import { checkCredentials } from "../utils/checkCredentials";
 import { sum } from "../utils/sum";
+import { chunk } from "../utils/chunk";
+import { XetBlob } from "../utils/XetBlob";
+import { pathsInfo } from "./paths-info";
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
@@ -42,6 +47,9 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 }
 
 const PARALLEL_DOWNLOADS = 20;
+const PATHS_INFO_BATCH_SIZE = 1_000;
+/// Covers the header of almost all shards (typically a few KB to ~100KB), larger ones need a second read
+const HEADER_SPECULATIVE_READ_LENGTH = 100_000;
 const MAX_HEADER_LENGTH = 25_000_000; // 25MB
 const MAX_CONFIG_LENGTH = 10_000_000; // 10MB — config.json is typically small; cap to avoid large memory use
 const MAX_SHARD_COUNT = 10_000; // well above any real sharded model; blocks crafted index with millions of entries
@@ -361,15 +369,18 @@ async function parseSingleFile(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
-): Promise<{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined }> {
-	const blob = await downloadFile({ ...params, path });
+): Promise<SafetensorsFileHeader> {
+	return parseHeaderFromBlob(path, await downloadFile({ ...params, path }));
+}
 
+async function parseHeaderFromBlob(path: string, blob: Blob | null): Promise<SafetensorsFileHeader> {
 	if (!blob) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
 	}
 
-	const bufLengthOfHeaderLE = await blob.slice(0, 8).arrayBuffer();
-	const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
+	// Read the length and (usually) the whole header in a single request
+	const prefix = new Uint8Array(await blob.slice(0, HEADER_SPECULATIVE_READ_LENGTH).arrayBuffer());
+	const lengthOfHeader = new DataView(prefix.buffer).getBigUint64(0, true);
 	// ^little-endian
 	if (lengthOfHeader <= 0) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
@@ -380,9 +391,23 @@ async function parseSingleFile(
 		);
 	}
 
+	const headerEnd = 8 + Number(lengthOfHeader);
+	let headerBytes = prefix.subarray(8, headerEnd);
+	if (headerEnd > prefix.byteLength) {
+		if (headerEnd > blob.size) {
+			throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
+		}
+		headerBytes = new Uint8Array(headerEnd - 8);
+		headerBytes.set(prefix.subarray(8));
+		headerBytes.set(
+			new Uint8Array(await blob.slice(prefix.byteLength, headerEnd).arrayBuffer()),
+			prefix.byteLength - 8,
+		);
+	}
+
 	let header: SafetensorsFileHeader;
 	try {
-		header = JSON.parse(await blob.slice(8, 8 + Number(lengthOfHeader)).text());
+		header = JSON.parse(new TextDecoder().decode(headerBytes));
 	} catch (err) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
 	}
@@ -395,7 +420,7 @@ async function parseSingleFile(
 		validateTensorEntry(path, tensorName, info, fileSizeBytes);
 	}
 
-	return { header, fileSizeBytes };
+	return header;
 }
 
 async function parseShardedIndex(
@@ -535,21 +560,102 @@ async function fetchAllHeaders(
 	for (const filename of filenames) {
 		assertSafeShardFilename(filename);
 	}
-	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
-		(
-			await promisesQueue(
-				filenames.map(
-					(filename) => async () =>
-						[filename, await parseSingleFile(pathPrefix + encodeShardFilename(filename), params)] satisfies [
-							string,
-							{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined },
-						],
+	if (!filenames.length) {
+		return {};
+	}
+	const paths = filenames.map((filename) => pathPrefix + filename);
+	// Only the first shard goes through the per-file resolve probe: it gives us the xet refresh URL,
+	// shared by the whole repo. The other shards' xet hashes come from batched paths-info calls.
+	const firstBlob = await downloadFile({ ...params, path: paths[0] });
+	const firstXetBlob = firstBlob instanceof XetBlob ? firstBlob : undefined;
+	const otherInfos = firstXetBlob
+		? await Promise.all(
+				chunk(paths.slice(1), PATHS_INFO_BATCH_SIZE).map((batch) =>
+					pathsInfo({ ...params, paths: batch }).catch(() => []),
 				),
-				PARALLEL_DOWNLOADS,
 			)
-		).map(([filename, { header }]) => [filename, header]),
+		: [];
+	const infoByPath = new Map(otherInfos.flat().map((info) => [info.path, info]));
+
+	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
+		await promisesQueue(
+			filenames.map((filename, i) => async () => {
+				const path = paths[i];
+				const info = infoByPath.get(path);
+				const blob =
+					i === 0
+						? firstBlob
+						: firstXetBlob && info?.xetHash
+							? new XetBlob({
+									fetch: firstXetBlob.fetch,
+									refreshUrl: firstXetBlob.refreshUrl,
+									accessToken: firstXetBlob.accessToken,
+									hash: info.xetHash,
+									size: info.size,
+								})
+							: await downloadFile({ ...params, path });
+				return [filename, await parseHeaderFromBlob(path, blob)] satisfies [string, SafetensorsFileHeader];
+			}),
+			PARALLEL_DOWNLOADS,
+		),
 	);
 	return shardedMap;
+}
+
+/**
+ * The Hub serves the headers of every shard of a sharded model on `main` in a single request.
+ *
+ * Returns undefined when it can't (other revisions, endpoint unavailable...), to fall back to fetching each shard header.
+ */
+async function fetchShardedHeadersFromHub(
+	path: string,
+	params: {
+		repo: RepoDesignation;
+		revision?: string;
+		hubUrl?: string;
+		useSafetensorsMetadataEndpoint?: boolean;
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>,
+): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } | undefined> {
+	const repoId = toRepoId(params.repo);
+	if (params.useSafetensorsMetadataEndpoint === false || (params.revision && params.revision !== "main")) {
+		return undefined;
+	}
+	const accessToken = checkCredentials(params);
+	try {
+		const res = await (params.fetch ?? fetch)(
+			`${params.hubUrl ?? HUB_URL}/api/models/${repoId.name}/safetensors-metadata/${encodeShardFilename(path)}`,
+			{ headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {} },
+		);
+		if (!res.ok) {
+			return undefined;
+		}
+		const { index, headers }: { index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } = await res.json();
+		// Same guards as when fetching each shard header: a failing check falls back to that path, which then throws
+		if (Object.keys(headers).length > MAX_SHARD_COUNT) {
+			return undefined;
+		}
+		for (const [filename, header] of Object.entries(headers)) {
+			assertSafeShardFilename(filename);
+			for (const [tensorName, info] of typedEntries(omit(header, "__metadata__"))) {
+				validateTensorEntry(filename, tensorName, info, undefined);
+			}
+		}
+		// The response leaves out the index's weight_map, which repeats the tensor names of the shard headers
+		const weightMap = Object.fromEntries(
+			Object.entries(headers).flatMap(([filename, header]) =>
+				Object.keys(header)
+					.filter((name) => name !== "__metadata__")
+					.map((name) => [name, filename]),
+			),
+		);
+		return {
+			index: Object.keys(weightMap).length <= MAX_WEIGHT_MAP_ENTRIES ? { ...index, weight_map: weightMap } : index,
+			headers,
+		};
+	} catch {
+		return undefined;
+	}
 }
 
 /**
@@ -621,6 +727,13 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
+		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
+		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
+		 *
+		 * @default true
+		 */
+		useSafetensorsMetadataEndpoint?: boolean;
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -648,6 +761,13 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
+		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
+		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
+		 *
+		 * @default true
+		 */
+		useSafetensorsMetadataEndpoint?: boolean;
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -661,6 +781,7 @@ export async function parseSafetensorsMetadata(
 		library?: string;
 		hubUrl?: string;
 		revision?: string;
+		useSafetensorsMetadataEndpoint?: boolean;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
@@ -709,7 +830,7 @@ export async function parseSafetensorsMetadata(
 	}
 
 	if (location && !location.sharded) {
-		const { header } = await parseSingleFile(location.path, params);
+		const header = await parseSingleFile(location.path, params);
 		const paramStats = params.computeParametersCount
 			? (() => {
 					const parameterCount = computeNumOfParamsByDtypeSingleFile(header, quantConfig, expertDtype);
@@ -731,8 +852,11 @@ export async function parseSafetensorsMetadata(
 		};
 	} else if (location) {
 		const path = location.path;
-		const { index, shardFilenames } = await parseShardedIndex(path, params);
-		const shardedMap = await fetchAllHeaders(path, shardFilenames, params);
+		const fromHub = await fetchShardedHeadersFromHub(path, params);
+		const { index, shardFilenames } = fromHub
+			? { index: fromHub.index, shardFilenames: Object.keys(fromHub.headers) }
+			: await parseShardedIndex(path, params);
+		const shardedMap = fromHub?.headers ?? (await fetchAllHeaders(path, shardFilenames, params));
 		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 
 		const paramStats = params.computeParametersCount
@@ -761,6 +885,11 @@ export interface QuantizationConfig {
 	quant_method?: string;
 	/** Routed expert precision when it differs from the main quantizer (e.g. FP4 experts with FP8 attention). */
 	expert_dtype?: string;
+	/**
+	 * Same role as `expert_dtype` under another name: MiMo-V2.6 is `quant_method: "fp8"` for its
+	 * dense layers but stores the routed experts as `store_dtype: "mxfp4"`, packed two per `U8`.
+	 */
+	store_dtype?: string;
 	/** MLX quantization mode (e.g. `affine`); MLX configs do not declare `quant_method`. */
 	mode?: string;
 	group_size?: number;
@@ -1162,18 +1291,22 @@ export function getQuantizationMultiplier(
 
 		case "fp8": {
 			// fp8 weights live in F8_* dtypes at one value per byte, so nothing to do for them.
-			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8.
+			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8/U8.
 			// `expert_dtype` is in quantization_config for DeepSeek-V4.1, or in the model config
-			// for DeepSeek-V4-Pro. Both declare "fp4", i.e. two weights per byte.
+			// for DeepSeek-V4-Pro. Both declare "fp4", i.e. two weights per byte. MiMo-V2.6 declares
+			// the same packing as `store_dtype: "mxfp4"` in quantization_config instead.
 			// Those experts dominate the parameter count, so missing this halves the total.
 			//
-			// `expert_dtype` describes the experts and nothing else, so it must not be applied to
+			// These keys describe the experts and nothing else, so they must not be applied to
 			// every integer tensor in the model: a routing table or other integer bookkeeping would
 			// otherwise be inflated by the packing factor — 8x for an I32 one.
 			if (!isRoutedExpertTensor(tensorName)) {
 				return 1;
 			}
-			return packingFactor(dtype, bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype));
+			return packingFactor(
+				dtype,
+				bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype ?? quantConfig.store_dtype),
+			);
 		}
 
 		case "bitsandbytes":

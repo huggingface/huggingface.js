@@ -71,6 +71,63 @@ describe("parseSafetensorsMetadata", () => {
 		assert.ok(parse.filepaths.includes("model_00012-of-00072.safetensors"));
 	});
 
+	it("fetches every shard header of a sharded model on main in one request", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 8);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert(parse.index.weight_map);
+		assert.ok(Object.values(parse.index.weight_map).every((filename) => filename in parse.headers));
+		assert.ok(urls.some((url) => url.includes("/safetensors-metadata/model.safetensors.index.json")));
+		assert.ok(!urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
+	});
+
+	it("falls back to fetching each shard header when the one-request response fails the header checks", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				if (String(url).includes("/safetensors-metadata/")) {
+					const header = { "lm_head.weight": { dtype: "BF16", shape: [1e300], data_offsets: [0, 2] } };
+					return new Response(JSON.stringify({ index: {}, headers: { "model-00001-of-00008.safetensors": header } }));
+				}
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert.ok(urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
+	});
+
+	it("never requests the one-request endpoint when it's disabled", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			useSafetensorsMetadataEndpoint: false,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert.ok(!urls.some((url) => url.includes("/safetensors-metadata/")));
+	});
+
 	it("fetch info for single-file with multiple dtypes", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",
@@ -201,10 +258,11 @@ describe("parseSafetensorsMetadata", () => {
 			header: Record<string, unknown>,
 			dataBytes = 0,
 			config?: Record<string, unknown>,
+			declaredHeaderLength?: number,
 		): typeof fetch => {
 			const headerBytes = new TextEncoder().encode(JSON.stringify(header));
 			const file = new Uint8Array(8 + headerBytes.length + dataBytes);
-			new DataView(file.buffer).setBigUint64(0, BigInt(headerBytes.length), true);
+			new DataView(file.buffer).setBigUint64(0, BigInt(declaredHeaderLength ?? headerBytes.length), true);
 			file.set(headerBytes, 8);
 			const configFile = config ? new TextEncoder().encode(JSON.stringify(config)) : undefined;
 			return (async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -219,6 +277,9 @@ describe("parseSafetensorsMetadata", () => {
 				if (range?.startsWith("bytes=")) {
 					const [start, endRaw] = range.slice("bytes=".length).split("-");
 					const startByte = Number(start);
+					if (startByte >= resource.length) {
+						return new Response(null, { status: 416 });
+					}
 					const endByte = endRaw === "" ? resource.length - 1 : Math.min(Number(endRaw), resource.length - 1);
 					return new Response(resource.slice(startByte, endByte + 1), {
 						status: 206,
@@ -277,6 +338,43 @@ describe("parseSafetensorsMetadata", () => {
 					fetch,
 				}),
 			).rejects.toThrow(/exceeds the file size/);
+		});
+
+		it("reads a header larger than the speculative first read", async () => {
+			const padding = "x".repeat(300_000);
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", padding },
+					weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] },
+				},
+				800,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/large-header-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.strictEqual(parse.header.__metadata__?.padding, padding);
+			assert.deepStrictEqual(parse.parameterCount, { F32: 200 });
+		});
+
+		it("rejects a header length pointing past the end of a small file", async () => {
+			const fetch = fetchForFile(
+				{ weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] } },
+				800,
+				undefined,
+				10_000,
+			);
+
+			await expect(
+				parseSafetensorsMetadata({
+					repo: "some-user/truncated-header-model",
+					fetch,
+				}),
+			).rejects.toThrow(SafetensorParseError);
 		});
 
 		it("caps a self-reported total_parameters above the computed count", async () => {
@@ -372,6 +470,46 @@ describe("parseSafetensorsMetadata", () => {
 			// Only the packed experts expand: 8 bytes hold 16 FP4 parameters. The Engram
 			// embedding and attention retain their original counts, and block scales are excluded.
 			assert.deepStrictEqual(parse.parameterCount, { I8: 20, F8_E4M3: 8, BF16: 2 });
+			assert.strictEqual(parse.parameterTotal, 30);
+		});
+
+		it("reads store_dtype from quantization_config when counting packed U8 experts", async () => {
+			// MiMo-V2.6: `quant_method: "fp8"` for the dense layers, but the routed experts are
+			// `store_dtype: "mxfp4"` — two weights per U8 byte, with U8 `weight_scale` blocks beside them.
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", total_parameters: "30" },
+					"model.layers.1.mlp.experts.0.gate_proj.weight": { dtype: "U8", shape: [2, 4], data_offsets: [0, 8] },
+					"model.layers.1.mlp.experts.0.gate_proj.weight_scale": { dtype: "U8", shape: [2, 1], data_offsets: [8, 10] },
+					"model.layers.0.mlp.gate_proj.weight": { dtype: "F8_E4M3", shape: [2, 4], data_offsets: [10, 18] },
+					"model.layers.0.mlp.gate_proj.weight_scale_inv": { dtype: "F32", shape: [1], data_offsets: [18, 22] },
+					"model.layers.1.self_attn.o_proj.weight": { dtype: "BF16", shape: [2, 2], data_offsets: [22, 30] },
+					"model.layers.1.mlp.gate.e_score_correction_bias": { dtype: "F32", shape: [2], data_offsets: [30, 38] },
+				},
+				38,
+				{
+					quantization_config: {
+						activation_scheme: "dynamic",
+						fmt: "e4m3",
+						mxfp4_block_size: 32,
+						quant_method: "fp8",
+						store_dtype: "mxfp4",
+						weight_block_size: [128, 128],
+					},
+				},
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/fp8-model-with-mxfp4-experts",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			// Only the packed experts expand: 8 bytes hold 16 MXFP4 parameters. The dense fp8 layer and
+			// attention keep their counts, the router bias is a real F32 parameter, and both kinds of
+			// block scales are excluded.
+			assert.deepStrictEqual(parse.parameterCount, { U8: 16, F8_E4M3: 8, BF16: 4, F32: 2 });
 			assert.strictEqual(parse.parameterTotal, 30);
 		});
 
@@ -874,6 +1012,43 @@ describe("parseSafetensorsMetadata", () => {
 			});
 		});
 
+		describe("fp8 with store_dtype", () => {
+			// MiMo-V2.6 spells the packed-expert declaration `store_dtype` and uses U8 containers.
+			const mimo = { quant_method: "fp8", store_dtype: "mxfp4" };
+
+			it("packs routed experts two-per-byte in either 8-bit container", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", mimo), 2);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "I8", mimo), 2);
+			});
+
+			it("leaves everything that is not a packed routed expert alone", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "F8_E4M3", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "BF16", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.mlp.gate_proj.weight", "U8", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.ffn.shared_experts.w1.weight", "U8", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.self_attn.qkv_proj.weight", "F8_E4M3", mimo), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.layers.0.mlp.gate.tid2eid", "I32", mimo), 1);
+			});
+
+			it("is a no-op for a store_dtype that isn't sub-byte", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, store_dtype: "fp8" }), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, store_dtype: "bf16" }), 1);
+			});
+
+			it("defers to an explicit expert_dtype, in the quantizer or at the model level", () => {
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, expert_dtype: "fp8" }), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", mimo, "fp8"), 1);
+				assert.strictEqual(getQuantizationMultiplier(EXPERT, "U8", { ...mimo, expert_dtype: "fp4" }), 2);
+			});
+
+			it.each([4, {}, null])("ignores a malformed store_dtype (%j)", (storeDtype) => {
+				assert.strictEqual(
+					getQuantizationMultiplier(EXPERT, "U8", { ...mimo, store_dtype: storeDtype as unknown as string }),
+					1,
+				);
+			});
+		});
+
 		describe("compressed-tensors packing factor", () => {
 			const packed = (numBits: number) => ({
 				quant_method: "compressed-tensors",
@@ -1136,6 +1311,33 @@ describe("parseSafetensorsMetadata", () => {
 		});
 		assert.strictEqual(sum(Object.values(parse.parameterCount)), 763_205_315_794);
 	});
+
+	it("counts mxfp4 experts declared as store_dtype (XiaomiMiMo/MiMo-V2.6-Flash-RL)", async () => {
+		// `quant_method: "fp8"` with `store_dtype: "mxfp4"`: the routed experts are packed two per U8
+		// byte. Counting them once per byte reported 159.359B for a 309B model. The corrected total is
+		// exactly what this parser counts for XiaomiMiMo/MiMo-V2.5, the same weights stored as unpacked
+		// fp8: its F8_E4M3 count equals the F8_E4M3 plus unpacked U8 counts here.
+		const parse = await parseSafetensorsMetadata({
+			repo: "XiaomiMiMo/MiMo-V2.6-Flash-RL",
+			revision: "3b38d063180c3e4aed9691fdc735f3d10b266ee4",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 65);
+		// hidden_size 4096 packed into 2048 bytes per row
+		assert.deepStrictEqual(
+			parse.headers["model_pp0_ep0_shard0.safetensors"]["model.layers.1.mlp.experts.0.gate_proj.weight"].shape,
+			[2048, 2048],
+		);
+		assert.deepStrictEqual(parse.parameterCount, {
+			F32: 12_032,
+			BF16: 4_101_308_032,
+			F8_E4M3: 3_859_808_256,
+			U8: 302_795_194_368, // 151_397_597_184 packed bytes x 2
+		});
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 310_756_322_688);
+	});
 });
 
 describe("assertSafeShardFilename", () => {
@@ -1188,5 +1390,34 @@ describe("assertSafeShardFilename", () => {
 	it("encodes each path segment separately", () => {
 		expect(encodeShardFilename("unet/model 1.safetensors")).toBe("unet/model%201.safetensors");
 		expect(encodeShardFilename("model-00001-of-00002.safetensors")).toBe("model-00001-of-00002.safetensors");
+	});
+
+	it("requests shards with their path encoded exactly once", async () => {
+		const index = new TextEncoder().encode(
+			JSON.stringify({ weight_map: { "model.embed.weight": "sub dir/model 1.safetensors" } }),
+		);
+		const urls: string[] = [];
+		const fetchIndex = (async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+			urls.push(url);
+			if (!url.endsWith(".index.json")) {
+				return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
+			}
+			const range = new Headers(init?.headers).get("range");
+			const [start, end] = (range ?? `bytes=0-${index.length - 1}`).slice("bytes=".length).split("-").map(Number);
+			const last = Math.min(end, index.length - 1);
+			return new Response(index.slice(start, last + 1), {
+				status: 206,
+				headers: { "content-range": `bytes ${start}-${last}/${index.length}`, etag: '"hermetic-test-file"' },
+			});
+		}) as typeof fetch;
+
+		await parseSafetensorsMetadata({
+			repo: "some-user/some-model",
+			path: "model.safetensors.index.json",
+			fetch: fetchIndex,
+		}).catch(() => undefined);
+
+		assert.include(urls, "https://huggingface.co/some-user/some-model/resolve/main/sub%20dir/model%201.safetensors");
 	});
 });

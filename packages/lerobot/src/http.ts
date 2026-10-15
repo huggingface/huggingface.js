@@ -14,9 +14,11 @@ export interface RangeResult {
 	bytes: Uint8Array;
 	/** Total size of the file, parsed from `Content-Range`. Absent when the server does not report it. */
 	total?: number;
+	/** `false` when the server ignored `Range` and answered 200 with the whole file. */
+	partial: boolean;
 }
 
-/** `bytes 68464-72559/72560` — the trailing total is free information on every range response. */
+/** The total from `bytes 68464-72559/72560`. */
 function parseTotalFromContentRange(contentRange: string | null): number | undefined {
 	const total = contentRange?.match(/\/\s*(\d+)\s*$/)?.[1];
 	if (total === undefined) {
@@ -59,15 +61,13 @@ export async function fetchRange(
 	return {
 		bytes: new Uint8Array(await response.arrayBuffer()),
 		total: parseTotalFromContentRange(response.headers.get("content-range")),
+		partial: response.status === 206,
 	};
 }
 
 export interface TextPrefix {
 	text: string;
-	/**
-	 * Bytes actually returned. Compare this, never `text.length`, when deciding whether a prefix read
-	 * reached the end of the file: a UTF-8 string is shorter than its byte count for any non-ASCII input.
-	 */
+	/** Bytes returned. Use this, not `text.length`, to detect end of file: non-ASCII text decodes shorter. */
 	byteLength: number;
 }
 
@@ -77,13 +77,12 @@ export async function fetchTextPrefix(url: string, maxBytes: number, options?: F
 	return { text: new TextDecoder().decode(bytes), byteLength: bytes.byteLength };
 }
 
-const TAIL_PROBE_BYTES = 64 * 1024;
+/** Also hyparquet's `initialFetchSize`, so the footer comes from this tail. Holds most episode indexes whole. */
+export const TAIL_PROBE_BYTES = 512 * 1024;
 
 /**
- * Opens a remote file for random access.
- *
- * The first request is a suffix range, which yields both the file size and the parquet footer in one
- * round trip; later reads inside that tail are served from memory.
+ * Opens a remote file for random access. A suffix range gets the size and the parquet footer in one
+ * request; reads inside that tail are served from memory.
  */
 export async function openRemoteFile(url: string, options?: FetchOptions): Promise<RandomAccessFile> {
 	const tail = await fetchRange(url, -TAIL_PROBE_BYTES, undefined, options);

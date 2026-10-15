@@ -1712,7 +1712,7 @@ export class Interpreter {
 
 		switch (node.operator.value) {
 			case "not":
-				return new BooleanValue(!argument.value);
+				return new BooleanValue(!argument.__bool__().value);
 			case "+":
 			case "-": {
 				const sign = node.operator.value === "-" ? -1 : 1;

@@ -58,6 +58,15 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	"aadya-neural": {
+		prettyLabel: "aadya-neural",
+		repoName: "aadya",
+		repoUrl: "https://github.com/manasdutta04/aadya",
+		docsUrl: "https://github.com/manasdutta04/aadya/blob/main/train/README.md",
+		snippets: snippets.aadyaNeural,
+		filter: false,
+		countDownloads: `path:"model.safetensors" OR path:"pytorch_model.bin"`,
+	},
 	acestep: {
 		prettyLabel: "ACE-Step",
 		repoName: "ACE-Step",
@@ -105,6 +114,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://huggingface.co/Arabic-Clip/araclip",
 		filter: false,
 		snippets: snippets.araclip,
+	},
+	asimov: {
+		prettyLabel: "Asimov",
+		repoName: "Asimov",
+		repoUrl: "https://github.com/menloresearch/humanoid-policy-viewer",
+		snippets: snippets.asimov,
+		filter: false,
+		countDownloads: `path:"env.yaml"`,
 	},
 	"aviation-ner": {
 		prettyLabel: "Aviation NER",
@@ -463,6 +480,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	drinkme: {
+		prettyLabel: "drinkme",
+		repoName: "drinkme",
+		repoUrl: "https://github.com/ninachaubal/drinkme",
+		docsUrl: "https://drinkme.petrichor.wtf",
+		filter: false,
+		countDownloads: `path_filename:"source-identity" AND path_extension:"json"`,
+	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",
@@ -485,6 +510,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/mozilla-ai/encoderfile",
 		filter: false,
 		countDownloads: `path_extension:"encoderfile"`,
+	},
+	ensomi: {
+		prettyLabel: "ensomi",
+		repoName: "ensomi",
+		repoUrl: "https://github.com/ensomi-labs/ensomi-model",
+		filter: false,
+		countDownloads: `(path_filename:"ensomi-package" AND path_extension:"json") OR path:"checkpoint.pt"`,
 	},
 	espnet: {
 		prettyLabel: "ESPnet",
@@ -546,6 +578,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	flexray: {
+		prettyLabel: "FleXray",
+		repoName: "FleXray",
+		repoUrl: "https://github.com/VictorButoi/FleXray",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"onnx"`,
+		snippets: snippets.flexray,
+	},
 	flextab: {
 		prettyLabel: "FlexTab",
 		repoName: "FlexTab",
@@ -560,6 +600,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://ai2-climate-emulator.readthedocs.io/en/latest/",
 		filter: false,
 		countDownloads: `path_extension:"tar"`,
+	},
+	gaussianformer: {
+		prettyLabel: "GaussianFormer",
+		repoName: "GaussianFormer",
+		repoUrl: "https://github.com/SVLwoof/gaussianformer",
+		snippets: snippets.gaussianformer,
+		filter: false,
+		countDownloads: `path:"config.json"`,
 	},
 	"gemma.cpp": {
 		prettyLabel: "gemma.cpp",
@@ -644,6 +692,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/MiniMaxAI/MiniMax-H3",
 		filter: false,
 		countDownloads: `path_extension:"safetensors" OR path_filename:"model_index" OR path_filename:"config" OR path:"modular_model_index.json"`,
+	},
+	mect: {
+		prettyLabel: "MECT",
+		repoName: "AntSpeaker",
+		repoUrl: "https://github.com/ant-research/AntSpeaker",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	hermes: {
 		prettyLabel: "HERMES",
@@ -752,6 +807,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	"jev-style": {
+		prettyLabel: "jev-style",
+		repoName: "jev-style",
+		repoUrl: "https://github.com/lawrence3699/jev-style",
+		snippets: snippets.jev_style,
+		filter: false,
+		countDownloads: `path_extension:"gguf" OR (path_filename:"config" AND path_extension:"json")`,
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
@@ -833,6 +896,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/lagernvs",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	laya: {
+		prettyLabel: "Laya",
+		repoName: "Laya",
+		repoUrl: "https://github.com/NandhaKishorM/laya",
+		filter: false,
+		countDownloads: `path:"rl_agent_config.json"`,
 	},
 	ltx: {
 		prettyLabel: "LTX-2",
@@ -990,6 +1060,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/filipstrand/mflux",
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	microduck: {
+		prettyLabel: "Microduck",
+		repoName: "Microduck",
+		repoUrl: "https://github.com/pollen-robotics/microduck",
+		snippets: snippets.microduck,
+		filter: true,
+		countDownloads: `path_extension:"onnx"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
@@ -1347,6 +1425,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+	},
+	"sage-music": {
+		prettyLabel: "SAGE",
+		repoName: "SAGE",
+		repoUrl: "https://github.com/francescobrigante/SAGE",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	"scail-2": {
 		prettyLabel: "SCAIL-2",
