@@ -1655,6 +1655,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
 	},
+	"strands-decider": {
+		prettyLabel: "Strands Decider",
+		repoName: "strands-decider",
+		repoUrl: "https://github.com/strands-labs/strands-decider",
+		snippets: snippets.strandsDecider,
+		filter: false,
+		countDownloads: `path:"strands_decider_config.json" OR path:"hobson_config.json"`,
+	},
 	supertonic: {
 		prettyLabel: "Supertonic",
 		repoName: "Supertonic",
