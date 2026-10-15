@@ -71,6 +71,63 @@ describe("parseSafetensorsMetadata", () => {
 		assert.ok(parse.filepaths.includes("model_00012-of-00072.safetensors"));
 	});
 
+	it("fetches every shard header of a sharded model on main in one request", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 8);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert(parse.index.weight_map);
+		assert.ok(Object.values(parse.index.weight_map).every((filename) => filename in parse.headers));
+		assert.ok(urls.some((url) => url.includes("/safetensors-metadata/model.safetensors.index.json")));
+		assert.ok(!urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
+	});
+
+	it("falls back to fetching each shard header when the one-request response fails the header checks", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				if (String(url).includes("/safetensors-metadata/")) {
+					const header = { "lm_head.weight": { dtype: "BF16", shape: [1e300], data_offsets: [0, 2] } };
+					return new Response(JSON.stringify({ index: {}, headers: { "model-00001-of-00008.safetensors": header } }));
+				}
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert.ok(urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
+	});
+
+	it("never requests the one-request endpoint when it's disabled", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			useSafetensorsMetadataEndpoint: false,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert.ok(!urls.some((url) => url.includes("/safetensors-metadata/")));
+	});
+
 	it("fetch info for single-file with multiple dtypes", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",
