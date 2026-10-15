@@ -84,6 +84,49 @@ npx @huggingface/tiny-agents run ./my-agent
 Voilà! 🔥
 
 
+### Example: web search with Parallel
+
+[Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp) provides web search and page fetching
+without a Parallel account or API key. Anonymous search uses Fast mode and is subject to free-tier rate limits.
+
+Install Tiny Agents and create a local configuration folder:
+
+```bash
+pnpm add @huggingface/tiny-agents
+mkdir parallel-search
+```
+
+Save the following as `parallel-search/agent.json`. This example uses a local OpenAI-compatible model endpoint;
+start one with tool-calling support, then set `model` and `endpointUrl` to match it. You can also use a
+`provider` and an inference API key as in the examples above.
+
+```json
+{
+	"model": "Qwen/Qwen3-32B",
+	"endpointUrl": "http://localhost:1234/v1",
+	"servers": [
+		{
+			"type": "http",
+			"url": "https://search.parallel.ai/mcp",
+			"headers": {
+				"User-Agent": "huggingface.js/tiny-agents-parallel-search-example"
+			}
+		}
+	]
+}
+```
+
+Run the agent from the directory containing `parallel-search`:
+
+```bash
+pnpm exec tiny-agents run ./parallel-search
+```
+
+Try asking: "Find the Hugging Face JavaScript MCP docs and explain which transports they support."
+The agent can use `web_search` for results with excerpts, and `web_fetch` when it needs content from specific URLs.
+The model endpoint runs separately from the free MCP server.
+
+
 ## Tiny Agents collection
 
 Browse our curated collection of Tiny Agents at https://huggingface.co/datasets/tiny-agents/tiny-agents. Each agent is stored in its own subdirectory, following the structure outlined above. Running an agent from the Hub is as simple as using its `agent_id`. For example, to run the [`julien-c/flux-schnell-generator`](https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/julien-c/flux-schnell-generator) agent:
