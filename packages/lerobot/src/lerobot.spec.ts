@@ -586,6 +586,21 @@ describe("frames columns", () => {
 		const frames = await dataset.frames(episode);
 		expect(frames?.series).toEqual({ "next.reward": [[0, 0.5, 1]] });
 	});
+
+	it("reads only the features asked for", async () => {
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
+		const [episode] = await dataset.episodes({ limit: 1 });
+		const frames = await dataset.frames(episode, { features: ["next.success"] });
+		expect(frames?.timestamps).toEqual([0, 0.1, 0.2]);
+		expect(frames?.series).toEqual({ "next.success": [[0, 0, 1]] });
+	});
+
+	it("resolves undefined when the columns to read are over maxBytes", async () => {
+		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
+		const [episode] = await dataset.episodes({ limit: 1 });
+		expect(await dataset.frames(episode, { maxBytes: 10 })).toBeUndefined();
+		expect((await dataset.frames(episode, { maxBytes: 10_000 }))?.length).toBe(3);
+	});
 });
 
 describe("episode count and repeated indexes", () => {
