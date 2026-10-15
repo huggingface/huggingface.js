@@ -651,6 +651,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"flow/flow.pt"`,
 	},
+	glyd: {
+		prettyLabel: "Glyd",
+		repoName: "Glyd",
+		repoUrl: "https://github.com/surya-koritala/Glyd",
+		docsUrl: "https://getglyd.com",
+		filter: false,
+	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
 		repoName: "Glyph-ByT5",
