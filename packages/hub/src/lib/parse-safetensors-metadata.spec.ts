@@ -91,6 +91,26 @@ describe("parseSafetensorsMetadata", () => {
 		assert.ok(!urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
 	});
 
+	it("falls back to fetching each shard header when the one-request response fails the header checks", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				if (String(url).includes("/safetensors-metadata/")) {
+					const header = { "lm_head.weight": { dtype: "BF16", shape: [1e300], data_offsets: [0, 2] } };
+					return new Response(JSON.stringify({ index: {}, headers: { "model-00001-of-00008.safetensors": header } }));
+				}
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert.ok(urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
+	});
+
 	it("fetch info for single-file with multiple dtypes", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",

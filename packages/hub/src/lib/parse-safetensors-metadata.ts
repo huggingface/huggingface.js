@@ -630,6 +630,16 @@ async function fetchShardedHeadersFromHub(
 			return undefined;
 		}
 		const { index, headers }: { index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } = await res.json();
+		// Same guards as when fetching each shard header: a failing check falls back to that path, which then throws
+		if (Object.keys(headers).length > MAX_SHARD_COUNT) {
+			return undefined;
+		}
+		for (const [filename, header] of Object.entries(headers)) {
+			assertSafeShardFilename(filename);
+			for (const [tensorName, info] of typedEntries(omit(header, "__metadata__"))) {
+				validateTensorEntry(filename, tensorName, info, undefined);
+			}
+		}
 		// The response leaves out the index's weight_map, which repeats the tensor names of the shard headers
 		const weightMap = Object.fromEntries(
 			Object.entries(headers).flatMap(([filename, header]) =>
