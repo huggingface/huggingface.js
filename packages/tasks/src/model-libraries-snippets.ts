@@ -19,13 +19,17 @@ const isValidIdentifier = (str: string): boolean => /^[A-Za-z_]\w*$/.test(str);
 //#region snippets
 
 export const aadyaNeural = (model: ModelData): string[] => [
-	`# Install from https://github.com/manasdutta04/aadya (train extras: torch)
+	`import sys
 from huggingface_hub import snapshot_download
-from aadya_neural.torch_forecaster import AadyaM1Forecaster
 
-weights = snapshot_download("${model.id}")
-model = AadyaM1Forecaster(weights)
-pmf = model.forecast([28, 30, 27], elapsed=0)`,
+path = snapshot_download("${model.id}")  # includes the self-contained runtime
+sys.path.insert(0, path)
+
+from aadya_m1 import AadyaM1
+
+model = AadyaM1.from_pretrained(path)
+pmf = model.forecast([28, 30, 27, 29], days_since_last_period=0)
+print(model.window(pmf))  # 80% window, in cycle days`,
 ];
 
 export const adapters = (model: ModelData): string[] => [
