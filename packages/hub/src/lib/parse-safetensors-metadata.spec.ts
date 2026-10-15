@@ -71,6 +71,63 @@ describe("parseSafetensorsMetadata", () => {
 		assert.ok(parse.filepaths.includes("model_00012-of-00072.safetensors"));
 	});
 
+	it("fetches every shard header of a sharded model on main in one request", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 8);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert(parse.index.weight_map);
+		assert.ok(Object.values(parse.index.weight_map).every((filename) => filename in parse.headers));
+		assert.ok(urls.some((url) => url.includes("/safetensors-metadata/model.safetensors.index.json")));
+		assert.ok(!urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
+	});
+
+	it("falls back to fetching each shard header when the one-request response fails the header checks", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				if (String(url).includes("/safetensors-metadata/")) {
+					const header = { "lm_head.weight": { dtype: "BF16", shape: [1e300], data_offsets: [0, 2] } };
+					return new Response(JSON.stringify({ index: {}, headers: { "model-00001-of-00008.safetensors": header } }));
+				}
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert.ok(urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
+	});
+
+	it("never requests the one-request endpoint when it's disabled", async () => {
+		const urls: string[] = [];
+		const parse = await parseSafetensorsMetadata({
+			repo: "HuggingFaceH4/zephyr-7b-beta",
+			computeParametersCount: true,
+			useSafetensorsMetadataEndpoint: false,
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				return fetch(url, init);
+			},
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
+		assert.ok(!urls.some((url) => url.includes("/safetensors-metadata/")));
+	});
+
 	it("fetch info for single-file with multiple dtypes", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",
@@ -201,10 +258,11 @@ describe("parseSafetensorsMetadata", () => {
 			header: Record<string, unknown>,
 			dataBytes = 0,
 			config?: Record<string, unknown>,
+			declaredHeaderLength?: number,
 		): typeof fetch => {
 			const headerBytes = new TextEncoder().encode(JSON.stringify(header));
 			const file = new Uint8Array(8 + headerBytes.length + dataBytes);
-			new DataView(file.buffer).setBigUint64(0, BigInt(headerBytes.length), true);
+			new DataView(file.buffer).setBigUint64(0, BigInt(declaredHeaderLength ?? headerBytes.length), true);
 			file.set(headerBytes, 8);
 			const configFile = config ? new TextEncoder().encode(JSON.stringify(config)) : undefined;
 			return (async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -219,6 +277,9 @@ describe("parseSafetensorsMetadata", () => {
 				if (range?.startsWith("bytes=")) {
 					const [start, endRaw] = range.slice("bytes=".length).split("-");
 					const startByte = Number(start);
+					if (startByte >= resource.length) {
+						return new Response(null, { status: 416 });
+					}
 					const endByte = endRaw === "" ? resource.length - 1 : Math.min(Number(endRaw), resource.length - 1);
 					return new Response(resource.slice(startByte, endByte + 1), {
 						status: 206,
@@ -277,6 +338,43 @@ describe("parseSafetensorsMetadata", () => {
 					fetch,
 				}),
 			).rejects.toThrow(/exceeds the file size/);
+		});
+
+		it("reads a header larger than the speculative first read", async () => {
+			const padding = "x".repeat(300_000);
+			const fetch = fetchForFile(
+				{
+					__metadata__: { format: "pt", padding },
+					weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] },
+				},
+				800,
+			);
+
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/large-header-model",
+				computeParametersCount: true,
+				fetch,
+			});
+
+			assert(!parse.sharded);
+			assert.strictEqual(parse.header.__metadata__?.padding, padding);
+			assert.deepStrictEqual(parse.parameterCount, { F32: 200 });
+		});
+
+		it("rejects a header length pointing past the end of a small file", async () => {
+			const fetch = fetchForFile(
+				{ weight: { dtype: "F32", shape: [10, 20], data_offsets: [0, 800] } },
+				800,
+				undefined,
+				10_000,
+			);
+
+			await expect(
+				parseSafetensorsMetadata({
+					repo: "some-user/truncated-header-model",
+					fetch,
+				}),
+			).rejects.toThrow(SafetensorParseError);
 		});
 
 		it("caps a self-reported total_parameters above the computed count", async () => {
@@ -1292,5 +1390,34 @@ describe("assertSafeShardFilename", () => {
 	it("encodes each path segment separately", () => {
 		expect(encodeShardFilename("unet/model 1.safetensors")).toBe("unet/model%201.safetensors");
 		expect(encodeShardFilename("model-00001-of-00002.safetensors")).toBe("model-00001-of-00002.safetensors");
+	});
+
+	it("requests shards with their path encoded exactly once", async () => {
+		const index = new TextEncoder().encode(
+			JSON.stringify({ weight_map: { "model.embed.weight": "sub dir/model 1.safetensors" } }),
+		);
+		const urls: string[] = [];
+		const fetchIndex = (async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+			urls.push(url);
+			if (!url.endsWith(".index.json")) {
+				return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
+			}
+			const range = new Headers(init?.headers).get("range");
+			const [start, end] = (range ?? `bytes=0-${index.length - 1}`).slice("bytes=".length).split("-").map(Number);
+			const last = Math.min(end, index.length - 1);
+			return new Response(index.slice(start, last + 1), {
+				status: 206,
+				headers: { "content-range": `bytes ${start}-${last}/${index.length}`, etag: '"hermetic-test-file"' },
+			});
+		}) as typeof fetch;
+
+		await parseSafetensorsMetadata({
+			repo: "some-user/some-model",
+			path: "model.safetensors.index.json",
+			fetch: fetchIndex,
+		}).catch(() => undefined);
+
+		assert.include(urls, "https://huggingface.co/some-user/some-model/resolve/main/sub%20dir/model%201.safetensors");
 	});
 });

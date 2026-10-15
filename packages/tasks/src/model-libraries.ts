@@ -511,6 +511,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"encoderfile"`,
 	},
+	ensomi: {
+		prettyLabel: "ensomi",
+		repoName: "ensomi",
+		repoUrl: "https://github.com/ensomi-labs/ensomi-model",
+		filter: false,
+		countDownloads: `(path_filename:"ensomi-package" AND path_extension:"json") OR path:"checkpoint.pt"`,
+	},
 	espnet: {
 		prettyLabel: "ESPnet",
 		repoName: "ESPnet",
@@ -1418,6 +1425,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+	},
+	"sage-music": {
+		prettyLabel: "SAGE",
+		repoName: "SAGE",
+		repoUrl: "https://github.com/francescobrigante/SAGE",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	"scail-2": {
 		prettyLabel: "SCAIL-2",

@@ -1,0 +1,24 @@
+[package]
+name = "usd-wasm"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "OpenUSD composition and mesh extraction for the web, built on the openusd crate"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+openusd.workspace = true
+openusd-schemas.workspace = true
+# Already linked by openusd for .usdz; used to read packaged files from memory.
+# Decode only: openusd itself still enables `deflate`, which adds the zopfli encoder.
+zip = { version = "8.2.0", default-features = false, features = ["deflate-flate2-zlib-rs"] }
+serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1", default-features = false, features = ["alloc"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "=0.2.129"
+
+[dev-dependencies]
+insta = { version = "1.49.0", features = ["glob"] }

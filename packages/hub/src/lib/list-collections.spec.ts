@@ -133,7 +133,6 @@ describe("listCollections", () => {
 						sdk: "static",
 						tags: ["static", "region:us"],
 						title: "Push Model From Web",
-						trendingScore: expect.any(Number),
 						type: "space",
 						visibility: "public",
 					},

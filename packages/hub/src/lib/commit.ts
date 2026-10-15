@@ -26,6 +26,7 @@ import { createBlobs } from "../utils/createBlobs";
 import type { XetTokenParams } from "../utils/uploadShards";
 import { uploadShards } from "../utils/uploadShards";
 import { splitAsyncGenerator } from "../utils/splitAsyncGenerator";
+import { randomUUID } from "../utils/randomUUID";
 import { SplicedBlob } from "../utils/SplicedBlob";
 import type { RangeEditCache } from "../utils/rangeEdit";
 
@@ -853,7 +854,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 			})();
 
 			const xetParams: XetTokenParams = {
-				sessionId: crypto.randomUUID(),
+				sessionId: randomUUID(),
 				refreshWriteTokenUrl: `${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/xet-write-token`,
 			};
 			const sources = splitAsyncGenerator(source, 5);
