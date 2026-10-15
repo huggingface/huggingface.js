@@ -76,16 +76,16 @@ describe("parseSafetensorsMetadata", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "HuggingFaceH4/zephyr-7b-beta",
 			computeParametersCount: true,
-			fetch: (input, init) => {
-				urls.push(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
-				return fetch(input, init);
+			fetch: async (url, init) => {
+				urls.push(String(url));
+				return fetch(url, init);
 			},
 		});
 
 		assert(parse.sharded);
 		assert.strictEqual(Object.keys(parse.headers).length, 8);
 		assert.deepStrictEqual(parse.parameterCount, { BF16: 7_241_732_096 });
-		assert.ok(parse.index.weight_map);
+		assert(parse.index.weight_map);
 		assert.ok(Object.values(parse.index.weight_map).every((filename) => filename in parse.headers));
 		assert.ok(urls.some((url) => url.includes("/safetensors-metadata/model.safetensors.index.json")));
 		assert.ok(!urls.some((url) => /model-\d+-of-\d+\.safetensors/.test(url)));
