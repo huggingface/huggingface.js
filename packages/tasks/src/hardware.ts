@@ -217,6 +217,13 @@ export const SKUS = {
 				power: 160,
 				releaseYear: 2025,
 			},
+			"Intel Core Ultra 7 266V": {
+				tflops: 0.56,
+				msrp: 520,
+				power: 37,
+				releaseYear: 2024,
+				aliases: ["Lunar Lake"],
+			},
 			"Intel Core Ultra 7 265KF": {
 				tflops: 1.53,
 				msrp: 400,
