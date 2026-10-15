@@ -103,8 +103,8 @@ export class LeRobotDataset {
 	}
 
 	/**
-	  * One episode's frame rows, as a series per component. `undefined` when `episode.data` is absent, or
-	  * reading would cost more than `maxBytes`.
+	 * One episode's frame rows, as a series per component. `undefined` when `episode.data` is absent, or
+	 * reading would cost more than `maxBytes`.
 	 *
 	 * ```ts
 	 * const [episode] = await dataset.episodes({ limit: 1 });
