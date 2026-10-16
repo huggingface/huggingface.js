@@ -40,18 +40,23 @@ The following findings come from static inspection of installed macOS distributi
 - The executor setup (distribution line 756, function `iZe`) supplies `SAND_AGENT=1` and `CURSOR_AGENT=1`. Shell initialization (lines 602–611, functions `Jae`, `Vae`, `Wae`, `pI`) passes these into Bash/Zsh child environments.
 - The local rule therefore matches only `SAND_AGENT=1` and precedes Cursor detection. `CURSOR_AGENT` is not an alternative Grok Bot marker. This static audit alone does not establish PowerShell or cloud-only coverage; the separate cloud-shell observation is documented below.
 
-### QoderWork family: QwenWorkCN 1.2.5
+### QwenWork 1.2.5 distribution context
 
-- Inspected product: [QwenWorkCN](https://qwenwork.cn/docs/product-introduction), bundle ID `cn.qwenwork.desktop.mac`. Its runtime and marker names use `QoderWork`; this is a family-level registration proposal, not a claim to have tested every QoderWork or QwenWork release.
+- Inspected distribution: QwenWorkCN 1.2.5, bundle ID `cn.qwenwork.desktop.mac`. The registered product is [QwenWork](https://qwenwork.cn/docs/product-introduction), with ID `qwenwork`. Internal Qoder-prefixed symbols do not establish a separate product identity.
 - `Contents/Resources/app.asar` SHA-256: `d946457e5e3d7761f7203111775388d5131293a337bf13430e0c26b8993536fb`.
 - `out/main/main.js` SHA-256: `59066b75806a1d7b3e798615302c957a9bca1efa8a7866c60e4d2b210c9c3f36`.
-- `composeQoderAgentSdkRuntimeEnv` (distribution line 654) injects `QODERWORK_IS_CN=true`. Foreground/background workspace Bash paths (lines 11824 and 11838) add `QODERWORK_SOURCE_CHAT_ID` and, conditionally, the same sentinel.
-- The environment is carried through `ShellExecutionService` / `QxcSeatbeltBackend.runBash` to the macOS Bash child (lines 2313–2316 and 1048). `buildQxcTargetEnvironment` (line 888) does not filter either marker. VM command construction (line 1412) also exports these markers on relevant paths; a VM was not launched for verification.
-- Only the observed exact `true` value is accepted for `QODERWORK_IS_CN`; `false`, `0`, and `1` do not match this branch. A result reports the harness family, not a region, model, or exact commercial edition. The [hook documentation](https://docs.qoder.com/qoderwork/hooks) describes a separate interface; this Bash evidence does not establish hook-specific injection.
+- The earlier static inspection located `composeQoderAgentSdkRuntimeEnv` (distribution line 654) and the `ShellExecutionService` / `QxcSeatbeltBackend.runBash` environment path (lines 2313–2316 and 1048). These internal symbol names are preserved as inspected. This context alone does not verify propagation of the product marker reported below.
+- Country, chat, site, execution-mode, and endpoint configuration are not detection conditions. In particular, `QODERWORK_IS_CN` and `QODERWORK_SOURCE_CHAT_ID` do not identify this entry, alone or together.
 
 Distribution line numbers refer to packaged JavaScript, not unpublished source repositories. Static propagation establishes reachable code paths, not successful execution under every shell setup or sandbox policy.
 
 ## User-provided runtime observation
+
+### QwenWork product marker
+
+On 2026-10-16, a user reported `QODER_WORK_INTEGRATION_PRODUCT=qwenworkcn` as the product identity marker for QwenWork. The rule accepts only that exact value, without case folding or whitespace trimming. The public product documentation establishes the QwenWork name, not a public contract for this internal environment variable. The report has not been independently reproduced as a dynamic product test.
+
+The rule does not use `QODERWORK_IS_CN`, `QODERWORK_SOURCE_CHAT_ID`, `QODER_SITE`, `QODERWORK_EXECUTION_ENV`, `QWENWORK_BASE_URL`, or `QODERCN_SERVER_ENDPOINT` as alternatives. A country, chat identifier, local execution setting, or configured endpoint does not establish the product identity. No real user paths, addresses, or identifiers are retained.
 
 ### Grok Bot cloud shell
 

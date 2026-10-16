@@ -106,12 +106,12 @@ export const AGENT_HARNESSES = {
 		// Keep product-specific runtime markers before inherited contexts.
 		envVars: { WORKBUDDY_APPLICATION_NAME: "WorkBuddy", WORKBUDDY_APP_NAME: "WorkBuddy" },
 	},
-	qoderwork: {
-		prettyLabel: "QoderWork",
-		docsUrl: "https://docs.qoder.com/qoderwork/hooks",
+	qwenwork: {
+		prettyLabel: "QwenWork",
+		docsUrl: "https://qwenwork.cn/docs/product-introduction",
 		description: "Desktop agent for coding and knowledge work.",
 		// Keep product-specific runtime markers before inherited contexts.
-		envVars: { QODERWORK_SOURCE_CHAT_ID: "*", QODERWORK_IS_CN: "true" },
+		envVars: { QODER_WORK_INTEGRATION_PRODUCT: "qwenworkcn" },
 	},
 	cue: {
 		prettyLabel: "Cue",
