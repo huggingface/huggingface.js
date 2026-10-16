@@ -1955,6 +1955,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 	},
+	zipsplat: {
+		prettyLabel: "ZipSplat",
+		repoName: "ZipSplat",
+		repoUrl: "https://github.com/cvg/ZipSplat",
+		filter: false,
+		countDownloads: `path_extension:"tar"`,
+	},
 	zonos: {
 		prettyLabel: "Zonos",
 		repoName: "Zonos",
