@@ -82,6 +82,16 @@ export const AGENT_HARNESSES = {
 		description: "Anthropic's agent for autonomous knowledge work, built on top of Claude Code.",
 		envVars: { CLAUDE_CODE_IS_COWORK: "*" },
 	},
+	"grok-build": {
+		// Keep before `claude-code` for environments with Claude Code compatibility markers.
+		prettyLabel: "Grok Build",
+		repoUrl: "https://github.com/xai-org/grok-build",
+		docsUrl: "https://github.com/xai-org/grok-build/tree/main/crates/codegen/xai-grok-pager/docs",
+		description: "xAI's coding agent for the terminal.",
+		// Agent terminals set GROK_AGENT=1; other values can select an agent definition.
+		// The plugin variables are injected into plugin hook processes.
+		envVars: { GROK_AGENT: "1", GROK_PLUGIN_ROOT: "*", GROK_PLUGIN_DATA: "*" },
+	},
 	"claude-code": {
 		prettyLabel: "Claude Code",
 		repoUrl: "https://github.com/anthropics/claude-code",
@@ -94,7 +104,7 @@ export const AGENT_HARNESSES = {
 		repoUrl: "https://github.com/openai/codex",
 		docsUrl: "https://developers.openai.com/codex",
 		description: "OpenAI's lightweight coding agent that runs in your terminal.",
-		envVars: { CODEX_SANDBOX: "*", CODEX_CI: "*", CODEX_THREAD_ID: "*" },
+		envVars: { CODEX_SANDBOX: "*", CODEX_CI: "*", CODEX_THREAD_ID: "*", CODEX_SANDBOX_NETWORK_DISABLED: "*" },
 	},
 	crush: {
 		prettyLabel: "Crush",
@@ -128,7 +138,7 @@ export const AGENT_HARNESSES = {
 		repoUrl: "https://github.com/NousResearch/hermes-agent",
 		docsUrl: "https://hermes-agent.nousresearch.com/docs",
 		description: "Nous Research's self-improving, multi-provider terminal AI agent.",
-		envVars: { HERMES_SESSION_ID: "*" },
+		envVars: { HERMES_SESSION_ID: "*", HERMES_AGENT: "*" },
 	},
 	hi: {
 		prettyLabel: "hi",
@@ -136,12 +146,28 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://github.com/PipeNetwork/hi#readme",
 		description: "Rust terminal coding agent with verification-in-the-loop.",
 	},
+	junie: {
+		prettyLabel: "Junie",
+		repoUrl: "https://github.com/JetBrains/junie",
+		docsUrl: "https://junie.jetbrains.com",
+		description: "JetBrains' coding agent for the terminal.",
+		// Exported by the Junie CLI launcher into its child process environment.
+		envVars: { JUNIE_DATA: "*", JUNIE_SHIM_PATH: "*" },
+	},
 	"kilo-code": {
 		prettyLabel: "Kilo Code",
 		repoUrl: "https://github.com/Kilo-Org/kilocode",
 		docsUrl: "https://kilocode.ai/docs",
 		description: "Open-source agentic coding agent for VS Code, JetBrains, and the terminal.",
 		envVars: { KILOCODE_FEATURE: "*" },
+	},
+	kimi: {
+		prettyLabel: "Kimi Code",
+		repoUrl: "https://github.com/MoonshotAI/kimi-code",
+		docsUrl: "https://moonshotai.github.io/kimi-code/",
+		description: "Moonshot AI's coding agent for the terminal.",
+		// Injected into plugin hooks; KIMI_CODE_HOME can also be user configuration.
+		envVars: { KIMI_PLUGIN_ROOT: "*" },
 	},
 	kiro: {
 		prettyLabel: "Kiro",
