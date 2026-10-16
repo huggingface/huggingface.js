@@ -1151,19 +1151,6 @@ describe("parseSafetensorsMetadata", () => {
 				});
 			});
 
-			it("falls back to config_groups num_bits for targeted modules", () => {
-				const config = {
-					quant_method: "modelopt",
-					quant_algo: "MIXED_PRECISION",
-					config_groups: {
-						group_0: { weights: { num_bits: 8 }, targets: ["model.layers.0.self_attn.q_proj"] },
-						group_1: { weights: { num_bits: 4 }, targets: ["model.layers.0.mlp.experts"] },
-					},
-				};
-				assert.strictEqual(getQuantizationMultiplier("model.layers.0.mlp.experts.0.up_proj.weight", "U8", config), 2);
-				assert.strictEqual(getQuantizationMultiplier("model.layers.0.self_attn.q_proj.weight", "U8", config), 1);
-			});
-
 			it("counts an NVFP4 export at its unquantized size, without block scales", () => {
 				const tensor = (dtype: Dtype, shape: number[]): TensorInfo => ({ dtype, shape, data_offsets: [0, 0] });
 				// 64x128 logical weight: 64x64 packed bytes, one FP8 scale per 16 values, FP32 global scales

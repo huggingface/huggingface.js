@@ -175,17 +175,10 @@ function bitsFromFormatString(format: string | undefined): number | undefined {
 }
 
 /**
- * Whether `moduleName` is `target` or nested under it. ModelOpt lists fused containers such as
- * `model.layers.0.mlp.experts`, which cover every `…experts.N.down_proj` below them.
- */
-function isModuleOrDescendant(moduleName: string, target: string): boolean {
-	return moduleName === target || moduleName.startsWith(`${target}.`);
-}
-
-/**
- * Bit width of a ModelOpt-quantized weight, resolved from the most specific declaration available:
- * the per-module `quantized_layers` entry (mixed precision), then a `config_groups` entry whose
- * targets name the module, then the global `quant_algo`.
+ * Bit width of a ModelOpt-quantized weight: the most specific `quantized_layers` entry (mixed
+ * precision) for the module or one of its parents, then the global `quant_algo`. ModelOpt lists
+ * fused containers such as `model.layers.0.mlp.experts`, which cover every `…experts.N.down_proj`
+ * below them.
  *
  * A module-level declaration wins even when it isn't sub-byte: in a mixed FP8 + NVFP4 export the
  * FP8 layers must not inherit the 4-bit width of the global algorithm.
@@ -205,13 +198,6 @@ function getModelOptWeightBits(tensorName: string, quantConfig: QuantizationConf
 				break;
 			}
 			target = target.slice(0, parentIndex);
-		}
-	}
-
-	for (const group of Object.values(quantConfig.config_groups ?? {})) {
-		if (group.targets?.some((target) => typeof target === "string" && isModuleOrDescendant(moduleName, target))) {
-			const numBits = group.weights?.num_bits;
-			return typeof numBits === "number" ? numBits : undefined;
 		}
 	}
 
