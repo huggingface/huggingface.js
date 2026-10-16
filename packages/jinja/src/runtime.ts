@@ -793,6 +793,40 @@ function getNumericValue(value: NumericLikeValue): number {
 }
 
 /**
+ * Structural equality between two runtime values, matching Python's `==`:
+ * - booleans, integers and floats compare by numeric value (`1 == 1.0 == true`)
+ * - lists, tuples and dicts compare element-wise, and a list never equals a tuple
+ * - values of unrelated types are never equal (`"1" != 1`, `[] != 0`)
+ * - `none` and undefined only equal themselves
+ */
+function areRuntimeValuesEqual(a: AnyRuntimeValue, b: AnyRuntimeValue): boolean {
+	if (isNumericLikeValue(a) && isNumericLikeValue(b)) {
+		return getNumericValue(a) === getNumericValue(b);
+	}
+	if (a instanceof ArrayValue && b instanceof ArrayValue) {
+		return (
+			a.type === b.type &&
+			a.value.length === b.value.length &&
+			a.value.every((item, i) => areRuntimeValuesEqual(item, b.value[i]))
+		);
+	}
+	if (a instanceof ObjectValue && b instanceof ObjectValue) {
+		if (a.value.size !== b.value.size) {
+			return false;
+		}
+		for (const [key, item] of a.value) {
+			const other = b.value.get(key);
+			if (other === undefined || !areRuntimeValuesEqual(item, other)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	// Strings compare by content; none, undefined, functions and namespaces by identity.
+	return a.type === b.type && a.value === b.value;
+}
+
+/**
  * Helper function to get a nested attribute value from an object using dot notation.
  * Supports both object properties and array indices.
  * @param item The item to get the value from
@@ -1088,9 +1122,9 @@ export class Interpreter {
 		const right = this.evaluate(node.right, environment);
 		switch (node.operator.value) {
 			case "==":
-				return new BooleanValue(left.value == right.value);
+				return new BooleanValue(areRuntimeValuesEqual(left, right));
 			case "!=":
-				return new BooleanValue(left.value != right.value);
+				return new BooleanValue(!areRuntimeValuesEqual(left, right));
 		}
 
 		if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
