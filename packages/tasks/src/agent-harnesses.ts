@@ -31,19 +31,9 @@ export interface AgentHarness {
 	 *  - `"<value>"`: the variable equals this exact value
 	 *  - `"<prefix>*"`: the variable value starts with `<prefix>` (fuzzy match, resolved client-side)
 	 *
-	 * A matching entry or a matching `envVarsAll` group identifies the harness.
-	 * If neither map is provided, only the standard AI_AGENT / AGENT variables identify it.
+	 * If not provided, the harness is detected through the standard AI_AGENT / AGENT variables only.
 	 */
 	envVars?: Record<string, string>;
-	/**
-	 * Environment variables that must ALL match to identify this harness, using
-	 * the same value patterns as `envVars`. An empty map must not match.
-	 *
-	 * This group is an alternative to `envVars`: either any `envVars` entry or
-	 * every entry in a non-empty `envVarsAll` group may identify the harness.
-	 * Clients without support for this optional field can still use `envVars`.
-	 */
-	envVarsAll?: Record<string, string>;
 }
 
 /**
@@ -108,8 +98,6 @@ export const AGENT_HARNESSES = {
 		description: "Cursor's agent with cloud and optional local execution.",
 		// Grok Bot's agent terminal also sets CURSOR_AGENT; use its own marker first.
 		envVars: { SAND_AGENT: "1" },
-		// User-observed cloud shell: require the shared Cursor marker and both sandbox sentinels.
-		envVarsAll: { CURSOR_AGENT: "*", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "1" },
 	},
 	workbuddy: {
 		prettyLabel: "WorkBuddy",

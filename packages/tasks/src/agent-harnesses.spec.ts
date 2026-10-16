@@ -10,13 +10,20 @@ describe("agent-harnesses", () => {
 		for (const [id, harness] of Object.entries(harnesses)) {
 			expect(id).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 			expect(harness.prettyLabel.trim()).not.toBe("");
-			for (const vars of [harness.envVars, harness.envVarsAll]) {
-				for (const [name, pattern] of Object.entries(vars ?? {})) {
-					expect(name).toMatch(/^[A-Z_][A-Z0-9_]*$/);
-					expect(pattern).not.toBe("");
-					// Standard declarations identify a harness by id, rather than by a wildcard rule.
-					expect(STANDARD_AGENT_ENV_VARS).not.toContain(name);
-				}
+			for (const [name, pattern] of Object.entries(harness.envVars ?? {})) {
+				expect(name).toMatch(/^[A-Z_][A-Z0-9_]*$/);
+				expect(pattern).not.toBe("");
+				// Standard declarations identify a harness by id, rather than by a wildcard rule.
+				expect(STANDARD_AGENT_ENV_VARS).not.toContain(name);
+			}
+		}
+	});
+
+	it("uses only fields understood by existing registry consumers", () => {
+		const supportedFields = ["prettyLabel", "repoUrl", "docsUrl", "description", "envVars"];
+		for (const harness of Object.values(harnesses)) {
+			for (const field of Object.keys(harness)) {
+				expect(supportedFields).toContain(field);
 			}
 		}
 	});
@@ -55,37 +62,12 @@ describe("agent-harnesses", () => {
 			const value = env[name];
 			return !!value && (pattern === "*" || pattern === value);
 		};
-		const all = Object.entries(harness.envVarsAll ?? {});
-		return Object.entries(harness.envVars ?? {}).some(matchesEntry) || (all.length > 0 && all.every(matchesEntry));
+		return Object.entries(harness.envVars ?? {}).some(matchesEntry);
 	}
 
 	function matchEnvironment(env: Record<string, string>): string | undefined {
 		return Object.entries(harnesses).find(([, harness]) => matchesHarness(harness, env))?.[0];
 	}
-
-	it("does not let an empty all-conditions map match every process", () => {
-		expect(matchesHarness({ prettyLabel: "Synthetic", envVarsAll: {} }, {})).toBe(false);
-	});
-
-	it("allows an any-condition rule to match independently of an empty all-conditions map", () => {
-		expect(
-			matchesHarness(
-				{ prettyLabel: "Synthetic", envVars: { SYNTHETIC_AGENT: "1" }, envVarsAll: {} },
-				{ SYNTHETIC_AGENT: "1" },
-			),
-		).toBe(true);
-	});
-
-	it("retains local Grok Bot detection for clients that only consume envVars", () => {
-		const legacyRule = {
-			prettyLabel: AGENT_HARNESSES["grok-bot"].prettyLabel,
-			envVars: AGENT_HARNESSES["grok-bot"].envVars,
-		};
-		expect(matchesHarness(legacyRule, { SAND_AGENT: "1" })).toBe(true);
-		expect(matchesHarness(legacyRule, { CURSOR_AGENT: "1", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "1" })).toBe(
-			false,
-		);
-	});
 
 	it.each<[Record<string, string>, string | undefined]>([
 		[{ KIMI_PLUGIN_ROOT: "/tmp/example-plugin" }, "kimi"],
@@ -107,7 +89,8 @@ describe("agent-harnesses", () => {
 		[{ SAND_AGENT: "0", CURSOR_AGENT: "1" }, "cursor-cli"],
 		[{ SAND_AGENT: "true" }, undefined],
 		[{ SAND_AGENT: "" }, undefined],
-		[{ CURSOR_AGENT: "1", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "1" }, "grok-bot"],
+		// Shared sandbox flags cannot refine Cursor without a dedicated marker in the existing format.
+		[{ CURSOR_AGENT: "1", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "1" }, "cursor-cli"],
 		[{ SAND_AGENT: "1", SAND_MANIFEST_V2: "0", SAND_SUPERVISOR_ENABLED: "0" }, "grok-bot"],
 		[{ CURSOR_AGENT: "1" }, "cursor-cli"],
 		[{ SAND_MANIFEST_V2: "1" }, undefined],

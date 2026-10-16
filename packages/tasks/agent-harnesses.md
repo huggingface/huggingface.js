@@ -2,11 +2,11 @@
 
 This note records the evidence and scope for the harness rules added in this change, reviewed on 2026-10-16. Environment markers identify an execution context; they do not authenticate the immediate caller. Variables can be inherited, overridden, or set manually. Registry order preserves the existing first-match behavior and does not resolve arbitrary nested agents.
 
-## Matching contract and rollout
+## Existing matching contract
 
-`envVars` keeps its existing any-entry semantics. The optional `envVarsAll` map describes one group in which every entry must match; an empty group must not match. The two maps are alternatives: a harness matches when any `envVars` entry matches **or** every entry in a non-empty `envVarsAll` group matches. Both maps use the same value-pattern syntax.
+This contribution adds registry data using the existing `envVars` format. Any matching entry identifies the harness. The rules use the already-supported non-empty (`"*"`) and exact-value patterns; no new registry fields, matching capabilities, or client changes are required.
 
-Grok Bot retains its local `SAND_AGENT=1` rule in `envVars` and adds a separate cloud-shell group in `envVarsAll`. Older clients that ignore the optional field can still recognize the local marker, but will not apply the new cloud group. The new branch requires a client that implements `envVarsAll` and a deployed registry API that preserves the field. This package change alone does not establish that either deployment has occurred. The public server-side path from `@huggingface/tasks` to `/api/agent-harnesses` was not confirmed, so no automatic rollout or deployment timing is claimed.
+Grok Bot is registered with its local `SAND_AGENT=1` marker. Its reported cloud-shell markers cannot safely be represented as independent alternatives and are not added as detection conditions. Updating the published registry still depends on the normal server-side rollout and client cache refresh; no deployment timing is claimed.
 
 ## Public upstream sources
 
@@ -55,9 +55,9 @@ Distribution line numbers refer to packaged JavaScript, not unpublished source r
 
 ### Grok Bot cloud shell
 
-On 2026-10-16, a user confirmed that an ordinary shell in a Grok Bot cloud sandbox exposed a non-empty `CURSOR_AGENT`, `SAND_MANIFEST_V2=1`, and `SAND_SUPERVISOR_ENABLED=1`, without `SAND_AGENT`. The new group requires all three conditions together. Neither sandbox sentinel alone, nor either sentinel combined with the shared Cursor marker, identifies this branch. `CURSOR_AGENT` alone continues to match Cursor CLI.
+On 2026-10-16, a user confirmed that an ordinary shell in a Grok Bot cloud sandbox exposed a non-empty `CURSOR_AGENT`, `SAND_MANIFEST_V2=1`, and `SAND_SUPERVISOR_ENABLED=1`, without `SAND_AGENT`. The existing registry format cannot require these conditions together. This observation therefore adds no cloud detection rule: without the dedicated local marker or a standard harness declaration, that shell continues to match Cursor CLI. Neither sandbox sentinel is added as an independent Grok Bot marker.
 
-This is a user-reported shell observation, not an independently reproduced product test or a public vendor guarantee that these internal markers are exclusive to Grok Bot. No real sandbox identifiers, endpoints, paths, or environment snapshots are retained. The conjunction narrows the heuristic without authenticating the caller.
+This is a user-reported shell observation, not an independently reproduced product test or a public vendor guarantee that these internal markers are exclusive to Grok Bot. No real sandbox identifiers, endpoints, paths, or environment snapshots are retained.
 
 ### Cue Linux desktop worker
 
@@ -77,4 +77,4 @@ On 2026-10-16, a user reported seven `MANUS_ADDON_*` / `MANUS_GROUP_*` variable 
 
 ## Validation scope
 
-`src/agent-harnesses.spec.ts` checks registry structure, important precedence relationships, and the non-empty/exact-value and any/all-group contracts with synthetic environments. These tests do not run the Python detector, read the machine's environment, or validate the vendor applications dynamically. Cases cover exact-value rejection, empty values, complete and partial conjunctions, empty-group rejection, legacy local-marker compatibility, compatibility-marker precedence, and configuration-only non-matches.
+`src/agent-harnesses.spec.ts` checks the existing registry field contract, important precedence relationships, and non-empty/exact-value patterns with synthetic environments. These tests do not run the Python detector, read the machine's environment, or validate the vendor applications dynamically. Cases cover exact-value rejection, empty values, Grok Bot local-marker detection, unchanged Cursor fallback for shared sandbox markers, compatibility-marker precedence, and configuration-only non-matches.
