@@ -92,6 +92,33 @@ export const AGENT_HARNESSES = {
 		// The plugin variables are injected into plugin hook processes.
 		envVars: { GROK_AGENT: "1", GROK_PLUGIN_ROOT: "*", GROK_PLUGIN_DATA: "*" },
 	},
+	"grok-bot": {
+		prettyLabel: "Grok Bot",
+		docsUrl: "https://cursor.com/docs/grok-bot/teams",
+		description: "Cursor's coding agent with optional local execution.",
+		// Grok Bot's agent terminal also sets CURSOR_AGENT; use its own marker first.
+		envVars: { SAND_AGENT: "1" },
+	},
+	workbuddy: {
+		prettyLabel: "WorkBuddy",
+		docsUrl: "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Product-Guide",
+		description: "Tencent's desktop agent for coding and knowledge work.",
+		// Match the WorkBuddy application name before its Claude Code compatibility host.
+		envVars: { WORKBUDDY_APPLICATION_NAME: "WorkBuddy", WORKBUDDY_APP_NAME: "WorkBuddy" },
+	},
+	qoderwork: {
+		prettyLabel: "QoderWork",
+		docsUrl: "https://docs.qoder.com/qoderwork/hooks",
+		description: "Desktop agent for coding and knowledge work.",
+		// Prefer the host runtime's own terminal markers over Claude Code compatibility markers.
+		envVars: { QODERWORK_SOURCE_CHAT_ID: "*", QODERWORK_IS_CN: "true" },
+	},
+	manus: {
+		prettyLabel: "Manus",
+		description: "General-purpose agent with a desktop worker environment.",
+		// Observed in a Linux desktop worker; other MANUS_* configuration does not identify this context.
+		envVars: { MANUS_LONG_DESKTOP_WORKER: "1" },
+	},
 	"claude-code": {
 		prettyLabel: "Claude Code",
 		repoUrl: "https://github.com/anthropics/claude-code",

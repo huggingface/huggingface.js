@@ -1,0 +1,56 @@
+# Agent harness detection evidence
+
+This note records the evidence and scope for the harness rules added in this change, reviewed on 2026-10-16. Environment markers identify an execution context; they do not authenticate the immediate caller. Variables can be inherited, overridden, or set manually. Registry order preserves the existing first-match behavior and does not resolve arbitrary nested agents.
+
+## Public upstream sources
+
+| Harness      | Rule                                                                 | Source and scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------ | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kimi Code    | Non-empty `KIMI_PLUGIN_ROOT`                                         | [Official plugin documentation](https://github.com/MoonshotAI/kimi-code/blob/18c6d64272952503baccf706bff455bb6a2c488e/docs/en/customization/plugins.md#L482-L486) documents injection into enabled plugin hooks. This does not cover every ordinary shell command. `KIMI_CODE_HOME` is deliberately excluded because it can be user configuration.                                                                                                                                                                                                                                                                                                                                                                          |
+| Grok Build   | `GROK_AGENT=1`, or non-empty `GROK_PLUGIN_ROOT` / `GROK_PLUGIN_DATA` | The [marker definition](https://github.com/xai-org/grok-build/blob/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8/crates/codegen/xai-grok-tools/src/util/env.rs#L31-L42) distinguishes the terminal sentinel `1` from other values used to select agent definitions. The [terminal spawn path](https://github.com/xai-org/grok-build/blob/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8/crates/codegen/xai-grok-tools/src/computer/local/terminal.rs#L3315-L3323) applies the marker after environment layering. [Plugin documentation](https://github.com/xai-org/grok-build/blob/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8/crates/codegen/xai-grok-pager/docs/user-guide/09-plugins.md#L429-L438) covers the two plugin-hook markers. |
+| Junie        | Non-empty `JUNIE_DATA` / `JUNIE_SHIM_PATH`                           | The [official CLI launcher](https://github.com/JetBrains/junie/blob/cdbfbcf6a9f17951c94dd2902619dffc37f5881f/templates/junie.shim.sh#L684-L700) exports both into the launched process. These are launcher-context signals; `JUNIE_DATA` can also be configured externally.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Codex        | Additional non-empty `CODEX_SANDBOX_NETWORK_DISABLED`                | [Official subprocess code](https://github.com/openai/codex/blob/6ae8b8aa7c608730d4315d59c5c081897ae02780/codex-rs/core/src/spawn.rs#L85-L88) injects `1` when network access is disabled by the sandbox policy. It is a conditional fallback, not a universal Codex marker.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Hermes Agent | Additional non-empty `HERMES_AGENT`                                  | [Official shell wrapper](https://github.com/NousResearch/hermes-agent/blob/e5eb6b36fe78eb012cefd1f5f436cd458411b8b3/tools/environments/base_session_env.py#L132-L159) exports the marker for terminal commands. Existing non-empty values are preserved, so the rule follows the registry's non-empty convention.                                                                                                                                                                                                                                                                                                                                                                                                           |
+
+Grok Build and Grok Bot are separate entries. Their names alone are not evidence of a shared runtime or publisher.
+
+## Static review of distributed desktop applications
+
+The following findings come from static inspection of installed macOS distribution files, not a live end-to-end execution test. Public product pages establish product identity and capabilities; they do not promise these variables as stable public interfaces. Only independently written descriptions, variable names, fixed sentinel values, and artifact fingerprints are recorded here. No proprietary source, user paths, configuration, or real session identifiers are included.
+
+### WorkBuddy 5.8.3
+
+- Product: [WorkBuddy](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Product-Guide), bundle ID `com.tencent.workbuddy.mac`.
+- `Contents/Resources/app.asar` SHA-256: `a7eff702411704d140d7d8d706fe9e711d9b13e304928481c9eba0af9c06f731`.
+- `main/main-bootstrap.js`, `buildDaemonProcessEnv` (distribution line 77), constructs `WORKBUDDY_APPLICATION_NAME`, `WORKBUDDY_APP_NAME`, and the packaged-state flag. The daemon spawn merges this environment into its child environment.
+- `main/sidecar-manager.js`, `buildSidecarProcessEnv` (line 16), preserves the parent environment. `app.asar.unpacked/cli/dist/codebuddy-lite-wb.mjs`, `buildChildProcessEnv` (line 1684), passes the resulting environment to ordinary shell and PTY children. The sandbox path carries it in its execution request; the native sandbox was not exercised.
+- Both name rules require the exact value `WorkBuddy`. Config directories and packaged-state flags are not independent detection rules. Custom branding or multi-instance names may not match.
+
+### Grok Bot 0.71.2
+
+- Product: [Cursor's Grok Bot](https://cursor.com/docs/grok-bot/teams#architecture), bundle ID `com.anysphere.sand`. The documented architecture separates cloud agents and an optional local execution daemon.
+- Distribution SHA-256: `055b087a9bacc3be4e5f80c468edf2fd031dd5b928ab2e7da7e01dd10de0e860`.
+- `dist/local-exec-daemon/main.cjs` SHA-256: `af56c42ec34f893fcbb2486a7850f861d8a3a4be2e9031f9b07de3a163d09b60`.
+- The executor setup (distribution line 756, function `iZe`) supplies `SAND_AGENT=1` and `CURSOR_AGENT=1`. Shell initialization (lines 602–611, functions `Jae`, `Vae`, `Wae`, `pI`) passes these into Bash/Zsh child environments.
+- The rule therefore matches only `SAND_AGENT=1` and precedes Cursor detection. `CURSOR_AGENT` is not an alternative Grok Bot marker. This audit does not establish PowerShell or cloud-only coverage.
+
+### QoderWork family: QwenWorkCN 1.2.5
+
+- Inspected product: [QwenWorkCN](https://qwenwork.cn/docs/product-introduction), bundle ID `cn.qwenwork.desktop.mac`. Its runtime and marker names use `QoderWork`; this is a family-level registration proposal, not a claim to have tested every QoderWork or QwenWork release.
+- `Contents/Resources/app.asar` SHA-256: `d946457e5e3d7761f7203111775388d5131293a337bf13430e0c26b8993536fb`.
+- `out/main/main.js` SHA-256: `59066b75806a1d7b3e798615302c957a9bca1efa8a7866c60e4d2b210c9c3f36`.
+- `composeQoderAgentSdkRuntimeEnv` (distribution line 654) injects `QODERWORK_IS_CN=true`. Foreground/background workspace Bash paths (lines 11824 and 11838) add `QODERWORK_SOURCE_CHAT_ID` and, conditionally, the same sentinel.
+- The environment is carried through `ShellExecutionService` / `QxcSeatbeltBackend.runBash` to the macOS Bash child (lines 2313–2316 and 1048). `buildQxcTargetEnvironment` (line 888) does not filter either marker. VM command construction (line 1412) also exports these markers on relevant paths; a VM was not launched for verification.
+- Only the observed exact `true` value is accepted for `QODERWORK_IS_CN`; `false`, `0`, and `1` do not match this branch. A result reports the harness family, not a region, model, or exact commercial edition. The [hook documentation](https://docs.qoder.com/qoderwork/hooks) describes a separate interface; this Bash evidence does not establish hook-specific injection.
+
+Distribution line numbers refer to packaged JavaScript, not unpublished source repositories. Static propagation establishes reachable code paths, not successful execution under every shell setup or sandbox policy.
+
+## User-provided runtime observation
+
+### Manus Linux desktop worker
+
+On 2026-10-16, a user supplied an observation from a Manus Linux desktop-worker environment containing the exact marker `MANUS_LONG_DESKTOP_WORKER=1`. This was not independently reproduced by launching the product, and no public stable-interface guarantee was established. The rule is limited to that exact marker; other `MANUS_*` configuration or path variables do not identify this context. No desktop identifiers, endpoints, paths, or other runtime values from the observation are retained. A shared `MANUS_*` prefix is not evidence that another product, such as Cue, has the same identity.
+
+## Validation scope
+
+`src/agent-harnesses.spec.ts` checks registry structure, important precedence relationships, and the existing non-empty/exact-value contract with synthetic environments. These tests do not run the Python detector, read the machine's environment, or validate the vendor applications dynamically. Cases cover exact-value rejection, empty values, compatibility-marker precedence, and configuration-only non-matches.
