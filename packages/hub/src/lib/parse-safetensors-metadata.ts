@@ -101,6 +101,9 @@ const QUANTIZATION_AUXILIARY_SUFFIXES = [
  */
 const MXFP4_SCALES_SUFFIX = "_scales";
 
+/** Underscore-joined scale names ModelOpt uses for fused expert tensors (see `shouldSkipTensor`). */
+const MODELOPT_FUSED_SCALE_SUFFIXES = ["_weight_scale", "_weight_scale_2", "_input_scale"];
+
 /**
  * bitsandbytes keeps its double-quantization state beside each 4-bit weight: `absmax` (one value
  * per 64-weight block), the nested quantization of those absmax values, and the NF4/FP4 lookup
@@ -169,6 +172,48 @@ function bitsFromFormatString(format: string | undefined): number | undefined {
 	}
 	const normalized = format.toLowerCase();
 	return SUB_BYTE_FORMAT_BITS.find(([pattern]) => normalized.includes(pattern))?.[1];
+}
+
+/**
+ * Whether `moduleName` is `target` or nested under it. ModelOpt lists fused containers such as
+ * `model.layers.0.mlp.experts`, which cover every `…experts.N.down_proj` below them.
+ */
+function isModuleOrDescendant(moduleName: string, target: string): boolean {
+	return moduleName === target || moduleName.startsWith(`${target}.`);
+}
+
+/**
+ * Bit width of a ModelOpt-quantized weight, resolved from the most specific declaration available:
+ * the per-module `quantized_layers` entry (mixed precision), then a `config_groups` entry whose
+ * targets name the module, then the global `quant_algo`.
+ *
+ * A module-level declaration wins even when it isn't sub-byte: in a mixed FP8 + NVFP4 export the
+ * FP8 layers must not inherit the 4-bit width of the global algorithm.
+ */
+function getModelOptWeightBits(tensorName: string, quantConfig: QuantizationConfig): number | undefined {
+	const moduleName = getTensorModuleName(tensorName);
+
+	const layers = quantConfig.quantized_layers;
+	if (layers && typeof layers === "object") {
+		let bestMatch: string | undefined;
+		for (const target of Object.keys(layers)) {
+			if (isModuleOrDescendant(moduleName, target) && (!bestMatch || target.length > bestMatch.length)) {
+				bestMatch = target;
+			}
+		}
+		if (bestMatch !== undefined) {
+			return bitsFromFormatString(layers[bestMatch]?.quant_algo);
+		}
+	}
+
+	for (const group of Object.values(quantConfig.config_groups ?? {})) {
+		if (group.targets?.some((target) => typeof target === "string" && isModuleOrDescendant(moduleName, target))) {
+			const numBits = group.weights?.num_bits;
+			return typeof numBits === "number" ? numBits : undefined;
+		}
+	}
+
+	return bitsFromFormatString(quantConfig.quant_algo);
 }
 
 /**
@@ -905,6 +950,13 @@ export interface QuantizationConfig {
 	 * using the same `re:`-prefixed target syntax as `config_groups[].targets`.
 	 */
 	ignore?: string[];
+	/**
+	 * NVIDIA ModelOpt (`quant_method: "modelopt"`) algorithm, e.g. `"NVFP4"`, `"W4A16_NVFP4"`, `"FP8"`,
+	 * or `"MIXED_PRECISION"` — in which case the per-module algorithm is in `quantized_layers`.
+	 */
+	quant_algo?: string;
+	/** ModelOpt mixed-precision: module name (or a parent module, e.g. `…mlp.experts`) -> its algorithm. */
+	quantized_layers?: Record<string, { quant_algo?: string }>;
 }
 
 export interface MlxQuantizationConfig extends QuantizationConfig {
@@ -1289,6 +1341,16 @@ export function getQuantizationMultiplier(
 			return packingFactor(dtype, numBits);
 		}
 
+		case "modelopt": {
+			// NVIDIA ModelOpt NVFP4 packs two FP4 weights per U8 (with FP8 E4M3 block scales in
+			// `weight_scale`, skipped as bookkeeping). Without this case the default branch counted
+			// them one per byte, halving every NVFP4 export's parameter count.
+			if (!INTEGER_CONTAINER_BITS[dtype]) {
+				return 1;
+			}
+			return packingFactor(dtype, getModelOptWeightBits(tensorName, quantConfig));
+		}
+
 		case "fp8": {
 			// fp8 weights live in F8_* dtypes at one value per byte, so nothing to do for them.
 			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8/U8.
@@ -1429,6 +1491,13 @@ function shouldSkipTensor(
 	// other architecture is left alone.
 	if (quantMethod === "mxfp4") {
 		return dtype === "U8" && getTensorSuffix(tensorName).endsWith(MXFP4_SCALES_SUFFIX);
+	}
+
+	// ModelOpt names the scales of fused (3D) expert tensors after the tensor itself, e.g.
+	// `…experts.gate_up_proj_weight_scale`, so the dot-separated suffix check above can't see them.
+	if (quantMethod === "modelopt") {
+		const suffix = getTensorSuffix(tensorName);
+		return MODELOPT_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s));
 	}
 
 	if (quantMethod === "bitsandbytes") {
