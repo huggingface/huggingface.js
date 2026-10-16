@@ -1342,9 +1342,7 @@ export function getQuantizationMultiplier(
 		}
 
 		case "modelopt": {
-			// NVIDIA ModelOpt NVFP4 packs two FP4 weights per U8 (with FP8 E4M3 block scales in
-			// `weight_scale`, skipped as bookkeeping). Without this case the default branch counted
-			// them one per byte, halving every NVFP4 export's parameter count.
+			// NVIDIA ModelOpt NVFP4 packs two FP4 weights per U8
 			if (!INTEGER_CONTAINER_BITS[dtype]) {
 				return 1;
 			}

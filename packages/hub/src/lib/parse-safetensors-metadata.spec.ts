@@ -1173,7 +1173,7 @@ describe("parseSafetensorsMetadata", () => {
 						"model.layers.0.mlp.down_proj.weight_scale": tensor("F8_E4M3", [64, 8]),
 						"model.layers.0.mlp.down_proj.weight_scale_2": tensor("F32", [1]),
 						"model.layers.0.mlp.down_proj.input_scale": tensor("F32", [1]),
-						// fused experts: scales named after the tensor with an underscore
+						// underscored scales: e.g. in meta-models/Muse-Spark-Open-816B-A42B-NVFP4
 						"model.layers.0.mlp.experts.gate_up_proj": tensor("U8", [2, 256, 64]),
 						"model.layers.0.mlp.experts.gate_up_proj_weight_scale": tensor("F8_E4M3", [2, 256, 8]),
 						"model.layers.0.mlp.experts.gate_up_proj_weight_scale_2": tensor("F32", [2]),
