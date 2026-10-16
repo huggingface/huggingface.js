@@ -1446,6 +1446,32 @@ describe("parseSafetensorsMetadata", () => {
 		});
 		assert.strictEqual(sum(Object.values(parse.parameterCount)), 310_756_322_688);
 	});
+
+	it("counts modelopt MIXED_PRECISION NVFP4 weights packed in U8 (nvidia/Qwen3.6-35B-A3B-NVFP4)", async () => {
+		// `quant_method: "modelopt"` with `quant_algo: "MIXED_PRECISION"`: `quantized_layers` marks the
+		// MoE experts and shared experts W4A16_NVFP4, packed two per U8 byte, and the attention
+		// projections FP8. Counting the U8 bytes once each reported 19_528_501_104 for a 35B model.
+		const parse = await parseSafetensorsMetadata({
+			repo: "nvidia/Qwen3.6-35B-A3B-NVFP4",
+			revision: "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 3);
+		const shard = parse.headers["model-00001-of-00003.safetensors"];
+		// NVFP4 expert: moe_intermediate_size 512 packed into 256 bytes per row
+		assert.deepStrictEqual(shard["model.language_model.layers.0.mlp.experts.0.down_proj.weight"].shape, [2048, 256]);
+		// FP8 layer: one value per byte, left unpacked
+		assert.strictEqual(shard["model.language_model.layers.3.self_attn.q_proj.weight"].dtype, "F8_E4M3");
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 1_825_916_784,
+			F8_E4M3: 1_279_262_720,
+			U8: 32_846_643_200, // 16_423_321_600 packed bytes x 2
+		});
+		// exactly the unquantized Qwen/Qwen3.6-35B-A3B parameter count
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 35_951_822_704);
+	});
 });
 
 describe("assertSafeShardFilename", () => {
