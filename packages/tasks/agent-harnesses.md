@@ -55,6 +55,12 @@ Distribution line numbers refer to packaged JavaScript, not unpublished source r
 
 ## User-provided runtime observation
 
+### Doubao Office
+
+On 2026-10-16, a user reported `DOUBAO_OFFICE_AGENT_NAME=doubao_moa` in a Doubao Office shell runtime. The rule accepts only that exact value, without case folding or whitespace trimming. This is a user-provided observation, not an independently reproduced product test or a public vendor contract.
+
+Other `DOUBAO_OFFICE_*` fields, including application/message identifiers, citation settings, proxy configuration, credentials, edition, logs, and market, are not detection alternatives. The synthetic fixtures verify that they do not identify the harness alone or together. No real credentials, identifiers, endpoints, or user paths are retained.
+
 ### Grok Bot cloud shell
 
 On 2026-10-16, a user confirmed that an ordinary shell in a Grok Bot cloud sandbox exposed a non-empty `CURSOR_AGENT`, `SAND_MANIFEST_V2=1`, and `SAND_SUPERVISOR_ENABLED=1`, without `SAND_AGENT`. The existing registry format cannot require these conditions together. This observation therefore adds no cloud detection rule. For the reported cloud-marker-only environment, existing clients continue to match Cursor CLI; first-match ordering and standard-declaration precedence are unchanged. Neither sandbox sentinel is added as an independent Grok Bot marker.
