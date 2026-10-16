@@ -55,7 +55,7 @@ Distribution line numbers refer to packaged JavaScript, not unpublished source r
 
 ### Grok Bot cloud shell
 
-On 2026-10-16, a user confirmed that an ordinary shell in a Grok Bot cloud sandbox exposed a non-empty `CURSOR_AGENT`, `SAND_MANIFEST_V2=1`, and `SAND_SUPERVISOR_ENABLED=1`, without `SAND_AGENT`. The existing registry format cannot require these conditions together. This observation therefore adds no cloud detection rule: without the dedicated local marker or a standard harness declaration, that shell continues to match Cursor CLI. Neither sandbox sentinel is added as an independent Grok Bot marker.
+On 2026-10-16, a user confirmed that an ordinary shell in a Grok Bot cloud sandbox exposed a non-empty `CURSOR_AGENT`, `SAND_MANIFEST_V2=1`, and `SAND_SUPERVISOR_ENABLED=1`, without `SAND_AGENT`. The existing registry format cannot require these conditions together. This observation therefore adds no cloud detection rule. For the reported cloud-marker-only environment, existing clients continue to match Cursor CLI; first-match ordering and standard-declaration precedence are unchanged. Neither sandbox sentinel is added as an independent Grok Bot marker.
 
 This is a user-reported shell observation, not an independently reproduced product test or a public vendor guarantee that these internal markers are exclusive to Grok Bot. No real sandbox identifiers, endpoints, paths, or environment snapshots are retained.
 
