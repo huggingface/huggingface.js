@@ -340,7 +340,11 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1.gguf")).toEqual(undefined);
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-F32-Q2_K.gguf")).toEqual("Q2_K"); // gguf name with two quant labels [F32, Q2_K]
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-IQ3_XS.gguf")).toEqual("IQ3_XS");
-		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual("Q4_0"); // TODO: investigate Q4_0_4_4
+		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0.gguf")).toEqual("Q4_0");
+		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual("Q4_0_4_4");
+		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_8.gguf")).toEqual("Q4_0_4_8");
+		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_8_8.gguf")).toEqual("Q4_0_8_8");
+		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_1_SOME_F16.gguf")).toEqual("Q4_1_SOME_F16");
 		expect(parseGGUFQuantLabel("Qwen3-4B-UD-Q2_K_XL.gguf")).toEqual("UD-Q2_K_XL"); // unsloth UD (Unsloth Dynamic) prefix
 		// llama.cpp names gpt-oss files after the tensor type (MXFP4) even though general.file_type is MXFP4_MOE
 		expect(parseGGUFQuantLabel("gpt-oss-20b-MXFP4.gguf")).toEqual("MXFP4");
@@ -363,6 +367,16 @@ describe("gguf", () => {
 			sizeVariation: undefined,
 		});
 		expect(groups("gpt-oss-20b-MXFP4.gguf")).toEqual({ prefix: undefined, quant: "MXFP4", sizeVariation: undefined });
+		expect(groups("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual({
+			prefix: undefined,
+			quant: "Q4_0_4_4",
+			sizeVariation: undefined,
+		});
+		expect(groups("Codestral-22B-v0.1-Q4_1_SOME_F16.gguf")).toEqual({
+			prefix: undefined,
+			quant: "Q4_1_SOME_F16",
+			sizeVariation: undefined,
+		});
 	});
 
 	it("calculate tensor data offset", async () => {
