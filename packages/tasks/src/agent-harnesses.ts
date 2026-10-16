@@ -105,7 +105,7 @@ export const AGENT_HARNESSES = {
 	"grok-bot": {
 		prettyLabel: "Grok Bot",
 		docsUrl: "https://cursor.com/docs/grok-bot/teams",
-		description: "Cursor's coding agent with optional local execution.",
+		description: "Cursor's agent with cloud and optional local execution.",
 		// Grok Bot's agent terminal also sets CURSOR_AGENT; use its own marker first.
 		envVars: { SAND_AGENT: "1" },
 		// User-observed cloud shell: require the shared Cursor marker and both sandbox sentinels.
@@ -115,14 +115,14 @@ export const AGENT_HARNESSES = {
 		prettyLabel: "WorkBuddy",
 		docsUrl: "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Product-Guide",
 		description: "Tencent's desktop agent for coding and knowledge work.",
-		// Match the WorkBuddy application name before its Claude Code compatibility host.
+		// Keep product-specific runtime markers before inherited contexts.
 		envVars: { WORKBUDDY_APPLICATION_NAME: "WorkBuddy", WORKBUDDY_APP_NAME: "WorkBuddy" },
 	},
 	qoderwork: {
 		prettyLabel: "QoderWork",
 		docsUrl: "https://docs.qoder.com/qoderwork/hooks",
 		description: "Desktop agent for coding and knowledge work.",
-		// Prefer the host runtime's own terminal markers over Claude Code compatibility markers.
+		// Keep product-specific runtime markers before inherited contexts.
 		envVars: { QODERWORK_SOURCE_CHAT_ID: "*", QODERWORK_IS_CN: "true" },
 	},
 	cue: {
