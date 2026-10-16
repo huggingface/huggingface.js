@@ -57,7 +57,7 @@ Distribution line numbers refer to packaged JavaScript, not unpublished source r
 
 ### Doubao Office
 
-On 2026-10-16, a user reported `DOUBAO_OFFICE_AGENT_NAME=doubao_moa` in a Doubao Office shell runtime. The rule accepts only that exact value, without case folding or whitespace trimming. This is a user-provided observation, not an independently reproduced product test or a public vendor contract.
+On 2026-10-16, a user reported `DOUBAO_OFFICE_AGENT_NAME` in a Doubao Office shell runtime. The rule uses the existing non-empty (`"*"`) pattern, with no fixed agent-name restriction. Missing or empty values do not match; any non-empty value, including whitespace, matches without trimming. This is a user-provided observation, not an independently reproduced product test or a public vendor contract.
 
 Other `DOUBAO_OFFICE_*` fields, including application/message identifiers, citation settings, proxy configuration, credentials, edition, logs, and market, are not detection alternatives. The synthetic fixtures verify that they do not identify the harness alone or together. No real credentials, identifiers, endpoints, or user paths are retained.
 

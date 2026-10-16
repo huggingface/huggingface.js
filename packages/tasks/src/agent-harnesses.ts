@@ -117,7 +117,7 @@ export const AGENT_HARNESSES = {
 		prettyLabel: "Doubao Office",
 		description: "Agent for office work.",
 		// User-observed product marker; other office configuration does not identify the agent.
-		envVars: { DOUBAO_OFFICE_AGENT_NAME: "doubao_moa" },
+		envVars: { DOUBAO_OFFICE_AGENT_NAME: "*" },
 	},
 	cue: {
 		prettyLabel: "Cue",
