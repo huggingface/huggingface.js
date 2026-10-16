@@ -40,23 +40,20 @@ The following findings come from static inspection of installed macOS distributi
 - The executor setup (distribution line 756, function `iZe`) supplies `SAND_AGENT=1` and `CURSOR_AGENT=1`. Shell initialization (lines 602–611, functions `Jae`, `Vae`, `Wae`, `pI`) passes these into Bash/Zsh child environments.
 - The local rule therefore matches only `SAND_AGENT=1` and precedes Cursor detection. `CURSOR_AGENT` is not an alternative Grok Bot marker. This static audit alone does not establish PowerShell or cloud-only coverage; the separate cloud-shell observation is documented below.
 
-### QwenWork 1.2.5 distribution context
+### QwenWork 1.3.1
 
-- Inspected distribution: QwenWorkCN 1.2.5, bundle ID `cn.qwenwork.desktop.mac`. The registered product is [QwenWork](https://qwenwork.cn/docs/product-introduction), with ID `qwenwork`. Internal Qoder-prefixed symbols do not establish a separate product identity.
-- `Contents/Resources/app.asar` SHA-256: `d946457e5e3d7761f7203111775388d5131293a337bf13430e0c26b8993536fb`.
-- `out/main/main.js` SHA-256: `59066b75806a1d7b3e798615302c957a9bca1efa8a7866c60e4d2b210c9c3f36`.
-- The earlier static inspection located `composeQoderAgentSdkRuntimeEnv` (distribution line 654) and the `ShellExecutionService` / `QxcSeatbeltBackend.runBash` environment path (lines 2313–2316 and 1048). These internal symbol names are preserved as inspected. This context alone does not verify propagation of the product marker reported below.
-- Country, chat, site, execution-mode, and endpoint configuration are not detection conditions. In particular, `QODERWORK_IS_CN` and `QODERWORK_SOURCE_CHAT_ID` do not identify this entry, alone or together.
+- Inspected distribution: QwenWorkCN 1.3.1, bundle ID `cn.qwenwork.desktop.mac`. The registered product is [QwenWork](https://qwenwork.cn/docs/product-introduction), with ID `qwenwork`. Internal Qoder-prefixed symbols do not establish a separate product identity.
+- `Contents/Resources/app.asar` SHA-256: `f654cd3d68406139b326f5d10d3dbade1b85c610d1fee386c2f3dca43fb6596c`.
+- `out/main/main.js` SHA-256: `76540a35496c1a0df187081b58c4d640aabc9b0f84e78fdbf7fb9fc36bc6eb3d`.
+- `out/main/chunks/index-CHipc8Ca.js` SHA-256: `bc3f123f5f1ca973522628a660946e021d53509c219abe7548ab2eb38b714bcc`; its build constant exported as `Y` supplies the product value below.
+- `buildHostCliDiscoveryEnv` (distribution line 688) sets `QODER_WORK_INTEGRATION_PRODUCT` from the fixed `qwenworkcn` product constant in `out/main/chunks/index-CHipc8Ca.js`. `buildQoderWorkIntegrationEnv` and `composeQoderAgentSdkRuntimeEnv` (line 697) merge this environment, which `executeLocalShell` (line 2330) passes to the child process.
+- `executeQxcHostShell` (line 2331) rebuilds the host discovery environment before passing it to local shell execution. This confirms the inspected host-side paths, not propagation to ordinary VM/QXC guest shells. The product was not dynamically launched for this audit.
+- A user reported `QODER_WORK_INTEGRATION_PRODUCT=qwenworkcn` on 2026-10-16; the static inspection corroborates the host-side injection. The rule accepts only that exact value, without case folding or whitespace trimming. Public documentation establishes the QwenWork name, not a public contract for the internal marker.
+- Country, chat, site, execution-mode, and endpoint configuration are not detection conditions. `QODERWORK_IS_CN`, `QODERWORK_SOURCE_CHAT_ID`, `QODER_SITE`, `QODERWORK_EXECUTION_ENV`, `QWENWORK_BASE_URL`, and `QODERCN_SERVER_ENDPOINT` do not identify this entry, alone or together. No real user paths, addresses, or identifiers are retained.
 
 Distribution line numbers refer to packaged JavaScript, not unpublished source repositories. Static propagation establishes reachable code paths, not successful execution under every shell setup or sandbox policy.
 
 ## User-provided runtime observation
-
-### QwenWork product marker
-
-On 2026-10-16, a user reported `QODER_WORK_INTEGRATION_PRODUCT=qwenworkcn` as the product identity marker for QwenWork. The rule accepts only that exact value, without case folding or whitespace trimming. The public product documentation establishes the QwenWork name, not a public contract for this internal environment variable. The report has not been independently reproduced as a dynamic product test.
-
-The rule does not use `QODERWORK_IS_CN`, `QODERWORK_SOURCE_CHAT_ID`, `QODER_SITE`, `QODERWORK_EXECUTION_ENV`, `QWENWORK_BASE_URL`, or `QODERCN_SERVER_ENDPOINT` as alternatives. A country, chat identifier, local execution setting, or configured endpoint does not establish the product identity. No real user paths, addresses, or identifiers are retained.
 
 ### Grok Bot cloud shell
 
