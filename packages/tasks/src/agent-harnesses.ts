@@ -31,9 +31,19 @@ export interface AgentHarness {
 	 *  - `"<value>"`: the variable equals this exact value
 	 *  - `"<prefix>*"`: the variable value starts with `<prefix>` (fuzzy match, resolved client-side)
 	 *
-	 * If not provided, the harness is detected through the standard AI_AGENT / AGENT variables only.
+	 * A matching entry or a matching `envVarsAll` group identifies the harness.
+	 * If neither map is provided, only the standard AI_AGENT / AGENT variables identify it.
 	 */
 	envVars?: Record<string, string>;
+	/**
+	 * Environment variables that must ALL match to identify this harness, using
+	 * the same value patterns as `envVars`. An empty map must not match.
+	 *
+	 * This group is an alternative to `envVars`: either any `envVars` entry or
+	 * every entry in a non-empty `envVarsAll` group may identify the harness.
+	 * Clients without support for this optional field can still use `envVars`.
+	 */
+	envVarsAll?: Record<string, string>;
 }
 
 /**
@@ -98,6 +108,8 @@ export const AGENT_HARNESSES = {
 		description: "Cursor's coding agent with optional local execution.",
 		// Grok Bot's agent terminal also sets CURSOR_AGENT; use its own marker first.
 		envVars: { SAND_AGENT: "1" },
+		// User-observed cloud shell: require the shared Cursor marker and both sandbox sentinels.
+		envVarsAll: { CURSOR_AGENT: "*", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "1" },
 	},
 	workbuddy: {
 		prettyLabel: "WorkBuddy",
@@ -113,11 +125,24 @@ export const AGENT_HARNESSES = {
 		// Prefer the host runtime's own terminal markers over Claude Code compatibility markers.
 		envVars: { QODERWORK_SOURCE_CHAT_ID: "*", QODERWORK_IS_CN: "true" },
 	},
-	manus: {
-		prettyLabel: "Manus",
-		description: "General-purpose agent with a desktop worker environment.",
-		// Observed in a Linux desktop worker; other MANUS_* configuration does not identify this context.
+	cue: {
+		prettyLabel: "Cue",
+		description: "Agent with a Linux desktop worker environment.",
+		// User-observed Cue worker marker; its MANUS_* namespace does not identify Manus Studio.
 		envVars: { MANUS_LONG_DESKTOP_WORKER: "1" },
+	},
+	muse: {
+		prettyLabel: "Muse",
+		docsUrl: "https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse",
+		description: "Meta's personal agent with a cloud execution environment.",
+		// User-observed execution markers; contextual identifiers alone are not detection rules.
+		envVars: { JARVIS_IS_ASSIGNED: "1", JARVIS_TOOL_CALL_ID: "*" },
+	},
+	"manus-studio": {
+		prettyLabel: "Manus Studio",
+		description: "Desktop agent with an add-on runtime.",
+		// User-reported ordinary-shell descriptor keys; no enabled-flag values are assumed.
+		envVars: { MANUS_ADDON_RUNTIME_SPEC_PATH: "*", MANUS_ADDON_RUNTIME_SPECS_REVISION: "*" },
 	},
 	"claude-code": {
 		prettyLabel: "Claude Code",

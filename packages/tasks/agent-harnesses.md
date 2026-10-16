@@ -2,6 +2,12 @@
 
 This note records the evidence and scope for the harness rules added in this change, reviewed on 2026-10-16. Environment markers identify an execution context; they do not authenticate the immediate caller. Variables can be inherited, overridden, or set manually. Registry order preserves the existing first-match behavior and does not resolve arbitrary nested agents.
 
+## Matching contract and rollout
+
+`envVars` keeps its existing any-entry semantics. The optional `envVarsAll` map describes one group in which every entry must match; an empty group must not match. The two maps are alternatives: a harness matches when any `envVars` entry matches **or** every entry in a non-empty `envVarsAll` group matches. Both maps use the same value-pattern syntax.
+
+Grok Bot retains its local `SAND_AGENT=1` rule in `envVars` and adds a separate cloud-shell group in `envVarsAll`. Older clients that ignore the optional field can still recognize the local marker, but will not apply the new cloud group. The new branch requires a client that implements `envVarsAll` and a deployed registry API that preserves the field. This package change alone does not establish that either deployment has occurred. The public server-side path from `@huggingface/tasks` to `/api/agent-harnesses` was not confirmed, so no automatic rollout or deployment timing is claimed.
+
 ## Public upstream sources
 
 | Harness      | Rule                                                                 | Source and scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -32,7 +38,7 @@ The following findings come from static inspection of installed macOS distributi
 - Distribution SHA-256: `055b087a9bacc3be4e5f80c468edf2fd031dd5b928ab2e7da7e01dd10de0e860`.
 - `dist/local-exec-daemon/main.cjs` SHA-256: `af56c42ec34f893fcbb2486a7850f861d8a3a4be2e9031f9b07de3a163d09b60`.
 - The executor setup (distribution line 756, function `iZe`) supplies `SAND_AGENT=1` and `CURSOR_AGENT=1`. Shell initialization (lines 602–611, functions `Jae`, `Vae`, `Wae`, `pI`) passes these into Bash/Zsh child environments.
-- The rule therefore matches only `SAND_AGENT=1` and precedes Cursor detection. `CURSOR_AGENT` is not an alternative Grok Bot marker. This audit does not establish PowerShell or cloud-only coverage.
+- The local rule therefore matches only `SAND_AGENT=1` and precedes Cursor detection. `CURSOR_AGENT` is not an alternative Grok Bot marker. This static audit alone does not establish PowerShell or cloud-only coverage; the separate cloud-shell observation is documented below.
 
 ### QoderWork family: QwenWorkCN 1.2.5
 
@@ -47,10 +53,28 @@ Distribution line numbers refer to packaged JavaScript, not unpublished source r
 
 ## User-provided runtime observation
 
-### Manus Linux desktop worker
+### Grok Bot cloud shell
 
-On 2026-10-16, a user supplied an observation from a Manus Linux desktop-worker environment containing the exact marker `MANUS_LONG_DESKTOP_WORKER=1`. This was not independently reproduced by launching the product, and no public stable-interface guarantee was established. The rule is limited to that exact marker; other `MANUS_*` configuration or path variables do not identify this context. No desktop identifiers, endpoints, paths, or other runtime values from the observation are retained. A shared `MANUS_*` prefix is not evidence that another product, such as Cue, has the same identity.
+On 2026-10-16, a user confirmed that an ordinary shell in a Grok Bot cloud sandbox exposed a non-empty `CURSOR_AGENT`, `SAND_MANIFEST_V2=1`, and `SAND_SUPERVISOR_ENABLED=1`, without `SAND_AGENT`. The new group requires all three conditions together. Neither sandbox sentinel alone, nor either sentinel combined with the shared Cursor marker, identifies this branch. `CURSOR_AGENT` alone continues to match Cursor CLI.
+
+This is a user-reported shell observation, not an independently reproduced product test or a public vendor guarantee that these internal markers are exclusive to Grok Bot. No real sandbox identifiers, endpoints, paths, or environment snapshots are retained. The conjunction narrows the heuristic without authenticating the caller.
+
+### Cue Linux desktop worker
+
+On 2026-10-16, a user supplied an observation from a Cue Linux desktop-worker environment containing the exact marker `MANUS_LONG_DESKTOP_WORKER=1`. This was not independently reproduced by launching the product, and no public stable-interface guarantee was established. The rule is limited to that exact marker; other `MANUS_*` configuration or path variables do not identify this context. No desktop identifiers, endpoints, paths, or other runtime values from the observation are retained. The marker's `MANUS_*` namespace is not evidence that the observed product is Manus or Manus Studio.
+
+### Muse execution context
+
+On 2026-10-16, a user supplied observations attributed to Muse containing `JARVIS_IS_ASSIGNED=1` for an active session and a non-empty `JARVIS_TOOL_CALL_ID` during tool execution. Either execution marker can identify this observed context. `JARVIS_HATCHLING_ID`, `JARVIS_SESSION_ID`, `JARVIS_TIER`, `JARVIS_USER_TIMEZONE`, and `JARVIS_VM_COMPUTE_REGION` without an execution marker do not trigger the rule. Fixtures use synthetic values; no observed identifiers or context content are retained.
+
+Meta's [official Muse architecture article](https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse) establishes the product identity and cloud VM execution model, but does not establish a public contract for these `JARVIS_*` variables. The environment observations were user-provided, not independently reproduced, and should not be generalized to every Muse interface or to the separate Muse Code product.
+
+### Manus Studio add-on runtime
+
+On 2026-10-16, a user reported seven `MANUS_ADDON_*` / `MANUS_GROUP_*` variable names and confirmed that they were observed in an ordinary Manus Studio shell. Actual values were withheld. The proposed detection rules accept a non-empty `MANUS_ADDON_RUNTIME_SPEC_PATH` or `MANUS_ADDON_RUNTIME_SPECS_REVISION` as an add-on runtime descriptor. This is a user-reported shell observation, not a verified public contract or a successful local static/dynamic audit of Manus Studio 2.0.7.
+
+`MANUS_ADDON_PREVIEW_PUBLIC_ORIGIN`, `MANUS_ADDON_REGISTRY_ENABLED`, `MANUS_ADDON_RUNTIME_PUBLIC_ORIGIN`, `MANUS_ADDON_SERVER_BRANCH`, and `MANUS_GROUP_ENABLED` do not independently trigger detection. No enabled-flag value is inferred from a variable name. The Cue worker marker is a separate rule and does not identify Manus Studio. All fixture paths, revisions, origins, and flag values are synthetic, not retained runtime values.
 
 ## Validation scope
 
-`src/agent-harnesses.spec.ts` checks registry structure, important precedence relationships, and the existing non-empty/exact-value contract with synthetic environments. These tests do not run the Python detector, read the machine's environment, or validate the vendor applications dynamically. Cases cover exact-value rejection, empty values, compatibility-marker precedence, and configuration-only non-matches.
+`src/agent-harnesses.spec.ts` checks registry structure, important precedence relationships, and the non-empty/exact-value and any/all-group contracts with synthetic environments. These tests do not run the Python detector, read the machine's environment, or validate the vendor applications dynamically. Cases cover exact-value rejection, empty values, complete and partial conjunctions, empty-group rejection, legacy local-marker compatibility, compatibility-marker precedence, and configuration-only non-matches.

@@ -10,11 +10,13 @@ describe("agent-harnesses", () => {
 		for (const [id, harness] of Object.entries(harnesses)) {
 			expect(id).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 			expect(harness.prettyLabel.trim()).not.toBe("");
-			for (const [name, pattern] of Object.entries(harness.envVars ?? {})) {
-				expect(name).toMatch(/^[A-Z_][A-Z0-9_]*$/);
-				expect(pattern).not.toBe("");
-				// Standard declarations identify a harness by id, rather than by a wildcard rule.
-				expect(STANDARD_AGENT_ENV_VARS).not.toContain(name);
+			for (const vars of [harness.envVars, harness.envVarsAll]) {
+				for (const [name, pattern] of Object.entries(vars ?? {})) {
+					expect(name).toMatch(/^[A-Z_][A-Z0-9_]*$/);
+					expect(pattern).not.toBe("");
+					// Standard declarations identify a harness by id, rather than by a wildcard rule.
+					expect(STANDARD_AGENT_ENV_VARS).not.toContain(name);
+				}
 			}
 		}
 	});
@@ -26,7 +28,9 @@ describe("agent-harnesses", () => {
 		["grok-bot", "cursor-cli"],
 		["workbuddy", "claude-code"],
 		["qoderwork", "claude-code"],
-		["manus", "claude-code"],
+		["cue", "claude-code"],
+		["muse", "claude-code"],
+		["manus-studio", "claude-code"],
 		["grok-build", "cursor-cli"],
 		["junie", "cursor-cli"],
 		["kimi", "cursor-cli"],
@@ -46,14 +50,42 @@ describe("agent-harnesses", () => {
 
 	// Exercise the registry's non-empty / exact-value contract with synthetic inputs.
 	// The registry itself does not read the environment or implement client detection.
-	function matchEnvironment(env: Record<string, string>): string | undefined {
-		return Object.entries(harnesses).find(([, harness]) =>
-			Object.entries(harness.envVars ?? {}).some(([name, pattern]) => {
-				const value = env[name];
-				return !!value && (pattern === "*" || pattern === value);
-			}),
-		)?.[0];
+	function matchesHarness(harness: AgentHarness, env: Record<string, string>): boolean {
+		const matchesEntry = ([name, pattern]: [string, string]): boolean => {
+			const value = env[name];
+			return !!value && (pattern === "*" || pattern === value);
+		};
+		const all = Object.entries(harness.envVarsAll ?? {});
+		return Object.entries(harness.envVars ?? {}).some(matchesEntry) || (all.length > 0 && all.every(matchesEntry));
 	}
+
+	function matchEnvironment(env: Record<string, string>): string | undefined {
+		return Object.entries(harnesses).find(([, harness]) => matchesHarness(harness, env))?.[0];
+	}
+
+	it("does not let an empty all-conditions map match every process", () => {
+		expect(matchesHarness({ prettyLabel: "Synthetic", envVarsAll: {} }, {})).toBe(false);
+	});
+
+	it("allows an any-condition rule to match independently of an empty all-conditions map", () => {
+		expect(
+			matchesHarness(
+				{ prettyLabel: "Synthetic", envVars: { SYNTHETIC_AGENT: "1" }, envVarsAll: {} },
+				{ SYNTHETIC_AGENT: "1" },
+			),
+		).toBe(true);
+	});
+
+	it("retains local Grok Bot detection for clients that only consume envVars", () => {
+		const legacyRule = {
+			prettyLabel: AGENT_HARNESSES["grok-bot"].prettyLabel,
+			envVars: AGENT_HARNESSES["grok-bot"].envVars,
+		};
+		expect(matchesHarness(legacyRule, { SAND_AGENT: "1" })).toBe(true);
+		expect(matchesHarness(legacyRule, { CURSOR_AGENT: "1", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "1" })).toBe(
+			false,
+		);
+	});
 
 	it.each<[Record<string, string>, string | undefined]>([
 		[{ KIMI_PLUGIN_ROOT: "/tmp/example-plugin" }, "kimi"],
@@ -75,6 +107,19 @@ describe("agent-harnesses", () => {
 		[{ SAND_AGENT: "0", CURSOR_AGENT: "1" }, "cursor-cli"],
 		[{ SAND_AGENT: "true" }, undefined],
 		[{ SAND_AGENT: "" }, undefined],
+		[{ CURSOR_AGENT: "1", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "1" }, "grok-bot"],
+		[{ SAND_AGENT: "1", SAND_MANIFEST_V2: "0", SAND_SUPERVISOR_ENABLED: "0" }, "grok-bot"],
+		[{ CURSOR_AGENT: "1" }, "cursor-cli"],
+		[{ SAND_MANIFEST_V2: "1" }, undefined],
+		[{ SAND_SUPERVISOR_ENABLED: "1" }, undefined],
+		[{ SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "1" }, undefined],
+		[{ CURSOR_AGENT: "1", SAND_SUPERVISOR_ENABLED: "1" }, "cursor-cli"],
+		[{ CURSOR_AGENT: "1", SAND_MANIFEST_V2: "1" }, "cursor-cli"],
+		[{ CURSOR_AGENT: "", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "1" }, undefined],
+		[{ CURSOR_AGENT: "1", SAND_MANIFEST_V2: "0", SAND_SUPERVISOR_ENABLED: "1" }, "cursor-cli"],
+		[{ CURSOR_AGENT: "1", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "0" }, "cursor-cli"],
+		[{ CURSOR_AGENT: "1", SAND_MANIFEST_V2: "true", SAND_SUPERVISOR_ENABLED: "1" }, "cursor-cli"],
+		[{ CURSOR_AGENT: "1", SAND_MANIFEST_V2: "1", SAND_SUPERVISOR_ENABLED: "true" }, "cursor-cli"],
 		[{ GROK_AGENT: "1" }, "grok-build"],
 		[{ GROK_AGENT: "custom-agent" }, undefined],
 		[{ GROK_PLUGIN_ROOT: "/tmp/example-plugin", CLAUDECODE: "1" }, "grok-build"],
@@ -87,12 +132,43 @@ describe("agent-harnesses", () => {
 		[{ QODERWORK_IS_CN: "1" }, undefined],
 		[{ QODERWORK_IS_CN: "" }, undefined],
 		[{ QODERWORK_SOURCE_CHAT_ID: "" }, undefined],
-		[{ MANUS_LONG_DESKTOP_WORKER: "1" }, "manus"],
-		[{ MANUS_LONG_DESKTOP_WORKER: "1", CLAUDECODE: "1", CURSOR_AGENT: "1" }, "manus"],
+		[{ MANUS_LONG_DESKTOP_WORKER: "1" }, "cue"],
+		[{ MANUS_LONG_DESKTOP_WORKER: "1", CLAUDECODE: "1", CURSOR_AGENT: "1" }, "cue"],
 		[{ MANUS_LONG_DESKTOP_WORKER: "true" }, undefined],
 		[{ MANUS_LONG_DESKTOP_WORKER: "0" }, undefined],
 		[{ MANUS_LONG_DESKTOP_WORKER: "" }, undefined],
 		[{ MANUS_CONFIG_DIR: "/tmp/example-config" }, undefined],
+		[{ MANUS_ADDON_RUNTIME_SPEC_PATH: "/tmp/synthetic-spec.json" }, "manus-studio"],
+		[{ MANUS_ADDON_RUNTIME_SPECS_REVISION: "synthetic-revision" }, "manus-studio"],
+		[{ MANUS_ADDON_RUNTIME_SPEC_PATH: "" }, undefined],
+		[{ MANUS_ADDON_RUNTIME_SPECS_REVISION: "" }, undefined],
+		[{ MANUS_ADDON_PREVIEW_PUBLIC_ORIGIN: "https://preview.example.test" }, undefined],
+		[{ MANUS_ADDON_REGISTRY_ENABLED: "1" }, undefined],
+		[{ MANUS_ADDON_RUNTIME_PUBLIC_ORIGIN: "https://runtime.example.test" }, undefined],
+		[{ MANUS_ADDON_SERVER_BRANCH: "synthetic-branch" }, undefined],
+		[{ MANUS_GROUP_ENABLED: "1" }, undefined],
+		[{ JARVIS_IS_ASSIGNED: "1" }, "muse"],
+		[{ JARVIS_TOOL_CALL_ID: "synthetic-tool-call" }, "muse"],
+		[{ JARVIS_IS_ASSIGNED: "1", CLAUDECODE: "1" }, "muse"],
+		[{ JARVIS_IS_ASSIGNED: "0" }, undefined],
+		[{ JARVIS_IS_ASSIGNED: "true" }, undefined],
+		[{ JARVIS_IS_ASSIGNED: "" }, undefined],
+		[{ JARVIS_TOOL_CALL_ID: "" }, undefined],
+		[{ JARVIS_HATCHLING_ID: "synthetic-vm" }, undefined],
+		[{ JARVIS_SESSION_ID: "synthetic-session" }, undefined],
+		[{ JARVIS_TIER: "pro" }, undefined],
+		[{ JARVIS_USER_TIMEZONE: "UTC" }, undefined],
+		[{ JARVIS_VM_COMPUTE_REGION: "test-region" }, undefined],
+		[
+			{
+				JARVIS_HATCHLING_ID: "synthetic-vm",
+				JARVIS_SESSION_ID: "synthetic-session",
+				JARVIS_TIER: "pro",
+				JARVIS_USER_TIMEZONE: "UTC",
+				JARVIS_VM_COMPUTE_REGION: "test-region",
+			},
+			undefined,
+		],
 	])("matches synthetic environment %j as %s", (env, expected) => {
 		expect(matchEnvironment(env)).toBe(expected);
 	});
