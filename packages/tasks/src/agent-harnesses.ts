@@ -111,7 +111,7 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://qwenwork.cn/docs/product-introduction",
 		description: "Desktop agent for coding and knowledge work.",
 		// Keep product-specific runtime markers before inherited contexts.
-		envVars: { QODER_WORK_INTEGRATION_PRODUCT: "qwenworkcn" },
+		envVars: { QODER_WORK_INTEGRATION_PRODUCT: "*" },
 	},
 	"doubao-office": {
 		prettyLabel: "Doubao Office",
