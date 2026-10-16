@@ -138,10 +138,10 @@ export class McpClient {
 			},
 		);
 
-		const message = {
+		const message: ChatCompletionInputMessage & { reasoning_content?: string } = {
 			role: "unknown",
 			content: "",
-		} satisfies ChatCompletionInputMessage;
+		};
 		const finalToolCalls: Record<number, ChatCompletionStreamOutputDeltaToolCall> = {};
 		let numOfChunks = 0;
 
@@ -160,6 +160,9 @@ export class McpClient {
 			}
 			if (delta.content) {
 				message.content += delta.content;
+			}
+			if (typeof delta.reasoning_content === "string") {
+				message.reasoning_content = (message.reasoning_content ?? "") + delta.reasoning_content;
 			}
 			for (const toolCall of delta.tool_calls ?? []) {
 				// aggregating chunks into an encoded arguments JSON object
@@ -187,8 +190,11 @@ export class McpClient {
 
 		const assistantMessage: ChatCompletionInputMessage = {
 			role: "assistant",
-			content: message.content,
 		};
+
+		if (message.reasoning_content !== undefined) {
+			assistantMessage.reasoning_content = message.reasoning_content;
+		}
 
 		const finalToolCallValues = Object.values(finalToolCalls);
 
@@ -201,6 +207,12 @@ export class McpClient {
 					arguments: toolCall.function.arguments,
 				},
 			}));
+			
+			if (message.content !== "") {
+				assistantMessage.content = message.content;
+			}
+		} else {
+			assistantMessage.content = message.content;
 		}
 		messages.push(assistantMessage);
 
