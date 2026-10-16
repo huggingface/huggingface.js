@@ -195,14 +195,16 @@ function getModelOptWeightBits(tensorName: string, quantConfig: QuantizationConf
 
 	const layers = quantConfig.quantized_layers;
 	if (layers && typeof layers === "object") {
-		let bestMatch: string | undefined;
-		for (const target of Object.keys(layers)) {
-			if (isModuleOrDescendant(moduleName, target) && (!bestMatch || target.length > bestMatch.length)) {
-				bestMatch = target;
+		let target = moduleName;
+		while (true) {
+			if (Object.prototype.hasOwnProperty.call(layers, target)) {
+				return bitsFromFormatString(layers[target]?.quant_algo);
 			}
-		}
-		if (bestMatch !== undefined) {
-			return bitsFromFormatString(layers[bestMatch]?.quant_algo);
+			const parentIndex = target.lastIndexOf(".");
+			if (parentIndex === -1) {
+				break;
+			}
+			target = target.slice(0, parentIndex);
 		}
 	}
 
