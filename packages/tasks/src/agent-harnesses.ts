@@ -86,55 +86,59 @@ export const AGENT_HARNESSES = {
 		// Keep before `claude-code` for environments with Claude Code compatibility markers.
 		prettyLabel: "Grok Build",
 		repoUrl: "https://github.com/xai-org/grok-build",
-		docsUrl: "https://github.com/xai-org/grok-build/tree/main/crates/codegen/xai-grok-pager/docs",
-		description: "xAI's coding agent for the terminal.",
+		docsUrl: "https://docs.x.ai/build/overview",
+		description: "Terminal coding agent for editing code, running commands, and managing development tasks.",
 		// Agent terminals set GROK_AGENT=1; other values can select an agent definition.
 		// The plugin variables are injected into plugin hook processes.
 		envVars: { GROK_AGENT: "1", GROK_PLUGIN_ROOT: "*", GROK_PLUGIN_DATA: "*" },
 	},
 	"grok-bot": {
 		prettyLabel: "Grok Bot",
-		docsUrl: "https://cursor.com/docs/grok-bot/teams",
-		description: "Cursor's agent with cloud and optional local execution.",
+		docsUrl: "https://cursor.com/docs/grok-bot",
+		description:
+			"AI teammates from Cursor that carry out tasks across apps and websites on a persistent cloud computer.",
 		// Grok Bot's agent terminal also sets CURSOR_AGENT; use its own marker first.
 		envVars: { SAND_AGENT: "1" },
 	},
 	workbuddy: {
 		prettyLabel: "WorkBuddy",
 		docsUrl: "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Product-Guide",
-		description: "Tencent's desktop agent for coding and knowledge work.",
+		description: "Tencent's desktop AI workspace for completing office tasks.",
 		// Keep product-specific runtime markers before inherited contexts.
 		envVars: { WORKBUDDY_APPLICATION_NAME: "WorkBuddy", WORKBUDDY_APP_NAME: "WorkBuddy" },
 	},
 	qwenwork: {
 		prettyLabel: "QwenWork",
 		docsUrl: "https://qwenwork.cn/docs/product-introduction",
-		description: "Desktop agent for coding and knowledge work.",
+		description: "Alibaba's AI office platform for completing tasks across desktop and web.",
 		// Keep product-specific runtime markers before inherited contexts.
 		envVars: { QODER_WORK_INTEGRATION_PRODUCT: "*" },
 	},
-	"doubao-office": {
-		prettyLabel: "Doubao Office",
-		description: "Agent for office work.",
+	"doubao-work": {
+		prettyLabel: "Doubao Work",
+		docsUrl: "https://www.doubao.com/work",
+		description: "An AI work platform for individuals, teams, and enterprises.",
 		// User-observed product marker; other office configuration does not identify the agent.
 		envVars: { DOUBAO_OFFICE_AGENT_NAME: "*" },
 	},
 	cue: {
 		prettyLabel: "Cue",
-		description: "Agent with a Linux desktop worker environment.",
-		// User-observed Cue worker marker; its MANUS_* namespace does not identify Manus Studio.
+		docsUrl: "https://cue.im/?lang=zh-CN",
+		description: "Personal AI agents from Manus AI with their own computer, email, phone, and wallet.",
+		// User-observed Cue worker marker; its MANUS_* namespace does not identify Manus.
 		envVars: { MANUS_LONG_DESKTOP_WORKER: "1" },
 	},
 	muse: {
 		prettyLabel: "Muse",
 		docsUrl: "https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse",
-		description: "Meta's personal agent with a cloud execution environment.",
+		description: "Meta's personal AI agent that works across connected services on a dedicated cloud computer.",
 		// User-observed execution markers; contextual identifiers alone are not detection rules.
 		envVars: { JARVIS_IS_ASSIGNED: "1", JARVIS_TOOL_CALL_ID: "*" },
 	},
-	"manus-studio": {
-		prettyLabel: "Manus Studio",
-		description: "Desktop agent with an add-on runtime.",
+	manus: {
+		prettyLabel: "Manus",
+		docsUrl: "https://www.manus.im/about",
+		description: "General-purpose AI agent for research, content creation, and workflow automation.",
 		// User-reported ordinary-shell descriptor keys; no enabled-flag values are assumed.
 		envVars: { MANUS_ADDON_RUNTIME_SPEC_PATH: "*", MANUS_ADDON_RUNTIME_SPECS_REVISION: "*" },
 	},
@@ -196,7 +200,7 @@ export const AGENT_HARNESSES = {
 		prettyLabel: "Junie",
 		repoUrl: "https://github.com/JetBrains/junie",
 		docsUrl: "https://junie.jetbrains.com",
-		description: "JetBrains' coding agent for the terminal.",
+		description: "JetBrains' coding agent for terminal, IDE, and CI workflows.",
 		// Exported by the Junie CLI launcher into its child process environment.
 		envVars: { JUNIE_DATA: "*", JUNIE_SHIM_PATH: "*" },
 	},
@@ -211,7 +215,7 @@ export const AGENT_HARNESSES = {
 		prettyLabel: "Kimi Code",
 		repoUrl: "https://github.com/MoonshotAI/kimi-code",
 		docsUrl: "https://moonshotai.github.io/kimi-code/",
-		description: "Moonshot AI's coding agent for the terminal.",
+		description: "Moonshot AI's terminal coding agent with file editing and shell tools.",
 		// Injected into plugin hooks; KIMI_CODE_HOME can also be user configuration.
 		envVars: { KIMI_PLUGIN_ROOT: "*" },
 	},

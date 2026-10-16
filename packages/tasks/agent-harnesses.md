@@ -2,6 +2,23 @@
 
 This note records the evidence and scope for the harness rules added in this change, reviewed on 2026-10-16. Environment markers identify an execution context; they do not authenticate the immediate caller. Variables can be inherited, overridden, or set manually. Registry order preserves the existing first-match behavior and does not resolve arbitrary nested agents.
 
+## Official product positioning
+
+The descriptions below summarize official product pages, documentation, and READMEs reviewed on 2026-10-16. Product capabilities can span more interfaces than the markers cover. These sources establish product positioning; evidence for the environment rules and their coverage appears separately below.
+
+| Product     | Registry description                                                                                   | Official source and basis                                                                                                                                                                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kimi Code   | Moonshot AI's terminal coding agent with file editing and shell tools.                                 | [Official README](https://github.com/MoonshotAI/kimi-code#what-is-kimi-code-cli) describes a terminal coding agent that reads and edits code and runs shell commands.                                                                                                               |
+| Grok Build  | Terminal coding agent for editing code, running commands, and managing development tasks.              | [Official README](https://github.com/xai-org/grok-build#readme) describes a terminal AI coding agent with file editing, command execution, and long-running tasks.                                                                                                                  |
+| Junie       | JetBrains' coding agent for terminal, IDE, and CI workflows.                                           | [Official product page](https://junie.jetbrains.com/) lists terminal, IDE, GitHub Actions, and GitLab CI integrations.                                                                                                                                                              |
+| WorkBuddy   | Tencent's desktop AI workspace for completing office tasks.                                            | [Official product guide](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Product-Guide) describes Tencent's desktop workplace agent and autonomous office-task execution.                                                                                     |
+| QwenWork    | Alibaba's AI office platform for completing tasks across desktop and web.                              | [Official introduction](https://qwenwork.cn/docs/product-introduction) describes Alibaba's AI office platform across desktop and web, including analysis and artifact creation.                                                                                                     |
+| Doubao Work | An AI work platform for individuals, teams, and enterprises.                                           | [Official Feishu introduction](https://www.feishu.cn/content/article/7677519271848610746) defines that audience and positioning; [Feishu's English help](https://www.feishu.cn/hc/en-US/articles/428390929435-admin-configure-screen-capture-protection) uses the name Doubao Work. |
+| Grok Bot    | AI teammates from Cursor that carry out tasks across apps and websites on a persistent cloud computer. | [Official documentation](https://cursor.com/docs/grok-bot) describes AI teammates and their cloud computer, apps, and website access.                                                                                                                                               |
+| Muse        | Meta's personal AI agent that works across connected services on a dedicated cloud computer.           | [Official architecture article](https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse) describes a personal agent, connected services, and its dedicated cloud computer.                                                                           |
+| Manus       | General-purpose AI agent for research, content creation, and workflow automation.                      | [Official about page](https://www.manus.im/about) presents its general-purpose agent and these task categories.                                                                                                                                                                     |
+| Cue         | Personal AI agents from Manus AI with their own computer, email, phone, and wallet.                    | [Official Cue site](https://cue.im/?lang=zh-CN) describes these resources and names Manus AI; [official agent documentation](https://open.manus.ai/docs/v2/agents-overview) identifies agents in the Cue app.                                                                       |
+
 ## Existing matching contract
 
 This contribution adds registry data using the existing `envVars` format. Any matching entry identifies the harness. The rules use the already-supported non-empty (`"*"`) and exact-value patterns; no new registry fields, matching capabilities, or client changes are required.
@@ -56,9 +73,9 @@ Distribution line numbers refer to packaged JavaScript, not unpublished source r
 
 ## User-provided runtime observation
 
-### Doubao Office
+### Doubao Work
 
-On 2026-10-16, a user reported `DOUBAO_OFFICE_AGENT_NAME` in a Doubao Office shell runtime. The rule uses the existing non-empty (`"*"`) pattern, with no fixed agent-name restriction. Missing or empty values do not match; any non-empty value, including whitespace, matches without trimming. This is a user-provided observation, not an independently reproduced product test or a public vendor contract.
+On 2026-10-16, a user reported `DOUBAO_OFFICE_AGENT_NAME` in a Doubao Work shell runtime. The rule uses the existing non-empty (`"*"`) pattern, with no fixed agent-name restriction. Missing or empty values do not match; any non-empty value, including whitespace, matches without trimming. This is a user-provided observation, not an independently reproduced product test or a public vendor contract.
 
 Other `DOUBAO_OFFICE_*` fields, including application/message identifiers, citation settings, proxy configuration, credentials, edition, logs, and market, are not detection alternatives. The synthetic fixtures verify that they do not identify the harness alone or together. No real credentials, identifiers, endpoints, or user paths are retained.
 
@@ -70,7 +87,7 @@ This is a user-reported shell observation, not an independently reproduced produ
 
 ### Cue Linux desktop worker
 
-On 2026-10-16, a user supplied an observation from a Cue Linux desktop-worker environment containing the exact marker `MANUS_LONG_DESKTOP_WORKER=1`. This was not independently reproduced by launching the product, and no public stable-interface guarantee was established. The rule is limited to that exact marker; other `MANUS_*` configuration or path variables do not identify this context. No desktop identifiers, endpoints, paths, or other runtime values from the observation are retained. The marker's `MANUS_*` namespace is not evidence that the observed product is Manus or Manus Studio.
+On 2026-10-16, a user supplied an observation from a Cue Linux desktop-worker environment containing the exact marker `MANUS_LONG_DESKTOP_WORKER=1`. This was not independently reproduced by launching the product, and no public stable-interface guarantee was established. The rule is limited to that exact marker; other `MANUS_*` configuration or path variables do not identify this context. No desktop identifiers, endpoints, paths, or other runtime values from the observation are retained. The marker's `MANUS_*` namespace does not identify the separate Manus registry entry.
 
 ### Muse execution context
 
@@ -78,11 +95,11 @@ On 2026-10-16, a user supplied observations attributed to Muse containing `JARVI
 
 Meta's [official Muse architecture article](https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse) establishes the product identity and cloud VM execution model, but does not establish a public contract for these `JARVIS_*` variables. The environment observations were user-provided, not independently reproduced, and should not be generalized to every Muse interface or to the separate Muse Code product.
 
-### Manus Studio add-on runtime
+### Manus add-on runtime
 
-On 2026-10-16, a user reported seven `MANUS_ADDON_*` / `MANUS_GROUP_*` variable names and confirmed that they were observed in an ordinary Manus Studio shell. Actual values were withheld. The proposed detection rules accept a non-empty `MANUS_ADDON_RUNTIME_SPEC_PATH` or `MANUS_ADDON_RUNTIME_SPECS_REVISION` as an add-on runtime descriptor. This is a user-reported shell observation, not a verified public contract or a successful local static/dynamic audit of Manus Studio 2.0.7.
+On 2026-10-16, a user reported seven `MANUS_ADDON_*` / `MANUS_GROUP_*` variable names and confirmed that they were observed in an ordinary Manus shell. Actual values were withheld. The proposed detection rules accept a non-empty `MANUS_ADDON_RUNTIME_SPEC_PATH` or `MANUS_ADDON_RUNTIME_SPECS_REVISION` as an add-on runtime descriptor. This is a user-reported shell observation, not a verified public contract or a successful local static/dynamic audit. The separately inspected distribution was labeled Manus Studio 2.0.7; that artifact name is retained here only to identify the scope of the inconclusive inspection.
 
-`MANUS_ADDON_PREVIEW_PUBLIC_ORIGIN`, `MANUS_ADDON_REGISTRY_ENABLED`, `MANUS_ADDON_RUNTIME_PUBLIC_ORIGIN`, `MANUS_ADDON_SERVER_BRANCH`, and `MANUS_GROUP_ENABLED` do not independently trigger detection. No enabled-flag value is inferred from a variable name. The Cue worker marker is a separate rule and does not identify Manus Studio. All fixture paths, revisions, origins, and flag values are synthetic, not retained runtime values.
+`MANUS_ADDON_PREVIEW_PUBLIC_ORIGIN`, `MANUS_ADDON_REGISTRY_ENABLED`, `MANUS_ADDON_RUNTIME_PUBLIC_ORIGIN`, `MANUS_ADDON_SERVER_BRANCH`, and `MANUS_GROUP_ENABLED` do not independently trigger detection. No enabled-flag value is inferred from a variable name. The Cue worker marker is a separate rule and does not identify Manus. All fixture paths, revisions, origins, and flag values are synthetic, not retained runtime values.
 
 ## Validation scope
 
