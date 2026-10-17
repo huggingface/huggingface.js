@@ -77,7 +77,7 @@ export const AGENT_HARNESSES = {
 	},
 	cowork: {
 		// must stay before `claude-code` so the more specific signal takes priority when both `CLAUDE_CODE` and `CLAUDE_CODE_IS_COWORK` are set.
-		prettyLabel: "Cowork",
+		prettyLabel: "Claude Cowork",
 		docsUrl: "https://claude.com/product/cowork",
 		description: "Anthropic's agent for autonomous knowledge work, built on top of Claude Code.",
 		envVars: { CLAUDE_CODE_IS_COWORK: "*" },

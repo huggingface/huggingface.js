@@ -23,6 +23,8 @@ The descriptions below summarize official product pages, documentation, and READ
 
 This contribution adds registry data using the existing `envVars` format. Any matching entry identifies the harness. The rules use the already-supported non-empty (`"*"`) and exact-value patterns; no new registry fields, matching capabilities, or client changes are required.
 
+The existing `cowork` entry is displayed as Claude Cowork. Its pre-existing canonical ID and detection rule remain unchanged.
+
 Grok Bot is registered with its local `SAND_AGENT=1` marker. Its reported cloud-shell markers cannot safely be represented as independent alternatives and are not added as detection conditions. Updating the published registry still depends on the normal server-side rollout and client cache refresh; no deployment timing is claimed.
 
 ## Public upstream sources
