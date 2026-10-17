@@ -202,7 +202,7 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://junie.jetbrains.com",
 		description: "JetBrains' coding agent for terminal, IDE, and CI workflows.",
 		// Exported by the Junie CLI launcher into its child process environment.
-		envVars: { JUNIE_DATA: "*", JUNIE_SHIM_PATH: "*" },
+		envVars: { JUNIE_SHIM_PATH: "*" },
 	},
 	"kilo-code": {
 		prettyLabel: "Kilo Code",
