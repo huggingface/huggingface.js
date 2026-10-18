@@ -12,6 +12,7 @@ import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OpenRouter from "../providers/openrouter.js";
+import * as Oruk from "../providers/oruk.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
 import type {
@@ -149,6 +150,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	openrouter: {
 		conversational: new OpenRouter.OpenRouterConversationalTask(),
+	},
+	oruk: {
+		"automatic-speech-recognition": new Oruk.OrukAutomaticSpeechRecognitionTask(),
 	},
 	ovhcloud: {
 		conversational: new OvhCloud.OvhCloudConversationalTask(),
