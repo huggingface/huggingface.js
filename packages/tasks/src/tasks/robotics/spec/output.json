@@ -1,0 +1,32 @@
+{
+	"$id": "/inference/schemas/robotics/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Robotics task",
+	"title": "RoboticsOutput",
+	"type": "object",
+	"properties": {
+		"actions": {
+			"description": "The action chunk: one row per future control step, action_dim values per row, in the policy's action space",
+			"type": "array",
+			"items": {
+				"type": "array",
+				"items": {
+					"type": "number"
+				}
+			}
+		},
+		"action_dim": {
+			"description": "Number of values per action",
+			"type": "integer"
+		},
+		"chunk": {
+			"description": "Number of actions in the chunk",
+			"type": "integer"
+		},
+		"frequency_hz": {
+			"description": "Control frequency the chunk is meant for, when the policy declares one",
+			"type": "number"
+		}
+	},
+	"required": ["actions"]
+}
