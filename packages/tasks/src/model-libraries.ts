@@ -1854,6 +1854,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"npz"`,
 		snippets: snippets.videoprism,
 	},
+	"verto-asr": {
+		prettyLabel: "Verto ASR",
+		repoName: "Verto-Arabic-ASR",
+		repoUrl: "https://github.com/yayaiu6/Verto-Arabic-ASR",
+		docsUrl: "https://github.com/yayaiu6/Verto-Arabic-ASR#javascript-quickstart",
+		filter: false,
+		countDownloads: `path:"metro.int8.onnx"`,
+		snippets: snippets.vertoASR,
+	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
 		repoName: "VFIMamba",
