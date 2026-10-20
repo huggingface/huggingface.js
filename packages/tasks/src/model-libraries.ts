@@ -1239,7 +1239,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "OpenPeer_AI_NTK_Trainer",
 		repoUrl: "	https://huggingface.co/OpenPeerAI/OpenPeer-AI-NTK-Trainer",
 		docsUrl: "	https://huggingface.co/OpenPeerAI/OpenPeer-AI-NTK-Trainer/blob/main/README.md",
-		countDownloads: `path_extension:"py"' OR  `path_extension:"toml"' OR `path:".meta-huggingface.json"`,
+		countDownloads: `path_extension:"py" OR path_extension:"toml" OR path:".meta-huggingface.json"`,
 		filter: false,
 	},	
 	openpeerllm: {
