@@ -173,4 +173,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
 		url: "https://github.com/run-llama/ExtractBench",
 	},
+	provael: {
+		name: "provael",
+		description:
+			"Provael red-teams open vision-language-action robot policies in simulation and reports per-arm attack-success rates against a benign control, with Wilson intervals.",
+		url: "https://github.com/provael/provael",
+	},
 } as const;
