@@ -313,7 +313,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		memory: [16, 32],
 		gfxVersion: "gfx900",
 		msrp: 4_000,
-		power: 230,
+		power: 300,
 		releaseYear: 2018,
 	},
 	"Radeon 610M": {
