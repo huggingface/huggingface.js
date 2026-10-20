@@ -85,6 +85,19 @@ describe("Test utility functions", () => {
 		it("[-start::-step]", async () => {
 			expect(slice(array, -3, undefined, -1)).toEqual([7, 6, 5, 4, 3, 2, 1, 0]);
 		});
+		it("distinguishes an explicit -1 stop from an omitted stop when reversing", () => {
+			expect(slice(array, undefined, -1, -1)).toEqual([]);
+			expect(slice(array, 8, -1, -2)).toEqual([]);
+			expect(slice(array, -1, -1, -1)).toEqual([]);
+			expect(slice(array, undefined, undefined, -1)).toEqual([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
+		});
+		it("normalizes and clamps negative stops when reversing", () => {
+			expect(slice(array, undefined, -2, -1)).toEqual([9]);
+			expect(slice(array, undefined, -10, -3)).toEqual([9, 6, 3]);
+			expect(slice(array, undefined, -11, -3)).toEqual([9, 6, 3, 0]);
+			expect(slice([], undefined, -1, -1)).toEqual([]);
+			expect(slice([0], undefined, -1, -1)).toEqual([]);
+		});
 	});
 
 	describe("strftime function", () => {

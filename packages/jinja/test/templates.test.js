@@ -6437,6 +6437,19 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Reverse slicing", () => {
+		it.each([
+			{ source: "{{ values[:-1:-1] | join }}", values: [0, 1, 2, 3], expected: "" },
+			{ source: "{{ values[2:-1:-2] | join }}", values: [0, 1, 2, 3], expected: "" },
+			{ source: "{{ values[::-1] | join }}", values: [0, 1, 2, 3], expected: "3210" },
+			{ source: "{{ values[:-2:-1] | join }}", values: [0, 1, 2, 3], expected: "3" },
+			{ source: "{{ values[:-1:-1] }}", values: "abcd", expected: "" },
+			{ source: "{{ values[::-1] }}", values: "abcd", expected: "dcba" },
+		])("renders $source for $values", ({ source, values, expected }) => {
+			expect(new Template(source).render({ values })).toEqual(expected);
+		});
+	});
+
 	describe("Member access", () => {
 		it.each([3, -4])("returns undefined for out-of-range string index %i", (index) => {
 			const template = new Template(
