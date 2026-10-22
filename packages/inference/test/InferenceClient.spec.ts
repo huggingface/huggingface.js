@@ -2081,7 +2081,7 @@ describe.skip("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_INFRAXSKY_KEY ?? "dummy");
 			const hfModelId = "Qwen/Qwen3-30B-A3B";
-			const providerModelId = "Qwen/Qwen3-30B-A3B-GPTQ-Int4";
+			const providerModelId = "nvidia/Qwen3-30B-A3B-NVFP4";
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["infraxsky"] = {
 				[hfModelId]: {
