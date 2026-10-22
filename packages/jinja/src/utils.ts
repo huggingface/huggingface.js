@@ -44,7 +44,7 @@ export function slice<T>(array: T[], start?: number, stop?: number, step = 1): T
 		stop = (stop ??= array.length) < 0 ? Math.max(array.length + stop, 0) : Math.min(stop, array.length);
 	} else {
 		start = (start ??= array.length - 1) < 0 ? Math.max(array.length + start, -1) : Math.min(start, array.length - 1);
-		stop = (stop ??= -1) < -1 ? Math.max(array.length + stop, -1) : Math.min(stop, array.length - 1);
+		stop = stop === undefined ? -1 : stop < 0 ? Math.max(array.length + stop, -1) : Math.min(stop, array.length - 1);
 	}
 
 	const result: T[] = [];
