@@ -1411,6 +1411,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"onnx" OR path_extension:"joblib"`,
 	},
+	"rt-detr-hand-detector-v1": {
+		prettyLabel: "RT-DETR-Hand-Detector-v1",
+		repoName: "IsaacCapture",
+		repoUrl: "https://github.com/NVIDIA/IsaacCapture/tree/main/src/python/isaaccapture_egopost",
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	rwkv: {
 		prettyLabel: "RWKV",
 		repoName: "RWKV-LM",
