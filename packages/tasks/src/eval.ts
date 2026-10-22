@@ -173,4 +173,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
 		url: "https://github.com/run-llama/ExtractBench",
 	},
+	sparc: {
+		name: "sparc",
+		description:
+			"SPaRC (Spatial Pathfinding Reasoning Challenge) is a benchmark of 2D grid pathfinding puzzles that tests spatial and symbolic reasoning. A path counts as correct only if it exactly matches one of the puzzle's stored solutions.",
+		url: "https://github.com/lkaesberg/SPaRC",
+	},
 } as const;
