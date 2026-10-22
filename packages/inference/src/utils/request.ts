@@ -280,6 +280,9 @@ export async function* innerStreamingRequest<T>(
 			events = [];
 		}
 	} finally {
+		// Stop downloading on early return, [DONE], or a parsing/provider error.
+		// Cleanup failures must not replace the original stream error.
+		await reader.cancel().catch(() => {});
 		reader.releaseLock();
 	}
 }
