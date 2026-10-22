@@ -499,7 +499,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	egohand: {
 		prettyLabel: "EgoHand",
-		repoName: "IsaacCapture",
+		repoName: "EgoHand",
 		repoUrl: "https://github.com/NVIDIA/IsaacCapture/tree/main/src/python/isaaccapture_egopost",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
