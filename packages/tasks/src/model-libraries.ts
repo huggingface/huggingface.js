@@ -949,6 +949,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth" OR path:"config.json"`,
 	},
+	"lingbot-map": {
+		prettyLabel: "LingBot-Map",
+		repoName: "lingbot-map",
+		repoUrl: "https://github.com/Robbyant/lingbot-map",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
