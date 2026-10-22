@@ -42,6 +42,40 @@ describe("streaming request cleanup", () => {
 		expect(body.locked).toBe(false);
 	});
 
+	it("does not wait for the other branch of a cloned response to finish", async () => {
+		const cancel = vi.fn();
+		const response = new Response(
+			new ReadableStream<Uint8Array>({
+				start(controller) {
+					controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(chunk)}\n\n`));
+				},
+				cancel,
+			}),
+			{ headers: { "Content-Type": "text/event-stream" } },
+		);
+		const clone = response.clone();
+		const client = new InferenceClient();
+		const stream = client.chatCompletionStream(
+			{ endpointUrl: "https://example.com", messages: [{ role: "user", content: "hello" }] },
+			{ fetch: async () => response },
+		);
+
+		await expect(stream.next()).resolves.toMatchObject({ value: chunk, done: false });
+		let finished = false;
+		const result = stream.return(undefined).then(() => {
+			finished = true;
+		});
+		try {
+			await vi.waitFor(() => expect(finished).toBe(true));
+			expect(response.body?.locked).toBe(false);
+			expect(cancel).not.toHaveBeenCalled();
+		} finally {
+			await clone.body?.cancel();
+			await result;
+		}
+		expect(cancel).toHaveBeenCalledTimes(1);
+	});
+
 	it("cancels the response body after [DONE] without waiting for HTTP EOF", async () => {
 		const cancel = vi.fn();
 		const body = new ReadableStream<Uint8Array>({

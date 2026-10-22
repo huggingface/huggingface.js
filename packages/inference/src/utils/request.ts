@@ -281,8 +281,9 @@ export async function* innerStreamingRequest<T>(
 		}
 	} finally {
 		// Stop downloading on early return, [DONE], or a parsing/provider error.
-		// Cleanup failures must not replace the original stream error.
-		await reader.cancel().catch(() => {});
+		// Do not wait for other branches of a cloned response to finish, or let
+		// cleanup failures replace the original stream error.
+		void reader.cancel().catch(() => {});
 		reader.releaseLock();
 	}
 }
