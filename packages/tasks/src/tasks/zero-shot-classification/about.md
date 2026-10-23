@@ -26,7 +26,7 @@ You can use the 🤗 Transformers library zero-shot-classification pipeline to i
 ```python
 from transformers import pipeline
 
-pipe = pipeline(model="facebook/bart-large-mnli")
+pipe = pipeline(task="zero-shot-classification", model="facebook/bart-large-mnli")
 pipe("I have a problem with my iphone that needs to be resolved asap!",
     candidate_labels=["urgent", "not urgent", "phone", "tablet", "computer"],
 )
