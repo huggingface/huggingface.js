@@ -101,6 +101,15 @@ describe("CallToolResultFormatter", () => {
 		expect(ResultFormatter.format(result)).toBe("Error: MCP tool returned isError=true\n[No content]");
 	});
 
+	it("should preserve successful content when isError is false", () => {
+		const result: CallToolResult = {
+			isError: false,
+			content: [{ type: "text", text: "File contents" }],
+		};
+
+		expect(ResultFormatter.format(result)).toBe("File contents");
+	});
+
 	it("should not double-prefix when content already starts with Error:", () => {
 		const result: CallToolResult = {
 			isError: true,
