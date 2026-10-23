@@ -6666,6 +6666,42 @@ describe("Feature regressions", () => {
 			expect(() => new Template(source).render()).toThrowError();
 		});
 	});
+
+	describe("Modulo", () => {
+		// Python's `%` takes the sign of the divisor, unlike JavaScript's `%`.
+		// Expected values are what Python jinja2 3.1.6 renders.
+		it.each([
+			{ name: "negative dividend", source: `{{ -7 % 3 }}|{{ -1 % 4 }}|{{ -12 % 5 }}`, expected: "2|3|3" },
+			{ name: "negative divisor", source: `{{ 7 % -3 }}|{{ 1 % -4 }}|{{ 12 % -5 }}`, expected: "-2|-3|-3" },
+			{ name: "both negative", source: `{{ -7 % -3 }}|{{ -1 % -4 }}`, expected: "-1|-1" },
+			{ name: "both positive", source: `{{ 7 % 3 }}|{{ 1 % 2 }}|{{ 2 % 7 }}`, expected: "1|1|2" },
+			{ name: "exact multiples", source: `{{ 6 % 3 }}|{{ -6 % 3 }}|{{ 6 % -3 }}|{{ 0 % 5 }}`, expected: "0|0|0|0" },
+			{
+				name: "float operands",
+				source: `{{ -7.5 % 2 }}|{{ 7.5 % -2 }}|{{ 7.5 % 2 }}|{{ -7 % 2.5 }}`,
+				expected: "0.5|-0.5|1.5|0.5",
+			},
+			{
+				name: "float exact multiples",
+				source: `{{ -4.0 % 2 }}|{{ 4.0 % -2 }}|{{ -7 % 1.0 }}|{{ 0 % -2.5 }}`,
+				expected: "0.0|-0.0|0.0|-0.0",
+			},
+			{ name: "result type", source: `{{ (-7 % 3) is integer }}|{{ (-7.0 % 3) is integer }}`, expected: "true|false" },
+			{
+				name: "wrap-around index",
+				source: `{{ (idx - 1) % n }}|{{ (idx + 1) % n }}`,
+				context: { idx: 0, n: 4 },
+				expected: "3|1",
+			},
+			{
+				name: "loop wrap-around",
+				source: `{% for i in range(6) %}{{ (i - 2) % 3 }}{% endfor %}`,
+				expected: "120120",
+			},
+		])("matches Python for $name", ({ source, context, expected }) => {
+			expect(new Template(source).render(context ?? {})).toBe(expected);
+		});
+	});
 });
 
 describe("Error checking", () => {

@@ -1146,8 +1146,16 @@ export class Interpreter {
 					return isFloat ? new FloatValue(res) : new IntegerValue(res);
 				}
 				case "%": {
-					const rem = a % b;
+					// Modulo takes the sign of the divisor (matching Python semantics), unlike JavaScript's `%`
+					// which takes the sign of the dividend, e.g. `-7 % 3` is 2 in Python but -1 in JavaScript.
 					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
+					let rem = a % b;
+					if (rem === 0) {
+						// A zero remainder also takes the divisor's sign (`4.0 % -2` is `-0.0` in Python)
+						rem = isFloat && b < 0 ? -0 : 0;
+					} else if (rem < 0 !== b < 0) {
+						rem += b;
+					}
 					return isFloat ? new FloatValue(rem) : new IntegerValue(rem);
 				}
 				// Comparison operators
