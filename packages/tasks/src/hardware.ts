@@ -325,6 +325,20 @@ export const SKUS = {
 				power: 90,
 				releaseYear: 2020,
 			},
+			"Intel Celeron G3930": {
+				tflops: 0.046, // 2 cores x 2.9 GHz x 8 FP32 FLOPS/cycle (SSE4.2 only, no AVX/FMA)
+				msrp: 42,
+				power: 51, // TDP (no turbo)
+				releaseYear: 2017,
+				aliases: ["Kaby Lake"],
+			},
+			"Intel Core i5-3230M": {
+				tflops: 0.083, // 2 cores x 2.6 GHz x 16 FP32 FLOPS/cycle (AVX, no FMA)
+				msrp: 225,
+				power: 35, // TDP
+				releaseYear: 2013,
+				aliases: ["Ivy Bridge"],
+			},
 		},
 		AMD: {
 			"EPYC 5th Generation Zen 5 (Turin)": {
@@ -494,6 +508,16 @@ export const SKUS = {
 				msrp: 250,
 				power: 28,
 				releaseYear: 2024,
+			},
+		},
+		Broadcom: {
+			BCM2711: {
+				tflops: 0.058, // 4x Cortex-A72 x 1.8 GHz x 8 FP32 FLOPS/cycle (one 128-bit NEON FMA pipe)
+				memory: [1, 2, 4, 8],
+				msrp: 75, // Raspberry Pi 4 Model B 8GB
+				power: 7, // estimated board power under full CPU load
+				releaseYear: 2019,
+				aliases: ["Raspberry Pi 4", "Raspberry Pi 400", "Compute Module 4", "Cortex-A72"],
 			},
 		},
 	},
