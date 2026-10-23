@@ -113,6 +113,12 @@ export const EVALUATION_FRAMEWORKS = {
 			"Real5-OmniDocBench is a benchmark for evaluating document parsing robustness under five real-world acquisition scenarios: scanning, warping, screen-photography, illumination, and skew.",
 		url: "https://huggingface.co/datasets/PaddlePaddle/Real5-OmniDocBench",
 	},
+	puredocbench: {
+		name: "puredocbench",
+		description:
+			"PureDocBench evaluates document parsing accuracy and robustness on source-traceable documents across clean, digitally degraded, and real-degraded image tracks.",
+		url: "https://github.com/zhihengli-casia/PureDocBench",
+	},
 	parsebench: {
 		name: "parsebench",
 		description:
@@ -172,11 +178,5 @@ export const EVALUATION_FRAMEWORKS = {
 		description:
 			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
 		url: "https://github.com/run-llama/ExtractBench",
-	},
-	puredocbench: {
-		name: "puredocbench",
-		description:
-			"PureDocBench evaluates document parsing accuracy and robustness on source-traceable documents across clean, digitally degraded, and real-degraded image tracks.",
-		url: "https://github.com/zhihengli-casia/PureDocBench",
 	},
 } as const;
