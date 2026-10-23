@@ -59,6 +59,7 @@ export const INFERENCE_PROVIDERS = [
 	"nscale",
 	"openai",
 	"openrouter",
+	"oruk",
 	"ovhcloud",
 	"publicai",
 	"replicate",
@@ -94,6 +95,7 @@ export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
 	nscale: "nscale",
 	openai: "openai",
 	openrouter: "OpenRouter",
+	oruk: "oruk", // Provisional organization/slug: confirm with HF before registration.
 	ovhcloud: "ovhcloud",
 	publicai: "publicai",
 	replicate: "replicate",

@@ -32,6 +32,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	nscale: {},
 	openai: {},
 	openrouter: {},
+	oruk: {},
 	publicai: {},
 	ovhcloud: {},
 	replicate: {},
