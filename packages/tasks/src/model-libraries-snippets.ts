@@ -2775,6 +2775,34 @@ def forward_fn(inputs, train=False):
   return flax_model.apply(loaded_state, inputs, train=train)`,
 ];
 
+export const vertoASR = (model: ModelData): string[] => [
+	`// Build and serve the browser application first:
+// git clone https://github.com/yayaiu6/Verto-Arabic-ASR.git
+// cd Verto-Arabic-ASR && npm ci && npm run build && npm start
+// Run in a browser module served from http://127.0.0.1:4180.
+import { VertoASR } from "/web/verto.mjs";
+
+const response = await fetch("https://huggingface.co/api/models/${model.id}");
+if (!response.ok) throw new Error("Model metadata unavailable");
+const { sha: revision } = await response.json();
+const asr = await VertoASR.fromPretrained("${model.id}", { revision });
+
+const input = document.createElement("input");
+input.type = "file";
+input.accept = "audio/*";
+document.body.append(input);
+input.onchange = async () => {
+  if (!input.files?.length) return;
+  input.disabled = true;
+  try {
+    console.log((await asr.transcribe(input.files[0])).text);
+  } finally {
+    input.disabled = false;
+  }
+};
+addEventListener("pagehide", () => asr.close(), { once: true });`,
+];
+
 export const vfimamba = (model: ModelData): string[] => [
 	`from Trainer_finetune import Model
 
