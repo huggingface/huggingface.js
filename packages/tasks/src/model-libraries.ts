@@ -425,6 +425,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.describe_anything,
 		filter: false,
 	},
+	dew: {
+		prettyLabel: "Dew",
+		repoName: "dew",
+		repoUrl: "https://github.com/AshishKumar4/dew",
+		docsUrl: "https://dewml.dev",
+		snippets: snippets.dew,
+		filter: false,
+		countDownloads: `path:"run.json"`,
+	},
 	"dia-tts": {
 		prettyLabel: "Dia",
 		repoName: "Dia",
