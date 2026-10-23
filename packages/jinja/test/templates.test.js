@@ -6447,6 +6447,114 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("Equality", () => {
+		// Expected values are what Python jinja2 3.1.6 renders (modulo lowercase booleans).
+		it.each([
+			{
+				name: "missing key == none",
+				source: `{{ m.tool_calls == none }}`,
+				context: { m: { role: "user" } },
+				expected: "false",
+			},
+			{
+				name: "missing key != none",
+				source: `{{ m.tool_calls != none }}`,
+				context: { m: { role: "user" } },
+				expected: "true",
+			},
+			{
+				name: "null key == none",
+				source: `{{ m.tool_calls == none }}`,
+				context: { m: { tool_calls: null } },
+				expected: "true",
+			},
+			{
+				name: "null key != none",
+				source: `{{ m.tool_calls != none }}`,
+				context: { m: { tool_calls: null } },
+				expected: "false",
+			},
+			{ name: "undefined variable == none", source: `{{ x == none }}`, expected: "false" },
+			{ name: "undefined variable != none", source: `{{ x != none }}`, expected: "true" },
+			{ name: "undefined == undefined", source: `{{ x == y }}`, expected: "true" },
+			{
+				name: "empty string == none",
+				source: `{{ '' == none }}|{{ 0 == none }}|{{ [] == none }}`,
+				expected: "false|false|false",
+			},
+			{ name: "list == int", source: `{{ [] == 0 }}|{{ [0] == 0 }}`, expected: "false|false" },
+			{
+				name: "string == int",
+				source: `{{ '1' == 1 }}|{{ 1 == '1' }}|{{ 0 == '' }}|{{ '' == 0 }}`,
+				expected: "false|false|false|false",
+			},
+			{ name: "list == string", source: `{{ [] == '' }}|{{ 'a' == ['a'] }}`, expected: "false|false" },
+			{ name: "list == dict", source: `{{ [] == {} }}`, expected: "false" },
+			{
+				name: "equal lists",
+				source: `{{ [1, 2] == [1, 2] }}|{{ [] == [] }}|{{ [1, [2, 3]] == [1, [2, 3]] }}`,
+				expected: "true|true|true",
+			},
+			{
+				name: "unequal lists",
+				source: `{{ [1, 2] == [2, 1] }}|{{ [1, 2] == [1, 2, 3] }}|{{ [1, [2, 3]] == [1, [2, 4]] }}`,
+				expected: "false|false|false",
+			},
+			{ name: "!= on lists", source: `{{ [1, 2] != [1, 2] }}|{{ [1, 2] != [2, 1] }}`, expected: "false|true" },
+			{
+				name: "equal dicts",
+				source: `{{ {'a': 1} == {'a': 1} }}|{{ {} == {} }}|{{ {'a': 1, 'b': 2} == {'b': 2, 'a': 1} }}|{{ {'a': [1]} == {'a': [1]} }}`,
+				expected: "true|true|true|true",
+			},
+			{
+				name: "unequal dicts",
+				source: `{{ {'a': 1} == {'a': 2} }}|{{ {'a': 1} == {'b': 1} }}|{{ {'a': 1} != {'a': 1} }}`,
+				expected: "false|false|false",
+			},
+			{ name: "variable == empty list", source: `{{ tools == [] }}`, context: { tools: [] }, expected: "true" },
+			{
+				name: "non-empty variable == empty list",
+				source: `{{ tools == [] }}`,
+				context: { tools: [1] },
+				expected: "false",
+			},
+			{
+				name: "context lists",
+				source: `{{ a == b }}`,
+				context: { a: [1, { k: "v" }], b: [1, { k: "v" }] },
+				expected: "true",
+			},
+			{
+				name: "int/float interop",
+				source: `{{ 1 == 1.0 }}|{{ 1.0 == 1 }}|{{ 1 != 1.0 }}|{{ [1] == [1.0] }}|{{ {'a': 1} == {'a': 1.0} }}`,
+				expected: "true|true|false|true|true",
+			},
+			{
+				name: "bool/int interop",
+				source: `{{ true == 1 }}|{{ 1 == true }}|{{ false == 0 }}|{{ true == 2 }}|{{ [true] == [1] }}`,
+				expected: "true|true|true|false|true",
+			},
+			{
+				name: "tuple vs list",
+				source: `{{ (1, 2) == [1, 2] }}|{{ [1, 2] == (1, 2) }}|{{ (1, 2) == (1, 2) }}`,
+				expected: "false|false|true",
+			},
+			{
+				name: "scalars",
+				source: `{{ 'a' == 'a' }}|{{ 'a' == 'b' }}|{{ 'a' != 'b' }}|{{ none == none }}|{{ 1 == 2 }}`,
+				expected: "true|false|true|true|false",
+			},
+			{
+				name: "tool_calls guard",
+				source: `{% if m.tool_calls != none %}has{% else %}none{% endif %}`,
+				context: { m: { role: "user" } },
+				expected: "has",
+			},
+		])("matches Python for $name", ({ source, context, expected }) => {
+			expect(new Template(source).render(context ?? {})).toBe(expected);
+		});
+	});
+
 	describe("Namespaces", () => {
 		it("supports namespace attributes in collection filters", () => {
 			const template = new Template(`{%- set a = namespace(x=2, active=true, inner=namespace(value=2)) -%}
