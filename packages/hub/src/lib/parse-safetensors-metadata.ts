@@ -890,11 +890,7 @@ export interface QuantizationConfig {
 	 * dense layers but stores the routed experts as `store_dtype: "mxfp4"`, packed two per `U8`.
 	 */
 	store_dtype?: string;
-	/**
-	 * Same role again, as written by MiniMax-M3.1: `quant_method: "mxfp8"` for the dense layers, with
-	 * the routed experts stored as `moe_quant_algo: "NVFP4"` / `moe_quant_format: "nvfp4-pack-quantized"`,
-	 * packed two per `U8`.
-	 */
+	/** Same role again, as MiniMax-M3.1 spells it (e.g. `"nvfp4-pack-quantized"` / `"NVFP4"`). */
 	moe_quant_algo?: string;
 	moe_quant_format?: string;
 	/** MLX quantization mode (e.g. `affine`); MLX configs do not declare `quant_method`. */
