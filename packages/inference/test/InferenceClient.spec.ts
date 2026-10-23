@@ -1960,6 +1960,57 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 	describe.concurrent(
+		"Highreso",
+		() => {
+			const client = new InferenceClient(env.HF_HIGHRESO_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["highreso"] = {
+				"zai-org/GLM-5.3": {
+					provider: "highreso",
+					hfModelId: "zai-org/GLM-5.3",
+					providerId: "glm-5.3-hf",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "zai-org/GLM-5.3",
+					provider: "highreso",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "zai-org/GLM-5.3",
+					provider: "highreso",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
+	describe.concurrent(
 		"Groq",
 		() => {
 			const client = new InferenceClient(env.HF_GROQ_KEY ?? "dummy");
