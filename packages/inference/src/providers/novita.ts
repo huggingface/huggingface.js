@@ -104,7 +104,7 @@ export class NovitaImageTextToVideoTask extends TaskProviderHelper implements Im
 		if (params.model !== "MiniMax-H3") {
 			throw new InferenceClientInputError(`Unsupported Novita image-text-to-video model: ${params.model}`);
 		}
-		return "/v3/minimax/v2/video_generation";
+		return "/v3/minimax-en/v2/video_generation";
 	}
 
 	override preparePayload(params: BodyParams<ImageTextToVideoArgs>): Record<string, unknown> {
@@ -160,7 +160,7 @@ export class NovitaImageTextToVideoTask extends TaskProviderHelper implements Im
 		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
 			parsedUrl.host === "router.huggingface.co" ? "/novita" : ""
 		}`;
-		const resultUrl = `${baseUrl}/v3/minimax/v2/query/video_generation/${encodeURIComponent(response.task_id)}`;
+		const resultUrl = `${baseUrl}/v3/minimax-en/v2/query/video_generation/${encodeURIComponent(response.task_id)}`;
 
 		while (true) {
 			const resultResponse = await fetch(resultUrl, { headers, signal });
