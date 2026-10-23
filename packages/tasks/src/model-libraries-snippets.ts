@@ -1973,6 +1973,13 @@ export const timm = (model: ModelData): string[] => [
 model = timm.create_model("hf-hub:${model.id}", pretrained=True)`,
 ];
 
+// create_model() takes a name from the torch-pointcloud registry; the weights live in "torch-pointcloud/<name>"
+export const torch_pointcloud = (model: ModelData): string[] => [
+	`import torch_pointcloud as tp
+
+model = tp.create_model("${nameWithoutNamespace(model.id)}", pretrained=True)`,
+];
+
 export const saelens = (/* model: ModelData */): string[] => [
 	`# pip install sae-lens
 from sae_lens import SAE
