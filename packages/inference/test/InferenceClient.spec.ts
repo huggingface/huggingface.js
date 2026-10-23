@@ -2077,6 +2077,71 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
+		"InfraXsky",
+		() => {
+			const client = new InferenceClient(env.HF_INFRAXSKY_KEY ?? "dummy");
+			const hfModelId = "Qwen/Qwen3-30B-A3B";
+			const providerModelId = "nvidia/Qwen3-30B-A3B-NVFP4";
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["infraxsky"] = {
+				[hfModelId]: {
+					provider: "infraxsky",
+					hfModelId,
+					providerId: providerModelId,
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const response = await client.chatCompletion({
+					model: hfModelId,
+					provider: "infraxsky",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+				});
+
+				expect(response.choices[0]?.message.content).toBeTruthy();
+				expect(response.usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: hfModelId,
+					provider: "infraxsky",
+					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let content = "";
+				let usage: ChatCompletionStreamOutput["usage"];
+
+				for await (const chunk of stream) {
+					content += chunk.choices[0]?.delta.content ?? "";
+					if (chunk.usage) {
+						usage = chunk.usage;
+					}
+				}
+
+				expect(content).toBeTruthy();
+				expect(usage).toEqual(
+					expect.objectContaining({
+						prompt_tokens: expect.any(Number),
+						completion_tokens: expect.any(Number),
+						total_tokens: expect.any(Number),
+					}),
+				);
+			});
+		},
+		TIMEOUT,
+	);
+
+	describe.concurrent(
 		"ZAI",
 		() => {
 			const client = new InferenceClient(env.HF_ZAI_KEY ?? "dummy");
