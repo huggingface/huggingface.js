@@ -1,0 +1,59 @@
+{
+	"$id": "/inference/schemas/robotics/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Robotics inference: one observation of a robot, returning the policy's next action chunk",
+	"title": "RoboticsInput",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "The robot's observation",
+			"$ref": "#/$defs/RoboticsInputs"
+		},
+		"parameters": {
+			"description": "Additional inference parameters for Robotics",
+			"$ref": "#/$defs/RoboticsParameters"
+		}
+	},
+	"$defs": {
+		"RoboticsInputs": {
+			"title": "RoboticsInputs",
+			"type": "object",
+			"properties": {
+				"images": {
+					"description": "Camera images keyed by camera name (the policy's camera names when known), each a base64-encoded PNG or JPEG or a URL",
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
+				"state": {
+					"description": "Proprioceptive state vector (joint positions, gripper, ...)",
+					"type": "array",
+					"items": {
+						"type": "number"
+					}
+				},
+				"instruction": {
+					"description": "Natural-language task instruction",
+					"type": "string"
+				}
+			},
+			"required": ["images"]
+		},
+		"RoboticsParameters": {
+			"title": "RoboticsParameters",
+			"type": "object",
+			"properties": {
+				"seed": {
+					"description": "Seed for the policy's own random draws (flow-matching or diffusion noise), for reproducible actions",
+					"type": "integer"
+				},
+				"num_actions": {
+					"description": "Number of actions of the chunk to return (defaults to the policy's chunk size)",
+					"type": "integer"
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}

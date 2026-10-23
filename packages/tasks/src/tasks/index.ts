@@ -23,6 +23,7 @@ import objectDetection from "./object-detection/data.js";
 import depthEstimation from "./depth-estimation/data.js";
 import placeholder from "./placeholder/data.js";
 import reinforcementLearning from "./reinforcement-learning/data.js";
+import robotics from "./robotics/data.js";
 import questionAnswering from "./question-answering/data.js";
 import sentenceSimilarity from "./sentence-similarity/data.js";
 import summarization from "./summarization/data.js";
@@ -89,6 +90,7 @@ export type {
 export type * from "./object-detection/inference.js";
 export type * from "./depth-estimation/inference.js";
 export type * from "./question-answering/inference.js";
+export type * from "./robotics/inference.js";
 export type * from "./sentence-similarity/inference.js";
 export type * from "./text-ranking/inference.js";
 export type * from "./summarization/inference.js";
@@ -248,7 +250,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	other: undefined,
 	"question-answering": getData("question-answering", questionAnswering),
 	"reinforcement-learning": getData("reinforcement-learning", reinforcementLearning),
-	robotics: undefined,
+	robotics: getData("robotics", robotics),
 	"sentence-similarity": getData("sentence-similarity", sentenceSimilarity),
 	summarization: getData("summarization", summarization),
 	"table-question-answering": getData("table-question-answering", tableQuestionAnswering),
