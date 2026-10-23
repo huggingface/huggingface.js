@@ -62,7 +62,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "aadya-neural",
 		repoName: "aadya",
 		repoUrl: "https://github.com/manasdutta04/aadya",
-		docsUrl: "https://github.com/manasdutta04/aadya/blob/main/train/README.md",
+		docsUrl: "https://huggingface.co/manasdutta04/aadya-m1",
 		snippets: snippets.aadyaNeural,
 		filter: false,
 		countDownloads: `path:"model.safetensors" OR path:"pytorch_model.bin"`,
