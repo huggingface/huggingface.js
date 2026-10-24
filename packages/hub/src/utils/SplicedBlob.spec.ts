@@ -1,5 +1,22 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import { SplicedBlob } from "./SplicedBlob";
+import { WebBlob } from "./WebBlob";
+
+function createRangeFetch(content: string): typeof fetch {
+	return async (_input, init) => {
+		const range = new Headers(init?.headers).get("range");
+		if (!range) {
+			return new Response(content);
+		}
+
+		const match = /^bytes=(\d+)-(\d+)$/.exec(range);
+		if (!match) {
+			return new Response(null, { status: 416 });
+		}
+
+		return new Response(content.slice(Number(match[1]), Number(match[2]) + 1), { status: 206 });
+	};
+}
 
 describe("SplicedBlob", () => {
 	let originalBlob: Blob;
@@ -131,10 +148,50 @@ describe("SplicedBlob", () => {
 			expect(text).toBe("789"); // Only gets what's available
 		});
 
+		it("should return an empty blob for NaN bounds", async () => {
+			const splicedBlob = SplicedBlob.create(originalBlob, [{ insert: insertBlob, start: 5, end: 5 }]);
+
+			expect(await splicedBlob.slice(Number.NaN).text()).toBe("");
+			expect(await splicedBlob.slice(0, Number.NaN).text()).toBe("");
+		});
+
 		it("should throw error for negative start/end", () => {
 			const splicedBlob = SplicedBlob.create(originalBlob, [{ insert: insertBlob, start: 5, end: 5 }]);
 			expect(() => splicedBlob.slice(-1, 5)).toThrow("Unsupported negative start/end on SplicedBlob.slice");
 			expect(() => splicedBlob.slice(0, -1)).toThrow("Unsupported negative start/end on SplicedBlob.slice");
+		});
+
+		it("should preserve a lazy original blob when slicing", async () => {
+			const content = "0123456789";
+			const lazyOriginal = new WebBlob(
+				new URL("https://huggingface.co/file"),
+				0,
+				content.length,
+				"text/plain",
+				true,
+				createRangeFetch(content),
+				undefined,
+			);
+			const splicedBlob = SplicedBlob.create(lazyOriginal, [{ insert: insertBlob, start: 5, end: 5 }]);
+
+			expect(await splicedBlob.slice(0, 4).text()).toBe("0123");
+			expect(await splicedBlob.slice(0, 8).text()).toBe("01234ABC");
+		});
+
+		it("should preserve a lazy insert blob when slicing", async () => {
+			const content = "ABC";
+			const lazyInsert = new WebBlob(
+				new URL("https://huggingface.co/insert"),
+				0,
+				content.length,
+				"text/plain",
+				true,
+				createRangeFetch(content),
+				undefined,
+			);
+			const splicedBlob = SplicedBlob.create(originalBlob, [{ insert: lazyInsert, start: 5, end: 5 }]);
+
+			expect(await splicedBlob.slice(4, 9).text()).toBe("4ABC5");
 		});
 	});
 
