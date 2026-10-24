@@ -76,6 +76,54 @@ describe("CallToolResultFormatter", () => {
 		expect(formatted).toContain("bytes]");
 	});
 
+	it("should prefix MCP isError=true so the model does not treat a failed tool as success", () => {
+		const result: CallToolResult = {
+			isError: true,
+			content: [
+				{
+					type: "text",
+					text: "file not found: /tmp/missing.txt",
+				},
+			],
+		};
+
+		expect(ResultFormatter.format(result)).toBe(
+			"Error: MCP tool returned isError=true\nfile not found: /tmp/missing.txt",
+		);
+	});
+
+	it("should prefix isError even when content is empty", () => {
+		const result: CallToolResult = {
+			isError: true,
+			content: [],
+		};
+
+		expect(ResultFormatter.format(result)).toBe("Error: MCP tool returned isError=true\n[No content]");
+	});
+
+	it("should preserve successful content when isError is false", () => {
+		const result: CallToolResult = {
+			isError: false,
+			content: [{ type: "text", text: "File contents" }],
+		};
+
+		expect(ResultFormatter.format(result)).toBe("File contents");
+	});
+
+	it("should not double-prefix when content already starts with Error:", () => {
+		const result: CallToolResult = {
+			isError: true,
+			content: [
+				{
+					type: "text",
+					text: "Error: permission denied",
+				},
+			],
+		};
+
+		expect(ResultFormatter.format(result)).toBe("Error: permission denied");
+	});
+
 	it("should handle mixed content types", () => {
 		const result: CallToolResult = {
 			content: [
