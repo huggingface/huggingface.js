@@ -6447,6 +6447,40 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("String methods", () => {
+		// Expected values match Python's str.rsplit
+		it.each([
+			[`{{ "a,b,c".rsplit(",") | tojson }}`, `["a", "b", "c"]`],
+			[`{{ "a,b,c".rsplit(",", 1) | tojson }}`, `["a,b", "c"]`],
+			[`{{ "a,b,c".rsplit(",", 0) | tojson }}`, `["a,b,c"]`],
+			[`{{ "a,b,c".rsplit(",", -2) | tojson }}`, `["a", "b", "c"]`],
+			[`{{ "a,,b".rsplit(",") | tojson }}`, `["a", "", "b"]`],
+			[`{{ "aaa".rsplit("aa") | tojson }}`, `["a", ""]`],
+			[`{{ "".rsplit(",") | tojson }}`, `[""]`],
+			[`{{ "  a b  c ".rsplit() | tojson }}`, `["a", "b", "c"]`],
+			[`{{ "  a b  c ".rsplit(none, 0) | tojson }}`, `["  a b  c"]`],
+			[`{{ "  a b  c ".rsplit(none, 1) | tojson }}`, `["  a b", "c"]`],
+			[`{{ "  a b  c ".rsplit(none, 2) | tojson }}`, `["  a", "b", "c"]`],
+			[`{{ "  a b  c ".rsplit(none, 3) | tojson }}`, `["a", "b", "c"]`],
+			[`{{ "   ".rsplit() | tojson }}`, `[]`],
+		])("supports rsplit: %s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+
+		it("supports rsplit to drop earlier reasoning in chat templates", () => {
+			// Pattern from the onnx-community/Youtu-LLM-2B-ONNX chat template
+			expectTemplateToRender(
+				`{%- set content = "<think>\\n2 plus 2 equals 4.\\n</think>\\n\\nThe answer is 4." -%}` +
+					`{{- content.rsplit("</think>", 1)[-1].lstrip("\\n") -}}`,
+				"The answer is 4.",
+			);
+		});
+
+		it("throws on an empty rsplit separator", () => {
+			expect(() => new Template(`{{ "a".rsplit("") }}`).render()).toThrow("empty separator");
+		});
+	});
+
 	describe("Namespaces", () => {
 		it("supports namespace attributes in collection filters", () => {
 			const template = new Template(`{%- set a = namespace(x=2, active=true, inner=namespace(value=2)) -%}
