@@ -49,4 +49,14 @@ describe("FileBlob", () => {
 		expect(() => fileBlob.slice(-5)).toThrow(TypeError);
 		expect(() => fileBlob.slice(0, -1)).toThrow(TypeError);
 	});
+
+	it("should clamp slices outside the file", async () => {
+		const fileBlob = await FileBlob.create("package.json");
+
+		for (const slice of [fileBlob.slice(fileBlob.size + 1), fileBlob.slice(20, 10)]) {
+			expect(slice.size).toBe(0);
+			expect(await slice.text()).toBe("");
+			expect(await new Response(slice.stream()).text()).toBe("");
+		}
+	});
 });

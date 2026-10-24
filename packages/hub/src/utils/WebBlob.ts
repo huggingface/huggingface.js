@@ -114,6 +114,9 @@ export class WebBlob extends Blob {
 			throw new TypeError("Unsupported negative start/end on WebBlob.slice");
 		}
 
+		start = Math.min(start, this.size);
+		end = Math.max(start, Math.min(end, this.size));
+
 		const slice = new WebBlob(
 			this.url,
 			this.start + start,
@@ -140,6 +143,10 @@ export class WebBlob extends Blob {
 	}
 
 	override stream(): ReturnType<Blob["stream"]> {
+		if (this.size === 0) {
+			return new Blob([]).stream();
+		}
+
 		const stream = new TransformStream();
 
 		this.fetchRange()
@@ -150,6 +157,10 @@ export class WebBlob extends Blob {
 	}
 
 	private fetchRange(): Promise<Response> {
+		if (this.size === 0) {
+			return Promise.resolve(new Response());
+		}
+
 		const fetch = this.fetch; // to avoid this.fetch() which is bound to the instance instead of globalThis
 		if (this.full) {
 			return fetch(this.url, {
