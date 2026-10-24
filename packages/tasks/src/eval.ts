@@ -173,4 +173,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"ExtractBench is a benchmark for schema-guided data extraction from enterprise documents, scoring schema-valid JSON extraction and evidence grounding without an LLM judge.",
 		url: "https://github.com/run-llama/ExtractBench",
 	},
+	"decision-index": {
+		name: "decision-index",
+		description:
+			"The Decision Index evaluates decision models: given a state (text, JSON or images) and typed questions, a model returns a choice or ranking, scored on private same-skill and new-domain sets.",
+		url: "https://github.com/apolinario/decision-index",
+	},
 } as const;
