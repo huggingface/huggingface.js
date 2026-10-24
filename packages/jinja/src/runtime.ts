@@ -1098,6 +1098,12 @@ export class Interpreter {
 				// Special case: `anything in undefined` is `false` and `anything not in undefined` is `true`
 				return new BooleanValue(node.operator.value === "not in");
 			}
+			if (node.operator.value === "~" && !(left instanceof NullValue || right instanceof NullValue)) {
+				// Like Jinja, an undefined operand concatenates as an empty string
+				const leftStr = left instanceof UndefinedValue ? "" : left.value.toString();
+				const rightStr = right instanceof UndefinedValue ? "" : right.value.toString();
+				return new StringValue(leftStr + rightStr);
+			}
 			throw new Error(`Cannot perform operation ${node.operator.value} on undefined values`);
 		} else if (left instanceof NullValue || right instanceof NullValue) {
 			throw new Error("Cannot perform operation on null values");

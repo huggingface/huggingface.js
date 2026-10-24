@@ -208,6 +208,7 @@ const TEST_STRINGS = {
 	// Undefined
 	UNDEFINED_VARIABLES: `{{ undefined_variable }}`,
 	UNDEFINED_ACCESS: `{{ object.undefined_attribute }}`,
+	UNDEFINED_CONCATENATION: `{{ "a" ~ x ~ "b" }}|{{ x ~ y }}|{{ object.missing ~ 1 }}`,
 
 	// Null
 	NULL_VARIABLE: `{% if not null_val is defined %}{% set null_val = none %}{% endif %}{% if null_val is not none %}{{ 'fail' }}{% else %}{{ 'pass' }}{% endif %}`,
@@ -4524,6 +4525,29 @@ const TEST_PARSED = {
 		{ value: "undefined_attribute", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	UNDEFINED_CONCATENATION: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: "x", type: "Identifier" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "object", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "missing", type: "Identifier" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Null
 	NULL_VARIABLE: [
@@ -6035,6 +6059,7 @@ const TEST_CONTEXT = {
 	// Undefined
 	UNDEFINED_VARIABLES: {},
 	UNDEFINED_ACCESS: { object: {} },
+	UNDEFINED_CONCATENATION: { object: {} },
 
 	// Null
 	NULL_VARIABLE: { a: null },
@@ -6305,6 +6330,7 @@ const EXPECTED_OUTPUTS = {
 	// Undefined
 	UNDEFINED_VARIABLES: ``,
 	UNDEFINED_ACCESS: ``,
+	UNDEFINED_CONCATENATION: `ab||1`,
 
 	// Null
 	NULL_VARIABLE: `pass`,
