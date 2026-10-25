@@ -1779,6 +1779,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NX-AI/tirex-2",
 		countDownloads: `path:"model-config.yaml"`,
 	},
+	tokenizers: {
+		prettyLabel: "Tokenizers",
+		repoName: "tokenizers",
+		repoUrl: "https://github.com/huggingface/tokenizers",
+		docsUrl: "https://huggingface.co/docs/tokenizers",
+		countDownloads: `path:"tokenizer.json" OR path_extension:"tiktoken"`,
+	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",
 		repoName: "TorchGeo",
