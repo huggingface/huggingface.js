@@ -470,12 +470,9 @@ function createGeometry(g: GeometryMeta, a: GeometryArrays) {
 	if (a.colors) {
 		geometry.setAttribute("color", new THREE.BufferAttribute(a.colors, 3));
 	}
-	const index = new THREE.BufferAttribute(a.indices, 1);
-	geometry.setIndex(index);
-	// Once on the GPU the arrays are dead weight: bounds are precomputed, so
-	// framing and culling never read them. The cost: nothing to re-upload
-	// after a lost WebGL context, and no CPU raycasting against the mesh.
-	for (const attribute of [index, ...(Object.values(geometry.attributes) as THREE.BufferAttribute[])]) {
+	geometry.setIndex(new THREE.BufferAttribute(a.indices, 1));
+	// Once on the GPU the vertex arrays are dead weight. The index stays: three.js builds wireframes from it.
+	for (const attribute of Object.values(geometry.attributes) as THREE.BufferAttribute[]) {
 		attribute.onUpload(releaseArray);
 	}
 	// Bounds come from the worker, so framing and culling never rescan positions.
