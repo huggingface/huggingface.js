@@ -145,7 +145,7 @@ export class StringValue extends RuntimeValue<string> {
 					return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
 				}),
 			],
-			["length", new IntegerValue(this.value.length)],
+			["length", new IntegerValue(Array.from(this.value).length)],
 			[
 				"rstrip",
 				new FunctionValue(() => {
@@ -1836,7 +1836,7 @@ export class Interpreter {
 		} else if (object instanceof ArrayValue || object instanceof StringValue) {
 			if (property instanceof IntegerValue) {
 				if (object instanceof StringValue) {
-					const character = object.value.at(property.value);
+					const character = Array.from(object.value).at(property.value);
 					value = character === undefined ? undefined : new StringValue(character);
 				} else {
 					value = object.value.at(property.value);
