@@ -878,6 +878,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 75,
 		releaseYear: 2016,
 	},
+	"GTX 980": {
+		tflops: 4.98, // float32 (GPU does not support native float16)
+		memory: [4],
+		computeCapability: 5.2,
+		msrp: 549,
+		power: 165,
+		releaseYear: 2014,
+	},
 	"RTX Titan": {
 		tflops: 32.62,
 		memory: [24],
