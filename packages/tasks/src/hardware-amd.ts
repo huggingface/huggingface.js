@@ -315,6 +315,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		msrp: 4_000,
 		power: 300,
 		releaseYear: 2018,
+		aliases: ["Radeon Pro V340L"],
 	},
 	"Radeon 610M": {
 		tflops: 0.97,
