@@ -6637,6 +6637,56 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("Chained comparisons", () => {
+		// Expected values are what jinja2 3.1.6 renders for the same template and context (as `true`/`false`).
+		it.each([
+			{ source: `{{ 0 <= idx < 3 }}`, context: { idx: 1 }, expected: "true" },
+			{ source: `{{ 0 <= idx < 3 }}`, context: { idx: 3 }, expected: "false" },
+			{ source: `{{ 0 <= idx < 3 }}`, context: { idx: -1 }, expected: "false" },
+			{ source: `{{ 3 > 2 > 1 }}`, expected: "true" },
+			{ source: `{{ 5 < 3 < 7 }}`, expected: "false" },
+			{ source: `{{ 1 < 2 < 3 < 4 }}`, expected: "true" },
+			{ source: `{{ 1 < 2 < 3 < 3 }}`, expected: "false" },
+			{ source: `{{ 1 <= 1 <= 1 }}`, expected: "true" },
+			{ source: `{{ 1 < 2 > 0 }}`, expected: "true" },
+			{ source: `{{ a < b < c }}`, context: { a: 1, b: 2, c: 3 }, expected: "true" },
+			{ source: `{{ 0 <= 1 + 1 < 3 }}`, expected: "true" },
+			{ source: `{{ 1 < x | length < 3 }}`, context: { x: "ab" }, expected: "true" },
+			{ source: `{{ 1 == 1 == 1 }}`, expected: "true" },
+			{ source: `{{ 1 == 2 == 2 }}`, expected: "false" },
+			{ source: `{{ 2 == 2 != 3 }}`, expected: "true" },
+			{ source: `{{ 1 != 2 != 1 }}`, expected: "true" },
+			{ source: `{{ 'a' in 'abc' in ['abc'] }}`, expected: "true" },
+			{ source: `{{ 'a' not in 'bcd' not in ['x'] }}`, expected: "true" },
+			{ source: `{{ not 1 < 2 < 3 }}`, expected: "false" },
+			{ source: `{{ 1 < 2 < 3 if true else 0 }}`, expected: "true" },
+			{ source: `{% for i in range(5) %}{{ 1 < i <= 3 }},{% endfor %}`, expected: "false,false,true,true,false," },
+		])("evaluates $source like Python", ({ source, context, expected }) => {
+			expect(new Template(source).render(context)).toBe(expected);
+		});
+
+		it("evaluates each operand once", () => {
+			let calls = 0;
+			const f = () => ++calls + 1; // returns 2 on the first call
+			expect(new Template(`{{ 1 < f() < 3 }}`).render({ f })).toBe("true");
+			expect(calls).toBe(1);
+		});
+
+		it("stops at the first false comparison", () => {
+			let calls = 0;
+			const f = () => ++calls;
+			expect(new Template(`{{ 3 < 2 < f() < 4 }}`).render({ f })).toBe("false");
+			expect(new Template(`{{ 3 < 2 < undefined_name }}`).render()).toBe("false");
+			expect(calls).toBe(0);
+			expect(() => new Template(`{{ 1 < 2 < undefined_name }}`).render()).toThrowError();
+		});
+
+		it("does not chain explicitly grouped comparisons", () => {
+			expect(new Template(`{{ (1 < 2) == true }}`).render()).toBe("true");
+			expect(new Template(`{{ 1 < 2 == true }}`).render()).toBe("false");
+		});
+	});
+
 	describe("Macro special arguments", () => {
 		it.each([
 			{
