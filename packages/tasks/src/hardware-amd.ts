@@ -308,7 +308,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 250,
 		releaseYear: 2020,
 	},
-	"Radeon Pro V340":{
+	"Radeon Pro V340": {
 		tflops: 43.0,
 		memory: [16, 32],
 		gfxVersion: "gfx900",
