@@ -6516,6 +6516,92 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("tojson key order and indent", () => {
+		// Expected values are what jinja2 3.1.6 (`json.dumps`) renders for the same template and context.
+		const astral = String.fromCodePoint(0x1f600); // U+1F600, a surrogate pair in UTF-16
+		const fullwidth = String.fromCodePoint(0xffe5); // U+FFE5, a BMP character above the surrogate range
+		const privateUse = String.fromCodePoint(0xe000); // U+E000
+		it.each([
+			{
+				name: "ASCII keys by code point, not locale",
+				obj: { first_name: 1, firstName: 2, Zeta: 3, alpha: 4, _id: 5, é: 6, zz: 7 },
+				expected: `{"Zeta": 3, "_id": 5, "alpha": 4, "firstName": 2, "first_name": 1, "zz": 7, "é": 6}`,
+			},
+			{
+				name: "upper case before lower case",
+				obj: { b: 1, B: 2, a: 3, A: 4, 10: 5, 9: 6, "": 7, " ": 8 },
+				expected: `{"": 7, " ": 8, "10": 5, "9": 6, "A": 4, "B": 2, "a": 3, "b": 1}`,
+			},
+			{
+				name: "astral characters after U+E000 and U+FFE5",
+				obj: { [astral]: 1, [fullwidth]: 2, [privateUse]: 3, a: 4, é: 5, z: 6 },
+				expected: `{"a": 4, "z": 6, "é": 5, "${privateUse}": 3, "${fullwidth}": 2, "${astral}": 1}`,
+			},
+			{
+				name: "nested objects",
+				obj: { b: { d: 1, C: 2 }, B: [{ y: 1, Y: 2 }] },
+				expected: `{"B": [{"Y": 2, "y": 1}], "b": {"C": 2, "d": 1}}`,
+			},
+		])("sorts keys with sort_keys=true: $name", ({ obj, expected }) => {
+			expect(new Template(`{{ obj | tojson(sort_keys=true) }}`).render({ obj })).toBe(expected);
+		});
+
+		it("sorts astral keys by code point when ensure_ascii is set", () => {
+			const obj = { [astral]: 1, [fullwidth]: 2, [privateUse]: 3, a: 4 };
+			const template = new Template(`{{ obj | tojson(sort_keys=true, ensure_ascii=true) }}`);
+			expect(template.render({ obj })).toBe(`{"a": 4, "\\ue000": 3, "\\uffe5": 2, "\\ud83d\\ude00": 1}`);
+		});
+
+		it("sorts keys at every depth when indenting", () => {
+			const obj = { b: { d: 1, C: 2 }, B: [{ y: 1, Y: 2 }] };
+			const template = new Template(`{{ obj | tojson(sort_keys=true, indent=2) }}`);
+			expect(template.render({ obj })).toBe(
+				`{\n  "B": [\n    {\n      "Y": 2,\n      "y": 1\n    }\n  ],\n  "b": {\n    "C": 2,\n    "d": 1\n  }\n}`,
+			);
+		});
+
+		it.each([
+			{
+				name: "nested object",
+				source: `{{ obj | tojson(indent=0) }}`,
+				obj: { a: [1, 2] },
+				expected: `{\n"a": [\n1,\n2\n]\n}`,
+			},
+			{
+				name: "empty containers stay compact",
+				source: `{{ obj | tojson(indent=0) }}`,
+				obj: [1, { a: [], b: {} }, [2]],
+				expected: `[\n1,\n{\n"a": [],\n"b": {}\n},\n[\n2\n]\n]`,
+			},
+			{
+				name: "compact separators",
+				source: `{{ obj | tojson(indent=0, separators=(',', ':')) }}`,
+				obj: { a: [1, 2] },
+				expected: `{\n"a":[\n1,\n2\n]\n}`,
+			},
+			{
+				name: "custom item separator is kept",
+				source: `{{ obj | tojson(indent=0, separators=(', ', ': ')) }}`,
+				obj: { a: [1, 2] },
+				expected: `{\n"a": [\n1, \n2\n]\n}`,
+			},
+			{
+				name: "negative indent",
+				source: `{{ obj | tojson(indent=-1) }}`,
+				obj: { a: [1, 2] },
+				expected: `{\n"a": [\n1,\n2\n]\n}`,
+			},
+			{
+				name: "scalar",
+				source: `{{ obj | tojson(indent=0) }}`,
+				obj: 5,
+				expected: `5`,
+			},
+		])("breaks lines for indent=0: $name", ({ source, obj, expected }) => {
+			expect(new Template(source).render({ obj })).toBe(expected);
+		});
+	});
+
 	describe("Member access", () => {
 		it.each([3, -4])("returns undefined for out-of-range string index %i", (index) => {
 			const template = new Template(
