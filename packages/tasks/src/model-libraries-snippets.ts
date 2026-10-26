@@ -1717,6 +1717,22 @@ opendde doctor
 opendde pred -i examples/input.json -o ./output -n opendde_v1`,
 ];
 
+export const opendecision = (model: ModelData): string[] => [
+	`# pip install tokz-opendecision
+from opendecision import OpenDecision, Choice, Bool, MultiLabel
+
+model = OpenDecision.from_pretrained("${model.id}")
+out = model.decide(
+    "I was charged twice for my May invoice and the app keeps logging me out.",
+    {
+        "queue": Choice(["billing", "technical", "account", "sales"]),
+        "tags": MultiLabel(["double_charge", "login_issue", "refund_request", "outage"]),
+        "urgent": Bool(),
+    },
+)
+print(out["queue"].best, out["tags"].selected, out["urgent"].policy)`,
+];
+
 export const paddlenlp = (model: ModelData): string[] => {
 	const architecture = model.config?.architectures?.[0];
 	// interpolated as a Python class name, so a non-identifier is treated as absent
