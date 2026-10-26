@@ -157,16 +157,17 @@ test("a texture arriving after dispose is closed, not applied", async () => {
 	assert.equal(textureCount(), 0);
 });
 
-test("geometry bounds come from the worker, so arrays are released once uploaded and framing still works", async () => {
+test("geometry bounds come from the worker, so vertex arrays are released once uploaded and framing still works", async () => {
 	const { root } = await load();
 	const { geometry } = root.children[0];
 	assert.deepEqual(geometry.boundingBox, new THREE.Box3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(1, 1, 0)));
 	assert.deepEqual(geometry.boundingSphere.center, new THREE.Vector3(0.5, 0.5, 0));
 	assert.ok(geometry.boundingSphere.radius >= Math.SQRT1_2);
-	const attributes = [geometry.index, ...Object.values(geometry.attributes)];
+	const attributes = Object.values(geometry.attributes);
 	// three.js calls this right after copying an attribute to the GPU.
-	for (const attribute of attributes) attribute.onUploadCallback();
+	for (const attribute of [geometry.index, ...attributes]) attribute.onUploadCallback();
 	assert.ok(attributes.every((attribute) => attribute.array === null));
+	assert.deepEqual([...geometry.index.array], [0, 1, 2]);
 	assert.ok(!new THREE.Box3().setFromObject(root).isEmpty());
 });
 test("abort before geometry rejects with an aborted UsdLoadError and stops the worker", async () => {
