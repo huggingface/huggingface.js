@@ -113,9 +113,10 @@ fn joints_report_limits_by_kind() {
     let slide = find(joints, "/Cabinet/Joints/Slide");
     assert_eq!(slide["kind"], "prismatic");
     assert_eq!(slide["axis"], "X");
-    assert_eq!(
-        (slide["lower"].as_f64(), slide["upper"].as_f64()),
-        (Some(0.0), Some(30.0))
+    // Centimeters in the file, meters out.
+    assert!(
+        close(&slide["lower"], 0.0) && close(&slide["upper"], 0.3),
+        "{slide}"
     );
     assert_eq!(slide["displayName"], "Top drawer");
     // A target inside a rigid body is that body.
@@ -134,20 +135,27 @@ fn joints_report_limits_by_kind() {
     );
     assert_eq!(ball["body0"], Value::Null);
     let rope = find(joints, "/Cabinet/Joints/Rope");
-    assert_eq!(
-        (rope["min"].as_f64(), rope["max"].as_f64()),
-        (Some(5.0), Some(50.0))
+    assert!(
+        close(&rope["min"], 0.05) && close(&rope["max"], 0.5),
+        "{rope}"
     );
     let custom = find(joints, "/Cabinet/Joints/Custom");
     assert_eq!(custom["kind"], "generic");
+    // Rotations stay in degrees; translations are in meters.
+    let dofs = custom["dofs"].as_array().unwrap();
     assert_eq!(
-        custom["dofs"],
-        json!([
-            { "dof": "rotX", "low": -10.0, "high": 10.0 },
-            { "dof": "transY", "low": 1.0, "high": -1.0 },
-            { "dof": "rotY", "low": -5.0, "high": null },
-        ])
+        dofs.iter()
+            .map(|d| d["dof"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        ["rotX", "transY", "rotY"]
     );
+    assert!(close(&dofs[0]["low"], -10.0) && close(&dofs[0]["high"], 10.0));
+    assert!(
+        close(&dofs[1]["low"], 0.01) && close(&dofs[1]["high"], -0.01),
+        "{}",
+        dofs[1]
+    );
+    assert!(close(&dofs[2]["low"], -5.0) && dofs[2]["high"].is_null());
     let follower = find(joints, "/Cabinet/Joints/Follower");
     assert_eq!(
         follower["mimic"],
@@ -231,6 +239,11 @@ fn drives_and_articulation_roots_are_in_si_units() {
     assert!(close(&hinge["targetPosition"], 45.0));
     assert!(close(&hinge["stiffness"], 1.0), "{}", hinge["stiffness"]);
     assert_eq!(find(joints, "/Cabinet/Joints/Pane")["drives"], json!([]));
+    // An acceleration drive's gains carry no mass: only its limit, an acceleration, scales to m/s².
+    let custom = &find(joints, "/Cabinet/Joints/Custom")["drives"][0];
+    assert_eq!(custom["type"], "acceleration");
+    assert!(close(&custom["stiffness"], 5.0), "{}", custom["stiffness"]);
+    assert!(close(&custom["maxForce"], 1.0), "{}", custom["maxForce"]);
 }
 
 #[test]

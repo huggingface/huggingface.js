@@ -230,8 +230,9 @@ export type UsdJoint = UsdJointKind & {
 };
 
 /**
- * A `PhysicsDriveAPI:<axis>` instance, as authored but in SI units. A linear drive's positions are in meters, its stiffness in
- * N/m, its damping in N·s/m and `maxForce` in newtons; an angular drive's are in degrees, N·m/°, N·m·s/° and N·m.
+ * A `PhysicsDriveAPI:<axis>` instance, as authored but in SI units. Positions are in meters (linear) or degrees (angular). For a
+ * force drive (the default), stiffness is in N/m or N·m/°, damping in N·s/m or N·m·s/° and `maxForce` in N or N·m; for an
+ * acceleration drive, stiffness is in 1/s², damping in 1/s and `maxForce` in m/s² or °/s².
  */
 export interface UsdJointDrive {
 	readonly axis: "linear" | "angular" | "transX" | "transY" | "transZ" | "rotX" | "rotY" | "rotZ";

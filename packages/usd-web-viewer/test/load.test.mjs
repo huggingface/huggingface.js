@@ -514,13 +514,7 @@ function articulatedMessages() {
 					joints: [
 						joint("/J/Hinge", "revolute", "/Body", "/Door", { axis: "Z", lower: -90, upper: 90 }),
 						joint("/J/Pane", "fixed", "/Door", "/Door/Pane"),
-						joint("/J/Slide", "prismatic", "/Body", "/Drawer", { axis: "X", lower: 0, upper: 30 }),
-						joint("/J/Custom", "generic", "/Body", "/Door", {
-							dofs: [
-								{ dof: "transX", low: -5, high: 5 },
-								{ dof: "rotZ", low: -10, high: 10 },
-							],
-						}),
+						joint("/J/Slide", "prismatic", "/Body", "/Drawer", { axis: "X", lower: 0, upper: 0.3 }),
 						joint("/J/Lid", "revolute", "/Shelf", "/Lid", { axis: "Z", lower: 0, upper: 90 }),
 						joint("/J/Follower", "revolute", "/Body", "/Drawer", {
 							axis: "Z",
@@ -555,7 +549,7 @@ async function loadArticulated() {
 	return { ...result, worker, position };
 }
 
-test("physics, labels and variant selections pass through, with prismatic limits in meters", async () => {
+test("physics, labels and variant selections pass through", async () => {
 	const { info } = await loadArticulated();
 	const slide = info.physics.joints.find((j) => j.path === "/J/Slide");
 	assert.deepEqual([slide.lower, slide.upper, slide.rest], [0, 0.3, 0]);
@@ -612,15 +606,6 @@ test("getPose reports every joint where it is, mimic joints included", async () 
 	assert.deepEqual(getPose(), { ...rest, "/J/Hinge": 45, "/J/Slide": 0.1, "/J/Follower": 45 });
 	resetPose();
 	assert.deepEqual(getPose(), rest);
-});
-
-test("generic translation limits are in meters too", async () => {
-	const { info } = await loadArticulated();
-	const custom = info.physics.joints.find((j) => j.path === "/J/Custom");
-	assert.deepEqual(custom.dofs, [
-		{ dof: "transX", low: -0.05, high: 0.05 },
-		{ dof: "rotZ", low: -10, high: 10 },
-	]);
 });
 
 test("pose moves a body hung from a prim that is not a rigid body", async () => {

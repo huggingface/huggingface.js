@@ -84,9 +84,12 @@ def Xform "Cabinet" (
         }
 
         def PhysicsJoint "Custom" (
-            prepend apiSchemas = ["PhysicsLimitAPI:rotX", "PhysicsLimitAPI:transY", "PhysicsLimitAPI:rotY"]
+            prepend apiSchemas = ["PhysicsLimitAPI:rotX", "PhysicsLimitAPI:transY", "PhysicsLimitAPI:rotY", "PhysicsDriveAPI:transX"]
         )
         {
+            uniform token drive:transX:physics:type = "acceleration"
+            float drive:transX:physics:stiffness = 5
+            float drive:transX:physics:maxForce = 100
             rel physics:body0 = </Cabinet/Body>
             rel physics:body1 = </Cabinet/Glass>
             float limit:rotX:physics:low = -10

@@ -66,7 +66,6 @@ export interface SceneMeta {
 	geometryCount: number;
 	instances: InstanceMeta[];
 	materials: MaterialMeta[];
-	/** Prismatic and distance limits and positions in stage units. */
 	physics: UsdPhysics;
 	labels: UsdLabel[];
 	variantSelections: UsdVariantSelection[];

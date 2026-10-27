@@ -1,8 +1,8 @@
 //! What a stage authors for simulation (UsdPhysics rigid bodies, colliders,
 //! physics materials and joints, plus UsdSemantics labels), read as authored:
-//! nothing is estimated. Masses are in kilograms, densities in kg/m³ and
-//! inertia in kg·m²; positions and matrices stay in stage space, like the
-//! meshes' own matrices.
+//! nothing is estimated. Masses are in kilograms, densities in kg/m³, inertia
+//! in kg·m², joint limits and positions in meters or degrees; positions and
+//! matrices stay in stage space, like the meshes' own matrices.
 
 use std::collections::HashMap;
 
@@ -126,7 +126,7 @@ pub struct Joint {
     #[serde(serialize_with = "finite")]
     pub frame1: [f64; 16],
     /// Computed from the two frames: where the authored poses put the joint,
-    /// in degrees for a revolute joint, stage units for a prismatic one, 0 for the others.
+    /// in degrees for a revolute joint, meters for a prismatic one, 0 for the others.
     #[serde(serialize_with = "finite")]
     pub rest: f64,
     /// A PhysX mimic joint: `position + gearing * reference + offset = 0`.
@@ -136,8 +136,10 @@ pub struct Joint {
 }
 
 /// A `PhysicsDriveAPI:<axis>` instance, in SI units: positions in meters or
-/// degrees, forces in newtons and torques in newton-meters (per meter or
-/// degree for stiffness, per meter or degree per second for damping).
+/// degrees; for a force drive (the default), forces in newtons and torques in
+/// newton-meters (per meter or degree for stiffness, per meter or degree per
+/// second for damping); for an acceleration drive, gains in 1/s² and 1/s and
+/// the limit in m/s² or °/s².
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Drive {
@@ -454,17 +456,25 @@ impl<'a> Reader<'a> {
     /// kilogramsPerUnit; angles stay in degrees.
     fn drive(&self, prim: &usd::Prim, axis: &str) -> Drive {
         let attr = |name: &str| float(prim, &format!("drive:{axis}:physics:{name}")).map(f64::from);
+        let drive_type = token_attr(prim, &format!("drive:{axis}:physics:type"));
         let (kg, m) = (self.kilograms_per_unit, self.meters_per_unit);
-        let linear = matches!(axis, "linear" | "transX" | "transY" | "transZ");
-        // Force (kg·m/s²) per meter or per m/s for a linear drive; torque (kg·m²/s²) per degree otherwise.
-        let (length, force, gain) = if linear {
-            (m, kg * m, kg)
+        let length = if matches!(axis, "linear" | "transX" | "transY" | "transZ") {
+            m
         } else {
-            (1.0, kg * m * m, kg * m * m)
+            1.0
+        };
+        // A force drive's gains are force per length (kg/s², kg/s) or torque per
+        // degree (kg·m²/s² per degree), and its limit a force or torque. An
+        // acceleration drive's gains carry no mass or length, and its limit is an
+        // acceleration (m/s² or °/s²).
+        let (gain, force) = if drive_type.as_deref() == Some("acceleration") {
+            (1.0, length)
+        } else {
+            (kg * m * m / length / length, kg * m * m / length)
         };
         Drive {
             axis: axis.to_owned(),
-            drive_type: token_attr(prim, &format!("drive:{axis}:physics:type")),
+            drive_type,
             target_position: attr("targetPosition").map(|v| v * length),
             target_velocity: attr("targetVelocity").map(|v| v * length),
             stiffness: attr("stiffness").map(|v| v * gain),
@@ -506,6 +516,9 @@ impl<'a> Reader<'a> {
             Some(axis @ ("Y" | "Z")) => axis.to_owned(),
             _ => "X".to_owned(),
         };
+        // Translation limits and positions in meters; rotations stay in degrees.
+        let m = self.meters_per_unit;
+        let meters = |v: Option<f32>| v.map(|v| (v as f64 * m) as f32);
         let limits = match ty {
             "PhysicsRevoluteJoint" => Limits::Revolute {
                 axis: axis(),
@@ -514,8 +527,8 @@ impl<'a> Reader<'a> {
             },
             "PhysicsPrismaticJoint" => Limits::Prismatic {
                 axis: axis(),
-                lower: float(prim, "physics:lowerLimit"),
-                upper: float(prim, "physics:upperLimit"),
+                lower: meters(float(prim, "physics:lowerLimit")),
+                upper: meters(float(prim, "physics:upperLimit")),
             },
             "PhysicsSphericalJoint" => Limits::Spherical {
                 axis: axis(),
@@ -523,8 +536,8 @@ impl<'a> Reader<'a> {
                 cone1: float(prim, "physics:coneAngle1Limit"),
             },
             "PhysicsDistanceJoint" => Limits::Distance {
-                min: float(prim, "physics:minDistance"),
-                max: float(prim, "physics:maxDistance"),
+                min: meters(float(prim, "physics:minDistance")),
+                max: meters(float(prim, "physics:maxDistance")),
             },
             "PhysicsFixedJoint" => Limits::Fixed,
             _ => Limits::Generic {
@@ -533,8 +546,9 @@ impl<'a> Reader<'a> {
                     .into_iter()
                     .filter_map(|dof| {
                         let dof = dof.as_str();
-                        let low = float(prim, &format!("limit:{dof}:physics:low"));
-                        let high = float(prim, &format!("limit:{dof}:physics:high"));
+                        let scale = |v| if dof.starts_with("rot") { v } else { meters(v) };
+                        let low = scale(float(prim, &format!("limit:{dof}:physics:low")));
+                        let high = scale(float(prim, &format!("limit:{dof}:physics:high")));
                         (low.is_some() || high.is_some()).then(|| Dof {
                             dof: dof.to_owned(),
                             low,
@@ -550,7 +564,8 @@ impl<'a> Reader<'a> {
                 let k = axis_index(axis);
                 (0..3)
                     .map(|i| (frame1[12 + i] - frame0[12 + i]) * frame0[4 * k + i])
-                    .sum()
+                    .sum::<f64>()
+                    * m
             }
             _ => 0.0,
         };
@@ -567,7 +582,15 @@ impl<'a> Reader<'a> {
                 Some(Mimic {
                     reference: reference.as_str().to_owned(),
                     gearing: float(prim, &format!("physxMimicJoint:{dof}:gearing")).unwrap_or(1.0),
-                    offset: float(prim, &format!("physxMimicJoint:{dof}:offset")).unwrap_or(0.0),
+                    offset: float(prim, &format!("physxMimicJoint:{dof}:offset"))
+                        .map(|v| {
+                            if dof.starts_with("trans") {
+                                (v as f64 * m) as f32
+                            } else {
+                                v
+                            }
+                        })
+                        .unwrap_or(0.0),
                 })
             });
         let target0 = target0.map(|t| t.as_str().to_owned());

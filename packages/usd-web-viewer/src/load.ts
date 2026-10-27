@@ -16,16 +16,7 @@ import type {
 	StageProgress,
 	WorkerMessage,
 } from "./meta.js";
-import type {
-	LoadInfo,
-	LoadOptions,
-	LoadProgress,
-	LoadResult,
-	LoadStats,
-	UsdDependency,
-	UsdJoint,
-	UsdPhysics,
-} from "./types.js";
+import type { LoadInfo, LoadOptions, LoadProgress, LoadResult, LoadStats, UsdDependency } from "./types.js";
 
 // Instances of one geometry with the same materials drawn as one
 // InstancedMesh past this many.
@@ -322,7 +313,7 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 		materials: meta.materials.length,
 		materialKinds: countBy(meta.materials, (m) => m.kind),
 		warnings: [...meta.warnings],
-		physics: inMeters(meta.physics, meta.metersPerUnit || 1),
+		physics: meta.physics,
 		labels: meta.labels,
 		variantSelections: meta.variantSelections,
 		// The fetched layers come with the scene; textures in packages are part of their package.
@@ -495,39 +486,6 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 	const poser = createPoser(root, info.physics.joints, info.physics.bodies, meta.metersPerUnit);
 
 	return { root, info, poser, addGeometry, applyTexture, textureFailed, dispose };
-}
-
-/** Joint limits, positions and mimic offsets from stage units to meters wherever they are lengths. */
-function inMeters(physics: UsdPhysics, metersPerUnit: number): UsdPhysics {
-	const m = (v: number | null) => (v === null ? null : v * metersPerUnit);
-	const joints = physics.joints.map((j): UsdJoint => {
-		switch (j.kind) {
-			case "prismatic":
-				return {
-					...j,
-					lower: m(j.lower),
-					upper: m(j.upper),
-					rest: j.rest * metersPerUnit,
-					mimic: j.mimic && { ...j.mimic, offset: j.mimic.offset * metersPerUnit },
-				};
-			case "distance":
-				return { ...j, min: m(j.min), max: m(j.max) };
-			case "generic":
-				return {
-					...j,
-					dofs: j.dofs.map((d) => (d.dof.startsWith("rot") ? d : { ...d, low: m(d.low), high: m(d.high) })),
-				};
-			case "revolute":
-			case "spherical":
-			case "fixed":
-				return j;
-			default: {
-				const never: never = j;
-				return never;
-			}
-		}
-	});
-	return { ...physics, joints };
 }
 
 function createGeometry(g: GeometryMeta, a: GeometryArrays) {
