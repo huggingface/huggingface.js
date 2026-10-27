@@ -125,6 +125,12 @@ export const EVALUATION_FRAMEWORKS = {
 			"Video-MME-v2 is a benchmark for evaluating the next stage of video understanding capabilities of multimodal large language models.",
 		url: "https://github.com/MME-Benchmarks/Video-MME-v2",
 	},
+	omnicompass: {
+		name: "omnicompass",
+		description:
+			"OmniCompass evaluates temporal grounding, spatial grounding, and video question answering with paired text and image-based target specifications across visual and audio-visual tracks.",
+		url: "https://github.com/PolyU-VCLab/OmniCompass",
+	},
 	"claw-eval": {
 		name: "claw-eval",
 		description:
