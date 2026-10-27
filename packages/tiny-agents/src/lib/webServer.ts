@@ -3,7 +3,7 @@ import { createServer, ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { z } from "zod";
 import type { Agent } from "../index";
-import { ANSI, error } from "./utils";
+import { ANSI, debug, error } from "./utils";
 import { stdout } from "node:process";
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
@@ -133,10 +133,15 @@ export function startServer(agent: Agent): Server<typeof IncomingMessage, typeof
 					}
 				}
 			} catch (err) {
-				/// The 200 status and headers are already sent at this point, so report the failure as an SSE event.
 				const message = err instanceof Error ? err.message : String(err);
-				error(`Error while running the agent: ${message}`);
-				res.write(`data: ${JSON.stringify({ error: { message } })}\n\n`);
+				if (abortController.signal.aborted) {
+					/// The client disconnected and we aborted the agent: the abort surfaces as an error, but nobody is listening anymore.
+					debug("Agent stopped after client disconnect:", message);
+				} else {
+					/// The 200 status and headers are already sent at this point, so report the failure as an SSE event.
+					error(`Error while running the agent: ${message}`);
+					res.write(`data: ${JSON.stringify({ error: { message } })}\n\n`);
+				}
 			}
 			res.end();
 		} else {

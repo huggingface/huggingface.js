@@ -1,3 +1,4 @@
+import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Agent } from "../src/index";
@@ -123,5 +124,63 @@ describe("tiny-agents web server", () => {
 		await res.text().catch(() => undefined);
 
 		await vi.waitFor(() => expect(signal?.aborted).toBe(true));
+	});
+
+	it("does not report the abort caused by a client disconnect as an agent error", async () => {
+		// An upstream that never answers, like an inference provider that is still generating
+		const upstream = createServer(() => undefined);
+		await new Promise<void>((resolve) => upstream.listen(0, "127.0.0.1", resolve));
+		const upstreamUrl = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
+
+		let started: () => void = () => undefined;
+		const hasStarted = new Promise<void>((resolve) => (started = resolve));
+		let finished: () => void = () => undefined;
+		const hasFinished = new Promise<void>((resolve) => (finished = resolve));
+		let thrown: unknown;
+		try {
+			await start(
+				fakeAgent(async function* (_messages, opts) {
+					try {
+						yield chunk("first");
+						started();
+						// Like the inference client: a fetch aborted through the signal rejects with a DOMException
+						await fetch(upstreamUrl, { signal: opts?.abortSignal });
+					} catch (err) {
+						thrown = err;
+						throw err;
+					} finally {
+						finished();
+					}
+				}),
+			);
+
+			const controller = new AbortController();
+			const res = await post("hello", controller.signal);
+			await hasStarted;
+			controller.abort();
+			await res.text().catch(() => undefined);
+			await hasFinished;
+			// let the error handling of the server run
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
+			expect(thrown).toBeInstanceOf(DOMException);
+			expect((thrown as DOMException).name).toBe("AbortError");
+			expect(console.error).not.toHaveBeenCalled();
+		} finally {
+			upstream.closeAllConnections();
+			await new Promise((resolve) => upstream.close(resolve));
+		}
+	});
+
+	it("still reports an error that is not caused by a client disconnect, even if it is an AbortError", async () => {
+		await start(
+			fakeAgent(async function* () {
+				yield chunk("partial");
+				throw new DOMException("The operation was aborted by the provider", "AbortError");
+			}),
+		);
+		const res = await post("hello");
+		const events = parseSse(await res.text());
+		expect(events.at(-1)).toEqual({ error: { message: "The operation was aborted by the provider" } });
 	});
 });
