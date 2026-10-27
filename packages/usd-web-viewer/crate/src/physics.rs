@@ -582,13 +582,11 @@ impl<'a> Reader<'a> {
                 Some(Mimic {
                     reference: reference.as_str().to_owned(),
                     gearing: float(prim, &format!("physxMimicJoint:{dof}:gearing")).unwrap_or(1.0),
+                    // In the joint's own units: meters for a prismatic joint, whatever the instance is named.
                     offset: float(prim, &format!("physxMimicJoint:{dof}:offset"))
-                        .map(|v| {
-                            if dof.starts_with("trans") {
-                                (v as f64 * m) as f32
-                            } else {
-                                v
-                            }
+                        .map(|v| match ty {
+                            "PhysicsPrismaticJoint" => (v as f64 * m) as f32,
+                            _ => v,
                         })
                         .unwrap_or(0.0),
                 })

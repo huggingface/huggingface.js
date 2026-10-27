@@ -4,7 +4,7 @@ expression: "out.replace(&dir, \"\")"
 input_file: fixtures/physics.usda
 ---
 upAxis Z, metersPerUnit 0.01
-prims 21, meshes 5, triangles 50
+prims 22, meshes 5, triangles 50
 skipped invisible 0, purpose 1, empty 0
 
 instances:

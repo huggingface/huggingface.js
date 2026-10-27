@@ -156,6 +156,10 @@ fn joints_report_limits_by_kind() {
         dofs[1]
     );
     assert!(close(&dofs[2]["low"], -5.0) && dofs[2]["high"].is_null());
+    // A prismatic mimic's offset is in meters, whatever its instance is named.
+    let slide_follower = &find(joints, "/Cabinet/Joints/SlideFollower")["mimic"];
+    assert_eq!(slide_follower["reference"], "/Cabinet/Joints/Slide");
+    assert!(close(&slide_follower["offset"], 0.05), "{slide_follower}");
     let follower = find(joints, "/Cabinet/Joints/Follower");
     assert_eq!(
         follower["mimic"],

@@ -99,6 +99,18 @@ def Xform "Cabinet" (
             float limit:rotY:physics:low = -5
         }
 
+        def PhysicsPrismaticJoint "SlideFollower" (
+            prepend apiSchemas = ["PhysxMimicJointAPI:X"]
+        )
+        {
+            uniform token physics:axis = "X"
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Drawer>
+            float physxMimicJoint:X:gearing = -1
+            float physxMimicJoint:X:offset = 5
+            rel physxMimicJoint:X:referenceJoint = </Cabinet/Joints/Slide>
+        }
+
         def PhysicsRevoluteJoint "Follower" (
             prepend apiSchemas = ["PhysxMimicJointAPI:rotZ"]
         )
