@@ -1,11 +1,10 @@
 ---
 source: crate/tests/fixtures.rs
-assertion_line: 20
 expression: "out.replace(&dir, \"\")"
 input_file: fixtures/physics.usda
 ---
 upAxis Z, metersPerUnit 0.01
-prims 20, meshes 4, triangles 38
+prims 21, meshes 5, triangles 50
 skipped invisible 0, purpose 1, empty 0
 
 instances:
@@ -15,7 +14,9 @@ instances:
     at (0, 0, 40), world (0, 0, 40)..(10, 10, 40)
   /Cabinet/Door/Panel: geometry 2, material 1
     at (50, 0, 0), world (45, -5, -5)..(55, 5, 5)
-  /Cabinet/Floor: geometry 3, material 1
+  /Cabinet/Door/Handle: geometry 3, material 1
+    at (50, 0, 0), world (49.5, -0.5, -0.5)..(50.5, 0.5, 0.5)
+  /Cabinet/Floor: geometry 4, material 1
     at (0, 0, 0), world (-0.5, -0.5, -0.5)..(0.5, 0.5, 0.5)
 
 geometries:
@@ -25,7 +26,9 @@ geometries:
     normals (0, 0, 1) x4
   2 /Cabinet/Door/Panel: 12 triangles (all outward), 24 vertices, bounds (-5, -5, -5)..(5, 5, 5)
     normals (1, 0, 0) x4, (-1, 0, 0) x4, (0, 1, 0) x4, (0, -1, 0) x4, (0, 0, 1) x4, (0, 0, -1) x4
-  3 /Cabinet/Floor: 12 triangles (all outward), 24 vertices, bounds (-0.5, -0.5, -0.5)..(0.5, 0.5, 0.5)
+  3 /Cabinet/Door/Handle: 12 triangles (all outward), 24 vertices, bounds (-0.5, -0.5, -0.5)..(0.5, 0.5, 0.5)
+    normals (1, 0, 0) x4, (-1, 0, 0) x4, (0, 1, 0) x4, (0, -1, 0) x4, (0, 0, 1) x4, (0, 0, -1) x4
+  4 /Cabinet/Floor: 12 triangles (all outward), 24 vertices, bounds (-0.5, -0.5, -0.5)..(0.5, 0.5, 0.5)
     normals (1, 0, 0) x4, (-1, 0, 0) x4, (0, 1, 0) x4, (0, -1, 0) x4, (0, 0, 1) x4, (0, 0, -1) x4
 
 materials:

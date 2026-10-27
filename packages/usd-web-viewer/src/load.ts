@@ -515,9 +515,7 @@ function inMeters(physics: UsdPhysics, metersPerUnit: number): UsdPhysics {
 			case "generic":
 				return {
 					...j,
-					dofs: j.dofs.map((d) =>
-						d.dof.startsWith("rot") ? d : { ...d, low: d.low * metersPerUnit, high: d.high * metersPerUnit },
-					),
+					dofs: j.dofs.map((d) => (d.dof.startsWith("rot") ? d : { ...d, low: m(d.low), high: m(d.high) })),
 				};
 			case "revolute":
 			case "spherical":

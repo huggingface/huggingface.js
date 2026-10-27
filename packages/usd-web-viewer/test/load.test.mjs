@@ -468,8 +468,7 @@ function articulatedMessages() {
 	const body = (path, mass) => ({
 		path,
 		kinematic: false,
-		mass,
-		massSource: mass === null ? null : "authored",
+		mass: mass === null ? null : { value: mass, source: "authored" },
 		centerOfMass: null,
 		diagonalInertia: null,
 		principalAxes: null,
@@ -483,7 +482,11 @@ function articulatedMessages() {
 		displayName: null,
 		body0,
 		body1,
-		frame: frame(100),
+		type: `Physics${kind[0].toUpperCase()}${kind.slice(1)}Joint`,
+		target0: body0,
+		target1: body1,
+		frame0: frame(100),
+		frame1: frame(100),
 		rest: 0,
 		mimic: null,
 		...extra,
@@ -593,6 +596,8 @@ test("pose slides in meters, clamps to the limits, and resetPose puts everything
 	assert.ok(position("/Drawer/M").length() < 1e-12);
 	assert.ok(position("/Door/M").length() < 1e-12);
 	assert.throws(() => pose("/J/Missing", 1), /no joint at \/J\/Missing/);
+	assert.throws(() => pose("/J/Pane", 1), /cannot be posed/);
+	assert.throws(() => pose("/J/Slide", NaN), RangeError);
 });
 
 test("getPose reports every joint where it is, mimic joints included", async () => {

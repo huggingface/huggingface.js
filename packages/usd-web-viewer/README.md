@@ -31,7 +31,7 @@ await complete; // textures stream in after the geometry
 
 ## Physics and joints
 
-`info` also reports what the stage authors for simulation (UsdPhysics) and its UsdSemantics labels, as authored: nothing is estimated. Masses are in kilograms, densities in kg/m³, joint limits in degrees or meters.
+`info` also reports what the stage authors for simulation (UsdPhysics) and its UsdSemantics labels, as authored: nothing is estimated. Masses are in kilograms, densities in kg/m³, inertia in kg·m², joint limits and positions in degrees or meters; positions and matrices are in stage space, like the meshes under `root`.
 
 ```js
 const { info, pose, resetPose, getPose } = await viewer.load(url);
@@ -44,7 +44,7 @@ info.labels; // e.g. { path: '/RootNode', taxonomy: 'wikidata_class', values: ['
 info.variantSelections; // e.g. { prim: '/Robotiq_2F_85', set: 'Physics', selection: 'Physx_parallel_grip' }
 info.dependencies; // every layer and texture the stage read, with its size
 
-pose('/Robotiq_2F_85/Robotiq_2F_85/Joints/finger_joint', 40); // moves the joint and what hangs from it; mimic joints follow
+pose('/Robotiq_2F_85/Robotiq_2F_85/Joints/finger_joint', 40); // revolute and prismatic joints; what hangs from it and mimic joints follow
 getPose(); // where every revolute and prismatic joint is now
 resetPose(); // back to the authored pose
 ```

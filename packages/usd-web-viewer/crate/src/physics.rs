@@ -1,7 +1,8 @@
 //! What a stage authors for simulation (UsdPhysics rigid bodies, colliders,
 //! physics materials and joints, plus UsdSemantics labels), read as authored:
-//! nothing is estimated. Masses are in kilograms and densities in kg/m³;
-//! lengths stay in stage units, which the host scales like the geometry.
+//! nothing is estimated. Masses are in kilograms, densities in kg/m³ and
+//! inertia in kg·m²; positions and matrices stay in stage space, like the
+//! meshes' own matrices.
 
 use std::collections::HashMap;
 
@@ -29,27 +30,34 @@ pub struct Physics {
 pub struct Body {
     pub path: String,
     pub kinematic: bool,
-    /// Kilograms: `physics:mass` on the body, else the sum of its colliders'
-    /// own masses; `None` when neither is authored (the engine computes it).
-    #[serde(serialize_with = "finite")]
-    pub mass: Option<f64>,
-    /// `authored`, `colliders`, or `None` with no mass.
-    pub mass_source: Option<&'static str>,
+    /// `physics:mass` on the body, else the sum of its colliders' own masses
+    /// when every collider has one; `None` otherwise (the engine computes it).
+    pub mass: Option<Mass>,
     /// In the body's frame, stage units, as authored.
     #[serde(serialize_with = "finite")]
     pub center_of_mass: Option<[f32; 3]>,
+    /// kg·m², about the principal axes.
     #[serde(serialize_with = "finite")]
-    pub diagonal_inertia: Option<[f32; 3]>,
+    pub diagonal_inertia: Option<[f64; 3]>,
     /// `w, x, y, z`.
     #[serde(serialize_with = "finite")]
     pub principal_axes: Option<[f32; 4]>,
-    /// Local-to-world, like [`crate::extract::Instance::matrix`].
+    /// Local-to-world in stage space, laid out like [`crate::extract::Instance::matrix`].
     #[serde(serialize_with = "finite")]
     pub world: [f64; 16],
     /// Collider prim paths.
     pub colliders: Vec<String>,
     /// Bodies held to this one by fixed joints, which move with it.
     pub attached: Vec<String>,
+}
+
+/// A body's mass in kilograms and where it comes from.
+#[derive(Serialize)]
+pub struct Mass {
+    #[serde(serialize_with = "finite")]
+    pub value: f64,
+    /// `authored` on the body, or `colliders` summed from its colliders.
+    pub source: &'static str,
 }
 
 /// A prim with `PhysicsCollisionAPI`.
@@ -59,7 +67,7 @@ pub struct Collider {
     pub path: String,
     /// The nearest rigid body at or above it; `None` for a static collider.
     pub body: Option<String>,
-    /// The prim type, lowercased: `mesh`, `cube`, `sphere`, `capsule`, ...
+    /// The prim type as authored: `Mesh`, `Cube`, `Sphere`, `Capsule`, ...
     pub shape: String,
     /// `physics:approximation` on a mesh collider: `none`, `convexHull`, `sdf`, ...
     pub approximation: Option<String>,
@@ -93,21 +101,28 @@ pub struct PhysicsMaterial {
 #[serde(rename_all = "camelCase")]
 pub struct Joint {
     pub path: String,
+    /// The prim type as authored, e.g. `PhysicsRevoluteJoint`.
+    #[serde(rename = "type")]
+    pub type_name: String,
     #[serde(flatten)]
     pub limits: Limits,
     /// Only when authored.
     pub display_name: Option<String>,
+    /// The `physics:body0` / `physics:body1` targets as authored; `None` is the world.
+    pub target0: Option<String>,
+    pub target1: Option<String>,
     /// The rigid bodies it connects: the nearest rigid body at or above each
-    /// `physics:body` target, else the target itself; `None` is the world.
+    /// target, else the target itself; `None` is the world.
     pub body0: Option<String>,
     pub body1: Option<String>,
-    /// The joint frame on body0 in world space, rigid (scale removed), like
-    /// [`crate::extract::Instance::matrix`]: its rows are the joint axes, then
-    /// the origin.
+    /// The joint frame on each target, local-to-world in stage space with the
+    /// scale removed, laid out like [`crate::extract::Instance::matrix`].
     #[serde(serialize_with = "finite")]
-    pub frame: [f64; 16],
-    /// Where the authored poses put the joint: degrees for a revolute joint,
-    /// stage units for a prismatic one, 0 for the others.
+    pub frame0: [f64; 16],
+    #[serde(serialize_with = "finite")]
+    pub frame1: [f64; 16],
+    /// Computed from the two frames: where the authored poses put the joint,
+    /// in degrees for a revolute joint, stage units for a prismatic one, 0 for the others.
     #[serde(serialize_with = "finite")]
     pub rest: f64,
     /// A PhysX mimic joint: `position + gearing * reference + offset = 0`.
@@ -155,11 +170,11 @@ pub enum Limits {
 pub struct Dof {
     /// `transX`, `transY`, `transZ`, `rotX`, `rotY`, `rotZ` or `distance`.
     pub dof: String,
-    /// Locked when `low > high`.
+    /// Locked when `low > high`; `None` is unbounded on that side.
     #[serde(serialize_with = "finite")]
-    pub low: f32,
+    pub low: Option<f32>,
     #[serde(serialize_with = "finite")]
-    pub high: f32,
+    pub high: Option<f32>,
 }
 
 #[derive(Serialize)]
@@ -242,10 +257,14 @@ impl<'a> Reader<'a> {
                     .ok()
                     .flatten()
                     .unwrap_or(false),
-                mass: self.mass(prim),
-                mass_source: None,
+                mass: self.mass(prim).map(|value| Mass {
+                    value,
+                    source: "authored",
+                }),
                 center_of_mass: vec3(prim, "physics:centerOfMass"),
-                diagonal_inertia: vec3(prim, "physics:diagonalInertia"),
+                diagonal_inertia: vec3(prim, "physics:diagonalInertia").map(|v| {
+                    v.map(|c| c as f64 * self.kilograms_per_unit * self.meters_per_unit.powi(2))
+                }),
                 principal_axes: quat(prim, "physics:principalAxes"),
                 world: world(xforms, prim),
                 colliders: Vec::new(),
@@ -261,11 +280,11 @@ impl<'a> Reader<'a> {
                 .ok()
                 .flatten()
                 .map(|p| p.as_str().to_owned());
-            let shape = ty.unwrap_or("").to_ascii_lowercase();
+            let shape = ty.unwrap_or("").to_owned();
             self.physics.colliders.push(Collider {
                 path: path.as_str().to_owned(),
                 body: body.map(|b| self.physics.bodies[b].path.clone()),
-                approximation: (shape == "mesh")
+                approximation: (shape == "Mesh")
                     .then(|| token_attr(prim, "physics:approximation"))
                     .flatten(),
                 shape,
@@ -339,19 +358,19 @@ impl<'a> Reader<'a> {
             .filter_map(|c| Some((c.path.as_str(), c.mass?)))
             .collect();
         for body in &mut physics.bodies {
-            if body.mass.is_some() {
-                body.mass_source = Some("authored");
+            if body.mass.is_some() || body.colliders.is_empty() {
                 continue;
             }
-            let masses: Vec<f64> = body
+            // Only a complete sum: a collider without a mass leaves the body's unknown.
+            let masses: Option<Vec<f64>> = body
                 .colliders
                 .iter()
-                .filter_map(|c| collider_mass.get(c.as_str()).copied())
+                .map(|c| collider_mass.get(c.as_str()).copied())
                 .collect();
-            if !masses.is_empty() {
-                body.mass = Some(masses.iter().sum());
-                body.mass_source = Some("colliders");
-            }
+            body.mass = masses.map(|m| Mass {
+                value: m.iter().sum(),
+                source: "colliders",
+            });
         }
         let index: HashMap<String, usize> = physics
             .bodies
@@ -424,7 +443,11 @@ impl<'a> Reader<'a> {
             vec3(prim, "physics:localPos1").unwrap_or([0.0; 3]),
             quat(prim, "physics:localRot1").unwrap_or([1.0, 0.0, 0.0, 0.0]),
         );
-        let axis = || token_attr(prim, "physics:axis").unwrap_or_else(|| "X".to_owned());
+        // The schema's tokens; anything else falls back to the schema's default, X.
+        let axis = || match token_attr(prim, "physics:axis").as_deref() {
+            Some(axis @ ("Y" | "Z")) => axis.to_owned(),
+            _ => "X".to_owned(),
+        };
         let limits = match ty {
             "PhysicsRevoluteJoint" => Limits::Revolute {
                 axis: axis(),
@@ -452,10 +475,12 @@ impl<'a> Reader<'a> {
                     .into_iter()
                     .filter_map(|dof| {
                         let dof = dof.as_str();
-                        Some(Dof {
+                        let low = float(prim, &format!("limit:{dof}:physics:low"));
+                        let high = float(prim, &format!("limit:{dof}:physics:high"));
+                        (low.is_some() || high.is_some()).then(|| Dof {
                             dof: dof.to_owned(),
-                            low: float(prim, &format!("limit:{dof}:physics:low"))?,
-                            high: float(prim, &format!("limit:{dof}:physics:high"))?,
+                            low,
+                            high,
                         })
                     })
                     .collect(),
@@ -487,14 +512,20 @@ impl<'a> Reader<'a> {
                     offset: float(prim, &format!("physxMimicJoint:{dof}:offset")).unwrap_or(0.0),
                 })
             });
+        let target0 = target0.map(|t| t.as_str().to_owned());
+        let target1 = target1.map(|t| t.as_str().to_owned());
         Ok(Joint {
             path: prim.path().as_str().to_owned(),
+            type_name: ty.to_owned(),
             limits,
             display_name: prim.get_metadata::<String>("displayName").ok().flatten(),
             // The targets for now: [`Reader::finish`] resolves them to bodies once every prim is read.
-            body0: target0.map(|t| t.as_str().to_owned()),
-            body1: target1.map(|t| t.as_str().to_owned()),
-            frame: frame0,
+            body0: target0.clone(),
+            body1: target1.clone(),
+            target0,
+            target1,
+            frame0,
+            frame1,
             rest,
             mimic,
         })

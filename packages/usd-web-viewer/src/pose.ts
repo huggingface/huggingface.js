@@ -8,6 +8,9 @@ interface Target {
 	rest: THREE.Matrix4;
 }
 
+/** What `pose` can move: a revolute or prismatic joint that moves a body. */
+const posable = (joint: UsdJoint) => (joint.kind === "revolute" || joint.kind === "prismatic") && joint.body1 !== null;
+
 const AXES = { X: new THREE.Vector3(1, 0, 0), Y: new THREE.Vector3(0, 1, 0), Z: new THREE.Vector3(0, 0, 1) };
 
 /**
@@ -54,7 +57,7 @@ export function createPoser(
 				continue;
 			}
 			const parent = joint.body0 ?? "";
-			const edge = { joint, body: joint.body1, frame: new THREE.Matrix4().fromArray(joint.frame) };
+			const edge = { joint, body: joint.body1, frame: new THREE.Matrix4().fromArray(joint.frame0) };
 			children.set(parent, [...(children.get(parent) ?? []), edge]);
 			moved.add(joint.body1);
 		}
@@ -135,8 +138,11 @@ export function createPoser(
 			if (!joint) {
 				throw new Error(`no joint at ${path}`);
 			}
-			if (joint.kind !== "revolute" && joint.kind !== "prismatic") {
-				return;
+			if (!posable(joint)) {
+				throw new Error(`${path} cannot be posed: only revolute and prismatic joints with a body1 can`);
+			}
+			if (!Number.isFinite(value)) {
+				throw new RangeError(`a joint position must be a finite number, got ${value}`);
 			}
 			const clamp = (j: UsdJoint, v: number) =>
 				j.kind === "revolute" || j.kind === "prismatic"
@@ -152,11 +158,7 @@ export function createPoser(
 			apply();
 		},
 		getPose() {
-			return Object.fromEntries(
-				joints
-					.filter((j) => j.kind === "revolute" || j.kind === "prismatic")
-					.map((j) => [j.path, values.get(j.path) ?? j.rest]),
-			);
+			return Object.fromEntries(joints.filter(posable).map((j) => [j.path, values.get(j.path) ?? j.rest]));
 		},
 		resetPose() {
 			values.clear();

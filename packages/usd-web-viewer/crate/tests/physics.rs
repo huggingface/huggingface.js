@@ -42,17 +42,17 @@ fn masses_are_kilograms_and_read_as_authored() {
     let bodies = &out["physics"]["bodies"];
     // kilogramsPerUnit = 0.001: grams in the file.
     let body = find(bodies, "/Cabinet/Body");
-    assert!(close(&body["mass"], 100.0));
-    assert_eq!(body["massSource"], "authored");
+    assert!(close(&body["mass"]["value"], 100.0));
+    assert_eq!(body["mass"]["source"], "authored");
     assert_eq!(body["centerOfMass"], json!([0.0, 0.0, 50.0]));
     // No mass on the drawer: the sum of its colliders' own masses.
     let drawer = find(bodies, "/Cabinet/Drawer");
-    assert!(close(&drawer["mass"], 2.5));
-    assert_eq!(drawer["massSource"], "colliders");
+    assert!(close(&drawer["mass"]["value"], 2.5));
+    assert_eq!(drawer["mass"]["source"], "colliders");
     // Nothing authored: nothing guessed.
     let door = find(bodies, "/Cabinet/Door");
+    // One of the door's colliders has a mass, the other not: no partial sum.
     assert_eq!(door["mass"], Value::Null);
-    assert_eq!(door["massSource"], Value::Null);
 }
 
 #[test]
@@ -61,7 +61,7 @@ fn colliders_know_their_body_shape_and_material() {
     let colliders = &out["physics"]["colliders"];
     let shell = find(colliders, "/Cabinet/Body/Shell");
     assert_eq!(shell["body"], "/Cabinet/Body");
-    assert_eq!(shell["shape"], "cube");
+    assert_eq!(shell["shape"], "Cube");
     assert_eq!(shell["approximation"], Value::Null);
     let box_ = find(colliders, "/Cabinet/Drawer/Box");
     assert_eq!(box_["approximation"], "convexHull");
@@ -145,6 +145,7 @@ fn joints_report_limits_by_kind() {
         json!([
             { "dof": "rotX", "low": -10.0, "high": 10.0 },
             { "dof": "transY", "low": 1.0, "high": -1.0 },
+            { "dof": "rotY", "low": -5.0, "high": null },
         ])
     );
     let follower = find(joints, "/Cabinet/Joints/Follower");
@@ -162,12 +163,43 @@ fn joints_know_their_frame_and_where_the_authored_pose_puts_them() {
     let slide = find(joints, "/Cabinet/Joints/Slide");
     assert!(close(&slide["rest"], 0.0));
     assert_eq!(
-        slide["frame"].as_array().unwrap()[12..15],
+        slide["frame0"].as_array().unwrap()[12..15],
         [json!(0.0), json!(0.0), json!(40.0)]
     );
     // The door's frame is turned 90° about Z from the hinge's frame on the body.
     let hinge = find(joints, "/Cabinet/Joints/Hinge");
     assert!(close(&hinge["rest"], 90.0), "{}", hinge["rest"]);
+}
+
+#[test]
+fn inertia_is_in_kilogram_square_meters() {
+    let out = fixture();
+    let body = find(&out["physics"]["bodies"], "/Cabinet/Body");
+    // g·cm² (kilogramsPerUnit 0.001, metersPerUnit 0.01) to kg·m²: × 1e-7.
+    let inertia = body["diagonalInertia"].as_array().unwrap();
+    for (v, expected) in inertia.iter().zip([1e-4, 2e-4, 3e-4]) {
+        assert!(
+            (v.as_f64().unwrap() - expected).abs() < 1e-12,
+            "{inertia:?}"
+        );
+    }
+}
+
+#[test]
+fn joints_keep_their_authored_type_targets_and_both_frames() {
+    let out = fixture();
+    let joints = &out["physics"]["joints"];
+    let slide = find(joints, "/Cabinet/Joints/Slide");
+    assert_eq!(slide["type"], "PhysicsPrismaticJoint");
+    assert_eq!(slide["target1"], "/Cabinet/Drawer/Box");
+    assert_eq!(slide["body1"], "/Cabinet/Drawer");
+    assert_eq!(slide["frame1"].as_array().unwrap().len(), 16);
+    assert_eq!(
+        find(joints, "/Cabinet/Joints/Custom")["type"],
+        "PhysicsJoint"
+    );
+    // An axis outside the schema's X, Y, Z reads as its default, X.
+    assert_eq!(find(joints, "/Cabinet/Joints/Ball")["axis"], "X");
 }
 
 #[test]

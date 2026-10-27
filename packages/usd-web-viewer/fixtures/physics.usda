@@ -59,7 +59,7 @@ def Xform "Cabinet" (
 
         def PhysicsSphericalJoint "Ball"
         {
-            uniform token physics:axis = "Z"
+            uniform token physics:axis = "W"
             rel physics:body1 = </Cabinet/Glass>
             float physics:coneAngle0Limit = 30
             float physics:coneAngle1Limit = 20
@@ -74,7 +74,7 @@ def Xform "Cabinet" (
         }
 
         def PhysicsJoint "Custom" (
-            prepend apiSchemas = ["PhysicsLimitAPI:rotX", "PhysicsLimitAPI:transY"]
+            prepend apiSchemas = ["PhysicsLimitAPI:rotX", "PhysicsLimitAPI:transY", "PhysicsLimitAPI:rotY"]
         )
         {
             rel physics:body0 = </Cabinet/Body>
@@ -83,6 +83,7 @@ def Xform "Cabinet" (
             float limit:rotX:physics:high = 10
             float limit:transY:physics:low = 1
             float limit:transY:physics:high = -1
+            float limit:rotY:physics:low = -5
         }
 
         def PhysicsRevoluteJoint "Follower" (
@@ -103,6 +104,7 @@ def Xform "Cabinet" (
     {
         float physics:mass = 100000
         point3f physics:centerOfMass = (0, 0, 50)
+        float3 physics:diagonalInertia = (1000, 2000, 3000)
 
         def Cube "Shell" (
             prepend apiSchemas = ["PhysicsCollisionAPI"]
@@ -156,6 +158,14 @@ def Xform "Cabinet" (
         )
         {
             double size = 10
+        }
+
+        def Cube "Handle" (
+            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMassAPI"]
+        )
+        {
+            float physics:mass = 100
+            double size = 1
         }
     }
 
