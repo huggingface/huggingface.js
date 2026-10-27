@@ -322,6 +322,16 @@ impl<'a> Reader<'a> {
     /// The physics, with each body's mass completed from its colliders and
     /// its fixed attachments listed, and the labels.
     pub fn finish(mut self) -> (Physics, Vec<Label>) {
+        // A joint may come before the bodies it names, so its targets resolve now.
+        let resolved: Vec<_> = self
+            .physics
+            .joints
+            .iter()
+            .map(|j| (self.resolve(&j.body0), self.resolve(&j.body1)))
+            .collect();
+        for (joint, (body0, body1)) in self.physics.joints.iter_mut().zip(resolved) {
+            (joint.body0, joint.body1) = (body0, body1);
+        }
         let physics = &mut self.physics;
         let collider_mass: HashMap<&str, f64> = physics
             .colliders
@@ -372,12 +382,18 @@ impl<'a> Reader<'a> {
             .map(|d| d as f64 * self.kilograms_per_unit / self.meters_per_unit.powi(3))
     }
 
-    /// The rigid body a `physics:body` target belongs to.
-    fn body_for(&self, target: &sdf::Path) -> String {
-        std::iter::successors(Some(target.clone()), |p| p.parent())
-            .find_map(|p| self.body_of.get(&p).copied().flatten())
-            .map(|b| self.physics.bodies[b].path.clone())
-            .unwrap_or_else(|| target.as_str().to_owned())
+    /// The rigid body a `physics:body` target belongs to: the nearest at or
+    /// above it, else the target itself.
+    fn resolve(&self, target: &Option<String>) -> Option<String> {
+        let target = target.as_ref()?;
+        let Ok(path) = sdf::Path::new(target) else {
+            return Some(target.clone());
+        };
+        Some(
+            std::iter::successors(Some(path), |p| p.parent())
+                .find_map(|p| self.body_of.get(&p).copied().flatten())
+                .map_or_else(|| target.clone(), |b| self.physics.bodies[b].path.clone()),
+        )
     }
 
     fn joint(
@@ -475,8 +491,9 @@ impl<'a> Reader<'a> {
             path: prim.path().as_str().to_owned(),
             limits,
             display_name: prim.get_metadata::<String>("displayName").ok().flatten(),
-            body0: target0.as_ref().map(|t| self.body_for(t)),
-            body1: target1.as_ref().map(|t| self.body_for(t)),
+            // The targets for now: [`Reader::finish`] resolves them to bodies once every prim is read.
+            body0: target0.map(|t| t.as_str().to_owned()),
+            body1: target1.map(|t| t.as_str().to_owned()),
             frame: frame0,
             rest,
             mimic,

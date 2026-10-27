@@ -495,15 +495,28 @@ function articulatedMessages() {
 			meta: {
 				...meta.meta,
 				metersPerUnit: 0.01,
-				instances: ["/Body/M", "/Door/M", "/Door/Pane/M", "/Drawer/M"].map(instance),
+				instances: ["/Body/M", "/Door/M", "/Door/Pane/M", "/Drawer/M", "/Lid/M"].map(instance),
 				physics: {
-					bodies: [body("/Body", 50), body("/Door", 2), body("/Door/Pane", 1), body("/Drawer", null)],
+					bodies: [
+						body("/Body", 50),
+						body("/Door", 2),
+						body("/Door/Pane", 1),
+						body("/Drawer", null),
+						body("/Lid", null),
+					],
 					colliders: [],
 					materials: [],
 					joints: [
 						joint("/J/Hinge", "revolute", "/Body", "/Door", { axis: "Z", lower: -90, upper: 90 }),
 						joint("/J/Pane", "fixed", "/Door", "/Door/Pane"),
 						joint("/J/Slide", "prismatic", "/Body", "/Drawer", { axis: "X", lower: 0, upper: 30 }),
+						joint("/J/Custom", "generic", "/Body", "/Door", {
+							dofs: [
+								{ dof: "transX", low: -5, high: 5 },
+								{ dof: "rotZ", low: -10, high: 10 },
+							],
+						}),
+						joint("/J/Lid", "revolute", "/Shelf", "/Lid", { axis: "Z", lower: 0, upper: 90 }),
 						joint("/J/Follower", "revolute", "/Body", "/Drawer", {
 							axis: "Z",
 							lower: null,
@@ -527,7 +540,13 @@ async function loadArticulated() {
 	const worker = FakeWorker.last;
 	articulatedMessages().forEach((m) => worker.send(m));
 	const result = await loading;
-	const position = (path) => new THREE.Vector3().setFromMatrixPosition(result.root.getObjectByName(path).matrix);
+	// Five copies of one mesh draw as one InstancedMesh: read the copy's own matrix.
+	const position = (path) => {
+		const mesh = result.root.children.find((m) => m.userData.paths?.includes(path));
+		const matrix = new THREE.Matrix4();
+		mesh.getMatrixAt(mesh.userData.paths.indexOf(path), matrix);
+		return new THREE.Vector3().setFromMatrixPosition(matrix);
+	};
 	return { ...result, worker, position };
 }
 
@@ -537,7 +556,7 @@ test("physics, labels and variant selections pass through, with prismatic limits
 	assert.deepEqual([slide.lower, slide.upper, slide.rest], [0, 0.3, 0]);
 	const hinge = info.physics.joints.find((j) => j.path === "/J/Hinge");
 	assert.deepEqual([hinge.lower, hinge.upper], [-90, 90]);
-	assert.equal(info.physics.bodies.length, 4);
+	assert.equal(info.physics.bodies.length, 5);
 	assert.deepEqual(info.labels, [{ path: "/", taxonomy: "wikidata_class", values: ["cabinet"] }]);
 	assert.deepEqual(info.variantSelections, [{ prim: "/Cabinet", set: "PhysX", selection: "Enabled" }]);
 });
@@ -578,10 +597,27 @@ test("pose slides in meters, clamps to the limits, and resetPose puts everything
 
 test("getPose reports every joint where it is, mimic joints included", async () => {
 	const { pose, resetPose, getPose } = await loadArticulated();
-	assert.deepEqual(getPose(), { "/J/Hinge": 0, "/J/Slide": 0, "/J/Follower": 0 });
+	const rest = { "/J/Hinge": 0, "/J/Slide": 0, "/J/Lid": 0, "/J/Follower": 0 };
+	assert.deepEqual(getPose(), rest);
 	pose("/J/Hinge", 45);
 	pose("/J/Slide", 0.1);
-	assert.deepEqual(getPose(), { "/J/Hinge": 45, "/J/Slide": 0.1, "/J/Follower": 45 });
+	assert.deepEqual(getPose(), { ...rest, "/J/Hinge": 45, "/J/Slide": 0.1, "/J/Follower": 45 });
 	resetPose();
-	assert.deepEqual(getPose(), { "/J/Hinge": 0, "/J/Slide": 0, "/J/Follower": 0 });
+	assert.deepEqual(getPose(), rest);
+});
+
+test("generic translation limits are in meters too", async () => {
+	const { info } = await loadArticulated();
+	const custom = info.physics.joints.find((j) => j.path === "/J/Custom");
+	assert.deepEqual(custom.dofs, [
+		{ dof: "transX", low: -0.05, high: 0.05 },
+		{ dof: "rotZ", low: -10, high: 10 },
+	]);
+});
+
+test("pose moves a body hung from a prim that is not a rigid body", async () => {
+	const { pose, position } = await loadArticulated();
+	pose("/J/Lid", 90);
+	const lid = position("/Lid/M");
+	assert.ok(lid.distanceTo(new THREE.Vector3(100, -100, 0)) < 1e-9, `lid at ${lid.toArray()}`);
 });

@@ -58,7 +58,9 @@ export function createPoser(
 			children.set(parent, [...(children.get(parent) ?? []), edge]);
 			moved.add(joint.body1);
 		}
-		const roots = ["", ...bodies.map((b) => b.path).filter((b) => !moved.has(b))];
+		// The walk starts from whatever no joint moves: the world, static bodies,
+		// and prims a joint hangs from that are not rigid bodies.
+		const roots = [...new Set(["", ...bodies.map((b) => b.path), ...children.keys()])].filter((b) => !moved.has(b));
 		return { targets, children, roots };
 	}
 

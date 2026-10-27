@@ -23,6 +23,80 @@ def Xform "Cabinet" (
         }
     }
 
+    # Before the bodies they connect: joints are resolved once every prim is read.
+    def Scope "Joints"
+    {
+        def PhysicsPrismaticJoint "Slide" (
+            displayName = "Top drawer"
+        )
+        {
+            uniform token physics:axis = "X"
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Drawer/Box>
+            point3f physics:localPos0 = (0, 0, 40)
+            point3f physics:localPos1 = (0, 0, 0)
+            float physics:lowerLimit = 0
+            float physics:upperLimit = 30
+        }
+
+        def PhysicsRevoluteJoint "Hinge"
+        {
+            uniform token physics:axis = "Z"
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Door>
+            point3f physics:localPos0 = (50, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot1 = (0.70710677, 0, 0, 0.70710677)
+            float physics:lowerLimit = -90
+            float physics:upperLimit = 90
+        }
+
+        def PhysicsFixedJoint "Pane"
+        {
+            rel physics:body0 = </Cabinet/Door>
+            rel physics:body1 = </Cabinet/Glass>
+        }
+
+        def PhysicsSphericalJoint "Ball"
+        {
+            uniform token physics:axis = "Z"
+            rel physics:body1 = </Cabinet/Glass>
+            float physics:coneAngle0Limit = 30
+            float physics:coneAngle1Limit = 20
+        }
+
+        def PhysicsDistanceJoint "Rope"
+        {
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Glass>
+            float physics:minDistance = 5
+            float physics:maxDistance = 50
+        }
+
+        def PhysicsJoint "Custom" (
+            prepend apiSchemas = ["PhysicsLimitAPI:rotX", "PhysicsLimitAPI:transY"]
+        )
+        {
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Glass>
+            float limit:rotX:physics:low = -10
+            float limit:rotX:physics:high = 10
+            float limit:transY:physics:low = 1
+            float limit:transY:physics:high = -1
+        }
+
+        def PhysicsRevoluteJoint "Follower" (
+            prepend apiSchemas = ["PhysxMimicJointAPI:rotZ"]
+        )
+        {
+            uniform token physics:axis = "Z"
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Door>
+            float physxMimicJoint:rotZ:gearing = -1
+            rel physxMimicJoint:rotZ:referenceJoint = </Cabinet/Joints/Hinge>
+        }
+    }
+
     def Xform "Body" (
         prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
     )
@@ -110,79 +184,6 @@ def Xform "Cabinet" (
             float physics:dynamicFriction = 0.3
             float physics:restitution = 0.5
             token[] semantics:labels:material = ["plastic"]
-        }
-    }
-
-    def Scope "Joints"
-    {
-        def PhysicsPrismaticJoint "Slide" (
-            displayName = "Top drawer"
-        )
-        {
-            uniform token physics:axis = "X"
-            rel physics:body0 = </Cabinet/Body>
-            rel physics:body1 = </Cabinet/Drawer/Box>
-            point3f physics:localPos0 = (0, 0, 40)
-            point3f physics:localPos1 = (0, 0, 0)
-            float physics:lowerLimit = 0
-            float physics:upperLimit = 30
-        }
-
-        def PhysicsRevoluteJoint "Hinge"
-        {
-            uniform token physics:axis = "Z"
-            rel physics:body0 = </Cabinet/Body>
-            rel physics:body1 = </Cabinet/Door>
-            point3f physics:localPos0 = (50, 0, 0)
-            point3f physics:localPos1 = (0, 0, 0)
-            quatf physics:localRot1 = (0.70710677, 0, 0, 0.70710677)
-            float physics:lowerLimit = -90
-            float physics:upperLimit = 90
-        }
-
-        def PhysicsFixedJoint "Pane"
-        {
-            rel physics:body0 = </Cabinet/Door>
-            rel physics:body1 = </Cabinet/Glass>
-        }
-
-        def PhysicsSphericalJoint "Ball"
-        {
-            uniform token physics:axis = "Z"
-            rel physics:body1 = </Cabinet/Glass>
-            float physics:coneAngle0Limit = 30
-            float physics:coneAngle1Limit = 20
-        }
-
-        def PhysicsDistanceJoint "Rope"
-        {
-            rel physics:body0 = </Cabinet/Body>
-            rel physics:body1 = </Cabinet/Glass>
-            float physics:minDistance = 5
-            float physics:maxDistance = 50
-        }
-
-        def PhysicsJoint "Custom" (
-            prepend apiSchemas = ["PhysicsLimitAPI:rotX", "PhysicsLimitAPI:transY"]
-        )
-        {
-            rel physics:body0 = </Cabinet/Body>
-            rel physics:body1 = </Cabinet/Glass>
-            float limit:rotX:physics:low = -10
-            float limit:rotX:physics:high = 10
-            float limit:transY:physics:low = 1
-            float limit:transY:physics:high = -1
-        }
-
-        def PhysicsRevoluteJoint "Follower" (
-            prepend apiSchemas = ["PhysxMimicJointAPI:rotZ"]
-        )
-        {
-            uniform token physics:axis = "Z"
-            rel physics:body0 = </Cabinet/Body>
-            rel physics:body1 = </Cabinet/Door>
-            float physxMimicJoint:rotZ:gearing = -1
-            rel physxMimicJoint:rotZ:referenceJoint = </Cabinet/Joints/Hinge>
         }
     }
 }

@@ -497,19 +497,31 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 	return { root, info, poser, addGeometry, applyTexture, textureFailed, dispose };
 }
 
-/** Joint limits and positions from stage units to meters for prismatic and distance joints. */
+/** Joint limits, positions and mimic offsets from stage units to meters wherever they are lengths. */
 function inMeters(physics: UsdPhysics, metersPerUnit: number): UsdPhysics {
 	const m = (v: number | null) => (v === null ? null : v * metersPerUnit);
 	const joints = physics.joints.map((j): UsdJoint => {
 		switch (j.kind) {
 			case "prismatic":
-				return { ...j, lower: m(j.lower), upper: m(j.upper), rest: j.rest * metersPerUnit };
+				return {
+					...j,
+					lower: m(j.lower),
+					upper: m(j.upper),
+					rest: j.rest * metersPerUnit,
+					mimic: j.mimic && { ...j.mimic, offset: j.mimic.offset * metersPerUnit },
+				};
 			case "distance":
 				return { ...j, min: m(j.min), max: m(j.max) };
+			case "generic":
+				return {
+					...j,
+					dofs: j.dofs.map((d) =>
+						d.dof.startsWith("rot") ? d : { ...d, low: d.low * metersPerUnit, high: d.high * metersPerUnit },
+					),
+				};
 			case "revolute":
 			case "spherical":
 			case "fixed":
-			case "generic":
 				return j;
 			default: {
 				const never: never = j;
