@@ -93,6 +93,124 @@ export interface LoadWarning {
 	readonly path?: string | undefined;
 }
 
+/**
+ * What a stage authors for simulation (UsdPhysics), read as authored: nothing is estimated. Masses are in kilograms, densities in
+ * kg/m³ and joint limits in degrees or meters. Positions and matrices are in stage space, like the meshes' own matrices under the
+ * root (column-major for three.js).
+ */
+export interface UsdPhysics {
+	readonly bodies: readonly UsdRigidBody[];
+	readonly colliders: readonly UsdCollider[];
+	readonly materials: readonly UsdPhysicsMaterial[];
+	readonly joints: readonly UsdJoint[];
+}
+
+/** A prim with `PhysicsRigidBodyAPI`. Its meshes are the ones at or under its path, but not under a nested body. */
+export interface UsdRigidBody {
+	readonly path: string;
+	readonly kinematic: boolean;
+	/** `physics:mass` on the body (`authored`), else the sum of its colliders' own masses (`colliders`); null when neither is authored. */
+	readonly mass: number | null;
+	readonly massSource: "authored" | "colliders" | null;
+	/** In the body's frame, stage units, as authored. */
+	readonly centerOfMass: readonly [number, number, number] | null;
+	readonly diagonalInertia: readonly [number, number, number] | null;
+	/** `w, x, y, z`. */
+	readonly principalAxes: readonly [number, number, number, number] | null;
+	/** Local-to-world. */
+	readonly world: readonly number[];
+	/** Collider prim paths. */
+	readonly colliders: readonly string[];
+	/** Bodies held to this one by fixed joints: they move with it. */
+	readonly attached: readonly string[];
+}
+
+/** A prim with `PhysicsCollisionAPI`. */
+export interface UsdCollider {
+	readonly path: string;
+	/** The nearest rigid body at or above it; null for a static collider. */
+	readonly body: string | null;
+	/** The prim type, lowercased: `mesh`, `cube`, `sphere`, `capsule`, `cylinder`, `cone`, `plane`, ... */
+	readonly shape: string;
+	/** `physics:approximation` on a mesh: `none`, `convexHull`, `convexDecomposition`, `meshSimplification`, `boundingCube`, `boundingSphere`, `sdf`, ... */
+	readonly approximation: string | null;
+	/** False for an invisible or guide collision-only mesh, which the viewer does not draw. */
+	readonly visual: boolean;
+	/** The physics material bound with the `physics` purpose. */
+	readonly material: string | null;
+	readonly mass: number | null;
+	readonly density: number | null;
+}
+
+/** A material with `PhysicsMaterialAPI`. */
+export interface UsdPhysicsMaterial {
+	readonly path: string;
+	readonly density: number | null;
+	readonly staticFriction: number | null;
+	readonly dynamicFriction: number | null;
+	readonly restitution: number | null;
+}
+
+/** The limits of a joint, by kind: degrees for rotation, meters for translation; null when unbounded. */
+export type UsdJointLimits =
+	| {
+			readonly kind: "revolute" | "prismatic";
+			readonly axis: "X" | "Y" | "Z";
+			readonly lower: number | null;
+			readonly upper: number | null;
+	  }
+	| {
+			readonly kind: "spherical";
+			readonly axis: "X" | "Y" | "Z";
+			readonly cone0: number | null;
+			readonly cone1: number | null;
+	  }
+	| { readonly kind: "distance"; readonly min: number | null; readonly max: number | null }
+	| { readonly kind: "fixed" }
+	/** A `PhysicsJoint` limited per degree of freedom by `PhysicsLimitAPI`; locked where `low > high`. */
+	| {
+			readonly kind: "generic";
+			readonly dofs: readonly { readonly dof: string; readonly low: number; readonly high: number }[];
+	  };
+
+/** A UsdPhysics joint between two rigid bodies. */
+export type UsdJoint = UsdJointLimits & {
+	readonly path: string;
+	/** Only when authored. */
+	readonly displayName: string | null;
+	/** The rigid bodies it connects (the nearest body at or above each `physics:body` target); null is the world. */
+	readonly body0: string | null;
+	readonly body1: string | null;
+	/** The joint frame on body0, in stage space, without scale. */
+	readonly frame: readonly number[];
+	/** Where the authored poses put the joint (degrees or meters; 0 for the other kinds): what `resetPose` returns it to. */
+	readonly rest: number;
+	/** A PhysX mimic joint, which follows `reference`: `position + gearing * reference + offset = 0`. */
+	readonly mimic: { readonly reference: string; readonly gearing: number; readonly offset: number } | null;
+};
+
+/** A UsdSemantics label set: `semantics:labels:<taxonomy>` on a prim, e.g. `wikidata_class` = `["cabinet"]`. */
+export interface UsdLabel {
+	readonly path: string;
+	readonly taxonomy: string;
+	readonly values: readonly string[];
+}
+
+/** A variant selection on the default prim, e.g. `PhysX` = `Enabled`. */
+export interface UsdVariantSelection {
+	readonly prim: string;
+	readonly set: string;
+	readonly selection: string;
+}
+
+/** A file the stage read: a layer (USD, or a package holding layers) or a texture. */
+export interface UsdDependency {
+	readonly url: string;
+	readonly kind: "layer" | "texture";
+	/** Bytes; null for one that was not fetched (a texture the texture mode skips, or one that failed). */
+	readonly size: number | null;
+}
+
 export type MaterialKind = "preview" | "omnipbr" | "gltf-pbr" | "displayColor" | "fallback";
 
 export interface LoadStats {
@@ -120,6 +238,11 @@ export interface LoadInfo {
 	readonly stats: LoadStats;
 	/** What could not be shown faithfully. Grows (texture failures) until `complete` settles. */
 	readonly warnings: readonly LoadWarning[];
+	readonly physics: UsdPhysics;
+	readonly labels: readonly UsdLabel[];
+	readonly variantSelections: readonly UsdVariantSelection[];
+	/** Every layer and texture the stage read, with its size. Grows (textures) until `complete` settles. */
+	readonly dependencies: readonly UsdDependency[];
 }
 
 export interface LoadResult {
@@ -128,6 +251,16 @@ export interface LoadResult {
 	readonly info: LoadInfo;
 	/** Settles when textures have streamed in; rejects with a UsdLoadError if the load is aborted, disposed or the worker dies. */
 	readonly complete: Promise<{ textures: number; failed: number }>;
+	/**
+	 * Moves a joint to `value` (degrees for a revolute joint, meters for a prismatic one, clamped to its limits) and with it the meshes
+	 * of its body1, the bodies fixed to it and everything further down the chain; mimic joints follow. Kinematic only: no collisions.
+	 * Cheap enough for every frame of a drag. A viewer needs `requestRender()` after it.
+	 */
+	pose(joint: string, value: number): void;
+	/** Puts every joint back where the authored poses have it. */
+	resetPose(): void;
+	/** Where every revolute and prismatic joint is now, by path (degrees or meters), mimic joints included. */
+	getPose(): Record<string, number>;
 	/** Frees geometries, materials and textures and stops any textures still streaming. */
 	dispose(): void;
 }

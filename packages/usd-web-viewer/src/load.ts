@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { UsdLoadError } from "./errors.js";
 import { OUT_OF_MEMORY, localKey, localUrl } from "./load-core.js";
+import { createPoser } from "./pose.js";
 import { SHOW } from "./show.js";
 import type { InternalOptions } from "./show.js";
 import { applyFallback, attachTexture, configureTexture, createMaterial, variant } from "./materials.js";
@@ -15,7 +16,16 @@ import type {
 	StageProgress,
 	WorkerMessage,
 } from "./meta.js";
-import type { LoadInfo, LoadOptions, LoadProgress, LoadResult, LoadStats } from "./types.js";
+import type {
+	LoadInfo,
+	LoadOptions,
+	LoadProgress,
+	LoadResult,
+	LoadStats,
+	UsdDependency,
+	UsdJoint,
+	UsdPhysics,
+} from "./types.js";
 
 // Instances of one geometry with the same materials drawn as one
 // InstancedMesh past this many.
@@ -230,6 +240,9 @@ export async function loadUsd(url: string, options: LoadOptions = {}): Promise<L
 			case "scene": {
 				const { warnings, ...stats } = data.stats;
 				builtScene().info.stats = stats;
+				builtScene().info.dependencies.unshift(
+					...data.layers.map(({ url, size }): UsdDependency => ({ url, kind: "layer", size })),
+				);
 				builtScene().info.warnings.push(...warnings);
 				delivered = true;
 				resolveScene(builtScene());
@@ -237,7 +250,7 @@ export async function loadUsd(url: string, options: LoadOptions = {}): Promise<L
 			}
 			case "texture":
 				if (data.bitmap) {
-					builtScene().applyTexture(data.path, data.bitmap, data.color);
+					builtScene().applyTexture(data.path, data.bitmap, data.color, data.size);
 					counts.textures++;
 				} else {
 					builtScene().textureFailed(data.path);
@@ -283,6 +296,9 @@ export async function loadUsd(url: string, options: LoadOptions = {}): Promise<L
 		root: scene.root,
 		info: scene.info as LoadInfo,
 		complete,
+		pose: scene.poser.pose,
+		resetPose: scene.poser.resetPose,
+		getPose: scene.poser.getPose,
 		dispose() {
 			stop(aborted());
 			scene.dispose();
@@ -293,7 +309,11 @@ export async function loadUsd(url: string, options: LoadOptions = {}): Promise<L
 type BuiltScene = ReturnType<typeof buildScene>;
 
 function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
-	const info: Mutable<Omit<LoadInfo, "stats">> & { stats?: LoadStats; warnings: LoadInfo["warnings"][number][] } = {
+	const info: Mutable<Omit<LoadInfo, "stats">> & {
+		stats?: LoadStats;
+		warnings: LoadInfo["warnings"][number][];
+		dependencies: Mutable<UsdDependency>[];
+	} = {
 		upAxis: meta.upAxis,
 		metersPerUnit: meta.metersPerUnit,
 		meshes: 0,
@@ -302,6 +322,13 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 		materials: meta.materials.length,
 		materialKinds: countBy(meta.materials, (m) => m.kind),
 		warnings: [...meta.warnings],
+		physics: inMeters(meta.physics, meta.metersPerUnit || 1),
+		labels: meta.labels,
+		variantSelections: meta.variantSelections,
+		// The fetched layers come with the scene; textures in packages are part of their package.
+		dependencies: [...new Set(meta.materials.flatMap((m) => Object.values(m.maps).map((ref) => ref.path)))]
+			.filter((path) => !path.includes("["))
+			.map((url): Mutable<UsdDependency> => ({ url, kind: "texture", size: null })),
 	};
 	const root = new THREE.Group();
 	root.name = "usd";
@@ -401,6 +428,7 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 			if (list.length > INSTANCING_MIN) {
 				const mesh = new THREE.InstancedMesh(geometry, material, list.length);
 				mesh.name = list[0].path;
+				mesh.userData.paths = list.map((inst) => inst.path);
 				const matrix = new THREE.Matrix4();
 				list.forEach((inst, k) => mesh.setMatrixAt(k, matrix.fromArray(inst.matrix)));
 				mesh.computeBoundingBox();
@@ -422,7 +450,13 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 
 	const allMaterials = () => [...materials, ...variants.values()];
 	const textures = new Map<string, THREE.Texture>();
-	const applyTexture = (path: string, bitmap: ImageBitmap, isColor: boolean) => {
+	const applyTexture = (path: string, bitmap: ImageBitmap, isColor: boolean, size: number) => {
+		const dependency = info.dependencies.find((d) => d.url === path && d.kind === "texture") as
+			| Mutable<UsdDependency>
+			| undefined;
+		if (dependency) {
+			dependency.size = size;
+		}
 		const base = new THREE.Texture(bitmap);
 		base.flipY = false;
 		base.anisotropy = 4;
@@ -458,7 +492,32 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 		}
 	};
 
-	return { root, info, addGeometry, applyTexture, textureFailed, dispose };
+	const poser = createPoser(root, info.physics.joints, info.physics.bodies, meta.metersPerUnit);
+
+	return { root, info, poser, addGeometry, applyTexture, textureFailed, dispose };
+}
+
+/** Joint limits and positions from stage units to meters for prismatic and distance joints. */
+function inMeters(physics: UsdPhysics, metersPerUnit: number): UsdPhysics {
+	const m = (v: number | null) => (v === null ? null : v * metersPerUnit);
+	const joints = physics.joints.map((j): UsdJoint => {
+		switch (j.kind) {
+			case "prismatic":
+				return { ...j, lower: m(j.lower), upper: m(j.upper), rest: j.rest * metersPerUnit };
+			case "distance":
+				return { ...j, min: m(j.min), max: m(j.max) };
+			case "revolute":
+			case "spherical":
+			case "fixed":
+			case "generic":
+				return j;
+			default: {
+				const never: never = j;
+				return never;
+			}
+		}
+	});
+	return { ...physics, joints };
 }
 
 function createGeometry(g: GeometryMeta, a: GeometryArrays) {

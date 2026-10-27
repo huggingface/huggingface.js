@@ -1,0 +1,188 @@
+#usda 1.0
+(
+    defaultPrim = "Cabinet"
+    metersPerUnit = 0.01
+    kilogramsPerUnit = 0.001
+    upAxis = "Z"
+)
+
+def Xform "Cabinet" (
+    prepend apiSchemas = ["SemanticsLabelsAPI:wikidata_class"]
+    variants = {
+        string Engine = "PhysX"
+    }
+    prepend variantSets = "Engine"
+)
+{
+    token[] semantics:labels:wikidata_class = ["cabinet"]
+
+    variantSet "Engine" = {
+        "PhysX" {
+        }
+        "MuJoCo" {
+        }
+    }
+
+    def Xform "Body" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        float physics:mass = 100000
+        point3f physics:centerOfMass = (0, 0, 50)
+
+        def Cube "Shell" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            double size = 100
+        }
+    }
+
+    def Xform "Drawer" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI"]
+    )
+    {
+        double3 xformOp:translate = (0, 0, 40)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Mesh "Box" (
+            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI", "PhysicsMassAPI", "MaterialBindingAPI"]
+        )
+        {
+            float physics:mass = 2000
+            uniform token physics:approximation = "convexHull"
+            rel material:binding:physics = </Cabinet/Materials/Plastic>
+            int[] faceVertexCounts = [4]
+            int[] faceVertexIndices = [0, 1, 2, 3]
+            point3f[] points = [(0, 0, 0), (10, 0, 0), (10, 10, 0), (0, 10, 0)]
+        }
+
+        def Mesh "Hull" (
+            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI", "PhysicsMassAPI"]
+        )
+        {
+            float physics:mass = 500
+            uniform token physics:approximation = "convexHull"
+            uniform token purpose = "guide"
+            int[] faceVertexCounts = [3]
+            int[] faceVertexIndices = [0, 1, 2]
+            point3f[] points = [(0, 0, 0), (10, 0, 0), (0, 10, 0)]
+        }
+    }
+
+    def Xform "Door" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI"]
+    )
+    {
+        double3 xformOp:translate = (50, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Cube "Panel" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            double size = 10
+        }
+    }
+
+    def Xform "Glass" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        float physics:mass = 8000
+    }
+
+    def Cube "Floor" (
+        prepend apiSchemas = ["PhysicsCollisionAPI"]
+    )
+    {
+        double size = 1
+    }
+
+    def Scope "Materials"
+    {
+        def Material "Plastic" (
+            prepend apiSchemas = ["PhysicsMaterialAPI", "SemanticsLabelsAPI:material"]
+        )
+        {
+            float physics:density = 0.95
+            float physics:staticFriction = 0.4
+            float physics:dynamicFriction = 0.3
+            float physics:restitution = 0.5
+            token[] semantics:labels:material = ["plastic"]
+        }
+    }
+
+    def Scope "Joints"
+    {
+        def PhysicsPrismaticJoint "Slide" (
+            displayName = "Top drawer"
+        )
+        {
+            uniform token physics:axis = "X"
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Drawer/Box>
+            point3f physics:localPos0 = (0, 0, 40)
+            point3f physics:localPos1 = (0, 0, 0)
+            float physics:lowerLimit = 0
+            float physics:upperLimit = 30
+        }
+
+        def PhysicsRevoluteJoint "Hinge"
+        {
+            uniform token physics:axis = "Z"
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Door>
+            point3f physics:localPos0 = (50, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot1 = (0.70710677, 0, 0, 0.70710677)
+            float physics:lowerLimit = -90
+            float physics:upperLimit = 90
+        }
+
+        def PhysicsFixedJoint "Pane"
+        {
+            rel physics:body0 = </Cabinet/Door>
+            rel physics:body1 = </Cabinet/Glass>
+        }
+
+        def PhysicsSphericalJoint "Ball"
+        {
+            uniform token physics:axis = "Z"
+            rel physics:body1 = </Cabinet/Glass>
+            float physics:coneAngle0Limit = 30
+            float physics:coneAngle1Limit = 20
+        }
+
+        def PhysicsDistanceJoint "Rope"
+        {
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Glass>
+            float physics:minDistance = 5
+            float physics:maxDistance = 50
+        }
+
+        def PhysicsJoint "Custom" (
+            prepend apiSchemas = ["PhysicsLimitAPI:rotX", "PhysicsLimitAPI:transY"]
+        )
+        {
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Glass>
+            float limit:rotX:physics:low = -10
+            float limit:rotX:physics:high = 10
+            float limit:transY:physics:low = 1
+            float limit:transY:physics:high = -1
+        }
+
+        def PhysicsRevoluteJoint "Follower" (
+            prepend apiSchemas = ["PhysxMimicJointAPI:rotZ"]
+        )
+        {
+            uniform token physics:axis = "Z"
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Door>
+            float physxMimicJoint:rotZ:gearing = -1
+            rel physxMimicJoint:rotZ:referenceJoint = </Cabinet/Joints/Hinge>
+        }
+    }
+}

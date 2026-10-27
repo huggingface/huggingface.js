@@ -29,6 +29,28 @@ scene.add(root); // a THREE.Group, Y-up, in meters
 await complete; // textures stream in after the geometry
 ```
 
+## Physics and joints
+
+`info` also reports what the stage authors for simulation (UsdPhysics) and its UsdSemantics labels, as authored: nothing is estimated. Masses are in kilograms, densities in kg/m³, joint limits in degrees or meters.
+
+```js
+const { info, pose, resetPose, getPose } = await viewer.load(url);
+
+info.physics.bodies; // rigid bodies: mass, center of mass, inertia, colliders, bodies fixed to them
+info.physics.colliders; // shape, approximation (convexHull, sdf, ...), physics material
+info.physics.materials; // density, friction, restitution
+info.physics.joints; // revolute, prismatic, spherical, distance, fixed and generic joints with their limits
+info.labels; // e.g. { path: '/RootNode', taxonomy: 'wikidata_class', values: ['cabinet'] }
+info.variantSelections; // e.g. { prim: '/Robotiq_2F_85', set: 'Physics', selection: 'Physx_parallel_grip' }
+info.dependencies; // every layer and texture the stage read, with its size
+
+pose('/Robotiq_2F_85/Robotiq_2F_85/Joints/finger_joint', 40); // moves the joint and what hangs from it; mimic joints follow
+getPose(); // where every revolute and prismatic joint is now
+resetPose(); // back to the authored pose
+```
+
+Posing is kinematic only (no collisions or gravity) and cheap enough for every frame of a slider drag.
+
 ## Options
 
 `loadUsd(url, options)` and `viewer.load(url, options)` take:

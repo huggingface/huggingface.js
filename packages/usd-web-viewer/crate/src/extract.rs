@@ -12,6 +12,7 @@ use serde::{Serialize, Serializer};
 
 use crate::implicit;
 use crate::material::{self, Material};
+use crate::physics::{self, Label, Physics, VariantSelection};
 use crate::ser::{as_map, finite};
 
 /// Everything a renderer needs from a stage. [`plan`] fills in all but the
@@ -30,6 +31,12 @@ pub struct Scene {
     /// max), known before any triangle is read; `None` when a mesh has none.
     pub bounds: Option<[[f64; 3]; 2]>,
     pub materials: Vec<Material>,
+    /// What the stage authors for simulation.
+    pub physics: Physics,
+    /// UsdSemantics labels.
+    pub labels: Vec<Label>,
+    /// Variant selections on the default prim.
+    pub variant_selections: Vec<VariantSelection>,
     pub stats: Stats,
     /// What the viewer could not show faithfully, for the host to surface.
     pub warnings: Vec<Warning>,
@@ -349,6 +356,7 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
         ..Scene::default()
     };
 
+    let mut physics = physics::Reader::new(stage, scene.meters_per_unit)?;
     let mut paths = Vec::new();
     stage.traverse(PrimPredicate::DEFAULT_PROXIES, |path| {
         paths.push(path.clone())
@@ -481,7 +489,14 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
         own.prototype = prototype_index.get(&path).copied().or(inherited);
         let own = *own;
 
-        let Some(ty) = prim.type_name()? else {
+        let ty = prim.type_name()?;
+        physics.visit(
+            &prim,
+            ty.as_ref().map(|t| t.as_str()),
+            !own.invisible && !own.hidden_purpose,
+            &mut xforms,
+        )?;
+        let Some(ty) = ty else {
             continue;
         };
         if ty.as_str() != "Mesh" && !implicit::is_implicit(ty.as_str()) {
@@ -628,6 +643,8 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
         }
     }
     scene.bounds = bounds.filter(|_| !scene.instances.is_empty());
+    (scene.physics, scene.labels) = physics.finish();
+    scene.variant_selections = physics::variant_selections(stage)?;
     if let Some(path) = over_limit.or(truncated) {
         scene.warnings.push(Warning {
             code: "instance-limit",

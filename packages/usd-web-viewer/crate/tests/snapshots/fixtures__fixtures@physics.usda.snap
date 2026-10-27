@@ -1,0 +1,33 @@
+---
+source: crate/tests/fixtures.rs
+assertion_line: 20
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/physics.usda
+---
+upAxis Z, metersPerUnit 0.01
+prims 20, meshes 4, triangles 38
+skipped invisible 0, purpose 1, empty 0
+
+instances:
+  /Cabinet/Body/Shell: geometry 0, material 1
+    at (0, 0, 0), world (-50, -50, -50)..(50, 50, 50)
+  /Cabinet/Drawer/Box: geometry 1, material 1
+    at (0, 0, 40), world (0, 0, 40)..(10, 10, 40)
+  /Cabinet/Door/Panel: geometry 2, material 1
+    at (50, 0, 0), world (45, -5, -5)..(55, 5, 5)
+  /Cabinet/Floor: geometry 3, material 1
+    at (0, 0, 0), world (-0.5, -0.5, -0.5)..(0.5, 0.5, 0.5)
+
+geometries:
+  0 /Cabinet/Body/Shell: 12 triangles (all outward), 24 vertices, bounds (-50, -50, -50)..(50, 50, 50)
+    normals (1, 0, 0) x4, (-1, 0, 0) x4, (0, 1, 0) x4, (0, -1, 0) x4, (0, 0, 1) x4, (0, 0, -1) x4
+  1 /Cabinet/Drawer/Box: 2 triangles (all outward), 4 vertices, bounds (0, 0, 0)..(10, 10, 0)
+    normals (0, 0, 1) x4
+  2 /Cabinet/Door/Panel: 12 triangles (all outward), 24 vertices, bounds (-5, -5, -5)..(5, 5, 5)
+    normals (1, 0, 0) x4, (-1, 0, 0) x4, (0, 1, 0) x4, (0, -1, 0) x4, (0, 0, 1) x4, (0, 0, -1) x4
+  3 /Cabinet/Floor: 12 triangles (all outward), 24 vertices, bounds (-0.5, -0.5, -0.5)..(0.5, 0.5, 0.5)
+    normals (1, 0, 0) x4, (-1, 0, 0) x4, (0, 1, 0) x4, (0, -1, 0) x4, (0, 0, 1) x4, (0, 0, -1) x4
+
+materials:
+  0 (unbound) displayColor: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0, color from primvar displayColor
+  1 (unbound) fallback: color (0.7, 0.7, 0.7), opacity 1, roughness 0.5, metallic 0
