@@ -28,8 +28,14 @@ def Xform "Cabinet" (
     {
         def PhysicsPrismaticJoint "Slide" (
             displayName = "Top drawer"
+            prepend apiSchemas = ["PhysicsDriveAPI:linear"]
         )
         {
+            uniform token drive:linear:physics:type = "force"
+            float drive:linear:physics:targetPosition = 10
+            float drive:linear:physics:stiffness = 1000
+            float drive:linear:physics:damping = 200
+            float drive:linear:physics:maxForce = 100000
             uniform token physics:axis = "X"
             rel physics:body0 = </Cabinet/Body>
             rel physics:body1 = </Cabinet/Drawer/Box>
@@ -39,8 +45,12 @@ def Xform "Cabinet" (
             float physics:upperLimit = 30
         }
 
-        def PhysicsRevoluteJoint "Hinge"
+        def PhysicsRevoluteJoint "Hinge" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
         {
+            float drive:angular:physics:targetPosition = 45
+            float drive:angular:physics:stiffness = 10000000
             uniform token physics:axis = "Z"
             rel physics:body0 = </Cabinet/Body>
             rel physics:body1 = </Cabinet/Door>
@@ -99,7 +109,7 @@ def Xform "Cabinet" (
     }
 
     def Xform "Body" (
-        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsArticulationRootAPI"]
     )
     {
         float physics:mass = 100000

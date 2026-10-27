@@ -17,11 +17,15 @@ use crate::extract::token_attr;
 use crate::ser::finite;
 
 #[derive(Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Physics {
     pub bodies: Vec<Body>,
     pub colliders: Vec<Collider>,
     pub materials: Vec<PhysicsMaterial>,
     pub joints: Vec<Joint>,
+    /// Prims with `PhysicsArticulationRootAPI`: where an articulation (bodies
+    /// an engine solves together, like a robot) starts.
+    pub articulation_roots: Vec<String>,
 }
 
 /// A prim with `PhysicsRigidBodyAPI`.
@@ -127,6 +131,31 @@ pub struct Joint {
     pub rest: f64,
     /// A PhysX mimic joint: `position + gearing * reference + offset = 0`.
     pub mimic: Option<Mimic>,
+    /// `PhysicsDriveAPI` instances: the motors or springs on the joint.
+    pub drives: Vec<Drive>,
+}
+
+/// A `PhysicsDriveAPI:<axis>` instance, in SI units: positions in meters or
+/// degrees, forces in newtons and torques in newton-meters (per meter or
+/// degree for stiffness, per meter or degree per second for damping).
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Drive {
+    /// `linear`, `angular`, `transX`, `transY`, `transZ`, `rotX`, `rotY` or `rotZ`.
+    pub axis: String,
+    /// `force` or `acceleration`, as authored.
+    #[serde(rename = "type")]
+    pub drive_type: Option<String>,
+    #[serde(serialize_with = "finite")]
+    pub target_position: Option<f64>,
+    #[serde(serialize_with = "finite")]
+    pub target_velocity: Option<f64>,
+    #[serde(serialize_with = "finite")]
+    pub stiffness: Option<f64>,
+    #[serde(serialize_with = "finite")]
+    pub damping: Option<f64>,
+    #[serde(serialize_with = "finite")]
+    pub max_force: Option<f64>,
 }
 
 #[derive(Serialize)]
@@ -300,6 +329,12 @@ impl<'a> Reader<'a> {
             }
         }
 
+        if has("PhysicsArticulationRootAPI") {
+            self.physics
+                .articulation_roots
+                .push(path.as_str().to_owned());
+        }
+
         if has("PhysicsMaterialAPI") {
             self.physics.materials.push(PhysicsMaterial {
                 path: path.as_str().to_owned(),
@@ -415,6 +450,29 @@ impl<'a> Reader<'a> {
         )
     }
 
+    /// A drive in SI units: lengths scale by metersPerUnit, masses by
+    /// kilogramsPerUnit; angles stay in degrees.
+    fn drive(&self, prim: &usd::Prim, axis: &str) -> Drive {
+        let attr = |name: &str| float(prim, &format!("drive:{axis}:physics:{name}")).map(f64::from);
+        let (kg, m) = (self.kilograms_per_unit, self.meters_per_unit);
+        let linear = matches!(axis, "linear" | "transX" | "transY" | "transZ");
+        // Force (kg·m/s²) per meter or per m/s for a linear drive; torque (kg·m²/s²) per degree otherwise.
+        let (length, force, gain) = if linear {
+            (m, kg * m, kg)
+        } else {
+            (1.0, kg * m * m, kg * m * m)
+        };
+        Drive {
+            axis: axis.to_owned(),
+            drive_type: token_attr(prim, &format!("drive:{axis}:physics:type")),
+            target_position: attr("targetPosition").map(|v| v * length),
+            target_velocity: attr("targetVelocity").map(|v| v * length),
+            stiffness: attr("stiffness").map(|v| v * gain),
+            damping: attr("damping").map(|v| v * gain),
+            max_force: attr("maxForce").map(|v| v * force),
+        }
+    }
+
     fn joint(
         &self,
         prim: &usd::Prim,
@@ -514,6 +572,11 @@ impl<'a> Reader<'a> {
             });
         let target0 = target0.map(|t| t.as_str().to_owned());
         let target1 = target1.map(|t| t.as_str().to_owned());
+        let drives = prim
+            .api_schema_instance_names("PhysicsDriveAPI")?
+            .into_iter()
+            .map(|axis| self.drive(prim, axis.as_str()))
+            .collect();
         Ok(Joint {
             path: prim.path().as_str().to_owned(),
             type_name: ty.to_owned(),
@@ -528,6 +591,7 @@ impl<'a> Reader<'a> {
             frame1,
             rest,
             mimic,
+            drives,
         })
     }
 }

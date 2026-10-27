@@ -63,7 +63,7 @@ function sceneMessages(matrix) {
 				metersPerUnit: 1,
 				warnings: [],
 				geometryCount: 1,
-				physics: { bodies: [], colliders: [], materials: [], joints: [] },
+				physics: { bodies: [], colliders: [], materials: [], joints: [], articulationRoots: [] },
 				labels: [],
 				variantSelections: [],
 				instances: [{ path: "/M", geometry: 0, material: 0, subsets: {}, doubleSided: false, matrix }],
@@ -489,6 +489,7 @@ function articulatedMessages() {
 		frame1: frame(100),
 		rest: 0,
 		mimic: null,
+		drives: [],
 		...extra,
 	});
 	const [meta, geometry] = sceneMessages(IDENTITY);
@@ -509,6 +510,7 @@ function articulatedMessages() {
 					],
 					colliders: [],
 					materials: [],
+					articulationRoots: ["/Body"],
 					joints: [
 						joint("/J/Hinge", "revolute", "/Body", "/Door", { axis: "Z", lower: -90, upper: 90 }),
 						joint("/J/Pane", "fixed", "/Door", "/Door/Pane"),
@@ -560,6 +562,7 @@ test("physics, labels and variant selections pass through, with prismatic limits
 	const hinge = info.physics.joints.find((j) => j.path === "/J/Hinge");
 	assert.deepEqual([hinge.lower, hinge.upper], [-90, 90]);
 	assert.equal(info.physics.bodies.length, 5);
+	assert.deepEqual(info.physics.articulationRoots, ["/Body"]);
 	assert.deepEqual(info.labels, [{ path: "/", taxonomy: "wikidata_class", values: ["cabinet"] }]);
 	assert.deepEqual(info.variantSelections, [{ prim: "/Cabinet", set: "PhysX", selection: "Enabled" }]);
 });

@@ -39,7 +39,8 @@ const { info, pose, resetPose, getPose } = await viewer.load(url);
 info.physics.bodies; // rigid bodies: mass, center of mass, inertia, colliders, bodies fixed to them
 info.physics.colliders; // shape, approximation (convexHull, sdf, ...), physics material
 info.physics.materials; // density, friction, restitution
-info.physics.joints; // revolute, prismatic, spherical, distance, fixed and generic joints with their limits
+info.physics.joints; // revolute, prismatic, spherical, distance, fixed and generic joints with their limits and drives
+info.physics.articulationRoots; // where articulations (bodies solved together, like a robot) start
 info.labels; // e.g. { path: '/RootNode', taxonomy: 'wikidata_class', values: ['cabinet'] }
 info.variantSelections; // e.g. { prim: '/Robotiq_2F_85', set: 'Physics', selection: 'Physx_parallel_grip' }
 info.dependencies; // every layer and texture the stage read, with its size

@@ -203,6 +203,37 @@ fn joints_keep_their_authored_type_targets_and_both_frames() {
 }
 
 #[test]
+fn drives_and_articulation_roots_are_in_si_units() {
+    let out = fixture();
+    assert_eq!(
+        out["physics"]["articulationRoots"],
+        json!(["/Cabinet/Body"])
+    );
+    let joints = &out["physics"]["joints"];
+    // Grams and centimeters in the file: a linear drive's gains are in kg/s² and kg/s,
+    // its position in meters and its force in newtons.
+    let slide = &find(joints, "/Cabinet/Joints/Slide")["drives"][0];
+    assert_eq!(
+        (slide["axis"].as_str(), slide["type"].as_str()),
+        (Some("linear"), Some("force"))
+    );
+    for (key, expected) in [
+        ("targetPosition", 0.1),
+        ("stiffness", 1.0),
+        ("damping", 0.2),
+        ("maxForce", 1.0),
+    ] {
+        assert!(close(&slide[key], expected), "{key}: {}", slide[key]);
+    }
+    assert_eq!(slide["targetVelocity"], Value::Null);
+    // An angular drive keeps degrees; its stiffness is in N·m per degree.
+    let hinge = &find(joints, "/Cabinet/Joints/Hinge")["drives"][0];
+    assert!(close(&hinge["targetPosition"], 45.0));
+    assert!(close(&hinge["stiffness"], 1.0), "{}", hinge["stiffness"]);
+    assert_eq!(find(joints, "/Cabinet/Joints/Pane")["drives"], json!([]));
+}
+
+#[test]
 fn fixed_joints_attach_bodies_to_the_one_that_moves_them() {
     let out = fixture();
     let door = find(&out["physics"]["bodies"], "/Cabinet/Door");

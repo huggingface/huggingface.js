@@ -127,6 +127,8 @@ export interface UsdPhysics {
 	readonly colliders: readonly UsdCollider[];
 	readonly materials: readonly UsdPhysicsMaterial[];
 	readonly joints: readonly UsdJoint[];
+	/** Prims with `PhysicsArticulationRootAPI`: where an articulation (bodies an engine solves together, like a robot) starts. */
+	readonly articulationRoots: readonly string[];
 }
 
 /** A prim with `PhysicsRigidBodyAPI`. Its meshes are the ones at or under its path, but not under a nested body. */
@@ -223,7 +225,24 @@ export type UsdJoint = UsdJointKind & {
 	readonly rest: number;
 	/** A PhysX mimic joint, which follows `reference`: `position + gearing * reference + offset = 0`. */
 	readonly mimic: { readonly reference: string; readonly gearing: number; readonly offset: number } | null;
+	/** The motors or springs on the joint (`PhysicsDriveAPI`), one per driven axis. */
+	readonly drives: readonly UsdJointDrive[];
 };
+
+/**
+ * A `PhysicsDriveAPI:<axis>` instance, as authored but in SI units. A linear drive's positions are in meters, its stiffness in
+ * N/m, its damping in N·s/m and `maxForce` in newtons; an angular drive's are in degrees, N·m/°, N·m·s/° and N·m.
+ */
+export interface UsdJointDrive {
+	readonly axis: "linear" | "angular" | "transX" | "transY" | "transZ" | "rotX" | "rotY" | "rotZ";
+	/** `force` or `acceleration`. */
+	readonly type: string | null;
+	readonly targetPosition: number | null;
+	readonly targetVelocity: number | null;
+	readonly stiffness: number | null;
+	readonly damping: number | null;
+	readonly maxForce: number | null;
+}
 
 /** A UsdSemantics label set: `semantics:labels:<taxonomy>` on a prim, e.g. `wikidata_class` = `["cabinet"]`. */
 export interface UsdLabel {
