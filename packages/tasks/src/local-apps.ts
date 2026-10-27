@@ -236,7 +236,7 @@ function isLociModel(model: ModelData): boolean {
 			].includes(model.config.model_type)
 		);
 	}
-	return model.library_name === "litert-lm" || model.tags.includes("litert-lm");
+	return false;
 }
 
 function isUnslothModel(model: ModelData) {
@@ -745,8 +745,9 @@ export const LOCAL_APPS = {
 	},
 	loci: {
 		prettyLabel: "Loci",
-		docsUrl: "https://askloci.ai/",
+		docsUrl: "https://askloci.ai/private-ai-mac/",
 		mainTask: "text-generation",
+		macOSOnly: true,
 		// The app verifies the selected files, runtime compatibility and device fit before importing.
 		displayOnModelPage: isLociModel,
 		deeplink: (model, filepath) => {
