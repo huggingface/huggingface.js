@@ -15,6 +15,11 @@ const FILE_FOOTER_LENGTH = 48;
 export const SHARD_HEADER_VERSION = 2n;
 export const SHARD_FOOTER_VERSION = 1n;
 
+const FILE_INFO_SECTION_MAX_SIZE = Math.floor((SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.25);
+const XORB_INFO_SECTION_MAX_SIZE = Math.floor((SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.75);
+/** Initial allocation for a shard section, enough for a few files / xorbs */
+const SECTION_INITIAL_SIZE = 16 * 1024;
+
 const MDB_FILE_FLAG_WITH_VERIFICATION = 0x80000000; // Cannot define as 1 << 31 because it becomes a negative number
 const MDB_FILE_FLAG_WITH_METADATA_EXT = 0x40000000;
 
@@ -97,13 +102,28 @@ export async function* uploadShards(
 	const xorbHashes: Array<string> = [];
 	const seenFileXetHashes = new Set<string>();
 
-	const fileInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.25);
-	const xorbInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.75);
+	// The sections start small and grow as needed (up to their max size), to avoid allocating
+	// the full shard size when uploading a few small files
+	let fileInfoSection = new Uint8Array(0);
+	let xorbInfoSection = new Uint8Array(0);
 
-	const xorbView = new DataView(xorbInfoSection.buffer);
+	let xorbView = new DataView(xorbInfoSection.buffer);
 	let xorbViewOffset = 0;
-	const fileInfoView = new DataView(fileInfoSection.buffer);
+	let fileInfoView = new DataView(fileInfoSection.buffer);
 	let fileViewOffset = 0;
+
+	const ensureXorbInfoCapacity = (needed: number) => {
+		if (needed > xorbInfoSection.length) {
+			xorbInfoSection = growSection(xorbInfoSection, xorbViewOffset, needed, XORB_INFO_SECTION_MAX_SIZE);
+			xorbView = new DataView(xorbInfoSection.buffer);
+		}
+	};
+	const ensureFileInfoCapacity = (needed: number) => {
+		if (needed > fileInfoSection.length) {
+			fileInfoSection = growSection(fileInfoSection, fileViewOffset, needed, FILE_INFO_SECTION_MAX_SIZE);
+			fileInfoView = new DataView(fileInfoSection.buffer);
+		}
+	};
 	let xorbTotalSize = 0n;
 	let fileTotalSize = 0n;
 	let xorbTotalUnpackedSize = 0n;
@@ -119,12 +139,13 @@ export async function* uploadShards(
 				const totalXorbSize = xorbEntrySize + chunksSize;
 
 				// Check if adding this xorb would exceed buffer capacity
-				if (xorbViewOffset + totalXorbSize > xorbInfoSection.length) {
+				if (xorbViewOffset + totalXorbSize > XORB_INFO_SECTION_MAX_SIZE) {
 					// Upload current shard and reset buffers
 					if (xorbViewOffset > 0 || fileViewOffset > 0) {
 						await uploadShard(createShard(), params);
 					}
 				}
+				ensureXorbInfoCapacity(xorbViewOffset + totalXorbSize);
 
 				// todo: handle when going out of bounds
 				writeHashToArray(output.hash, xorbInfoSection, xorbViewOffset);
@@ -211,12 +232,13 @@ export async function* uploadShards(
 				const totalFileSize = fileHeaderSize + representationSize + verificationSize + metadataSize;
 
 				// Check if adding this file would exceed buffer capacity
-				if (fileViewOffset + totalFileSize > fileInfoSection.length) {
+				if (fileViewOffset + totalFileSize > FILE_INFO_SECTION_MAX_SIZE) {
 					// Upload current shard and reset buffers
 					if (xorbViewOffset > 0 || fileViewOffset > 0) {
 						await uploadShard(createShard(), params);
 					}
 				}
+				ensureFileInfoCapacity(fileViewOffset + totalFileSize);
 
 				writeHashToArray(output.hash, fileInfoSection, fileViewOffset);
 				fileViewOffset += HASH_LENGTH;
@@ -395,6 +417,17 @@ export async function* uploadShards(
 	if (xorbViewOffset || fileViewOffset) {
 		await uploadShard(createShard(), params);
 	}
+}
+
+/**
+ * Returns a bigger buffer (geometric growth, capped at `maxSize` unless `needed` is bigger) holding
+ * the first `used` bytes of `section`
+ */
+function growSection(section: Uint8Array, used: number, needed: number, maxSize: number): Uint8Array {
+	const newSize = Math.max(needed, Math.min(maxSize, Math.max(SECTION_INITIAL_SIZE, section.length * 2)));
+	const newSection = new Uint8Array(newSize);
+	newSection.set(section.subarray(0, used));
+	return newSection;
 }
 
 // Todo: switch from hex to non-hex when WASM switches. For now consider hash is hex
