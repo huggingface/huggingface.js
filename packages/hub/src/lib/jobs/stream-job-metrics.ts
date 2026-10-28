@@ -76,6 +76,8 @@ export async function* streamJobMetrics(
 			}
 		}
 	} finally {
+		// Do not wait for another branch of a cloned response, or let cleanup errors escape.
+		void reader.cancel().catch(() => {});
 		reader.releaseLock();
 	}
 }
