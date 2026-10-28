@@ -1318,7 +1318,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVlabs/ProtoMotions",
 		docsUrl: "https://nvlabs.github.io/ProtoMotions/",
 		filter: false,
-		countDownloads: `path_extension:"onnx" OR path_filename:"inference_last.ckpt"`,
+		countDownloads: `path_extension:"onnx" OR (path_filename:"inference_last" AND path_extension:"ckpt")`,
 	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
