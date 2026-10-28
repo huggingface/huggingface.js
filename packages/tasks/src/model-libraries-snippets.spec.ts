@@ -88,6 +88,27 @@ output = llm(
 print(output)`);
 	});
 
+	it("llama_cpp_python embedding", async () => {
+		const model: ModelData = {
+			id: "ggml-org/embeddinggemma-300M-GGUF",
+			tags: ["feature-extraction"],
+			inference: "",
+		};
+		const snippet = llama_cpp_python(model);
+
+		expect(snippet.join("\n")).toEqual(`# !pip install llama-cpp-python
+
+from llama_cpp import Llama
+
+llm = Llama.from_pretrained(
+	repo_id="ggml-org/embeddinggemma-300M-GGUF",
+	filename="{{GGUF_FILE}}",
+	embedding=True,
+)
+
+embeddings = llm.create_embedding("Hello, world!")`);
+	});
+
 	describe("microduck", () => {
 		it("uses an explicit slot tag even when the repo name and other tags suggest walking", () => {
 			const model: ModelData = {
