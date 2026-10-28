@@ -878,6 +878,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/KittenML/KittenTTS",
 		snippets: snippets.kittentts,
 	},
+	konfai: {
+		prettyLabel: "KonfAI",
+		repoName: "KonfAI",
+		repoUrl: "https://github.com/fideus-labs/KonfAI",
+		docsUrl: "https://konfai.readthedocs.io/en/latest/usage/apps.html",
+		snippets: snippets.konfai,
+		filter: false,
+		countDownloads: `path_filename:"app" AND path_extension:"json"`,
+	},
 	kronos: {
 		prettyLabel: "KRONOS",
 		repoName: "KRONOS",
