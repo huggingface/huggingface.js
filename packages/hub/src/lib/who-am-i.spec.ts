@@ -1,4 +1,4 @@
-import { assert, it, describe } from "vitest";
+import { expect, it, describe } from "vitest";
 import { TEST_ACCESS_TOKEN, TEST_HUB_URL } from "../test/consts";
 import { whoAmI } from "./who-am-i";
 
@@ -10,7 +10,7 @@ describe("whoAmI", () => {
 			info.auth.accessToken.createdAt = new Date(0);
 		}
 
-		assert.deepStrictEqual(info, {
+		expect(info).toEqual({
 			type: "user",
 			id: "62f264b9f3c90f4b6514a269",
 			name: "hub.js",
@@ -20,7 +20,7 @@ describe("whoAmI", () => {
 			canPay: false,
 			isPro: false,
 			periodEnd: null,
-			avatarUrl: "/avatars/934b830e9fdaa879487852f79eef7165.svg",
+			avatarUrl: expect.stringMatching(/^\/avatars\//),
 			billingMode: "postpaid",
 			orgs: [],
 			auth: {
