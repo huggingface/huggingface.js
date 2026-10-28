@@ -1312,6 +1312,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tts_b6369a24.safetensors"`,
 	},
+	protomotions: {
+		prettyLabel: "ProtoMotions",
+		repoName: "ProtoMotions",
+		repoUrl: "https://github.com/NVlabs/ProtoMotions",
+		docsUrl: "https://nvlabs.github.io/ProtoMotions/",
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_filename:"inference_last.ckpt"`,
+	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
 		repoName: "Pruna AI",
