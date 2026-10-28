@@ -125,6 +125,12 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/scaleapi/agentenv-framework",
 		docsUrl: "https://www.agentenvframework.com/docs",
 	},
+	simready: {
+		prettyLabel: "SimReady",
+		repoName: "simready-foundation",
+		repoUrl: "https://github.com/NVIDIA/simready-foundation",
+		docsUrl: "https://nvidia.github.io/simready-foundation/",
+	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
 /// List of the dataset libraries supported by the Hub
