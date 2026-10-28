@@ -420,10 +420,13 @@ export async function* uploadShards(
 }
 
 /**
- * Returns a bigger buffer (geometric growth, capped at `maxSize` unless `needed` is bigger) holding
- * the first `used` bytes of `section`
+ * Returns a bigger buffer (geometric growth, capped at `maxSize`) holding the first `used` bytes of `section`
  */
 function growSection(section: Uint8Array, used: number, needed: number, maxSize: number): Uint8Array {
+	if (needed > maxSize) {
+		// A single entry doesn't fit in an empty section: never produce an oversized shard
+		throw new Error(`Shard section overflow: needs ${needed} bytes, max is ${maxSize}`);
+	}
 	const newSize = Math.max(needed, Math.min(maxSize, Math.max(SECTION_INITIAL_SIZE, section.length * 2)));
 	const newSection = new Uint8Array(newSize);
 	newSection.set(section.subarray(0, used));
