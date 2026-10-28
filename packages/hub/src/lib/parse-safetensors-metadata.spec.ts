@@ -1109,6 +1109,101 @@ describe("parseSafetensorsMetadata", () => {
 			});
 		});
 
+		describe("modelopt (NVIDIA ModelOpt)", () => {
+			const nvfp4 = { quant_method: "modelopt", quant_algo: "NVFP4" };
+			const dense = "model.layers.0.mlp.down_proj.weight";
+
+			it("packs NVFP4 weights two-per-U8", () => {
+				assert.strictEqual(getQuantizationMultiplier(dense, "U8", nvfp4), 2);
+				assert.strictEqual(getQuantizationMultiplier(dense, "U8", { ...nvfp4, quant_algo: "W4A16_NVFP4" }), 2);
+			});
+
+			it("leaves non-integer dtypes and FP8 exports alone", () => {
+				assert.strictEqual(getQuantizationMultiplier(dense, "F8_E4M3", nvfp4), 1);
+				assert.strictEqual(getQuantizationMultiplier(dense, "BF16", nvfp4), 1);
+				assert.strictEqual(getQuantizationMultiplier(dense, "U8", { ...nvfp4, quant_algo: "FP8" }), 1);
+				assert.strictEqual(getQuantizationMultiplier(dense, "U8", { quant_method: "modelopt" }), 1);
+			});
+
+			it("does not pack modules excluded from quantization", () => {
+				const config = { ...nvfp4, modules_to_not_convert: ["lm_head"] };
+				assert.strictEqual(getQuantizationMultiplier("lm_head.weight", "U8", config), 1);
+			});
+
+			describe("MIXED_PRECISION (nvidia/Qwen3.6-35B-A3B-NVFP4)", () => {
+				const mixed = {
+					quant_method: "modelopt",
+					quant_algo: "MIXED_PRECISION",
+					quantized_layers: {
+						"model.language_model.layers.0.linear_attn.out_proj": { quant_algo: "FP8" },
+						"model.language_model.layers.0.mlp.experts": { quant_algo: "W4A16_NVFP4" },
+						"model.language_model.layers.0.mlp.shared_expert.up_proj": { quant_algo: "W4A16_NVFP4" },
+					},
+				};
+
+				it("resolves the per-module algorithm, including parent containers like `…mlp.experts`", () => {
+					assert.strictEqual(
+						getQuantizationMultiplier("model.language_model.layers.0.mlp.experts.7.down_proj.weight", "U8", mixed),
+						2,
+					);
+					// fused 3D expert tensor directly under the container
+					assert.strictEqual(
+						getQuantizationMultiplier("model.language_model.layers.0.mlp.experts.gate_up_proj", "U8", mixed),
+						2,
+					);
+					assert.strictEqual(
+						getQuantizationMultiplier("model.language_model.layers.0.mlp.shared_expert.up_proj.weight", "U8", mixed),
+						2,
+					);
+				});
+
+				it("does not pack FP8 modules or modules the config doesn't list", () => {
+					assert.strictEqual(
+						getQuantizationMultiplier("model.language_model.layers.0.linear_attn.out_proj.weight", "U8", mixed),
+						1,
+					);
+					assert.strictEqual(
+						getQuantizationMultiplier("model.language_model.layers.0.mlp.gate.weight", "U8", mixed),
+						1,
+					);
+					// prefix match is on module boundaries: `…experts` must not cover `…experts_gate`
+					assert.strictEqual(
+						getQuantizationMultiplier("model.language_model.layers.0.mlp.experts_gate.weight", "U8", mixed),
+						1,
+					);
+				});
+
+				it("lets a module-level FP8 entry override a global NVFP4 algorithm", () => {
+					const config = { ...mixed, quant_algo: "NVFP4" };
+					assert.strictEqual(
+						getQuantizationMultiplier("model.language_model.layers.0.linear_attn.out_proj.weight", "U8", config),
+						1,
+					);
+				});
+			});
+
+			it("counts an NVFP4 export at its unquantized size, without block scales", () => {
+				const tensor = (dtype: Dtype, shape: number[]): TensorInfo => ({ dtype, shape, data_offsets: [0, 0] });
+				// 64x128 logical weight: 64x64 packed bytes, one FP8 scale per 16 values, FP32 global scales
+				const parameterCount = computeNumOfParamsByDtypeSingleFile(
+					{
+						"model.layers.0.mlp.down_proj.weight": tensor("U8", [64, 64]),
+						"model.layers.0.mlp.down_proj.weight_scale": tensor("F8_E4M3", [64, 8]),
+						"model.layers.0.mlp.down_proj.weight_scale_2": tensor("F32", [1]),
+						"model.layers.0.mlp.down_proj.input_scale": tensor("F32", [1]),
+						// underscored scales: e.g. in meta-models/Muse-Spark-Open-816B-A42B-NVFP4
+						"model.layers.0.mlp.experts.gate_up_proj": tensor("U8", [2, 256, 64]),
+						"model.layers.0.mlp.experts.gate_up_proj_weight_scale": tensor("F8_E4M3", [2, 256, 8]),
+						"model.layers.0.mlp.experts.gate_up_proj_weight_scale_2": tensor("F32", [2]),
+						"model.layers.0.mlp.experts.gate_up_proj_input_scale": tensor("F32", [2]),
+						"lm_head.weight": tensor("BF16", [10, 128]),
+					},
+					{ quant_method: "modelopt", quant_algo: "NVFP4", modules_to_not_convert: ["lm_head"] },
+				);
+				assert.deepStrictEqual(parameterCount, { U8: 64 * 128 + 2 * 256 * 128, BF16: 1280 });
+			});
+		});
+
 		it("ignores fp6, which is stored in native F6_* dtypes rather than packed", () => {
 			// A 6-bit width in an 8-bit container has no reference implementation, so claiming any
 			// packing for it would be a guess.
@@ -1368,6 +1463,32 @@ describe("parseSafetensorsMetadata", () => {
 			U8: 302_795_194_368, // 151_397_597_184 packed bytes x 2
 		});
 		assert.strictEqual(sum(Object.values(parse.parameterCount)), 310_756_322_688);
+	});
+
+	it("counts modelopt MIXED_PRECISION NVFP4 weights packed in U8 (nvidia/Qwen3.6-35B-A3B-NVFP4)", async () => {
+		// `quant_method: "modelopt"` with `quant_algo: "MIXED_PRECISION"`: `quantized_layers` marks the
+		// MoE experts and shared experts W4A16_NVFP4, packed two per U8 byte, and the attention
+		// projections FP8. Counting the U8 bytes once each reported 19_528_501_104 for a 35B model.
+		const parse = await parseSafetensorsMetadata({
+			repo: "nvidia/Qwen3.6-35B-A3B-NVFP4",
+			revision: "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 3);
+		const shard = parse.headers["model-00001-of-00003.safetensors"];
+		// NVFP4 expert: moe_intermediate_size 512 packed into 256 bytes per row
+		assert.deepStrictEqual(shard["model.language_model.layers.0.mlp.experts.0.down_proj.weight"].shape, [2048, 256]);
+		// FP8 layer: one value per byte, left unpacked
+		assert.strictEqual(shard["model.language_model.layers.3.self_attn.q_proj.weight"].dtype, "F8_E4M3");
+		assert.deepStrictEqual(parse.parameterCount, {
+			BF16: 1_825_916_784,
+			F8_E4M3: 1_279_262_720,
+			U8: 32_846_643_200, // 16_423_321_600 packed bytes x 2
+		});
+		// exactly the unquantized Qwen/Qwen3.6-35B-A3B parameter count
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 35_951_822_704);
 	});
 });
 
