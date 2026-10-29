@@ -125,6 +125,12 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/scaleapi/agentenv-framework",
 		docsUrl: "https://www.agentenvframework.com/docs",
 	},
+	lerobot: {
+		prettyLabel: "LeRobot",
+		repoName: "lerobot",
+		repoUrl: "https://github.com/huggingface/lerobot",
+		docsUrl: "https://huggingface.co/docs/lerobot/",
+	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
 /// List of the dataset libraries supported by the Hub
