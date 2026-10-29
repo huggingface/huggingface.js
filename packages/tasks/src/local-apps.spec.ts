@@ -277,6 +277,22 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain('openclaw agent --local --agent main --message "Hello from Hugging Face"');
 	});
 
+	it("llamay", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS["llamay"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf");
+
+		expect(displayOnModelPage(model)).toEqual(true);
+		const ref = "hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M";
+		expect(snippet[0].content).toEqual(`llamay run -m ${ref} -chat -p "Hello!"`);
+		expect(snippet[1].content).toEqual(`llamay serve -m ${ref}`);
+	});
+
 	it("docker model runner", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
 		const model: ModelData = {
