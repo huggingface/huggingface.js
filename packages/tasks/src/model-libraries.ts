@@ -1918,6 +1918,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"vqw"`,
 		filter: false,
 	},
+	vifasttts: {
+		prettyLabel: "ViFastTts",
+		repoName: "ViFastTts",
+		repoUrl: "https://github.com/dvchd/ViFastTts",
+		docsUrl: "https://github.com/dvchd/ViFastTts/blob/main/docs/MODEL_SEARCH.md",
+		// ViFastTts distributes .vfa/.vfts bundles; ONNX is used by its native runtime.
+		countDownloads: `path_extension:"vfa" OR path_extension:"vfts" OR path_extension:"onnx"`,
+		filter: false,
+	},
 	vibevoice: {
 		prettyLabel: "VibeVoice",
 		repoName: "VibeVoice",
