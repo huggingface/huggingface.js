@@ -243,8 +243,12 @@ const snippetLlamay = (model: ModelData, filepath?: string): LocalAppSnippet[] =
 	const modelRef = `hf.co/${model.id}${getQuantTag(filepath)}`;
 	return [
 		{
-			title: "Chat with the model",
+			title: "Pull the model",
 			setup: "# Download llamay from https://llamay.com/download/",
+			content: `llamay pull ${modelRef}`,
+		},
+		{
+			title: "Chat with the model",
 			content: `llamay run -m ${modelRef} -chat -p "Hello!"`,
 		},
 		{
