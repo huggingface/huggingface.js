@@ -1,4 +1,4 @@
-import type { ModelData } from "./model-data.js";
+import type { ModelData, TransformersInfo } from "./model-data.js";
 import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
 import { LIBRARY_TASK_MAPPING, REMOVED_IN_V5_TRANSFORMERS_PIPELINES } from "./library-to-tasks.js";
 import { getModelInputSnippet } from "./snippets/inputs.js";
@@ -17,6 +17,16 @@ const escapeStringForJson = (str: string): string => JSON.stringify(str).slice(1
 const isValidIdentifier = (str: string): boolean => /^[A-Za-z_]\w*$/.test(str);
 
 //#region snippets
+
+export const aadyaNeural = (model: ModelData): string[] => [
+	`# Install from https://github.com/manasdutta04/aadya (train extras: torch)
+from huggingface_hub import snapshot_download
+from aadya_neural.torch_forecaster import AadyaM1Forecaster
+
+weights = snapshot_download("${model.id}")
+model = AadyaM1Forecaster(weights)
+pmf = model.forecast([28, 30, 27], elapsed=0)`,
+];
 
 export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
@@ -54,6 +64,14 @@ export const araclip = (model: ModelData): string[] => [
 	`from araclip import AraClip
 
 model = AraClip.from_pretrained("${model.id}")`,
+];
+
+export const asimov = (model: ModelData): string[] => [
+	`# Run the policy in a browser simulation of the Asimov 1 humanoid (no GPU needed)
+git clone https://github.com/menloresearch/humanoid-policy-viewer
+cd humanoid-policy-viewer
+npm install
+npm run hf ${model.id}`,
 ];
 
 export const asteroid = (model: ModelData): string[] => [
@@ -2384,14 +2402,37 @@ const hasChatTemplate = (model: ModelData): boolean =>
 	model.config?.processor_config?.chat_template !== undefined ||
 	model.config?.chat_template_jinja !== undefined;
 
+// timm config.json is not a transformers config (no model_type / architectures), so the Hub
+// reports transformersInfo as { auto_model: "AutoModel" } and drops the image processor.
+// The timm wrapper still loads through the same Auto classes as a native vision model.
+const transformersSnippetInfo = (model: ModelData): TransformersInfo | undefined => {
+	if (model.library_name === "timm") {
+		if (model.pipeline_tag === "image-classification") {
+			return {
+				...model.transformersInfo,
+				auto_model: "AutoModelForImageClassification",
+				processor: "AutoImageProcessor",
+			};
+		}
+		if (model.pipeline_tag === "image-feature-extraction") {
+			return {
+				...model.transformersInfo,
+				auto_model: "AutoModel",
+				processor: "AutoImageProcessor",
+			};
+		}
+	}
+	return model.transformersInfo;
+};
+
 // interpolated as a Python class name (and into RegExps in pruna_transformers), so a non-identifier is treated as absent
 const autoModelClass = (model: ModelData): string | undefined => {
-	const autoModel = model.transformersInfo?.auto_model;
+	const autoModel = transformersSnippetInfo(model)?.auto_model;
 	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
 };
 
 export const transformers = (model: ModelData): string[] => {
-	const info = model.transformersInfo;
+	const info = transformersSnippetInfo(model);
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}

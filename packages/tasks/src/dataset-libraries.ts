@@ -119,6 +119,12 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVIDIA-NeMo/Gym",
 		docsUrl: "https://docs.nvidia.com/nemo/gym/",
 	},
+	agentenv: {
+		prettyLabel: "AgentEnv",
+		repoName: "agentenv-framework",
+		repoUrl: "https://github.com/scaleapi/agentenv-framework",
+		docsUrl: "https://www.agentenvframework.com/docs",
+	},
 	lerobot: {
 		prettyLabel: "LeRobot",
 		repoName: "lerobot",
