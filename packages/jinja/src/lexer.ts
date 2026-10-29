@@ -26,6 +26,7 @@ export const TOKEN_TYPES = Object.freeze({
 	CallOperator: "CallOperator", // ()
 	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + - ~
 	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / // %
+	ExponentiationBinaryOperator: "ExponentiationBinaryOperator", // **
 	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
 	UnaryOperator: "UnaryOperator", // ! - +
 	Comment: "Comment", // {# ... #}
@@ -91,6 +92,7 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	["+", TOKEN_TYPES.AdditiveBinaryOperator],
 	["-", TOKEN_TYPES.AdditiveBinaryOperator],
 	["~", TOKEN_TYPES.AdditiveBinaryOperator],
+	["**", TOKEN_TYPES.ExponentiationBinaryOperator], // NOTE: must come before "*" so that "**" is matched first
 	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	["//", TOKEN_TYPES.MultiplicativeBinaryOperator], // NOTE: must come before "/" so that "//" is matched first
 	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
@@ -173,6 +175,17 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 
 				// Add the escaped character
 				const escaped = src[cursorPosition++];
+				if (escaped === "x" || escaped === "u") {
+					const length = escaped === "x" ? 2 : 4;
+					const hex = src.slice(cursorPosition, cursorPosition + length);
+					if (hex.length !== length || /[^0-9a-f]/i.test(hex)) {
+						throw new SyntaxError(`Invalid hexadecimal escape sequence: \\${escaped}${hex}`);
+					}
+					str += String.fromCharCode(parseInt(hex, 16));
+					cursorPosition += length;
+					continue;
+				}
+
 				const unescaped = ESCAPE_CHARACTERS.get(escaped);
 				if (unescaped === undefined) {
 					throw new SyntaxError(`Unexpected escaped character: ${escaped}`);

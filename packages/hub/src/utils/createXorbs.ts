@@ -32,6 +32,11 @@ const TARGET_CHUNK_SIZE = 64 * 1024;
 const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
+/**
+ * Smallest chunk the chunker can emit (except for the last chunk of a file), used to bound the
+ * number of chunk headers needed for a given amount of data
+ */
+const MIN_CHUNK_SIZE = TARGET_CHUNK_SIZE / 8;
 const INTERVAL_BETWEEN_REMOTE_DEDUP = 4_000_000; // 4MB
 /**
  * 0 = only show progress when uploading the xorb
@@ -111,8 +116,29 @@ export class CurrentXorbInfo {
 		this.fileProcessedBytes = {};
 		this.fileUploadedBytes = {};
 		this.fileSize = {};
-		this.data = new Uint8Array(XORB_SIZE);
+		// Allocated lazily (and grown as needed) by `ensureCapacity`, so uploading small files
+		// doesn't allocate a full-size xorb buffer
+		this.data = new Uint8Array(0);
 		this.immutableData = null;
+	}
+
+	/**
+	 * Make sure the xorb buffer can hold `needed` bytes.
+	 *
+	 * @param remainingBytesHint Upper bound of the raw bytes still to be written for the current file. Used
+	 * to size the buffer in one go for big files, while small files only get a small buffer.
+	 */
+	ensureCapacity(needed: number, remainingBytesHint: number): void {
+		if (needed <= this.data.length) {
+			return;
+		}
+		// Raw data is an upper bound of the stored data, since chunks are only stored compressed when it's smaller
+		const estimatedSize =
+			this.offset + remainingBytesHint + XET_CHUNK_HEADER_BYTES * (Math.ceil(remainingBytesHint / MIN_CHUNK_SIZE) + 1);
+		const newCapacity = Math.min(XORB_SIZE, Math.max(needed, estimatedSize, this.data.length * 2));
+		const newData = new Uint8Array(newCapacity);
+		newData.set(this.data.subarray(0, this.offset));
+		this.data = newData;
 	}
 
 	event(computeXorbHash: (chunks: { hash: string; length: number }[]) => string): XorbEvent {
@@ -247,37 +273,15 @@ export async function* createXorbs(
 			// Prime the chunk cache with the original file's dedup info (one query on its first
 			// chunk returns the whole shard, ie the chunk => xorb mapping of the original file),
 			// so unchanged window bytes dedup against the original xorbs instead of re-uploading.
-			if (rangeEditPlan !== undefined) {
-				await loadDedupInfoToCache(
-					(fileSource.content as SplicedBlob).originalBlob.slice(0, MAX_CHUNK_SIZE),
-					remoteXorbHashes,
-					params,
-					chunkCache,
-					computeHmacHex,
-					{
-						maxChunks: 1,
-						isAtBeginning: true,
-					},
-				);
-			}
-
-			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
+			//
+			// Only the first chunk's bytes are needed: for a XetBlob the slice is fetched with a
+			// range-scoped CAS reconstruction, so only that chunk's byte range is downloaded,
+			// not the whole xorb.
 			if (
-				rangeEditPlan === undefined &&
 				fileSource.content instanceof SplicedBlob &&
-				fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE
+				(rangeEditPlan !== undefined || fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE)
 			) {
-				await loadDedupInfoToCache(
-					fileSource.content.originalBlob.slice(0, MAX_CHUNK_SIZE),
-					remoteXorbHashes,
-					params,
-					chunkCache,
-					computeHmacHex,
-					{
-						maxChunks: 1,
-						isAtBeginning: true,
-					},
-				);
+				await loadFirstChunkDedupInfo(fileSource.content, remoteXorbHashes, params, chunkCache);
 			}
 			let bytesSinceRemoteDedup = Infinity;
 			let bytesSinceLastProgressEvent = 0;
@@ -285,6 +289,12 @@ export async function* createXorbs(
 			const sourceChunks: Array<Uint8Array> = [];
 
 			let processedBytes = 0;
+			/** Raw bytes of this file that will go through the chunker (only the windows for range edits) */
+			const bytesToChunk =
+				rangeEditPlan !== undefined
+					? sum(rangeEditPlan.windows.map((window) => window.newSize))
+					: fileSource.content.size;
+			let chunkedBytes = 0;
 			let dedupedBytes = 0; // Track bytes that were deduplicated
 			// Needed to compute the final file hash
 			// todo: have the wasm function to compute file hash be able to take data chunk by chunk instead of all at once
@@ -345,8 +355,11 @@ export async function* createXorbs(
 							}
 						}
 					}
+					// Includes the current chunk
+					const remainingBytesHint = Math.max(bytesToChunk - chunkedBytes, chunk.length);
+					chunkedBytes += chunk.length;
 					if (cacheData === undefined) {
-						if (!writeChunk(xorb, chunkToCopy, chunk.hash)) {
+						if (!writeChunk(xorb, chunkToCopy, chunk.hash, remainingBytesHint)) {
 							// Failure to write chunk, maybe because it went over xorb size limit
 							yield nextXorb({ path: fileSource.path, uploadedBytes: processedBytes, size: fileSource.content.size });
 
@@ -362,7 +375,7 @@ export async function* createXorbs(
 							}
 							pendingFileEvents.length = 0;
 
-							if (!writeChunk(xorb, chunkToCopy, chunk.hash)) {
+							if (!writeChunk(xorb, chunkToCopy, chunk.hash, remainingBytesHint)) {
 								throw new Error("Failed to write chunk into xorb");
 							}
 						}
@@ -453,6 +466,9 @@ export async function* createXorbs(
 					dedupNextChunk = true;
 					const startIndex = fileChunks.length;
 
+					// The window's segments are XetBlob slices: the CAS reconstruction request is
+					// range-scoped, so only the window's chunk byte ranges are fetched, not the
+					// whole xorb.
 					for (const segment of windowSegments(window, originalBlob)) {
 						yield* pumpBlob(chunker, segment);
 					}
@@ -683,16 +699,18 @@ function removeChunkFromSourceData(sourceChunks: Array<Uint8Array>, chunkLength:
  *
  * If it returns 0, it means there wasn't enough space in the xorb
  */
-function writeChunk(xorb: CurrentXorbInfo, chunk: Uint8Array, hash: string): boolean {
+function writeChunk(xorb: CurrentXorbInfo, chunk: Uint8Array, hash: string, remainingBytesHint: number): boolean {
 	const regularCompressedChunk = lz4_compress(chunk);
 	const bgCompressedChunk = lz4_compress(bg4_split_bytes(chunk));
 	const compressedChunk =
 		bgCompressedChunk.length < regularCompressedChunk.length ? bgCompressedChunk : regularCompressedChunk;
 	const chunkToWrite = compressedChunk.length < chunk.length ? compressedChunk : chunk;
 
-	if (xorb.offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length > XORB_SIZE) {
+	const needed = xorb.offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length;
+	if (needed > XORB_SIZE) {
 		return false;
 	}
+	xorb.ensureCapacity(needed, remainingBytesHint);
 
 	xorb.data[xorb.offset] = 0;
 	xorb.data[xorb.offset + 1] = chunkToWrite.length & 0xff;
@@ -788,6 +806,35 @@ const buildFileRepresentation = (
 
 	return representation;
 };
+
+/**
+ * Prime the chunk cache with the original file's dedup info (one query on its first chunk
+ * returns the whole shard, ie the chunk => xorb mapping of the original file), so unchanged
+ * bytes of a splice/edit dedup against the file's existing xorbs instead of being
+ * re-uploaded.
+ *
+ * Only the first chunk's bytes are needed; for a {@link XetBlob} the slice is fetched with
+ * a range-scoped CAS reconstruction, so only that chunk's byte range is downloaded rather
+ * than the whole xorb.
+ */
+async function loadFirstChunkDedupInfo(
+	content: SplicedBlob,
+	remoteXorbHashes: string[],
+	params: XetWriteTokenParams,
+	chunkCache: ChunkCache,
+): Promise<void> {
+	await loadDedupInfoToCache(
+		content.originalBlob.slice(0, MAX_CHUNK_SIZE),
+		remoteXorbHashes,
+		params,
+		chunkCache,
+		computeHmacHex,
+		{
+			maxChunks: 1,
+			isAtBeginning: true,
+		},
+	);
+}
 
 /**
  * Helper to load dedup info for blob contents into cache.

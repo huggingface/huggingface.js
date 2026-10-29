@@ -1,0 +1,93 @@
+{
+	"name": "@huggingface/usd-web-viewer",
+	"version": "0.2.0",
+	"description": "OpenUSD viewer for the web: pure-Rust USD composition (openusd) in WASM, rendered with three.js",
+	"license": "MIT",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
+	"type": "module",
+	"tshy": {
+		"dialects": [
+			"esm"
+		],
+		"exports": {
+			".": "./src/index.ts",
+			"./worker": "./src/worker.ts",
+			"./wasm/usd_wasm_bg.wasm": "./dist/wasm/usd_wasm_bg.wasm",
+			"./package.json": "./package.json"
+		}
+	},
+	"files": [
+		"dist",
+		"!dist/esm/{hub-prefetch,load-core,materials,meta,show}.d.ts",
+		"LICENSE",
+		"THIRD_PARTY_LICENSES"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tshy && if [ -f wasm/usd_wasm_bg.wasm ]; then mkdir -p dist/wasm && cp wasm/usd_wasm.js wasm/usd_wasm_bg.wasm dist/wasm/; fi",
+		"build:wasm": "bash scripts/build-wasm.sh",
+		"test": "cargo test --locked && cargo clippy --locked -- -D warnings && pnpm run build:wasm && git diff --exit-code -- wasm/usd_wasm.d.ts && vitest run",
+		"test:e2e": "node scripts/api-test.mjs",
+		"test:browser": "pnpm run build:wasm && pnpm run build && playwright install --with-deps chromium && pnpm run test:e2e",
+		"check": "tsc --noEmit",
+		"licenses": "node scripts/third-party-licenses.mjs",
+		"lint": "eslint --quiet --fix --ext .cjs,.ts . && cargo fmt",
+		"lint:check": "eslint --ext .cjs,.ts . && cargo fmt --check",
+		"format": "oxfmt .",
+		"format:check": "oxfmt --check .",
+		"prepack": "pnpm run build:wasm && pnpm run licenses && pnpm run build && (test -f dist/wasm/usd_wasm_bg.wasm || (echo 'dist/wasm/usd_wasm_bg.wasm is missing after the build' >&2 && exit 1))"
+	},
+	"peerDependencies": {
+		"@types/three": ">=0.162.0 <0.187.0",
+		"three": ">=0.162.0 <0.187.0"
+	},
+	"peerDependenciesMeta": {
+		"@types/three": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@types/three": "^0.186.0",
+		"@typescript-eslint/eslint-plugin": "^7.18.0",
+		"@typescript-eslint/parser": "^7.18.0",
+		"binaryen": "^132.0.0",
+		"eslint": "^8.57.1",
+		"eslint-config-prettier": "^9.1.2",
+		"oxfmt": "^0.26.0",
+		"playwright": "1.64.0",
+		"three": "^0.186.1",
+		"tshy": "^3.3.2",
+		"typescript": "~5.9.3",
+		"vitest": "^4.1.11"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			}
+		},
+		"./worker": {
+			"import": {
+				"types": "./dist/esm/worker.d.ts",
+				"default": "./dist/esm/worker.js"
+			}
+		},
+		"./wasm/usd_wasm_bg.wasm": "./dist/wasm/usd_wasm_bg.wasm",
+		"./package.json": "./package.json"
+	},
+	"module": "./dist/esm/index.js",
+	"typesVersions": {
+		"*": {
+			"*": [
+				"./dist/esm/*"
+			]
+		}
+	}
+}

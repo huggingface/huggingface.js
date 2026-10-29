@@ -36,9 +36,10 @@ export async function* listCommits(
 	const repoId = toRepoId(params.repo);
 
 	// Could upgrade to 1000 commits per page
-	let url: string | undefined = `${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commits/${
-		params.revision ?? "main"
-	}?limit=${params.batchSize ?? 100}`;
+	let url: string | undefined =
+		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commits/${encodeURIComponent(
+			params.revision ?? "main",
+		)}?limit=${params.batchSize ?? 100}`;
 
 	while (url) {
 		const res: Response = await (params.fetch ?? fetch)(url, {

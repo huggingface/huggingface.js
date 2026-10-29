@@ -1,7 +1,39 @@
-import { describe, expect, it } from "vitest";
-import { backtrackDedup, CurrentXorbInfo } from "./createXorbs";
+import { describe, expect, it, vi } from "vitest";
+import { backtrackDedup, createXorbs, CurrentXorbInfo } from "./createXorbs";
 import type { ShardData } from "./shardParser";
 import { ChunkCache } from "./ChunkCache";
+
+vi.mock("./xetWriteToken", () => ({
+	xetWriteToken: async () => ({ casUrl: "https://cas.example", accessToken: "token" }),
+}));
+
+function randomBytes(size: number): Uint8Array {
+	const bytes = new Uint8Array(size);
+	for (let i = 0; i < size; i += 65_536) {
+		crypto.getRandomValues(bytes.subarray(i, i + 65_536));
+	}
+	return bytes;
+}
+
+async function collectXorbs(files: Uint8Array[]): Promise<Uint8Array[]> {
+	async function* source() {
+		for (const [i, file] of files.entries()) {
+			yield { content: new Blob([file]), path: `file${i}` };
+		}
+	}
+	const xorbs: Uint8Array[] = [];
+	for await (const event of createXorbs(source(), {
+		fetch: async () => new Response(null, { status: 404 }),
+		accessToken: undefined,
+		hubUrl: "https://hub.example",
+		xetParams: { refreshWriteTokenUrl: "https://hub.example/refresh" },
+	} as Parameters<typeof createXorbs>[1])) {
+		if (event.event === "xorb") {
+			xorbs.push(event.xorb);
+		}
+	}
+	return xorbs;
+}
 
 describe("createXorb", () => {
 	describe("backtrackDedup", () => {
@@ -88,6 +120,22 @@ describe("createXorb", () => {
 			expect(chunkCache.getChunk("chunk1", computeHmac)).toEqual({ xorbIndex: -1, chunkIndex: 1 });
 			// The xorb index for chunk2 should be 0 now that the previous chunk was erased from the xorb
 			expect(chunkCache.getChunk("chunk2", computeHmac)).toEqual({ xorbIndex: 0, chunkIndex: 0 });
+		});
+	});
+
+	describe("xorb buffer allocation", () => {
+		it("should not allocate a full-size xorb buffer for small files", async () => {
+			const xorbs = await collectXorbs([randomBytes(1_000)]);
+			expect(xorbs).toHaveLength(1);
+			expect(xorbs[0].buffer.byteLength).toBeLessThan(10_000);
+		});
+
+		it("should grow the xorb buffer for many small files", async () => {
+			const files = Array.from({ length: 50 }, () => randomBytes(20_000));
+			const xorbs = await collectXorbs(files);
+			expect(xorbs).toHaveLength(1);
+			expect(xorbs[0].length).toBeGreaterThan(50 * 20_000);
+			expect(xorbs[0].buffer.byteLength).toBeLessThan(4 * 50 * 20_000);
 		});
 	});
 });

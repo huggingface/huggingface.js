@@ -7,10 +7,12 @@ import * as FeatherlessAI from "../providers/featherless-ai.js";
 import * as Fireworks from "../providers/fireworks-ai.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
+import * as Humain from "../providers/humain-ai.js";
 import * as IteraCompute from "../providers/iteracompute.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
+import * as OpenRouter from "../providers/openrouter.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
 import type {
@@ -31,6 +33,7 @@ import type {
 	ObjectDetectionTaskHelper,
 	QuestionAnsweringTaskHelper,
 	SentenceSimilarityTaskHelper,
+	TextRankingTaskHelper,
 	SummarizationTaskHelper,
 	TableQuestionAnsweringTaskHelper,
 	TabularClassificationTaskHelper,
@@ -71,6 +74,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new DeepInfra.DeepInfraConversationalTask(),
 		"feature-extraction": new DeepInfra.DeepInfraFeatureExtractionTask(),
 		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
+		"text-to-image": new DeepInfra.DeepInfraTextToImageTask(),
 		"text-to-speech": new DeepInfra.DeepInfraTextToSpeechTask(),
 	},
 	"fal-ai": {
@@ -110,6 +114,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"zero-shot-classification": new HFInference.HFInferenceZeroShotClassificationTask(),
 		"image-to-image": new HFInference.HFInferenceImageToImageTask(),
 		"sentence-similarity": new HFInference.HFInferenceSentenceSimilarityTask(),
+		"text-ranking": new HFInference.HFInferenceTextRankingTask(),
 		"table-question-answering": new HFInference.HFInferenceTableQuestionAnsweringTask(),
 		"tabular-classification": new HFInference.HFInferenceTabularClassificationTask(),
 		"text-to-speech": new HFInference.HFInferenceTextToSpeechTask(),
@@ -127,11 +132,15 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new Groq.GroqConversationalTask(),
 		"text-generation": new Groq.GroqTextGenerationTask(),
 	},
+	"humain-ai": {
+		conversational: new Humain.HumainAIConversationalTask(),
+	},
 	iteracompute: {
 		conversational: new IteraCompute.IteraComputeConversationalTask(),
 	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
+		"image-text-to-video": new Novita.NovitaImageTextToVideoTask(),
 		"text-generation": new Novita.NovitaTextGenerationTask(),
 		"text-to-video": new Novita.NovitaTextToVideoTask(),
 	},
@@ -141,6 +150,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
+	},
+	openrouter: {
+		conversational: new OpenRouter.OpenRouterConversationalTask(),
 	},
 	ovhcloud: {
 		conversational: new OvhCloud.OvhCloudConversationalTask(),
@@ -286,6 +298,10 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "image-text-to-video",
 ): ImageTextToVideoTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
+	task: "text-ranking",
+): TextRankingTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "sentence-similarity",

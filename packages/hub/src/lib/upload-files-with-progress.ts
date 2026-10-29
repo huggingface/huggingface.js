@@ -1,7 +1,8 @@
 import type { CredentialsParams } from "../types/public";
 import { typedInclude } from "../utils/typedInclude";
-import type { CommitOutput, CommitParams, CommitProgressEvent, ContentSource } from "./commit";
+import type { CommitOperation, CommitOutput, CommitParams, CommitProgressEvent, ContentSource } from "./commit";
 import { commitIter } from "./commit";
+import type { CommitEditFileParams } from "./upload-file";
 
 const multipartUploadTracking = new WeakMap<
 	(progress: number) => void,
@@ -20,7 +21,7 @@ const multipartUploadTracking = new WeakMap<
 export async function* uploadFilesWithProgress(
 	params: {
 		repo: CommitParams["repo"];
-		files: Array<URL | File | { path: string; content: ContentSource }>;
+		files: Array<URL | File | { path: string; content: ContentSource } | CommitEditFileParams>;
 		commitTitle?: CommitParams["title"];
 		commitDescription?: CommitParams["description"];
 		hubUrl?: CommitParams["hubUrl"];
@@ -30,20 +31,36 @@ export async function* uploadFilesWithProgress(
 		abortSignal?: CommitParams["abortSignal"];
 		maxFolderDepth?: CommitParams["maxFolderDepth"];
 		useXet?: CommitParams["useXet"];
+		rangeEditCache?: CommitParams["rangeEditCache"];
 		/**
 		 * Set this to true in order to have progress events for hashing
 		 */
 		useWebWorkers?: CommitParams["useWebWorkers"];
 	} & Partial<CredentialsParams>,
 ): AsyncGenerator<CommitProgressEvent, CommitOutput | undefined> {
+	const operations: CommitOperation[] = params.files.map((file) => {
+		const path =
+			file instanceof URL ? (file.pathname.split("/").at(-1) ?? "file") : "path" in file ? file.path : file.name;
+
+		if (typeof file === "object" && "edits" in file) {
+			return {
+				operation: "edit",
+				path,
+				originalContent: file.originalContent,
+				edits: file.edits,
+			};
+		}
+		return {
+			operation: "addOrUpdate",
+			path,
+			content: "content" in file ? file.content : file,
+		};
+	});
+
 	return yield* commitIter({
 		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
-		operations: params.files.map((file) => ({
-			operation: "addOrUpdate",
-			path: file instanceof URL ? (file.pathname.split("/").at(-1) ?? "file") : "path" in file ? file.path : file.name,
-			content: "content" in file ? file.content : file,
-		})),
+		operations,
 		title: params.commitTitle ?? `Add ${params.files.length} files`,
 		description: params.commitDescription,
 		hubUrl: params.hubUrl,
@@ -53,6 +70,7 @@ export async function* uploadFilesWithProgress(
 		useWebWorkers: params.useWebWorkers,
 		abortSignal: params.abortSignal,
 		useXet: params.useXet,
+		rangeEditCache: params.rangeEditCache,
 		fetch: async (input, init) => {
 			if (!init) {
 				return fetch(input);

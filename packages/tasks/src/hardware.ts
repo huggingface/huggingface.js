@@ -632,6 +632,13 @@ export const SKUS = {
 				power: 110,
 				releaseYear: 2026,
 			},
+			"Apple M5 Ultra": {
+				tflops: 45.6,
+				memory: [96, 256],
+				msrp: 10_799,
+				power: 220,
+				releaseYear: 2026,
+			},
 		},
 	},
 } satisfies Record<string, Record<string, Record<string, HardwareSpec>>>;
