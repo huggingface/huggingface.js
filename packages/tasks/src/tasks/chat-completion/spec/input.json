@@ -267,7 +267,7 @@
 			"required": ["id", "type", "function"],
 			"properties": {
 				"function": {
-					"$ref": "#/$defs/ChatCompletionInputFunctionDefinition"
+					"$ref": "#/$defs/ChatCompletionInputFunctionCall"
 				},
 				"id": {
 					"type": "string"
@@ -277,6 +277,19 @@
 				}
 			},
 			"title": "ChatCompletionInputToolCall"
+		},
+		"ChatCompletionInputFunctionCall": {
+			"type": "object",
+			"required": ["name", "arguments"],
+			"properties": {
+				"arguments": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"title": "ChatCompletionInputFunctionCall"
 		},
 		"ChatCompletionInputFunctionDefinition": {
 			"type": "object",
