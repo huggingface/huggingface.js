@@ -55,7 +55,7 @@ export async function makeRequestOptions(
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
+	const hfModel = maybeModel ?? (await loadDefaultModel(task!, options?.fetch));
 
 	if (providerHelper.clientSideRoutingOnly && !maybeModel) {
 		throw new InferenceClientInputError(`Provider ${provider} requires a model ID to be passed directly.`);
@@ -196,9 +196,9 @@ export function makeRequestOptionsFromResolvedModel(
 	return { url, info };
 }
 
-async function loadDefaultModel(task: InferenceTask): Promise<string> {
+async function loadDefaultModel(task: InferenceTask, customFetch?: Options["fetch"]): Promise<string> {
 	if (!tasks) {
-		tasks = await loadTaskInfo();
+		tasks = await loadTaskInfo(customFetch);
 	}
 	const taskInfo = tasks[task];
 	if ((taskInfo?.models.length ?? 0) <= 0) {
@@ -209,9 +209,9 @@ async function loadDefaultModel(task: InferenceTask): Promise<string> {
 	return taskInfo.models[0].id;
 }
 
-async function loadTaskInfo(): Promise<Record<string, { models: { id: string }[] }>> {
+async function loadTaskInfo(customFetch?: Options["fetch"]): Promise<Record<string, { models: { id: string }[] }>> {
 	const url = `${HF_HUB_URL}/api/tasks`;
-	const res = await fetch(url);
+	const res = await (customFetch ?? fetch)(url);
 
 	if (!res.ok) {
 		throw new InferenceClientHubApiError(
