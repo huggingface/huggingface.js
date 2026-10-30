@@ -949,6 +949,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.lerobot,
 	},
+	libreyolo: {
+		prettyLabel: "LibreYOLO",
+		repoName: "LibreYOLO",
+		repoUrl: "https://github.com/LibreYOLO/libreyolo",
+		docsUrl: "https://www.libreyolo.com/docs",
+		filter: false,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json"`,
+	},
 	lightglue: {
 		prettyLabel: "LightGlue",
 		repoName: "LightGlue",
