@@ -239,6 +239,25 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
+const snippetLlamay = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const modelRef = `hf.co/${model.id}${getQuantTag(filepath)}`;
+	return [
+		{
+			title: "Pull the model",
+			setup: "# Download llamay from https://llamay.com/download/",
+			content: `llamay pull ${modelRef}`,
+		},
+		{
+			title: "Chat with the model",
+			content: `llamay run -m ${modelRef} -chat -p "Hello!"`,
+		},
+		{
+			title: "Serve it with an OpenAI-compatible API",
+			content: `llamay serve -m ${modelRef}`,
+		},
+	];
+};
+
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		["# Load and run the model:", `${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`].join("\n");
@@ -764,6 +783,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
+	},
+	llamay: {
+		prettyLabel: "llamay",
+		docsUrl: "https://llamay.com",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetLlamay,
 	},
 	unsloth: {
 		prettyLabel: "Unsloth Desktop",
