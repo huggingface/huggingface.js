@@ -1304,6 +1304,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"onnx" OR path_extension:"ckpt"`,
 	},
+	pixeldense: {
+		prettyLabel: "PixelDense",
+		repoName: "PixelDense",
+		repoUrl: "https://github.com/Hansxsourse/PixelDense",
+		filter: false,
+		countDownloads: `path:"PixelDense_XXL_T2I.ckpt"`,
+	},
 	"pocket-tts": {
 		prettyLabel: "Pocket-TTS",
 		repoName: "PocketTTS",
