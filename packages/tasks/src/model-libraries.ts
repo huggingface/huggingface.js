@@ -380,6 +380,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVIDIA/Cosmos",
 		countDownloads: `path:"config.json" OR path_extension:"pt"`,
 	},
+	"cro-bpe": {
+		prettyLabel: "cro-bpe",
+		repoName: "cro-bpe",
+		repoUrl: "https://github.com/ibizaca/cro-bpe",
+		filter: false,
+		countDownloads: `path:"tokenizer.json" OR path_extension:"tiktoken"`,
+	},
 	"cxr-foundation": {
 		prettyLabel: "CXR Foundation",
 		repoName: "cxr-foundation",
