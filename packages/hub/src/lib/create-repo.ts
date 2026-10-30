@@ -1,7 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiCreateRepoPayload } from "../types/api/api-create-repo";
-import type { CredentialsParams, RepoDesignation, SpaceSdk } from "../types/public";
+import type { CredentialsParams, RepoDesignation, SpaceHardwareFlavor, SpaceSdk } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
@@ -28,6 +28,10 @@ export async function createRepo(
 		files?: Array<{ content: ArrayBuffer | Blob; path: string }>;
 		/** @required for when {@link repo.type} === "space" */
 		sdk?: SpaceSdk;
+		/**
+		 * only used for spaces, ignored for static spaces
+		 */
+		hardware?: SpaceHardwareFlavor;
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -72,6 +76,7 @@ export async function createRepo(
 							? {
 									type: "space",
 									sdk: params.sdk ?? "static",
+									hardware: params.hardware,
 								}
 							: {
 									type: repoId.type,
