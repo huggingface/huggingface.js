@@ -70,14 +70,14 @@ export class McpClient {
 		if (!("type" in server)) {
 			transport = new StdioClientTransport({
 				...server,
-				env: { ...server.env, PATH: process.env.PATH ?? "" },
+				env: { PATH: process.env.PATH ?? "", ...server.env },
 			});
 		} else {
 			switch (server.type) {
 				case "stdio":
 					transport = new StdioClientTransport({
 						...server.config,
-						env: { ...server.config.env, PATH: process.env.PATH ?? "" },
+						env: { PATH: process.env.PATH ?? "", ...server.config.env },
 					});
 					break;
 				case "sse":
