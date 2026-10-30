@@ -3,5 +3,5 @@ curl https://router.huggingface.co/hf-inference/models/FacebookAI/xlm-roberta-la
     -H "Authorization: Bearer $HF_TOKEN" \
     -H 'Content-Type: application/json' \
     -d '{
-        "inputs": "\"My name is Sarah Jessica Parker but you can call me Jessica\""
+        "inputs": "My name is Sarah Jessica Parker but you can call me Jessica"
     }'
