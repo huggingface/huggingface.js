@@ -302,6 +302,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/amazon-science/chronos-forecasting",
 		snippets: snippets.chronos_forecasting,
 	},
+	"circuit-tracer": {
+		prettyLabel: "circuit-tracer",
+		repoName: "circuit-tracer",
+		repoUrl: "https://github.com/decoderesearch/circuit-tracer",
+		filter: false,
+		countDownloads: `path_filename:"config" AND path_extension:"yaml"`,
+	},
 	clara: {
 		prettyLabel: "Clara",
 		repoName: "Clara",
