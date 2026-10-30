@@ -103,4 +103,31 @@ describe("createRepo", () => {
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
 		});
 	});
+
+	it("should send hardware for spaces only", async () => {
+		const bodies: unknown[] = [];
+		const fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+			bodies.push(JSON.parse(String(init?.body)));
+			return new Response(JSON.stringify({ url: "", id: "" }));
+		};
+
+		await createRepo({
+			accessToken: TEST_ACCESS_TOKEN,
+			repo: { name: `${TEST_USER}/space`, type: "space" },
+			sdk: "gradio",
+			hardware: "zero-a10g",
+			fetch,
+		});
+		await createRepo({
+			accessToken: TEST_ACCESS_TOKEN,
+			repo: { name: `${TEST_USER}/model`, type: "model" },
+			hardware: "zero-a10g",
+			fetch,
+		});
+
+		expect(bodies).toEqual([
+			{ name: "space", organization: TEST_USER, type: "space", sdk: "gradio", hardware: "zero-a10g" },
+			{ name: "model", organization: TEST_USER, type: "model" },
+		]);
+	});
 });

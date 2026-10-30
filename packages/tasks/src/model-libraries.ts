@@ -480,6 +480,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	drinkme: {
+		prettyLabel: "drinkme",
+		repoName: "drinkme",
+		repoUrl: "https://github.com/ninachaubal/drinkme",
+		docsUrl: "https://drinkme.petrichor.wtf",
+		filter: false,
+		countDownloads: `path_filename:"source-identity" AND path_extension:"json"`,
+	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",
@@ -488,6 +496,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.edsnlp,
 		countDownloads: `path_filename:"config" AND path_extension:"cfg"`,
+	},
+	egohand: {
+		prettyLabel: "EgoHand",
+		repoName: "EgoHand",
+		repoUrl: "https://github.com/NVIDIA/IsaacCapture/tree/main/src/python/isaaccapture_egopost",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	elm: {
 		prettyLabel: "ELM",
@@ -502,6 +517,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/mozilla-ai/encoderfile",
 		filter: false,
 		countDownloads: `path_extension:"encoderfile"`,
+	},
+	ensomi: {
+		prettyLabel: "ensomi",
+		repoName: "ensomi",
+		repoUrl: "https://github.com/ensomi-labs/ensomi-model",
+		filter: false,
+		countDownloads: `(path_filename:"ensomi-package" AND path_extension:"json") OR path:"checkpoint.pt"`,
 	},
 	espnet: {
 		prettyLabel: "ESPnet",
@@ -1396,6 +1418,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"onnx" OR path_extension:"joblib"`,
 	},
+	"rt-detr-hand-detector-v1": {
+		prettyLabel: "RT-DETR-Hand-Detector-v1",
+		repoName: "IsaacCapture",
+		repoUrl: "https://github.com/NVIDIA/IsaacCapture/tree/main/src/python/isaaccapture_egopost",
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	rwkv: {
 		prettyLabel: "RWKV",
 		repoName: "RWKV-LM",
@@ -1410,6 +1439,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+	},
+	"sage-music": {
+		prettyLabel: "SAGE",
+		repoName: "SAGE",
+		repoUrl: "https://github.com/francescobrigante/SAGE",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	"scail-2": {
 		prettyLabel: "SCAIL-2",

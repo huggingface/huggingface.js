@@ -115,6 +115,29 @@ for await (const fileInfo of hub.listFiles({repo})) {
 await hub.deleteRepo({ repo, accessToken: "hf_..." });
 ```
 
+### Buckets
+
+[Storage Buckets](https://huggingface.co/docs/hub/storage-buckets) are mutable, non-versioned storage on the Hub. Use a `buckets/` prefix (or `{ type: "bucket", name }`) with the same functions:
+
+```ts
+const bucket = "buckets/myname/my-bucket";
+
+await hub.createRepo({ repo: bucket, accessToken: "hf_..." });
+
+await hub.uploadFiles({ repo: bucket, accessToken: "hf_...", files: [pathToFileURL("./checkpoints")] });
+
+for await (const fileInfo of hub.listFiles({ repo: bucket, recursive: true, accessToken: "hf_..." })) {
+  console.log(fileInfo.path, fileInfo.uploadedAt);
+}
+
+// Copy files from a model or dataset repo into a bucket server-side, without downloading them
+await hub.copyFolder({
+  source: { repo: { type: "dataset", name: "myname/my-dataset" }, path: "data" },
+  destination: { repo: bucket, path: "data" },
+  accessToken: "hf_...",
+});
+```
+
 ## CLI usage
 
 You can use `@huggingface/hub` in CLI mode to upload and download files and folders to/from your repo.

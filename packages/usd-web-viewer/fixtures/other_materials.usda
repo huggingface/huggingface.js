@@ -1,0 +1,117 @@
+#usda 1.0
+
+# Materials that are not UsdPreviewSurface:
+# - MDL (/ClearCoat, /Gltf, /Custom): read by which MDL material they
+#   instantiate, not by their input names: the OmniPBR family and glTF's
+#   `gltf_material` (in a copy of pbr.mdl under another file name) are
+#   approximated; a custom module with OmniPBR-style inputs is not OmniPBR, so
+#   it falls back to grey. /GltfDouble authors its base color factor as
+#   double4, whose alpha is its opacity (0.5) as a float4's is.
+# - MaterialX (/MaterialX): a material with only a MaterialX surface is shown
+#   grey and counted in the fallback warning. MaterialX documents are never
+#   fetched: a reference to one (/Library) is reported unresolved.
+def Mesh "ClearCoat" (prepend apiSchemas = ["MaterialBindingAPI"])
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    rel material:binding = </ClearCoatMat>
+}
+
+def Mesh "Gltf" (prepend apiSchemas = ["MaterialBindingAPI"])
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(2, 0, 0), (3, 0, 0), (2, 1, 0)]
+    rel material:binding = </GltfMat>
+}
+
+def Mesh "Custom" (prepend apiSchemas = ["MaterialBindingAPI"])
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(4, 0, 0), (5, 0, 0), (4, 1, 0)]
+    rel material:binding = </CustomMat>
+}
+
+def Material "ClearCoatMat"
+{
+    token outputs:mdl:surface.connect = </ClearCoatMat/Shader.outputs:out>
+
+    def Shader "Shader"
+    {
+        uniform asset info:mdl:sourceAsset = @../source_assets/OmniPBR_ClearCoat.mdl@
+        uniform token info:mdl:sourceAsset:subIdentifier = "OmniPBR_ClearCoat"
+        color3f inputs:diffuse_color_constant = (0.8, 0.1, 0.1)
+        token outputs:out
+    }
+}
+
+def Material "GltfMat"
+{
+    token outputs:mdl:surface.connect = </GltfMat/Shader.outputs:out>
+
+    def Shader "Shader"
+    {
+        uniform asset info:mdl:sourceAsset = @pbr_3.mdl@
+        uniform token info:mdl:sourceAsset:subIdentifier = "gltf_material"
+        color4f inputs:base_color_factor = (0.1, 0.8, 0.1, 1)
+        token outputs:out
+    }
+}
+
+def Material "CustomMat"
+{
+    token outputs:mdl:surface.connect = </CustomMat/Shader.outputs:out>
+
+    def Shader "Shader"
+    {
+        uniform asset info:mdl:sourceAsset = @Metal_Painted_Green_A.mdl@
+        uniform token info:mdl:sourceAsset:subIdentifier = "Metal_Painted_Green_A"
+        color3f inputs:diffuse_color_constant = (0.1, 0.1, 0.8)
+        token outputs:out
+    }
+}
+
+def Mesh "MaterialX" (prepend apiSchemas = ["MaterialBindingAPI"])
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(6, 0, 0), (7, 0, 0), (6, 1, 0)]
+    rel material:binding = </MaterialXMat>
+}
+
+def Material "MaterialXMat"
+{
+    token outputs:mtlx:surface.connect = </MaterialXMat/Surface.outputs:out>
+
+    def Shader "Surface"
+    {
+        uniform token info:id = "ND_standard_surface_surfaceshader"
+        color3f inputs:base_color = (1, 0, 0)
+        token outputs:out
+    }
+}
+
+def "Library" (references = @./library.mtlx@) {}
+
+def Mesh "GltfDouble" (prepend apiSchemas = ["MaterialBindingAPI"])
+{
+    int[] faceVertexCounts = [3]
+    int[] faceVertexIndices = [0, 1, 2]
+    point3f[] points = [(8, 0, 0), (9, 0, 0), (8, 1, 0)]
+    rel material:binding = </GltfDoubleMat>
+}
+
+def Material "GltfDoubleMat"
+{
+    token outputs:mdl:surface.connect = </GltfDoubleMat/Shader.outputs:out>
+
+    def Shader "Shader"
+    {
+        uniform asset info:mdl:sourceAsset = @pbr_3.mdl@
+        uniform token info:mdl:sourceAsset:subIdentifier = "gltf_material"
+        double4 inputs:base_color_factor = (0.8, 0.8, 0.1, 0.5)
+        token outputs:out
+    }
+}
