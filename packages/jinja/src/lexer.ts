@@ -108,10 +108,15 @@ const ESCAPE_CHARACTERS = new Map([
 	["b", "\b"], // Backspace
 	["f", "\f"], // Form feed
 	["v", "\v"], // Vertical tab
+	["a", "\x07"], // Bell
 	["'", "'"], // Single quote
 	['"', '"'], // Double quote
 	["\\", "\\"], // Backslash
 ]);
+
+function isOctalDigit(char: string | undefined): boolean {
+	return char !== undefined && char >= "0" && char <= "7";
+}
 
 export interface PreprocessOptions {
 	trim_blocks?: boolean;
@@ -175,22 +180,43 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 
 				// Add the escaped character
 				const escaped = src[cursorPosition++];
-				if (escaped === "x" || escaped === "u") {
-					const length = escaped === "x" ? 2 : 4;
+				if (escaped === "x" || escaped === "u" || escaped === "U") {
+					const length = escaped === "x" ? 2 : escaped === "u" ? 4 : 8;
 					const hex = src.slice(cursorPosition, cursorPosition + length);
 					if (hex.length !== length || /[^0-9a-f]/i.test(hex)) {
 						throw new SyntaxError(`Invalid hexadecimal escape sequence: \\${escaped}${hex}`);
 					}
-					str += String.fromCharCode(parseInt(hex, 16));
+					const codePoint = parseInt(hex, 16);
+					if (codePoint > 0x10ffff) {
+						throw new SyntaxError(`Invalid Unicode escape sequence: \\${escaped}${hex}`);
+					}
+					str += escaped === "U" ? String.fromCodePoint(codePoint) : String.fromCharCode(codePoint);
 					cursorPosition += length;
 					continue;
 				}
 
-				const unescaped = ESCAPE_CHARACTERS.get(escaped);
-				if (unescaped === undefined) {
-					throw new SyntaxError(`Unexpected escaped character: ${escaped}`);
+				if (isOctalDigit(escaped)) {
+					// Like Python, read up to three octal digits (e.g. \0, \12, \101)
+					let octal = escaped;
+					while (octal.length < 3 && isOctalDigit(src[cursorPosition])) {
+						octal += src[cursorPosition++];
+					}
+					str += String.fromCharCode(parseInt(octal, 8));
+					continue;
 				}
-				str += unescaped;
+
+				if (escaped === "\n") {
+					// A backslash at the end of a line continues the string on the next line
+					continue;
+				}
+
+				if (escaped === "N") {
+					throw new SyntaxError("Named Unicode escapes (\\N{...}) are not supported");
+				}
+
+				const unescaped = ESCAPE_CHARACTERS.get(escaped);
+				// Like Python, keep unrecognized escape sequences (e.g. \d) unchanged
+				str += unescaped ?? `\\${escaped}`;
 				continue;
 			}
 
