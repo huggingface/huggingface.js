@@ -10,7 +10,7 @@ import type {
 	MemberExpression,
 	CallExpression,
 	Identifier,
-	BinaryExpression,
+	ChainedComparison,
 	FilterExpression,
 	TestExpression,
 	UnaryExpression,
@@ -20,7 +20,6 @@ import type {
 	TupleLiteral,
 	Macro,
 	Parameter,
-	Expression,
 	SelectExpression,
 	CallStatement,
 	FilterStatement,
@@ -28,7 +27,7 @@ import type {
 	SpreadExpression,
 	KeywordSpreadExpression,
 } from "./ast";
-import { Statement } from "./ast";
+import { BinaryExpression, Expression, Statement } from "./ast";
 import { range, replace, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
@@ -1058,6 +1057,17 @@ function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statem
 	return accessed;
 }
 
+/**
+ * Wraps an already evaluated value so it can be used as an operand of a `BinaryExpression`.
+ */
+class EvaluatedOperand extends Expression {
+	override type = "EvaluatedOperand";
+
+	constructor(public value: AnyRuntimeValue) {
+		super();
+	}
+}
+
 export class Interpreter {
 	global: Environment;
 
@@ -1206,6 +1216,30 @@ export class Interpreter {
 		}
 
 		throw new SyntaxError(`Unknown operator "${node.operator.value}" between ${left.type} and ${right.type}`);
+	}
+
+	/**
+	 * Evaluates a chain of comparisons such as `a < b < c`, like Python: it means `a < b and b < c`, but each
+	 * operand is evaluated only once, and evaluation stops at the first comparison that is false.
+	 */
+	private evaluateChainedComparison(node: ChainedComparison, environment: Environment): AnyRuntimeValue {
+		let left = this.evaluate(node.operands[0], environment);
+		let result: AnyRuntimeValue = new BooleanValue(true);
+		for (let i = 0; i < node.operators.length; ++i) {
+			const right = this.evaluate(node.operands[i + 1], environment);
+			// Compare the already evaluated operands with the regular binary operator logic.
+			const comparison = new BinaryExpression(
+				node.operators[i],
+				new EvaluatedOperand(left),
+				new EvaluatedOperand(right),
+			);
+			result = this.evaluateBinaryExpression(comparison, environment);
+			if (!result.__bool__().value) {
+				return result;
+			}
+			left = right;
+		}
+		return result;
 	}
 
 	private evaluateArguments(
@@ -2169,6 +2203,10 @@ export class Interpreter {
 				return this.evaluateUnaryExpression(statement as UnaryExpression, environment);
 			case "BinaryExpression":
 				return this.evaluateBinaryExpression(statement as BinaryExpression, environment);
+			case "ChainedComparison":
+				return this.evaluateChainedComparison(statement as ChainedComparison, environment);
+			case "EvaluatedOperand":
+				return (statement as EvaluatedOperand).value;
 			case "FilterExpression":
 				return this.evaluateFilterExpression(statement as FilterExpression, environment);
 			case "FilterStatement":
