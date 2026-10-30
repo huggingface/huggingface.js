@@ -120,6 +120,19 @@ function isMlxModel(model: ModelData) {
 }
 
 /**
+ * Kokon runs a single model, Qwen-Image 2.1 Turbo, so only show it on the repos it can run.
+ */
+const KOKON_MODELS = new Set([
+	"Qwen/Qwen-Image-2.1-Turbo",
+	"unsloth/Qwen-Image-2.1-Turbo-GGUF",
+	"DogukanUrker/Qwen-Image-2.1-Turbo-GGUF",
+]);
+
+function isKokonModel(model: ModelData) {
+	return KOKON_MODELS.has(model.id);
+}
+
+/**
  * Returns the model's chat template string, coalescing across sources:
  * GGUF metadata > chat_template_jinja file > tokenizer_config.json
  */
@@ -757,6 +770,20 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) =>
 			model.tags.includes("coreml") && model.tags.includes("joyfusion") && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://joyfusion.app/import_from_hf?repo_id=${model.id}`),
+	},
+	kokon: {
+		prettyLabel: "Kokon",
+		docsUrl: "https://kokon.app",
+		mainTask: "text-to-image",
+		displayOnModelPage: isKokonModel,
+		deeplink: (model, filepath?: string) => {
+			const url = new URL("https://kokon.app/huggingface/");
+			url.searchParams.set("repo_id", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
 	},
 	ollama: {
 		prettyLabel: "Ollama",
