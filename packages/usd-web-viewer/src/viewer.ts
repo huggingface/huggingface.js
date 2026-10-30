@@ -192,7 +192,18 @@ export function createViewer(container: HTMLElement, options: ViewerOptions = {}
 			};
 			try {
 				const internal: InternalOptions = { ...loadOptions, signal: controller.signal, onProgress, [SHOW]: show };
-				const result = await loadUsd(url, internal);
+				const loaded = await loadUsd(url, internal);
+				const result: LoadResult = {
+					...loaded,
+					pose(joint, value) {
+						loaded.pose(joint, value);
+						requestRender();
+					},
+					resetPose() {
+						loaded.resetPose();
+						requestRender();
+					},
+				};
 				// Superseded (or the viewer disposed) as geometry arrived: drop it.
 				if (controller.signal.aborted || disposed) {
 					result.dispose();

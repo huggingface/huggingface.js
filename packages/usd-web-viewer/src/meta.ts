@@ -1,6 +1,16 @@
 // What the WASM side reports as JSON (crate/src/json.rs), and the
 // messages between the page and the worker. Internal: not exported.
-import type { LoadProgress, LoadStats, LoadWarning, MaterialKind, TextureMode, UsdLoadErrorCode } from "./types.js";
+import type {
+	UsdLabel,
+	UsdPhysics,
+	UsdVariantSelection,
+	LoadProgress,
+	LoadStats,
+	LoadWarning,
+	MaterialKind,
+	TextureMode,
+	UsdLoadErrorCode,
+} from "./types.js";
 
 export type Vec3 = [number, number, number];
 export type Vec4 = [number, number, number, number];
@@ -56,6 +66,9 @@ export interface SceneMeta {
 	geometryCount: number;
 	instances: InstanceMeta[];
 	materials: MaterialMeta[];
+	physics: UsdPhysics;
+	labels: UsdLabel[];
+	variantSelections: UsdVariantSelection[];
 }
 
 /** `[start, count, subset?]`, in indices. */
@@ -122,8 +135,8 @@ export type WorkerMessage =
 	| { type: "progress"; progress: StageProgress }
 	| { type: "meta"; meta: SceneMeta }
 	| { type: "geometry"; index: number; meta: GeometryMeta | null; arrays: GeometryArrays | null }
-	| { type: "scene"; stats: LoadStats & { warnings: LoadWarning[] } }
-	| { type: "texture"; path: string; bitmap: ImageBitmap; color: boolean; error?: undefined }
+	| { type: "scene"; stats: LoadStats & { warnings: LoadWarning[] }; layers: { url: string; size: number }[] }
+	| { type: "texture"; path: string; bitmap: ImageBitmap; color: boolean; size: number; error?: undefined }
 	| { type: "texture"; path: string; error: string; bitmap?: undefined }
 	| { type: "done" }
 	| ({ type: "error" } & Failure);

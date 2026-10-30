@@ -15,6 +15,7 @@ pub mod deps;
 pub mod extract;
 mod implicit;
 pub mod material;
+pub mod physics;
 pub mod resolver;
 #[cfg(target_arch = "wasm32")]
 mod wasm;

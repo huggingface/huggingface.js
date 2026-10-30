@@ -79,7 +79,13 @@ export async function composeStage({
 	maxInstances = DEFAULTS.maxInstances,
 	preload,
 	onProgress = () => {},
-}: ComposeOptions): Promise<{ scene: UsdScene; meta: SceneMeta; stats: ComposeStats }> {
+}: ComposeOptions): Promise<{
+	scene: UsdScene;
+	meta: SceneMeta;
+	stats: ComposeStats;
+	/** Every layer file read, with its size. */
+	layers: { url: string; size: number }[];
+}> {
 	const root = rootUrl.split(/[?#]/)[0];
 	const urlOf = (path: string) => (path === root ? rootUrl : path);
 	const loader = new UsdLoader();
@@ -317,7 +323,8 @@ export async function composeStage({
 	const scene = loader.takeScene();
 	loader.free();
 	const meta: SceneMeta = JSON.parse(scene.meta());
-	return { scene, meta, stats };
+	const layers = [...layerSizes].map(([path, size]) => ({ url: urlOf(path), size }));
+	return { scene, meta, stats, layers };
 }
 
 /**
