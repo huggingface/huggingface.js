@@ -66,8 +66,12 @@ const ggufQuants = Object.values(GGMLFileQuantizationType).filter((v): v is stri
  *
  * Appended last so `MXFP4_MOE` still wins the alternation, instead of matching as `MXFP4` with
  * sizeVariation `MOE`.
+ *
+ * `Q6_0` and `Q3_0` are the 6-bit and 3-bit types of the ROCmFPX llama.cpp fork for AMD GPUs
+ * (https://github.com/HarshaVardhan3002/ROCmFPX), published as e.g. `model-Q6_0_ROCMFPX.gguf`. Its 8-bit
+ * and 4-bit files (`Q8_0_ROCMFPX`, `Q4_0_ROCMFP4`) already match `Q8_0` and `Q4_0`.
  */
-const GGUF_QUANT_FILENAME_ALIASES = ["MXFP4"];
+const GGUF_QUANT_FILENAME_ALIASES = ["MXFP4", "Q6_0", "Q3_0"];
 export const GGUF_QUANT_RE = new RegExp(
 	"(?<prefix>UD-)?" +
 		`(?<quant>${[...ggufQuants, ...GGUF_QUANT_FILENAME_ALIASES].join("|")})` +
