@@ -25,6 +25,8 @@ import type {
 	ObjectDetectionOutput,
 	QuestionAnsweringInput,
 	QuestionAnsweringOutput,
+	RoboticsInput,
+	RoboticsOutput,
 	SentenceSimilarityInput,
 	SentenceSimilarityOutput,
 	TextRankingInput,
@@ -390,6 +392,12 @@ export interface TabularClassificationTaskHelper {
 	preparePayload(
 		params: BodyParams<BaseArgs & { inputs: { data: Record<string, string[]> } } & Record<string, unknown>>,
 	): Record<string, unknown> | BodyInit;
+}
+
+// Robotics tasks
+export interface RoboticsTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<RoboticsOutput>;
+	preparePayload(params: BodyParams<RoboticsInput & BaseArgs>): Record<string, unknown>;
 }
 
 export interface TabularRegressionTaskHelper {
