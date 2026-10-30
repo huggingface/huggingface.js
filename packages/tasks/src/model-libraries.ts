@@ -1169,6 +1169,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.multimolecule,
 		filter: false,
 	},
+	My_Name_is_Riemann_Prerelease: {
+		prettyLabel: "My_Name_is_Riemann_Prerelease",
+		repoName: "My_Name_is_Riemann_Prerelease",
+		repoUrl: "https://huggingface.co/OpenPeerAI/My-Name-is-Riemann-Prerelease",
+		docsUrl: "https://huggingface.co/OpenPeerAI/My-Name-is-Riemann-Prerelease/blob/main/README.md",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"py"`,
+	},	
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
@@ -1233,6 +1241,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	OpenPeer_AI_NTK_Trainer: {
+		prettyLabel: "OpenPeer_AI_NTK_Trainer",
+		repoName: "OpenPeer_AI_NTK_Trainer",
+		repoUrl: "https://huggingface.co/OpenPeerAI/OpenPeer-AI-NTK-Trainer",
+		docsUrl: "https://huggingface.co/OpenPeerAI/OpenPeer-AI-NTK-Trainer/blob/main/README.md",
+		countDownloads: `path_extension:"py" OR path_extension:"toml" OR path:".meta-huggingface.json"`,
+		filter: false,
+	},	
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
 		repoName: "OpenPeerLLM",
