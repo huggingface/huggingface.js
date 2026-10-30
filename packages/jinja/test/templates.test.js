@@ -6517,6 +6517,45 @@ function expectTemplateToRender(source, expected) {
 
 describe("Feature regressions", () => {
 	describe("Member access", () => {
+		it.each([
+			["A😀B", "3|A|😀|B|😀"],
+			["😀😇", "2|😀|😇|😇|😇"],
+			["𠮷野家", "3|𠮷|野|家|野"],
+			["𝄞é", "2|𝄞|é|é|é"],
+			["😀", "1|😀||😀|"],
+			["e\u0301", "2|e|\u0301|\u0301|\u0301"],
+			["abc", "3|a|b|c|b"],
+			["", "0||||"],
+		])("counts and indexes Unicode code points in %j", (value, expected) => {
+			const template = new Template(
+				`{{ value | length }}|{{ value[0] }}|{{ value[1] }}|{{ value[-1] }}|{{ value[1:2] }}`,
+			);
+			expect(template.render({ value })).toBe(expected);
+			expect(new Template(template.format()).render({ value })).toBe(expected);
+		});
+
+		it.each([3, -4, 4, -5])("returns undefined for out-of-range Unicode string index %i", (index) => {
+			const template = new Template(
+				`[{{ value[${index}] }}]|{{ value[${index}] | default("missing") }}|{{ value[${index}] is defined }}`,
+			);
+			expect(template.render({ value: "A😀B" })).toBe("[]|missing|false");
+		});
+
+		it("uses the same code point count for the string length member and filter", () => {
+			expectTemplateToRender(`{{ "A😀B".length }}|{{ "A😀B" | length }}`, "3|3");
+		});
+
+		it("preserves array length and indexing for strings containing astral characters", () => {
+			expectTemplateToRender(`{% set a = ["😀", "𠮷"] %}{{ a | length }}|{{ a[0] }}|{{ a[-1] }}`, "2|😀|𠮷");
+		});
+
+		it("keeps characters intact when indexing message content in a chat template", () => {
+			const template = new Template(
+				`{% for i in range(message.content | length) %}[{{ message.content[i] }}]{% endfor %}`,
+			);
+			expect(template.render({ message: { content: "A😀B" } })).toBe("[A][😀][B]");
+		});
+
 		it.each([3, -4])("returns undefined for out-of-range string index %i", (index) => {
 			const template = new Template(
 				`[{{ "abc"[${index}] }}]|{{ "abc"[${index}] | default("missing") }}|{{ "abc"[${index}] is defined }}`,
