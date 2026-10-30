@@ -1,9 +1,9 @@
-import type { IncomingMessage } from "node:http";
+import type { IncomingMessage, Server } from "node:http";
 import { createServer, ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { z } from "zod";
 import type { Agent } from "../index";
-import { ANSI } from "./utils";
+import { ANSI, debug, error } from "./utils";
 import { stdout } from "node:process";
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
@@ -38,6 +38,8 @@ const ChatCompletionInputSchema = z.object({
 function getJsonBody(req: IncomingMessage) {
 	return new Promise((resolve, reject) => {
 		let data = "";
+		/// Decode incrementally: concatenating raw Buffer chunks would corrupt multi-byte characters split across chunks.
+		req.setEncoding("utf8");
 		req.on("data", (chunk) => (data += chunk));
 		req.on("end", () => {
 			try {
@@ -55,7 +57,7 @@ class ServerResp extends ServerResponse {
 	}
 }
 
-export function startServer(agent: Agent): void {
+export function startServer(agent: Agent): Server<typeof IncomingMessage, typeof ServerResp> {
 	const server = createServer({ ServerResponse: ServerResp }, async (req, res) => {
 		res.setHeader(REQUEST_ID_HEADER, crypto.randomUUID());
 		res.setHeader("Content-Type", "application/json");
@@ -93,29 +95,52 @@ export function startServer(agent: Agent): void {
 				...requestBody.messages,
 			];
 
-			for await (const chunk of agent.run(messages)) {
-				if ("choices" in chunk) {
-					res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-				} else {
-					/// Tool call info
-					/// /!\ We format it as a regular chunk of role = "tool"
-					const chunkToolcallInfo = {
-						choices: [
-							{
-								index: 0,
-								delta: {
-									role: "tool",
-									content: `Tool[${chunk.name}] ${chunk.tool_call_id}\n` + chunk.content,
-								},
-							},
-						],
-						created: Math.floor(Date.now() / 1000),
-						id: chunk.tool_call_id,
-						model: "",
-						system_fingerprint: "",
-					} satisfies ChatCompletionStreamOutput;
+			/// Stop the agent if the client goes away before the response is complete.
+			const abortController = new AbortController();
+			res.on("close", () => {
+				if (!res.writableFinished) {
+					abortController.abort();
+				}
+			});
 
-					res.write(`data: ${JSON.stringify(chunkToolcallInfo)}\n\n`);
+			try {
+				for await (const chunk of agent.run(messages, { abortSignal: abortController.signal })) {
+					if (abortController.signal.aborted) {
+						break;
+					}
+					if ("choices" in chunk) {
+						res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+					} else {
+						/// Tool call info
+						/// /!\ We format it as a regular chunk of role = "tool"
+						const chunkToolcallInfo = {
+							choices: [
+								{
+									index: 0,
+									delta: {
+										role: "tool",
+										content: `Tool[${chunk.name}] ${chunk.tool_call_id}\n` + chunk.content,
+									},
+								},
+							],
+							created: Math.floor(Date.now() / 1000),
+							id: chunk.tool_call_id,
+							model: "",
+							system_fingerprint: "",
+						} satisfies ChatCompletionStreamOutput;
+
+						res.write(`data: ${JSON.stringify(chunkToolcallInfo)}\n\n`);
+					}
+				}
+			} catch (err) {
+				const message = err instanceof Error ? err.message : String(err);
+				if (abortController.signal.aborted) {
+					/// The client disconnected and we aborted the agent: the abort surfaces as an error, but nobody is listening anymore.
+					debug("Agent stopped after client disconnect:", message);
+				} else {
+					/// The 200 status and headers are already sent at this point, so report the failure as an SSE event.
+					error(`Error while running the agent: ${message}`);
+					res.write(`data: ${JSON.stringify({ error: { message } })}\n\n`);
 				}
 			}
 			res.end();
@@ -131,4 +156,5 @@ export function startServer(agent: Agent): void {
 		stdout.write("\n");
 		console.log(ANSI.GRAY + `listening on http://localhost:${(server.address() as AddressInfo).port}` + ANSI.RESET);
 	});
+	return server;
 }
