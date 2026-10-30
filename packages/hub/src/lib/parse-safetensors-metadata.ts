@@ -923,6 +923,9 @@ export interface QuantizationConfig {
 	 * dense layers but stores the routed experts as `store_dtype: "mxfp4"`, packed two per `U8`.
 	 */
 	store_dtype?: string;
+	/** Same role again, as MiniMax-M3.1 spells it (e.g. `"nvfp4-pack-quantized"` / `"NVFP4"`). */
+	moe_quant_algo?: string;
+	moe_quant_format?: string;
 	/** MLX quantization mode (e.g. `affine`); MLX configs do not declare `quant_method`. */
 	mode?: string;
 	group_size?: number;
@@ -1337,12 +1340,14 @@ export function getQuantizationMultiplier(
 			return packingFactor(dtype, getModelOptWeightBits(tensorName, quantConfig));
 		}
 
-		case "fp8": {
+		case "fp8":
+		case "mxfp8": {
 			// fp8 weights live in F8_* dtypes at one value per byte, so nothing to do for them.
 			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8/U8.
 			// `expert_dtype` is in quantization_config for DeepSeek-V4.1, or in the model config
 			// for DeepSeek-V4-Pro. Both declare "fp4", i.e. two weights per byte. MiMo-V2.6 declares
-			// the same packing as `store_dtype: "mxfp4"` in quantization_config instead.
+			// the same packing as `store_dtype: "mxfp4"` in quantization_config instead, and
+			// MiniMax-M3.1 (`quant_method: "mxfp8"`) as `moe_quant_format: "nvfp4-pack-quantized"`.
 			// Those experts dominate the parameter count, so missing this halves the total.
 			//
 			// These keys describe the experts and nothing else, so they must not be applied to
@@ -1353,7 +1358,13 @@ export function getQuantizationMultiplier(
 			}
 			return packingFactor(
 				dtype,
-				bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype ?? quantConfig.store_dtype),
+				bitsFromFormatString(
+					quantConfig.expert_dtype ??
+						expertDtype ??
+						quantConfig.store_dtype ??
+						quantConfig.moe_quant_format ??
+						quantConfig.moe_quant_algo,
+				),
 			);
 		}
 
