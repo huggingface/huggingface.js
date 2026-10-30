@@ -1,4 +1,9 @@
 result = client.{{ methodName }}(
+{% if task == "sentence-similarity" %}
+    sentence={{ sentenceSimilarityInputs.source_sentence | tojson }},
+    other_sentences={{ sentenceSimilarityInputs.sentences | tojson }},
+{% else %}
     {{ inputs.asObj.inputs }},
+{% endif %}
     model="{{ model.id }}",
 )
