@@ -247,6 +247,57 @@ export class StringValue extends RuntimeValue<string> {
 				}),
 			],
 			[
+				"rsplit",
+				// follows Python's `str.rsplit(sep=None, maxsplit=-1)` function behavior
+				// https://docs.python.org/3.13/library/stdtypes.html#str.rsplit
+				new FunctionValue((args) => {
+					const sep = args[0] ?? new NullValue();
+					if (!(sep instanceof StringValue || sep instanceof NullValue)) {
+						throw new Error("sep argument must be a string or null");
+					}
+					const maxsplit = args[1] ?? new IntegerValue(-1);
+					if (!(maxsplit instanceof IntegerValue)) {
+						throw new Error("maxsplit argument must be a number");
+					}
+					// Like Python, any negative maxsplit means there is no limit
+					const limit = maxsplit.value < 0 ? Infinity : maxsplit.value;
+
+					let result: string[] = [];
+					if (sep instanceof NullValue) {
+						// Runs of consecutive whitespace are regarded as a single separator. Splitting starts from the right, so
+						// once maxsplit is reached, the remaining text keeps its leading whitespace (but not its trailing whitespace).
+						const words = [...this.value.matchAll(/\S+/g)];
+						if (limit >= words.length) {
+							result = words.map(({ 0: word }) => word);
+						} else {
+							// matchAll always sets index; the default only satisfies the type checker
+							const { 0: lastKept, index = 0 } = words[words.length - limit - 1];
+							result = [
+								this.value.slice(0, index + lastKept.length),
+								...words.slice(words.length - limit).map(({ 0: word }) => word),
+							];
+						}
+					} else {
+						if (sep.value === "") {
+							throw new Error("empty separator");
+						}
+						// Search from the right, so overlapping separators match like Python (e.g. "aaa".rsplit("aa") is ["a", ""])
+						let end = this.value.length;
+						while (result.length < limit && end >= sep.value.length) {
+							const index = this.value.lastIndexOf(sep.value, end - sep.value.length);
+							if (index === -1) {
+								break;
+							}
+							result.push(this.value.slice(index + sep.value.length, end));
+							end = index;
+						}
+						result.push(this.value.slice(0, end));
+						result.reverse();
+					}
+					return new ArrayValue(result.map((part) => new StringValue(part)));
+				}),
+			],
+			[
 				"replace",
 				new FunctionValue((args): StringValue => {
 					if (args.length < 2) {
