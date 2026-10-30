@@ -394,6 +394,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
 		repoUrl: "https://github.com/weecology/DeepForest",
 	},
+	defm: {
+		prettyLabel: "DeFM",
+		repoName: "DeFM",
+		repoUrl: "https://github.com/leggedrobotics/defm",
+		snippets: snippets.defm,
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
 		repoName: "Depth Anything V2",
