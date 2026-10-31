@@ -83,6 +83,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	alkove: {
+		prettyLabel: "Alkove",
+		repoName: "Alkove",
+		repoUrl: "https://github.com/alkove-ai/alkove",
+		docsUrl: "https://alkove.ai/docs/",
+		snippets: snippets.alkove,
+		filter: false,
+		countDownloads: `path_extension:"alk"`,
+	},
 	allennlp: {
 		prettyLabel: "AllenNLP",
 		repoName: "AllenNLP",

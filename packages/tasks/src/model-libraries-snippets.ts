@@ -37,6 +37,16 @@ model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
 model.load_adapter("${model.id}", set_active=True)`,
 ];
 
+export const alkove = (model: ModelData): string[] => {
+	const name = /^alkove-([a-z]+)-/.exec(model.id.split("/").pop() ?? "")?.[1] ?? "focus";
+	return [
+		`# pip install alkove
+import alkove
+
+models = alkove.Models.load(["${name}"])`,
+	];
+};
+
 const allennlpUnknown = (model: ModelData) => [
 	`import allennlp_models
 from allennlp.predictors.predictor import Predictor
