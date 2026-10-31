@@ -6,7 +6,9 @@ import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
 import type { SetRequired } from "../vendor/type-fest/set-required";
-import { parseSafetensorsIndexStream } from "./parse-safetensors-index";
+import { MAX_WEIGHT_MAP_ENTRIES, parseSafetensorsIndexStream } from "./parse-safetensors-index";
+import { HUB_URL } from "../consts";
+import { checkCredentials } from "../utils/checkCredentials";
 import { sum } from "../utils/sum";
 import { chunk } from "../utils/chunk";
 import { XetBlob } from "../utils/XetBlob";
@@ -99,6 +101,9 @@ const QUANTIZATION_AUXILIARY_SUFFIXES = [
  */
 const MXFP4_SCALES_SUFFIX = "_scales";
 
+/** Underscore-joined scale names ModelOpt uses for fused expert tensors (see `shouldSkipTensor`). */
+const MODELOPT_FUSED_SCALE_SUFFIXES = ["_weight_scale", "_weight_scale_2", "_input_scale"];
+
 /**
  * bitsandbytes keeps its double-quantization state beside each 4-bit weight: `absmax` (one value
  * per 64-weight block), the nested quantization of those absmax values, and the NF4/FP4 lookup
@@ -167,6 +172,36 @@ function bitsFromFormatString(format: string | undefined): number | undefined {
 	}
 	const normalized = format.toLowerCase();
 	return SUB_BYTE_FORMAT_BITS.find(([pattern]) => normalized.includes(pattern))?.[1];
+}
+
+/**
+ * Bit width of a ModelOpt-quantized weight: the most specific `quantized_layers` entry (mixed
+ * precision) for the module or one of its parents, then the global `quant_algo`. ModelOpt lists
+ * fused containers such as `model.layers.0.mlp.experts`, which cover every `…experts.N.down_proj`
+ * below them.
+ *
+ * A module-level declaration wins even when it isn't sub-byte: in a mixed FP8 + NVFP4 export the
+ * FP8 layers must not inherit the 4-bit width of the global algorithm.
+ */
+function getModelOptWeightBits(tensorName: string, quantConfig: QuantizationConfig): number | undefined {
+	const moduleName = getTensorModuleName(tensorName);
+
+	const layers = quantConfig.quantized_layers;
+	if (layers && typeof layers === "object") {
+		let target = moduleName;
+		while (true) {
+			if (Object.prototype.hasOwnProperty.call(layers, target)) {
+				return bitsFromFormatString(layers[target]?.quant_algo);
+			}
+			const parentIndex = target.lastIndexOf(".");
+			if (parentIndex === -1) {
+				break;
+			}
+			target = target.slice(0, parentIndex);
+		}
+	}
+
+	return bitsFromFormatString(quantConfig.quant_algo);
 }
 
 /**
@@ -601,6 +636,62 @@ async function fetchAllHeaders(
 }
 
 /**
+ * The Hub serves the headers of every shard of a sharded model on `main` in a single request.
+ *
+ * Returns undefined when it can't (other revisions, endpoint unavailable...), to fall back to fetching each shard header.
+ */
+async function fetchShardedHeadersFromHub(
+	path: string,
+	params: {
+		repo: RepoDesignation;
+		revision?: string;
+		hubUrl?: string;
+		useSafetensorsMetadataEndpoint?: boolean;
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>,
+): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } | undefined> {
+	const repoId = toRepoId(params.repo);
+	if (params.useSafetensorsMetadataEndpoint === false || (params.revision && params.revision !== "main")) {
+		return undefined;
+	}
+	const accessToken = checkCredentials(params);
+	try {
+		const res = await (params.fetch ?? fetch)(
+			`${params.hubUrl ?? HUB_URL}/api/models/${repoId.name}/safetensors-metadata/${encodeShardFilename(path)}`,
+			{ headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {} },
+		);
+		if (!res.ok) {
+			return undefined;
+		}
+		const { index, headers }: { index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } = await res.json();
+		// Same guards as when fetching each shard header: a failing check falls back to that path, which then throws
+		if (Object.keys(headers).length > MAX_SHARD_COUNT) {
+			return undefined;
+		}
+		for (const [filename, header] of Object.entries(headers)) {
+			assertSafeShardFilename(filename);
+			for (const [tensorName, info] of typedEntries(omit(header, "__metadata__"))) {
+				validateTensorEntry(filename, tensorName, info, undefined);
+			}
+		}
+		// The response leaves out the index's weight_map, which repeats the tensor names of the shard headers
+		const weightMap = Object.fromEntries(
+			Object.entries(headers).flatMap(([filename, header]) =>
+				Object.keys(header)
+					.filter((name) => name !== "__metadata__")
+					.map((name) => [name, filename]),
+			),
+		);
+		return {
+			index: Object.keys(weightMap).length <= MAX_WEIGHT_MAP_ENTRIES ? { ...index, weight_map: weightMap } : index,
+			headers,
+		};
+	} catch {
+		return undefined;
+	}
+}
+
+/**
  * Reads the `total_parameters` shortcut from the header/index metadata. It's self-reported and
  * the Hub displays it verbatim, bypassing the header validation above — so cap it at the
  * computed count when we have one (a no-op for well-formed files, where the two agree).
@@ -669,6 +760,13 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
+		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
+		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
+		 *
+		 * @default true
+		 */
+		useSafetensorsMetadataEndpoint?: boolean;
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -696,6 +794,13 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
+		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
+		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
+		 *
+		 * @default true
+		 */
+		useSafetensorsMetadataEndpoint?: boolean;
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -709,6 +814,7 @@ export async function parseSafetensorsMetadata(
 		library?: string;
 		hubUrl?: string;
 		revision?: string;
+		useSafetensorsMetadataEndpoint?: boolean;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
@@ -779,8 +885,11 @@ export async function parseSafetensorsMetadata(
 		};
 	} else if (location) {
 		const path = location.path;
-		const { index, shardFilenames } = await parseShardedIndex(path, params);
-		const shardedMap = await fetchAllHeaders(path, shardFilenames, params);
+		const fromHub = await fetchShardedHeadersFromHub(path, params);
+		const { index, shardFilenames } = fromHub
+			? { index: fromHub.index, shardFilenames: Object.keys(fromHub.headers) }
+			: await parseShardedIndex(path, params);
+		const shardedMap = fromHub?.headers ?? (await fetchAllHeaders(path, shardFilenames, params));
 		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 
 		const paramStats = params.computeParametersCount
@@ -829,6 +938,13 @@ export interface QuantizationConfig {
 	 * using the same `re:`-prefixed target syntax as `config_groups[].targets`.
 	 */
 	ignore?: string[];
+	/**
+	 * NVIDIA ModelOpt (`quant_method: "modelopt"`) algorithm, e.g. `"NVFP4"`, `"W4A16_NVFP4"`, `"FP8"`,
+	 * or `"MIXED_PRECISION"` — in which case the per-module algorithm is in `quantized_layers`.
+	 */
+	quant_algo?: string;
+	/** ModelOpt mixed-precision: module name (or a parent module, e.g. `…mlp.experts`) -> its algorithm. */
+	quantized_layers?: Record<string, { quant_algo?: string }>;
 }
 
 export interface MlxQuantizationConfig extends QuantizationConfig {
@@ -1213,6 +1329,14 @@ export function getQuantizationMultiplier(
 			return packingFactor(dtype, numBits);
 		}
 
+		case "modelopt": {
+			// NVIDIA ModelOpt NVFP4 packs two FP4 weights per U8
+			if (!INTEGER_CONTAINER_BITS[dtype]) {
+				return 1;
+			}
+			return packingFactor(dtype, getModelOptWeightBits(tensorName, quantConfig));
+		}
+
 		case "fp8": {
 			// fp8 weights live in F8_* dtypes at one value per byte, so nothing to do for them.
 			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8/U8.
@@ -1353,6 +1477,13 @@ function shouldSkipTensor(
 	// other architecture is left alone.
 	if (quantMethod === "mxfp4") {
 		return dtype === "U8" && getTensorSuffix(tensorName).endsWith(MXFP4_SCALES_SUFFIX);
+	}
+
+	// ModelOpt names the scales of fused (3D) expert tensors after the tensor itself, e.g.
+	// `…experts.gate_up_proj_weight_scale`, so the dot-separated suffix check above can't see them.
+	if (quantMethod === "modelopt") {
+		const suffix = getTensorSuffix(tensorName);
+		return MODELOPT_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s));
 	}
 
 	if (quantMethod === "bitsandbytes") {

@@ -4,17 +4,11 @@ import { MAX_PATH_TEMPLATE_LENGTH } from "./paths";
 
 const SUPPORTED_VERSIONS: LeRobotCodebaseVersion[] = ["v2.0", "v2.1", "v3.0"];
 const DEFAULT_CHUNKS_SIZE = 1_000;
-/**
- * `meta/info.json` is user-authored and callers render these strings, so each is bounded. Real
- * values are a few dozen characters at most; anything longer is dropped rather than truncated.
- */
+/** info.json is user-authored and callers render these, so longer values are dropped. */
 const MAX_FEATURE_KEY_LENGTH = 200;
 const MAX_ROBOT_TYPE_LENGTH = 100;
 const MAX_CODEC_LENGTH = 32;
-/**
- * Counts are bounded too: each camera yields a formatted URL per episode, so the per-path cap alone
- * would not bound a listing. Real datasets have a handful of cameras and joint features.
- */
+/** Each camera adds a URL per episode, so the counts are bounded too. */
 const MAX_CAMERAS = 32;
 const MAX_JOINT_FEATURES = 64;
 /** A feature with more names is dropped rather than truncated, which would mislabel its dimensions. */
@@ -51,10 +45,7 @@ function isSupportedVersion(value: unknown): value is LeRobotCodebaseVersion {
 	return typeof value === "string" && SUPPORTED_VERSIONS.includes(value as LeRobotCodebaseVersion);
 }
 
-/**
- * LeRobot writes the per-camera video metadata under `info`. Datasets converted from v1 carry it under
- * `video_info` instead, with the frame size moved into `shape`.
- */
+/** Under `info`, or `video_info` on datasets converted from v1. */
 function readCodec(feature: Record<string, unknown>): string | undefined {
 	for (const key of ["info", "video_info"]) {
 		const block = feature[key];
@@ -69,9 +60,8 @@ function readCodec(feature: Record<string, unknown>): string | undefined {
 }
 
 /**
- * Prefers the frame size LeRobot read from the encoded video, which `shape` can disagree with. Otherwise
- * `names` labels the axes of `shape`: usually `[height, width, channels]`, but some converters write
- * `[channels, height, width]`.
+ * Prefers the encoded video's size, which `shape` can disagree with. `names` labels the axes of
+ * `shape`: usually `[height, width, channels]`, but some converters put channels first.
  */
 function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamera | undefined {
 	const codec = readCodec(feature);
@@ -95,10 +85,7 @@ function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamer
 	return { key, height, width, codec };
 }
 
-/**
- * `names` is usually a flat list of joint names, but some datasets nest it under a single key
- * such as `{ motors: [...] }`.
- */
+/** A flat list of names, or one nested under a single key such as `{ motors: [...] }`. */
 function readJointNames(feature: Record<string, unknown>): string[] | undefined {
 	const names = feature.names;
 	let list = asStringArray(names);
@@ -121,10 +108,8 @@ function readJointNames(feature: Record<string, unknown>): string[] | undefined 
 }
 
 /**
- * Parses the contents of `meta/info.json`.
- *
- * Throws when the input is not a usable LeRobot info file, which includes an LFS pointer, a
- * truncated blob, or a dataset whose `codebase_version` this package does not implement.
+ * Parses `meta/info.json`. Throws on anything unusable: an LFS pointer, a truncated read, or an
+ * unsupported `codebase_version`.
  */
 export function parseInfo(text: string): LeRobotInfo {
 	let json: unknown;
