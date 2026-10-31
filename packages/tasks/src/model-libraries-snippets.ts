@@ -447,48 +447,22 @@ dam = DescribeAnythingModel(
 )`,
 ];
 
-const dew_install = `# uv pip install "dewml[cuda12]"   # NVIDIA GPU; [cuda13] for CUDA 13 drivers, [tpu] on TPU
-# uv pip install dewml             # CPU`;
-
 export const dew = (model: ModelData): string[] => {
-	switch (model.pipeline_tag) {
-		case "text-to-image":
-			return [
-				`${dew_install}
+	if (model.pipeline_tag === "text-to-image") {
+		return [
+			`# pip install dewml --extra-index-url https://pypi.dewml.dev/simple
 import dew
 
 pipe = dew.pipeline("${model.id}")
 images = pipe(["a red fox in a snowy forest"], steps=20, key=0).host().images`,
-			];
-		case "text-generation":
-			return [
-				`${dew_install}
-import dew
-
-task = dew.pipeline("${model.id}")
-generation = task(["Explain gradient accumulation in one paragraph."], 128, key=0)
-print(generation.text[0])`,
-			];
-		case "text-classification":
-			return [
-				`${dew_install}
-import dew
-from dew.decision import Choice
-
-decide = dew.pipeline("${model.id}")
-answers = decide("Hi, we were billed twice for March and I want it reversed today.", {
-    "department": Choice("Which department should handle this?", criteria=["billing", "technical", "sales"]),
-})
-print(answers["department"].choice)`,
-			];
-		default:
-			return [
-				`${dew_install}
+		];
+	}
+	return [
+		`# pip install dewml --extra-index-url https://pypi.dewml.dev/simple
 import dew
 
 task = dew.pipeline("${model.id}")`,
-			];
-	}
+	];
 };
 
 const diffusers_install = "pip install -U diffusers transformers accelerate";

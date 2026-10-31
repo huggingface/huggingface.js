@@ -425,9 +425,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.describe_anything,
 		filter: false,
 	},
-	dew: {
+	dewml: {
 		prettyLabel: "Dew",
-		repoName: "dew",
+		repoName: "Dew",
 		repoUrl: "https://github.com/AshishKumar4/dew",
 		docsUrl: "https://dewml.dev",
 		snippets: snippets.dew,
