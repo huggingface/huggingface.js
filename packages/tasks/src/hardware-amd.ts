@@ -406,4 +406,13 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		releaseYear: 2025,
 		aliases: ["Strix Halo"],
 	},
+		"Ryzen AI Max+ PRO 495": {
+		tflops: 30.7,
+		memory: [192],
+		gfxVersion: "gfx1151",
+		msrp: 7_399,
+		power: 120,
+		releaseYear: 2026,
+		aliases: ["Gorgon Halo", "Radeon 8065S"],
+	},
 };
