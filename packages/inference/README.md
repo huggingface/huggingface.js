@@ -54,6 +54,7 @@ Currently, we support the following providers:
 - [Humain AI](https://node.humain.com/)
 - [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
+- [OpenRouter](https://openrouter.ai)
 - [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
 - [Public AI](https://publicai.co)
 - [Replicate](https://replicate.com)
@@ -91,6 +92,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [HF Inference supported models](https://huggingface.co/api/partners/hf-inference/models)
 - [Humain AI supported models](https://huggingface.co/api/partners/humain-ai/models)
 - [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
+- [OpenRouter supported models](https://huggingface.co/api/partners/openrouter/models)
 - [OVHcloud supported models](https://huggingface.co/api/partners/ovhcloud/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Scaleway supported models](https://huggingface.co/api/partners/scaleway/models)
@@ -146,6 +148,7 @@ The package defines several error types that extend the base `Error` class:
 import { InferenceClient } from "@huggingface/inference";
 import {
   InferenceClientError,
+  InferenceClientInputError,
   InferenceClientProviderApiError,
   InferenceClientProviderOutputError,
   InferenceClientHubApiError,
@@ -162,13 +165,13 @@ try {
   if (error instanceof InferenceClientProviderApiError) {
     // Handle API errors (e.g., rate limits, authentication issues)
     console.error("Provider API Error:", error.message);
-    console.error("HTTP Request details:", error.request);
-    console.error("HTTP Response details:", error.response);
-  if (error instanceof InferenceClientHubApiError) {
+    console.error("HTTP Request details:", error.httpRequest);
+    console.error("HTTP Response details:", error.httpResponse);
+  } else if (error instanceof InferenceClientHubApiError) {
     // Handle API errors (e.g., rate limits, authentication issues)
     console.error("Hub API Error:", error.message);
-    console.error("HTTP Request details:", error.request);
-    console.error("HTTP Response details:", error.response);
+    console.error("HTTP Request details:", error.httpRequest);
+    console.error("HTTP Response details:", error.httpResponse);
   } else if (error instanceof InferenceClientProviderOutputError) {
     // Handle malformed responses from providers
     console.error("Provider Output Error:", error.message);
@@ -206,8 +209,8 @@ This error occurs when there are issues with the API request when performing inf
 
 It has several properties:
 - `message`: A descriptive error message
-- `request`: Details about the failed request (URL, method, headers)
-- `response`: Response details including status code and body
+- `httpRequest`: Details about the failed request (URL, method, headers)
+- `httpResponse`: Response details including status code and body
 
 #### InferenceClientHubApiError
 
@@ -215,8 +218,8 @@ This error occurs when there are issues with the API request when requesting the
 
 It has several properties:
 - `message`: A descriptive error message
-- `request`: Details about the failed request (URL, method, headers)
-- `response`: Response details including status code and body
+- `httpRequest`: Details about the failed request (URL, method, headers)
+- `httpResponse`: Response details including status code and body
 
 
 #### InferenceClientProviderOutputError
@@ -418,6 +421,25 @@ await hf.sentenceSimilarity({
       'That is a happy dog',
       'That is a very happy person',
       'Today is a sunny day'
+    ]
+  }
+})
+```
+
+#### Text Ranking
+
+Rank documents by their relevance to a query.
+
+```typescript
+await hf.textRanking({
+  model: 'cross-encoder/ettin-reranker-68m-v1',
+  inputs: {
+    query: 'Which planet is known as the Red Planet?',
+    texts: [
+      "Venus is often called Earth's twin because of its similar size and proximity.",
+      'Mars, known for its reddish appearance, is often referred to as the Red Planet.',
+      'Jupiter, the largest planet in our solar system, has a prominent red spot.',
+      'Saturn, famous for its rings, is sometimes mistaken for the Red Planet.'
     ]
   }
 })

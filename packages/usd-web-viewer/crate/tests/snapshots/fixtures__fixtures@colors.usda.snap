@@ -1,0 +1,38 @@
+---
+source: crate/tests/fixtures.rs
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/colors.usda
+---
+upAxis Y, metersPerUnit 0.01
+prims 13, meshes 4, triangles 4
+
+instances:
+  /Vertex: geometry 0, material 0
+    at (0, 0, 0), world (0, 0, 0)..(1, 1, 0)
+  /Constant: geometry 1, material 1
+    at (0, 0, 0), world (0, 0, 0)..(1, 1, 0)
+  /Tinted: geometry 2, material 2
+    at (0, 0, 0), world (0, 0, 0)..(1, 1, 0)
+  /Subset: geometry 3, material 4
+    at (0, 0, 0), world (0, 0, 0)..(1, 1, 0)
+
+geometries:
+  0 /Vertex: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+    colors (1, 0, 0), (0, 1, 0), (0, 0, 1)
+  1 /Constant: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+  2 /Tinted: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+    colors (1, 0, 0), (0, 1, 0), (0, 0, 1)
+  3 /Subset: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+    colors (1, 0, 0), (0, 1, 0), (0, 0, 1)
+    groups 0+3 Part
+
+materials:
+  0 (unbound) displayColor: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0, color from primvar displayColor
+  1 (unbound) displayColor: color (0.5, 0.25, 1), opacity 1, roughness 0.5, metallic 0
+  2 /TintMat preview: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0, color from primvar tint
+  3 /Base preview: color (0.5, 0.5, 0.5), opacity 1, roughness 0.5, metallic 0
+  4 /SubsetMat preview: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0, color from primvar displayColor

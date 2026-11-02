@@ -54,7 +54,7 @@ export async function fileDownloadInfo(
 	const url =
 		`${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/${
 			params.raw ? "raw" : "resolve"
-		}${revision ? `/${encodeURIComponent(revision)}` : ""}/${params.path}` +
+		}${revision ? `/${encodeURIComponent(revision)}` : ""}/${params.path.split("/").map(encodeURIComponent).join("/")}` +
 		(params.noContentDisposition ? "?noContentDisposition=1" : "");
 
 	const resp = await (params.fetch ?? fetch)(url, {

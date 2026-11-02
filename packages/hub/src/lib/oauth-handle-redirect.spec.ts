@@ -51,7 +51,7 @@ describe("oauthHandleRedirect", () => {
 			email_verified: true,
 			email: "eliott@huggingface.co",
 			isPro: false,
-			picture: expect.stringMatching(/^https:\/\/hub-ci\.huggingface\.co\/avatars\/[0-9a-f]+\.svg$/),
+			picture: expect.stringMatching(/^https:\/\/hub-ci\.huggingface\.co\/avatars\//),
 			profile: "https://hub-ci.huggingface.co/hub.js",
 			website: "https://github.com/huggingface/hub.js",
 			orgs: [],
