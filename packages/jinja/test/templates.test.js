@@ -6516,6 +6516,15 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("String split", () => {
+		it.each([
+			[`{{ "a,b,c".split(",", -2) | tojson }}`, `["a", "b", "c"]`],
+			[`{{ "  a b  c  ".split(none, -2) | tojson }}`, `["a", "b", "c"]`],
+		])("treats a negative maxsplit as unlimited: %s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+	});
+
 	describe("Member access", () => {
 		it.each([3, -4])("returns undefined for out-of-range string index %i", (index) => {
 			const template = new Template(
