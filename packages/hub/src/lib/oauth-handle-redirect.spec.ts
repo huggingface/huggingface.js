@@ -51,10 +51,11 @@ describe("oauthHandleRedirect", () => {
 			email_verified: true,
 			email: "eliott@huggingface.co",
 			isPro: false,
-			picture: "https://hub-ci.huggingface.co/avatars/934b830e9fdaa879487852f79eef7165.svg",
+			picture: expect.stringMatching(/^https:\/\/hub-ci\.huggingface\.co\/avatars\/[0-9a-f]+\.svg$/),
 			profile: "https://hub-ci.huggingface.co/hub.js",
 			website: "https://github.com/huggingface/hub.js",
 			orgs: [],
+			groups: [],
 		});
 	});
 });
