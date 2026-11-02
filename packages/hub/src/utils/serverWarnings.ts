@@ -1,4 +1,4 @@
-const MAX_WARNED_TOPICS = 100;
+const MAX_WARNED_TOPICS = 1000;
 const warnedTopics = new Set<string>();
 
 /**
