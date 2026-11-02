@@ -24,7 +24,7 @@ export async function fileExists(
 	const endpoint = repoId.type === "bucket" ? "resolve" : "raw";
 	const url = `${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/${endpoint}${
 		revision ? `/${encodeURIComponent(revision)}` : ""
-	}/${params.path}`;
+	}/${params.path.split("/").map(encodeURIComponent).join("/")}`;
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "HEAD",

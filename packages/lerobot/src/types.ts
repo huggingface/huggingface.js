@@ -13,7 +13,7 @@ export interface LeRobotCamera {
 /** Normalized view of `meta/info.json`. */
 export interface LeRobotInfo {
 	codebaseVersion: LeRobotCodebaseVersion;
-	/** Raw `robot_type`; `unknown` and blank values are dropped. */
+	/** Raw `robot_type`; `unknown`, blank and implausibly long values are dropped. */
 	robotType?: string;
 	fps: number;
 	totalEpisodes: number;
@@ -38,23 +38,35 @@ export interface LeRobotEpisodeVideo {
 	toSec: number;
 }
 
-/** Where an episode's frame rows live, for callers that want to chart them. */
+/** An episode's frame rows, read from the parquet file its `data` points at. */
+export interface LeRobotFrames {
+	length: number;
+	/** Seconds from the start of the episode, one per frame. */
+	timestamps: number[];
+	/**
+	 * Feature key -> one series per component (e.g. per motor), each `length` long. A scalar is one
+	 * series, booleans are 0 / 1, and bookkeeping columns such as `frame_index` are left out.
+	 */
+	series: Record<string, number[][]>;
+	/** Feature key -> component names, for the features whose `info.json` entry declares them. */
+	names: Record<string, string[]>;
+}
+
 export interface LeRobotEpisodeData {
 	url: string;
+	/** Inclusive row offset inside `url`, not a dataset-wide frame index. */
 	fromRow: number;
-	/** Exclusive. */
+	/** Exclusive row offset inside `url`. */
 	toRow: number;
 }
 
-/**
- * One episode, normalized so that v2 and v3 datasets are indistinguishable to callers.
- */
+/** One episode, the same shape for v2 and v3. */
 export interface LeRobotEpisode {
 	index: number;
-	/** Number of frames. */
 	length: number;
 	durationSec: number;
 	tasks: string[];
 	videos: LeRobotEpisodeVideo[];
-	data: LeRobotEpisodeData;
+	/** Absent when the episode's rows inside its v3 data file could not be located. */
+	data?: LeRobotEpisodeData;
 }

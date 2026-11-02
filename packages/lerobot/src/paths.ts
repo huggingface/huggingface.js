@@ -2,34 +2,41 @@
 export const MAX_INFO_BYTES = 200_000;
 /** LeRobot templates use widths of 3 and 6; the file is user-controlled so keep expansion bounded. */
 const MAX_INDEX_WIDTH = 16;
-const MAX_PATH_TEMPLATE_LENGTH = 1_000;
+export const MAX_PATH_TEMPLATE_LENGTH = 1_000;
+/** Bounds the filled-in path too: a short template can repeat a long `{video_key}`. */
+const MAX_REPO_PATH_LENGTH = 1_000;
 
 const PLACEHOLDER_RE = /\{(\w+)(?::0?(\d+)d)?\}/g;
 
-/**
- * A repo path is safe when it cannot escape its prefix once pasted into a URL. Feature keys come
- * straight from user-authored `meta/info.json`, so a key of `..` would otherwise walk up the tree.
- */
+/** False for a path that would escape the repo, such as a `..` feature key from a user-authored info.json. */
 export function isSafeRepoPath(path: string): boolean {
 	return path.length > 0 && !path.split("/").includes("..") && !path.startsWith("/");
 }
 
 /**
- * Fills a python-format template such as `data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet`.
- * Unknown placeholders resolve to 0 so that partially-specified templates still yield a usable path.
+ * Fills a python-format template such as `data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet`,
+ * unknown placeholders as 0. Templates come from a user-authored info.json, so this throws past
+ * `MAX_REPO_PATH_LENGTH` or on a path that fails `isSafeRepoPath`.
  */
 export function formatPathTemplate(template: string, vars: Record<string, string | number>): string {
 	if (template.length > MAX_PATH_TEMPLATE_LENGTH) {
 		throw new Error(`Path template is too long (${template.length} > ${MAX_PATH_TEMPLATE_LENGTH})`);
 	}
-	return template.replace(PLACEHOLDER_RE, (_match, name: string, width?: string) => {
+	let length = template.length;
+	const path = template.replace(PLACEHOLDER_RE, (match, name: string, width?: string) => {
 		const value = vars[name] ?? 0;
-		if (typeof value === "string") {
-			return value;
+		const filled =
+			typeof value === "string" ? value : String(value).padStart(Math.min(Number(width ?? "1"), MAX_INDEX_WIDTH), "0");
+		length += filled.length - match.length;
+		if (length > MAX_REPO_PATH_LENGTH) {
+			throw new Error(`Formatted path is too long (> ${MAX_REPO_PATH_LENGTH})`);
 		}
-		const pad = Math.min(Number(width ?? "1"), MAX_INDEX_WIDTH);
-		return String(value).padStart(pad, "0");
+		return filled;
 	});
+	if (!isSafeRepoPath(path)) {
+		throw new Error(`Refusing unsafe repo path: ${path.slice(0, 100)}`);
+	}
+	return path;
 }
 
 /** Builds `${endpoint}/datasets/${repoId}/resolve/${revision}/${path}`, encoding each path segment. */

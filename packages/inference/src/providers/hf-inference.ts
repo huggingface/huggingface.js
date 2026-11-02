@@ -24,6 +24,7 @@ import type {
 	QuestionAnsweringOutput,
 	QuestionAnsweringOutputElement,
 	SentenceSimilarityOutput,
+	TextRankingOutput,
 	SummarizationOutput,
 	TableQuestionAnsweringOutput,
 	TextClassificationOutput,
@@ -55,6 +56,7 @@ import type {
 	ObjectDetectionTaskHelper,
 	QuestionAnsweringTaskHelper,
 	SentenceSimilarityTaskHelper,
+	TextRankingTaskHelper,
 	SummarizationTaskHelper,
 	TableQuestionAnsweringTaskHelper,
 	TabularClassificationTaskHelper,
@@ -601,6 +603,27 @@ export class HFInferenceZeroShotClassificationTask extends HFInferenceTask imple
 			"score" in elem &&
 			typeof elem.label === "string" &&
 			typeof elem.score === "number"
+		);
+	}
+}
+
+export class HFInferenceTextRankingTask extends HFInferenceTask implements TextRankingTaskHelper {
+	override async getResponse(response: unknown): Promise<TextRankingOutput> {
+		if (
+			Array.isArray(response) &&
+			response.every(
+				(item) =>
+					typeof item === "object" &&
+					item !== null &&
+					Number.isInteger(item.index) &&
+					item.index >= 0 &&
+					typeof item.score === "number",
+			)
+		) {
+			return response;
+		}
+		throw new InferenceClientProviderOutputError(
+			"Received malformed response from HF-Inference text-ranking API: expected Array<{ index: number, score: number }>",
 		);
 	}
 }
