@@ -1,0 +1,26 @@
+---
+source: crate/tests/fixtures.rs
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/uv_set.usda
+---
+upAxis Y, metersPerUnit 0.01
+prims 6, meshes 2, triangles 4
+
+instances:
+  /Quad: geometry 0, material 0
+    at (0, 0, 0), world (-1, -1, 0)..(1, 1, 0)
+  /OnlyCustom: geometry 1, material 0
+    at (0, 0, 0), world (-1, -1, 0)..(1, 1, 0)
+
+geometries:
+  0 /Quad: 2 triangles (all outward), 4 vertices, bounds (-1, -1, 0)..(1, 1, 0)
+    normals (0, 0, 1) x4
+    uv st (0, 0) x4
+    uv custom (0.99, 0.99) x4
+  1 /OnlyCustom: 2 triangles (all outward), 4 vertices, bounds (-1, -1, 0)..(1, 1, 0)
+    normals (0, 0, 1) x4
+    uv custom (0.99, 0.99) x4
+
+materials:
+  0 /Mat preview: color (0, 0, 0), opacity 1, roughness 1, metallic 0
+    emissiveColor <- quadrants.png.rgb, value (0, 0, 0), uv custom, wrapS clamp, wrapT clamp
