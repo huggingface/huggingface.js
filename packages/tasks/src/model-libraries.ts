@@ -1076,6 +1076,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
 	},
+	"minicpm-ocr": {
+		prettyLabel: "MiniCPM-OCR SDK",
+		repoName: "MiniCPM-OCR",
+		repoUrl: "https://github.com/OpenBMB/MiniCPM-OCR",
+		docsUrl: "https://github.com/OpenBMB/MiniCPM-OCR/blob/main/docs/minicpm_ocr_sdk_api_en.md",
+		snippets: snippets.minicpmOcr,
+		filter: false,
+	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",

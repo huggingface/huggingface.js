@@ -28,6 +28,52 @@ model = AadyaM1Forecaster(weights)
 pmf = model.forecast([28, 30, 27], elapsed=0)`,
 ];
 
+export const minicpmOcr = (model: ModelData): string[] => [
+	`# Install PaddlePaddle for your platform, then:
+# pip install "minicpm-ocr[layout,pdf]" pypdfium2
+# First deploy ${model.id} as a recognition service:
+# https://github.com/OpenBMB/MiniCPM-OCR/blob/main/docs/minicpm_ocr_tutorial_en.md
+# This example assumes port 8080, served model name minicpm-ocr,
+# a vLLM backend, and an NVIDIA GPU for layout detection.
+
+from importlib.resources import files
+from pathlib import Path
+
+from minicpmvocr import load_config, pipelined_run
+from minicpmvocr.layouts.download import ensure_layout_model
+
+
+def main():
+    layout_model = ensure_layout_model(Path("models/PP-DocLayoutV3_infer"))
+
+    cfg = load_config(
+        str(files("minicpmvocr").joinpath("configs/minicpmvocr.yaml")),
+        overrides={
+            "input": {"file_path": str(Path("demo.png").resolve())},
+            "engine": {
+                "type": "vllm",
+                "server_url": "http://127.0.0.1:8080",
+                "model_name": "minicpm-ocr",
+            },
+            "layout": {
+                "model_dir": str(layout_model),
+                "device": "cuda:0",
+            },
+            "pipeline": {"overlap_layout": True},
+            "run": {"run_root": str(Path("output").resolve())},
+        },
+    )
+
+    pipelined_run(cfg)
+
+    print("JSON directory:", cfg["_meta"]["result_json_dir"])
+    print("Markdown directory:", cfg["_meta"]["output_dir"])
+
+
+if __name__ == "__main__":
+    main()`,
+];
+
 export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
 
