@@ -166,6 +166,32 @@ export const SKUS = {
 				releaseYear: 2024,
 			},
 		},
+		THOX: {
+			"THOX ThoxAir": {
+				tflops: 0.04,
+				memory: [2],
+				msrp: 149,
+				power: 5,
+				releaseYear: 2027,
+				aliases: ["ThoxAir"],
+			},
+			"THOX ThoxMini": {
+				tflops: 0.06,
+				memory: [4],
+				msrp: 299,
+				power: 10,
+				releaseYear: 2027,
+				aliases: ["ThoxMini"],
+			},
+			"THOX ThoxClip": {
+				tflops: 0.06,
+				memory: [6],
+				msrp: 399,
+				power: 10,
+				releaseYear: 2027,
+				aliases: ["ThoxClip"],
+			},
+		},
 	},
 	CPU: {
 		Intel: {
