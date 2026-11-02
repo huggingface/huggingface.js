@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type { LoadResult, UsdJoint, UsdRigidBody } from "./types.js";
+import type { LoadResult, UsdFrame, UsdJoint, UsdRigidBody } from "./types.js";
 
 /** A drawn copy of a mesh: a `THREE.Mesh`, or one instance of a `THREE.InstancedMesh`. */
 interface Target {
@@ -23,22 +23,36 @@ export function createPoser(
 	root: THREE.Group,
 	joints: readonly UsdJoint[],
 	bodies: readonly UsdRigidBody[],
+	frames: readonly UsdFrame[],
 	metersPerUnit: number,
-): Pick<LoadResult, "joints" | "setJointPositions" | "resetJointPositions" | "getJointPositions"> {
+): Pick<LoadResult, "joints" | "setJointPositions" | "resetJointPositions" | "getJointPositions" | "getWorldPosition"> {
 	const values = new Map<string, number>();
 	let state: ReturnType<typeof prepare> | null = null;
+	// Each body's move from its rest pose, once anything has been posed.
+	let deltas = new Map<string, THREE.Matrix4>();
 
 	// Built on first use, once every mesh has streamed in.
 	function prepare() {
 		const bodyPaths = bodies.map((b) => b.path).sort((a, b) => b.length - a.length);
 		const ownerOf = (path: string) => bodyPaths.find((b) => path === b || path.startsWith(b + "/"));
 		const targets = new Map<string, Target[]>();
+		// Where each prim `getWorldPosition` can read is in the authored pose, and the body that moves it.
+		const places = new Map<string, { body: string; rest: THREE.Vector3 }>();
+		const place = (path: string, body: string, rest: THREE.Matrix4) =>
+			places.set(path, { body, rest: new THREE.Vector3().setFromMatrixPosition(rest) });
 		const add = (path: string, target: Target) => {
 			const body = ownerOf(path);
 			if (body) {
 				targets.set(body, [...(targets.get(body) ?? []), target]);
+				place(path, body, target.rest);
 			}
 		};
+		for (const { path, world } of bodies) {
+			place(path, path, new THREE.Matrix4().fromArray(world));
+		}
+		for (const { path, body, world } of frames) {
+			place(path, body, new THREE.Matrix4().fromArray(world));
+		}
 		const matrix = new THREE.Matrix4();
 		for (const child of root.children) {
 			if (child instanceof THREE.InstancedMesh) {
@@ -65,7 +79,7 @@ export function createPoser(
 		// The walk starts from whatever no joint moves: the world, static bodies,
 		// and prims a joint hangs from that are not rigid bodies.
 		const roots = [...new Set(["", ...bodies.map((b) => b.path), ...children.keys()])].filter((b) => !moved.has(b));
-		return { targets, children, roots };
+		return { targets, places, children, roots };
 	}
 
 	const motion = new THREE.Matrix4();
@@ -88,7 +102,7 @@ export function createPoser(
 		const { targets, children, roots } = state;
 		// Each body's move from its rest pose: its parent's, then the joint's
 		// motion about the joint frame (frame · motion · frame⁻¹).
-		const deltas = new Map<string, THREE.Matrix4>();
+		deltas = new Map();
 		const queue = roots.map((body) => ({ body, delta: new THREE.Matrix4() }));
 		for (let next = queue.shift(); next; next = queue.shift()) {
 			const { body, delta } = next;
@@ -171,6 +185,20 @@ export function createPoser(
 		},
 		getJointPositions() {
 			return Object.fromEntries(movable.map((j) => [j.path, values.get(j.path) ?? j.rest]));
+		},
+		getWorldPosition(path) {
+			state ??= prepare();
+			const place = state.places.get(path);
+			if (!place) {
+				return null;
+			}
+			const position = place.rest.clone();
+			const delta = deltas.get(place.body);
+			if (delta) {
+				position.applyMatrix4(delta);
+			}
+			root.updateWorldMatrix(true, false);
+			return root.localToWorld(position);
 		},
 		resetJointPositions() {
 			values.clear();

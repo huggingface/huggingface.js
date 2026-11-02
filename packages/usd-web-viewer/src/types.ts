@@ -129,6 +129,17 @@ export interface UsdPhysics {
 	readonly joints: readonly UsdJoint[];
 	/** Prims with `PhysicsArticulationRootAPI`: where an articulation (bodies an engine solves together, like a robot) starts. */
 	readonly articulationRoots: readonly string[];
+	/** Xforms under a rigid body, which move with it: often named points with no mesh, like a gripper's tip. */
+	readonly frames: readonly UsdFrame[];
+}
+
+/** An `Xform` under a rigid body. */
+export interface UsdFrame {
+	readonly path: string;
+	/** The nearest rigid body above it. */
+	readonly body: string;
+	/** Where it is in the authored pose, in stage space; not updated by `setJointPositions`. */
+	readonly world: UsdMatrix;
 }
 
 /** A prim with `PhysicsRigidBodyAPI`. Its meshes are the ones at or under its path, but not under a nested body. */
@@ -328,6 +339,11 @@ export interface LoadResult {
 	resetJointPositions(): void;
 	/** Where every joint in `joints` is now, by path (degrees or meters); `setJointPositions` takes it back. */
 	getJointPositions(): Record<string, number>;
+	/**
+	 * Where a rigid body, a frame in `info.physics.frames` or a drawn mesh under a body is now, after `setJointPositions` and wherever
+	 * `root` has been moved: in the scene's space, like `Object3D.getWorldPosition`, not the stage space of `info.physics`. Null for any other path.
+	 */
+	getWorldPosition(path: string): THREE.Vector3 | null;
 	/** Frees geometries, materials and textures and stops any textures still streaming. */
 	dispose(): void;
 }

@@ -63,7 +63,7 @@ function sceneMessages(matrix) {
 				metersPerUnit: 1,
 				warnings: [],
 				geometryCount: 1,
-				physics: { bodies: [], colliders: [], materials: [], joints: [], articulationRoots: [] },
+				physics: { bodies: [], colliders: [], materials: [], joints: [], articulationRoots: [], frames: [] },
 				labels: [],
 				variantSelections: [],
 				instances: [{ path: "/M", geometry: 0, material: 0, subsets: {}, doubleSided: false, matrix }],
@@ -512,6 +512,7 @@ function articulatedMessages() {
 					colliders: [],
 					materials: [],
 					articulationRoots: ["/Body"],
+					frames: [{ path: "/Door/Tip", body: "/Door", world: frame(2) }],
 					joints: [
 						joint("/J/Hinge", "revolute", "/Body", "/Door", { axis: "Z", lower: -90, upper: 90 }),
 						joint("/J/Pane", "fixed", "/Door", "/Door/Pane"),
@@ -610,6 +611,30 @@ test("joints lists what setJointPositions can move, under the keys getJointPosit
 		Object.keys(getJointPositions()),
 		joints.map((j) => j.path),
 	);
+});
+
+test("getWorldPosition follows a frame with no mesh, in the scene's meters", async () => {
+	const { root, setJointPositions, resetJointPositions, getWorldPosition } = await loadArticulated();
+	const inScene = (x, y, z) => root.localToWorld(new THREE.Vector3(x, y, z));
+	assert.ok(getWorldPosition("/Door/Tip").distanceTo(inScene(2, 0, 0)) < 1e-9, "authored before any posing");
+	setJointPositions({ "/J/Hinge": 90 });
+	// Like the pane, 2 cm along the door: a quarter turn about x = 100 cm takes it to (100, -98).
+	assert.ok(getWorldPosition("/Door/Tip").distanceTo(new THREE.Vector3(1, -0.98, 0)) < 1e-9, "in meters");
+	resetJointPositions();
+	assert.ok(getWorldPosition("/Door/Tip").distanceTo(inScene(2, 0, 0)) < 1e-9);
+});
+
+test("getWorldPosition reads bodies and drawn meshes, follows root, and is null for anything else", async () => {
+	const { root, setJointPositions, getWorldPosition } = await loadArticulated();
+	setJointPositions({ "/J/Hinge": 90 });
+	assert.ok(getWorldPosition("/Door").distanceTo(new THREE.Vector3(1, -1, 0)) < 1e-9);
+	assert.ok(getWorldPosition("/Door/Pane/M").distanceTo(new THREE.Vector3(1, -0.98, 0)) < 1e-9);
+	assert.equal(getWorldPosition("/Nowhere"), null);
+
+	const base = new THREE.Group();
+	base.position.set(1, 2, 3);
+	base.add(root);
+	assert.ok(getWorldPosition("/Door").distanceTo(new THREE.Vector3(2, 1, 3)) < 1e-9, "a parent of root moves it too");
 });
 
 test("a disabled joint is reported but cannot be posed", async () => {

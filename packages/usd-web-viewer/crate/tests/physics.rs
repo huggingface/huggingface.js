@@ -258,6 +258,17 @@ fn fixed_joints_attach_bodies_to_the_one_that_moves_them() {
 }
 
 #[test]
+fn xforms_under_a_body_are_reported_as_frames() {
+    let out = fixture();
+    let frames = out["physics"]["frames"].as_array().unwrap();
+    // Only the Tip: not the body itself, the Xforms above it or the shapes beside it.
+    assert_eq!(frames.len(), 1, "{frames:?}");
+    assert_eq!(frames[0]["path"], "/Cabinet/Door/Tip");
+    assert_eq!(frames[0]["body"], "/Cabinet/Door");
+    assert_eq!(frames[0]["world"].as_array().unwrap()[12], json!(55.0));
+}
+
+#[test]
 fn disabled_joints_are_reported_and_attach_nothing() {
     let out = fixture();
     let joints = &out["physics"]["joints"];

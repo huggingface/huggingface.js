@@ -34,13 +34,14 @@ await complete; // textures stream in after the geometry
 `info` also reports what the stage authors for simulation (UsdPhysics) and its UsdSemantics labels, as authored: nothing is estimated. Masses are in kilograms, densities in kg/m³, inertia in kg·m², joint limits and positions in degrees or meters; positions and matrices are in stage space, like the meshes under `root`.
 
 ```js
-const { info, joints, setJointPositions, resetJointPositions, getJointPositions } = await viewer.load(url);
+const { info, joints, setJointPositions, resetJointPositions, getJointPositions, getWorldPosition } = await viewer.load(url);
 
 info.physics.bodies; // rigid bodies: mass, center of mass, inertia, colliders, bodies fixed to them
 info.physics.colliders; // shape, approximation (convexHull, sdf, ...), physics material
 info.physics.materials; // density, friction, restitution
 info.physics.joints; // revolute, prismatic, spherical, distance, fixed and generic joints with their limits and drives
 info.physics.articulationRoots; // where articulations (bodies solved together, like a robot) start
+info.physics.frames; // Xforms under a body, often points with no mesh, like a gripper's tip
 info.labels; // e.g. { path: '/RootNode', taxonomy: 'wikidata_class', values: ['cabinet'] }
 info.variantSelections; // e.g. { prim: '/Robotiq_2F_85', set: 'Physics', selection: 'Physx_parallel_grip' }
 info.dependencies; // every layer and texture the stage read, with its size
@@ -48,6 +49,7 @@ info.dependencies; // every layer and texture the stage read, with its size
 joints; // the joints setJointPositions can move, e.g. to build sliders
 setJointPositions({ '/Robotiq_2F_85/Robotiq_2F_85/Joints/finger_joint': 40 }); // revolute and prismatic joints, any number at once; what hangs from them and mimic joints follow
 getJointPositions(); // where every revolute and prismatic joint is now
+getWorldPosition('/SO101/gripper/gripper_frame_link'); // where a body, frame or mesh under a body is now, as a THREE.Vector3 in the scene; null if it is none of those
 resetJointPositions(); // back to the authored pose
 ```
 

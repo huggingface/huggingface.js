@@ -26,6 +26,20 @@ pub struct Physics {
     /// Prims with `PhysicsArticulationRootAPI`: where an articulation (bodies
     /// an engine solves together, like a robot) starts.
     pub articulation_roots: Vec<String>,
+    /// Xforms under a rigid body, which move with it: often named points with
+    /// no mesh, like a gripper's tip.
+    pub frames: Vec<Frame>,
+}
+
+/// An `Xform` under a rigid body.
+#[derive(Serialize)]
+pub struct Frame {
+    pub path: String,
+    /// The nearest rigid body above it.
+    pub body: String,
+    /// Local-to-world in stage space, laid out like [`crate::extract::Instance::matrix`].
+    #[serde(serialize_with = "finite")]
+    pub world: [f64; 16],
 }
 
 /// A prim with `PhysicsRigidBodyAPI`.
@@ -306,6 +320,16 @@ impl<'a> Reader<'a> {
             body = Some(self.physics.bodies.len() - 1);
         }
         self.body_of.insert(path.clone(), body);
+
+        if let (Some(b), Some("Xform")) = (inherited, ty)
+            && !has("PhysicsRigidBodyAPI")
+        {
+            self.physics.frames.push(Frame {
+                path: path.as_str().to_owned(),
+                body: self.physics.bodies[b].path.clone(),
+                world: world(xforms, prim),
+            });
+        }
 
         if has("PhysicsCollisionAPI") {
             let material = MaterialBindingAPI::from_prim_unchecked(prim.clone())

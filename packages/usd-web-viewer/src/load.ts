@@ -291,6 +291,7 @@ export async function loadUsd(url: string, options: LoadOptions = {}): Promise<L
 		setJointPositions: scene.poser.setJointPositions,
 		resetJointPositions: scene.poser.resetJointPositions,
 		getJointPositions: scene.poser.getJointPositions,
+		getWorldPosition: scene.poser.getWorldPosition,
 		dispose() {
 			stop(aborted());
 			scene.dispose();
@@ -484,7 +485,7 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 		}
 	};
 
-	const poser = createPoser(root, info.physics.joints, info.physics.bodies, meta.metersPerUnit);
+	const poser = createPoser(root, info.physics.joints, info.physics.bodies, info.physics.frames, meta.metersPerUnit);
 
 	return { root, info, poser, addGeometry, applyTexture, textureFailed, dispose };
 }

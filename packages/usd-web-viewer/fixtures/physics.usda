@@ -199,6 +199,12 @@ def Xform "Cabinet" (
             float physics:mass = 100
             double size = 1
         }
+
+        def Xform "Tip"
+        {
+            double3 xformOp:translate = (5, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
     }
 
     def Xform "Glass" (
