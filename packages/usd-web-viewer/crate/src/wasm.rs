@@ -7,6 +7,7 @@ use wasm_bindgen::prelude::*;
 
 use crate::extract::{Geometry, Group, Instance, Read, Warning};
 use crate::material::Material;
+use crate::physics::{Label, Physics, VariantSelection};
 use crate::ser::finite;
 use crate::{Composed, Loader, Scene, resolver};
 
@@ -55,6 +56,9 @@ struct SceneMeta<'a> {
     geometry_count: usize,
     instances: &'a [Instance],
     materials: &'a [Material],
+    physics: &'a Physics,
+    labels: &'a [Label],
+    variant_selections: &'a [VariantSelection],
 }
 
 impl<'a> SceneMeta<'a> {
@@ -69,6 +73,9 @@ impl<'a> SceneMeta<'a> {
             geometry_count: scene.sources.len(),
             instances: &scene.instances,
             materials: &scene.materials,
+            physics: &scene.physics,
+            labels: &scene.labels,
+            variant_selections: &scene.variant_selections,
         }
     }
 }
