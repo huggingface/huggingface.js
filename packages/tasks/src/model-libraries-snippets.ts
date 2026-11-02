@@ -28,13 +28,30 @@ model = AadyaM1Forecaster(weights)
 pmf = model.forecast([28, 30, 27], elapsed=0)`,
 ];
 
-export const minicpmOcr = (model: ModelData): string[] => [
-	`# Install minicpm-ocr for your platform, then:
+export const minicpmOcr = (model: ModelData): string[] => {
+	const isGguf = Boolean(model.gguf) || model.tags.includes("gguf") || model.id.toLowerCase().endsWith("-gguf");
+	const backend = isGguf ? "llamacpp" : "vllm";
+	const device = isGguf ? "cpu" : "cuda:0";
+	const contextLength = isGguf ? 8192 : 40960;
+	const guide = isGguf ? "llamacpp_deploy.md" : "vllm_deploy_en.md";
+	const serviceSettings = isGguf
+		? "# llama.cpp: load the model and vision projector; use --port 8080,\n# --alias minicpm-ocr, --ctx-size 8192, --parallel 1, --jinja --reasoning off."
+		: "# vLLM: load the model above; use --port 8080,\n# --served-model-name minicpm-ocr and --max-model-len 40960.";
+	const pipeline = isGguf
+		? `{
+                "overlap_layout": False,
+                "queue_mode": "serial",
+                "max_workers": 1,
+            }`
+		: '{"overlap_layout": True}';
+
+	return [
+		`# Install minicpm-ocr for your platform:
 # pip install "minicpm-ocr[all]"
 # First deploy ${model.id} as a recognition service:
-# https://github.com/OpenBMB/MiniCPM-OCR/blob/main/docs/minicpm_ocr_tutorial_en.md
-# This example assumes port 8080, served model name minicpm-ocr,
-# a vLLM backend, and an NVIDIA GPU for layout detection.
+# https://github.com/OpenBMB/MiniCPM-OCR/blob/main/docs/${guide}
+${serviceSettings}
+# Layout detection uses ${device}; recognition runs on the deployed service.
 
 from importlib.resources import files
 from pathlib import Path
@@ -51,15 +68,16 @@ def main():
         overrides={
             "input": {"file_path": str(Path("demo.png").resolve())},
             "engine": {
-                "type": "vllm",
+                "type": "${backend}",
                 "server_url": "http://127.0.0.1:8080",
                 "model_name": "minicpm-ocr",
+                "max_model_len": ${contextLength},
             },
             "layout": {
                 "model_dir": str(layout_model),
-                "device": "cuda:0",
+                "device": "${device}",
             },
-            "pipeline": {"overlap_layout": True},
+            "pipeline": ${pipeline},
             "run": {"run_root": str(Path("output").resolve())},
         },
     )
@@ -72,7 +90,8 @@ def main():
 
 if __name__ == "__main__":
     main()`,
-];
+	];
+};
 
 export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
