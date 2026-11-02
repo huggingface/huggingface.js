@@ -45,28 +45,28 @@ describe("warnOnServerWarnings", () => {
 	it("should remember at most 100 topics and evict the oldest", () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-		for (let i = 0; i < 100; i++) {
+		for (let i = 0; i < 1000; i++) {
 			warnOnServerWarnings(responseWithWarnings(`topic${i}; Warning ${i}`));
 		}
-		expect(warn).toHaveBeenCalledTimes(100);
+		expect(warn).toHaveBeenCalledTimes(1000);
 
-		// All 100 topics are still deduplicated at capacity.
-		for (let i = 0; i < 100; i++) {
+		// All 1000 topics are still deduplicated at capacity.
+		for (let i = 0; i < 1000; i++) {
 			warnOnServerWarnings(responseWithWarnings(`TOPIC${i}; Repeated warning ${i}`));
 		}
-		expect(warn).toHaveBeenCalledTimes(100);
+		expect(warn).toHaveBeenCalledTimes(1000);
 
-		warnOnServerWarnings(responseWithWarnings("topic100; New warning"));
-		expect(warn).toHaveBeenCalledTimes(101);
+		warnOnServerWarnings(responseWithWarnings("topic1000; New warning"));
+		expect(warn).toHaveBeenCalledTimes(1001);
 		expect(warn).toHaveBeenLastCalledWith("New warning");
 
 		// Recent topics remain cached, while the oldest can warn again.
-		for (let i = 1; i <= 100; i++) {
+		for (let i = 1; i <= 1000; i++) {
 			warnOnServerWarnings(responseWithWarnings(`topic${i}; Repeated warning ${i}`));
 		}
-		expect(warn).toHaveBeenCalledTimes(101);
+		expect(warn).toHaveBeenCalledTimes(1001);
 		warnOnServerWarnings(responseWithWarnings("topic0; Oldest warning again"));
-		expect(warn).toHaveBeenCalledTimes(102);
+		expect(warn).toHaveBeenCalledTimes(1002);
 		expect(warn).toHaveBeenLastCalledWith("Oldest warning again");
 	});
 
