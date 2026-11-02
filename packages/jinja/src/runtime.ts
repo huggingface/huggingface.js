@@ -106,6 +106,16 @@ export class FloatValue extends RuntimeValue<number> {
 	}
 }
 
+/** Count Unicode code points without materializing an array. */
+function codePointLength(value: string): number {
+	let length = 0;
+	const iterator = value[Symbol.iterator]();
+	while (!iterator.next().done) {
+		++length;
+	}
+	return length;
+}
+
 /**
  * Represents a string value at runtime.
  */
@@ -145,7 +155,7 @@ export class StringValue extends RuntimeValue<string> {
 					return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
 				}),
 			],
-			["length", new IntegerValue(Array.from(this.value).length)],
+			["length", new IntegerValue(codePointLength(this.value))],
 			[
 				"rstrip",
 				new FunctionValue(() => {

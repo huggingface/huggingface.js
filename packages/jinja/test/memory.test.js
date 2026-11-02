@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Template } from "../src/index";
+import { StringValue } from "../src/runtime";
 
 // Adapted from https://huggingface.co/ibm-granite/granite-guardian-3.2-5b
 // The template contains large embedded object literals.
@@ -15,6 +16,28 @@ const GRANITE_GUARDIAN_CONTEXT = {
 describe("Runtime memory allocation", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
+	});
+
+	it.each([
+		["", 0],
+		["abc", 3],
+		["A😀B", 3],
+		["e\u0301", 2],
+		["😀\u200d😇", 3],
+		["\ud800x\udc00", 3],
+	])("counts string length without materializing a code-point array for %j", (value, expected) => {
+		const string = new StringValue(value);
+		const template = new Template("{{ value | length }}|{{ value.length }}");
+		const arrayFromSpy = vi.spyOn(Array, "from");
+
+		const length = string.builtins.get("length").value;
+		const output = template.render({ value });
+		const stringCopies = arrayFromSpy.mock.calls.filter(([input]) => input === value).length;
+		arrayFromSpy.mockRestore();
+
+		expect(length).toBe(expected);
+		expect(output).toBe(`${expected}|${expected}`);
+		expect(stringCopies).toBe(0);
 	});
 
 	it("renders template that contains large embedded object literals", () => {
