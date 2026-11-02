@@ -67,6 +67,13 @@ def Xform "Cabinet" (
             rel physics:body1 = </Cabinet/Glass>
         }
 
+        def PhysicsFixedJoint "Disabled"
+        {
+            bool physics:jointEnabled = 0
+            rel physics:body0 = </Cabinet/Body>
+            rel physics:body1 = </Cabinet/Glass>
+        }
+
         def PhysicsSphericalJoint "Ball"
         {
             uniform token physics:axis = "W"

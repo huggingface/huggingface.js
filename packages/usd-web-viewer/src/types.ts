@@ -210,6 +210,8 @@ export type UsdJoint = UsdJointKind & {
 	readonly path: string;
 	/** The prim type as authored, e.g. `PhysicsRevoluteJoint`. */
 	readonly type: string;
+	/** `physics:jointEnabled`: a disabled joint constrains nothing, so `pose` neither moves it nor moves bodies through it. */
+	readonly enabled: boolean;
 	/** Only when authored. */
 	readonly displayName: string | null;
 	/** The `physics:body0` / `physics:body1` targets as authored; null is the world. */
@@ -314,7 +316,7 @@ export interface LoadResult {
 	/**
 	 * Moves a joint to `value` (degrees for a revolute joint, meters for a prismatic one, clamped to its limits) and with it the meshes
 	 * of its body1, the bodies fixed to it and everything further down the chain; mimic joints follow. Kinematic only: no collisions.
-	 * Cheap enough for every frame of a drag. Only revolute and prismatic joints with a body1 can be posed: anything else, an unknown
+	 * Cheap enough for every frame of a drag. Only enabled revolute and prismatic joints with a body1 can be posed: anything else, an unknown
 	 * path or a value that is not a finite number throws. `viewer.load` results re-render by themselves; for `loadUsd`, render after.
 	 */
 	pose(joint: string, value: number): void;

@@ -257,6 +257,16 @@ fn fixed_joints_attach_bodies_to_the_one_that_moves_them() {
     assert_eq!(door["attached"], json!(["/Cabinet/Glass"]));
 }
 
+#[test]
+fn disabled_joints_are_reported_and_attach_nothing() {
+    let out = fixture();
+    let joints = &out["physics"]["joints"];
+    assert_eq!(find(joints, "/Cabinet/Joints/Disabled")["enabled"], false);
+    assert_eq!(find(joints, "/Cabinet/Joints/Pane")["enabled"], true);
+    let body = find(&out["physics"]["bodies"], "/Cabinet/Body");
+    assert_eq!(body["attached"], json!([]));
+}
+
 /// `USD_PHYSICS_DUMP=<root layer> cargo test --test physics dump -- --nocapture --ignored`
 #[test]
 #[ignore]

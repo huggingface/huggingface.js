@@ -110,6 +110,8 @@ pub struct Joint {
     pub type_name: String,
     #[serde(flatten)]
     pub limits: Limits,
+    /// `physics:jointEnabled`: a disabled joint constrains nothing.
+    pub enabled: bool,
     /// Only when authored.
     pub display_name: Option<String>,
     /// The `physics:body0` / `physics:body1` targets as authored; `None` is the world.
@@ -415,7 +417,7 @@ impl<'a> Reader<'a> {
             .enumerate()
             .map(|(i, b)| (b.path.clone(), i))
             .collect();
-        for joint in &physics.joints {
+        for joint in physics.joints.iter().filter(|j| j.enabled) {
             if let (Limits::Fixed, Some(b0), Some(b1)) = (&joint.limits, &joint.body0, &joint.body1)
                 && let Some(&i) = index.get(b0)
             {
@@ -602,6 +604,12 @@ impl<'a> Reader<'a> {
             path: prim.path().as_str().to_owned(),
             type_name: ty.to_owned(),
             limits,
+            enabled: prim
+                .attribute("physics:jointEnabled")
+                .get::<bool>()
+                .ok()
+                .flatten()
+                .unwrap_or(true),
             display_name: prim.get_metadata::<String>("displayName").ok().flatten(),
             // The targets for now: [`Reader::finish`] resolves them to bodies once every prim is read.
             body0: target0.clone(),

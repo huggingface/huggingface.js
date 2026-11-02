@@ -8,8 +8,9 @@ interface Target {
 	rest: THREE.Matrix4;
 }
 
-/** What `pose` can move: a revolute or prismatic joint that moves a body. */
-const posable = (joint: UsdJoint) => (joint.kind === "revolute" || joint.kind === "prismatic") && joint.body1 !== null;
+/** What `pose` can move: an enabled revolute or prismatic joint that moves a body. */
+const posable = (joint: UsdJoint) =>
+	joint.enabled && (joint.kind === "revolute" || joint.kind === "prismatic") && joint.body1 !== null;
 
 const AXES = { X: new THREE.Vector3(1, 0, 0), Y: new THREE.Vector3(0, 1, 0), Z: new THREE.Vector3(0, 0, 1) };
 
@@ -53,7 +54,7 @@ export function createPoser(
 		const children = new Map<string, { joint: UsdJoint; body: string; frame: THREE.Matrix4 }[]>();
 		const moved = new Set<string>();
 		for (const joint of joints) {
-			if (!joint.body1 || !["revolute", "prismatic", "fixed"].includes(joint.kind)) {
+			if (!joint.enabled || !joint.body1 || !["revolute", "prismatic", "fixed"].includes(joint.kind)) {
 				continue;
 			}
 			const parent = joint.body0 ?? "";
@@ -139,7 +140,7 @@ export function createPoser(
 				throw new Error(`no joint at ${path}`);
 			}
 			if (!posable(joint)) {
-				throw new Error(`${path} cannot be posed: only revolute and prismatic joints with a body1 can`);
+				throw new Error(`${path} cannot be posed: only enabled revolute and prismatic joints with a body1 can`);
 			}
 			if (!Number.isFinite(value)) {
 				throw new RangeError(`a joint position must be a finite number, got ${value}`);

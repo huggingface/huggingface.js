@@ -479,6 +479,7 @@ function articulatedMessages() {
 	const joint = (path, kind, body0, body1, extra) => ({
 		path,
 		kind,
+		enabled: true,
 		displayName: null,
 		body0,
 		body1,
@@ -514,6 +515,8 @@ function articulatedMessages() {
 					joints: [
 						joint("/J/Hinge", "revolute", "/Body", "/Door", { axis: "Z", lower: -90, upper: 90 }),
 						joint("/J/Pane", "fixed", "/Door", "/Door/Pane"),
+						// A shorter way to the pane than through the door, which only counts while it is enabled.
+						joint("/J/Off", "revolute", "/Body", "/Door/Pane", { axis: "X", lower: null, upper: null, enabled: false }),
 						joint("/J/Slide", "prismatic", "/Body", "/Drawer", { axis: "X", lower: 0, upper: 0.3 }),
 						joint("/J/Lid", "revolute", "/Shelf", "/Lid", { axis: "Z", lower: 0, upper: 90 }),
 						joint("/J/Follower", "revolute", "/Body", "/Drawer", {
@@ -595,6 +598,13 @@ test("pose slides in meters, clamps to the limits, and resetPose puts everything
 	assert.throws(() => pose("/J/Missing", 1), /no joint at \/J\/Missing/);
 	assert.throws(() => pose("/J/Pane", 1), /cannot be posed/);
 	assert.throws(() => pose("/J/Slide", NaN), RangeError);
+});
+
+test("a disabled joint is reported but cannot be posed", async () => {
+	const { info, pose, getPose } = await loadArticulated();
+	assert.equal(info.physics.joints.find((j) => j.path === "/J/Off").enabled, false);
+	assert.ok(!("/J/Off" in getPose()));
+	assert.throws(() => pose("/J/Off", 1), /cannot be posed/);
 });
 
 test("getPose reports every joint where it is, mimic joints included", async () => {
