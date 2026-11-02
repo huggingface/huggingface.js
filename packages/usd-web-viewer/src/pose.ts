@@ -8,7 +8,7 @@ interface Target {
 	rest: THREE.Matrix4;
 }
 
-/** What `pose` can move: an enabled revolute or prismatic joint that moves a body. */
+/** What `setJointPositions` can move: an enabled revolute or prismatic joint that moves a body. */
 const posable = (joint: UsdJoint) =>
 	joint.enabled && (joint.kind === "revolute" || joint.kind === "prismatic") && joint.body1 !== null;
 
@@ -24,7 +24,7 @@ export function createPoser(
 	joints: readonly UsdJoint[],
 	bodies: readonly UsdRigidBody[],
 	metersPerUnit: number,
-): Pick<LoadResult, "pose" | "resetPose" | "getPose"> {
+): Pick<LoadResult, "joints" | "setJointPositions" | "resetJointPositions" | "getJointPositions"> {
 	const values = new Map<string, number>();
 	let state: ReturnType<typeof prepare> | null = null;
 
@@ -133,35 +133,46 @@ export function createPoser(
 		}
 	}
 
+	const movable = joints.filter(posable);
+
 	return {
-		pose(path: string, value: number) {
-			const joint = joints.find((j) => j.path === path);
-			if (!joint) {
-				throw new Error(`no joint at ${path}`);
-			}
-			if (!posable(joint)) {
-				throw new Error(`${path} cannot be posed: only enabled revolute and prismatic joints with a body1 can`);
-			}
-			if (!Number.isFinite(value)) {
-				throw new RangeError(`a joint position must be a finite number, got ${value}`);
-			}
+		joints: movable,
+		setJointPositions(positions) {
 			const clamp = (j: UsdJoint, v: number) =>
 				j.kind === "revolute" || j.kind === "prismatic"
 					? Math.min(j.upper ?? Infinity, Math.max(j.lower ?? -Infinity, v))
 					: v;
-			const v = clamp(joint, value);
-			values.set(path, v);
-			for (const follower of joints) {
-				if (follower.mimic?.reference === path) {
-					values.set(follower.path, clamp(follower, -(follower.mimic.gearing * v + follower.mimic.offset)));
+			// Checked before any is set, so a bad entry moves nothing.
+			const moves = Object.entries(positions).map(([path, value]) => {
+				const joint = joints.find((j) => j.path === path);
+				if (!joint) {
+					throw new Error(`no joint at ${path}`);
+				}
+				if (!posable(joint)) {
+					throw new Error(`${path} cannot be posed: only enabled revolute and prismatic joints with a body1 can`);
+				}
+				if (!Number.isFinite(value)) {
+					throw new RangeError(`a joint position must be a finite number, got ${value}`);
+				}
+				return { joint, value: clamp(joint, value) };
+			});
+			for (const { joint, value } of moves) {
+				values.set(joint.path, value);
+			}
+			// After every value is set: a mimic joint follows its reference even when both are given.
+			for (const { joint, value } of moves) {
+				for (const follower of joints) {
+					if (follower.mimic?.reference === joint.path) {
+						values.set(follower.path, clamp(follower, -(follower.mimic.gearing * value + follower.mimic.offset)));
+					}
 				}
 			}
 			apply();
 		},
-		getPose() {
-			return Object.fromEntries(joints.filter(posable).map((j) => [j.path, values.get(j.path) ?? j.rest]));
+		getJointPositions() {
+			return Object.fromEntries(movable.map((j) => [j.path, values.get(j.path) ?? j.rest]));
 		},
-		resetPose() {
+		resetJointPositions() {
 			values.clear();
 			if (state) {
 				apply();

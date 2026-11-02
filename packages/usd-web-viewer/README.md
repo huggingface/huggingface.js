@@ -34,7 +34,7 @@ await complete; // textures stream in after the geometry
 `info` also reports what the stage authors for simulation (UsdPhysics) and its UsdSemantics labels, as authored: nothing is estimated. Masses are in kilograms, densities in kg/m³, inertia in kg·m², joint limits and positions in degrees or meters; positions and matrices are in stage space, like the meshes under `root`.
 
 ```js
-const { info, pose, resetPose, getPose } = await viewer.load(url);
+const { info, joints, setJointPositions, resetJointPositions, getJointPositions } = await viewer.load(url);
 
 info.physics.bodies; // rigid bodies: mass, center of mass, inertia, colliders, bodies fixed to them
 info.physics.colliders; // shape, approximation (convexHull, sdf, ...), physics material
@@ -45,12 +45,13 @@ info.labels; // e.g. { path: '/RootNode', taxonomy: 'wikidata_class', values: ['
 info.variantSelections; // e.g. { prim: '/Robotiq_2F_85', set: 'Physics', selection: 'Physx_parallel_grip' }
 info.dependencies; // every layer and texture the stage read, with its size
 
-pose('/Robotiq_2F_85/Robotiq_2F_85/Joints/finger_joint', 40); // revolute and prismatic joints; what hangs from it and mimic joints follow
-getPose(); // where every revolute and prismatic joint is now
-resetPose(); // back to the authored pose
+joints; // the joints setJointPositions can move, e.g. to build sliders
+setJointPositions({ '/Robotiq_2F_85/Robotiq_2F_85/Joints/finger_joint': 40 }); // revolute and prismatic joints, any number at once; what hangs from them and mimic joints follow
+getJointPositions(); // where every revolute and prismatic joint is now
+resetJointPositions(); // back to the authored pose
 ```
 
-Posing is kinematic only (no collisions or gravity) and cheap enough for every frame of a slider drag.
+Posing is kinematic only (no collisions or gravity) and cheap enough for every frame of a slider drag or a recording.
 
 ## Options
 

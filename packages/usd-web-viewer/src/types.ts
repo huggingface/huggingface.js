@@ -146,7 +146,7 @@ export interface UsdRigidBody {
 	readonly diagonalInertia: readonly [number, number, number] | null;
 	/** `w, x, y, z`, in the body's frame. */
 	readonly principalAxes: readonly [number, number, number, number] | null;
-	/** Where the body is in the authored pose; not updated by `pose`. */
+	/** Where the body is in the authored pose; not updated by `setJointPositions`. */
 	readonly world: UsdMatrix;
 	/** Collider prim paths. */
 	readonly colliders: readonly string[];
@@ -210,7 +210,7 @@ export type UsdJoint = UsdJointKind & {
 	readonly path: string;
 	/** The prim type as authored, e.g. `PhysicsRevoluteJoint`. */
 	readonly type: string;
-	/** `physics:jointEnabled`: a disabled joint constrains nothing, so `pose` neither moves it nor moves bodies through it. */
+	/** `physics:jointEnabled`: a disabled joint constrains nothing, so `setJointPositions` neither moves it nor moves bodies through it. */
 	readonly enabled: boolean;
 	/** Only when authored. */
 	readonly displayName: string | null;
@@ -220,7 +220,7 @@ export type UsdJoint = UsdJointKind & {
 	/** The rigid bodies it connects: the nearest rigid body at or above each target, else the target itself; null is the world. */
 	readonly body0: string | null;
 	readonly body1: string | null;
-	/** The joint frame on each target (`localPos` and `localRot` placed in the authored pose), without scale; not updated by `pose`. */
+	/** The joint frame on each target (`localPos` and `localRot` placed in the authored pose), without scale; not updated by `setJointPositions`. */
 	readonly frame0: UsdMatrix;
 	readonly frame1: UsdMatrix;
 	/** Computed from the two frames: where the authored poses put the joint (degrees or meters; 0 for the other kinds). */
@@ -313,17 +313,21 @@ export interface LoadResult {
 	readonly info: LoadInfo;
 	/** Settles when textures have streamed in; rejects with a UsdLoadError if the load is aborted, disposed or the worker dies. */
 	readonly complete: Promise<{ textures: number; failed: number }>;
+	/** The joints `setJointPositions` can move: enabled revolute and prismatic joints with a body1, mimic joints included (`mimic` tells them apart). */
+	readonly joints: readonly UsdJoint[];
 	/**
-	 * Moves a joint to `value` (degrees for a revolute joint, meters for a prismatic one, clamped to its limits) and with it the meshes
-	 * of its body1, the bodies fixed to it and everything further down the chain; mimic joints follow. Kinematic only: no collisions.
-	 * Cheap enough for every frame of a drag. Only enabled revolute and prismatic joints with a body1 can be posed: anything else, an unknown
-	 * path or a value that is not a finite number throws. `viewer.load` results re-render by themselves; for `loadUsd`, render after.
+	 * Moves joints, given by path, to their positions (degrees for a revolute joint, meters for a prismatic one, clamped to its limits)
+	 * and with them the meshes of their body1, the bodies fixed to them and everything further down the chain; mimic joints follow, even
+	 * when given a position of their own. Joints left out stay where they are. Kinematic only: no collisions. All the joints move in one
+	 * update, cheap enough for every frame of a drag or a recording. Only enabled revolute and prismatic joints with a body1 can be posed:
+	 * anything else, an unknown path or a value that is not a finite number throws and moves nothing. `viewer.load` results re-render by
+	 * themselves; for `loadUsd`, render after.
 	 */
-	pose(joint: string, value: number): void;
+	setJointPositions(positions: Readonly<Record<string, number>>): void;
 	/** Puts every joint back where the authored poses have it. */
-	resetPose(): void;
-	/** Where every joint `pose` can move is now, by path (degrees or meters), mimic joints included. */
-	getPose(): Record<string, number>;
+	resetJointPositions(): void;
+	/** Where every joint in `joints` is now, by path (degrees or meters); `setJointPositions` takes it back. */
+	getJointPositions(): Record<string, number>;
 	/** Frees geometries, materials and textures and stops any textures still streaming. */
 	dispose(): void;
 }

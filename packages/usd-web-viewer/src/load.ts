@@ -287,9 +287,10 @@ export async function loadUsd(url: string, options: LoadOptions = {}): Promise<L
 		root: scene.root,
 		info: scene.info as LoadInfo,
 		complete,
-		pose: scene.poser.pose,
-		resetPose: scene.poser.resetPose,
-		getPose: scene.poser.getPose,
+		joints: scene.poser.joints,
+		setJointPositions: scene.poser.setJointPositions,
+		resetJointPositions: scene.poser.resetJointPositions,
+		getJointPositions: scene.poser.getJointPositions,
 		dispose() {
 			stop(aborted());
 			scene.dispose();

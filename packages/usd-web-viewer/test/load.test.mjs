@@ -574,9 +574,9 @@ test("dependencies list the layers read and the textures, sized as they arrive",
 	assert.equal(info.dependencies[1].size, 2048);
 });
 
-test("pose turns a body about its joint and moves what is fixed to it", async () => {
-	const { pose, position } = await loadArticulated();
-	pose("/J/Hinge", 90);
+test("setJointPositions turns a body about its joint and moves what is fixed to it", async () => {
+	const { setJointPositions, position } = await loadArticulated();
+	setJointPositions({ "/J/Hinge": 90 });
 	// Hinged at x = 100 cm, a quarter turn about Z takes the door's origin to (100, -100).
 	const door = position("/Door/M");
 	assert.ok(door.distanceTo(new THREE.Vector3(100, -100, 0)) < 1e-9, `door at ${door.toArray()}`);
@@ -586,41 +586,80 @@ test("pose turns a body about its joint and moves what is fixed to it", async ()
 	assert.ok(position("/Body/M").length() < 1e-12, "the body stays");
 });
 
-test("pose slides in meters, clamps to the limits, and resetPose puts everything back", async () => {
-	const { pose, resetPose, position } = await loadArticulated();
-	pose("/J/Slide", 0.12);
+test("setJointPositions slides in meters, clamps to the limits, and resetJointPositions puts everything back", async () => {
+	const { setJointPositions, resetJointPositions, position } = await loadArticulated();
+	setJointPositions({ "/J/Slide": 0.12 });
 	assert.ok(position("/Drawer/M").distanceTo(new THREE.Vector3(12, 0, 0)) < 1e-9);
-	pose("/J/Slide", 5);
+	setJointPositions({ "/J/Slide": 5 });
 	assert.ok(position("/Drawer/M").distanceTo(new THREE.Vector3(30, 0, 0)) < 1e-9, "clamped to 0.3 m");
-	resetPose();
+	resetJointPositions();
 	assert.ok(position("/Drawer/M").length() < 1e-12);
 	assert.ok(position("/Door/M").length() < 1e-12);
-	assert.throws(() => pose("/J/Missing", 1), /no joint at \/J\/Missing/);
-	assert.throws(() => pose("/J/Pane", 1), /cannot be posed/);
-	assert.throws(() => pose("/J/Slide", NaN), RangeError);
+	assert.throws(() => setJointPositions({ "/J/Missing": 1 }), /no joint at \/J\/Missing/);
+	assert.throws(() => setJointPositions({ "/J/Pane": 1 }), /cannot be posed/);
+	assert.throws(() => setJointPositions({ "/J/Slide": NaN }), RangeError);
+});
+
+test("joints lists what setJointPositions can move, under the keys getJointPositions uses", async () => {
+	const { joints, getJointPositions } = await loadArticulated();
+	assert.deepEqual(
+		joints.map((j) => j.path),
+		["/J/Hinge", "/J/Slide", "/J/Lid", "/J/Follower"],
+	);
+	assert.deepEqual(
+		Object.keys(getJointPositions()),
+		joints.map((j) => j.path),
+	);
 });
 
 test("a disabled joint is reported but cannot be posed", async () => {
-	const { info, pose, getPose } = await loadArticulated();
+	const { info, setJointPositions, getJointPositions } = await loadArticulated();
 	assert.equal(info.physics.joints.find((j) => j.path === "/J/Off").enabled, false);
-	assert.ok(!("/J/Off" in getPose()));
-	assert.throws(() => pose("/J/Off", 1), /cannot be posed/);
+	assert.ok(!("/J/Off" in getJointPositions()));
+	assert.throws(() => setJointPositions({ "/J/Off": 1 }), /cannot be posed/);
 });
 
-test("getPose reports every joint where it is, mimic joints included", async () => {
-	const { pose, resetPose, getPose } = await loadArticulated();
+test("setJointPositions sets several joints in one walk, or none if any is invalid", async () => {
+	const { root, setJointPositions, getJointPositions, position } = await loadArticulated();
+	const mesh = root.children.find((m) => m.isInstancedMesh);
+	let writes = 0;
+	const setMatrixAt = mesh.setMatrixAt.bind(mesh);
+	mesh.setMatrixAt = (...args) => (writes++, setMatrixAt(...args));
+	setJointPositions({ "/J/Hinge": 90, "/J/Slide": 0.12 });
+	assert.equal(writes, 5, "each of the five copies is written once");
+	assert.ok(position("/Door/M").distanceTo(new THREE.Vector3(100, -100, 0)) < 1e-9);
+	assert.ok(position("/Drawer/M").x !== 0);
+
+	const before = getJointPositions();
+	assert.throws(() => setJointPositions({ "/J/Hinge": 10, "/J/Missing": 1 }), /no joint at/);
+	assert.throws(() => setJointPositions({ "/J/Hinge": 10, "/J/Slide": NaN }), RangeError);
+	assert.deepEqual(getJointPositions(), before, "nothing moved");
+});
+
+test("positions read back from getJointPositions restore them, and a mimic joint follows its reference in any order", async () => {
+	const { setJointPositions, getJointPositions, resetJointPositions } = await loadArticulated();
+	setJointPositions({ "/J/Hinge": 45, "/J/Slide": 0.1 });
+	const saved = getJointPositions();
+	resetJointPositions();
+	setJointPositions(saved);
+	assert.deepEqual(getJointPositions(), saved);
+	setJointPositions({ "/J/Follower": 5, "/J/Hinge": 30 });
+	assert.equal(getJointPositions()["/J/Follower"], 30);
+});
+
+test("getJointPositions reports every joint where it is, mimic joints included", async () => {
+	const { setJointPositions, resetJointPositions, getJointPositions } = await loadArticulated();
 	const rest = { "/J/Hinge": 0, "/J/Slide": 0, "/J/Lid": 0, "/J/Follower": 0 };
-	assert.deepEqual(getPose(), rest);
-	pose("/J/Hinge", 45);
-	pose("/J/Slide", 0.1);
-	assert.deepEqual(getPose(), { ...rest, "/J/Hinge": 45, "/J/Slide": 0.1, "/J/Follower": 45 });
-	resetPose();
-	assert.deepEqual(getPose(), rest);
+	assert.deepEqual(getJointPositions(), rest);
+	setJointPositions({ "/J/Hinge": 45, "/J/Slide": 0.1 });
+	assert.deepEqual(getJointPositions(), { ...rest, "/J/Hinge": 45, "/J/Slide": 0.1, "/J/Follower": 45 });
+	resetJointPositions();
+	assert.deepEqual(getJointPositions(), rest);
 });
 
-test("pose moves a body hung from a prim that is not a rigid body", async () => {
-	const { pose, position } = await loadArticulated();
-	pose("/J/Lid", 90);
+test("setJointPositions moves a body hung from a prim that is not a rigid body", async () => {
+	const { setJointPositions, position } = await loadArticulated();
+	setJointPositions({ "/J/Lid": 90 });
 	const lid = position("/Lid/M");
 	assert.ok(lid.distanceTo(new THREE.Vector3(100, -100, 0)) < 1e-9, `lid at ${lid.toArray()}`);
 });

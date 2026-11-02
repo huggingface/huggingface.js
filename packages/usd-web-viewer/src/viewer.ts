@@ -195,12 +195,12 @@ export function createViewer(container: HTMLElement, options: ViewerOptions = {}
 				const loaded = await loadUsd(url, internal);
 				const result: LoadResult = {
 					...loaded,
-					pose(joint, value) {
-						loaded.pose(joint, value);
+					setJointPositions(positions) {
+						loaded.setJointPositions(positions);
 						requestRender();
 					},
-					resetPose() {
-						loaded.resetPose();
+					resetJointPositions() {
+						loaded.resetJointPositions();
 						requestRender();
 					},
 				};
