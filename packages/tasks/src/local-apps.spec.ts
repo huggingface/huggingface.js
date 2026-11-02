@@ -328,6 +328,35 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(false);
 	});
 
+	it("kokon deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["kokon"];
+		const model: ModelData = {
+			id: "unsloth/Qwen-Image-2.1-Turbo-GGUF",
+			tags: ["gguf", "text-to-image"],
+			pipeline_tag: "text-to-image",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe("https://kokon.app/huggingface/?repo_id=unsloth%2FQwen-Image-2.1-Turbo-GGUF");
+		expect(deeplink(model, "qwen-image-2.1-turbo-Q4_K_M.gguf").href).toBe(
+			"https://kokon.app/huggingface/?repo_id=unsloth%2FQwen-Image-2.1-Turbo-GGUF&file=qwen-image-2.1-turbo-Q4_K_M.gguf",
+		);
+	});
+
+	it("kokon not shown for other Qwen-Image models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["kokon"];
+		const model: ModelData = {
+			id: "Qwen/Qwen-Image-2.1",
+			library_name: "diffusers",
+			pipeline_tag: "text-to-image",
+			tags: ["diffusers", "text-to-image"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("llama deeplink", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS["llama-app"];
 		const model: ModelData = {
