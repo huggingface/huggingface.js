@@ -5,6 +5,7 @@ import type { EventSourceMessage } from "../vendor/fetch-event-source/parse.js";
 import { getLines, getMessages } from "../vendor/fetch-event-source/parse.js";
 import { InferenceClientProviderApiError } from "../errors.js";
 import type { JsonObject } from "../vendor/type-fest/basic.js";
+import { fetchWithServerWarnings } from "./serverWarnings.js";
 
 export interface ResponseWrapper<T> {
 	data: T;
@@ -47,7 +48,7 @@ export async function innerRequest<T>(
 	},
 ): Promise<ResponseWrapper<T>> {
 	const { url, info } = await makeRequestOptions(args, providerHelper, options);
-	const response = await (options?.fetch ?? fetch)(url, info);
+	const response = await fetchWithServerWarnings(options?.fetch)(url, info);
 
 	const requestContext: ResponseWrapper<T>["requestContext"] = { url, info };
 
@@ -133,7 +134,7 @@ export async function* innerStreamingRequest<T>(
 	},
 ): AsyncGenerator<T> {
 	const { url, info } = await makeRequestOptions({ ...args, stream: true }, providerHelper, options);
-	const response = await (options?.fetch ?? fetch)(url, info);
+	const response = await fetchWithServerWarnings(options?.fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503) {
 		return yield* innerStreamingRequest(args, providerHelper, options);

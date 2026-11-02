@@ -28,6 +28,7 @@ import { uploadShards } from "../utils/uploadShards";
 import { splitAsyncGenerator } from "../utils/splitAsyncGenerator";
 import { SplicedBlob } from "../utils/SplicedBlob";
 import type { RangeEditCache } from "../utils/rangeEdit";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export type { RangeEditCache, RangeEditCacheEntry } from "../utils/rangeEdit";
 
@@ -307,7 +308,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			abortSignal?.throwIfAborted();
 
-			const res = await (params.fetch ?? fetch)(
+			const res = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/preupload/${encodeURIComponent(
 					params.branch ?? "main",
 				)}` + (params.isPullRequest ? "?create_pr=1" : ""),
@@ -381,7 +382,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 				})),
 			};
 
-			const res = await (params.fetch ?? fetch)(
+			const res = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/${repoId.type === "model" ? "" : repoId.type + "s/"}${
 					repoId.name
 				}.git/info/lfs/objects/batch`,
@@ -568,7 +569,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 										const index = parseInt(part) - 1;
 										const slice = content.slice(index * chunkSize, (index + 1) * chunkSize);
 
-										const res = await (params.fetch ?? fetch)(header[part], {
+										const res = await fetchWithServerWarnings(params.fetch)(header[part], {
 											method: "PUT",
 											/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
 											body: slice instanceof WebBlob && isFrontend ? await slice.arrayBuffer() : slice,
@@ -606,7 +607,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 								abortSignal?.throwIfAborted();
 
-								const res = await (params.fetch ?? fetch)(completionUrl, {
+								const res = await fetchWithServerWarnings(params.fetch)(completionUrl, {
 									method: "POST",
 									body: JSON.stringify(completeReq),
 									headers: {
@@ -632,7 +633,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									state: "uploading",
 								});
 							} else {
-								const res = await (params.fetch ?? fetch)(obj.actions.upload.href, {
+								const res = await fetchWithServerWarnings(params.fetch)(obj.actions.upload.href, {
 									method: "PUT",
 									headers: {
 										...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
@@ -682,7 +683,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 		return yield* eventToGenerator<CommitProgressEvent, CommitOutput>(
 			async (yieldCallback, returnCallback, rejectCallback) =>
-				(params.fetch ?? fetch)(
+				fetchWithServerWarnings(params.fetch)(
 					`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
 						params.branch ?? "main",
 					)}` + (params.isPullRequest ? "?create_pr=1" : ""),
@@ -891,7 +892,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 				).then(() => returnCallback(undefined), rejectCallback),
 			);
 
-			const resp = await (params.fetch ?? fetch)(
+			const resp = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
 				{
 					method: "POST",
@@ -937,7 +938,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 		for (const copyChunk of chunk(copyOperations, 100)) {
 			abortSignal?.throwIfAborted();
 
-			const resp = await (params.fetch ?? fetch)(
+			const resp = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
 				{
 					method: "POST",
@@ -982,7 +983,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 		const deletedOperations = allOperations.filter((operation) => operation.operation === "delete");
 
 		if (deletedOperations.length > 0) {
-			const resp = await (params.fetch ?? fetch)(
+			const resp = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
 				{
 					method: "POST",

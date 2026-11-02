@@ -12,6 +12,7 @@ import type {
 import { typedInclude } from "../utils/typedInclude.js";
 import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
 import { getLogger } from "./logger.js";
+import { fetchWithServerWarnings } from "../utils/serverWarnings.js";
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMappingEntry[]>();
 
@@ -70,7 +71,7 @@ export async function fetchInferenceProviderMappingForModel(
 		inferenceProviderMapping = inferenceProviderMappingCache.get(modelId)!;
 	} else {
 		const url = `${HF_HUB_URL}/api/models/${modelId}?expand[]=inferenceProviderMapping`;
-		const resp = await (options?.fetch ?? fetch)(url, {
+		const resp = await fetchWithServerWarnings(options?.fetch)(url, {
 			headers: accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${accessToken}` } : {},
 		});
 		if (!resp.ok) {
