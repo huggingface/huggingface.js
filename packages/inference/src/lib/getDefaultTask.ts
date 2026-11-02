@@ -1,6 +1,5 @@
 import { HF_HUB_URL } from "../config.js";
 import { isUrl } from "./isUrl.js";
-import { fetchWithServerWarnings } from "../utils/serverWarnings.js";
 
 /**
  * We want to make calls to the huggingface hub the least possible, eg if
@@ -39,12 +38,9 @@ export async function getDefaultTask(
 	}
 
 	if (cachedTask === undefined) {
-		const modelTask = await fetchWithServerWarnings(options?.fetch)(
-			`${HF_HUB_URL}/api/models/${model}?expand[]=pipeline_tag`,
-			{
-				headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-			},
-		)
+		const modelTask = await (options?.fetch ?? fetch)(`${HF_HUB_URL}/api/models/${model}?expand[]=pipeline_tag`, {
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+		})
 			.then((resp) => resp.json())
 			.then((json) => json.pipeline_tag)
 			.catch(() => null);
