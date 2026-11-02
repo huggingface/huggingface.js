@@ -608,6 +608,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"tar"`,
 	},
+	fse: {
+		prettyLabel: "fse",
+		repoName: "fse",
+		repoUrl: "https://github.com/oborchers/Fast_Sentence_Embeddings",
+		snippets: snippets.fse,
+		filter: false,
+		countDownloads: `path:"config.json" OR path_extension:"model"`,
+	},
 	gaussianformer: {
 		prettyLabel: "GaussianFormer",
 		repoName: "GaussianFormer",
