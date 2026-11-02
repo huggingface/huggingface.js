@@ -122,10 +122,31 @@ export interface LoadInfo {
 	readonly warnings: readonly LoadWarning[];
 }
 
+/** A UsdPhysics joint between rigid bodies. */
+export interface UsdJoint {
+	/** The joint prim's name. */
+	readonly name: string;
+	readonly path: string;
+	readonly type: "revolute" | "prismatic" | "fixed";
+	/** In the joint frame; none on a fixed joint. */
+	readonly axis?: "X" | "Y" | "Z" | undefined;
+	/** As authored: degrees for a revolute joint, stage units for a prismatic one. None when unlimited. */
+	readonly lower?: number | undefined;
+	readonly upper?: number | undefined;
+}
+
 export interface LoadResult {
 	/** Y-up, in meters. */
 	readonly root: THREE.Group;
 	readonly info: LoadInfo;
+	/** The stage's revolute, prismatic and fixed joints between rigid bodies (`PhysicsRigidBodyAPI`). */
+	readonly joints: readonly UsdJoint[];
+	/**
+	 * Moves the bodies those joints connect, and the meshes under them: revolute positions in degrees, prismatic ones
+	 * in stage units, keyed by joint name (setting every joint so named) or path. Joints left out keep their position;
+	 * 0 is the authored pose. Limits are not enforced. A `createViewer` viewer renders the change; otherwise render it.
+	 */
+	setJointPositions(positions: Readonly<Record<string, number>>): void;
 	/** Settles when textures have streamed in; rejects with a UsdLoadError if the load is aborted, disposed or the worker dies. */
 	readonly complete: Promise<{ textures: number; failed: number }>;
 	/** Frees geometries, materials and textures and stops any textures still streaming. */

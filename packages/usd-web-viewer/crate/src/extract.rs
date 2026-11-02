@@ -30,9 +30,54 @@ pub struct Scene {
     /// max), known before any triangle is read; `None` when a mesh has none.
     pub bounds: Option<[[f64; 3]; 2]>,
     pub materials: Vec<Material>,
+    /// Prims with `PhysicsRigidBodyAPI`, which `joints` move.
+    pub bodies: Vec<Body>,
+    /// UsdPhysics revolute, prismatic and fixed joints, for posing the bodies.
+    pub joints: Vec<Joint>,
     pub stats: Stats,
     /// What the viewer could not show faithfully, for the host to surface.
     pub warnings: Vec<Warning>,
+}
+
+#[derive(Serialize)]
+pub struct Body {
+    pub path: String,
+    /// Local-to-world as authored, like [`Instance::matrix`].
+    #[serde(serialize_with = "finite")]
+    pub matrix: [f64; 16],
+}
+
+#[derive(Serialize)]
+pub struct Joint {
+    pub path: String,
+    /// `revolute`, `prismatic` or `fixed`.
+    #[serde(rename = "type")]
+    pub kind: &'static str,
+    /// `X`, `Y` or `Z`, in the joint frame; none on a fixed joint.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub axis: Option<String>,
+    /// Degrees for a revolute joint, stage units for a prismatic one; none when unlimited.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub lower: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub upper: Option<f32>,
+    pub body0: JointEnd,
+    pub body1: JointEnd,
+}
+
+/// One side of a joint. It can target the body or a prim under it (often its
+/// mesh): the joint frame is relative to the targeted prim, and moves its body.
+#[derive(Serialize)]
+pub struct JointEnd {
+    /// Index into the bodies; none for the world.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub body: Option<u32>,
+    /// The targeted prim's local-to-world; identity for the world.
+    #[serde(serialize_with = "finite")]
+    pub target: [f64; 16],
+    pub position: [f32; 3],
+    /// x, y, z, w.
+    pub rotation: [f32; 4],
 }
 
 /// Something the viewer could not show faithfully.
@@ -127,6 +172,9 @@ pub struct Instance {
     #[serde(serialize_with = "as_map")]
     pub subsets: Vec<(String, u32)>,
     pub double_sided: bool,
+    /// The nearest body at or above the mesh, which it moves with.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub body: Option<u32>,
 }
 
 /// Inherited imageable state along the traversal.
@@ -368,8 +416,13 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
     // Visibility and purpose first: an invisible or guide instancer places nothing.
     let mut instancers = Vec::new();
     let mut drawable = Vec::new();
+    let mut bodies = Vec::new();
+    let mut joints = Vec::new();
     for path in &paths {
         let prim = stage.prim(path)?;
+        if prim.has_api_schema("PhysicsRigidBodyAPI")? {
+            bodies.push(prim.clone());
+        }
         let mut own = path
             .parent()
             .and_then(|p| state.get(&p).copied())
@@ -387,6 +440,9 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
         state.insert(path.clone(), own);
         match prim.type_name()?.as_deref() {
             Some("PointInstancer") => instancers.push((prim, own.invisible || own.hidden_purpose)),
+            Some("PhysicsRevoluteJoint" | "PhysicsPrismaticJoint" | "PhysicsFixedJoint") => {
+                joints.push(prim)
+            }
             Some(ty)
                 if (ty == "Mesh" || implicit::is_implicit(ty))
                     && !own.invisible
@@ -624,9 +680,11 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
                 material: mesh_material,
                 subsets: subsets.clone(),
                 double_sided,
+                body: None,
             });
         }
     }
+    articulate(stage, &mut scene, &mut xforms, &bodies, &joints)?;
     scene.bounds = bounds.filter(|_| !scene.instances.is_empty());
     if let Some(path) = over_limit.or(truncated) {
         scene.warnings.push(Warning {
@@ -661,6 +719,122 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
         });
     }
     Ok(scene)
+}
+
+/// Fills in the bodies, the joints between them and the body each instance
+/// moves with.
+fn articulate(
+    stage: &Stage,
+    scene: &mut Scene,
+    xforms: &mut XformCache,
+    bodies: &[usd::Prim],
+    joints: &[usd::Prim],
+) -> openusd::Result<()> {
+    let mut index = HashMap::new();
+    for prim in bodies {
+        index.insert(prim.path().as_str().to_owned(), scene.bodies.len() as u32);
+        scene.bodies.push(Body {
+            path: prim.path().as_str().to_owned(),
+            matrix: xforms
+                .local_to_world_transform(prim)
+                .unwrap_or(Matrix4d::IDENTITY)
+                .0,
+        });
+    }
+    // The nearest body at or above a path (a placed instance's ends in its label).
+    let body_of = |mut path: &str| loop {
+        if let Some(&body) = index.get(path) {
+            return Some(body);
+        }
+        match path.rfind('/') {
+            Some(end) if end > 0 => path = &path[..end],
+            _ => return None,
+        }
+    };
+    for instance in &mut scene.instances {
+        instance.body = body_of(&instance.path);
+    }
+    for prim in joints {
+        if matches!(
+            prim.attribute("physics:jointEnabled").get::<bool>(),
+            Ok(Some(false))
+        ) {
+            continue;
+        }
+        let kind = match prim.type_name()?.as_deref() {
+            Some("PhysicsRevoluteJoint") => "revolute",
+            Some("PhysicsPrismaticJoint") => "prismatic",
+            _ => "fixed",
+        };
+        let mut end = |n: u8| -> openusd::Result<JointEnd> {
+            let target = prim
+                .relationship(format!("physics:body{n}"))
+                .targets()?
+                .into_iter()
+                .next();
+            let (body, target) = match target {
+                Some(path) => (
+                    body_of(path.as_str()),
+                    xforms
+                        .local_to_world_transform(&stage.prim(&path)?)
+                        .unwrap_or(Matrix4d::IDENTITY)
+                        .0,
+                ),
+                None => (None, Matrix4d::IDENTITY.0),
+            };
+            Ok(JointEnd {
+                body,
+                target,
+                position: vec3_attr(prim, &format!("physics:localPos{n}")).unwrap_or_default(),
+                rotation: quat_attr(prim, &format!("physics:localRot{n}"))
+                    .unwrap_or([0., 0., 0., 1.]),
+            })
+        };
+        let (body0, body1) = (end(0)?, end(1)?);
+        let moving = kind != "fixed";
+        let limit = |name| {
+            moving
+                .then(|| float_attr(prim, name))
+                .flatten()
+                .filter(|v| v.is_finite())
+        };
+        scene.joints.push(Joint {
+            path: prim.path().as_str().to_owned(),
+            kind,
+            axis: moving
+                .then(|| token_attr(prim, "physics:axis").unwrap_or_else(|| "X".to_owned())),
+            lower: limit("physics:lowerLimit"),
+            upper: limit("physics:upperLimit"),
+            body0,
+            body1,
+        });
+    }
+    Ok(())
+}
+
+fn float_attr(prim: &usd::Prim, name: &str) -> Option<f32> {
+    match prim.attribute(name).get::<Value>().ok()?? {
+        Value::Float(v) => Some(v),
+        Value::Double(v) => Some(v as f32),
+        _ => None,
+    }
+}
+
+fn vec3_attr(prim: &usd::Prim, name: &str) -> Option<[f32; 3]> {
+    match prim.attribute(name).get::<Value>().ok()?? {
+        Value::Vec3f(v) => Some([v.x, v.y, v.z]),
+        Value::Vec3d(v) => Some([v.x as f32, v.y as f32, v.z as f32]),
+        _ => None,
+    }
+}
+
+/// x, y, z, w.
+fn quat_attr(prim: &usd::Prim, name: &str) -> Option<[f32; 4]> {
+    match prim.attribute(name).get::<Value>().ok()?? {
+        Value::Quatf(q) => Some([q.x, q.y, q.z, q.w]),
+        Value::Quatd(q) => Some([q.x as f32, q.y as f32, q.z as f32, q.w as f32]),
+        _ => None,
+    }
 }
 
 /// A gprim's local bounding box: its authored `extent`, or for an implicit

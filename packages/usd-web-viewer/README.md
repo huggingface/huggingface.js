@@ -50,6 +50,15 @@ await complete; // textures stream in after the geometry
 
 Failures are `UsdLoadError`s with a `code` (`aborted`, `fetch`, `compose`, `worker`, `webgl`); anything that could not be shown faithfully is listed in `info.warnings`. Every option, error and warning is typed.
 
+## Joints
+
+`joints` lists the stage's UsdPhysics revolute, prismatic and fixed joints between rigid bodies (`PhysicsRigidBodyAPI`). `setJointPositions` moves the bodies they connect, and the meshes under them, from the authored pose: degrees for revolute joints, stage units for prismatic ones.
+
+```js
+const { joints, setJointPositions } = await viewer.load(url);
+setJointPositions({ shoulder_pan: 30, elbow_flex: -45 });
+```
+
 ## Loading untrusted files
 
 - Requests are sent like `<model-viewer>`'s: cookies only to the page's own origin (`credentials: 'same-origin'`), no custom headers, no referrer.

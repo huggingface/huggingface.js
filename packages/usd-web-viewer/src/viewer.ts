@@ -207,6 +207,11 @@ export function createViewer(container: HTMLElement, options: ViewerOptions = {}
 				}
 				requestRender();
 				result.complete.then(requestRender, () => {}).finally(releaseCallerSignal);
+				const setJointPositions = result.setJointPositions;
+				result.setJointPositions = (positions) => {
+					setJointPositions(positions);
+					requestRender();
+				};
 				return result;
 			} catch (error) {
 				releaseCallerSignal();

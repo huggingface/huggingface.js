@@ -1,0 +1,37 @@
+---
+source: crate/tests/fixtures.rs
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/articulation.usda
+---
+upAxis Z, metersPerUnit 1
+prims 11, meshes 3, triangles 36
+
+instances:
+  /Robot/base/box: geometry 0, material 1, body 0
+    at (0, 0, 0), world (-0.1, -0.1, -0.1)..(0.1, 0.1, 0.1)
+  /Robot/arm/box: geometry 1, material 1, body 1
+    at (0, 0, 0.6), world (-0.05, -0.05, 0.55)..(0.05, 0.05, 0.65)
+  /Robot/slider/box: geometry 2, material 1, body 2
+    at (0, 0, 1), world (-0.025, -0.025, 0.975)..(0.025, 0.025, 1.025)
+
+geometries:
+  0 /Robot/base/box: 12 triangles (all outward), 24 vertices, bounds (-0.1, -0.1, -0.1)..(0.1, 0.1, 0.1)
+    normals (1, 0, 0) x4, (-1, 0, 0) x4, (0, 1, 0) x4, (0, -1, 0) x4, (0, 0, 1) x4, (0, 0, -1) x4
+  1 /Robot/arm/box: 12 triangles (all outward), 24 vertices, bounds (-0.05, -0.05, -0.05)..(0.05, 0.05, 0.05)
+    normals (1, 0, 0) x4, (-1, 0, 0) x4, (0, 1, 0) x4, (0, -1, 0) x4, (0, 0, 1) x4, (0, 0, -1) x4
+  2 /Robot/slider/box: 12 triangles (all outward), 24 vertices, bounds (-0.025, -0.025, -0.025)..(0.025, 0.025, 0.025)
+    normals (1, 0, 0) x4, (-1, 0, 0) x4, (0, 1, 0) x4, (0, -1, 0) x4, (0, 0, 1) x4, (0, 0, -1) x4
+
+materials:
+  0 (unbound) displayColor: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0, color from primvar displayColor
+  1 (unbound) fallback: color (0.7, 0.7, 0.7), opacity 1, roughness 0.5, metallic 0
+
+bodies:
+  0 /Robot/base at (0, 0, 0)
+  1 /Robot/arm at (0, 0, 0.6)
+  2 /Robot/slider at (0, 0, 1)
+
+joints:
+  /Robot/shoulder: revolute Y -90..90, body 0 (target at (0, 0, 0)) + (0, 0, 0.1) -> body 1 (target at (0, 0, 0.6)) + (0, 0, -0.5)
+  /Robot/extend: prismatic Z 0..0.3, body 1 (target at (0, 0, 0.6)) + (0, 0, 0.5) -> body 2 (target at (0, 0, 1)) + (0, 0, 0.1)
+  /Robot/anchor: fixed, world (target at (0, 0, 0)) + (0, 0, 0) -> body 0 (target at (0, 0, 0)) + (0, 0, 0)

@@ -90,11 +90,12 @@ fn summary(s: &Scene) -> String {
             _ => format!("materials {materials:?}"),
         };
         let sided = if i.double_sided { " double-sided" } else { "" };
+        let body = i.body.map(|b| format!(", body {b}")).unwrap_or_default();
         let m = i.matrix;
         let [lo, hi] = world_bounds(&g.bounds, &m);
         writeln!(
             o,
-            "  {}: geometry {}, {materials}{sided}",
+            "  {}: geometry {}, {materials}{sided}{body}",
             i.path, i.geometry
         )
         .unwrap();
@@ -116,6 +117,48 @@ fn summary(s: &Scene) -> String {
     writeln!(o, "\nmaterials:").unwrap();
     for (k, m) in s.materials.iter().enumerate() {
         material(&mut o, k, m);
+    }
+
+    if !s.bodies.is_empty() {
+        writeln!(o, "\nbodies:").unwrap();
+    }
+    for (k, b) in s.bodies.iter().enumerate() {
+        writeln!(o, "  {k} {} at {}", b.path, vec(&b.matrix[12..15])).unwrap();
+    }
+    if !s.joints.is_empty() {
+        writeln!(o, "\njoints:").unwrap();
+    }
+    for j in &s.joints {
+        let end = |e: &usd_wasm::extract::JointEnd| {
+            let body = e.body.map_or("world".to_owned(), |b| format!("body {b}"));
+            format!(
+                "{body} (target at {}) + {}",
+                vec(&e.target[12..15]),
+                vec(&e.position)
+            )
+        };
+        let axis = j
+            .axis
+            .as_deref()
+            .map(|a| format!(" {a}"))
+            .unwrap_or_default();
+        let limits = match (j.lower, j.upper) {
+            (None, None) => String::new(),
+            (lower, upper) => format!(
+                " {}..{}",
+                lower.map_or("-inf".to_owned(), num),
+                upper.map_or("inf".to_owned(), num)
+            ),
+        };
+        writeln!(
+            o,
+            "  {}: {}{axis}{limits}, {} -> {}",
+            j.path,
+            j.kind,
+            end(&j.body0),
+            end(&j.body1)
+        )
+        .unwrap();
     }
 
     if !s.warnings.is_empty() {

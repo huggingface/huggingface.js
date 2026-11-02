@@ -46,6 +46,35 @@ export interface InstanceMeta {
 	material: number;
 	/** GeomSubset name to material index. */
 	subsets: Record<string, number>;
+	/** The body the mesh moves with. */
+	body?: number;
+}
+
+export interface BodyMeta {
+	path: string;
+	/** Row-major 4x4, as authored. */
+	matrix: number[];
+}
+
+/** One side of a joint: the frame is relative to `target`, a prim at or under the body. */
+export interface JointEndMeta {
+	/** None for the world. */
+	body?: number;
+	/** The targeted prim's local-to-world, row-major 4x4. */
+	target: number[];
+	position: Vec3;
+	/** x, y, z, w. */
+	rotation: Vec4;
+}
+
+export interface JointMeta {
+	path: string;
+	type: "revolute" | "prismatic" | "fixed";
+	axis?: "X" | "Y" | "Z";
+	lower?: number;
+	upper?: number;
+	body0: JointEndMeta;
+	body1: JointEndMeta;
 }
 
 export interface SceneMeta {
@@ -56,6 +85,8 @@ export interface SceneMeta {
 	geometryCount: number;
 	instances: InstanceMeta[];
 	materials: MaterialMeta[];
+	bodies: BodyMeta[];
+	joints: JointMeta[];
 }
 
 /** `[start, count, subset?]`, in indices. */

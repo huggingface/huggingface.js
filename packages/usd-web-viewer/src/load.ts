@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { UsdLoadError } from "./errors.js";
+import { createArticulation } from "./joints.js";
 import { OUT_OF_MEMORY, localKey, localUrl } from "./load-core.js";
 import { SHOW } from "./show.js";
 import type { InternalOptions } from "./show.js";
@@ -15,7 +16,7 @@ import type {
 	StageProgress,
 	WorkerMessage,
 } from "./meta.js";
-import type { LoadInfo, LoadOptions, LoadProgress, LoadResult, LoadStats } from "./types.js";
+import type { LoadInfo, LoadOptions, LoadProgress, LoadResult, LoadStats, UsdJoint } from "./types.js";
 
 // Instances of one geometry with the same materials drawn as one
 // InstancedMesh past this many.
@@ -282,6 +283,8 @@ export async function loadUsd(url: string, options: LoadOptions = {}): Promise<L
 	return {
 		root: scene.root,
 		info: scene.info as LoadInfo,
+		joints: scene.joints,
+		setJointPositions: scene.setJointPositions,
 		complete,
 		dispose() {
 			stop(aborted());
@@ -337,6 +340,62 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 			variants.set(key, copy);
 		}
 		return copy;
+	};
+
+	const articulation = meta.joints.length ? createArticulation(meta.bodies, meta.joints) : undefined;
+	const jointName = (path: string) => path.slice(path.lastIndexOf("/") + 1);
+	const joints: UsdJoint[] = meta.joints.map(({ path, type, axis, lower, upper }) => ({
+		name: jointName(path),
+		path,
+		type,
+		axis,
+		lower,
+		upper,
+	}));
+	/** Meshes (or instances) that move with a body, from their authored transform. */
+	interface Moving {
+		body: number;
+		mesh: THREE.Mesh;
+		index: number;
+		rest: THREE.Matrix4;
+	}
+	const moving: Moving[] = [];
+	let motions: THREE.Matrix4[] | undefined;
+	const place = (list: Moving[]) => {
+		if (!motions) {
+			return;
+		}
+		const matrix = new THREE.Matrix4();
+		const instancedMeshes = new Set<THREE.InstancedMesh>();
+		for (const { body, mesh, index, rest } of list) {
+			matrix.multiplyMatrices(motions[body], rest);
+			if (mesh instanceof THREE.InstancedMesh) {
+				mesh.setMatrixAt(index, matrix);
+				instancedMeshes.add(mesh);
+			} else {
+				mesh.matrix.copy(matrix);
+				mesh.matrixWorldNeedsUpdate = true;
+			}
+		}
+		for (const mesh of instancedMeshes) {
+			mesh.instanceMatrix.needsUpdate = true;
+			mesh.computeBoundingBox();
+			mesh.computeBoundingSphere();
+		}
+	};
+	const setJointPositions = (positions: Readonly<Record<string, number>>) => {
+		if (!articulation) {
+			return;
+		}
+		for (const [key, value] of Object.entries(positions)) {
+			for (const joint of meta.joints) {
+				if (joint.path === key || jointName(joint.path) === key) {
+					articulation.positions.set(joint, value);
+				}
+			}
+		}
+		motions = articulation.pose();
+		place(moving);
 	};
 
 	// Geometries stream in one at a time; each brings in the meshes that draw it.
@@ -397,12 +456,18 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 		}
 		// USD stores row-vector matrices row-major: the same numbers column-major for three.js.
 		// Set whole rather than decomposed, which would lose shear.
+		const added: Moving[] = [];
 		for (const { material, list } of batches.values()) {
 			if (list.length > INSTANCING_MIN) {
 				const mesh = new THREE.InstancedMesh(geometry, material, list.length);
 				mesh.name = list[0].path;
 				const matrix = new THREE.Matrix4();
-				list.forEach((inst, k) => mesh.setMatrixAt(k, matrix.fromArray(inst.matrix)));
+				list.forEach((inst, k) => {
+					mesh.setMatrixAt(k, matrix.fromArray(inst.matrix));
+					if (inst.body !== undefined) {
+						added.push({ body: inst.body, mesh, index: k, rest: matrix.clone() });
+					}
+				});
 				mesh.computeBoundingBox();
 				mesh.computeBoundingSphere();
 				instanced.push(mesh);
@@ -416,8 +481,14 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 				mesh.matrixAutoUpdate = false;
 				mesh.matrixWorldNeedsUpdate = true;
 				root.add(mesh);
+				if (inst.body !== undefined) {
+					added.push({ body: inst.body, mesh, index: 0, rest: mesh.matrix.clone() });
+				}
 			}
 		}
+		moving.push(...added);
+		// Posed before this geometry arrived.
+		place(added);
 	};
 
 	const allMaterials = () => [...materials, ...variants.values()];
@@ -458,7 +529,7 @@ function buildScene(meta: SceneMeta, textureMode: LoadOptions["textures"]) {
 		}
 	};
 
-	return { root, info, addGeometry, applyTexture, textureFailed, dispose };
+	return { root, info, joints, setJointPositions, addGeometry, applyTexture, textureFailed, dispose };
 }
 
 function createGeometry(g: GeometryMeta, a: GeometryArrays) {

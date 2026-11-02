@@ -64,6 +64,8 @@ function sceneMessages(matrix) {
 				warnings: [],
 				geometryCount: 1,
 				instances: [{ path: "/M", geometry: 0, material: 0, subsets: {}, doubleSided: false, matrix }],
+				bodies: [],
+				joints: [],
 				materials: [
 					{
 						path: "/Mat",
@@ -449,4 +451,124 @@ test("instances of one geometry with the same materials draw as one InstancedMes
 	batch.addEventListener("dispose", () => (freed = true));
 	dispose();
 	assert.equal(freed, true);
+});
+
+/** A row-major (USD) matrix translating by `x, y, z`. */
+const translated = (x, y, z) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
+const jointEnd = (body, target, position) => ({ body, target, position, rotation: [0, 0, 0, 1] });
+
+/** A base, an arm on a shoulder (Y) above it and a slider on the arm (Z), each drawn by one mesh. */
+async function loadArm(instances) {
+	const [meta, geometry, done] = sceneMessages(IDENTITY);
+	meta.meta.bodies = [
+		{ path: "/R/base", matrix: translated(0, 0, 0) },
+		{ path: "/R/arm", matrix: translated(0, 0, 0.6) },
+		{ path: "/R/slider", matrix: translated(0, 0, 1) },
+	];
+	meta.meta.joints = [
+		{
+			path: "/R/shoulder",
+			type: "revolute",
+			axis: "Y",
+			lower: -90,
+			upper: 90,
+			body0: jointEnd(0, translated(0, 0, 0), [0, 0, 0.1]),
+			body1: jointEnd(1, translated(0, 0, 0.6), [0, 0, -0.5]),
+		},
+		// Its frame is relative to the arm's mesh, as a joint may target a prim under its body.
+		{
+			path: "/R/extend",
+			type: "prismatic",
+			axis: "Z",
+			body0: jointEnd(1, translated(0, 0, 0.6), [0, 0, 0.5]),
+			body1: jointEnd(2, translated(0, 0, 1), [0, 0, 0.1]),
+		},
+		{
+			path: "/R/anchor",
+			type: "fixed",
+			body0: jointEnd(undefined, IDENTITY, [0, 0, 0]),
+			body1: jointEnd(0, IDENTITY, [0, 0, 0]),
+		},
+	];
+	meta.meta.instances = instances;
+	const loading = loadUsd("scene.usda");
+	await tick();
+	[meta, geometry, done].forEach((m) => FakeWorker.last.send(m));
+	return loading;
+}
+
+const bodyMesh = (path, body, matrix) => ({
+	path,
+	geometry: 0,
+	material: 0,
+	subsets: {},
+	doubleSided: false,
+	matrix,
+	body,
+});
+const positionOf = (object, index) => {
+	const matrix = new THREE.Matrix4();
+	if (index === undefined) {
+		matrix.copy(object.matrix);
+	} else {
+		object.getMatrixAt(index, matrix);
+	}
+	return new THREE.Vector3()
+		.setFromMatrixPosition(matrix)
+		.toArray()
+		.map((v) => +v.toFixed(6) + 0);
+};
+
+test("setJointPositions moves each mesh with its body, down the joint chain", async () => {
+	const { root, joints, setJointPositions } = await loadArm([
+		bodyMesh("/R/base/box", 0, translated(0, 0, 0)),
+		bodyMesh("/R/arm/box", 1, translated(0, 0, 0.6)),
+		bodyMesh("/R/slider/box", 2, translated(0, 0, 1)),
+	]);
+	assert.deepEqual(
+		joints.map((j) => [j.name, j.type, j.axis, j.lower, j.upper]),
+		[
+			["shoulder", "revolute", "Y", -90, 90],
+			["extend", "prismatic", "Z", undefined, undefined],
+			["anchor", "fixed", undefined, undefined, undefined],
+		],
+	);
+	const [base, arm, slider] = ["/R/base/box", "/R/arm/box", "/R/slider/box"].map((p) => root.getObjectByName(p));
+
+	// Arm and slider swing 90° about Y around the shoulder at z 0.1, and the slider slides 0.2 along the arm.
+	setJointPositions({ shoulder: 90, "/R/extend": 0.2, unknown: 5 });
+	assert.deepEqual(positionOf(base), [0, 0, 0]);
+	assert.deepEqual(positionOf(arm), [0.5, 0, 0.1]);
+	assert.deepEqual(positionOf(slider), [1.1, 0, 0.1]);
+
+	// Left out, a joint keeps its position; 0 is the authored pose.
+	setJointPositions({ shoulder: 0 });
+	assert.deepEqual(positionOf(slider), [0, 0, 1.2]);
+	setJointPositions({ extend: 0 });
+	assert.deepEqual(
+		[positionOf(arm), positionOf(slider)],
+		[
+			[0, 0, 0.6],
+			[0, 0, 1],
+		],
+	);
+});
+
+test("setJointPositions moves instances of an instanced mesh one by one", async () => {
+	const instances = [0, 1, 2, 3].map((k) => bodyMesh(`/R/base/i${k}`, 0, translated(k, 0, 0)));
+	instances.push(bodyMesh("/R/arm/i", 1, translated(0, 0, 0.6)));
+	const { root, setJointPositions } = await loadArm(instances);
+	const batch = root.children.find((c) => c.isInstancedMesh);
+	assert.equal(batch.count, 5);
+	setJointPositions({ shoulder: 90 });
+	assert.deepEqual(positionOf(batch, 3), [3, 0, 0]);
+	assert.deepEqual(positionOf(batch, 4), [0.5, 0, 0.1]);
+	assert.ok(batch.boundingBox.max.z < 0.2);
+});
+
+test("a stage without joints has none to set", async () => {
+	const { joints, setJointPositions, root } = await load();
+	assert.deepEqual(joints, []);
+	setJointPositions({ anything: 1 });
+	assert.deepEqual(positionOf(root.children[0]), [0, 0, 0]);
 });
