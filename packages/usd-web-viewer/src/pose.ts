@@ -25,7 +25,7 @@ export function createPoser(
 	bodies: readonly UsdRigidBody[],
 	frames: readonly UsdFrame[],
 	metersPerUnit: number,
-): Pick<LoadResult, "joints" | "setJointPositions" | "resetJointPositions" | "getJointPositions" | "getWorldPosition"> {
+): Pick<LoadResult, "joints" | "setJointPositions" | "resetJointPositions" | "getJointPositions" | "getWorldMatrix"> {
 	const values = new Map<string, number>();
 	let state: ReturnType<typeof prepare> | null = null;
 	// Each body's move from its rest pose, once anything has been posed.
@@ -36,10 +36,9 @@ export function createPoser(
 		const bodyPaths = bodies.map((b) => b.path).sort((a, b) => b.length - a.length);
 		const ownerOf = (path: string) => bodyPaths.find((b) => path === b || path.startsWith(b + "/"));
 		const targets = new Map<string, Target[]>();
-		// Where each prim `getWorldPosition` can read is in the authored pose, and the body that moves it.
-		const places = new Map<string, { body: string; rest: THREE.Vector3 }>();
-		const place = (path: string, body: string, rest: THREE.Matrix4) =>
-			places.set(path, { body, rest: new THREE.Vector3().setFromMatrixPosition(rest) });
+		// Where each prim `getWorldMatrix` can read is in the authored pose, and the body that moves it.
+		const places = new Map<string, { body: string; rest: THREE.Matrix4 }>();
+		const place = (path: string, body: string, rest: THREE.Matrix4) => places.set(path, { body, rest });
 		const add = (path: string, target: Target) => {
 			const body = ownerOf(path);
 			if (body) {
@@ -186,19 +185,19 @@ export function createPoser(
 		getJointPositions() {
 			return Object.fromEntries(movable.map((j) => [j.path, values.get(j.path) ?? j.rest]));
 		},
-		getWorldPosition(path) {
+		getWorldMatrix(path) {
 			state ??= prepare();
 			const place = state.places.get(path);
 			if (!place) {
 				return null;
 			}
-			const position = place.rest.clone();
+			const matrix = place.rest.clone();
 			const delta = deltas.get(place.body);
 			if (delta) {
-				position.applyMatrix4(delta);
+				matrix.premultiply(delta);
 			}
 			root.updateWorldMatrix(true, false);
-			return root.localToWorld(position);
+			return matrix.premultiply(root.matrixWorld);
 		},
 		resetJointPositions() {
 			values.clear();

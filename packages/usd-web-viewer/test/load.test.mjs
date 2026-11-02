@@ -613,28 +613,37 @@ test("joints lists what setJointPositions can move, under the keys getJointPosit
 	);
 });
 
-test("getWorldPosition follows a frame with no mesh, in the scene's meters", async () => {
-	const { root, setJointPositions, resetJointPositions, getWorldPosition } = await loadArticulated();
+const positionOf = (matrix) => new THREE.Vector3().setFromMatrixPosition(matrix);
+
+test("getWorldMatrix follows a frame with no mesh, in the scene's meters, and turns with it", async () => {
+	const { root, setJointPositions, resetJointPositions, getWorldMatrix } = await loadArticulated();
 	const inScene = (x, y, z) => root.localToWorld(new THREE.Vector3(x, y, z));
-	assert.ok(getWorldPosition("/Door/Tip").distanceTo(inScene(2, 0, 0)) < 1e-9, "authored before any posing");
+	const xAxis = () => new THREE.Vector3(1, 0, 0).transformDirection(getWorldMatrix("/Door/Tip"));
+	assert.ok(positionOf(getWorldMatrix("/Door/Tip")).distanceTo(inScene(2, 0, 0)) < 1e-9, "authored before any posing");
+	assert.ok(xAxis().distanceTo(new THREE.Vector3(1, 0, 0)) < 1e-9);
 	setJointPositions({ "/J/Hinge": 90 });
 	// Like the pane, 2 cm along the door: a quarter turn about x = 100 cm takes it to (100, -98).
-	assert.ok(getWorldPosition("/Door/Tip").distanceTo(new THREE.Vector3(1, -0.98, 0)) < 1e-9, "in meters");
+	assert.ok(positionOf(getWorldMatrix("/Door/Tip")).distanceTo(new THREE.Vector3(1, -0.98, 0)) < 1e-9, "in meters");
+	assert.ok(xAxis().distanceTo(new THREE.Vector3(0, 1, 0)) < 1e-9, "turned a quarter about Z");
 	resetJointPositions();
-	assert.ok(getWorldPosition("/Door/Tip").distanceTo(inScene(2, 0, 0)) < 1e-9);
+	assert.ok(positionOf(getWorldMatrix("/Door/Tip")).distanceTo(inScene(2, 0, 0)) < 1e-9);
+	assert.ok(xAxis().distanceTo(new THREE.Vector3(1, 0, 0)) < 1e-9);
 });
 
-test("getWorldPosition reads bodies and drawn meshes, follows root, and is null for anything else", async () => {
-	const { root, setJointPositions, getWorldPosition } = await loadArticulated();
+test("getWorldMatrix reads bodies and drawn meshes, follows root, and is null for anything else", async () => {
+	const { root, setJointPositions, getWorldMatrix } = await loadArticulated();
 	setJointPositions({ "/J/Hinge": 90 });
-	assert.ok(getWorldPosition("/Door").distanceTo(new THREE.Vector3(1, -1, 0)) < 1e-9);
-	assert.ok(getWorldPosition("/Door/Pane/M").distanceTo(new THREE.Vector3(1, -0.98, 0)) < 1e-9);
-	assert.equal(getWorldPosition("/Nowhere"), null);
+	assert.ok(positionOf(getWorldMatrix("/Door")).distanceTo(new THREE.Vector3(1, -1, 0)) < 1e-9);
+	assert.ok(positionOf(getWorldMatrix("/Door/Pane/M")).distanceTo(new THREE.Vector3(1, -0.98, 0)) < 1e-9);
+	assert.equal(getWorldMatrix("/Nowhere"), null);
 
 	const base = new THREE.Group();
 	base.position.set(1, 2, 3);
 	base.add(root);
-	assert.ok(getWorldPosition("/Door").distanceTo(new THREE.Vector3(2, 1, 3)) < 1e-9, "a parent of root moves it too");
+	assert.ok(
+		positionOf(getWorldMatrix("/Door")).distanceTo(new THREE.Vector3(2, 1, 3)) < 1e-9,
+		"a parent of root moves it too",
+	);
 });
 
 test("a disabled joint is reported but cannot be posed", async () => {

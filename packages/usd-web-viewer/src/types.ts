@@ -340,10 +340,11 @@ export interface LoadResult {
 	/** Where every joint in `joints` is now, by path (degrees or meters); `setJointPositions` takes it back. */
 	getJointPositions(): Record<string, number>;
 	/**
-	 * Where a rigid body, a frame in `info.physics.frames` or a drawn mesh under a body is now, after `setJointPositions` and wherever
-	 * `root` has been moved: in the scene's space, like `Object3D.getWorldPosition`, not the stage space of `info.physics`. Null for any other path.
+	 * Where a rigid body, a frame in `info.physics.frames` or a drawn mesh under a body is now and which way it faces, after
+	 * `setJointPositions` and wherever `root` has been moved: in the scene's space, like `Object3D.matrixWorld` and so with `root`'s scale,
+	 * not the stage space of `info.physics`. Null for any other path.
 	 */
-	getWorldPosition(path: string): THREE.Vector3 | null;
+	getWorldMatrix(path: string): THREE.Matrix4 | null;
 	/** Frees geometries, materials and textures and stops any textures still streaming. */
 	dispose(): void;
 }
