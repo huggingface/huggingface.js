@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { Template } from "../src/index";
-import { StringValue } from "../src/runtime";
+import { Environment, Interpreter, Template } from "../src/index";
+import { IntegerValue, StringValue } from "../src/runtime";
 
 // Adapted from https://huggingface.co/ibm-granite/granite-guardian-3.2-5b
 // The template contains large embedded object literals.
@@ -37,6 +37,53 @@ describe("Runtime memory allocation", () => {
 
 		expect(length).toBe(expected);
 		expect(output).toBe(`${expected}|${expected}`);
+		expect(stringCopies).toBe(0);
+	});
+
+	it.each([
+		["A😀B", "0", "A"],
+		["A😀B", "-0", "A"],
+		["A😀B", "1", "😀"],
+		["A😀B", "-1", "B"],
+		["A😀B", "-3", "A"],
+		["A😀B", "3", undefined],
+		["A😀B", "-4", undefined],
+		["", "0", undefined],
+		["abc", "-1", "c"],
+		["e\u0301", "1", "\u0301"],
+		["\ud800x\udc00", "-1", "\udc00"],
+		["A😀B", "0 // 0", "A"],
+		["A😀B", "1 // 0", undefined],
+		["A😀B", "-1 // 0", undefined],
+	])("indexes %j at %s without materializing a code-point array", (value, index, expected) => {
+		const template = new Template(`{{ value[${index}] | default('<missing>') }}|{{ value[${index}] is defined }}`);
+		const arrayFromSpy = vi.spyOn(Array, "from");
+		const output = template.render({ value });
+		const stringCopies = arrayFromSpy.mock.calls.filter(([input]) => input === value).length;
+		arrayFromSpy.mockRestore();
+
+		expect(output).toBe(`${expected ?? "<missing>"}|${expected !== undefined}`);
+		expect(stringCopies).toBe(0);
+	});
+
+	it.each([
+		[1.9, "😀"],
+		[-1.9, "B"],
+		[-0.5, "A"],
+		[undefined, "A"],
+	])("preserves Array.at index normalization for IntegerValue(%j)", (index, expected) => {
+		const value = "A😀B";
+		const environment = new Environment();
+		environment.setVariable("value", new StringValue(value));
+		environment.setVariable("index", new IntegerValue(index));
+		const interpreter = new Interpreter(environment);
+		const template = new Template("{{ value[index] }}");
+		const arrayFromSpy = vi.spyOn(Array, "from");
+		const output = interpreter.run(template.parsed).value;
+		const stringCopies = arrayFromSpy.mock.calls.filter(([input]) => input === value).length;
+		arrayFromSpy.mockRestore();
+
+		expect(output).toBe(expected);
 		expect(stringCopies).toBe(0);
 	});
 
