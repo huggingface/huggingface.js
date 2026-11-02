@@ -29,8 +29,8 @@ pmf = model.forecast([28, 30, 27], elapsed=0)`,
 ];
 
 export const minicpmOcr = (model: ModelData): string[] => [
-	`# Install PaddlePaddle for your platform, then:
-# pip install "minicpm-ocr[layout,pdf]" pypdfium2
+	`# Install minicpm-ocr for your platform, then:
+# pip install "minicpm-ocr[all]"
 # First deploy ${model.id} as a recognition service:
 # https://github.com/OpenBMB/MiniCPM-OCR/blob/main/docs/minicpm_ocr_tutorial_en.md
 # This example assumes port 8080, served model name minicpm-ocr,
