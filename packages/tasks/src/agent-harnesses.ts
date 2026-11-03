@@ -221,6 +221,12 @@ export const AGENT_HARNESSES = {
 			"Alibaba's AI office platform for completing tasks and delivering documents, spreadsheets, presentations, websites, and other work products.",
 		envVars: { QODER_WORK_INTEGRATION_PRODUCT: "*" },
 	},
+	cue: {
+		prettyLabel: "Cue",
+		description:
+			"Manus’s personal agent app, where agents have their own identities, tools and permissions and can collaborate on tasks.",
+		envVars: { MANUS_LONG_DESKTOP_WORKER: "*", MANUS_OPERATOR_PLATFORM: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
