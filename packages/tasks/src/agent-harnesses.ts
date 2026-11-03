@@ -209,6 +209,12 @@ export const AGENT_HARNESSES = {
 			"Tencent's AI workspace that plans workflows, uses tools, and creates finished documents, spreadsheets, presentations, and other work.",
 		envVars: { WORKBUDDY_APPLICATION_NAME: "*", WORKBUDDY_APP_NAME: "*" },
 	},
+	"grok-bot": {
+		prettyLabel: "Grok Bot",
+		description:
+			"AI teammates that retain context and complete tasks across apps and websites on a persistent cloud computer.",
+		envVars: { SAND_AGENT: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
