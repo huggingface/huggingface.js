@@ -101,6 +101,11 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 		template = template.replace(/([#%-]})\n/g, "$1");
 	}
 
+	// The generation-tag pattern cannot match without this literal substring.
+	if (typeof template === "string" && template.indexOf("generation") === -1) {
+		return template;
+	}
+
 	// Handle the custom transformers-specific `generation` tag.
 	// See https://github.com/huggingface/transformers/pull/30650 for more information.
 	// Also honors `{%-` / `-%}` whitespace-stripping modifiers by trimming

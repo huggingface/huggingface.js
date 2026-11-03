@@ -1,8 +1,22 @@
 import { describe, expect, it } from "vitest";
 
 import { Token, TOKEN_TYPES, tokenize } from "../src/lexer";
+import { Template } from "../src";
 
 describe("Lexer compatibility", () => {
+	it("retains the replacement path for string-like inputs", () => {
+		const source = { endsWith: () => false, replace: () => "text" };
+		expect(tokenize(source)).toEqual([new Token("text", TOKEN_TYPES.Text)]);
+	});
+
+	it("applies ordinary whitespace preprocessing without generation tags", () => {
+		expect(new Template("head\n  {% if true %}\nbody\n  {% endif %}\ntail\n").render()).toBe("head\nbody\ntail");
+	});
+
+	it("preserves generation-tag replacement inside quoted strings", () => {
+		expect(new Template("{{ 'A{% generation %}B{% endgeneration %}C' }}").render()).toBe("ABC");
+	});
+
 	it("preserves literal code units and backslashes around comments", () => {
 		const before = "text {\0🤗\\x41";
 		const after = "\\n} tail";
