@@ -227,6 +227,12 @@ export const AGENT_HARNESSES = {
 			"Manus’s personal agent app, where agents have their own identities, tools and permissions and can collaborate on tasks.",
 		envVars: { MANUS_LONG_DESKTOP_WORKER: "*", MANUS_OPERATOR_PLATFORM: "*" },
 	},
+	muse: {
+		prettyLabel: "Muse",
+		description:
+			"Meta’s personal AI agent that handles tasks and projects across everyday apps and turns long-term goals into action plans.",
+		envVars: { JARVIS_IS_ASSIGNED: "*", JARVIS_TOOL_CALL_ID: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
