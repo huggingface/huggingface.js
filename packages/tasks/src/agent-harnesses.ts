@@ -287,6 +287,12 @@ export const AGENT_HARNESSES = {
 			INSTINCT_OUTER_TOOL_USE_TIMEOUT_SECONDS: "*",
 		},
 	},
+	lingguang: {
+		prettyLabel: "Lingguang",
+		description:
+			"Ant Group’s multimodal personal AI agent that identifies needs and manages tasks over time with user authorization.",
+		envVars: { EXEC_FROM: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
