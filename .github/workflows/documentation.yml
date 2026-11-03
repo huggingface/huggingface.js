@@ -16,7 +16,7 @@ on:
 
 jobs:
   build:
-    uses: huggingface/doc-builder/.github/workflows/build_main_documentation.yml@145b9d4f6ab65ad3af87c66773b2c43294e52446 # main
+    uses: huggingface/doc-builder/.github/workflows/build_main_documentation.yml@6175bc655f1c949e6048b9277a90bd98eb8a4e6e # main
     with:
       commit_sha: ${{ github.sha }}
       package: huggingface.js
