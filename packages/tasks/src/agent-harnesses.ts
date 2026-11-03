@@ -203,6 +203,12 @@ export const AGENT_HARNESSES = {
 		description: "High-performance code editor with an integrated AI agent panel and terminal.",
 		envVars: { ZED_TERM: "*" },
 	},
+	workbuddy: {
+		prettyLabel: "WorkBuddy",
+		description:
+			"Tencent's AI workspace that plans workflows, uses tools, and creates finished documents, spreadsheets, presentations, and other work.",
+		envVars: { WORKBUDDY_APPLICATION_NAME: "*", WORKBUDDY_APP_NAME: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
