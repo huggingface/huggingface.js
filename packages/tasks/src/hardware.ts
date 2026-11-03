@@ -38,8 +38,9 @@ export interface HardwareSpec {
 	 * sold via OEMs without a public MSRP (H100, MI300X, ...), this is a
 	 * widely-reported street price. For mobile/laptop GPUs that are not sold
 	 * standalone, this is the approximate module/BOM cost. For Apple Silicon
-	 * SoCs, this is the price of a Mac configured with that chip and the
-	 * largest memory option. For CPU "family" entries (e.g. "Xeon 4th Gen",
+	 * and NVIDIA GB10/RTX Spark SoCs, this is the price of a representative
+	 * system configured with that chip and the largest memory option.
+	 * For CPU "family" entries (e.g. "Xeon 4th Gen",
 	 * "Ryzen Zen 4 7000 (Ryzen 9)"), this is the tray/box price of a
 	 * representative flagship SKU at launch.
 	 */

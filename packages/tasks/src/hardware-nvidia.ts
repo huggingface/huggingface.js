@@ -111,12 +111,43 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	GB10: {
 		tflops: 29.71,
-		memory: [128],
+		memory: [64, 128],
 		computeCapability: 12.1,
 		msrp: 3_999,
 		power: 140,
 		releaseYear: 2025,
 		aliases: ["DGX Spark"],
+	},
+	// https://www.nvidia.com/en-au/products/rtx-spark/specifications/
+	// TFLOPS are rough estimates scaled from GB10 by CUDA core count; OEM clocks vary.
+	// MSRP estimates use Surface system prices, since these SoCs are not sold standalone.
+	// Laptop configurations: https://www.microsoft.com/en-us/store/configure/surface-laptop-ultra/8wg5vqp0x4b8
+	"RTX Spark N1X (6144 cores)": {
+		tflops: 29.71,
+		memory: [32, 48, 64, 128],
+		computeCapability: 12.1,
+		msrp: 5_900,
+		power: 80,
+		releaseYear: 2026,
+		aliases: ["N1X", "RTX Spark", "RTX Spark Laptop", "Surface Laptop Ultra"],
+	},
+	"RTX Spark N1X (5120 cores)": {
+		tflops: 24.76,
+		memory: [24, 32],
+		computeCapability: 12.1,
+		msrp: 3_300,
+		power: 80,
+		releaseYear: 2026,
+		aliases: ["N1X", "RTX Spark", "RTX Spark Laptop", "Surface Laptop Ultra"],
+	},
+	"RTX Spark N1X Desktop": {
+		tflops: 29.71,
+		memory: [128],
+		computeCapability: 12.1,
+		msrp: 6_000,
+		power: 140,
+		releaseYear: 2026, // Announced for 2026; Surface RTX Spark Dev Box is available for pre-order.
+		aliases: ["N1X", "RTX Spark", "Surface RTX Spark Dev Box"],
 	},
 	"RTX PRO 6000 WS": {
 		tflops: 126,
