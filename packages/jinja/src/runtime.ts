@@ -225,7 +225,7 @@ export class StringValue extends RuntimeValue<string> {
 						// Trailing whitespace may be present when maxsplit is specified and there aren't sufficient matches in the string.
 						const text = this.value.trimStart();
 						for (const { 0: match, index } of text.matchAll(/\S+/g)) {
-							if (maxsplit.value !== -1 && result.length >= maxsplit.value && index !== undefined) {
+							if (maxsplit.value >= 0 && result.length >= maxsplit.value && index !== undefined) {
 								result.push(match + text.slice(index + match.length));
 								break;
 							}
@@ -237,7 +237,7 @@ export class StringValue extends RuntimeValue<string> {
 							throw new Error("empty separator");
 						}
 						result = this.value.split(sep.value);
-						if (maxsplit.value !== -1 && result.length > maxsplit.value) {
+						if (maxsplit.value >= 0 && result.length > maxsplit.value) {
 							// Follow Python's behavior: If maxsplit is given, at most maxsplit splits are done,
 							// with any remaining text returned as the final element of the list.
 							result.push(result.splice(maxsplit.value).join(sep.value));
