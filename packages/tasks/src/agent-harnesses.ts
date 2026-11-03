@@ -250,6 +250,11 @@ export const AGENT_HARNESSES = {
 		description: "Kimi Code CLI  —  The Starting Point for Next-Gen Agents",
 		envVars: { KIMI_PLUGIN_ROOT: "*" },
 	},
+	"grok-build": {
+		prettyLabel: "Grok Build",
+		description: "SpaceXAI's coding agent harness and TUI. Fullscreen, mouse interactive, extensible.",
+		envVars: { GROK_AGENT: "1", GROK_PLUGIN_ROOT: "*", GROK_PLUGIN_DATA: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
