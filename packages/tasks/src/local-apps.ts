@@ -678,6 +678,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
+	quo: {
+		prettyLabel: "Quo",
+		docsUrl: "https://quo.computer",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model, filepath) =>
+			new URL(`quo://models/huggingface/${model.id}${filepath ? `?file=${encodeURIComponent(filepath)}` : ""}`),
+	},
 	"atomic-chat": {
 		prettyLabel: "Atomic Chat",
 		docsUrl: "https://atomic.chat",
