@@ -265,6 +265,12 @@ export const AGENT_HARNESSES = {
 		description: "Roo Code gives you a whole dev team of AI agents in your code editor.",
 		envVars: { ROO_ACTIVE: "*", ROO_CLI_RUNTIME: "*" },
 	},
+	junie: {
+		prettyLabel: "Junie",
+		description:
+			"An AI coding agent by JetBrains that ships code from your terminal, IDE, or CI/CD pipeline - powered by any LLM you choose",
+		envVars: { JUNIE_SHIM_PATH: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
