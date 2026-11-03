@@ -215,7 +215,7 @@ export const AGENT_HARNESSES = {
 	"deepseek-harness": {
 		prettyLabel: "DeepSeek Harness",
 		repoUrl: "https://github.com/deepseek-ai/deepseek-harness",
-		description: "DeepSeek agent harness shell execution context.",
+		description: "DeepSeek Harness: Everything is a Plugin.",
 		envVars: { DSH_SHELL: "*" },
 	},
 	cursor: {
