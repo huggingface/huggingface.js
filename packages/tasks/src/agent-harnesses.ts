@@ -255,6 +255,11 @@ export const AGENT_HARNESSES = {
 		description: "SpaceXAI's coding agent harness and TUI. Fullscreen, mouse interactive, extensible.",
 		envVars: { GROK_AGENT: "1", GROK_PLUGIN_ROOT: "*", GROK_PLUGIN_DATA: "*" },
 	},
+	"qwen-code": {
+		prettyLabel: "Qwen Code",
+		description: "An open-source AI coding agent that lives in your terminal.",
+		envVars: { QWEN_CODE: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
