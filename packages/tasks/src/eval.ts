@@ -2,6 +2,12 @@
  * List of supported Evaluation Frameworks supported in the `eval.yaml` file in benchmarks datasets.
  */
 export const EVALUATION_FRAMEWORKS = {
+	"lifesci-diamond": {
+		name: "lifesci-diamond",
+		description:
+			"LifeSci Diamond evaluates life sciences regulatory affairs deliverables using task-specific rubrics and a panel of LLM judges.",
+		url: "https://huggingface.co/datasets/arca-inc/lifesci-diamond",
+	},
 	exgentic: {
 		name: "exgentic",
 		description:
