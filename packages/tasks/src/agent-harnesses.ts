@@ -260,6 +260,11 @@ export const AGENT_HARNESSES = {
 		description: "An open-source AI coding agent that lives in your terminal.",
 		envVars: { QWEN_CODE: "*" },
 	},
+	"roo-code": {
+		prettyLabel: "Roo Code",
+		description: "Roo Code gives you a whole dev team of AI agents in your code editor.",
+		envVars: { ROO_ACTIVE: "*", ROO_CLI_RUNTIME: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
