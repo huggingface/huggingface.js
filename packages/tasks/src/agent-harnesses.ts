@@ -212,6 +212,12 @@ export const AGENT_HARNESSES = {
 		description: "Cursor's coding agent for the command line.",
 		envVars: { CURSOR_AGENT: "*" },
 	},
+	"deepseek-harness": {
+		prettyLabel: "DeepSeek Harness",
+		repoUrl: "https://github.com/deepseek-ai/deepseek-harness",
+		description: "DeepSeek Harness: Everything is a Plugin.",
+		envVars: { DSH_SHELL: "*" },
+	},
 	cursor: {
 		prettyLabel: "Cursor",
 		docsUrl: "https://cursor.com",
