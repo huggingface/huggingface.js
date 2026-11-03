@@ -290,6 +290,33 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 	});
 
+	it("quo deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["quo"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe("quo://models/huggingface/bartowski/Llama-3.2-3B-Instruct-GGUF");
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf").href).toBe(
+			"quo://models/huggingface/bartowski/Llama-3.2-3B-Instruct-GGUF?file=Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+		);
+	});
+
+	it("quo not shown for a model without GGUF files", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["quo"];
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			tags: ["conversational"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("atomic chat deeplink", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS["atomic-chat"];
 		const model: ModelData = {
