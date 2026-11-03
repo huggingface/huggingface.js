@@ -735,9 +735,9 @@ export class Environment {
 	/**
 	 * Resolve the environment in which the variable is declared.
 	 * @param {string} name The name of the variable.
-	 * @returns {Environment} The environment in which the variable is declared.
+	 * @returns {Environment | undefined} The environment containing the variable, if declared.
 	 */
-	private resolve(name: string): Environment {
+	private resolve(name: string): Environment | undefined {
 		if (this.variables.has(name)) {
 			return this;
 		}
@@ -747,12 +747,12 @@ export class Environment {
 			return this.parent.resolve(name);
 		}
 
-		throw new Error(`Unknown variable: ${name}`);
+		return undefined;
 	}
 
 	lookupVariable(name: string): AnyRuntimeValue {
 		try {
-			return this.resolve(name).variables.get(name) ?? new UndefinedValue();
+			return this.resolve(name)?.variables.get(name) ?? new UndefinedValue();
 		} catch {
 			return new UndefinedValue();
 		}

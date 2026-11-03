@@ -143,3 +143,98 @@ describe("Test interpreter options", () => {
 		}
 	});
 });
+
+describe("Environment lookup", () => {
+	it("resolves the nearest binding and observes later assignments", () => {
+		const parent = new Environment();
+		const inherited = parent.set("name", "parent");
+		const child = new Environment(parent);
+		expect(child.lookupVariable("name")).toBe(inherited);
+
+		const local = child.set("name", "child");
+		expect(child.lookupVariable("name")).toBe(local);
+		child.setVariable("name", inherited);
+		expect(child.lookupVariable("name")).toBe(inherited);
+	});
+
+	it("preserves explicit undefined and none while keeping missing values independent", () => {
+		const parent = new Environment();
+		parent.set("name", "parent");
+		const child = new Environment(parent);
+		const explicit = child.set("name", undefined);
+		const none = child.set("empty", null);
+		expect(child.lookupVariable("name")).toBe(explicit);
+		expect(explicit.type).toBe("UndefinedValue");
+		expect(child.lookupVariable("empty")).toBe(none);
+		expect(none.type).toBe("NullValue");
+
+		const first = child.lookupVariable("missing");
+		const second = child.lookupVariable("missing");
+		expect(first).not.toBe(second);
+		first.value = "changed";
+		expect(second.value).toBeUndefined();
+		expect(child.lookupVariable("missing").value).toBeUndefined();
+	});
+
+	it("preserves parent accessors that change between reads", () => {
+		const first = new Environment();
+		const second = new Environment();
+		first.set("name", "first");
+		const expected = second.set("name", "second");
+		const child = new Environment();
+		let reads = 0;
+		Object.defineProperty(child, "parent", {
+			get() {
+				return ++reads === 1 ? first : second;
+			},
+		});
+		expect(child.lookupVariable("name")).toBe(expected);
+		expect(reads).toBe(2);
+	});
+
+	it("preserves dispatch through existing JavaScript resolver overrides", () => {
+		const target = new Environment();
+		const expected = target.set("name", "value");
+		const parent = new Environment();
+		const calls = [];
+		// The emitted JavaScript method can be overridden despite its private TS declaration.
+		parent.resolve = function (name) {
+			calls.push([name, this === parent]);
+			return target;
+		};
+		const child = new Environment(parent);
+		expect(child.lookupVariable("name")).toBe(expected);
+		expect(calls).toEqual([["name", true]]);
+	});
+
+	it("continues to handle unexpected errors while resolving a parent", () => {
+		const child = new Environment();
+		Object.defineProperty(child, "parent", {
+			get() {
+				throw new Error("Parent lookup failed");
+			},
+		});
+		expect(child.lookupVariable("missing").type).toBe("UndefinedValue");
+	});
+
+	it("terminates a cyclic parent lookup and resolves bindings before the cycle", () => {
+		const first = new Environment();
+		const second = new Environment(first);
+		const expected = second.set("name", "value");
+		let reads = 0;
+		let guardTripped = false;
+		Object.defineProperty(first, "parent", {
+			get() {
+				// Bound a possible iterative regression without pinning recursion depth.
+				if (++reads > 100_000) {
+					guardTripped = true;
+					throw new Error("Cyclic lookup did not terminate");
+				}
+				return second;
+			},
+		});
+		expect(first.lookupVariable("name")).toBe(expected);
+		expect(first.lookupVariable("missing").type).toBe("UndefinedValue");
+		expect(guardTripped).toBe(false);
+	});
+});
