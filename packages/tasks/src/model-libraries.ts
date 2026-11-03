@@ -752,6 +752,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "HunyuanWorld-voyager",
 		repoUrl: "https://github.com/Tencent-Hunyuan/HunyuanWorld-Voyager",
 	},
+	"hy-nomas": {
+		prettyLabel: "Hy-Nomas",
+		repoName: "Hy-Nomas",
+		repoUrl: "https://github.com/Tencent-Hunyuan/Hy-Nomas",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"hy-worldplay": {
 		prettyLabel: "HY-WorldPlay",
 		repoName: "HY-WorldPlay",
