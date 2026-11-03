@@ -228,7 +228,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			lastTokenType === TOKEN_TYPES.CloseExpression ||
 			lastTokenType === TOKEN_TYPES.Comment
 		) {
-			let text = "";
+			const textStart = cursorPosition;
 			while (
 				cursorPosition < src.length &&
 				// Keep going until we hit the next Jinja statement or expression
@@ -237,10 +237,10 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 					(src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{" || src[cursorPosition + 1] === "#")
 				)
 			) {
-				// Consume text
-				text += src[cursorPosition++];
+				++cursorPosition;
 			}
 
+			const text = src.slice(textStart, cursorPosition);
 			// There is some text to add
 			if (text.length > 0) {
 				tokens.push(new Token(text, TOKEN_TYPES.Text));
@@ -258,14 +258,16 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				++cursorPosition; // Skip the hyphen
 			}
 
-			let comment = "";
+			const commentStart = cursorPosition;
 			while (src[cursorPosition] !== "#" || src[cursorPosition + 1] !== "}") {
 				// Check for end of input
 				if (cursorPosition + 2 >= src.length) {
 					throw new SyntaxError("Missing end of comment tag");
 				}
-				comment += src[cursorPosition++];
+				++cursorPosition;
 			}
+
+			let comment = src.slice(commentStart, cursorPosition);
 
 			// Check for trailing hyphen for whitespace control -#}
 			const stripAfter = comment.endsWith("-");
