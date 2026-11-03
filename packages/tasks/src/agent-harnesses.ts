@@ -239,6 +239,12 @@ export const AGENT_HARNESSES = {
 			"General-purpose AI agent for automating workflows, conducting research and turning instructions into completed work.",
 		envVars: { MANUS_ADDON_RUNTIME_SPEC_PATH: "*", MANUS_ADDON_RUNTIME_SPECS_REVISION: "*" },
 	},
+	"doubao-work": {
+		prettyLabel: "Doubao Work",
+		description:
+			"AI work platform for individuals and teams that executes tasks and creates documents, spreadsheets, presentations and applications with Feishu integration.",
+		envVars: { DOUBAO_OFFICE_AGENT_NAME: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
