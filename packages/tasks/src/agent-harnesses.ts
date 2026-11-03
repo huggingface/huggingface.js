@@ -245,6 +245,11 @@ export const AGENT_HARNESSES = {
 			"AI work platform for individuals and teams that executes tasks and creates documents, spreadsheets, presentations and applications with Feishu integration.",
 		envVars: { DOUBAO_OFFICE_AGENT_NAME: "*" },
 	},
+	kimi: {
+		prettyLabel: "Kimi Code",
+		description: "Kimi Code CLI  —  The Starting Point for Next-Gen Agents",
+		envVars: { KIMI_PLUGIN_ROOT: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
