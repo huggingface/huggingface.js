@@ -115,6 +115,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.araclip,
 	},
+	areals: {
+		prettyLabel: "AREALS",
+		repoName: "AREALS",
+		repoUrl: "https://github.com/leochlon/areals",
+		filter: false,
+		countDownloads: `path_filename:"model" AND path_extension:"pt"`,
+	},
 	asimov: {
 		prettyLabel: "Asimov",
 		repoName: "Asimov",
