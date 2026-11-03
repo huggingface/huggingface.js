@@ -277,6 +277,16 @@ export const AGENT_HARNESSES = {
 		description: "Autonomous AI software engineer from Cognition.",
 		envVars: { DEVIN_DIR: "*", DEVIN_DISABLE_HISTEXPAND: "*" },
 	},
+	instinct: {
+		prettyLabel: "Instinct",
+		description:
+			"Personal assistant that understands your work and priorities, accepts texts or calls, and uses phones and computers to complete tasks.",
+		envVars: {
+			INSTINCT_OUTER_TOOL_USE_ID: "*",
+			INSTINCT_OUTER_TOOL_USE_STARTED_AT: "*",
+			INSTINCT_OUTER_TOOL_USE_TIMEOUT_SECONDS: "*",
+		},
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
