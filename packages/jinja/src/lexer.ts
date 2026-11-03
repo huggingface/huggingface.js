@@ -162,6 +162,48 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		return str;
 	};
 
+	const consumeDigits = (): string => {
+		const start = cursorPosition;
+		while (cursorPosition < src.length) {
+			const code = src.charCodeAt(cursorPosition);
+			if (code < 48 || code > 57) {
+				break;
+			}
+			if (++cursorPosition >= src.length) {
+				throw new SyntaxError("Unexpected end of input");
+			}
+		}
+		return src.slice(start, cursorPosition);
+	};
+
+	const consumeWord = (): string => {
+		const start = cursorPosition;
+		while (cursorPosition < src.length) {
+			const code = src.charCodeAt(cursorPosition);
+			if (!((code >= 48 && code <= 57) || (code >= 65 && code <= 90) || code === 95 || (code >= 97 && code <= 122))) {
+				break;
+			}
+			if (++cursorPosition >= src.length) {
+				throw new SyntaxError("Unexpected end of input");
+			}
+		}
+		return src.slice(start, cursorPosition);
+	};
+
+	const whitespaceAtCursor = (): boolean => {
+		const code = src.charCodeAt(cursorPosition);
+		// Keep the full ECMAScript whitespace class outside the ASCII fast path.
+		return code === 32 || (code >= 9 && code <= 13) || (code > 127 && isWhitespace(src[cursorPosition]));
+	};
+
+	const consumeWhitespace = (): void => {
+		while (whitespaceAtCursor()) {
+			if (++cursorPosition >= src.length) {
+				throw new SyntaxError("Unexpected end of input");
+			}
+		}
+	};
+
 	const stripTrailingWhitespace = () => {
 		const lastToken = tokens.at(-1);
 		if (lastToken && lastToken.type === TOKEN_TYPES.Text) {
@@ -173,7 +215,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 	};
 
 	const skipLeadingWhitespace = () => {
-		while (cursorPosition < src.length && isWhitespace(src[cursorPosition])) {
+		while (cursorPosition < src.length && whitespaceAtCursor()) {
 			++cursorPosition;
 		}
 	};
@@ -277,7 +319,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Consume (and ignore) all whitespace inside Jinja statements or expressions
-		consumeWhile(isWhitespace);
+		consumeWhitespace();
 
 		// Check for closing statement with whitespace control -%}
 		if (
@@ -329,10 +371,10 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 					++cursorPosition; // consume the unary operator
 
 					// Check for numbers following the unary operator
-					let num = consumeWhile(isInteger);
+					let num = consumeDigits();
 					if (num.length > 0 && src[cursorPosition] === "." && isInteger(src[cursorPosition + 1])) {
 						++cursorPosition; // consume '.'
-						const frac = consumeWhile(isInteger);
+						const frac = consumeDigits();
 						num = `${num}.${frac}`;
 					}
 					tokens.push(
@@ -458,7 +500,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 
 		if (isInteger(char)) {
 			// Consume integer part
-			let num = consumeWhile(isInteger);
+			let num = consumeDigits();
 			// Possibly, consume fractional part
 			if (
 				tokens.at(-1)?.type !== TOKEN_TYPES.Dot &&
@@ -466,7 +508,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				isInteger(src[cursorPosition + 1])
 			) {
 				++cursorPosition; // consume '.'
-				const frac = consumeWhile(isInteger);
+				const frac = consumeDigits();
 				num = `${num}.${frac}`;
 			}
 			tokens.push(new Token(num, TOKEN_TYPES.NumericLiteral));
@@ -474,7 +516,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 		if (isWord(char)) {
 			// consume any word characters and always classify as Identifier
-			const word = consumeWhile(isWord);
+			const word = consumeWord();
 			tokens.push(new Token(word, TOKEN_TYPES.Identifier));
 			continue;
 		}

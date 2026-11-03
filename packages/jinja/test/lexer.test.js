@@ -40,4 +40,30 @@ describe("Lexer compatibility", () => {
 			new Token("}}", TOKEN_TYPES.CloseExpression),
 		]);
 	});
+
+	it.each([0x00a0, 0x2028, 0xfeff])("accepts ECMAScript whitespace code point %s", (code) => {
+		const space = String.fromCharCode(code);
+		expect(tokenize(`${space}{{-${space}x${space}-}}${space}tail`)).toEqual([
+			new Token("{{", TOKEN_TYPES.OpenExpression),
+			new Token("x", TOKEN_TYPES.Identifier),
+			new Token("}}", TOKEN_TYPES.CloseExpression),
+			new Token("tail", TOKEN_TYPES.Text),
+		]);
+	});
+
+	it.each([0x0085, 0x180e, 0x200b])("rejects non-whitespace code point %s in expressions", (code) => {
+		const char = String.fromCharCode(code);
+		expect(() => tokenize(`{{${char}x }}`)).toThrowError(new SyntaxError(`Unexpected character: ${char}`));
+	});
+
+	it.each(["{{ 1", "{{ \t", "{{ word"])("preserves the end-of-input error for %j", (source) => {
+		expect(() => tokenize(source)).toThrowError(new SyntaxError("Unexpected end of input"));
+	});
+
+	it("allows a unary sign at EOF when no digits were consumed", () => {
+		expect(tokenize("{{ +")).toEqual([
+			new Token("{{", TOKEN_TYPES.OpenExpression),
+			new Token("+", TOKEN_TYPES.UnaryOperator),
+		]);
+	});
 });
