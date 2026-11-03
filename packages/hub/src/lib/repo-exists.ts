@@ -2,6 +2,7 @@ import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { RepoDesignation } from "../types/public";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function repoExists(params: {
 	repo: RepoDesignation;
@@ -19,7 +20,7 @@ export async function repoExists(params: {
 }): Promise<boolean> {
 	const repoId = toRepoId(params.repo);
 
-	const res = await (params.fetch ?? fetch)(
+	const res = await fetchWithServerWarnings(params.fetch)(
 		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}?expand[]=likes`,
 		{
 			method: "GET",

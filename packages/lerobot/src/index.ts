@@ -23,6 +23,13 @@ export interface ListEpisodesOptions {
 	limit?: number;
 }
 
+export interface ReadFramesOptions {
+	/** Only these features, such as `["observation.state", "action"]`. Every numeric one by default. */
+	features?: string[];
+	/** Resolve `undefined` rather than download more than this; a data file's columns are read whole. */
+	maxBytes?: number;
+}
+
 /**
  * A LeRobot dataset on the Hub, read over ranged HTTP requests.
  *
@@ -37,7 +44,7 @@ export class LeRobotDataset {
 	private readonly revision: string;
 	private readonly fetchOptions: FetchOptions;
 	private infoPromise?: Promise<LeRobotInfo>;
-	/** v3 index files walked so far, kept for the lifetime of this instance like `info()`. */
+	/** v3 index files walked so far, reused by later calls. */
 	private readonly indexShards: IndexShard[] = [];
 
 	constructor(
@@ -63,26 +70,21 @@ export class LeRobotDataset {
 	}
 
 	/**
-	 * Episodes in index order, normalized so v2 and v3 datasets look the same. Never more than
-	 * `info.totalEpisodes`, and an episode index repeated within one call is returned once, as its first
-	 * occurrence.
+	 * Episodes in index order, the same shape for v2 and v3. Never more than `info.totalEpisodes`; an index
+	 * repeated within one call is returned once.
 	 *
-	 * Rejects when a `v3.0` index needs more files to reach the page than there are episodes up to its
-	 * end (only empty index files do that), or more than 10,000 files.
-	 *
-	 * On v2.x the index is a JSON Lines file read from its start, so a deep `offset` downloads every line
-	 * before it, and throws if that is more than 256 MiB.
+	 * Rejects past 10,000 v3 index files, or when empty ones hold fewer episodes than the page needs. On
+	 * v2.x a deep `offset` reads the index from its start, and rejects past 256 MiB.
 	 */
 	async episodes(options?: ListEpisodesOptions): Promise<LeRobotEpisode[]> {
 		const info = await this.info();
 		const offset = Math.max(0, Math.floor(options?.offset ?? 0));
-		/// info.json is authoritative. A repo re-uploaded with fewer episodes can keep a stale index file
-		/// after the current one, numbered from 0 again; reading past the count would return it.
+		/// info.json's count wins: a re-upload with fewer episodes can leave a stale index file behind.
 		const limit = Math.min(
 			Math.max(0, Math.floor(options?.limit ?? DEFAULT_EPISODE_LIMIT)),
 			Math.max(0, info.totalEpisodes - offset),
 		);
-		/// Not `=== 0`: a NaN offset or limit makes `limit` NaN, which would read the whole v2 index.
+		/// Not `=== 0`: a NaN offset or limit would read the whole v2 index.
 		if (!(limit > 0)) {
 			return [];
 		}
@@ -90,11 +92,8 @@ export class LeRobotDataset {
 	}
 
 	/**
-	 * The episode whose `episode_index` is `index`, or `undefined` when there is none. Unlike
-	 * `episodes({ offset })`, which counts positions, this finds it in a dataset numbered from 10 or with
-	 * gaps. When episodes are numbered 0, 1, 2, ... it costs the same as `episodes({ offset: index, limit: 1 })`.
-	 *
-	 * Rejects in the same cases as `episodes()`.
+	 * The episode whose `episode_index` is `index`, or `undefined`. Unlike `episodes({ offset })`, which
+	 * counts positions, this handles datasets numbered from 10 or with gaps. Rejects like `episodes()`.
 	 */
 	async episode(index: number): Promise<LeRobotEpisode | undefined> {
 		if (!Number.isSafeInteger(index) || index < 0) {
@@ -104,8 +103,8 @@ export class LeRobotDataset {
 	}
 
 	/**
-	 * One episode's frame rows, as a series per component. `undefined` when the episode's rows could
-	 * not be located, which is what `episode.data` being absent means.
+	 * One episode's frame rows, as a series per component. `undefined` when `episode.data` is absent, or
+	 * reading would cost more than `maxBytes`.
 	 *
 	 * ```ts
 	 * const [episode] = await dataset.episodes({ limit: 1 });
@@ -113,8 +112,8 @@ export class LeRobotDataset {
 	 * frames?.series["observation.state"][0]; // shoulder_pan over time
 	 * ```
 	 */
-	async frames(episode: LeRobotEpisode): Promise<LeRobotFrames | undefined> {
-		return readFrames(await this.info(), episode, this.fetchOptions);
+	async frames(episode: LeRobotEpisode, options?: ReadFramesOptions): Promise<LeRobotFrames | undefined> {
+		return readFrames(await this.info(), episode, this.fetchOptions, options?.features, options?.maxBytes);
 	}
 }
 

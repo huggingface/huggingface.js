@@ -4,6 +4,7 @@ import type { CredentialsParams } from "../../types/public";
 import { checkCredentials } from "../../utils/checkCredentials";
 import { toRepoId } from "../../utils/toRepoId";
 import type { ApiScheduledJob, CreateScheduledJobOptions } from "../../types/api/api-jobs";
+import { fetchWithServerWarnings } from "../../utils/serverWarnings";
 
 /**
  * Create a scheduled job.
@@ -75,7 +76,7 @@ export async function createScheduledJob(
 		});
 	}
 
-	const response = await (customFetch || fetch)(`${hubUrl || HUB_URL}/api/scheduled-jobs/${namespace}`, {
+	const response = await fetchWithServerWarnings(customFetch)(`${hubUrl || HUB_URL}/api/scheduled-jobs/${namespace}`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
