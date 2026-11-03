@@ -31,6 +31,7 @@ import {
 	transformers,
 	transformersJS,
 	ultralytics,
+	unitree,
 	vui,
 } from "./model-libraries-snippets.js";
 
@@ -111,6 +112,49 @@ print(output)`);
 		});
 	});
 
+	describe("unitree", () => {
+		it("deploys an Isaac Lab velocity policy into unitree_rl_lab", () => {
+			const snippet = unitree({
+				id: "user/g1-velocity",
+				tags: ["unitree", "unitree-g1-29dof", "isaaclab", "velocity"],
+				inference: "",
+			}).join("\n");
+
+			expect(snippet).toContain("git clone https://github.com/unitreerobotics/unitree_rl_lab");
+			expect(snippet).toContain("cd unitree_rl_lab/deploy/robots/g1_29dof");
+			expect(snippet).toContain("hf download user/g1-velocity --local-dir config/policy/hub/g1-velocity");
+			expect(snippet).toContain("#     type: RLBase");
+			expect(snippet).toContain("./g1_ctrl --network eth0");
+			expect(snippet).not.toContain("ROBOT");
+			expect(snippet).not.toContain("motion_file");
+		});
+
+		it("deploys an mjlab mimic policy into unitree_rl_mjlab with its motion file", () => {
+			const snippet = unitree({
+				id: "user/g1-dance",
+				tags: ["unitree", "unitree-g1-29dof", "mjlab", "mimic"],
+				inference: "",
+			}).join("\n");
+
+			expect(snippet).toContain("cd unitree_rl_mjlab/deploy/robots/g1");
+			expect(snippet).toContain("#     type: Mimic");
+			expect(snippet).toContain("#     motion_file: config/policy/hub/g1-dance/params/motion.npz");
+			expect(snippet).not.toContain("fps");
+		});
+
+		it.each([
+			{ scenario: "missing robot tag", tags: ["unitree", "isaaclab"] },
+			{ scenario: "conflicting robot tags", tags: ["unitree-g1-29dof", "unitree-go2"] },
+			{ scenario: "robot not supported by the framework", tags: ["unitree-a2", "isaaclab"] },
+		])("asks for the robot on $scenario", ({ tags }) => {
+			const snippet = unitree({ id: "user/policy", tags, inference: "" }).join("\n");
+
+			expect(snippet).toContain("# Replace ROBOT with the robot named in the model card");
+			expect(snippet).toContain("cd unitree_rl_lab/deploy/robots/ROBOT");
+			expect(snippet).toContain("./ROBOT_ctrl");
+		});
+	});
+
 	// a repo owner can put anything in config.json / the model card, so every interpolated value
 	// must either be escaped (string literals) or rejected (bare identifiers)
 	describe("repo-controlled values are not injectable", () => {
@@ -121,6 +165,7 @@ print(output)`);
 			["diffusers", diffusers, { tags: ["lora"], cardData: { base_model: PAYLOAD, instance_prompt: PAYLOAD } }],
 			["keras_hub", keras_hub, { config: { keras_hub: { tasks: [PAYLOAD, "TextClassifier"] } } }],
 			["microduck", microduck, { tags: [`microduck-slot:${PAYLOAD}`] }],
+			["unitree", unitree, { tags: ["unitree-g1-29dof", PAYLOAD] }],
 			["paddlenlp", paddlenlp, { config: { architectures: [PAYLOAD] } }],
 			["peft", peft, { config: { peft: { base_model_name_or_path: PAYLOAD, task_type: "CAUSAL_LM" } } }],
 			["multimolecule", multimolecule, { widgetData: [{ text: PAYLOAD }] }],

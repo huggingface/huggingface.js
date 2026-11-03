@@ -3132,6 +3132,59 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
+// Unitree deploy controllers live in two repos with slightly different robot folder names:
+// unitree_rl_lab (policies trained with Isaac Lab) and unitree_rl_mjlab (policies trained with mjlab).
+const UNITREE_ROBOTS: Record<string, { bin: string; isaaclab?: string; mjlab?: string }> = {
+	"unitree-g1-29dof": { bin: "g1_ctrl", isaaclab: "g1_29dof", mjlab: "g1" },
+	"unitree-g1-23dof": { bin: "g1_ctrl", isaaclab: "g1_23dof", mjlab: "g1_23dof" },
+	"unitree-go2": { bin: "go2_ctrl", isaaclab: "go2", mjlab: "go2" },
+	"unitree-go2w": { bin: "go2w_ctrl", isaaclab: "go2w" },
+	"unitree-h1": { bin: "h1_ctrl", isaaclab: "h1" },
+	"unitree-h1-2": { bin: "h1_2_ctrl", isaaclab: "h1_2", mjlab: "h1_2" },
+	"unitree-b2": { bin: "b2_ctrl", isaaclab: "b2" },
+	"unitree-a2": { bin: "a2_ctrl", mjlab: "a2" },
+	"unitree-r1": { bin: "r1_ctrl", mjlab: "r1" },
+};
+
+export const unitree = (model: ModelData): string[] => {
+	// Model-card tag convention: tags: [unitree-g1-29dof, isaaclab | mjlab, velocity | mimic]
+	const framework = model.tags.includes("mjlab") ? "mjlab" : "isaaclab";
+	const repo = framework === "mjlab" ? "unitree_rl_mjlab" : "unitree_rl_lab";
+	const robotTags = Object.keys(UNITREE_ROBOTS).filter((tag) => model.tags.includes(tag));
+	const robot = robotTags.length === 1 ? UNITREE_ROBOTS[robotTags[0]] : undefined;
+	const dir = robot?.[framework];
+	const robotDir = dir ?? "ROBOT";
+	const bin = dir && robot ? robot.bin : "ROBOT_ctrl";
+	const supported = Object.values(UNITREE_ROBOTS)
+		.map((r) => r[framework])
+		.filter((d): d is string => d !== undefined);
+	const prefix = dir ? "" : `# Replace ROBOT with the robot named in the model card (${supported.join(", ")}).\n`;
+	const isMimic = model.tags.includes("mimic");
+	const name = model.id.split("/").pop() ?? model.id;
+	// Mimic states replay the reference motion shipped in the repo (params/motion.csv or .npz).
+	const mimicLines = isMimic
+		? framework === "mjlab"
+			? `\n#     motion_file: config/policy/hub/${name}/params/motion.npz`
+			: `\n#     motion_file: config/policy/hub/${name}/params/motion.csv\n#     fps: 60`
+		: "";
+
+	return [
+		`${prefix}# 1. Download the policy (exported/policy.onnx + params/deploy.yaml) into Unitree's controller
+git clone https://github.com/unitreerobotics/${repo}
+cd ${repo}/deploy/robots/${robotDir}
+hf download ${model.id} --local-dir config/policy/hub/${name}`,
+		`# 2. Add it as a controller state in config/config.yaml, then build (requires unitree_sdk2)
+#   Hub_Policy:
+#     id: 200
+#     type: ${isMimic ? "Mimic" : "RLBase"}
+#     policy_dir: config/policy/hub/${name}/${mimicLines}
+mkdir -p build && cd build && cmake .. && make`,
+		`# 3. Always test in simulation first (unitree_mujoco), then on the robot
+./${bin}                   # sim2sim against unitree_mujoco
+./${bin} --network eth0    # real robot (stop the on-board control program first)`,
+	];
+};
+
 export const univa = (model: ModelData): string[] => [
 	`# Follow installation instructions at https://github.com/PKU-YuanGroup/UniWorld-V1
 import torch
