@@ -271,6 +271,12 @@ export const AGENT_HARNESSES = {
 			"An AI coding agent by JetBrains that ships code from your terminal, IDE, or CI/CD pipeline - powered by any LLM you choose",
 		envVars: { JUNIE_SHIM_PATH: "*" },
 	},
+	devin: {
+		prettyLabel: "Devin",
+		docsUrl: "https://devin.ai",
+		description: "Autonomous AI software engineer from Cognition.",
+		envVars: { DEVIN_DIR: "*", DEVIN_DISABLE_HISTEXPAND: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
@@ -291,11 +297,6 @@ export const AGENT_HARNESSES = {
 		docsUrl: "https://cursor.com",
 		description: "AI-powered code editor.",
 		envVars: { CURSOR_TRACE_ID: "*" },
-	},
-	devin: {
-		prettyLabel: "Devin",
-		docsUrl: "https://devin.ai",
-		description: "Autonomous AI software engineer from Cognition.",
 	},
 } satisfies Record<string, AgentHarness>;
 
