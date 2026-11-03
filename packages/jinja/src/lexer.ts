@@ -61,46 +61,6 @@ function isWhitespace(char: string): boolean {
 	return /\s/.test(char);
 }
 
-/**
- * A data structure which contains a list of rules to test
- */
-const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
-	// Control sequences
-	["{%", TOKEN_TYPES.OpenStatement],
-	["%}", TOKEN_TYPES.CloseStatement],
-	["{{", TOKEN_TYPES.OpenExpression],
-	["}}", TOKEN_TYPES.CloseExpression],
-	// Single character tokens
-	["(", TOKEN_TYPES.OpenParen],
-	[")", TOKEN_TYPES.CloseParen],
-	["{", TOKEN_TYPES.OpenCurlyBracket],
-	["}", TOKEN_TYPES.CloseCurlyBracket],
-	["[", TOKEN_TYPES.OpenSquareBracket],
-	["]", TOKEN_TYPES.CloseSquareBracket],
-	[",", TOKEN_TYPES.Comma],
-	[".", TOKEN_TYPES.Dot],
-	[":", TOKEN_TYPES.Colon],
-	["|", TOKEN_TYPES.Pipe],
-	// Comparison operators
-	["<=", TOKEN_TYPES.ComparisonBinaryOperator],
-	[">=", TOKEN_TYPES.ComparisonBinaryOperator],
-	["==", TOKEN_TYPES.ComparisonBinaryOperator],
-	["!=", TOKEN_TYPES.ComparisonBinaryOperator],
-	["<", TOKEN_TYPES.ComparisonBinaryOperator],
-	[">", TOKEN_TYPES.ComparisonBinaryOperator],
-	// Arithmetic operators
-	["+", TOKEN_TYPES.AdditiveBinaryOperator],
-	["-", TOKEN_TYPES.AdditiveBinaryOperator],
-	["~", TOKEN_TYPES.AdditiveBinaryOperator],
-	["**", TOKEN_TYPES.ExponentiationBinaryOperator], // NOTE: must come before "*" so that "**" is matched first
-	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
-	["//", TOKEN_TYPES.MultiplicativeBinaryOperator], // NOTE: must come before "/" so that "//" is matched first
-	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
-	["%", TOKEN_TYPES.MultiplicativeBinaryOperator],
-	// Assignment operator
-	["=", TOKEN_TYPES.Equals],
-];
-
 const ESCAPE_CHARACTERS = new Map([
 	["n", "\n"], // New line
 	["t", "\t"], // Horizontal tab
@@ -219,7 +179,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 	};
 
 	// Build each token until end of input
-	main: while (cursorPosition < src.length) {
+	while (cursorPosition < src.length) {
 		// First, consume all text that is outside of a Jinja statement or expression
 		const lastTokenType = tokens.at(-1)?.type;
 		if (
@@ -292,7 +252,11 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Check for opening statement with whitespace control {%-
-		if (src.slice(cursorPosition, cursorPosition + 3) === "{%-") {
+		if (
+			src.charCodeAt(cursorPosition) === 123 &&
+			src.charCodeAt(cursorPosition + 1) === 37 &&
+			src.charCodeAt(cursorPosition + 2) === 45
+		) {
 			stripTrailingWhitespace();
 			tokens.push(new Token("{%", TOKEN_TYPES.OpenStatement));
 			cursorPosition += 3; // Skip {%-
@@ -300,7 +264,11 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Check for opening expression with whitespace control {{-
-		if (src.slice(cursorPosition, cursorPosition + 3) === "{{-") {
+		if (
+			src.charCodeAt(cursorPosition) === 123 &&
+			src.charCodeAt(cursorPosition + 1) === 123 &&
+			src.charCodeAt(cursorPosition + 2) === 45
+		) {
 			stripTrailingWhitespace();
 			tokens.push(new Token("{{", TOKEN_TYPES.OpenExpression));
 			curlyBracketDepth = 0;
@@ -312,7 +280,11 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		consumeWhile(isWhitespace);
 
 		// Check for closing statement with whitespace control -%}
-		if (src.slice(cursorPosition, cursorPosition + 3) === "-%}") {
+		if (
+			src.charCodeAt(cursorPosition) === 45 &&
+			src.charCodeAt(cursorPosition + 1) === 37 &&
+			src.charCodeAt(cursorPosition + 2) === 125
+		) {
 			tokens.push(new Token("%}", TOKEN_TYPES.CloseStatement));
 			cursorPosition += 3; // Skip -%}
 			skipLeadingWhitespace();
@@ -320,7 +292,11 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Check for closing expression with whitespace control -}}
-		if (src.slice(cursorPosition, cursorPosition + 3) === "-}}") {
+		if (
+			src.charCodeAt(cursorPosition) === 45 &&
+			src.charCodeAt(cursorPosition + 1) === 125 &&
+			src.charCodeAt(cursorPosition + 2) === 125
+		) {
 			tokens.push(new Token("}}", TOKEN_TYPES.CloseExpression));
 			cursorPosition += 3; // Skip -}}
 			skipLeadingWhitespace();
@@ -367,27 +343,109 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			}
 		}
 
-		// Try to match one of the tokens in the mapping table
-		for (const [seq, type] of ORDERED_MAPPING_TABLE) {
-			// inside an object literal, don't treat "}}" as expression-end
-			if (seq === "}}" && curlyBracketDepth > 0) {
-				continue;
-			}
-			const slice = src.slice(cursorPosition, cursorPosition + seq.length);
-			if (slice === seq) {
-				tokens.push(new Token(seq, type));
-
-				// possibly adjust the curly bracket depth
-				if (type === TOKEN_TYPES.OpenExpression) {
-					curlyBracketDepth = 0;
-				} else if (type === TOKEN_TYPES.OpenCurlyBracket) {
-					++curlyBracketDepth;
-				} else if (type === TOKEN_TYPES.CloseCurlyBracket) {
-					--curlyBracketDepth;
+		// Dispatch punctuation directly, checking longer tokens before their prefixes.
+		let tokenValue = char;
+		let tokenType: TokenType | undefined;
+		const code = src.charCodeAt(cursorPosition);
+		const nextCode = src.charCodeAt(cursorPosition + 1);
+		switch (code) {
+			case 123: // {
+				if (nextCode === 37) {
+					tokenValue = "{%";
+					tokenType = TOKEN_TYPES.OpenStatement;
+				} else if (nextCode === 123) {
+					tokenValue = "{{";
+					tokenType = TOKEN_TYPES.OpenExpression;
+				} else {
+					tokenType = TOKEN_TYPES.OpenCurlyBracket;
 				}
-				cursorPosition += seq.length;
-				continue main;
+				break;
+			case 125: // }
+				// Inside an object literal, don't treat "}}" as expression-end.
+				if (nextCode === 125 && curlyBracketDepth <= 0) {
+					tokenValue = "}}";
+					tokenType = TOKEN_TYPES.CloseExpression;
+				} else {
+					tokenType = TOKEN_TYPES.CloseCurlyBracket;
+				}
+				break;
+			case 37: // %
+				if (nextCode === 125) {
+					tokenValue = "%}";
+					tokenType = TOKEN_TYPES.CloseStatement;
+				} else {
+					tokenType = TOKEN_TYPES.MultiplicativeBinaryOperator;
+				}
+				break;
+			case 40: // (
+				tokenType = TOKEN_TYPES.OpenParen;
+				break;
+			case 41: // )
+				tokenType = TOKEN_TYPES.CloseParen;
+				break;
+			case 91: // [
+				tokenType = TOKEN_TYPES.OpenSquareBracket;
+				break;
+			case 93: // ]
+				tokenType = TOKEN_TYPES.CloseSquareBracket;
+				break;
+			case 44: // ,
+				tokenType = TOKEN_TYPES.Comma;
+				break;
+			case 46: // .
+				tokenType = TOKEN_TYPES.Dot;
+				break;
+			case 58: // :
+				tokenType = TOKEN_TYPES.Colon;
+				break;
+			case 124: // |
+				tokenType = TOKEN_TYPES.Pipe;
+				break;
+			case 60: // <
+				tokenValue = nextCode === 61 ? "<=" : "<";
+				tokenType = TOKEN_TYPES.ComparisonBinaryOperator;
+				break;
+			case 62: // >
+				tokenValue = nextCode === 61 ? ">=" : ">";
+				tokenType = TOKEN_TYPES.ComparisonBinaryOperator;
+				break;
+			case 61: // =
+				tokenValue = nextCode === 61 ? "==" : "=";
+				tokenType = nextCode === 61 ? TOKEN_TYPES.ComparisonBinaryOperator : TOKEN_TYPES.Equals;
+				break;
+			case 33: // !
+				if (nextCode === 61) {
+					tokenValue = "!=";
+					tokenType = TOKEN_TYPES.ComparisonBinaryOperator;
+				}
+				break;
+			case 43: // +
+			case 45: // -
+			case 126: // ~
+				tokenType = TOKEN_TYPES.AdditiveBinaryOperator;
+				break;
+			case 42: // *
+				tokenValue = nextCode === 42 ? "**" : "*";
+				tokenType =
+					nextCode === 42 ? TOKEN_TYPES.ExponentiationBinaryOperator : TOKEN_TYPES.MultiplicativeBinaryOperator;
+				break;
+			case 47: // /
+				tokenValue = nextCode === 47 ? "//" : "/";
+				tokenType = TOKEN_TYPES.MultiplicativeBinaryOperator;
+				break;
+		}
+		if (tokenType !== undefined) {
+			tokens.push(new Token(tokenValue, tokenType));
+
+			if (tokenType === TOKEN_TYPES.OpenExpression) {
+				curlyBracketDepth = 0;
+			} else if (tokenType === TOKEN_TYPES.OpenCurlyBracket) {
+				++curlyBracketDepth;
+			} else if (tokenType === TOKEN_TYPES.CloseCurlyBracket) {
+				--curlyBracketDepth;
 			}
+			cursorPosition += tokenValue.length;
+			continue;
 		}
 
 		if (char === "'" || char === '"') {

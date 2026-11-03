@@ -20,4 +20,24 @@ describe("Lexer compatibility", () => {
 			new Token("b", TOKEN_TYPES.Text),
 		]);
 	});
+
+	it("distinguishes nested dictionary closes from an expression delimiter", () => {
+		const tokens = tokenize("{{{'a':{'b':1}}}}");
+		expect(tokens.slice(-3)).toEqual([
+			new Token("}", TOKEN_TYPES.CloseCurlyBracket),
+			new Token("}", TOKEN_TYPES.CloseCurlyBracket),
+			new Token("}}", TOKEN_TYPES.CloseExpression),
+		]);
+	});
+
+	it("preserves trim-close precedence inside an unmatched dictionary", () => {
+		expect(tokenize("{{ {'a': 1 -}}").at(-1)).toEqual(new Token("}}", TOKEN_TYPES.CloseExpression));
+	});
+
+	it("recognizes an expression close after an unmatched dictionary close", () => {
+		expect(tokenize("{{ } }}").slice(-2)).toEqual([
+			new Token("}", TOKEN_TYPES.CloseCurlyBracket),
+			new Token("}}", TOKEN_TYPES.CloseExpression),
+		]);
+	});
 });
