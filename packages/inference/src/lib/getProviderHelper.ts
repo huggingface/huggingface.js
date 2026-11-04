@@ -14,6 +14,7 @@ import * as OpenAI from "../providers/openai.js";
 import * as OpenRouter from "../providers/openrouter.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
+import * as Scitix from "../providers/scitix.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -153,6 +154,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	ovhcloud: {
 		conversational: new OvhCloud.OvhCloudConversationalTask(),
 		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
+	},
+	scitix: {
+		conversational: new Scitix.ScitixConversationalTask(),
 	},
 	publicai: {
 		conversational: new PublicAI.PublicAIConversationalTask(),
