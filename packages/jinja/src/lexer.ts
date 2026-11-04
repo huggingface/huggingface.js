@@ -237,8 +237,29 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 					(src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{" || src[cursorPosition + 1] === "#")
 				)
 			) {
-				// Consume text
-				text += src[cursorPosition++];
+				// In-bounds primitive indexing has no overridable method calls.
+				// Keep braces and string-like preprocessing results on the scalar path.
+				if (
+					typeof src === "string" &&
+					cursorPosition + 8 <= src.length &&
+					src[cursorPosition] !== "{" &&
+					src[cursorPosition + 1] !== "{" &&
+					src[cursorPosition + 2] !== "{" &&
+					src[cursorPosition + 3] !== "{" &&
+					src[cursorPosition + 4] !== "{" &&
+					src[cursorPosition + 5] !== "{" &&
+					src[cursorPosition + 6] !== "{" &&
+					src[cursorPosition + 7] !== "{"
+				) {
+					text +=
+						src[cursorPosition] +
+						src[cursorPosition + 1] +
+						(src[cursorPosition + 2] + src[cursorPosition + 3]) +
+						(src[cursorPosition + 4] + src[cursorPosition + 5] + (src[cursorPosition + 6] + src[cursorPosition + 7]));
+					cursorPosition += 8;
+				} else {
+					text += src[cursorPosition++];
+				}
 			}
 
 			// There is some text to add

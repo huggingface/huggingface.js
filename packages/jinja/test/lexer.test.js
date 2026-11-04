@@ -243,3 +243,69 @@ describe("Lexer compatibility", () => {
 		expect(output).toBe(expected);
 	});
 });
+
+describe("Literal text boundaries", () => {
+	it.each([0, 1, 2, 3, 4, 5, 6, 7])("retains tags after literal braces at offset %i", (offset) => {
+		const prefix = "x".repeat(offset) + "{safe}" + "y".repeat(16);
+		expect(new Template(prefix + "{{ value }}Z").render({ value: 7 })).toBe(prefix + "7Z");
+	});
+
+	it.each([1, 2, 3, 7])("preserves Unicode code units across %i repetitions", (count) => {
+		const prefix = "\uD800é😀".repeat(count);
+		expect(new Template(prefix + "{{ value }}").render({ value: 7 })).toBe(prefix + "7");
+	});
+
+	it("preserves numeric prototype getters at a trailing brace", () => {
+		const source = "abcdefghijk{";
+		const key = String(source.length);
+		const original = Object.getOwnPropertyDescriptor(String.prototype, key);
+		let reads = 0;
+		let tokens;
+		try {
+			Object.defineProperty(String.prototype, key, {
+				configurable: true,
+				get() {
+					++reads;
+					return "x";
+				},
+			});
+			tokens = tokenize(source);
+		} finally {
+			if (original) {
+				Object.defineProperty(String.prototype, key, original);
+			} else {
+				delete String.prototype[key];
+			}
+		}
+		expect(tokens).toEqual([new Token(source, TOKEN_TYPES.Text)]);
+		expect(reads).toBe(3);
+	});
+
+	it("preserves reads from string-like preprocessing results", () => {
+		const original = Object.getOwnPropertyDescriptor(String.prototype, "replace");
+		let reads = 0;
+		const source = new Proxy(
+			{},
+			{
+				get(_, key) {
+					if (key === "length") {
+						++reads;
+						return 20;
+					}
+					if (typeof key === "string" && /^\d+$/.test(key)) {
+						return String(reads % 10);
+					}
+				},
+			},
+		);
+		let tokens;
+		try {
+			Object.defineProperty(String.prototype, "replace", { ...original, value: () => source });
+			tokens = tokenize("ignored");
+		} finally {
+			Object.defineProperty(String.prototype, "replace", original);
+		}
+		expect(tokens).toEqual([new Token("23456789012345678901", TOKEN_TYPES.Text)]);
+		expect(reads).toBe(23);
+	});
+});
