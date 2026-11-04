@@ -541,6 +541,40 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetOrcaConnect = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const isMLX = isMlxModel(model);
+	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
+	const serverStep = getLocalServerStep(model, filepath);
+	if (!isMLX) {
+		// Orca Connect finds a local llama.cpp server on port 8080, the port mlx_lm.server already uses.
+		serverStep.content += " --port 8080";
+	}
+
+	return [
+		serverStep,
+		{
+			title: "Share it with Orca Connect",
+			setup: "# Install Orca Connect:\ncurl -fsSL https://get.orcarouter.ai/orca-connect/latest/install.sh | sh",
+			content: [
+				"# Sign in, pick the model to share, and go online:",
+				"orca-connect login",
+				`orca-connect expose ${modelId}`,
+				"orca-connect serve",
+			].join("\n"),
+		},
+		{
+			title: "Call it from any device",
+			content: [
+				"# <rig> is this machine's name, shown by `orca-connect status`:",
+				"curl https://api.orcarouter.ai/v1/chat/completions \\",
+				'  -H "Authorization: Bearer $ORCAROUTER_API_KEY" \\',
+				'  -H "Content-Type: application/json" \\',
+				`  -d '{"model": "local/<rig>/${modelId}", "messages": [{"role": "user", "content": "Hello"}]}'`,
+			].join("\n"),
+		},
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	// Only add quant tag for GGUF models, not safetensors
 	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
@@ -813,6 +847,14 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	"orca-connect": {
+		prettyLabel: "Orca Connect",
+		docsUrl: "https://docs.orcarouter.ai/integrations/orca-connect",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			(isLlamaCppGgufModel(model) || isMlxModel(model)) && model.tags.includes("conversational"),
+		snippet: snippetOrcaConnect,
 	},
 } satisfies Record<string, LocalApp>;
 
