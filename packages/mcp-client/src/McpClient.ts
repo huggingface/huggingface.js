@@ -205,6 +205,9 @@ export class McpClient {
 		messages.push(assistantMessage);
 
 		for (const toolCall of finalToolCallValues) {
+			if (opts.abortSignal?.aborted) {
+				throw new Error("AbortError");
+			}
 			const toolName = toolCall.function.name ?? "unknown";
 			/// TODO(Fix upstream type so this is always a string)^
 			const toolMessage: ChatCompletionInputMessageTool = {
@@ -235,9 +238,17 @@ export class McpClient {
 			const client = this.clients.get(toolName);
 			if (client) {
 				try {
-					const result = await client.callTool({ name: toolName, arguments: toolArgs, signal: opts.abortSignal });
+					const result = await client.callTool({ name: toolName, arguments: toolArgs }, undefined, {
+						signal: opts.abortSignal,
+					});
+					if (opts.abortSignal?.aborted) {
+						throw new Error("AbortError");
+					}
 					toolMessage.content = ResultFormatter.format(result);
 				} catch (error) {
+					if (opts.abortSignal?.aborted) {
+						throw new Error("AbortError");
+					}
 					toolMessage.content = `Error: MCP tool call failed with error message: ${error}`;
 				}
 			} else {
