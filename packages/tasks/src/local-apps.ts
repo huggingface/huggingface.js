@@ -156,6 +156,33 @@ function isToolCallingLocalAgentModel(model: ModelData): boolean {
 	);
 }
 
+/**
+ * Siliconed installs these repositories, and imports adapters and quantizations made from them.
+ */
+const SILICONED_BASE_MODELS = [
+	"Tongyi-MAI/Z-Image-Turbo",
+	"Tongyi-MAI/Z-Image",
+	"circlestone-labs/Anima",
+	"Qwen/Qwen-Image-2.1-Turbo",
+	"Qwen/Qwen-Image-2.1",
+	"krea/Krea-2-Turbo",
+	"Comfy-Org/Krea-2",
+];
+
+function isSiliconedModel(model: ModelData): boolean {
+	return (
+		SILICONED_BASE_MODELS.includes(model.id) ||
+		model.tags.some((tag) => {
+			const [prefix, relation, base] = tag.split(":");
+			return (
+				prefix === "base_model" &&
+				(relation === "adapter" || relation === "quantized") &&
+				SILICONED_BASE_MODELS.includes(base)
+			);
+		})
+	);
+}
+
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -757,6 +784,21 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) =>
 			model.tags.includes("coreml") && model.tags.includes("joyfusion") && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://joyfusion.app/import_from_hf?repo_id=${model.id}`),
+	},
+	siliconed: {
+		prettyLabel: "Siliconed",
+		docsUrl: "https://github.com/gwenn-ha-dev/Siliconed",
+		mainTask: "text-to-image",
+		macOSOnly: true,
+		displayOnModelPage: isSiliconedModel,
+		deeplink: (model, filepath) => {
+			const url = new URL("https://gwenn-ha-dev.github.io/Siliconed/hf.html");
+			url.searchParams.set("repo_id", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
 	},
 	ollama: {
 		prettyLabel: "Ollama",
