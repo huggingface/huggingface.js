@@ -77,6 +77,35 @@ describe("Lexer compatibility", () => {
 		expect(new Template("{{ 'A{% generation %}B{% endgeneration %}C' }}").render()).toBe("ABC");
 	});
 
+	it("removes generation tags when indexOf is replaced after import", () => {
+		const original = Object.getOwnPropertyDescriptor(String.prototype, "indexOf");
+		try {
+			Object.defineProperty(String.prototype, "indexOf", { ...original, value: () => -1 });
+			expect(new Template("A{% generation %}B{% endgeneration %}C").render()).toBe("ABC");
+		} finally {
+			Object.defineProperty(String.prototype, "indexOf", original);
+		}
+	});
+
+	it("does not read an overridden indexOf getter for the generation guard", () => {
+		const original = Object.getOwnPropertyDescriptor(String.prototype, "indexOf");
+		let reads = 0;
+		try {
+			Object.defineProperty(String.prototype, "indexOf", {
+				configurable: true,
+				get() {
+					++reads;
+					throw new Error("indexOf getter must not be read");
+				},
+			});
+			expect(new Template("{{ 'A{% generation %}B{% endgeneration %}C' }}").render()).toBe("ABC");
+			expect(new Template("ordinary { text }").render()).toBe("ordinary { text }");
+			expect(reads).toBe(0);
+		} finally {
+			Object.defineProperty(String.prototype, "indexOf", original);
+		}
+	});
+
 	it("preserves literal code units and backslashes around comments", () => {
 		const before = "text {\0🤗\\x41";
 		const after = "\\n} tail";

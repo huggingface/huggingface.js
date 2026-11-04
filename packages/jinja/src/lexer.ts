@@ -106,7 +106,7 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 	}
 
 	// The generation-tag pattern cannot match without this literal substring.
-	if (typeof template === "string" && template.indexOf("generation") === -1) {
+	if (typeof template === "string" && stringIndexOf(template, "generation", 0) === -1) {
 		return template;
 	}
 
