@@ -1233,6 +1233,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	opendecision: {
+		prettyLabel: "OpenDecision",
+		repoName: "OpenDecision",
+		repoUrl: "https://github.com/tokz-labs/OpenDecision",
+		snippets: snippets.opendecision,
+		filter: false,
+	},
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
 		repoName: "OpenPeerLLM",
