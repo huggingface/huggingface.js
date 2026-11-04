@@ -71,6 +71,30 @@ describe("parseInfo", () => {
 		expect(withVideoInfo.cameras[0]?.codec).toBe("av1");
 	});
 
+	it("reads joint names nested under a key or in one more list", () => {
+		const info = parseInfo(
+			JSON.stringify({
+				codebase_version: "v3.0",
+				fps: 30,
+				total_episodes: 1,
+				data_path: "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+				features: {
+					keyed: { dtype: "float32", shape: [2], names: { motors: ["a", "b"] } },
+					listed: { dtype: "float32", shape: [2], names: [["kLeftShoulderPitch", "kLeftShoulderRoll"]] },
+					rows: {
+						dtype: "float32",
+						shape: [2, 2],
+						names: [
+							["a", "b"],
+							["c", "d"],
+						],
+					},
+				},
+			}),
+		);
+		expect(info.joints).toEqual({ keyed: ["a", "b"], listed: ["kLeftShoulderPitch", "kLeftShoulderRoll"] });
+	});
+
 	it("drops an unknown robot_type", () => {
 		const info = parseInfo(
 			JSON.stringify({

@@ -75,7 +75,7 @@ self.onmessage = async ({ data }) => {
 		wasmMemory = wasm.memory;
 		const tInit = performance.now();
 
-		const { scene, meta, stats } = await composeStage({
+		const { scene, meta, stats, layers } = await composeStage({
 			UsdLoader,
 			fetchBytes,
 			rootUrl: await rootUrl,
@@ -110,7 +110,7 @@ self.onmessage = async ({ data }) => {
 		stats.warnings.push(...warnings);
 		stats.totalMs = performance.now() - t0;
 		stats.wasmMemoryBytes = wasm.memory.buffer.byteLength;
-		self.postMessage({ type: "scene", stats: stats as Required<typeof stats> });
+		self.postMessage({ type: "scene", stats: stats as Required<typeof stats>, layers });
 
 		let loaded = 0;
 		let bytes = 0;
@@ -132,7 +132,7 @@ self.onmessage = async ({ data }) => {
 						const image = entry ?? (await fetchBytes(path, chargeTexture));
 						bytes += image.byteLength;
 						const { bitmap, color } = await decodeTexture(image, size);
-						self.postMessage({ type: "texture", path, bitmap, color }, [bitmap]);
+						self.postMessage({ type: "texture", path, bitmap, color, size: image.byteLength }, [bitmap]);
 					} catch (error) {
 						self.postMessage({ type: "texture", path, error: String((error as Error)?.message || error) });
 					}
