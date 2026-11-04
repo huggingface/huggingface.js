@@ -312,6 +312,7 @@ export type Dtype =
 	| "I8"
 	| "U16"
 	| "U8"
+	| "U3"
 	| "UE8"
 	| "BOOL";
 
