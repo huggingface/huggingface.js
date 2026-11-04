@@ -540,6 +540,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	"fahr-face": {
+		prettyLabel: "FAHR-Face",
+		repoName: "FAHR-Face",
+		repoUrl: "https://github.com/AIM-Harvard/FAHR-Face",
+		docsUrl: "https://huggingface.co/fridolin22/FAHR-Face",
+		filter: false,
+		countDownloads: `path:"fahr_face.pth" OR path:"fahr_faceage.pth"`,
+	},
 	fairseq: {
 		prettyLabel: "Fairseq",
 		repoName: "fairseq",
