@@ -5,6 +5,12 @@ import type { EventSourceMessage } from "../vendor/fetch-event-source/parse.js";
 import { getLines, getMessages } from "../vendor/fetch-event-source/parse.js";
 import { InferenceClientProviderApiError } from "../errors.js";
 import type { JsonObject } from "../vendor/type-fest/basic.js";
+import { delay } from "./delay.js";
+
+/** Number of times a 503 (provider warming up / loading the model) response is retried before the error is surfaced. */
+const MAX_503_RETRIES = 5;
+/** Base delay between 503 retries, in ms. Multiplied by the attempt number for a simple linear backoff. */
+const RETRY_DELAY_503_MS = 1000;
 
 export interface ResponseWrapper<T> {
 	data: T;
@@ -45,14 +51,17 @@ export async function innerRequest<T>(
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
 	},
+	attempt = 0,
 ): Promise<ResponseWrapper<T>> {
 	const { url, info } = await makeRequestOptions(args, providerHelper, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	const requestContext: ResponseWrapper<T>["requestContext"] = { url, info };
 
-	if (options?.retry_on_error !== false && response.status === 503) {
-		return innerRequest(args, providerHelper, options);
+	if (options?.retry_on_error !== false && response.status === 503 && attempt < MAX_503_RETRIES) {
+		await response.body?.cancel().catch(() => {});
+		await delay(RETRY_DELAY_503_MS * (attempt + 1), options?.signal);
+		return innerRequest(args, providerHelper, options, attempt + 1);
 	}
 
 	if (!response.ok) {
@@ -131,12 +140,15 @@ export async function* innerStreamingRequest<T>(
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
 	},
+	attempt = 0,
 ): AsyncGenerator<T> {
 	const { url, info } = await makeRequestOptions({ ...args, stream: true }, providerHelper, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
-	if (options?.retry_on_error !== false && response.status === 503) {
-		return yield* innerStreamingRequest(args, providerHelper, options);
+	if (options?.retry_on_error !== false && response.status === 503 && attempt < MAX_503_RETRIES) {
+		await response.body?.cancel().catch(() => {});
+		await delay(RETRY_DELAY_503_MS * (attempt + 1), options?.signal);
+		return yield* innerStreamingRequest(args, providerHelper, options, attempt + 1);
 	}
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
