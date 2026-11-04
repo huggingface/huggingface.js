@@ -55,6 +55,7 @@ describe("oauthHandleRedirect", () => {
 			profile: "https://hub-ci.huggingface.co/hub.js",
 			website: "https://github.com/huggingface/hub.js",
 			orgs: [],
+			groups: [],
 		});
 	});
 });

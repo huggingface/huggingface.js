@@ -185,4 +185,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"The Decision Index evaluates decision models: given a state (text, JSON or images) and typed questions, a model returns a choice or ranking, scored on private same-skill and new-domain sets.",
 		url: "https://github.com/apolinario/decision-index",
 	},
+	cyclotron: {
+		name: "cyclotron",
+		description:
+			"Cyclotron is a training and evaluation framework for humanoid robot control policies that runs Hub-hosted models and benchmarks in pinned simulation-based evaluation harnesses and records the provenance of every score.",
+		url: "https://github.com/menloresearch/cyclotron",
+	},
 } as const;
