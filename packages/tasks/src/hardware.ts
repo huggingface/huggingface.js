@@ -223,11 +223,32 @@ export const SKUS = {
 				power: 250,
 				releaseYear: 2024,
 			},
+			"Intel Core 14th Generation (i9)": {
+				tflops: 0.85,
+				msrp: 589,
+				power: 253,
+				releaseYear: 2023,
+				aliases: ["i9-14900K", "i9-14900KF", "i9-14900"],
+			},
 			"Intel Core 14th Generation (i7)": {
 				tflops: 0.8,
 				msrp: 400,
 				power: 253,
 				releaseYear: 2023,
+			},
+			"Intel Core 14th Generation (i5)": {
+				tflops: 0.79,
+				msrp: 319,
+				power: 181,
+				releaseYear: 2023,
+				aliases: ["i5-14600K", "i5-14600KF", "i5-14400"],
+			},
+			"Intel Core 14th Generation (i3)": {
+				tflops: 0.58,
+				msrp: 134,
+				power: 110,
+				releaseYear: 2024,
+				aliases: ["i3-14100", "i3-14100F"],
 			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,
