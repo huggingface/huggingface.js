@@ -4,6 +4,66 @@ import { Token, TOKEN_TYPES, tokenize } from "../src/lexer";
 import { Template } from "../src";
 
 describe("Lexer compatibility", () => {
+	it("retains ordinary braces around every kind of template tag", () => {
+		const source = "head {a} {{ value }}{b}{# note #}{c}{% set x = 1 %}{";
+		expect(
+			tokenize(source)
+				.filter((token) => token.type === TOKEN_TYPES.Text)
+				.map((token) => token.value),
+		).toEqual(["head {a} ", "{b}", "{c}", "{"]);
+		expect(new Template(source).render({ value: "X" })).toBe("head {a} X{b}{c}{");
+	});
+
+	it("preserves code units and a final literal opening brace", () => {
+		const source = "\0🤗{\n{x}\u2028tail {";
+		expect(tokenize(source)).toEqual([new Token(source, TOKEN_TYPES.Text)]);
+	});
+
+	it("does not introduce calls to a replaced brace-search method", () => {
+		const original = Object.getOwnPropertyDescriptor(String.prototype, "indexOf");
+		const originalCall = Object.getOwnPropertyDescriptor(original.value, "call");
+		let braceSearches = 0;
+		let tokens;
+		Object.defineProperty(original.value, "call", {
+			configurable: true,
+			value: function () {
+				++braceSearches;
+				return -1;
+			},
+		});
+		Object.defineProperty(String.prototype, "indexOf", {
+			...original,
+			value: function (...args) {
+				if (args[0] === "{") {
+					++braceSearches;
+					return -1;
+				}
+				return Reflect.apply(original.value, this, args);
+			},
+		});
+		try {
+			tokens = tokenize("A{x}{{ value }}B{");
+		} finally {
+			Object.defineProperty(String.prototype, "indexOf", original);
+			if (originalCall) {
+				Object.defineProperty(original.value, "call", originalCall);
+			} else {
+				delete original.value.call;
+			}
+		}
+		expect(braceSearches).toBe(0);
+		expect(tokens.filter((token) => token.type === TOKEN_TYPES.Text).map((token) => token.value)).toEqual([
+			"A{x}",
+			"B{",
+		]);
+	});
+
+	it("retains the character path for a string-like preprocessing result", () => {
+		const text = Object("{x} tail {");
+		const source = { endsWith: () => false, replace: () => text };
+		expect(tokenize(source)).toEqual([new Token(text.valueOf(), TOKEN_TYPES.Text)]);
+	});
+
 	it("retains the replacement path for string-like inputs", () => {
 		const source = { endsWith: () => false, replace: () => "text" };
 		expect(tokenize(source)).toEqual([new Token("text", TOKEN_TYPES.Text)]);

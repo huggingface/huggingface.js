@@ -73,6 +73,10 @@ const ESCAPE_CHARACTERS = new Map([
 	["\\", "\\"], // Backslash
 ]);
 
+const stringIndexOf: (source: string, search: string, position: number) => number = Function.prototype.call.bind(
+	String.prototype.indexOf,
+);
+
 export interface PreprocessOptions {
 	trim_blocks?: boolean;
 	lstrip_blocks?: boolean;
@@ -236,15 +240,31 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			lastTokenType === TOKEN_TYPES.Comment
 		) {
 			const textStart = cursorPosition;
-			while (
-				cursorPosition < src.length &&
-				// Keep going until we hit the next Jinja statement or expression
-				!(
-					src[cursorPosition] === "{" &&
-					(src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{" || src[cursorPosition + 1] === "#")
-				)
-			) {
-				++cursorPosition;
+			// Keep the legacy path for string-like values outside the declared input type.
+			if (typeof (src as unknown) === "string") {
+				while (cursorPosition < src.length) {
+					const nextBrace = stringIndexOf(src, "{", cursorPosition);
+					if (nextBrace === -1) {
+						cursorPosition = src.length;
+						break;
+					}
+					cursorPosition = nextBrace;
+					const next = src[cursorPosition + 1];
+					if (next === "%" || next === "{" || next === "#") {
+						break;
+					}
+					++cursorPosition;
+				}
+			} else {
+				while (
+					cursorPosition < src.length &&
+					!(
+						src[cursorPosition] === "{" &&
+						(src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{" || src[cursorPosition + 1] === "#")
+					)
+				) {
+					++cursorPosition;
+				}
 			}
 
 			const text = src.slice(textStart, cursorPosition);
