@@ -145,7 +145,7 @@ export async function* checkDDUF(url: Blob | URL, opts?: { log?: (x: string) => 
 
 		checkFilename(fileName);
 
-		const fileDiskNumber = centralDirView.getUint16(34, true);
+		const fileDiskNumber = centralDirView.getUint16(offset + 34, true);
 
 		if (fileDiskNumber !== 0 && fileDiskNumber !== 0xffff) {
 			throw new Error("Multi-disk archives not supported");
