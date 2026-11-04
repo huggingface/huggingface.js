@@ -8,6 +8,11 @@ export const EVALUATION_FRAMEWORKS = {
 			"Exgentic is an open evaluation framework for general-purpose AI agents across diverse domains and benchmarks.",
 		url: "https://github.com/Exgentic/exgentic",
 	},
+	finmirror: {
+		name: "FinMirror",
+		description: "Deterministic paired-world reliability evaluation for financial RAG systems and agents.",
+		url: "https://github.com/faceWang753/finmirror",
+	},
 	"inspect-ai": {
 		name: "inspect-ai",
 		description: "Inspect AI is an open-source framework for large language model evaluations.",
