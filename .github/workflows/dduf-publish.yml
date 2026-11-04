@@ -46,9 +46,11 @@ jobs:
       - run: pnpm install
       - run: git config --global user.name machineuser
       - run: git config --global user.email infra+machineuser@huggingface.co
-      - run: |
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
+      - env:
+          NEWVERSION: ${{ github.event.inputs.newversion }}
+        run: |
+          export PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          BUMPED_VERSION=$(node -p "require('semver').inc(process.env.PACKAGE_VERSION, process.env.NEWVERSION)")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           git commit . -m "🔖 @huggingface/dduf $BUMPED_VERSION"
