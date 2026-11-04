@@ -73,6 +73,21 @@ export interface ModelData {
 		keras_hub?: {
 			tasks?: string[];
 		};
+		/**
+		 * Subset of the microduck policy manifest (manifest.json)
+		 */
+		microduck?: {
+			name?: string;
+			/**
+			 * "episodic" (runs once) or "perpetual" (runs until told otherwise)
+			 */
+			kind?: string;
+			slot?: string;
+			/**
+			 * seconds the daemon unwinds a perpetual policy before handing back to the gait
+			 */
+			unwind_s?: number;
+		};
 	};
 	/**
 	 * all the model tags
