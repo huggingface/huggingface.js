@@ -169,4 +169,77 @@ describe("Lexer compatibility", () => {
 			new Token("+", TOKEN_TYPES.UnaryOperator),
 		]);
 	});
+
+	it("preserves literal output when String.slice is replaced", () => {
+		const original = Object.getOwnPropertyDescriptor(String.prototype, "slice");
+		let output;
+		try {
+			Object.defineProperty(String.prototype, "slice", { ...original, value: () => "S" });
+			output = new Template("A").render();
+		} finally {
+			Object.defineProperty(String.prototype, "slice", original);
+		}
+		expect(output).toBe("A");
+	});
+
+	it("does not read String.slice while consuming plain literal text", () => {
+		const original = Object.getOwnPropertyDescriptor(String.prototype, "slice");
+		let output, error;
+		let reads = 0;
+		try {
+			Object.defineProperty(String.prototype, "slice", {
+				configurable: true,
+				get() {
+					++reads;
+					throw new Error("slice getter was read");
+				},
+			});
+			try {
+				output = new Template("A").render();
+			} catch (caught) {
+				error = caught;
+			}
+		} finally {
+			Object.defineProperty(String.prototype, "slice", original);
+		}
+		expect(error).toBeUndefined();
+		expect(output).toBe("A");
+		expect(reads).toBe(0);
+	});
+
+	it("retains replaced String.slice behavior in expression recognition", () => {
+		const original = Object.getOwnPropertyDescriptor(String.prototype, "slice");
+		let error;
+		try {
+			Object.defineProperty(String.prototype, "slice", { ...original, value: () => "S" });
+			try {
+				tokenize("{{123}}");
+			} catch (caught) {
+				error = caught;
+			}
+		} finally {
+			Object.defineProperty(String.prototype, "slice", original);
+		}
+		expect(error).toEqual(new SyntaxError("Unexpected character: {"));
+	});
+
+	it.each([
+		["{{123}}", "123"],
+		["{{value}}", "7"],
+	])("preserves expression output for %s when String.charCodeAt is replaced", (source, expected) => {
+		const original = Object.getOwnPropertyDescriptor(String.prototype, "charCodeAt");
+		let output, error;
+		try {
+			Object.defineProperty(String.prototype, "charCodeAt", { ...original, value: () => 0 });
+			try {
+				output = new Template(source).render({ value: 7 });
+			} catch (caught) {
+				error = caught;
+			}
+		} finally {
+			Object.defineProperty(String.prototype, "charCodeAt", original);
+		}
+		expect(error).toBeUndefined();
+		expect(output).toBe(expected);
+	});
 });

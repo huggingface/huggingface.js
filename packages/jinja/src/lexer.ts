@@ -61,6 +61,46 @@ function isWhitespace(char: string): boolean {
 	return /\s/.test(char);
 }
 
+/**
+ * A data structure which contains a list of rules to test
+ */
+const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
+	// Control sequences
+	["{%", TOKEN_TYPES.OpenStatement],
+	["%}", TOKEN_TYPES.CloseStatement],
+	["{{", TOKEN_TYPES.OpenExpression],
+	["}}", TOKEN_TYPES.CloseExpression],
+	// Single character tokens
+	["(", TOKEN_TYPES.OpenParen],
+	[")", TOKEN_TYPES.CloseParen],
+	["{", TOKEN_TYPES.OpenCurlyBracket],
+	["}", TOKEN_TYPES.CloseCurlyBracket],
+	["[", TOKEN_TYPES.OpenSquareBracket],
+	["]", TOKEN_TYPES.CloseSquareBracket],
+	[",", TOKEN_TYPES.Comma],
+	[".", TOKEN_TYPES.Dot],
+	[":", TOKEN_TYPES.Colon],
+	["|", TOKEN_TYPES.Pipe],
+	// Comparison operators
+	["<=", TOKEN_TYPES.ComparisonBinaryOperator],
+	[">=", TOKEN_TYPES.ComparisonBinaryOperator],
+	["==", TOKEN_TYPES.ComparisonBinaryOperator],
+	["!=", TOKEN_TYPES.ComparisonBinaryOperator],
+	["<", TOKEN_TYPES.ComparisonBinaryOperator],
+	[">", TOKEN_TYPES.ComparisonBinaryOperator],
+	// Arithmetic operators
+	["+", TOKEN_TYPES.AdditiveBinaryOperator],
+	["-", TOKEN_TYPES.AdditiveBinaryOperator],
+	["~", TOKEN_TYPES.AdditiveBinaryOperator],
+	["**", TOKEN_TYPES.ExponentiationBinaryOperator], // NOTE: must come before "*" so that "**" is matched first
+	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	["//", TOKEN_TYPES.MultiplicativeBinaryOperator], // NOTE: must come before "/" so that "//" is matched first
+	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	["%", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	// Assignment operator
+	["=", TOKEN_TYPES.Equals],
+];
+
 const ESCAPE_CHARACTERS = new Map([
 	["n", "\n"], // New line
 	["t", "\t"], // Horizontal tab
@@ -72,10 +112,6 @@ const ESCAPE_CHARACTERS = new Map([
 	['"', '"'], // Double quote
 	["\\", "\\"], // Backslash
 ]);
-
-const stringIndexOf: (source: string, search: string, position: number) => number = Function.prototype.call.bind(
-	String.prototype.indexOf,
-);
 
 export interface PreprocessOptions {
 	trim_blocks?: boolean;
@@ -103,11 +139,6 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 		// If an application configures Jinja to trim_blocks, the first newline after
 		// a template tag is removed automatically (like in PHP).
 		template = template.replace(/([#%-]})\n/g, "$1");
-	}
-
-	// The generation-tag pattern cannot match without this literal substring.
-	if (typeof template === "string" && stringIndexOf(template, "generation", 0) === -1) {
-		return template;
 	}
 
 	// Handle the custom transformers-specific `generation` tag.
@@ -171,48 +202,6 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		return str;
 	};
 
-	const consumeDigits = (): string => {
-		const start = cursorPosition;
-		while (cursorPosition < src.length) {
-			const code = src.charCodeAt(cursorPosition);
-			if (code < 48 || code > 57) {
-				break;
-			}
-			if (++cursorPosition >= src.length) {
-				throw new SyntaxError("Unexpected end of input");
-			}
-		}
-		return src.slice(start, cursorPosition);
-	};
-
-	const consumeWord = (): string => {
-		const start = cursorPosition;
-		while (cursorPosition < src.length) {
-			const code = src.charCodeAt(cursorPosition);
-			if (!((code >= 48 && code <= 57) || (code >= 65 && code <= 90) || code === 95 || (code >= 97 && code <= 122))) {
-				break;
-			}
-			if (++cursorPosition >= src.length) {
-				throw new SyntaxError("Unexpected end of input");
-			}
-		}
-		return src.slice(start, cursorPosition);
-	};
-
-	const whitespaceAtCursor = (): boolean => {
-		const code = src.charCodeAt(cursorPosition);
-		// Keep the full ECMAScript whitespace class outside the ASCII fast path.
-		return code === 32 || (code >= 9 && code <= 13) || (code > 127 && isWhitespace(src[cursorPosition]));
-	};
-
-	const consumeWhitespace = (): void => {
-		while (whitespaceAtCursor()) {
-			if (++cursorPosition >= src.length) {
-				throw new SyntaxError("Unexpected end of input");
-			}
-		}
-	};
-
 	const stripTrailingWhitespace = () => {
 		const lastToken = tokens.at(-1);
 		if (lastToken && lastToken.type === TOKEN_TYPES.Text) {
@@ -224,13 +213,13 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 	};
 
 	const skipLeadingWhitespace = () => {
-		while (cursorPosition < src.length && whitespaceAtCursor()) {
+		while (cursorPosition < src.length && isWhitespace(src[cursorPosition])) {
 			++cursorPosition;
 		}
 	};
 
 	// Build each token until end of input
-	while (cursorPosition < src.length) {
+	main: while (cursorPosition < src.length) {
 		// First, consume all text that is outside of a Jinja statement or expression
 		const lastTokenType = tokens.at(-1)?.type;
 		if (
@@ -239,35 +228,19 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			lastTokenType === TOKEN_TYPES.CloseExpression ||
 			lastTokenType === TOKEN_TYPES.Comment
 		) {
-			const textStart = cursorPosition;
-			// Keep the legacy path for string-like values outside the declared input type.
-			if (typeof (src as unknown) === "string") {
-				while (cursorPosition < src.length) {
-					const nextBrace = stringIndexOf(src, "{", cursorPosition);
-					if (nextBrace === -1) {
-						cursorPosition = src.length;
-						break;
-					}
-					cursorPosition = nextBrace;
-					const next = src[cursorPosition + 1];
-					if (next === "%" || next === "{" || next === "#") {
-						break;
-					}
-					++cursorPosition;
-				}
-			} else {
-				while (
-					cursorPosition < src.length &&
-					!(
-						src[cursorPosition] === "{" &&
-						(src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{" || src[cursorPosition + 1] === "#")
-					)
-				) {
-					++cursorPosition;
-				}
+			let text = "";
+			while (
+				cursorPosition < src.length &&
+				// Keep going until we hit the next Jinja statement or expression
+				!(
+					src[cursorPosition] === "{" &&
+					(src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{" || src[cursorPosition + 1] === "#")
+				)
+			) {
+				// Consume text
+				text += src[cursorPosition++];
 			}
 
-			const text = src.slice(textStart, cursorPosition);
 			// There is some text to add
 			if (text.length > 0) {
 				tokens.push(new Token(text, TOKEN_TYPES.Text));
@@ -285,16 +258,14 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				++cursorPosition; // Skip the hyphen
 			}
 
-			const commentStart = cursorPosition;
+			let comment = "";
 			while (src[cursorPosition] !== "#" || src[cursorPosition + 1] !== "}") {
 				// Check for end of input
 				if (cursorPosition + 2 >= src.length) {
 					throw new SyntaxError("Missing end of comment tag");
 				}
-				++cursorPosition;
+				comment += src[cursorPosition++];
 			}
-
-			let comment = src.slice(commentStart, cursorPosition);
 
 			// Check for trailing hyphen for whitespace control -#}
 			const stripAfter = comment.endsWith("-");
@@ -319,11 +290,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Check for opening statement with whitespace control {%-
-		if (
-			src.charCodeAt(cursorPosition) === 123 &&
-			src.charCodeAt(cursorPosition + 1) === 37 &&
-			src.charCodeAt(cursorPosition + 2) === 45
-		) {
+		if (src.slice(cursorPosition, cursorPosition + 3) === "{%-") {
 			stripTrailingWhitespace();
 			tokens.push(new Token("{%", TOKEN_TYPES.OpenStatement));
 			cursorPosition += 3; // Skip {%-
@@ -331,11 +298,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Check for opening expression with whitespace control {{-
-		if (
-			src.charCodeAt(cursorPosition) === 123 &&
-			src.charCodeAt(cursorPosition + 1) === 123 &&
-			src.charCodeAt(cursorPosition + 2) === 45
-		) {
+		if (src.slice(cursorPosition, cursorPosition + 3) === "{{-") {
 			stripTrailingWhitespace();
 			tokens.push(new Token("{{", TOKEN_TYPES.OpenExpression));
 			curlyBracketDepth = 0;
@@ -344,14 +307,10 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Consume (and ignore) all whitespace inside Jinja statements or expressions
-		consumeWhitespace();
+		consumeWhile(isWhitespace);
 
 		// Check for closing statement with whitespace control -%}
-		if (
-			src.charCodeAt(cursorPosition) === 45 &&
-			src.charCodeAt(cursorPosition + 1) === 37 &&
-			src.charCodeAt(cursorPosition + 2) === 125
-		) {
+		if (src.slice(cursorPosition, cursorPosition + 3) === "-%}") {
 			tokens.push(new Token("%}", TOKEN_TYPES.CloseStatement));
 			cursorPosition += 3; // Skip -%}
 			skipLeadingWhitespace();
@@ -359,11 +318,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Check for closing expression with whitespace control -}}
-		if (
-			src.charCodeAt(cursorPosition) === 45 &&
-			src.charCodeAt(cursorPosition + 1) === 125 &&
-			src.charCodeAt(cursorPosition + 2) === 125
-		) {
+		if (src.slice(cursorPosition, cursorPosition + 3) === "-}}") {
 			tokens.push(new Token("}}", TOKEN_TYPES.CloseExpression));
 			cursorPosition += 3; // Skip -}}
 			skipLeadingWhitespace();
@@ -396,10 +351,10 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 					++cursorPosition; // consume the unary operator
 
 					// Check for numbers following the unary operator
-					let num = consumeDigits();
+					let num = consumeWhile(isInteger);
 					if (num.length > 0 && src[cursorPosition] === "." && isInteger(src[cursorPosition + 1])) {
 						++cursorPosition; // consume '.'
-						const frac = consumeDigits();
+						const frac = consumeWhile(isInteger);
 						num = `${num}.${frac}`;
 					}
 					tokens.push(
@@ -410,109 +365,27 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			}
 		}
 
-		// Dispatch punctuation directly, checking longer tokens before their prefixes.
-		let tokenValue = char;
-		let tokenType: TokenType | undefined;
-		const code = src.charCodeAt(cursorPosition);
-		const nextCode = src.charCodeAt(cursorPosition + 1);
-		switch (code) {
-			case 123: // {
-				if (nextCode === 37) {
-					tokenValue = "{%";
-					tokenType = TOKEN_TYPES.OpenStatement;
-				} else if (nextCode === 123) {
-					tokenValue = "{{";
-					tokenType = TOKEN_TYPES.OpenExpression;
-				} else {
-					tokenType = TOKEN_TYPES.OpenCurlyBracket;
-				}
-				break;
-			case 125: // }
-				// Inside an object literal, don't treat "}}" as expression-end.
-				if (nextCode === 125 && curlyBracketDepth <= 0) {
-					tokenValue = "}}";
-					tokenType = TOKEN_TYPES.CloseExpression;
-				} else {
-					tokenType = TOKEN_TYPES.CloseCurlyBracket;
-				}
-				break;
-			case 37: // %
-				if (nextCode === 125) {
-					tokenValue = "%}";
-					tokenType = TOKEN_TYPES.CloseStatement;
-				} else {
-					tokenType = TOKEN_TYPES.MultiplicativeBinaryOperator;
-				}
-				break;
-			case 40: // (
-				tokenType = TOKEN_TYPES.OpenParen;
-				break;
-			case 41: // )
-				tokenType = TOKEN_TYPES.CloseParen;
-				break;
-			case 91: // [
-				tokenType = TOKEN_TYPES.OpenSquareBracket;
-				break;
-			case 93: // ]
-				tokenType = TOKEN_TYPES.CloseSquareBracket;
-				break;
-			case 44: // ,
-				tokenType = TOKEN_TYPES.Comma;
-				break;
-			case 46: // .
-				tokenType = TOKEN_TYPES.Dot;
-				break;
-			case 58: // :
-				tokenType = TOKEN_TYPES.Colon;
-				break;
-			case 124: // |
-				tokenType = TOKEN_TYPES.Pipe;
-				break;
-			case 60: // <
-				tokenValue = nextCode === 61 ? "<=" : "<";
-				tokenType = TOKEN_TYPES.ComparisonBinaryOperator;
-				break;
-			case 62: // >
-				tokenValue = nextCode === 61 ? ">=" : ">";
-				tokenType = TOKEN_TYPES.ComparisonBinaryOperator;
-				break;
-			case 61: // =
-				tokenValue = nextCode === 61 ? "==" : "=";
-				tokenType = nextCode === 61 ? TOKEN_TYPES.ComparisonBinaryOperator : TOKEN_TYPES.Equals;
-				break;
-			case 33: // !
-				if (nextCode === 61) {
-					tokenValue = "!=";
-					tokenType = TOKEN_TYPES.ComparisonBinaryOperator;
-				}
-				break;
-			case 43: // +
-			case 45: // -
-			case 126: // ~
-				tokenType = TOKEN_TYPES.AdditiveBinaryOperator;
-				break;
-			case 42: // *
-				tokenValue = nextCode === 42 ? "**" : "*";
-				tokenType =
-					nextCode === 42 ? TOKEN_TYPES.ExponentiationBinaryOperator : TOKEN_TYPES.MultiplicativeBinaryOperator;
-				break;
-			case 47: // /
-				tokenValue = nextCode === 47 ? "//" : "/";
-				tokenType = TOKEN_TYPES.MultiplicativeBinaryOperator;
-				break;
-		}
-		if (tokenType !== undefined) {
-			tokens.push(new Token(tokenValue, tokenType));
-
-			if (tokenType === TOKEN_TYPES.OpenExpression) {
-				curlyBracketDepth = 0;
-			} else if (tokenType === TOKEN_TYPES.OpenCurlyBracket) {
-				++curlyBracketDepth;
-			} else if (tokenType === TOKEN_TYPES.CloseCurlyBracket) {
-				--curlyBracketDepth;
+		// Try to match one of the tokens in the mapping table
+		for (const [seq, type] of ORDERED_MAPPING_TABLE) {
+			// inside an object literal, don't treat "}}" as expression-end
+			if (seq === "}}" && curlyBracketDepth > 0) {
+				continue;
 			}
-			cursorPosition += tokenValue.length;
-			continue;
+			const slice = src.slice(cursorPosition, cursorPosition + seq.length);
+			if (slice === seq) {
+				tokens.push(new Token(seq, type));
+
+				// possibly adjust the curly bracket depth
+				if (type === TOKEN_TYPES.OpenExpression) {
+					curlyBracketDepth = 0;
+				} else if (type === TOKEN_TYPES.OpenCurlyBracket) {
+					++curlyBracketDepth;
+				} else if (type === TOKEN_TYPES.CloseCurlyBracket) {
+					--curlyBracketDepth;
+				}
+				cursorPosition += seq.length;
+				continue main;
+			}
 		}
 
 		if (char === "'" || char === '"') {
@@ -525,7 +398,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 
 		if (isInteger(char)) {
 			// Consume integer part
-			let num = consumeDigits();
+			let num = consumeWhile(isInteger);
 			// Possibly, consume fractional part
 			if (
 				tokens.at(-1)?.type !== TOKEN_TYPES.Dot &&
@@ -533,7 +406,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				isInteger(src[cursorPosition + 1])
 			) {
 				++cursorPosition; // consume '.'
-				const frac = consumeDigits();
+				const frac = consumeWhile(isInteger);
 				num = `${num}.${frac}`;
 			}
 			tokens.push(new Token(num, TOKEN_TYPES.NumericLiteral));
@@ -541,7 +414,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 		if (isWord(char)) {
 			// consume any word characters and always classify as Identifier
-			const word = consumeWord();
+			const word = consumeWhile(isWord);
 			tokens.push(new Token(word, TOKEN_TYPES.Identifier));
 			continue;
 		}
