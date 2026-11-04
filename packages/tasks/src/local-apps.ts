@@ -139,7 +139,7 @@ function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
 
-function isEmbeddingModel(model: ModelData): boolean {
+export function isEmbeddingModel(model: ModelData): boolean {
 	return (
 		!model.tags.includes("decision-model") &&
 		(model.tags.includes("feature-extraction") ||

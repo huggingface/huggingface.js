@@ -4,6 +4,7 @@ import { LIBRARY_TASK_MAPPING, REMOVED_IN_V5_TRANSFORMERS_PIPELINES } from "./li
 import { getModelInputSnippet } from "./snippets/inputs.js";
 import type { ChatCompletionInputMessage } from "./tasks/index.js";
 import { stringifyMessages } from "./snippets/common.js";
+import { isEmbeddingModel } from "./local-apps.js";
 
 const TAG_CUSTOM_CODE = "custom_code";
 
@@ -1482,6 +1483,7 @@ model.score("query", ["doc1", "doc2", "doc3"])`,
 };
 
 export const llama_cpp_python = (model: ModelData): string[] => {
+	const isEmbedding = isEmbeddingModel(model);
 	const snippets = [
 		`# !pip install llama-cpp-python
 
@@ -1489,12 +1491,14 @@ from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
-	filename="{{GGUF_FILE}}",
+	filename="{{GGUF_FILE}}",${isEmbedding ? "\n\tembedding=True," : ""}
 )
 `,
 	];
 
-	if (model.tags.includes("conversational")) {
+	if (isEmbedding) {
+		snippets.push(`embeddings = llm.create_embedding("Hello, world!")`);
+	} else if (model.tags.includes("conversational")) {
 		const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 		snippets.push(`llm.create_chat_completion(
 	messages = ${stringifyMessages(messages, { attributeKeyQuotes: true, indent: "\t" })}
