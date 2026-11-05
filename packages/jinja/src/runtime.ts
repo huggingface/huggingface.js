@@ -106,6 +106,37 @@ export class FloatValue extends RuntimeValue<number> {
 	}
 }
 
+/** Count Unicode code points without materializing an array. */
+function codePointLength(value: string): number {
+	let length = 0;
+	const iterator = value[Symbol.iterator]();
+	while (!iterator.next().done) {
+		++length;
+	}
+	return length;
+}
+
+/** Index Unicode code points with Array.at semantics, without materializing an array. */
+function codePointAtIndex(value: string, index: number): string | undefined {
+	index = Math.trunc(index) || 0;
+	if (!Number.isFinite(index)) {
+		return undefined;
+	}
+	if (index < 0) {
+		index += codePointLength(value);
+	}
+	if (index < 0) {
+		return undefined;
+	}
+	for (const character of value) {
+		if (index === 0) {
+			return character;
+		}
+		--index;
+	}
+	return undefined;
+}
+
 /**
  * Represents a string value at runtime.
  */
@@ -145,7 +176,7 @@ export class StringValue extends RuntimeValue<string> {
 					return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
 				}),
 			],
-			["length", new IntegerValue(this.value.length)],
+			["length", new IntegerValue(codePointLength(this.value))],
 			[
 				"rstrip",
 				new FunctionValue(() => {
@@ -1836,7 +1867,7 @@ export class Interpreter {
 		} else if (object instanceof ArrayValue || object instanceof StringValue) {
 			if (property instanceof IntegerValue) {
 				if (object instanceof StringValue) {
-					const character = object.value.at(property.value);
+					const character = codePointAtIndex(object.value, property.value);
 					value = character === undefined ? undefined : new StringValue(character);
 				} else {
 					value = object.value.at(property.value);
