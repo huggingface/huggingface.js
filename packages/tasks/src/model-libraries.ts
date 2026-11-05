@@ -1312,6 +1312,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tts_b6369a24.safetensors"`,
 	},
+	pqgan: {
+		prettyLabel: "PQGAN",
+		repoName: "PQGAN",
+		repoUrl: "https://github.com/vislearn/PQGAN",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
 		repoName: "Pruna AI",
@@ -1675,6 +1682,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/supertone-inc/supertonic",
 		snippets: snippets.supertonic,
 		filter: false,
+	},
+	svdtrunc: {
+		prettyLabel: "SVDtrunc",
+		repoName: "SVDtrunc",
+		repoUrl: "https://github.com/vislearn/SVDtrunc",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	swarmformer: {
 		prettyLabel: "SwarmFormer",
