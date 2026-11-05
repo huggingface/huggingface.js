@@ -344,6 +344,71 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		);
 	});
 
+	it("chaty deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.chaty;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model, undefined).href).toBe(
+			"https://chaty.ca/use.html?model=bartowski%2FLlama-3.2-3B-Instruct-GGUF",
+		);
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf").href).toBe(
+			"https://chaty.ca/use.html?model=bartowski%2FLlama-3.2-3B-Instruct-GGUF&file=Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+		);
+	});
+
+	it("chaty shown for mlx, image and music models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.chaty;
+		const models: ModelData[] = [
+			{ id: "mlx-community/Llama-3.2-3B-Instruct-4bit", tags: ["mlx"], pipeline_tag: "text-generation", inference: "" },
+			{ id: "leejet/FLUX.2-klein-4B-GGUF", tags: ["gguf"], pipeline_tag: "text-to-image", inference: "" },
+			{ id: "unsloth/FLUX.2-klein-4B-GGUF", tags: ["gguf"], pipeline_tag: "image-to-image", inference: "" },
+			{ id: "some-user/Z-Image-Turbo-8bit", tags: [], library_name: "mflux", inference: "" },
+			{ id: "audio-cpp/Yue2-3B-GGUF", tags: ["audio.cpp", "gguf"], pipeline_tag: "text-to-audio", inference: "" },
+			{
+				id: "audio-cpp/MiniMax-Music3-GGUF",
+				tags: ["audio.cpp", "gguf"],
+				pipeline_tag: "text-to-audio",
+				inference: "",
+			},
+		];
+
+		for (const model of models) {
+			expect(displayOnModelPage(model), model.id).toBe(true);
+		}
+	});
+
+	it("chaty not shown for models it does not run", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.chaty;
+		const models: ModelData[] = [
+			{
+				id: "meta-llama/Llama-3.2-3B-Instruct",
+				tags: ["conversational"],
+				pipeline_tag: "text-generation",
+				inference: "",
+			},
+			{ id: "black-forest-labs/FLUX.2-klein-4B", tags: [], pipeline_tag: "text-to-image", inference: "" },
+			// audio.cpp also packages speech models and music families Chaty does not run.
+			{ id: "audio-cpp/VibeVoice-7B-GGUF", tags: ["audio.cpp", "gguf"], pipeline_tag: "text-to-speech", inference: "" },
+			{
+				id: "audio-cpp/Magenta-RealTime-2-GGUF",
+				tags: ["audio.cpp", "gguf"],
+				pipeline_tag: "text-to-audio",
+				inference: "",
+			},
+			{ id: "yue-user/Kitten-TTS-GGUF", tags: ["audio.cpp", "gguf"], pipeline_tag: "text-to-speech", inference: "" },
+		];
+
+		for (const model of models) {
+			expect(displayOnModelPage(model), model.id).toBe(false);
+		}
+	});
+
 	it("unsloth tagged model", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS.unsloth;
 		const model: ModelData = {
