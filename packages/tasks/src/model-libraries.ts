@@ -956,6 +956,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth" OR path:"config.json"`,
 	},
+	"limx-dynamics": {
+		prettyLabel: "LimX Dynamics",
+		repoName: "LimX Dynamics",
+		repoUrl: "https://github.com/limxdynamics/limxdynamics",
+		filter: false,
+		countDownloads: `(path_filename:"params" AND path_extension:"yaml") OR (path_filename:"controllers" AND path_extension:"yaml") OR (path_filename:"norm_stats" AND path_extension:"json")`,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
