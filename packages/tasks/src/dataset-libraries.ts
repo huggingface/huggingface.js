@@ -131,6 +131,12 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/huggingface/lerobot",
 		docsUrl: "https://huggingface.co/docs/lerobot/",
 	},
+	scigantic: {
+		prettyLabel: "Scigantic",
+		repoName: "scigantic",
+		repoUrl: "https://github.com/Scigantic/scigantic",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-scigantic",
+	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
 /// List of the dataset libraries supported by the Hub
