@@ -3326,6 +3326,15 @@ export const hezar = (model: ModelData): string[] => [
 model = Model.load("${model.id}")`,
 ];
 
+export const zao = (model: ModelData): string[] => [
+	`# pip install zao
+from zao import ZAOTransformer
+
+zao = ZAOTransformer(weights="${model.id}")
+X = zao.transform(["CC(=O)Oc1ccccc1C(=O)O", "c1ccc2[nH]ccc2c1"])
+X.shape  # (2, 2048)`,
+];
+
 export const zonos = (model: ModelData): string[] => [
 	`# pip install git+https://github.com/Zyphra/Zonos.git
 import torchaudio
