@@ -1848,6 +1848,40 @@ image_prompt = Image.open("path/to/image.jpg").convert("RGB")
 video = wan_i2v.generate(text_prompt, image_prompt)`,
 ];
 
+export const pika_h3_flex = (model: ModelData): string[] => [
+	`# pip install -r examples/requirements-diffusers.txt (see the examples/ folder of this repo)
+import torch
+from diffusers import ComponentsManager, ModularPipeline
+from diffusers.utils.export_utils import encode_video
+from PIL import Image
+
+workflow = "fl2va"  # "fl2va" (first-frame to video+audio) or "ref2va" (reference images/video to video+audio)
+
+manager = ComponentsManager()
+manager.enable_auto_cpu_offload(device="cuda:0")
+pipe = ModularPipeline.from_pretrained("${model.id}", workflow=workflow, components_manager=manager)
+pipe.load_components(
+    pretrained_model_name_or_path="${model.id}",
+    dtype={"vae": torch.float32, "audio_vae": torch.float32, "default": torch.bfloat16},
+)
+# The bundled base components are not Pika-adapted weights: load the matching adapter.
+pipe.load_lora_weights("${model.id}", weight_name=f"{workflow}/adapter.safetensors")
+
+result = pipe(
+    prompt="A cat walks through a sunlit cafe and jumps onto the counter",
+    image=Image.open("first_frame.png").convert("RGB"),
+    height=480,
+    width=832,
+    num_frames=121,
+    generator=torch.Generator("cuda:0").manual_seed(0),
+    output=["videos", "audio", "sampling_rate"],
+)
+encode_video(
+    result["videos"][0], fps=24, output_path="output.mp4",
+    audio=result["audio"][0].float().cpu(), audio_sample_rate=result["sampling_rate"],
+)`,
+];
+
 export const pocket_tts = (model: ModelData): string[] => [
 	`from pocket_tts import TTSModel
 import scipy.io.wavfile

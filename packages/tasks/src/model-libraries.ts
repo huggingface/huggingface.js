@@ -1297,6 +1297,17 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"pika-h3-flex": {
+		prettyLabel: "Pika H3 Flex",
+		repoName: "Pika-H3-Flex",
+		repoUrl: "https://github.com/Pika-Labs/Pika-H3-Flex",
+		docsUrl: "https://huggingface.co/docs/diffusers/main/en/api/pipelines/pika_h3_flex",
+		snippets: snippets.pika_h3_flex,
+		filter: false,
+		/// Diffusers modular pipeline loads (index files) plus the Pika adapters, which live in
+		/// subfolders (fl2va/, ref2va/, comfy/loras/) that the diffusers rule does not count.
+		countDownloads: `path:"modular_model_index.json" OR path:"model_index.json" OR path:"fl2va/adapter.safetensors" OR path:"ref2va/adapter.safetensors" OR (path_prefix:"comfy/loras/" AND path_extension:"safetensors")`,
+	},
 	piper: {
 		prettyLabel: "Piper",
 		repoName: "Piper",
