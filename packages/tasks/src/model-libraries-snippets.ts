@@ -29,7 +29,7 @@ pmf = model.forecast([28, 30, 27], elapsed=0)`,
 ];
 
 export const minicpmOcr = (model: ModelData): string[] => {
-	const isGguf = Boolean(model.gguf) || model.tags.includes("gguf") || model.id.toLowerCase().endsWith("-gguf");
+	const isGguf = !!model.gguf?.context_length;
 	const backend = isGguf ? "llamacpp" : "vllm";
 	const device = isGguf ? "cpu" : "cuda:0";
 	const contextLength = isGguf ? 8192 : 40960;
@@ -38,58 +38,39 @@ export const minicpmOcr = (model: ModelData): string[] => {
 		? "# llama.cpp: load the model and vision projector; use --port 8080,\n# --alias minicpm-ocr, --ctx-size 8192, --parallel 1, --jinja --reasoning off."
 		: "# vLLM: load the model above; use --port 8080,\n# --served-model-name minicpm-ocr and --max-model-len 40960.";
 	const pipeline = isGguf
-		? `{
-                "overlap_layout": False,
-                "queue_mode": "serial",
-                "max_workers": 1,
-            }`
-		: '{"overlap_layout": True}';
+		? '{"queue_mode": "serial", "max_workers": 1, "render_workers": 1}'
+		: '{"overlap_layout": True, "render_workers": 1}';
 
 	return [
-		`# Install minicpm-ocr for your platform:
-# pip install "minicpm-ocr[all]"
-# First deploy ${model.id} as a recognition service:
+		`pip install "minicpm-ocr[all]" huggingface_hub
+
+# Deploy ${model.id} as a recognition service before running the Python example:
 # https://github.com/OpenBMB/MiniCPM-OCR/blob/main/docs/${guide}
 ${serviceSettings}
-# Layout detection uses ${device}; recognition runs on the deployed service.
-
-from importlib.resources import files
+# Layout detection uses ${device}; recognition runs on the deployed service.`,
+		`from importlib.resources import files
 from pathlib import Path
 
 from minicpmvocr import load_config, pipelined_run
-from minicpmvocr.layouts.download import ensure_layout_model
+from huggingface_hub import snapshot_download
 
-
-def main():
-    layout_model = ensure_layout_model(Path("models/PP-DocLayoutV3_infer"))
-
-    cfg = load_config(
-        str(files("minicpmvocr").joinpath("configs/minicpmvocr.yaml")),
-        overrides={
-            "input": {"file_path": str(Path("demo.png").resolve())},
-            "engine": {
-                "type": "${backend}",
-                "server_url": "http://127.0.0.1:8080",
-                "model_name": "minicpm-ocr",
-                "max_model_len": ${contextLength},
-            },
-            "layout": {
-                "model_dir": str(layout_model),
-                "device": "${device}",
-            },
-            "pipeline": ${pipeline},
-            "run": {"run_root": str(Path("output").resolve())},
+layout_model = snapshot_download("PaddlePaddle/PP-DocLayoutV3")
+cfg = load_config(
+    str(files("minicpmvocr").joinpath("configs/minicpmvocr.yaml")),
+    overrides={
+        "input": {"file_path": str(Path("demo.png").resolve())},
+        "engine": {
+            "type": "${backend}",
+            "server_url": "http://127.0.0.1:8080",
+            "model_name": "minicpm-ocr",
+            "max_model_len": ${contextLength},
         },
-    )
-
-    pipelined_run(cfg)
-
-    print("JSON directory:", cfg["_meta"]["result_json_dir"])
-    print("Markdown directory:", cfg["_meta"]["output_dir"])
-
-
-if __name__ == "__main__":
-    main()`,
+        "layout": {"model_dir": layout_model, "device": "${device}"},
+        # Render PDFs in-process so this example also works without a main guard.
+        "pipeline": ${pipeline},
+    },
+)
+pipelined_run(cfg)`,
 	];
 };
 

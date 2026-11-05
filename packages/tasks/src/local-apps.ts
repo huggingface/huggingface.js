@@ -596,17 +596,7 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
  *
  * Ping the HF team if we can help with anything!
  */
-/** Prefer the document-parsing SDK over generic local-app examples for MiniCPM-OCR. */
-function withSdkMenuPreference<T extends Record<string, LocalApp>>(apps: T): T {
-	for (const app of Object.values(apps)) {
-		const displayOnModelPage = app.displayOnModelPage;
-		app.displayOnModelPage = (model: ModelData) =>
-			model.library_name !== "minicpm-ocr" && displayOnModelPage(model);
-	}
-	return apps;
-}
-
-export const LOCAL_APPS = withSdkMenuPreference({
+export const LOCAL_APPS = {
 	"llama.cpp": {
 		prettyLabel: "llama.cpp",
 		docsUrl: "https://github.com/ggml-org/llama.cpp",
@@ -824,6 +814,6 @@ export const LOCAL_APPS = withSdkMenuPreference({
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
 	},
-} satisfies Record<string, LocalApp>);
+} satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;

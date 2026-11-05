@@ -3,38 +3,6 @@ import { LOCAL_APPS } from "./local-apps.js";
 import type { ModelData } from "./model-data.js";
 
 describe("local-apps", () => {
-	describe("MiniCPM-OCR SDK menu preference", () => {
-		const base: ModelData = {
-			id: "openbmb/MiniCPM-OCR-1.0",
-			library_name: "minicpm-ocr",
-			pipeline_tag: "image-text-to-text",
-			tags: ["conversational"],
-			inference: "",
-		};
-
-		it.each<ModelData>([
-			base,
-			{ ...base, config: { quantization_config: { quant_method: "awq" } } },
-			{ ...base, config: { quantization_config: { quant_method: "gptq" } } },
-			{ ...base, gguf: { total: 1, context_length: 8192 }, tags: ["gguf", "conversational", "unsloth"] },
-		])("hides generic local apps for SDK model metadata %#", (model) => {
-			const visibleApps = Object.entries(LOCAL_APPS).filter(([, app]) => app.displayOnModelPage(model));
-			expect(visibleApps).toEqual([]);
-		});
-
-		it("keeps generic quantized models available in their existing local apps", () => {
-			const other = { ...base, id: "other/model", library_name: "transformers" };
-			const awq = { ...other, config: { quantization_config: { quant_method: "awq" } } };
-			const gptq = { ...other, config: { quantization_config: { quant_method: "gptq" } } };
-			for (const model of [awq, gptq]) {
-				expect(LOCAL_APPS.vllm.displayOnModelPage(model)).toBe(true);
-				expect(LOCAL_APPS.sglang.displayOnModelPage(model)).toBe(true);
-			}
-			const gguf = { ...other, library_name: "llama.cpp", gguf: { total: 1, context_length: 8192 } };
-			expect(LOCAL_APPS["llama.cpp"].displayOnModelPage(gguf)).toBe(true);
-		});
-	});
-
 	it("llama.cpp conversational", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
 		const model: ModelData = {
