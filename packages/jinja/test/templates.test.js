@@ -6555,6 +6555,28 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("unique", () => {
+		it("ignores case by default, like Python Jinja", () => {
+			const template = new Template(`{{ ["a", "A", "b", "a"] | unique | join(",") }}`);
+			expect(template.render()).toBe("a,b");
+		});
+
+		it("accepts case_sensitive and attribute arguments", () => {
+			// GLM-5.3's chat template checks tool call ids with `unique(case_sensitive=true)`.
+			const template = new Template(
+				`{{ ["a", "A", "b"] | unique(case_sensitive=true) | join(",") }}|{{ ["a", "A"] | unique(true) | join(",") }}|` +
+					`{{ items | unique(attribute="n") | map(attribute="i") | join(",") }}|` +
+					`{{ items | unique(case_sensitive=true, attribute="n") | map(attribute="i") | join(",") }}`,
+			);
+			const items = [
+				{ n: "x", i: 1 },
+				{ n: "X", i: 2 },
+				{ n: "y", i: 3 },
+			];
+			expect(template.render({ items })).toBe("a,A,b|a,A|1,3|1,2,3");
+		});
+	});
+
 	describe("Macros and call statements", () => {
 		it.each([
 			{
