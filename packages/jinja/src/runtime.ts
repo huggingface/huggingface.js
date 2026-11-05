@@ -577,7 +577,7 @@ export class UndefinedValue extends RuntimeValue<undefined> {
 	override type = "UndefinedValue";
 }
 
-function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntimeValue] {
+function normalizeNamespaceEntry(pair: AnyRuntimeValue, name = "namespace"): [StringValue, AnyRuntimeValue] {
 	let values: AnyRuntimeValue[] | undefined;
 	if (pair instanceof ArrayValue) {
 		values = pair.value;
@@ -585,14 +585,52 @@ function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntim
 		values = Array.from(pair.value, (char) => new StringValue(char));
 	}
 	if (!values || values.length !== 2) {
-		throw new Error("namespace expected an object or an iterable of [key, value] pairs");
+		throw new Error(`${name} expected an object or an iterable of [key, value] pairs`);
 	}
 
 	const [key, value] = values;
 	if (!(key instanceof StringValue)) {
-		throw new Error("namespace keys must be strings");
+		throw new Error(`${name} keys must be strings`);
 	}
 	return [key, value];
+}
+
+/**
+ * Builds the entries of a `namespace(...)` or `dict(...)` call: an optional mapping or
+ * iterable of [key, value] pairs, then keyword arguments, like Python's `dict()`.
+ */
+function collectMappingArguments(args: AnyRuntimeValue[], name: string): Map<string, AnyRuntimeValue> {
+	// Copy top-level entries so namespace assignment does not mutate the input.
+	const positional = args.slice();
+	let kwargs: KeywordArgumentsValue | undefined;
+	if (positional.at(-1) instanceof KeywordArgumentsValue) {
+		kwargs = positional.pop() as KeywordArgumentsValue;
+	}
+	if (positional.length > 1) {
+		throw new Error(`${name} expected at most 1 argument, got ${positional.length}`);
+	}
+	const entries = new Map<string, AnyRuntimeValue>();
+	if (positional.length === 1) {
+		const source = positional[0];
+		if (source instanceof ObjectValue) {
+			for (const [key, value] of source.value) {
+				entries.set(key, value);
+			}
+		} else if (source instanceof ArrayValue) {
+			for (const pair of source.value) {
+				const [key, value] = normalizeNamespaceEntry(pair, name);
+				entries.set(key.value, value);
+			}
+		} else {
+			throw new Error(`'${source.type}' object is not iterable`);
+		}
+	}
+	if (kwargs) {
+		for (const [key, value] of kwargs.value) {
+			entries.set(key, value);
+		}
+	}
+	return entries;
 }
 
 /**
@@ -603,42 +641,7 @@ export class Environment {
 	 * The variables declared in this environment.
 	 */
 	variables: Map<string, AnyRuntimeValue> = new Map([
-		[
-			"namespace",
-			new FunctionValue((args) => {
-				// Copy top-level entries so namespace assignment does not mutate the input.
-				const positional = args.slice();
-				let kwargs: KeywordArgumentsValue | undefined;
-				if (positional.at(-1) instanceof KeywordArgumentsValue) {
-					kwargs = positional.pop() as KeywordArgumentsValue;
-				}
-				if (positional.length > 1) {
-					throw new Error(`namespace expected at most 1 argument, got ${positional.length}`);
-				}
-				const entries = new Map<string, AnyRuntimeValue>();
-				if (positional.length === 1) {
-					const source = positional[0];
-					if (source instanceof ObjectValue) {
-						for (const [key, value] of source.value) {
-							entries.set(key, value);
-						}
-					} else if (source instanceof ArrayValue) {
-						for (const pair of source.value) {
-							const [key, value] = normalizeNamespaceEntry(pair);
-							entries.set(key.value, value);
-						}
-					} else {
-						throw new Error(`'${source.type}' object is not iterable`);
-					}
-				}
-				if (kwargs) {
-					for (const [key, value] of kwargs.value) {
-						entries.set(key, value);
-					}
-				}
-				return new NamespaceValue(entries);
-			}),
-		],
+		["namespace", new FunctionValue((args) => new NamespaceValue(collectMappingArguments(args, "namespace")))],
 	]);
 
 	/**
@@ -750,11 +753,18 @@ export class Environment {
 		throw new Error(`Unknown variable: ${name}`);
 	}
 
+	/**
+	 * Built-in globals that templates and render variables may shadow, as in Python Jinja.
+	 */
+	private static readonly BUILTINS: ReadonlyMap<string, AnyRuntimeValue> = new Map([
+		["dict", new FunctionValue((args) => new ObjectValue(collectMappingArguments(args, "dict")))],
+	]);
+
 	lookupVariable(name: string): AnyRuntimeValue {
 		try {
 			return this.resolve(name).variables.get(name) ?? new UndefinedValue();
 		} catch {
-			return new UndefinedValue();
+			return Environment.BUILTINS.get(name) ?? new UndefinedValue();
 		}
 	}
 }
