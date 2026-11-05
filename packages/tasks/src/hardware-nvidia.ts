@@ -111,12 +111,30 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	GB10: {
 		tflops: 29.71,
-		memory: [128],
+		memory: [64, 128],
 		computeCapability: 12.1,
 		msrp: 3_999,
 		power: 140,
 		releaseYear: 2025,
 		aliases: ["DGX Spark"],
+	},
+	"RTX Spark N1X Laptop": {
+		tflops: 29.71,
+		memory: [24, 32, 48, 64, 128],
+		computeCapability: 12.1,
+		msrp: 5_900,
+		power: 80,
+		releaseYear: 2026,
+		aliases: ["N1X", "RTX Spark", "RTX Spark Laptop", "Surface Laptop Ultra"],
+	},
+	"RTX Spark N1X Desktop": {
+		tflops: 29.71,
+		memory: [128],
+		computeCapability: 12.1,
+		msrp: 6_000,
+		power: 140,
+		releaseYear: 2026, // Announced for 2026; Surface RTX Spark Dev Box is available for pre-order.
+		aliases: ["N1X", "RTX Spark", "Surface RTX Spark Dev Box"],
 	},
 	"RTX PRO 6000 WS": {
 		tflops: 126,
