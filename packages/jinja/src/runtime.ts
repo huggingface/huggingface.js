@@ -796,6 +796,24 @@ function getNumericValue(value: NumericLikeValue): number {
 }
 
 /**
+ * Keeps the first item for each distinct key, like Python Jinja's `unique` filter.
+ * Strings are compared case-insensitively unless `caseSensitive` is set.
+ */
+function uniqueItems(items: AnyRuntimeValue[], caseSensitive: boolean, attributePath?: string): AnyRuntimeValue[] {
+	const seen = new Set<unknown>();
+	const output: AnyRuntimeValue[] = [];
+	for (const item of items) {
+		const key = attributePath === undefined ? item : getAttributeValue(item, attributePath);
+		const value = !caseSensitive && key instanceof StringValue ? key.value.toLowerCase() : key.value;
+		if (!seen.has(value)) {
+			seen.add(value);
+			output.push(item);
+		}
+	}
+	return output;
+}
+
+/**
  * Helper function to get a nested attribute value from an object using dot notation.
  * Supports both object properties and array indices.
  * @param item The item to get the value from
@@ -1301,17 +1319,8 @@ export class Interpreter {
 						return new StringValue(operand.value.map((x) => x.value).join(""));
 					case "string":
 						return new StringValue(toJSON(operand, {}, 0, false));
-					case "unique": {
-						const seen = new Set();
-						const output: AnyRuntimeValue[] = [];
-						for (const item of operand.value) {
-							if (!seen.has(item.value)) {
-								seen.add(item.value);
-								output.push(item);
-							}
-						}
-						return new ArrayValue(output);
-					}
+					case "unique":
+						return new ArrayValue(uniqueItems(operand.value, false));
 					default:
 						throw new Error(`Unknown ArrayValue filter: ${filter.value}`);
 				}
@@ -1553,6 +1562,22 @@ export class Interpreter {
 								return reverse.value ? -result : result;
 							}),
 						);
+					}
+					case "unique": {
+						// https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.unique
+						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+						const caseSensitive = args.at(0) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
+						if (!(caseSensitive instanceof BooleanValue)) {
+							throw new Error("case_sensitive must be a boolean");
+						}
+						const attribute = args.at(1) ?? kwargs.get("attribute") ?? new NullValue();
+						if (
+							!(attribute instanceof StringValue || attribute instanceof IntegerValue || attribute instanceof NullValue)
+						) {
+							throw new Error("attribute must be a string, integer, or null");
+						}
+						const attrPath = attribute instanceof NullValue ? undefined : String(attribute.value);
+						return new ArrayValue(uniqueItems(operand.value, caseSensitive.value, attrPath));
 					}
 					case "selectattr":
 					case "rejectattr": {
