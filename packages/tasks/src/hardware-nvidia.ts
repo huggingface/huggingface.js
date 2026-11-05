@@ -118,24 +118,11 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		releaseYear: 2025,
 		aliases: ["DGX Spark"],
 	},
-	// https://www.nvidia.com/en-au/products/rtx-spark/specifications/
-	// TFLOPS are rough estimates scaled from GB10 by CUDA core count; OEM clocks vary.
-	// MSRP estimates use Surface system prices, since these SoCs are not sold standalone.
-	// Laptop configurations: https://www.microsoft.com/en-us/store/configure/surface-laptop-ultra/8wg5vqp0x4b8
-	"RTX Spark N1X (6144 cores)": {
+	"RTX Spark N1X Laptop": {
 		tflops: 29.71,
-		memory: [32, 48, 64, 128],
+		memory: [24, 32, 48, 64, 128],
 		computeCapability: 12.1,
 		msrp: 5_900,
-		power: 80,
-		releaseYear: 2026,
-		aliases: ["N1X", "RTX Spark", "RTX Spark Laptop", "Surface Laptop Ultra"],
-	},
-	"RTX Spark N1X (5120 cores)": {
-		tflops: 24.76,
-		memory: [24, 32],
-		computeCapability: 12.1,
-		msrp: 3_300,
 		power: 80,
 		releaseYear: 2026,
 		aliases: ["N1X", "RTX Spark", "RTX Spark Laptop", "Surface Laptop Ultra"],
