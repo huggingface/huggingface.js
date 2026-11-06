@@ -668,8 +668,8 @@ export const SKUS = {
 			},
 			"Apple M5 Ultra": {
 				tflops: 45.6,
-				memory: [96, 256],
-				msrp: 10_799,
+				memory: [96, 256, 512],
+				msrp: 22_299,
 				power: 220,
 				releaseYear: 2026,
 			},
