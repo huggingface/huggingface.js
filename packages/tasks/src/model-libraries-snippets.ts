@@ -143,7 +143,9 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 
 
-];export const case_model = (): string[] => {
+];
+
+export const case_model = (): string[] => {
 	const installSnippet = `pip install git+https://github.com/SAP-samples/case`;
 
 	const classificationSnippet = `import numpy as np
