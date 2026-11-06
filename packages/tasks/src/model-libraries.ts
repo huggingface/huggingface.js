@@ -250,7 +250,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
     prettyLabel: "CASE",
     repoName: "CASE",
     repoUrl: "https://github.com/SAP-samples/case",
-    countDownloads: `path_extension:"pt"`,
+    countDownloads: `path_extension:"safetensors"`,
     snippets: snippets.case_model,
 },
 	causilo: {
@@ -1505,7 +1505,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "sap-rpt-1-oss",
 		repoName: "sap-rpt-1-oss",
 		repoUrl: "https://github.com/SAP-samples/sap-rpt-1-oss",
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"safetensor"`,
 		snippets: snippets.sap_rpt_one_oss,
 	},
 	sapiens: {
