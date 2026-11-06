@@ -143,70 +143,19 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
-export const case_model = (): string[] => {
-	const installSnippet = `pip install git+https://github.com/SAP-samples/case`;
-
-	const classificationSnippet = `import numpy as np
-import pandas as pd
-from tabicl import TabICLRegressor
+export const case_model = (): string[] => [
+	`pip install git+https://github.com/SAP-samples/case`,
+	`import pandas as pd
 from case.embedding import CaseTransformer
-
-# --- Training Set ---
-# Contains a mix of messy text, semantic job hierarchies, and standard numerical features
-X_train = pd.DataFrame({
-    "age": [24.0, 30.0, 42.0, 30.0, 31.0, 45.0],
-    "job": [
-        "Junior Software Engenier", # Contains a typo
-        "Senior Data Scientist",    # Base tech track
-        "Engineering Manager",      # Management track
-        "VP of Product & Strategy",  # Executive tier
-        "Sr. Academic Researcher",  # Public/University tier
-        "Product Executive",        # Corporate executive tier
-    ],
-    "years_experience": [1.5, 10.0, 12.0, 10.0, 5.0, 14.0],
-    "company_size": ["Startup", "Enterprise", "Mid-market", "Enterprise", "University", "FAANG"],
+X = pd.DataFrame({
+    "job": ["Junior Data Scientist", "Senior Data Scientist", "Engineering Manager", "Product Executive"],
+    "years_experience": [1.5, 10.0, 12.0, 14.0],
 })
-
-# Target variable: Continuous income baseline
-y_train = pd.Series([72000, 130000, 165000, 240000, 85000, 210000], name="income")
-
-
-# --- Test Set (Out-of-Vocabulary Semantic Shift) ---
-# Force identical numerical features, but introduce a clear semantic hierarchy
-# completely unseen during training.
-X_test = pd.DataFrame({
-    "age": [30.0, 30.0, 30.0],
-    "job": [
-        "Junior Data Scientist",    # Unseen (implied lower salary band)
-        "Data Scientist II",         # Unseen alternative naming (implied mid/senior)
-        "Principal Data Scientist",  # Unseen (implied leadership premium)
-    ],
-    "years_experience": [10.0, 10.0, 10.0],
-    "company_size": ["Enterprise", "Enterprise", "Enterprise"],
-})
-
-# 1. Baseline: Fit/Predict without CASE embeddings
-reg_baseline = TabICLRegressor()
-reg_baseline.fit(X_train, y_train)
-predictions_baseline = reg_baseline.predict(X_test)
-
-# 2. Initialize CASE to generate context-aware semantic embeddings
+y = pd.Series([72000, 130000, 165000, 210000], name="income")
 case_embedder = CaseTransformer()
-X_train_enhanced = case_embedder.fit_transform(X_train, y_train)
-X_test_enhanced = case_embedder.transform(X_test)
-
-reg_case = TabICLRegressor()
-reg_case.fit(X_train_enhanced, y_train)
-predictions_case = reg_case.predict(X_test_enhanced)
-
-print("Predictions w/o CASE:", predictions_baseline)
-print("Predictions w/  CASE:", predictions_case)
-
-# Outputs:
-# Predictions w/o CASE: [157626.72 157626.72 157626.72]
-# Predictions w/  CASE: [101439.39 130765.45 196179.86]`;
-	return [installSnippet, classificationSnippet];
-};
+X_enhanced = case_embedder.fit_transform(X, y)
+# X_enhanced can now be fed to any tabular learner (e.g. TabICL)`,
+];
 
 export const chatterbox = (): string[] => [
 	`# pip install chatterbox-tts
