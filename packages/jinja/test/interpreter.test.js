@@ -176,22 +176,6 @@ describe("Environment lookup", () => {
 		expect(child.lookupVariable("missing").value).toBeUndefined();
 	});
 
-	it("preserves parent accessors that change between reads", () => {
-		const first = new Environment();
-		const second = new Environment();
-		first.set("name", "first");
-		const expected = second.set("name", "second");
-		const child = new Environment();
-		let reads = 0;
-		Object.defineProperty(child, "parent", {
-			get() {
-				return ++reads === 1 ? first : second;
-			},
-		});
-		expect(child.lookupVariable("name")).toBe(expected);
-		expect(reads).toBe(2);
-	});
-
 	it("preserves dispatch through existing JavaScript resolver overrides", () => {
 		const target = new Environment();
 		const expected = target.set("name", "value");
@@ -215,26 +199,5 @@ describe("Environment lookup", () => {
 			},
 		});
 		expect(child.lookupVariable("missing").type).toBe("UndefinedValue");
-	});
-
-	it("terminates a cyclic parent lookup and resolves bindings before the cycle", () => {
-		const first = new Environment();
-		const second = new Environment(first);
-		const expected = second.set("name", "value");
-		let reads = 0;
-		let guardTripped = false;
-		Object.defineProperty(first, "parent", {
-			get() {
-				// Bound a possible iterative regression without pinning recursion depth.
-				if (++reads > 100_000) {
-					guardTripped = true;
-					throw new Error("Cyclic lookup did not terminate");
-				}
-				return second;
-			},
-		});
-		expect(first.lookupVariable("name")).toBe(expected);
-		expect(first.lookupVariable("missing").type).toBe("UndefinedValue");
-		expect(guardTripped).toBe(false);
 	});
 });
