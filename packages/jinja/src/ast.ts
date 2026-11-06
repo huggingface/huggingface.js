@@ -196,6 +196,23 @@ export class BinaryExpression extends Expression {
 }
 
 /**
+ * A chain of two or more comparisons such as `a < b < c`.
+ * Like in Python, this means `a < b and b < c`, with each operand evaluated at most once
+ * and evaluation stopping at the first comparison that is false.
+ * `operators[i]` compares `operands[i]` with `operands[i + 1]`.
+ */
+export class ChainedComparison extends Expression {
+	override type = "ChainedComparison";
+
+	constructor(
+		public operators: Token[],
+		public operands: Expression[],
+	) {
+		super();
+	}
+}
+
+/**
  * An operation with two sides, separated by the | operator.
  * Operator precedence: https://github.com/pallets/jinja/issues/379#issuecomment-168076202
  */
