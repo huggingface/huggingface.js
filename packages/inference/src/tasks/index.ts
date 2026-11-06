@@ -41,6 +41,7 @@ export * from "./nlp/zeroShotClassification.js";
 
 // Multimodal tasks
 export * from "./multimodal/documentQuestionAnswering.js";
+export * from "./multimodal/robotics.js";
 export * from "./multimodal/visualQuestionAnswering.js";
 
 // Tabular tasks
