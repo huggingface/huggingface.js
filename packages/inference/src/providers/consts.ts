@@ -36,6 +36,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	ovhcloud: {},
 	replicate: {},
 	scaleway: {},
+	sokkan: {},
 	together: {},
 	wavespeed: {},
 	"zai-org": {},
