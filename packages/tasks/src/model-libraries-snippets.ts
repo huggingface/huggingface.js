@@ -961,6 +961,28 @@ print(f'Accuracy {accuracy_score(y_test, predictions):.2%}')
 	return [installSnippet, classificationSnippet, regressionsSnippet, matchingSnippet];
 };
 
+export const fse = (model: ModelData): string[] => {
+	if (model.config?.model_type === "fse") {
+		return [
+			`pip install "fse>=2.0"`,
+			`from fse import Encoder
+
+encoder = Encoder.from_pretrained("${model.id}")
+vectors = encoder.encode(["A sentence.", "Another sentence."])`,
+		];
+	}
+	return [
+		`pip install "fse<2"`,
+		`from fse import SIF, IndexedList, Vectors
+
+vectors = Vectors.from_pretrained("${nameWithoutNamespace(model.id)}")
+model = SIF(vectors)
+sentences = IndexedList([["hello", "world"], ["fast", "sentence", "embeddings"]])
+model.train(sentences)
+vector = model.sv[0]`,
+	];
+};
+
 export const gaussianformer = (model: ModelData): string[] => [
 	`# pip install "gaussianformer @ git+https://github.com/SVLwoof/gaussianformer"
 from gaussianformer import GaussianFormerRenderingPipeline, load_ply
