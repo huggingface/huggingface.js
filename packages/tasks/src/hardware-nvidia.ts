@@ -450,7 +450,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	"RTX 5070 Mobile": {
 		tflops: 13.13,
-		memory: [8],
+		memory: [8, 12],
 		computeCapability: 12.0,
 		msrp: 500,
 		power: 100,
@@ -903,6 +903,30 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 549,
 		power: 165,
 		releaseYear: 2014,
+	},
+	"GT 730 (Kepler)": {
+		tflops: 0.69, // float32 (GPU does not support native float16)
+		memory: [1, 2, 4],
+		computeCapability: 3.5,
+		msrp: 70,
+		power: 38,
+		releaseYear: 2014,
+	},
+	"GT 710": {
+		tflops: 0.37, // float32 (GPU does not support native float16)
+		memory: [1, 2],
+		computeCapability: 3.5,
+		msrp: 40,
+		power: 19,
+		releaseYear: 2014,
+	},
+	"GT 430": {
+		tflops: 0.27, // float32 (GPU does not support native float16)
+		memory: [1, 2, 4],
+		computeCapability: 2.1,
+		msrp: 79,
+		power: 49,
+		releaseYear: 2010,
 	},
 	"RTX Titan": {
 		tflops: 32.62,
