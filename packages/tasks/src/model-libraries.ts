@@ -83,6 +83,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	alkove: {
+		prettyLabel: "Alkove",
+		repoName: "Alkove",
+		repoUrl: "https://github.com/alkove-ai/alkove",
+		docsUrl: "https://alkove.ai/docs/",
+		snippets: snippets.alkove,
+		filter: false,
+		countDownloads: `path_extension:"alk"`,
+	},
 	allennlp: {
 		prettyLabel: "AllenNLP",
 		repoName: "AllenNLP",
@@ -302,6 +311,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/amazon-science/chronos-forecasting",
 		snippets: snippets.chronos_forecasting,
 	},
+	"circuit-tracer": {
+		prettyLabel: "circuit-tracer",
+		repoName: "circuit-tracer",
+		repoUrl: "https://github.com/decoderesearch/circuit-tracer",
+		filter: false,
+		countDownloads: `path_filename:"config" AND path_extension:"yaml"`,
+	},
 	clara: {
 		prettyLabel: "Clara",
 		repoName: "Clara",
@@ -424,6 +440,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVlabs/describe-anything",
 		snippets: snippets.describe_anything,
 		filter: false,
+	},
+	dewml: {
+		prettyLabel: "Dew",
+		repoName: "Dew",
+		repoUrl: "https://github.com/AshishKumar4/dew",
+		docsUrl: "https://dewml.dev",
+		snippets: snippets.dew,
+		filter: false,
+		countDownloads: `path:"run.json"`,
 	},
 	"dia-tts": {
 		prettyLabel: "Dia",
@@ -607,6 +632,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://ai2-climate-emulator.readthedocs.io/en/latest/",
 		filter: false,
 		countDownloads: `path_extension:"tar"`,
+	},
+	fse: {
+		prettyLabel: "fse",
+		repoName: "fse",
+		repoUrl: "https://github.com/oborchers/Fast_Sentence_Embeddings",
+		snippets: snippets.fse,
+		filter: false,
+		countDownloads: `path:"config.json" OR path_extension:"model"`,
 	},
 	gaussianformer: {
 		prettyLabel: "GaussianFormer",
@@ -949,12 +982,27 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.lerobot,
 	},
+	libreyolo: {
+		prettyLabel: "LibreYOLO",
+		repoName: "LibreYOLO",
+		repoUrl: "https://github.com/LibreYOLO/libreyolo",
+		docsUrl: "https://www.libreyolo.com/docs",
+		filter: false,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json"`,
+	},
 	lightglue: {
 		prettyLabel: "LightGlue",
 		repoName: "LightGlue",
 		repoUrl: "https://github.com/cvg/LightGlue",
 		filter: false,
 		countDownloads: `path_extension:"pth" OR path:"config.json"`,
+	},
+	"limx-dynamics": {
+		prettyLabel: "LimX Dynamics",
+		repoName: "LimX Dynamics",
+		repoUrl: "https://github.com/limxdynamics/limxdynamics",
+		filter: false,
+		countDownloads: `(path_filename:"params" AND path_extension:"yaml") OR (path_filename:"controllers" AND path_extension:"yaml") OR (path_filename:"norm_stats" AND path_extension:"json")`,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
@@ -968,6 +1016,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "LongCat-Video-Avatar 1.5",
 		repoUrl: "https://github.com/meituan-longcat/LongCat-Video",
 		filter: false,
+	},
+	"linnet-tts": {
+		prettyLabel: "LinnetTTS",
+		repoName: "LinnetTTS",
+		repoUrl: "https://github.com/VoxRT/LinnetTTS",
+		snippets: snippets.linnet_tts,
+		filter: false,
+		countDownloads: `path:"linnet-en-35m.fp16.safetensors"`,
 	},
 	"llama-cpp-python": {
 		prettyLabel: "llama-cpp-python",
@@ -1075,6 +1131,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.microduck,
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
+	},
+	"minicpm-ocr": {
+		prettyLabel: "MiniCPM-OCR",
+		repoName: "MiniCPM-OCR",
+		repoUrl: "https://github.com/OpenBMB/MiniCPM-OCR",
+		docsUrl: "https://github.com/OpenBMB/MiniCPM-OCR/blob/main/docs/minicpm_ocr_sdk_api_en.md",
+		snippets: snippets.minicpmOcr,
+		filter: false,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
@@ -1297,6 +1361,17 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"pika-h3-flex": {
+		prettyLabel: "Pika H3 Flex",
+		repoName: "Pika-H3-Flex",
+		repoUrl: "https://github.com/Pika-Labs/Pika-H3-Flex",
+		docsUrl: "https://huggingface.co/docs/diffusers/main/en/api/pipelines/pika_h3_flex",
+		snippets: snippets.pika_h3_flex,
+		filter: false,
+		/// Diffusers modular pipeline loads (index files) plus the Pika adapters, which live in
+		/// subfolders (fl2va/, ref2va/, comfy/loras/) that the diffusers rule does not count.
+		countDownloads: `path:"modular_model_index.json" OR path:"model_index.json" OR path:"fl2va/adapter.safetensors" OR path:"ref2va/adapter.safetensors" OR (path_prefix:"comfy/loras/" AND path_extension:"safetensors")`,
+	},
 	piper: {
 		prettyLabel: "Piper",
 		repoName: "Piper",
@@ -1493,6 +1568,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sampleFactory,
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
+	},
+	"sap-case": {
+		prettyLabel: "CASE",
+		repoName: "CASE",
+		repoUrl: "https://github.com/SAP-samples/case",
+		snippets: snippets.case_model,
 	},
 	"sap-rpt-1-oss": {
 		prettyLabel: "sap-rpt-1-oss",
