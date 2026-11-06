@@ -250,9 +250,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "CASE",
 		repoName: "CASE",
 		repoUrl: "https://github.com/SAP-samples/case",
-		countDownloads: `path_extension:"safetensors"`,
 		snippets: snippets.case_model,
-},
+	},
 	causilo: {
 		prettyLabel: "Causilo",
 		repoName: "Causilo",
