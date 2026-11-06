@@ -1509,3 +1509,188 @@ describe("gguf", () => {
 		}, 15_000);
 	});
 });
+
+describe("serializeGgufMetadata / buildGgufHeader with arrays of every element type", () => {
+	const encoder = new TextEncoder();
+
+	/**
+	 * Independent, hand-rolled encoder (does not share code with `serializeGgufMetadata`) so that the
+	 * round-trip below compares against bytes the serializer did not produce itself.
+	 */
+	function makeEncoder(version: 1 | 2 | 3, littleEndian: boolean) {
+		const bytes = (n: number, set: (v: DataView) => void) => {
+			const buf = new Uint8Array(n);
+			set(new DataView(buf.buffer));
+			return buf;
+		};
+		const concat = (parts: Uint8Array[]) => {
+			const out = new Uint8Array(parts.reduce((s, p) => s + p.length, 0));
+			let o = 0;
+			for (const p of parts) {
+				out.set(p, o);
+				o += p.length;
+			}
+			return out;
+		};
+		const u32 = (n: number) => bytes(4, (v) => v.setUint32(0, n, littleEndian));
+		const size = (n: number) => (version === 1 ? u32(n) : bytes(8, (v) => v.setBigUint64(0, BigInt(n), littleEndian)));
+		const str = (s: string) => {
+			const b = encoder.encode(s);
+			return concat([size(b.length), b]);
+		};
+		const scalar = (type: GGUFValueType, value: MetadataValue): Uint8Array => {
+			switch (type) {
+				case GGUFValueType.UINT8:
+					return bytes(1, (v) => v.setUint8(0, value as number));
+				case GGUFValueType.INT8:
+					return bytes(1, (v) => v.setInt8(0, value as number));
+				case GGUFValueType.UINT16:
+					return bytes(2, (v) => v.setUint16(0, value as number, littleEndian));
+				case GGUFValueType.INT16:
+					return bytes(2, (v) => v.setInt16(0, value as number, littleEndian));
+				case GGUFValueType.UINT32:
+					return u32(value as number);
+				case GGUFValueType.INT32:
+					return bytes(4, (v) => v.setInt32(0, value as number, littleEndian));
+				case GGUFValueType.FLOAT32:
+					return bytes(4, (v) => v.setFloat32(0, value as number, littleEndian));
+				case GGUFValueType.BOOL:
+					return bytes(1, (v) => v.setUint8(0, value ? 1 : 0));
+				case GGUFValueType.STRING:
+					return str(value as string);
+				case GGUFValueType.UINT64:
+					return bytes(8, (v) => v.setBigUint64(0, value as bigint, littleEndian));
+				case GGUFValueType.INT64:
+					return bytes(8, (v) => v.setBigInt64(0, value as bigint, littleEndian));
+				case GGUFValueType.FLOAT64:
+					return bytes(8, (v) => v.setFloat64(0, value as number, littleEndian));
+				default:
+					throw new Error(`unsupported scalar type ${type}`);
+			}
+		};
+		const arrayKv = (key: string, subType: GGUFValueType, values: MetadataValue[]) =>
+			concat([
+				str(key),
+				u32(GGUFValueType.ARRAY),
+				u32(subType),
+				size(values.length),
+				...values.map((v) => scalar(subType, v)),
+			]);
+		const file = (kvs: Uint8Array[]) => {
+			const body = concat([encoder.encode("GGUF"), u32(version), size(0), size(kvs.length), ...kvs]);
+			// pad with zeros up to the default alignment, like `serializeGgufMetadata` does
+			const padded = new Uint8Array(Math.ceil(body.length / 32) * 32);
+			padded.set(body);
+			return padded;
+		};
+		return { arrayKv, file };
+	}
+
+	const ARRAYS: Array<[string, GGUFValueType, MetadataValue[]]> = [
+		["uint8", GGUFValueType.UINT8, [0, 1, 255]],
+		["int8", GGUFValueType.INT8, [-128, 0, 127]],
+		["uint16", GGUFValueType.UINT16, [0, 1, 65535]],
+		["int16", GGUFValueType.INT16, [-32768, 0, 32767]],
+		["uint32", GGUFValueType.UINT32, [0, 1, 4294967295]],
+		["int32", GGUFValueType.INT32, [-2147483648, 0, 2147483647]],
+		["float32", GGUFValueType.FLOAT32, [0, 0.5, -1.5]],
+		["bool", GGUFValueType.BOOL, [true, false, true]],
+		["string", GGUFValueType.STRING, ["a", "", "héllo"]],
+		["uint64", GGUFValueType.UINT64, [0n, 1n, 18446744073709551615n]],
+		["int64", GGUFValueType.INT64, [-9223372036854775808n, 0n, 9223372036854775807n]],
+		["float64", GGUFValueType.FLOAT64, [0.1, -2.5, 1e300]],
+		["empty_uint8", GGUFValueType.UINT8, []],
+	];
+
+	async function parseBytes(bytes: Uint8Array) {
+		const tempFilePath = join(tmpdir(), `test-gguf-arrays-${process.pid}-${Date.now()}-${Math.random()}.gguf`);
+		fs.writeFileSync(tempFilePath, bytes);
+		try {
+			return await gguf(tempFilePath, { typedMetadata: true, allowLocalFile: true });
+		} finally {
+			try {
+				fs.unlinkSync(tempFilePath);
+			} catch {
+				// ignore cleanup errors
+			}
+		}
+	}
+
+	const VARIANTS: Array<{ version: 1 | 2 | 3; littleEndian: boolean }> = [
+		{ version: 1, littleEndian: true },
+		{ version: 2, littleEndian: true },
+		{ version: 3, littleEndian: true },
+		{ version: 3, littleEndian: false },
+	];
+
+	it.each(VARIANTS)(
+		"parse -> serialize reproduces the original bytes for arrays of every element type (v$version, littleEndian=$littleEndian)",
+		async ({ version, littleEndian }) => {
+			const enc = makeEncoder(version, littleEndian);
+			const original = enc.file(ARRAYS.map(([name, subType, values]) => enc.arrayKv(`test.${name}`, subType, values)));
+
+			const { typedMetadata } = await parseBytes(original);
+
+			// the parser keeps the element type (UINT8 === 0 included) and the values
+			for (const [name, subType, values] of ARRAYS) {
+				expect(typedMetadata[`test.${name}`]).toEqual({ value: values, type: GGUFValueType.ARRAY, subType });
+			}
+
+			const reserialized = serializeGgufMetadata(typedMetadata, { littleEndian });
+			expect(reserialized).toEqual(original);
+		},
+	);
+
+	it("serializes the tokenizer.ggml.precompiled_charsmap shape (ARRAY of UINT8) and parses it back", async () => {
+		const typedMetadata: GGUFTypedMetadata = {
+			version: { value: 3, type: GGUFValueType.UINT32 },
+			tensor_count: { value: 0n, type: GGUFValueType.UINT64 },
+			kv_count: { value: 1n, type: GGUFValueType.UINT64 },
+			"tokenizer.ggml.precompiled_charsmap": {
+				value: [1, 2, 3],
+				type: GGUFValueType.ARRAY,
+				subType: GGUFValueType.UINT8,
+			},
+		};
+
+		const serialized = serializeGgufMetadata(typedMetadata);
+		const parsed = await parseBytes(serialized);
+
+		expect(parsed.typedMetadata["tokenizer.ggml.precompiled_charsmap"]).toEqual({
+			value: [1, 2, 3],
+			type: GGUFValueType.ARRAY,
+			subType: GGUFValueType.UINT8,
+		});
+	});
+
+	it("still throws when an array has no subType", () => {
+		const typedMetadata = {
+			version: { value: 3, type: GGUFValueType.UINT32 },
+			tensor_count: { value: 0n, type: GGUFValueType.UINT64 },
+			kv_count: { value: 1n, type: GGUFValueType.UINT64 },
+			"test.array": { value: [1, 2, 3], type: GGUFValueType.ARRAY },
+		} as GGUFTypedMetadata;
+
+		expect(() => serializeGgufMetadata(typedMetadata)).toThrow("Array type requires subType to be specified");
+	});
+
+	it("buildGgufHeader accepts an ARRAY of UINT8", async () => {
+		const typedMetadata: GGUFTypedMetadata = {
+			version: { value: 3, type: GGUFValueType.UINT32 },
+			tensor_count: { value: 0n, type: GGUFValueType.UINT64 },
+			kv_count: { value: 1n, type: GGUFValueType.UINT64 },
+			"tokenizer.ggml.precompiled_charsmap": {
+				value: [1, 2, 3],
+				type: GGUFValueType.ARRAY,
+				subType: GGUFValueType.UINT8,
+			},
+		};
+
+		const header = await buildGgufHeader(new Blob([]), typedMetadata, {
+			littleEndian: true,
+			tensorInfoByteRange: [0, 0],
+		});
+
+		expect(new Uint8Array(await header.arrayBuffer())).toEqual(serializeGgufMetadata(typedMetadata));
+	});
+});
