@@ -315,6 +315,23 @@ function makeAsciiSafe(str: string): string {
 }
 
 /**
+ * Compares two strings by Unicode code point, like Python's `str` ordering (and `json.dumps(sort_keys=True)`).
+ * Unlike the default `<` / `localeCompare`, this is independent of the locale and orders astral characters
+ * (stored as surrogate pairs) after BMP characters such as U+E000-U+FFFF.
+ */
+function compareCodePoints(a: string, b: string): number {
+	const aCodePoints = Array.from(a, (c) => c.codePointAt(0) as number);
+	const bCodePoints = Array.from(b, (c) => c.codePointAt(0) as number);
+	const length = Math.min(aCodePoints.length, bCodePoints.length);
+	for (let i = 0; i < length; ++i) {
+		if (aCodePoints[i] !== bCodePoints[i]) {
+			return aCodePoints[i] - bCodePoints[i];
+		}
+	}
+	return aCodePoints.length - bCodePoints.length;
+}
+
+/**
  * Converts a runtime value to its JSON string representation.
  * @param input The runtime value to convert
  * @param options JSON serialization options
@@ -334,8 +351,8 @@ function toJSON(
 	let keySeparator: string;
 	if (separators) {
 		[itemSeparator, keySeparator] = separators;
-	} else if (indent) {
-		// When indent is set and no custom separators, use compact item separator
+	} else if (indent !== null) {
+		// When indent is set (even to 0) and no custom separators, use compact item separator
 		// but keep the standard key separator (matches Python json.dumps behavior)
 		itemSeparator = ",";
 		keySeparator = ": ";
@@ -364,20 +381,21 @@ function toJSON(
 		case "ArrayValue":
 		case "NamespaceValue":
 		case "ObjectValue": {
-			const indentValue = indent ? " ".repeat(indent) : "";
+			// Like Python, an indent of 0 (or a negative one) still puts every item on its own line.
+			const indentValue = indent !== null ? " ".repeat(Math.max(0, indent)) : "";
 			const basePadding = "\n" + indentValue.repeat(depth);
 			const childrenPadding = basePadding + indentValue; // Depth + 1
 
 			// Like Python's json.dumps, empty containers render as [] and {} even when indenting.
 			if (input.type === "ArrayValue") {
 				const core = (input as ArrayValue).value.map((x) => toJSON(x, options, depth + 1, convertUndefinedToNull));
-				return indent && core.length > 0
+				return indent !== null && core.length > 0
 					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
 					: `[${core.join(itemSeparator)}]`;
 			} else {
 				let entries = Array.from((input as ObjectValue | NamespaceValue).value.entries());
 				if (sortKeys) {
-					entries = entries.sort(([a], [b]) => a.localeCompare(b));
+					entries = entries.sort(([a], [b]) => compareCodePoints(a, b));
 				}
 				const core = entries.map(([key, value]) => {
 					let keyStr = JSON.stringify(key);
@@ -385,9 +403,9 @@ function toJSON(
 						keyStr = makeAsciiSafe(keyStr);
 					}
 					const v = `${keyStr}${keySeparator}${toJSON(value, options, depth + 1, convertUndefinedToNull)}`;
-					return indent ? `${childrenPadding}${v}` : v;
+					return indent !== null ? `${childrenPadding}${v}` : v;
 				});
-				return indent && core.length > 0
+				return indent !== null && core.length > 0
 					? `{${core.join(itemSeparator)}${basePadding}}`
 					: `{${core.join(itemSeparator)}}`;
 			}
