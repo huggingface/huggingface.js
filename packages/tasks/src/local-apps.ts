@@ -119,6 +119,10 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
+function isCortiqCmfTextModel(model: ModelData) {
+	return model.library_name === "cortiq" && model.pipeline_tag === "text-generation" && model.tags.includes("cmf");
+}
+
 /**
  * Returns the model's chat template string, coalescing across sources:
  * GGUF metadata > chat_template_jinja file > tokenizer_config.json
@@ -237,6 +241,29 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 
 const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
+};
+
+const snippetCortiq = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const file = filepath ?? "FILE.cmf";
+	const download = filepath
+		? `hf download ${model.id} "${filepath}" --local-dir .`
+		: `hf download ${model.id} --include "*.cmf" --local-dir .`;
+
+	return [
+		{
+			title: "Install and download",
+			setup: "cargo install cortiq-cli",
+			content: download,
+		},
+		{
+			title: "Run locally",
+			content: `cortiq run "${file}" --prompt "What is the capital of France?"`,
+		},
+		{
+			title: "Serve locally",
+			content: `cortiq serve "${file}" --port 8080`,
+		},
+	];
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -691,6 +718,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
+	},
+	cortiq: {
+		prettyLabel: "Cortiq",
+		docsUrl: "https://github.com/infosave2007/cmf",
+		mainTask: "text-generation",
+		displayOnModelPage: isCortiqCmfTextModel,
+		snippet: snippetCortiq,
 	},
 	jellybox: {
 		prettyLabel: "Jellybox",

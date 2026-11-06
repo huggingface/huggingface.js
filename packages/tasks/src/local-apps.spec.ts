@@ -290,6 +290,52 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 	});
 
+	it("cortiq CMF text-generation model", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.cortiq;
+		const model: ModelData = {
+			id: "infosave/Bonsai-1.7Bcmf",
+			library_name: "cortiq",
+			pipeline_tag: "text-generation",
+			tags: ["cortiq", "cmf", "quantized"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(snippetFunc(model)[0]).toEqual({
+			title: "Install and download",
+			setup: "cargo install cortiq-cli",
+			content: 'hf download infosave/Bonsai-1.7Bcmf --include "*.cmf" --local-dir .',
+		});
+		expect(snippetFunc(model, "bonsai-1.7b-q4tp.cmf")).toEqual([
+			{
+				title: "Install and download",
+				setup: "cargo install cortiq-cli",
+				content: 'hf download infosave/Bonsai-1.7Bcmf "bonsai-1.7b-q4tp.cmf" --local-dir .',
+			},
+			{
+				title: "Run locally",
+				content: 'cortiq run "bonsai-1.7b-q4tp.cmf" --prompt "What is the capital of France?"',
+			},
+			{
+				title: "Serve locally",
+				content: 'cortiq serve "bonsai-1.7b-q4tp.cmf" --port 8080',
+			},
+		]);
+	});
+
+	it("cortiq is not shown for non-text CMF models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.cortiq;
+		const model: ModelData = {
+			id: "infosave/Lumina-Image-2.0cmf",
+			library_name: "cortiq",
+			pipeline_tag: "text-to-image",
+			tags: ["cortiq", "cmf"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("atomic chat deeplink", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS["atomic-chat"];
 		const model: ModelData = {
