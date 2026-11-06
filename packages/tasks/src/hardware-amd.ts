@@ -308,6 +308,15 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 250,
 		releaseYear: 2020,
 	},
+	"Radeon Pro V340": {
+		tflops: 43.0,
+		memory: [16, 32],
+		gfxVersion: "gfx900",
+		msrp: 4_000,
+		power: 300,
+		releaseYear: 2018,
+		aliases: ["Radeon Pro V340L"],
+	},
 	"Radeon 610M": {
 		tflops: 0.97,
 		memory: AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS,

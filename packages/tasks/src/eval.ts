@@ -125,6 +125,12 @@ export const EVALUATION_FRAMEWORKS = {
 			"Video-MME-v2 is a benchmark for evaluating the next stage of video understanding capabilities of multimodal large language models.",
 		url: "https://github.com/MME-Benchmarks/Video-MME-v2",
 	},
+	omnicompass: {
+		name: "omnicompass",
+		description:
+			"OmniCompass evaluates temporal grounding, spatial grounding, and video question answering with paired text and image-based target specifications across visual and audio-visual tracks.",
+		url: "https://github.com/PolyU-VCLab/OmniCompass",
+	},
 	"claw-eval": {
 		name: "claw-eval",
 		description:
@@ -174,9 +180,21 @@ export const EVALUATION_FRAMEWORKS = {
 		url: "https://github.com/run-llama/ExtractBench",
 	},
 	"sra-bench": {
-   	name: "sra-bench",
-   	description:
-   		"SRA Stablecoin Risk Bench evaluates models as risk gates for stablecoin payments (approve, hold or reject) and as adjudicators of payment disputes across the settlement-finality boundary, with safety-weighted scoring of unsafe approvals, impossible remedies and wrongful refunds.",
-   	url: "https://github.com/sriram1983007-dev/sra-riskgate/tree/main/eval",
-  },
+		name: "sra-bench",
+		description:
+			"SRA Stablecoin Risk Bench evaluates models as risk gates for stablecoin payments (approve, hold or reject) and as adjudicators of payment disputes across the settlement-finality boundary, with safety-weighted scoring of unsafe approvals, impossible remedies and wrongful refunds.",
+		url: "https://github.com/sriram1983007-dev/sra-riskgate/tree/main/eval",
+	},
+	"decision-index": {
+		name: "decision-index",
+		description:
+			"The Decision Index evaluates decision models: given a state (text, JSON or images) and typed questions, a model returns a choice or ranking, scored on private same-skill and new-domain sets.",
+		url: "https://github.com/apolinario/decision-index",
+	},
+	cyclotron: {
+		name: "cyclotron",
+		description:
+			"Cyclotron is a training and evaluation framework for humanoid robot control policies that runs Hub-hosted models and benchmarks in pinned simulation-based evaluation harnesses and records the provenance of every score.",
+		url: "https://github.com/menloresearch/cyclotron",
+	},
 } as const;
