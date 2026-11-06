@@ -127,6 +127,16 @@ export const SKUS = {
 				power: 200,
 				releaseYear: 2025,
 			},
+			"Gaudi 3 PCIe": {
+				// Intel's BF16 vector throughput; matrix throughput is 1,678 TFLOPS.
+				tflops: 28.7,
+				memory: [128],
+				// Estimate based on Intel's $125,000 eight-accelerator OAM kit, not a PCIe card price.
+				msrp: 15_625,
+				power: 600,
+				releaseYear: 2025,
+				aliases: ["HL-338"],
+			},
 			"Arc Pro B70": {
 				tflops: 45.88,
 				memory: [32],
