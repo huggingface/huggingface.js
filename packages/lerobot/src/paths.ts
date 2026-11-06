@@ -13,6 +13,18 @@ export function isSafeRepoPath(path: string): boolean {
 	return path.length > 0 && !path.split("/").includes("..") && !path.startsWith("/");
 }
 
+/** Canonical directory containing a dataset's meta/info.json; an empty path selects the repo root. */
+export function normalizeDatasetPath(path = ""): string {
+	if (path.includes("\\") || Array.from(path).some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) {
+		throw new Error("Invalid dataset path");
+	}
+	const parts = path.split("/").filter((part) => part && part !== ".");
+	if (parts.includes("..")) {
+		throw new Error("Dataset path cannot contain '..'");
+	}
+	return parts.join("/");
+}
+
 /**
  * Fills a python-format template such as `data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet`,
  * unknown placeholders as 0. Templates come from a user-authored info.json, so this throws past
