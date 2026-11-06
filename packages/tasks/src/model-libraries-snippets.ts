@@ -312,6 +312,20 @@ cxr_client = make_hugging_face_client('cxr_model')
 print(cxr_client.get_image_embeddings_from_images([img]))`,
 ];
 
+export const defm = (): string[] => [
+	`# pip install defm
+import torch
+from defm.utils import preprocess_depth_image
+
+# Variants: defm_vit_l14, defm_vit_s14, defm_resnet{18,34,50}, defm_efficientnet_b{0,2,4,6}, defm_regnet_y_{400mf,800mf,1_6gf}
+model = torch.hub.load("leggedrobotics/defm:main", "defm_vit_l14", pretrained=True).eval()
+
+# metric_depth: depth map in meters (numpy array, tensor or PIL image)
+depth = preprocess_depth_image(metric_depth, target_size=518, patch_size=14)
+with torch.no_grad():
+    spatial_tokens, class_token = model.get_intermediate_layers(depth, n=1, reshape=True, return_class_token=True)[0]`,
+];
+
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	let encoder: string;
 	let features: string;
