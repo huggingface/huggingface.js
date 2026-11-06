@@ -1495,6 +1495,27 @@ model.score("query", ["doc1", "doc2", "doc3"])`,
 	];
 };
 
+export const linnet_tts = (model: ModelData): string[] => [
+	`# pip install linnet-tts soundfile
+import linnet_tts, soundfile as sf
+from huggingface_hub import hf_hub_download
+
+model = linnet_tts.Model(
+    hf_hub_download("${model.id}", "linnet-en-35m.fp16.safetensors"),
+    hf_hub_download("${model.id}", "tokenizer.model"),
+)
+voice = model.load_voice(hf_hub_download("${model.id}", "voices/linnet-en-f1.npy"))
+
+audio = model.synthesize("Hello there.", voice, temp=0.3, cfg=2.0, seed=0)
+sf.write("hello.wav", audio, model.sample_rate)  # float32, 24 kHz
+
+# streaming: one chunk per 80 ms step
+session = model.session(voice, seed=0)
+session.prime("Streaming gives the first chunk of audio after one step.")
+for chunk in session:
+    ...`,
+];
+
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
 		`# !pip install llama-cpp-python

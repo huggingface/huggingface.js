@@ -976,6 +976,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/meituan-longcat/LongCat-Video",
 		filter: false,
 	},
+	"linnet-tts": {
+		prettyLabel: "LinnetTTS",
+		repoName: "LinnetTTS",
+		repoUrl: "https://github.com/VoxRT/LinnetTTS",
+		snippets: snippets.linnet_tts,
+		filter: false,
+		countDownloads: `path:"linnet-en-35m.fp16.safetensors"`,
+	},
 	"llama-cpp-python": {
 		prettyLabel: "llama-cpp-python",
 		repoName: "llama-cpp-python",
