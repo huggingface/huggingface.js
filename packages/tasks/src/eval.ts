@@ -191,4 +191,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"Cyclotron is a training and evaluation framework for humanoid robot control policies that runs Hub-hosted models and benchmarks in pinned simulation-based evaluation harnesses and records the provenance of every score.",
 		url: "https://github.com/menloresearch/cyclotron",
 	},
+	longshot: {
+		name: "longshot",
+		description:
+			"LongShOT (NeurIPS 2026) evaluates long-form omni-modal video understanding (vision, speech and ambient audio) with open-ended single- and multi-turn questions scored by an LLM judge against weighted, criterion-level rubrics.",
+		url: "https://github.com/mbzuai-oryx/LongShOT",
+	},
 } as const;
