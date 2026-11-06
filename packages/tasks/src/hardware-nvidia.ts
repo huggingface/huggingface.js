@@ -886,13 +886,12 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 165,
 		releaseYear: 2014,
 	},
-	"GT 730": {
-		// Kepler GK208B only (DDR3 64-bit or GDDR5 64-bit); the Fermi GF108 GT 730 (96 cores, CC 2.1) is not covered
+	"GT 730 (Kepler)": {
 		tflops: 0.69, // float32 (GPU does not support native float16)
 		memory: [1, 2, 4],
 		computeCapability: 3.5,
 		msrp: 70,
-		power: 25,
+		power: 38,
 		releaseYear: 2014,
 	},
 	"GT 710": {
