@@ -330,14 +330,12 @@ export const SKUS = {
 				msrp: 42,
 				power: 51,
 				releaseYear: 2017,
-				aliases: ["Kaby Lake"],
 			},
 			"Intel Core i5-3230M": {
 				tflops: 0.083,
 				msrp: 225,
 				power: 35,
 				releaseYear: 2013,
-				aliases: ["Ivy Bridge"],
 			},
 		},
 		AMD: {
