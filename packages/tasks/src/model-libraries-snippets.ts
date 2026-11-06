@@ -2351,6 +2351,14 @@ stanza.download("${nameWithoutNamespace(model.id).replace("stanza-", "")}")
 nlp = stanza.Pipeline("${nameWithoutNamespace(model.id).replace("stanza-", "")}")`,
 ];
 
+export const strandsDecider = (model: ModelData): string[] => [
+	`# pip install strands-decider
+strands-decider ask ${model.id} \\
+  --state "Help! My payouts have been failing for 3 days!" \\
+  --choice "Which team should handle this?=billing,sales,retail" \\
+  --noul "Does this convey urgency?"`,
+];
+
 const speechBrainMethod = (speechbrainInterface: string) => {
 	switch (speechbrainInterface) {
 		case "EncoderClassifier":
