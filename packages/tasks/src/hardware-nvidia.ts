@@ -450,7 +450,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	"RTX 5070 Mobile": {
 		tflops: 13.13,
-		memory: [8],
+		memory: [8, 12],
 		computeCapability: 12.0,
 		msrp: 500,
 		power: 100,
