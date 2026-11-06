@@ -141,8 +141,6 @@ export const bm25s = (model: ModelData): string[] => [
 	`from bm25s.hf import BM25HF
 
 retriever = BM25HF.load_from_hub("${model.id}")`,
-
-
 ];
 
 export const case_model = (): string[] => {
