@@ -517,6 +517,24 @@ dam = DescribeAnythingModel(
 )`,
 ];
 
+export const dew = (model: ModelData): string[] => {
+	if (model.pipeline_tag === "text-to-image") {
+		return [
+			`# pip install dewml --extra-index-url https://pypi.dewml.dev/simple
+import dew
+
+pipe = dew.pipeline("${model.id}")
+images = pipe(["a red fox in a snowy forest"], steps=20, key=0).host().images`,
+		];
+	}
+	return [
+		`# pip install dewml --extra-index-url https://pypi.dewml.dev/simple
+import dew
+
+task = dew.pipeline("${model.id}")`,
+	];
+};
+
 const diffusers_install = "pip install -U diffusers transformers accelerate";
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
