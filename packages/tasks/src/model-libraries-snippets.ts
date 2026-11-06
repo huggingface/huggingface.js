@@ -191,7 +191,7 @@ reg_baseline.fit(X_train, y_train)
 predictions_baseline = reg_baseline.predict(X_test)
 
 # 2. Initialize CASE to generate context-aware semantic embeddings
-case_embedder = CaseTransformer(model_name="SAP/CASE")
+case_embedder = CaseTransformer()
 X_train_enhanced = case_embedder.fit_transform(X_train, y_train)
 X_test_enhanced = case_embedder.transform(X_test)
 
