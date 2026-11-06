@@ -1170,7 +1170,7 @@ export const konfai = (model: ModelData): string[] => [
 konfai-apps list ${model.id}
 
 # Run one of them on an image
-konfai-apps infer ${model.id}:<app> -i image.nii.gz -o Output --gpu 0`,
+konfai-apps infer ${model.id}:<app> -i image.nii.gz -o Output`,
 ];
 
 /**
