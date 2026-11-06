@@ -6555,6 +6555,86 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("selectattr and rejectattr", () => {
+		// Expected values are what jinja2 3.1.6 renders for the same template and context.
+		const items = [
+			{ a: 1, b: 3 },
+			{ a: 2, b: 9 },
+			{ a: 1, b: 4 },
+		];
+
+		it.each([
+			{
+				name: "integer test argument",
+				source: `{{ items|selectattr('a','eq',1)|map(attribute='b')|list }}`,
+				expected: "[3, 4]",
+			},
+			{
+				name: "rejectattr with an argument",
+				source: `{{ items|rejectattr('a','equalto',1)|map(attribute='b')|list }}`,
+				expected: "[9]",
+			},
+			{
+				name: "expression argument",
+				source: `{{ items|selectattr('a','eq',1+1)|map(attribute='b')|list }}`,
+				expected: "[9]",
+			},
+			{
+				name: "variable argument",
+				source: `{{ items|selectattr('a','eq',v)|map(attribute='b')|list }}`,
+				expected: "[9]",
+			},
+			{
+				name: "variable attribute",
+				source: `{{ items|selectattr(k)|map(attribute='b')|list }}`,
+				expected: "[3, 9, 4]",
+			},
+		])("accepts any expression as an argument: $name", ({ source, expected }) => {
+			expect(new Template(source).render({ items, v: 2, k: "a" })).toBe(expected);
+		});
+
+		it("compares against a boolean argument", () => {
+			const source = `{{ items|selectattr('a','eq',true)|map(attribute='b')|list }}`;
+			const context = {
+				items: [
+					{ a: true, b: 3 },
+					{ a: false, b: 9 },
+				],
+			};
+			expect(new Template(source).render(context)).toBe("[3]");
+		});
+
+		it.each([
+			{ source: `{{ items|selectattr('a.b')|list|length }}`, expected: "1" },
+			{ source: `{{ items|rejectattr('a.b')|list|length }}`, expected: "2" },
+			{ source: `{{ items|selectattr('a.b','equalto','x')|list|length }}`, expected: "1" },
+		])("resolves dotted attribute paths: $source", ({ source, expected }) => {
+			const context = { items: [{ a: { b: "x" } }, { a: { b: 0 } }, { a: {} }] };
+			expect(new Template(source).render(context)).toBe(expected);
+		});
+
+		it.each([
+			{ source: `{{ items|selectattr('a','undefined')|list|length }}`, expected: "1" },
+			{ source: `{{ items|rejectattr('a','undefined')|list|length }}`, expected: "2" },
+			{ source: `{{ items|selectattr('a','defined')|list|length }}`, expected: "2" },
+			{ source: `{{ items|selectattr('a','none')|list|length }}`, expected: "1" },
+			{ source: `{{ items|selectattr('a')|list|length }}`, expected: "1" },
+			{ source: `{{ items|rejectattr('a')|list|length }}`, expected: "2" },
+		])("passes a missing attribute to the test as undefined: $source", ({ source, expected }) => {
+			const context = { items: [{ a: 1 }, { a: null }, {}] };
+			expect(new Template(source).render(context)).toBe(expected);
+		});
+
+		it("rejects non-string attribute and test names", () => {
+			expect(() => new Template(`{{ items|selectattr(1)|list }}`).render({ items })).toThrowError(
+				"attribute of `selectattr` must be a string",
+			);
+			expect(() => new Template(`{{ items|selectattr('a', 1)|list }}`).render({ items })).toThrowError(
+				"test of `selectattr` must be a string",
+			);
+		});
+	});
+
 	describe("Macros and call statements", () => {
 		it.each([
 			{
