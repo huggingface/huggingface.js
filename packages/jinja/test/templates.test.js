@@ -6555,6 +6555,33 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("dict", () => {
+		it("builds a dict from keyword arguments", () => {
+			const template = new Template(`{{ dict(a=1, b="x") | tojson }}`);
+			expect(template.render()).toBe(`{"a": 1, "b": "x"}`);
+		});
+
+		it("copies a mapping and overrides it with keyword arguments", () => {
+			// DeepSeek-V4.1-Flash's chat template updates tool schemas and messages this way.
+			const template = new Template(
+				`{% set base = {"name": "f", "d": 1} %}{% set d = dict(base, description="g", **{"k": 2}) %}{{ d | tojson }}|{{ base | tojson }}`,
+			);
+			expect(template.render()).toBe(`{"name": "f", "d": 1, "description": "g", "k": 2}|{"name": "f", "d": 1}`);
+		});
+
+		it("builds a dict from [key, value] pairs", () => {
+			const template = new Template(
+				`{{ dict([["a", 1], ["b", 2]]) | tojson }}|{{ dict() | tojson }}|{% for k, v in dict(x=1, y=2).items() %}{{ k }}={{ v }};{% endfor %}`,
+			);
+			expect(template.render()).toBe(`{"a": 1, "b": 2}|{}|x=1;y=2;`);
+		});
+
+		it("lets render variables and template variables shadow dict", () => {
+			expect(new Template(`{{ dict.a }}`).render({ dict: { a: 1 } })).toBe("1");
+			expect(new Template(`{% set dict = 2 %}{{ dict }}`).render()).toBe("2");
+		});
+	});
+
 	describe("Macros and call statements", () => {
 		it.each([
 			{
