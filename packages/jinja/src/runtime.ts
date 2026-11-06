@@ -735,9 +735,9 @@ export class Environment {
 	/**
 	 * Resolve the environment in which the variable is declared.
 	 * @param {string} name The name of the variable.
-	 * @returns {Environment} The environment in which the variable is declared.
+	 * @returns {Environment | undefined} The environment containing the variable, if declared.
 	 */
-	private resolve(name: string): Environment {
+	private resolve(name: string): Environment | undefined {
 		if (this.variables.has(name)) {
 			return this;
 		}
@@ -747,12 +747,12 @@ export class Environment {
 			return this.parent.resolve(name);
 		}
 
-		throw new Error(`Unknown variable: ${name}`);
+		return undefined;
 	}
 
 	lookupVariable(name: string): AnyRuntimeValue {
 		try {
-			return this.resolve(name).variables.get(name) ?? new UndefinedValue();
+			return this.resolve(name)?.variables.get(name) ?? new UndefinedValue();
 		} catch {
 			return new UndefinedValue();
 		}
@@ -1055,6 +1055,26 @@ function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statem
 		declareArgument(parameter);
 	}
 	visit(body);
+	return accessed;
+}
+
+/**
+ * The scan above is a pure function of the AST, so its result is cached per `Macro`/`CallStatement`
+ * node. A parsed template is reused across renders, so each macro and call block is scanned at most
+ * once, however often it is rendered and however deeply it is nested inside a loop.
+ */
+const specialMacroArgumentCache = new WeakMap<Macro | CallStatement, Set<SpecialMacroArgument>>();
+
+function getAccessedSpecialMacroArguments(
+	node: Macro | CallStatement,
+	parameters: Parameter[],
+	body: Statement[],
+): Set<SpecialMacroArgument> {
+	let accessed = specialMacroArgumentCache.get(node);
+	if (accessed === undefined) {
+		accessed = findAccessedSpecialMacroArguments(parameters, body);
+		specialMacroArgumentCache.set(node, accessed);
+	}
 	return accessed;
 }
 
@@ -2069,11 +2089,26 @@ export class Interpreter {
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
-		const specialArguments = findAccessedSpecialMacroArguments(node.args, node.body);
+		const specialArguments = getAccessedSpecialMacroArguments(node, node.args, node.body);
 		environment.setVariable(
 			node.name.value,
-			new FunctionValue((args, scope) => {
-				const macroScope = new Environment(scope);
+			new FunctionValue((args, callSite) => {
+				// Macros are lexically scoped: the body resolves free names against the environment the
+				// macro was defined in, not the one it is called from. Capturing that environment by
+				// reference rather than copying it also preserves Jinja's late binding, so a name assigned
+				// in the defining scope after the macro is declared is still visible to the body.
+				let parent = environment;
+
+				// `{% call %}` hands `caller` to the macro it invokes, and to that macro alone. Keeping it
+				// in its own layer stops it from becoming an own variable of the macro scope, which would
+				// otherwise leak it into the macros that this macro calls.
+				const caller = callSite.variables.get("caller");
+				if (caller !== undefined) {
+					parent = new Environment(environment);
+					parent.setVariable("caller", caller);
+				}
+
+				const macroScope = new Environment(parent);
 				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);
 				return this.evaluateBlock(node.body, macroScope);
 			}),
@@ -2086,7 +2121,7 @@ export class Interpreter {
 	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
 		// Call blocks use anonymous-macro argument rules; Jinja labels them `None` in errors.
 		const parameters = node.callerArgs ?? [];
-		const specialArguments = findAccessedSpecialMacroArguments(parameters, node.body);
+		const specialArguments = getAccessedSpecialMacroArguments(node, parameters, node.body);
 		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[]) => {
 			const callBlockEnv = new Environment(environment);
 			this.bindMacroArguments("None", parameters, specialArguments, callerArguments, callBlockEnv);
