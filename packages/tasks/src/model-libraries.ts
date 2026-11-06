@@ -1501,6 +1501,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
 	},
+	"sap-case": {
+		prettyLabel: "CASE",
+		repoName: "CASE",
+		repoUrl: "https://github.com/SAP-samples/case",
+		snippets: snippets.case_model,
+	},
 	"sap-rpt-1-oss": {
 		prettyLabel: "sap-rpt-1-oss",
 		repoName: "sap-rpt-1-oss",

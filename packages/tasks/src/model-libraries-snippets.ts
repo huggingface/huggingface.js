@@ -143,6 +143,20 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
+export const case_model = (): string[] => [
+	`pip install git+https://github.com/SAP-samples/case`,
+	`import pandas as pd
+from case.embedding import CaseTransformer
+X = pd.DataFrame({
+    "job": ["Junior Data Scientist", "Senior Data Scientist", "Engineering Manager", "Product Executive"],
+    "years_experience": [1.5, 10.0, 12.0, 14.0],
+})
+y = pd.Series([72000, 130000, 165000, 210000], name="income")
+case_embedder = CaseTransformer()
+X_enhanced = case_embedder.fit_transform(X, y)
+# X_enhanced can now be fed to any tabular learner (e.g. TabICL)`,
+];
+
 export const chatterbox = (): string[] => [
 	`# pip install chatterbox-tts
 import torchaudio as ta
