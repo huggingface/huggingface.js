@@ -246,12 +246,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
 		snippets: snippets.cartesia_mlx,
 	},
-	case: {
-		prettyLabel: "CASE",
-		repoName: "CASE",
-		repoUrl: "https://github.com/SAP-samples/case",
-		snippets: snippets.case_model,
-	},
 	causilo: {
 		prettyLabel: "Causilo",
 		repoName: "Causilo",
@@ -1506,6 +1500,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sampleFactory,
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
+	},
+	"sap-case": {
+		prettyLabel: "CASE",
+		repoName: "CASE",
+		repoUrl: "https://github.com/SAP-samples/case",
+		snippets: snippets.case_model,
 	},
 	"sap-rpt-1-oss": {
 		prettyLabel: "sap-rpt-1-oss",
