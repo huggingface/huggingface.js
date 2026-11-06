@@ -237,18 +237,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 					(src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{" || src[cursorPosition + 1] === "#")
 				)
 			) {
-				if (typeof src === "string") {
-					// Short chunks avoid retaining a long chain of one-character concatenations.
-					const end = cursorPosition + 8;
-					let chunk = "";
-					while (cursorPosition < end && cursorPosition < src.length && src[cursorPosition] !== "{") {
-						chunk += src[cursorPosition++];
-					}
-					if (chunk) {
-						text += chunk;
-						continue;
-					}
-				}
+				// Consume text
 				text += src[cursorPosition++];
 			}
 
