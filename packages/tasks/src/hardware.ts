@@ -326,6 +326,18 @@ export const SKUS = {
 				power: 90,
 				releaseYear: 2020,
 			},
+			"Intel Celeron G3930": {
+				tflops: 0.046,
+				msrp: 42,
+				power: 51,
+				releaseYear: 2017,
+			},
+			"Intel Core i5-3230M": {
+				tflops: 0.083,
+				msrp: 225,
+				power: 35,
+				releaseYear: 2013,
+			},
 		},
 		AMD: {
 			"EPYC 5th Generation Zen 5 (Turin)": {
