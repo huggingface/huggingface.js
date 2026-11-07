@@ -2480,6 +2480,59 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
+		"Corvex",
+		() => {
+			const client = new InferenceClient(env.HF_CORVEX_KEY ?? "dummy");
+
+			const models = ["zai-org/GLM-5.3", "deepseek-ai/DeepSeek-V4-Flash-0731"];
+			HARDCODED_MODEL_INFERENCE_MAPPING["corvex"] = Object.fromEntries(
+				models.map((model) => [
+					model,
+					{ provider: "corvex", hfModelId: model, providerId: model, status: "live", task: "conversational" },
+				]),
+			);
+
+			it.each(models)("chatCompletion %s", async (model) => {
+				const res = await client.chatCompletion({
+					model,
+					provider: "corvex",
+					max_tokens: 4096,
+					reasoning_effort: "low",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				expect(res.choices.length).toBeGreaterThan(0);
+				expect(res.choices[0].message?.content).toContain("two");
+			});
+
+			it.each(models)("chatCompletion stream %s", async (model) => {
+				const stream = client.chatCompletionStream({
+					model,
+					provider: "corvex",
+					max_tokens: 4096,
+					reasoning_effort: "low",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
+
+	describe.concurrent(
 		"Baseten",
 		() => {
 			const client = new InferenceClient(env.HF_BASETEN_KEY ?? "dummy");
