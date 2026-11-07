@@ -1,8 +1,9 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
 import type { RepoDesignation, RepoId } from "../types/public";
 import { dirname, join } from "node:path";
-import { lstat, mkdir, stat, symlink, rename } from "node:fs/promises";
+import { lstat, mkdir, stat, symlink, rename, writeFile } from "node:fs/promises";
 import { pathsInfo } from "./paths-info";
+import { modelInfo } from "./model-info";
 import { createWriteStream, type Stats } from "node:fs";
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { toRepoId } from "../utils/toRepoId";
@@ -15,6 +16,7 @@ vi.mock("node:fs/promises", () => ({
 	lstat: vi.fn(),
 	mkdir: vi.fn(),
 	stat: vi.fn(),
+	writeFile: vi.fn(),
 }));
 
 vi.mock("node:fs", () => ({
@@ -23,6 +25,10 @@ vi.mock("node:fs", () => ({
 
 vi.mock("./paths-info", () => ({
 	pathsInfo: vi.fn(),
+}));
+
+vi.mock("./model-info", () => ({
+	modelInfo: vi.fn(),
 }));
 
 vi.mock("../utils/symlink", () => ({
@@ -35,6 +41,8 @@ const DUMMY_REPO: RepoId = {
 };
 
 const DUMMY_ETAG = "dummy-etag";
+// the commit "main" points to
+const DUMMY_COMMIT = "dummy-commit-hash";
 
 // utility test method to get blob file path
 function _getBlobFile(params: {
@@ -75,6 +83,8 @@ describe("downloadFileToCacheDir", () => {
 				},
 			}),
 		);
+
+		vi.mocked(modelInfo).mockResolvedValue({ sha: DUMMY_COMMIT } as Awaited<ReturnType<typeof modelInfo>>);
 
 		// prevent to use caching
 		vi.mocked(stat).mockRejectedValue(new Error("Do not exists"));
@@ -146,7 +156,7 @@ describe("downloadFileToCacheDir", () => {
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
 			path: "README.md",
-			revision: "main",
+			revision: DUMMY_COMMIT,
 		});
 		// stat ensure a symlink and the pointed file exists
 		vi.mocked(stat).mockResolvedValue({} as Stats); // prevent default mocked reject
@@ -267,8 +277,8 @@ describe("downloadFileToCacheDir", () => {
 		});
 
 		// expect blobs and snapshots folder to have been mkdir
-		expect(vi.mocked(mkdir).mock.calls[0][0]).toBe(dirname(expectedBlob));
-		expect(vi.mocked(mkdir).mock.calls[1][0]).toBe(dirname(expectPointer));
+		expect(mkdir).toHaveBeenCalledWith(dirname(expectedBlob), { recursive: true });
+		expect(mkdir).toHaveBeenCalledWith(dirname(expectPointer), { recursive: true });
 
 		expect(output).toBe(expectPointer);
 	});
@@ -317,5 +327,40 @@ describe("downloadFileToCacheDir", () => {
 		expect(rename).toHaveBeenCalledWith(incomplete, expectedBlob);
 		// 3. should create symlink pointing to blob
 		expect(createSymlink).toHaveBeenCalledWith({ sourcePath: expectedBlob, finalPath: expectPointer });
+	});
+
+	test("files of a branch go under the snapshot of the commit the branch points to", async () => {
+		// both blobs are already cached, only the snapshot pointers are created
+		vi.mocked(lstat).mockResolvedValue({} as Stats);
+		// each file was last changed by a different, older commit
+		for (const [path, lastCommitId] of [
+			["config.json", "older-commit-1"],
+			["README.md", "older-commit-2"],
+		]) {
+			vi.mocked(pathsInfo).mockResolvedValueOnce([
+				{
+					oid: DUMMY_ETAG,
+					size: 55,
+					path,
+					type: "file",
+					lastCommit: { date: new Date(), id: lastCommitId, title: "Commit msg" },
+				},
+			]);
+		}
+
+		const config = await downloadFileToCacheDir({ repo: DUMMY_REPO, path: "config.json", fetch: fetchMock });
+		const readme = await downloadFileToCacheDir({ repo: DUMMY_REPO, path: "README.md", fetch: fetchMock });
+
+		expect(config).toBe(_getSnapshotFile({ repo: DUMMY_REPO, path: "config.json", revision: DUMMY_COMMIT }));
+		expect(readme).toBe(_getSnapshotFile({ repo: DUMMY_REPO, path: "README.md", revision: DUMMY_COMMIT }));
+		// refs/main records the commit, as huggingface_hub does
+		expect(writeFile).toHaveBeenCalledWith(
+			join(getHFHubCachePath(), getRepoFolderName(DUMMY_REPO), "refs", "main"),
+			DUMMY_COMMIT,
+		);
+		expect(modelInfo).toHaveBeenCalledWith(expect.objectContaining({ name: DUMMY_REPO.name, revision: "main" }));
+		// the file metadata is read at that same commit
+		expect(pathsInfo).toHaveBeenNthCalledWith(1, expect.objectContaining({ revision: DUMMY_COMMIT }));
+		expect(pathsInfo).toHaveBeenNthCalledWith(2, expect.objectContaining({ revision: DUMMY_COMMIT }));
 	});
 });

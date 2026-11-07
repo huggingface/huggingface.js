@@ -1,11 +1,14 @@
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { dirname, join } from "node:path";
-import { rename, lstat, mkdir, stat } from "node:fs/promises";
+import { rename, lstat, mkdir, stat, writeFile } from "node:fs/promises";
 import type { PathInfo } from "./paths-info";
 import { pathsInfo } from "./paths-info";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { toRepoId } from "../utils/toRepoId";
 import { downloadFile } from "./download-file";
+import { modelInfo } from "./model-info";
+import { datasetInfo } from "./dataset-info";
+import { spaceInfo } from "./space-info";
 import { createSymlink } from "../utils/symlink";
 import { validateRelativeFilename } from "../utils/validateRelativeFilename";
 import { Readable } from "node:stream";
@@ -86,12 +89,29 @@ export async function downloadFileToCacheDir(
 		if (await exists(pointerPath, true)) {
 			return pointerPath;
 		}
+	} else if (repoId.type === "model" || repoId.type === "dataset" || repoId.type === "space") {
+		// Same layout as huggingface_hub: files of a branch or tag go under the snapshot of the commit
+		// it points to, recorded in refs/<revision>, not under each file's own last commit.
+		// (kernel repos have no info endpoint here and keep the per-file layout)
+		const infoParams = { ...params, name: repoId.name, additionalFields: ["sha" as const], revision };
+		const repoInfo =
+			repoId.type === "model"
+				? await modelInfo(infoParams)
+				: repoId.type === "dataset"
+					? await datasetInfo(infoParams)
+					: await spaceInfo(infoParams);
+		commitHash = repoInfo.sha;
+		const refPath = join(storageFolder, "refs", revision);
+		await mkdir(dirname(refPath), { recursive: true });
+		await writeFile(refPath, commitHash);
 	}
 
+	// pin the metadata and the download to the same commit, even if the branch moves meanwhile
+	const resolvedRevision = commitHash ?? revision;
 	const pathsInformation: PathInfo[] = await pathsInfo({
 		...params,
 		paths: [params.path],
-		revision,
+		revision: resolvedRevision,
 		expand: true,
 	});
 	if (!pathsInformation || pathsInformation.length !== 1) {
@@ -135,7 +155,7 @@ export async function downloadFileToCacheDir(
 
 	const blob: Blob | null = await downloadFile({
 		...params,
-		revision,
+		revision: resolvedRevision,
 	});
 
 	if (!blob) {
