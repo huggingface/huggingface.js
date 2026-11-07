@@ -1748,7 +1748,7 @@ export class Interpreter {
 		return this.evaluateBlock(program.body, environment);
 	}
 
-	private evaluateBlock(statements: Statement[], environment: Environment): StringValue {
+	private evaluateBlock(statements: Statement[], environment: Environment, capture = false): StringValue {
 		// Jinja templates always evaluate to a String,
 		// so we accumulate the result of each statement into a final string
 
@@ -1762,9 +1762,19 @@ export class Interpreter {
 				}
 			} catch (err) {
 				if (err instanceof BreakControl || err instanceof ContinueControl) {
-					// Prepend the output rendered by this block before the control
-					// flow signal, so enclosing blocks keep it as well.
-					err.output = result + err.output;
+					if (capture) {
+						// Text rendered inside a capturing block (e.g. a `{% set %}` or
+						// `{% filter %}` body) is not template output. When the control
+						// flow signal crosses the capturing block, the aborted capture -
+						// including everything accumulated from within it - is dropped,
+						// matching Python Jinja2. Loops nested inside the capture are
+						// unaffected: they catch the signal before it reaches here.
+						err.output = "";
+					} else {
+						// Prepend the output rendered by this block before the control
+						// flow signal, so enclosing blocks keep it as well.
+						err.output = result + err.output;
+					}
 				}
 				throw err;
 			}
@@ -1872,7 +1882,7 @@ export class Interpreter {
 	}
 
 	private evaluateSet(node: SetStatement, environment: Environment): NullValue {
-		const rhs = node.value ? this.evaluate(node.value, environment) : this.evaluateBlock(node.body, environment);
+		const rhs = node.value ? this.evaluate(node.value, environment) : this.evaluateBlock(node.body, environment, true);
 		if (node.assignee.type === "Identifier") {
 			const variableName = (node.assignee as Identifier).value;
 			environment.setVariable(variableName, rhs);
@@ -2092,7 +2102,7 @@ export class Interpreter {
 			new FunctionValue((args, scope) => {
 				const macroScope = new Environment(scope);
 				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);
-				return this.evaluateBlock(node.body, macroScope);
+				return this.evaluateBlock(node.body, macroScope, true);
 			}),
 		);
 
@@ -2107,7 +2117,7 @@ export class Interpreter {
 		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[]) => {
 			const callBlockEnv = new Environment(environment);
 			this.bindMacroArguments("None", parameters, specialArguments, callerArguments, callBlockEnv);
-			return this.evaluateBlock(node.body, callBlockEnv);
+			return this.evaluateBlock(node.body, callBlockEnv, true);
 		});
 
 		const [macroArgs, macroKwargs] = this.evaluateArguments(node.call.args, environment);
@@ -2122,7 +2132,7 @@ export class Interpreter {
 	}
 
 	private evaluateFilterStatement(node: FilterStatement, environment: Environment): AnyRuntimeValue {
-		const rendered = this.evaluateBlock(node.body, environment);
+		const rendered = this.evaluateBlock(node.body, environment, true);
 		return this.applyFilter(rendered, node.filter, environment);
 	}
 
