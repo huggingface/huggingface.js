@@ -1020,6 +1020,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "LibreYOLO",
 		repoUrl: "https://github.com/LibreYOLO/libreyolo",
 		docsUrl: "https://www.libreyolo.com/docs",
+		snippets: snippets.libreyolo,
 		filter: false,
 		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json"`,
 	},

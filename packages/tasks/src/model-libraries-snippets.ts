@@ -1579,6 +1579,14 @@ export const ltx = (model: ModelData): string[] => {
 	return _isLtx25Model(model) ? _ltx25Snippets(model, localDir, tags) : _ltx23Snippets(model, localDir, tags);
 };
 
+export const libreyolo = (model: ModelData): string[] => [
+	`# pip install libreyolo
+from libreyolo import LibreYOLO
+
+model = LibreYOLO("${model.id}")
+results = model("https://raw.githubusercontent.com/LibreYOLO/libreyolo/release/libreyolo/assets/guggenheim-bilbao.jpg", save=True)`,
+];
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
