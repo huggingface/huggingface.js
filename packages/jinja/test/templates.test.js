@@ -6458,6 +6458,33 @@ describe("Templates", () => {
 			expect(() => new Template(`{{ '${escaped}`)).toThrowError(SyntaxError);
 		});
 
+		it.each([
+			// Unrecognized escapes are kept as-is, like Python (e.g. regex patterns)
+			[String.raw`\d+`, String.raw`\d+`],
+			[String.raw`a\.b\_c`, String.raw`a\.b\_c`],
+			// Python-only escapes
+			[String.raw`\U0001F917`, "🤗"],
+			[String.raw`\U00000041`, "A"],
+			[String.raw`\0`, "\0"],
+			[String.raw`\101\60`, "A0"],
+			[String.raw`\1018`, "A8"],
+			[String.raw`\a`, "\x07"],
+			["a\\\nb", "ab"],
+		])("decodes %s like Python and preserves it when formatting", (escaped, expected) => {
+			for (const quote of ["'", '"']) {
+				const template = new Template(`{{ ${quote}${escaped}${quote} }}`);
+				expect(template.render()).toBe(expected);
+				expect(new Template(template.format()).render()).toBe(expected);
+			}
+		});
+
+		it.each([String.raw`\U0001F91`, String.raw`\U00110000`, String.raw`\N{EM DASH}`])(
+			"rejects unsupported escape %s",
+			(escaped) => {
+				expect(() => new Template(`{{ '${escaped}' }}`)).toThrowError(SyntaxError);
+			},
+		);
+
 		it("removes null characters with the flint replacement filter", () => {
 			const template = new Template(String.raw`{{ content | replace("\x00", "") }}`);
 			expect(template.render({ content: "a\0b\0c" })).toBe("abc");
