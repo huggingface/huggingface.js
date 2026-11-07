@@ -1022,7 +1022,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://www.libreyolo.com/docs",
 		snippets: snippets.libreyolo,
 		filter: false,
-		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json" OR path:"model_index.json" OR path:"pipeline.json"`,
 	},
 	lightglue: {
 		prettyLabel: "LightGlue",
