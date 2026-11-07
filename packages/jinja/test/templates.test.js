@@ -6516,6 +6516,38 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Concatenation with undefined values", () => {
+		// https://github.com/huggingface/huggingface.js/issues/2710
+		// Python Jinja2 renders undefined values as an empty string in `~` concatenation.
+		it.each([
+			[`{{ "a" ~ x ~ "b" }}`, {}, "ab"],
+			[`{{ x ~ "b" }}`, {}, "b"],
+			[`{{ "a" ~ x }}`, {}, "a"],
+			[`{{ x ~ y }}`, {}, ""],
+			[`{{ x ~ 1 ~ true }}`, {}, "1true"],
+			[`{{ object.undefined_attribute ~ "!" }}`, { object: {} }, "!"],
+		])("concatenates undefined as an empty string: %s", (source, context, expected) => {
+			const template = new Template(source);
+			expect(template.render(context)).toBe(expected);
+		});
+
+		it("supports appending to a variable that was never set (Llama 4 chat template pattern)", () => {
+			// Mirrors `{%- set tool_definition = tool_definition ~ (tools | tojson(indent=4)) %}` from the
+			// official Llama 4 Scout chat template, which appends to a variable that was never set.
+			const template = new Template(
+				`{% set tool_definition = tool_definition ~ (tools | tojson) %}{{ tool_definition }}`,
+			);
+			expect(template.render({ tools: ["a", "b"] })).toBe('["a", "b"]');
+		});
+
+		it.each([`{{ x + 1 }}`, `{{ x * 2 }}`, `{{ 1 - x }}`])(
+			"still throws for other binary operations on undefined: %s",
+			(source) => {
+				expect(() => new Template(source).render({})).toThrowError(/Cannot perform operation .* on undefined values/);
+			},
+		);
+	});
+
 	describe("Member access", () => {
 		it.each([3, -4])("returns undefined for out-of-range string index %i", (index) => {
 			const template = new Template(
