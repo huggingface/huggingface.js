@@ -118,7 +118,7 @@ You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to i
 import { InferenceClient } from "@huggingface/inference";
 
 const inference = new InferenceClient(HF_TOKEN);
-await inference.conversational({
+await inference.textClassification({
 	model: "distilbert-base-uncased-finetuned-sst-2-english",
 	inputs: "I love this movie!",
 });
