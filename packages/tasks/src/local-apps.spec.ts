@@ -410,4 +410,20 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			{ label: "Releases", url: "https://github.com/bartowski/Llama-3.2-3B-Instruct-GGUF/releases" },
 		]);
 	});
+
+	it("basalt", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS["basalt"];
+		const model: ModelData = {
+			id: "mlx-community/Qwen3-4B-4bit",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(displayOnModelPage({ ...model, tags: ["gguf"] })).toBe(false);
+		expect(snippet[0].setup).toContain("brew install goodmai/basalt/basalt");
+		expect(snippet[0].content).toContain('basalt serve --model "mlx-community/Qwen3-4B-4bit" --rest');
+	});
 });
