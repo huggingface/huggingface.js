@@ -31,10 +31,21 @@ import {
 	transformers,
 	transformersJS,
 	ultralytics,
+	vertoASR,
 	vui,
 } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
+	it("vertoASR provides a browser module with the requested Hub model", () => {
+		const [snippet] = vertoASR({ id: "example/ctc-asr", inference: "", tags: [] });
+		expect(snippet).toContain('fetch("https://huggingface.co/api/models/example/ctc-asr")');
+		expect(snippet).toContain('VertoASR.fromPretrained("example/ctc-asr", { revision })');
+		expect(snippet).toContain('document.createElement("input")');
+		expect(snippet).toContain("asr.close()");
+		const body = snippet.replace(/^import .*;$/m, "");
+		expect(() => new Function(`return async () => {${body}}`)).not.toThrow();
+	});
+
 	it("llama_cpp_python conversational", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
