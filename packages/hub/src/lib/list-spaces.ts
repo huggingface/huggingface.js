@@ -5,6 +5,7 @@ import type { CredentialsParams, SpaceSdk } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export const SPACE_EXPAND_KEYS = [
 	"sdk",
@@ -84,7 +85,7 @@ export async function* listSpaces<
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/spaces?${search}`;
 
 	while (url) {
-		const res: Response = await (params?.fetch ?? fetch)(url, {
+		const res: Response = await fetchWithServerWarnings(params?.fetch)(url, {
 			headers: {
 				accept: "application/json",
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
