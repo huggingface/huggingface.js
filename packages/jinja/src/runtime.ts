@@ -43,9 +43,15 @@ export type AnyRuntimeValue =
 	| NullValue
 	| UndefinedValue;
 
-// Control-flow exceptions for loop break/continue
-class BreakControl extends Error {}
-class ContinueControl extends Error {}
+// Control-flow exceptions for loop break/continue.
+// `output` carries the text already rendered in the current iteration,
+// so it can be kept instead of dropped (matching Python Jinja2).
+class BreakControl extends Error {
+	output = "";
+}
+class ContinueControl extends Error {
+	output = "";
+}
 
 const EMPTY_BUILTINS: ReadonlyMap<string, AnyRuntimeValue> = new Map();
 
@@ -1748,10 +1754,19 @@ export class Interpreter {
 
 		let result = "";
 		for (const statement of statements) {
-			const lastEvaluated: AnyRuntimeValue = this.evaluate(statement, environment);
+			try {
+				const lastEvaluated: AnyRuntimeValue = this.evaluate(statement, environment);
 
-			if (lastEvaluated.type !== "NullValue" && lastEvaluated.type !== "UndefinedValue") {
-				result += lastEvaluated.toString();
+				if (lastEvaluated.type !== "NullValue" && lastEvaluated.type !== "UndefinedValue") {
+					result += lastEvaluated.toString();
+				}
+			} catch (err) {
+				if (err instanceof BreakControl || err instanceof ContinueControl) {
+					// Prepend the output rendered by this block before the control
+					// flow signal, so enclosing blocks keep it as well.
+					err.output = result + err.output;
+				}
+				throw err;
 			}
 		}
 
@@ -1997,9 +2012,11 @@ export class Interpreter {
 				result += evaluated.value;
 			} catch (err) {
 				if (err instanceof ContinueControl) {
+					result += err.output;
 					continue;
 				}
 				if (err instanceof BreakControl) {
+					result += err.output;
 					break;
 				}
 				throw err;
