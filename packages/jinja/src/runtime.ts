@@ -2097,16 +2097,11 @@ export class Interpreter {
 				// macro was defined in, not the one it is called from. Capturing that environment by
 				// reference rather than copying it also preserves Jinja's late binding, so a name assigned
 				// in the defining scope after the macro is declared is still visible to the body.
-				let parent = environment;
-
-				// `{% call %}` hands `caller` to the macro it invokes, and to that macro alone. Keeping it
-				// in its own layer stops it from becoming an own variable of the macro scope, which would
-				// otherwise leak it into the macros that this macro calls.
+				// A caller belongs only to this invocation. Shadow any captured caller, even when this
+				// call has none, and keep it in a separate layer so ordinary calls do not forward it.
 				const caller = callSite.variables.get("caller");
-				if (caller !== undefined) {
-					parent = new Environment(environment);
-					parent.setVariable("caller", caller);
-				}
+				const parent = new Environment(environment);
+				parent.setVariable("caller", caller ?? new UndefinedValue());
 
 				const macroScope = new Environment(parent);
 				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);

@@ -6720,6 +6720,11 @@ describe("Feature regressions", () => {
 				expected: "[(z)]",
 			},
 			{
+				name: "passes a nested macro its own caller",
+				source: `{% macro outer() %}{% macro inner() %}{{ caller() }}{% endmacro %}{% call inner() %}I{% endcall %}|{{ caller() }}{% endmacro %}{% call outer() %}O{% endcall %}`,
+				expected: "I|O",
+			},
+			{
 				name: "invokes caller inside a loop in the macro body",
 				source: `{% macro m() %}{% for i in [1, 2] %}{{ caller() }}{% endfor %}{% endmacro %}{% call m() %}c{% endcall %}`,
 				expected: "cc",
@@ -6735,9 +6740,23 @@ describe("Feature regressions", () => {
 			expect(template.render({ rt: "RT" })).toBe("[RT]");
 		});
 
-		it("does not leak caller into the macros an invoked macro calls", () => {
-			const source = `{% macro b() %}[{{ caller() }}]{% endmacro %}{% macro a() %}{{ b() }}{% endmacro %}{% call a() %}C{% endcall %}`;
-			expect(() => new Template(source).render()).toThrowError();
+		it.each([
+			{
+				name: "an ordinary macro call",
+				source: `{% macro b() %}[{{ caller() }}]{% endmacro %}{% macro a() %}{{ b() }}{% endmacro %}{% call a() %}C{% endcall %}`,
+			},
+			{
+				name: "an immediately invoked nested macro",
+				source: `{% macro outer() %}{% macro inner() %}{{ caller() }}{% endmacro %}{{ inner() }}{% endmacro %}{% call outer() %}C{% endcall %}`,
+			},
+			{
+				name: "a nested macro saved and invoked later",
+				source: `{% set ns = namespace() %}{% macro outer() %}{% macro inner() %}{{ caller() }}{% endmacro %}{% set ns.inner = inner %}{% endmacro %}{% call outer() %}C{% endcall %}{{ ns.inner() }}`,
+			},
+		])("does not leak caller into $name", ({ source }) => {
+			expect(() => new Template(source).render()).toThrowError(
+				"Cannot call something that is not a function: got UndefinedValue",
+			);
 		});
 	});
 
