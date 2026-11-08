@@ -120,6 +120,13 @@ function isMlxModel(model: ModelData) {
 }
 
 /**
+ * Kapitsa loads MLX repos of the Qwen3.5 family (Qwen3.5, Qwen3.6, Qwen3.8) by repo id.
+ */
+function isKapitsaModel(model: ModelData) {
+	return isMlxModel(model) && ["qwen3_5", "qwen3_5_moe"].includes(model.config?.model_type ?? "");
+}
+
+/**
  * Returns the model's chat template string, coalescing across sources:
  * GGUF metadata > chat_template_jinja file > tokenizer_config.json
  */
@@ -585,6 +592,26 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetKapitsa = (model: ModelData): LocalAppSnippet[] => [
+	{
+		title: "Start an OpenAI- and Anthropic-compatible server",
+		setup: ["# Install Kapitsa", "brew install nace-ai/tap/kapitsa"].join("\n"),
+		content: [
+			"# Download the model and start the server (chat page at http://127.0.0.1:8000)",
+			`kapitsa serve --model "${model.id}"`,
+			"# Calling the OpenAI-compatible server with curl",
+			`curl -X POST "http://127.0.0.1:8000/v1/chat/completions" \\`,
+			`   -H "Content-Type: application/json" \\`,
+			`   --data '{`,
+			`     "model": "${model.id}",`,
+			`     "messages": [`,
+			`       {"role": "user", "content": "Hello"}`,
+			`     ]`,
+			`   }'`,
+		].join("\n"),
+	},
+];
+
 /**
  * Add your new local app here.
  *
@@ -813,6 +840,14 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	kapitsa: {
+		prettyLabel: "Kapitsa",
+		docsUrl: "https://github.com/nace-ai/kapitsa",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isKapitsaModel,
+		snippet: snippetKapitsa,
 	},
 } satisfies Record<string, LocalApp>;
 
