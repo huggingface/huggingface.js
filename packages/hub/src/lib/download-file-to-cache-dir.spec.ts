@@ -1,7 +1,7 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
 import type { RepoDesignation, RepoId } from "../types/public";
 import { dirname, join } from "node:path";
-import { lstat, mkdir, stat, symlink, rename, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, stat, symlink, rename, writeFile } from "node:fs/promises";
 import { pathsInfo } from "./paths-info";
 import { modelInfo } from "./model-info";
 import { createWriteStream, type Stats } from "node:fs";
@@ -16,6 +16,7 @@ vi.mock("node:fs/promises", () => ({
 	lstat: vi.fn(),
 	mkdir: vi.fn(),
 	stat: vi.fn(),
+	readFile: vi.fn(),
 	writeFile: vi.fn(),
 }));
 
@@ -362,5 +363,30 @@ describe("downloadFileToCacheDir", () => {
 		// the file metadata is read at that same commit
 		expect(pathsInfo).toHaveBeenNthCalledWith(1, expect.objectContaining({ revision: DUMMY_COMMIT }));
 		expect(pathsInfo).toHaveBeenNthCalledWith(2, expect.objectContaining({ revision: DUMMY_COMMIT }));
+	});
+
+	test("a cached branch file is returned from a read-only cache", async () => {
+		const expectPointer = _getSnapshotFile({ repo: DUMMY_REPO, path: "README.md", revision: DUMMY_COMMIT });
+		// blob and snapshot pointer are already cached
+		vi.mocked(stat).mockResolvedValue({} as Stats);
+		vi.mocked(lstat).mockResolvedValue({} as Stats);
+		// refs/main is missing and the cache cannot be written
+		vi.mocked(readFile).mockRejectedValue(Object.assign(new Error("ENOENT"), { code: "ENOENT" }));
+		vi.mocked(writeFile).mockRejectedValue(Object.assign(new Error("EROFS"), { code: "EROFS" }));
+
+		const output = await downloadFileToCacheDir({ repo: DUMMY_REPO, path: "README.md", fetch: fetchMock });
+
+		expect(output).toBe(expectPointer);
+		expect(pathsInfo).not.toHaveBeenCalled();
+	});
+
+	test("refs/<revision> is not rewritten when it already holds the commit", async () => {
+		vi.mocked(stat).mockResolvedValue({} as Stats);
+		vi.mocked(lstat).mockResolvedValue({} as Stats);
+		vi.mocked(readFile).mockResolvedValue(DUMMY_COMMIT);
+
+		await downloadFileToCacheDir({ repo: DUMMY_REPO, path: "README.md", fetch: fetchMock });
+
+		expect(writeFile).not.toHaveBeenCalled();
 	});
 });

@@ -1,6 +1,6 @@
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { dirname, join } from "node:path";
-import { rename, lstat, mkdir, stat, writeFile } from "node:fs/promises";
+import { rename, lstat, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import type { PathInfo } from "./paths-info";
 import { pathsInfo } from "./paths-info";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
@@ -39,6 +39,21 @@ async function exists(path: string, followSymlinks?: boolean): Promise<boolean> 
 	} catch (err: unknown) {
 		return false;
 	}
+}
+
+/**
+ * Record in refs/<revision> the commit a branch or tag points to, unless it is already there.
+ */
+async function updateRef(refPath: string, commitHash: string): Promise<void> {
+	try {
+		if ((await readFile(refPath, "utf8")) === commitHash) {
+			return;
+		}
+	} catch {
+		// missing ref, write it below
+	}
+	await mkdir(dirname(refPath), { recursive: true });
+	await writeFile(refPath, commitHash);
 }
 
 /**
@@ -102,8 +117,16 @@ export async function downloadFileToCacheDir(
 					: await spaceInfo(infoParams);
 		commitHash = repoInfo.sha;
 		const refPath = join(storageFolder, "refs", revision);
-		await mkdir(dirname(refPath), { recursive: true });
-		await writeFile(refPath, commitHash);
+		const pointerPath = getFilePointer(storageFolder, commitHash, params.path);
+		if (await exists(pointerPath, true)) {
+			try {
+				await updateRef(refPath, commitHash);
+			} catch {
+				// the file is already cached, a read-only cache must still serve it
+			}
+			return pointerPath;
+		}
+		await updateRef(refPath, commitHash);
 	}
 
 	// pin the metadata and the download to the same commit, even if the branch moves meanwhile
