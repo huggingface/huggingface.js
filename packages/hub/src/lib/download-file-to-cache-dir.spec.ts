@@ -51,14 +51,72 @@ function _getSnapshotFile(params: {
 	path: string;
 	revision: string;
 	cacheDir?: string; // default to {@link getHFHubCache}
+	raw?: boolean;
 }) {
 	return join(
 		params.cacheDir ?? getHFHubCachePath(),
 		getRepoFolderName(toRepoId(params.repo)),
-		"snapshots",
+		params.raw ? "raw-snapshots" : "snapshots",
 		params.revision,
 		params.path,
 	);
+}
+
+// Emulates the on-disk cache so back-to-back calls see what earlier calls wrote.
+// The real `stat` follows symlinks, so a snapshot entry is "present" once its blob exists.
+function _useInMemoryCache(): void {
+	const files = new Set<string>();
+	vi.mocked(mkdir).mockResolvedValue(undefined);
+	vi.mocked(rename).mockImplementation(async (_from, to) => {
+		files.add(String(to));
+	});
+	vi.mocked(createSymlink).mockImplementation(async ({ sourcePath, finalPath }) => {
+		if (files.has(String(sourcePath))) {
+			files.add(String(finalPath));
+		}
+	});
+	vi.mocked(stat).mockImplementation(async (path) => {
+		if (files.has(String(path))) {
+			return {} as Stats;
+		}
+		throw new Error("ENOENT");
+	});
+	vi.mocked(lstat).mockImplementation(async (path) => {
+		if (files.has(String(path))) {
+			return {} as Stats;
+		}
+		throw new Error("ENOENT");
+	});
+}
+
+const LFS_FILE = {
+	path: "pytorch_model.bin",
+	gitOid: "0123456789abcdef0123456789abcdef01234567",
+	lfsOid: "e".repeat(64),
+};
+const COMMIT_REVISION = "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7";
+const LAST_COMMIT_ID = "f".repeat(40);
+
+function _mockLfsPathInfo(lastCommitId: string): void {
+	vi.mocked(pathsInfo).mockResolvedValue([
+		{
+			oid: LFS_FILE.gitOid,
+			size: 131,
+			path: LFS_FILE.path,
+			type: "file",
+			lfs: { oid: LFS_FILE.lfsOid, size: 540217, pointerSize: 131 },
+			lastCommit: {
+				date: new Date(),
+				id: lastCommitId,
+				title: "Commit msg",
+			},
+		},
+	]);
+}
+
+function _mockDownloadStream(): void {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	vi.mocked(createWriteStream).mockReturnValue(async function* () {} as any);
 }
 
 describe("downloadFileToCacheDir", () => {
@@ -318,4 +376,56 @@ describe("downloadFileToCacheDir", () => {
 		// 3. should create symlink pointing to blob
 		expect(createSymlink).toHaveBeenCalledWith({ sourcePath: expectedBlob, finalPath: expectPointer });
 	});
+
+	test.each([
+		{ revision: COMMIT_REVISION, first: "raw" },
+		{ revision: COMMIT_REVISION, first: "resolved" },
+		{ revision: "main", first: "raw" },
+		{ revision: "main", first: "resolved" },
+	])(
+		"keeps raw and resolved LFS cache identities separate (revision=$revision, $first first)",
+		async ({ revision, first }) => {
+			_useInMemoryCache();
+			const { path, gitOid, lfsOid } = LFS_FILE;
+			_mockLfsPathInfo(LAST_COMMIT_ID);
+			_mockDownloadStream();
+			const snapshotId = revision === COMMIT_REVISION ? revision : LAST_COMMIT_ID;
+			const call = (raw?: boolean) =>
+				downloadFileToCacheDir({ repo: DUMMY_REPO, path, revision, raw, fetch: fetchMock });
+			const endpoints = () =>
+				new Set(
+					vi.mocked(fetchMock).mock.calls.map(([input]) => {
+						const url = String(input);
+						return url.includes("/raw/") ? "raw" : url.includes("/resolve/") ? "resolved" : "other";
+					}),
+				);
+
+			const firstPath = await call(first === "raw");
+			expect(endpoints()).toEqual(new Set([first]));
+
+			const secondPath = await call(first !== "raw");
+			const rawPath = first === "raw" ? firstPath : secondPath;
+			const resolvedPath = first === "resolved" ? firstPath : secondPath;
+
+			expect(rawPath).toBe(_getSnapshotFile({ repo: DUMMY_REPO, path, revision: snapshotId, raw: true }));
+			expect(resolvedPath).toBe(_getSnapshotFile({ repo: DUMMY_REPO, path, revision: snapshotId }));
+			expect(rawPath).not.toBe(resolvedPath);
+			expect(endpoints()).toEqual(new Set(["raw", "resolved"]));
+
+			const rawBlob = _getBlobFile({ repo: DUMMY_REPO, etag: gitOid });
+			const resolvedBlob = _getBlobFile({ repo: DUMMY_REPO, etag: lfsOid });
+			expect(rename).toHaveBeenCalledTimes(2);
+			expect(rename).toHaveBeenCalledWith(`${rawBlob}.incomplete`, rawBlob);
+			expect(rename).toHaveBeenCalledWith(`${resolvedBlob}.incomplete`, resolvedBlob);
+			expect(createSymlink).toHaveBeenCalledWith({ sourcePath: rawBlob, finalPath: rawPath });
+			expect(createSymlink).toHaveBeenCalledWith({ sourcePath: resolvedBlob, finalPath: resolvedPath });
+
+			// repeating either representation is served from its own cached snapshot
+			const fetchesBeforeCacheHits = vi.mocked(fetchMock).mock.calls.length;
+			expect(await call(true)).toBe(rawPath);
+			expect(await call(false)).toBe(resolvedPath);
+			expect(fetchMock).toHaveBeenCalledTimes(fetchesBeforeCacheHits);
+			expect(rename).toHaveBeenCalledTimes(2);
+		},
+	);
 });
