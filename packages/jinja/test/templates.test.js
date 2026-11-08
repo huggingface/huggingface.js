@@ -6426,6 +6426,44 @@ describe("Templates", () => {
 		// TODO add failure cases
 	});
 
+	describe("Hexadecimal string escapes", () => {
+		it.each([
+			[String.raw`\x00`, "\0"],
+			[String.raw`\x41\x42\xAf\xff`, "AB¯ÿ"],
+			[String.raw`\x001`, "\u00001"],
+			[String.raw`\x22\x27\x5c`, "\"'\\"],
+			[String.raw`\u0000\u0041\u00e9\u4F60\u597D`, "\0Aé你好"],
+			[String.raw`\uD83E\uDD17`, "🤗"],
+			[String.raw`\x5cx41`, String.raw`\x41`],
+			[String.raw`\\x41\\u0041`, String.raw`\x41\u0041`],
+		])("decodes %s and preserves it when formatting", (escaped, expected) => {
+			for (const quote of ["'", '"']) {
+				const template = new Template(`{{ ${quote}${escaped}${quote} }}`);
+				expect(template.render()).toBe(expected);
+				expect(new Template(template.format()).render()).toBe(expected);
+			}
+		});
+
+		it.each([
+			String.raw`\x`,
+			String.raw`\x0`,
+			String.raw`\xGG`,
+			String.raw`\x1g`,
+			String.raw`\u`,
+			String.raw`\u123`,
+			String.raw`\u12g4`,
+			"\\xA\n",
+		])("rejects malformed escape %s", (escaped) => {
+			expect(() => new Template(`{{ '${escaped}' }}`)).toThrowError(SyntaxError);
+			expect(() => new Template(`{{ '${escaped}`)).toThrowError(SyntaxError);
+		});
+
+		it("removes null characters with the flint replacement filter", () => {
+			const template = new Template(String.raw`{{ content | replace("\x00", "") }}`);
+			expect(template.render({ content: "a\0b\0c" })).toBe("abc");
+		});
+	});
+
 	describe("Parsing and interpretation", () => {
 		describe("should interpret an AST", () => {
 			for (const [name, text] of Object.entries(TEST_PARSED)) {

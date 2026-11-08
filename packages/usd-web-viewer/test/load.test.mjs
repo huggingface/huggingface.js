@@ -63,6 +63,9 @@ function sceneMessages(matrix) {
 				metersPerUnit: 1,
 				warnings: [],
 				geometryCount: 1,
+				physics: { bodies: [], colliders: [], materials: [], joints: [], articulationRoots: [], frames: [] },
+				labels: [],
+				variantSelections: [],
 				instances: [{ path: "/M", geometry: 0, material: 0, subsets: {}, doubleSided: false, matrix }],
 				materials: [
 					{
@@ -91,7 +94,7 @@ function sceneMessages(matrix) {
 				indices: new Uint16Array([0, 1, 2]),
 			},
 		},
-		{ type: "scene", stats: { warnings: [] } },
+		{ type: "scene", stats: { warnings: [] }, layers: [{ url: "https://example.test/scene.usda", size: 10 }] },
 	];
 }
 
@@ -449,4 +452,248 @@ test("instances of one geometry with the same materials draw as one InstancedMes
 	batch.addEventListener("dispose", () => (freed = true));
 	dispose();
 	assert.equal(freed, true);
+});
+
+/** A body with a door hinged at x = 1 about Z, a drawer sliding along X, and a pane fixed to the door, in centimeters. */
+function articulatedMessages() {
+	const frame = (x) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, 0, 0, 1];
+	const instance = (path) => ({
+		path,
+		geometry: 0,
+		material: 0,
+		subsets: {},
+		doubleSided: false,
+		matrix: frame(path === "/Door/Pane/M" ? 2 : 0),
+	});
+	const body = (path, mass) => ({
+		path,
+		kinematic: false,
+		mass: mass === null ? null : { value: mass, source: "authored" },
+		centerOfMass: null,
+		diagonalInertia: null,
+		principalAxes: null,
+		world: IDENTITY,
+		colliders: [],
+		attached: [],
+	});
+	const joint = (path, kind, body0, body1, extra) => ({
+		path,
+		kind,
+		enabled: true,
+		displayName: null,
+		body0,
+		body1,
+		type: `Physics${kind[0].toUpperCase()}${kind.slice(1)}Joint`,
+		target0: body0,
+		target1: body1,
+		frame0: frame(100),
+		frame1: frame(100),
+		rest: 0,
+		mimic: null,
+		drives: [],
+		...extra,
+	});
+	const [meta, geometry] = sceneMessages(IDENTITY);
+	return [
+		{
+			...meta,
+			meta: {
+				...meta.meta,
+				metersPerUnit: 0.01,
+				instances: ["/Body/M", "/Door/M", "/Door/Pane/M", "/Drawer/M", "/Lid/M"].map(instance),
+				physics: {
+					bodies: [
+						body("/Body", 50),
+						body("/Door", 2),
+						body("/Door/Pane", 1),
+						body("/Drawer", null),
+						body("/Lid", null),
+					],
+					colliders: [],
+					materials: [],
+					articulationRoots: ["/Body"],
+					frames: [{ path: "/Door/Tip", body: "/Door", world: frame(2) }],
+					joints: [
+						joint("/J/Hinge", "revolute", "/Body", "/Door", { axis: "Z", lower: -90, upper: 90 }),
+						joint("/J/Pane", "fixed", "/Door", "/Door/Pane"),
+						// A shorter way to the pane than through the door, which only counts while it is enabled.
+						joint("/J/Off", "revolute", "/Body", "/Door/Pane", { axis: "X", lower: null, upper: null, enabled: false }),
+						joint("/J/Slide", "prismatic", "/Body", "/Drawer", { axis: "X", lower: 0, upper: 0.3 }),
+						joint("/J/Lid", "revolute", "/Shelf", "/Lid", { axis: "Z", lower: 0, upper: 90 }),
+						joint("/J/Follower", "revolute", "/Body", "/Drawer", {
+							axis: "Z",
+							lower: null,
+							upper: null,
+							mimic: { reference: "/J/Hinge", gearing: -1, offset: 0 },
+						}),
+					],
+				},
+				labels: [{ path: "/", taxonomy: "wikidata_class", values: ["cabinet"] }],
+				variantSelections: [{ prim: "/Cabinet", set: "PhysX", selection: "Enabled" }],
+			},
+		},
+		geometry,
+		{ type: "scene", stats: { warnings: [] }, layers: [{ url: "https://example.test/scene.usda", size: 10 }] },
+	];
+}
+
+async function loadArticulated() {
+	const loading = loadUsd("scene.usda");
+	await tick();
+	const worker = FakeWorker.last;
+	articulatedMessages().forEach((m) => worker.send(m));
+	const result = await loading;
+	// Five copies of one mesh draw as one InstancedMesh: read the copy's own matrix.
+	const position = (path) => {
+		const mesh = result.root.children.find((m) => m.userData.paths?.includes(path));
+		const matrix = new THREE.Matrix4();
+		mesh.getMatrixAt(mesh.userData.paths.indexOf(path), matrix);
+		return new THREE.Vector3().setFromMatrixPosition(matrix);
+	};
+	return { ...result, worker, position };
+}
+
+test("physics, labels and variant selections pass through", async () => {
+	const { info } = await loadArticulated();
+	const slide = info.physics.joints.find((j) => j.path === "/J/Slide");
+	assert.deepEqual([slide.lower, slide.upper, slide.rest], [0, 0.3, 0]);
+	const hinge = info.physics.joints.find((j) => j.path === "/J/Hinge");
+	assert.deepEqual([hinge.lower, hinge.upper], [-90, 90]);
+	assert.equal(info.physics.bodies.length, 5);
+	assert.deepEqual(info.physics.articulationRoots, ["/Body"]);
+	assert.deepEqual(info.labels, [{ path: "/", taxonomy: "wikidata_class", values: ["cabinet"] }]);
+	assert.deepEqual(info.variantSelections, [{ prim: "/Cabinet", set: "PhysX", selection: "Enabled" }]);
+});
+
+test("dependencies list the layers read and the textures, sized as they arrive", async () => {
+	const { info, worker } = await load();
+	assert.deepEqual(info.dependencies, [
+		{ url: "https://example.test/scene.usda", kind: "layer", size: 10 },
+		{ url: TEXTURE.path, kind: "texture", size: null },
+	]);
+	worker.send({ type: "texture", path: TEXTURE.path, bitmap: fakeBitmap(), color: true, size: 2048 });
+	assert.equal(info.dependencies[1].size, 2048);
+});
+
+test("setJointPositions turns a body about its joint and moves what is fixed to it", async () => {
+	const { setJointPositions, position } = await loadArticulated();
+	setJointPositions({ "/J/Hinge": 90 });
+	// Hinged at x = 100 cm, a quarter turn about Z takes the door's origin to (100, -100).
+	const door = position("/Door/M");
+	assert.ok(door.distanceTo(new THREE.Vector3(100, -100, 0)) < 1e-9, `door at ${door.toArray()}`);
+	// The pane, 2 cm along the door, swings with it.
+	const pane = position("/Door/Pane/M");
+	assert.ok(pane.distanceTo(new THREE.Vector3(100, -98, 0)) < 1e-9, `pane at ${pane.toArray()}`);
+	assert.ok(position("/Body/M").length() < 1e-12, "the body stays");
+});
+
+test("setJointPositions slides in meters, clamps to the limits, and resetJointPositions puts everything back", async () => {
+	const { setJointPositions, resetJointPositions, position } = await loadArticulated();
+	setJointPositions({ "/J/Slide": 0.12 });
+	assert.ok(position("/Drawer/M").distanceTo(new THREE.Vector3(12, 0, 0)) < 1e-9);
+	setJointPositions({ "/J/Slide": 5 });
+	assert.ok(position("/Drawer/M").distanceTo(new THREE.Vector3(30, 0, 0)) < 1e-9, "clamped to 0.3 m");
+	resetJointPositions();
+	assert.ok(position("/Drawer/M").length() < 1e-12);
+	assert.ok(position("/Door/M").length() < 1e-12);
+	assert.throws(() => setJointPositions({ "/J/Missing": 1 }), /no joint at \/J\/Missing/);
+	assert.throws(() => setJointPositions({ "/J/Pane": 1 }), /cannot be posed/);
+	assert.throws(() => setJointPositions({ "/J/Slide": NaN }), RangeError);
+});
+
+test("joints lists what setJointPositions can move, under the keys getJointPositions uses", async () => {
+	const { joints, getJointPositions } = await loadArticulated();
+	assert.deepEqual(
+		joints.map((j) => j.path),
+		["/J/Hinge", "/J/Slide", "/J/Lid", "/J/Follower"],
+	);
+	assert.deepEqual(
+		Object.keys(getJointPositions()),
+		joints.map((j) => j.path),
+	);
+});
+
+const positionOf = (matrix) => new THREE.Vector3().setFromMatrixPosition(matrix);
+
+test("getWorldMatrix follows a frame with no mesh, in the scene's meters, and turns with it", async () => {
+	const { root, setJointPositions, resetJointPositions, getWorldMatrix } = await loadArticulated();
+	const inScene = (x, y, z) => root.localToWorld(new THREE.Vector3(x, y, z));
+	const xAxis = () => new THREE.Vector3(1, 0, 0).transformDirection(getWorldMatrix("/Door/Tip"));
+	assert.ok(positionOf(getWorldMatrix("/Door/Tip")).distanceTo(inScene(2, 0, 0)) < 1e-9, "authored before any posing");
+	assert.ok(xAxis().distanceTo(new THREE.Vector3(1, 0, 0)) < 1e-9);
+	setJointPositions({ "/J/Hinge": 90 });
+	// Like the pane, 2 cm along the door: a quarter turn about x = 100 cm takes it to (100, -98).
+	assert.ok(positionOf(getWorldMatrix("/Door/Tip")).distanceTo(new THREE.Vector3(1, -0.98, 0)) < 1e-9, "in meters");
+	assert.ok(xAxis().distanceTo(new THREE.Vector3(0, 1, 0)) < 1e-9, "turned a quarter about Z");
+	resetJointPositions();
+	assert.ok(positionOf(getWorldMatrix("/Door/Tip")).distanceTo(inScene(2, 0, 0)) < 1e-9);
+	assert.ok(xAxis().distanceTo(new THREE.Vector3(1, 0, 0)) < 1e-9);
+});
+
+test("getWorldMatrix reads bodies and drawn meshes, follows root, and is null for anything else", async () => {
+	const { root, setJointPositions, getWorldMatrix } = await loadArticulated();
+	setJointPositions({ "/J/Hinge": 90 });
+	assert.ok(positionOf(getWorldMatrix("/Door")).distanceTo(new THREE.Vector3(1, -1, 0)) < 1e-9);
+	assert.ok(positionOf(getWorldMatrix("/Door/Pane/M")).distanceTo(new THREE.Vector3(1, -0.98, 0)) < 1e-9);
+	assert.equal(getWorldMatrix("/Nowhere"), null);
+
+	const base = new THREE.Group();
+	base.position.set(1, 2, 3);
+	base.add(root);
+	assert.ok(
+		positionOf(getWorldMatrix("/Door")).distanceTo(new THREE.Vector3(2, 1, 3)) < 1e-9,
+		"a parent of root moves it too",
+	);
+});
+
+test("a disabled joint is reported but cannot be posed", async () => {
+	const { info, setJointPositions, getJointPositions } = await loadArticulated();
+	assert.equal(info.physics.joints.find((j) => j.path === "/J/Off").enabled, false);
+	assert.ok(!("/J/Off" in getJointPositions()));
+	assert.throws(() => setJointPositions({ "/J/Off": 1 }), /cannot be posed/);
+});
+
+test("setJointPositions sets several joints in one walk, or none if any is invalid", async () => {
+	const { root, setJointPositions, getJointPositions, position } = await loadArticulated();
+	const mesh = root.children.find((m) => m.isInstancedMesh);
+	let writes = 0;
+	const setMatrixAt = mesh.setMatrixAt.bind(mesh);
+	mesh.setMatrixAt = (...args) => (writes++, setMatrixAt(...args));
+	setJointPositions({ "/J/Hinge": 90, "/J/Slide": 0.12 });
+	assert.equal(writes, 5, "each of the five copies is written once");
+	assert.ok(position("/Door/M").distanceTo(new THREE.Vector3(100, -100, 0)) < 1e-9);
+	assert.ok(position("/Drawer/M").x !== 0);
+
+	const before = getJointPositions();
+	assert.throws(() => setJointPositions({ "/J/Hinge": 10, "/J/Missing": 1 }), /no joint at/);
+	assert.throws(() => setJointPositions({ "/J/Hinge": 10, "/J/Slide": NaN }), RangeError);
+	assert.deepEqual(getJointPositions(), before, "nothing moved");
+});
+
+test("positions read back from getJointPositions restore them, and a mimic joint follows its reference in any order", async () => {
+	const { setJointPositions, getJointPositions, resetJointPositions } = await loadArticulated();
+	setJointPositions({ "/J/Hinge": 45, "/J/Slide": 0.1 });
+	const saved = getJointPositions();
+	resetJointPositions();
+	setJointPositions(saved);
+	assert.deepEqual(getJointPositions(), saved);
+	setJointPositions({ "/J/Follower": 5, "/J/Hinge": 30 });
+	assert.equal(getJointPositions()["/J/Follower"], 30);
+});
+
+test("getJointPositions reports every joint where it is, mimic joints included", async () => {
+	const { setJointPositions, resetJointPositions, getJointPositions } = await loadArticulated();
+	const rest = { "/J/Hinge": 0, "/J/Slide": 0, "/J/Lid": 0, "/J/Follower": 0 };
+	assert.deepEqual(getJointPositions(), rest);
+	setJointPositions({ "/J/Hinge": 45, "/J/Slide": 0.1 });
+	assert.deepEqual(getJointPositions(), { ...rest, "/J/Hinge": 45, "/J/Slide": 0.1, "/J/Follower": 45 });
+	resetJointPositions();
+	assert.deepEqual(getJointPositions(), rest);
+});
+
+test("setJointPositions moves a body hung from a prim that is not a rigid body", async () => {
+	const { setJointPositions, position } = await loadArticulated();
+	setJointPositions({ "/J/Lid": 90 });
+	const lid = position("/Lid/M");
+	assert.ok(lid.distanceTo(new THREE.Vector3(100, -100, 0)) < 1e-9, `lid at ${lid.toArray()}`);
 });
