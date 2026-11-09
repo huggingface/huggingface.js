@@ -20,7 +20,7 @@ export async function visualQuestionAnswering(
 	args: VisualQuestionAnsweringArgs,
 	options?: Options,
 ): Promise<VisualQuestionAnsweringOutput[number]> {
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 	const providerHelper = getProviderHelper(provider, "visual-question-answering");
 	const reqArgs: RequestArgs = {
 		...args,

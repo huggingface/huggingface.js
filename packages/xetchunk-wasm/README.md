@@ -1,6 +1,6 @@
 # @huggingface/xetchunk-wasm
 
-Content-defined chunking and hashing for Hugging Face [Xet storage](https://huggingface.co/docs/hub/storage-regions), matching the [Rust reference implementation](https://github.com/huggingface/xet-core/blob/main/deduplication/src/chunking.rs).
+Content-defined chunking and hashing for Hugging Face [Xet storage](https://huggingface.co/docs/hub/storage-regions), matching the [Rust reference implementation](https://github.com/huggingface/xet-core/blob/main/xet_data/src/deduplication/chunking.rs).
 
 Uses [`gearhash-jit`](https://www.npmjs.com/package/gearhash-jit) for fast GEAR rolling hash boundary detection and [`@huggingface/blake3-jit`](https://www.npmjs.com/package/@huggingface/blake3-jit) for BLAKE3 chunk hashing.
 
@@ -47,6 +47,10 @@ All hash functions return `Uint8Array` (32 bytes). Use `hashToHex()` to convert 
 - **`fileHash(chunks: Chunk[]): Uint8Array`** — File-level hash (matches Rust `file_hash`).
 - **`hmac(hash: Uint8Array, key: Uint8Array): Uint8Array`** — BLAKE3 keyed hash (matches Rust `DataHash::hmac`).
 - **`verificationHash(chunkHashes: Uint8Array[]): Uint8Array`** — Range verification hash (matches Rust `range_hash_from_chunks`).
+
+### Partial merkle state
+
+- **`MerkleHashSubtree`** — Compact (O(log n)) partially-aggregated merkle state over a contiguous range of chunks, matching Rust's [`MerkleHashSubtree`](https://github.com/huggingface/xet-core/blob/main/xet_core_structures/src/merklehash/merkle_hash_subtree.rs). Build with `MerkleHashSubtree.fromChunks(atStart, chunks, atEnd)`, combine adjacent ranges with `mergeInto()` / `MerkleHashSubtree.merge()`, and read the aggregated hash with `finalHash()` once the range covers the whole file (apply `hmac(hash, zeroKey)` to get the file hash). `toJSON()` / `fromJSON()` are byte-compatible with serde's human-readable serialization, ie with the `hashRanges` entries of the CAS server's `GET /v2/file-chunk-hashes` responses. Useful for editing or appending to a file without knowing all of its chunk hashes.
 
 ### Utilities
 

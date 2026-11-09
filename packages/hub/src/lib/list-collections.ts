@@ -4,6 +4,7 @@ import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import type { ApiCollectionInfo } from "../types/api/api-collection";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 /*
  * When listing collections, the item list per collection is truncated to 4 items maximum.
@@ -72,7 +73,7 @@ export async function* listCollections(
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/collections?${searchParams}`;
 
 	while (url) {
-		const res: Response = await (params?.fetch ?? fetch)(url, {
+		const res: Response = await fetchWithServerWarnings(params?.fetch)(url, {
 			headers: {
 				accept: "application/json",
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),

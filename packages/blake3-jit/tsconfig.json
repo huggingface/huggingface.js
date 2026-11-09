@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"strict": true,
+		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"declaration": true,
 		"lib": ["ES2020", "DOM"]

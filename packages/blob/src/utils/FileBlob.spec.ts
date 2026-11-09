@@ -42,4 +42,11 @@ describe("FileBlob", () => {
 		const result = await slice.stream().getReader().read();
 		expect(new TextDecoder().decode(result.value)).toBe(expectedText);
 	});
+
+	it("should throw a TypeError on negative start/end", async () => {
+		const fileBlob = await FileBlob.create("package.json");
+
+		expect(() => fileBlob.slice(-5)).toThrow(TypeError);
+		expect(() => fileBlob.slice(0, -1)).toThrow(TypeError);
+	});
 });

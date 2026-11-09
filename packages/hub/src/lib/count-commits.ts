@@ -3,6 +3,7 @@ import { createApiError } from "../error";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function countCommits(
 	params: {
@@ -19,11 +20,12 @@ export async function countCommits(
 	const repoId = toRepoId(params.repo);
 
 	// Could upgrade to 1000 commits per page
-	const url: string | undefined = `${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commits/${
-		params.revision ?? "main"
-	}?limit=1`;
+	const url: string | undefined =
+		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commits/${encodeURIComponent(
+			params.revision ?? "main",
+		)}?limit=1`;
 
-	const res: Response = await (params.fetch ?? fetch)(url, {
+	const res: Response = await fetchWithServerWarnings(params.fetch)(url, {
 		headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
 	});
 

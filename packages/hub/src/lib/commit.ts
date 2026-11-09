@@ -26,7 +26,12 @@ import { createBlobs } from "../utils/createBlobs";
 import type { XetTokenParams } from "../utils/uploadShards";
 import { uploadShards } from "../utils/uploadShards";
 import { splitAsyncGenerator } from "../utils/splitAsyncGenerator";
+import { randomUUID } from "../utils/randomUUID";
 import { SplicedBlob } from "../utils/SplicedBlob";
+import type { RangeEditCache } from "../utils/rangeEdit";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
+
+export type { RangeEditCache, RangeEditCacheEntry } from "../utils/rangeEdit";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -47,9 +52,22 @@ export interface CommitFile {
 }
 
 /**
- * Opitmized when only the beginning or the end of the file is replaced
+ * Edit an existing file by replacing byte ranges of its original content.
  *
- * todo: handle other cases
+ * When `originalContent` is a {@link XetBlob} (as returned by {@link downloadFile} for
+ * xet-backed files), the unchanged parts of the file are neither downloaded nor re-chunked:
+ * the CAS server provides chunk-aligned edit windows and partial merkle data
+ * (`GET /v2/file-chunk-hashes`), so only the modified regions (plus their chunk-boundary
+ * neighborhood) are fetched, re-chunked and hashed.
+ *
+ * - For buckets (no sha256 involved), this means edits and appends require **no download of
+ *   the unchanged data at all**.
+ * - For models/datasets/spaces, the unchanged data is still streamed **once** to compute the
+ *   new file's sha256 (required by the LFS protocol), instead of twice (sha256 + chunking).
+ *
+ * With any other Blob as `originalContent`, the whole content is re-chunked locally and
+ * unchanged chunks are deduplicated against the remote (upload is skipped, but the content
+ * is read in full).
  */
 export interface CommitEditFile {
 	operation: "edit";
@@ -149,6 +167,15 @@ export type CommitParams = {
 	 * Use xet protocol: https://huggingface.co/blog/xet-on-the-hub to upload, rather than a basic S3 PUT
 	 */
 	useXet?: boolean;
+	/**
+	 * In-memory cache for repeated edits/appends to the same files (create one with `new Map()`).
+	 *
+	 * When the same cache instance is passed to successive `commit` calls, appending to a file
+	 * uploaded by a previous call (via an `edit` operation inserting at the end of the file)
+	 * skips the CAS metadata API calls entirely: the partial merkle state of the unchanged
+	 * data is kept in memory.
+	 */
+	rangeEditCache?: RangeEditCache;
 	// Credentials are optional due to custom fetch functions or cookie auth
 } & Partial<CredentialsParams>;
 
@@ -282,7 +309,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			abortSignal?.throwIfAborted();
 
-			const res = await (params.fetch ?? fetch)(
+			const res = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/preupload/${encodeURIComponent(
 					params.branch ?? "main",
 				)}` + (params.isPullRequest ? "?create_pr=1" : ""),
@@ -356,7 +383,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 				})),
 			};
 
-			const res = await (params.fetch ?? fetch)(
+			const res = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/${repoId.type === "model" ? "" : repoId.type + "s/"}${
 					repoId.name
 				}.git/info/lfs/objects/batch`,
@@ -449,6 +476,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									// todo: maybe leave empty if PR?
 									rev: params.branch ?? "main",
 									isPullRequest: params.isPullRequest,
+									rangeEditCache: params.rangeEditCache,
 									yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
 								})) {
 									if (event.event === "file") {
@@ -542,7 +570,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 										const index = parseInt(part) - 1;
 										const slice = content.slice(index * chunkSize, (index + 1) * chunkSize);
 
-										const res = await (params.fetch ?? fetch)(header[part], {
+										const res = await fetchWithServerWarnings(params.fetch)(header[part], {
 											method: "PUT",
 											/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
 											body: slice instanceof WebBlob && isFrontend ? await slice.arrayBuffer() : slice,
@@ -580,7 +608,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 								abortSignal?.throwIfAborted();
 
-								const res = await (params.fetch ?? fetch)(completionUrl, {
+								const res = await fetchWithServerWarnings(params.fetch)(completionUrl, {
 									method: "POST",
 									body: JSON.stringify(completeReq),
 									headers: {
@@ -606,7 +634,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									state: "uploading",
 								});
 							} else {
-								const res = await (params.fetch ?? fetch)(obj.actions.upload.href, {
+								const res = await fetchWithServerWarnings(params.fetch)(obj.actions.upload.href, {
 									method: "PUT",
 									headers: {
 										...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
@@ -656,7 +684,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 		return yield* eventToGenerator<CommitProgressEvent, CommitOutput>(
 			async (yieldCallback, returnCallback, rejectCallback) =>
-				(params.fetch ?? fetch)(
+				fetchWithServerWarnings(params.fetch)(
 					`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
 						params.branch ?? "main",
 					)}` + (params.isPullRequest ? "?create_pr=1" : ""),
@@ -827,7 +855,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 			})();
 
 			const xetParams: XetTokenParams = {
-				sessionId: crypto.randomUUID(),
+				sessionId: randomUUID(),
 				refreshWriteTokenUrl: `${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/xet-write-token`,
 			};
 			const sources = splitAsyncGenerator(source, 5);
@@ -841,6 +869,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 							repo: repoId,
 							xetParams,
 							rev: params.branch ?? "main",
+							rangeEditCache: params.rangeEditCache,
 							yieldCallback: (event) => yieldCallback({ ...event, state: "uploading" }),
 						})) {
 							if (event.event === "file") {
@@ -864,7 +893,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 				).then(() => returnCallback(undefined), rejectCallback),
 			);
 
-			const resp = await (params.fetch ?? fetch)(
+			const resp = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
 				{
 					method: "POST",
@@ -910,7 +939,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 		for (const copyChunk of chunk(copyOperations, 100)) {
 			abortSignal?.throwIfAborted();
 
-			const resp = await (params.fetch ?? fetch)(
+			const resp = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
 				{
 					method: "POST",
@@ -955,7 +984,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 		const deletedOperations = allOperations.filter((operation) => operation.operation === "delete");
 
 		if (deletedOperations.length > 0) {
-			const resp = await (params.fetch ?? fetch)(
+			const resp = await fetchWithServerWarnings(params.fetch)(
 				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/batch`,
 				{
 					method: "POST",

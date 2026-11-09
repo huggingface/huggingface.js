@@ -39,7 +39,7 @@ export interface AudioToAudioOutput {
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
 	const providerHelper = getProviderHelper(provider, "audio-to-audio");
 	const payload = await providerHelper.preparePayloadAsync(args);
 	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, providerHelper, {

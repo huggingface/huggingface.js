@@ -6,8 +6,13 @@ import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
 import type { SetRequired } from "../vendor/type-fest/set-required";
-import { parseSafetensorsIndexStream } from "./parse-safetensors-index";
+import { MAX_WEIGHT_MAP_ENTRIES, parseSafetensorsIndexStream } from "./parse-safetensors-index";
+import { HUB_URL } from "../consts";
+import { checkCredentials } from "../utils/checkCredentials";
 import { sum } from "../utils/sum";
+import { chunk } from "../utils/chunk";
+import { XetBlob } from "../utils/XetBlob";
+import { pathsInfo } from "./paths-info";
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
@@ -42,6 +47,9 @@ export function parseSafetensorsShardFilename(filename: string): SafetensorsShar
 }
 
 const PARALLEL_DOWNLOADS = 20;
+const PATHS_INFO_BATCH_SIZE = 1_000;
+/// Covers the header of almost all shards (typically a few KB to ~100KB), larger ones need a second read
+const HEADER_SPECULATIVE_READ_LENGTH = 100_000;
 const MAX_HEADER_LENGTH = 25_000_000; // 25MB
 const MAX_CONFIG_LENGTH = 10_000_000; // 10MB — config.json is typically small; cap to avoid large memory use
 const MAX_SHARD_COUNT = 10_000; // well above any real sharded model; blocks crafted index with millions of entries
@@ -51,6 +59,10 @@ const MAX_SHARD_COUNT = 10_000; // well above any real sharded model; blocks cra
 const MAX_TENSOR_DIM = 2 ** 32;
 const GPTQ_QWEIGHT_SUFFIX = "qweight";
 const GPTQ_AWQ_AUXILIARY_SUFFIXES = ["qzeros", "g_idx", "scales"];
+const MLX_QUANTIZATION_METHOD = "mlx";
+const MLX_QUANTIZATION_MODES: ReadonlySet<string> = new Set(["affine", "mxfp4", "nvfp4", "mxfp8"]);
+const MLX_AFFINE_BITS: ReadonlySet<number> = new Set([2, 3, 4, 5, 6, 8]);
+const MLX_AFFINE_GROUP_SIZES: ReadonlySet<number> = new Set([32, 64, 128]);
 
 /**
  * Block/group scales and zero-points stored alongside quantized weights. They are quantization
@@ -88,6 +100,9 @@ const QUANTIZATION_AUXILIARY_SUFFIXES = [
  * reported total for both gpt-oss sizes.
  */
 const MXFP4_SCALES_SUFFIX = "_scales";
+
+/** Underscore-joined scale names ModelOpt uses for fused expert tensors (see `shouldSkipTensor`). */
+const MODELOPT_FUSED_SCALE_SUFFIXES = ["_weight_scale", "_weight_scale_2", "_input_scale"];
 
 /**
  * bitsandbytes keeps its double-quantization state beside each 4-bit weight: `absmax` (one value
@@ -152,11 +167,41 @@ function isRoutedExpertTensor(tensorName: string): boolean {
 
 /** Reads a bit width out of a free-form format/dtype string, e.g. `"mxfp4-pack-quantized"` -> 4. */
 function bitsFromFormatString(format: string | undefined): number | undefined {
-	if (!format) {
+	if (typeof format !== "string") {
 		return undefined;
 	}
 	const normalized = format.toLowerCase();
 	return SUB_BYTE_FORMAT_BITS.find(([pattern]) => normalized.includes(pattern))?.[1];
+}
+
+/**
+ * Bit width of a ModelOpt-quantized weight: the most specific `quantized_layers` entry (mixed
+ * precision) for the module or one of its parents, then the global `quant_algo`. ModelOpt lists
+ * fused containers such as `model.layers.0.mlp.experts`, which cover every `…experts.N.down_proj`
+ * below them.
+ *
+ * A module-level declaration wins even when it isn't sub-byte: in a mixed FP8 + NVFP4 export the
+ * FP8 layers must not inherit the 4-bit width of the global algorithm.
+ */
+function getModelOptWeightBits(tensorName: string, quantConfig: QuantizationConfig): number | undefined {
+	const moduleName = getTensorModuleName(tensorName);
+
+	const layers = quantConfig.quantized_layers;
+	if (layers && typeof layers === "object") {
+		let target = moduleName;
+		while (true) {
+			if (Object.prototype.hasOwnProperty.call(layers, target)) {
+				return bitsFromFormatString(layers[target]?.quant_algo);
+			}
+			const parentIndex = target.lastIndexOf(".");
+			if (parentIndex === -1) {
+				break;
+			}
+			target = target.slice(0, parentIndex);
+		}
+	}
+
+	return bitsFromFormatString(quantConfig.quant_algo);
 }
 
 /**
@@ -357,15 +402,18 @@ async function parseSingleFile(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
-): Promise<{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined }> {
-	const blob = await downloadFile({ ...params, path });
+): Promise<SafetensorsFileHeader> {
+	return parseHeaderFromBlob(path, await downloadFile({ ...params, path }));
+}
 
+async function parseHeaderFromBlob(path: string, blob: Blob | null): Promise<SafetensorsFileHeader> {
 	if (!blob) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
 	}
 
-	const bufLengthOfHeaderLE = await blob.slice(0, 8).arrayBuffer();
-	const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
+	// Read the length and (usually) the whole header in a single request
+	const prefix = new Uint8Array(await blob.slice(0, HEADER_SPECULATIVE_READ_LENGTH).arrayBuffer());
+	const lengthOfHeader = new DataView(prefix.buffer).getBigUint64(0, true);
 	// ^little-endian
 	if (lengthOfHeader <= 0) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
@@ -376,9 +424,23 @@ async function parseSingleFile(
 		);
 	}
 
+	const headerEnd = 8 + Number(lengthOfHeader);
+	let headerBytes = prefix.subarray(8, headerEnd);
+	if (headerEnd > prefix.byteLength) {
+		if (headerEnd > blob.size) {
+			throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
+		}
+		headerBytes = new Uint8Array(headerEnd - 8);
+		headerBytes.set(prefix.subarray(8));
+		headerBytes.set(
+			new Uint8Array(await blob.slice(prefix.byteLength, headerEnd).arrayBuffer()),
+			prefix.byteLength - 8,
+		);
+	}
+
 	let header: SafetensorsFileHeader;
 	try {
-		header = JSON.parse(await blob.slice(8, 8 + Number(lengthOfHeader)).text());
+		header = JSON.parse(new TextDecoder().decode(headerBytes));
 	} catch (err) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
 	}
@@ -391,7 +453,7 @@ async function parseSingleFile(
 		validateTensorEntry(path, tensorName, info, fileSizeBytes);
 	}
 
-	return { header, fileSizeBytes };
+	return header;
 }
 
 async function parseShardedIndex(
@@ -434,6 +496,81 @@ async function parseShardedIndex(
 	}
 }
 
+/**
+ * `weight_map` filenames come from a repo file, so they're attacker-controlled: they must stay
+ * relative paths inside the index's own directory.
+ *
+ * A literal `includes("..")` check isn't enough, because the URL the filename ends up in is parsed
+ * by the WHATWG URL parser *after* the check, and that parser percent-decodes dot segments:
+ * `%2e%2e` (or `.%2e`, `%2E%2E`, …) is a `..` segment for it, so it escapes the repo — and with a
+ * credential attached, the request lands authorized on another repo's `resolve` URL.
+ *
+ * So decode before validating (repeatedly, to catch `%252e%252e`), and reject anything that isn't a
+ * plain relative path.
+ */
+export function assertSafeShardFilename(filename: string): void {
+	const unsafe = (reason: string): never => {
+		throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}" (${reason})`);
+	};
+
+	if (!filename) {
+		unsafe("empty");
+	}
+
+	// Percent-decode until stable, so nested encodings can't hide a dot segment or a separator.
+	let decoded = filename;
+	for (let i = 0; i < 5; i++) {
+		let next: string;
+		try {
+			next = decodeURIComponent(decoded);
+		} catch {
+			// Malformed percent-escape: the URL parser would keep it verbatim, but nothing legitimate
+			// looks like that.
+			return unsafe("malformed percent-encoding");
+		}
+		if (next === decoded) {
+			break;
+		}
+		decoded = next;
+	}
+
+	// Validate both the raw and the decoded form: the fetch may see either one depending on how the
+	// path is assembled downstream.
+	for (const candidate of new Set([filename, decoded])) {
+		for (let i = 0; i < candidate.length; i++) {
+			const code = candidate.charCodeAt(i);
+			if (code <= 0x1f || code === 0x7f) {
+				unsafe("control character");
+			}
+		}
+		if (candidate.includes("\\")) {
+			unsafe("backslash");
+		}
+		if (candidate.startsWith("/")) {
+			// Also covers protocol-relative `//host/…`.
+			unsafe("absolute path");
+		}
+		if (candidate.slice(0, candidate.indexOf("/") === -1 ? candidate.length : candidate.indexOf("/")).includes(":")) {
+			// A colon in the first segment is what makes the URL parser see a scheme (`https:…`) or a
+			// Windows drive letter.
+			unsafe("scheme-like first path segment");
+		}
+		for (const segment of candidate.split("/")) {
+			if (segment === "." || segment === "..") {
+				unsafe("dot segment");
+			}
+		}
+	}
+}
+
+/**
+ * Defense in depth: the download URL is built by string interpolation, so encode each path segment
+ * of the (already validated) filename rather than trusting it to be URL-safe.
+ */
+export function encodeShardFilename(filename: string): string {
+	return filename.split("/").map(encodeURIComponent).join("/");
+}
+
 async function fetchAllHeaders(
 	path: string,
 	filenames: string[],
@@ -454,25 +591,104 @@ async function fetchAllHeaders(
 		);
 	}
 	for (const filename of filenames) {
-		if (filename.includes("..") || filename.startsWith("/") || filename.includes("://")) {
-			throw new SafetensorParseError(`Unsafe shard filename in weight_map: "${filename}"`);
-		}
+		assertSafeShardFilename(filename);
 	}
-	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
-		(
-			await promisesQueue(
-				filenames.map(
-					(filename) => async () =>
-						[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [
-							string,
-							{ header: SafetensorsFileHeader; fileSizeBytes: number | undefined },
-						],
+	if (!filenames.length) {
+		return {};
+	}
+	const paths = filenames.map((filename) => pathPrefix + filename);
+	// Only the first shard goes through the per-file resolve probe: it gives us the xet refresh URL,
+	// shared by the whole repo. The other shards' xet hashes come from batched paths-info calls.
+	const firstBlob = await downloadFile({ ...params, path: paths[0] });
+	const firstXetBlob = firstBlob instanceof XetBlob ? firstBlob : undefined;
+	const otherInfos = firstXetBlob
+		? await Promise.all(
+				chunk(paths.slice(1), PATHS_INFO_BATCH_SIZE).map((batch) =>
+					pathsInfo({ ...params, paths: batch }).catch(() => []),
 				),
-				PARALLEL_DOWNLOADS,
 			)
-		).map(([filename, { header }]) => [filename, header]),
+		: [];
+	const infoByPath = new Map(otherInfos.flat().map((info) => [info.path, info]));
+
+	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
+		await promisesQueue(
+			filenames.map((filename, i) => async () => {
+				const path = paths[i];
+				const info = infoByPath.get(path);
+				const blob =
+					i === 0
+						? firstBlob
+						: firstXetBlob && info?.xetHash
+							? new XetBlob({
+									fetch: firstXetBlob.fetch,
+									refreshUrl: firstXetBlob.refreshUrl,
+									accessToken: firstXetBlob.accessToken,
+									hash: info.xetHash,
+									size: info.size,
+								})
+							: await downloadFile({ ...params, path });
+				return [filename, await parseHeaderFromBlob(path, blob)] satisfies [string, SafetensorsFileHeader];
+			}),
+			PARALLEL_DOWNLOADS,
+		),
 	);
 	return shardedMap;
+}
+
+/**
+ * The Hub serves the headers of every shard of a sharded model on `main` in a single request.
+ *
+ * Returns undefined when it can't (other revisions, endpoint unavailable...), to fall back to fetching each shard header.
+ */
+async function fetchShardedHeadersFromHub(
+	path: string,
+	params: {
+		repo: RepoDesignation;
+		revision?: string;
+		hubUrl?: string;
+		useSafetensorsMetadataEndpoint?: boolean;
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>,
+): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } | undefined> {
+	const repoId = toRepoId(params.repo);
+	if (params.useSafetensorsMetadataEndpoint === false || (params.revision && params.revision !== "main")) {
+		return undefined;
+	}
+	const accessToken = checkCredentials(params);
+	try {
+		const res = await (params.fetch ?? fetch)(
+			`${params.hubUrl ?? HUB_URL}/api/models/${repoId.name}/safetensors-metadata/${encodeShardFilename(path)}`,
+			{ headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {} },
+		);
+		if (!res.ok) {
+			return undefined;
+		}
+		const { index, headers }: { index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders } = await res.json();
+		// Same guards as when fetching each shard header: a failing check falls back to that path, which then throws
+		if (Object.keys(headers).length > MAX_SHARD_COUNT) {
+			return undefined;
+		}
+		for (const [filename, header] of Object.entries(headers)) {
+			assertSafeShardFilename(filename);
+			for (const [tensorName, info] of typedEntries(omit(header, "__metadata__"))) {
+				validateTensorEntry(filename, tensorName, info, undefined);
+			}
+		}
+		// The response leaves out the index's weight_map, which repeats the tensor names of the shard headers
+		const weightMap = Object.fromEntries(
+			Object.entries(headers).flatMap(([filename, header]) =>
+				Object.keys(header)
+					.filter((name) => name !== "__metadata__")
+					.map((name) => [name, filename]),
+			),
+		);
+		return {
+			index: Object.keys(weightMap).length <= MAX_WEIGHT_MAP_ENTRIES ? { ...index, weight_map: weightMap } : index,
+			headers,
+		};
+	} catch {
+		return undefined;
+	}
 }
 
 /**
@@ -544,6 +760,13 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
+		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
+		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
+		 *
+		 * @default true
+		 */
+		useSafetensorsMetadataEndpoint?: boolean;
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -571,6 +794,13 @@ export async function parseSafetensorsMetadata(
 		hubUrl?: string;
 		revision?: string;
 		/**
+		 * For sharded models on `main`, get every shard header from the Hub in a single request when it serves them.
+		 * Set to false to always fetch each shard header, e.g. when running on the Hub itself, so it doesn't call back into it.
+		 *
+		 * @default true
+		 */
+		useSafetensorsMetadataEndpoint?: boolean;
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -584,6 +814,7 @@ export async function parseSafetensorsMetadata(
 		library?: string;
 		hubUrl?: string;
 		revision?: string;
+		useSafetensorsMetadataEndpoint?: boolean;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
@@ -598,7 +829,8 @@ export async function parseSafetensorsMetadata(
 
 	// Fetch model config for quantization information
 	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
-	const quantConfig = modelConfig?.quantization_config ?? modelConfig?.text_config?.quantization_config;
+	const quantConfig =
+		getModelQuantizationConfig(modelConfig) ?? getModelQuantizationConfig(modelConfig?.text_config ?? null);
 	const expertDtype = modelConfig?.expert_dtype ?? modelConfig?.text_config?.expert_dtype;
 
 	// Resolve which file to parse, in order:
@@ -631,7 +863,7 @@ export async function parseSafetensorsMetadata(
 	}
 
 	if (location && !location.sharded) {
-		const { header } = await parseSingleFile(location.path, params);
+		const header = await parseSingleFile(location.path, params);
 		const paramStats = params.computeParametersCount
 			? (() => {
 					const parameterCount = computeNumOfParamsByDtypeSingleFile(header, quantConfig, expertDtype);
@@ -653,8 +885,11 @@ export async function parseSafetensorsMetadata(
 		};
 	} else if (location) {
 		const path = location.path;
-		const { index, shardFilenames } = await parseShardedIndex(path, params);
-		const shardedMap = await fetchAllHeaders(path, shardFilenames, params);
+		const fromHub = await fetchShardedHeadersFromHub(path, params);
+		const { index, shardFilenames } = fromHub
+			? { index: fromHub.index, shardFilenames: Object.keys(fromHub.headers) }
+			: await parseShardedIndex(path, params);
+		const shardedMap = fromHub?.headers ?? (await fetchAllHeaders(path, shardFilenames, params));
 		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 
 		const paramStats = params.computeParametersCount
@@ -681,6 +916,16 @@ export async function parseSafetensorsMetadata(
 
 export interface QuantizationConfig {
 	quant_method?: string;
+	/** Routed expert precision when it differs from the main quantizer (e.g. FP4 experts with FP8 attention). */
+	expert_dtype?: string;
+	/**
+	 * Same role as `expert_dtype` under another name: MiMo-V2.6 is `quant_method: "fp8"` for its
+	 * dense layers but stores the routed experts as `store_dtype: "mxfp4"`, packed two per `U8`.
+	 */
+	store_dtype?: string;
+	/** MLX quantization mode (e.g. `affine`); MLX configs do not declare `quant_method`. */
+	mode?: string;
+	group_size?: number;
 	modules_to_not_convert?: string[];
 	bits?: number;
 	load_in_4bit?: boolean;
@@ -693,17 +938,210 @@ export interface QuantizationConfig {
 	 * using the same `re:`-prefixed target syntax as `config_groups[].targets`.
 	 */
 	ignore?: string[];
+	/**
+	 * NVIDIA ModelOpt (`quant_method: "modelopt"`) algorithm, e.g. `"NVFP4"`, `"W4A16_NVFP4"`, `"FP8"`,
+	 * or `"MIXED_PRECISION"` — in which case the per-module algorithm is in `quantized_layers`.
+	 */
+	quant_algo?: string;
+	/** ModelOpt mixed-precision: module name (or a parent module, e.g. `…mlp.experts`) -> its algorithm. */
+	quantized_layers?: Record<string, { quant_algo?: string }>;
+}
+
+export interface MlxQuantizationConfig extends QuantizationConfig {
+	[key: string]: unknown;
+}
+
+function getQuantizationMethod(quantConfig: QuantizationConfig | undefined): string | undefined {
+	return typeof quantConfig?.quant_method === "string" ? quantConfig.quant_method.toLowerCase() : undefined;
 }
 
 export interface ModelConfig {
-	quantization_config?: QuantizationConfig;
-	text_config?: { quantization_config?: QuantizationConfig } & Pick<ModelConfig, "expert_dtype">;
+	/** Current MLX format, optionally with per-module overrides keyed by module name. */
+	quantization?: MlxQuantizationConfig;
+	quantization_config?: QuantizationConfig | MlxQuantizationConfig;
+	text_config?: Pick<ModelConfig, "expert_dtype" | "quantization" | "quantization_config">;
 	/**
 	 * Some MoEs store their experts at a narrower precision than the rest of the model and declare
-	 * it here, *outside* `quantization_config` (e.g. DeepSeek-V4 is `quant_method: "fp8"` for
-	 * attention but `expert_dtype: "fp4"` for the experts, which dominate the parameter count).
+	 * it here, outside `quantization_config` (e.g. DeepSeek-V4). Used as a fallback when the
+	 * quantization config does not declare its own `expert_dtype` (as DeepSeek-V4.1 does).
 	 */
 	expert_dtype?: string;
+}
+
+interface MlxQuantizationParameters {
+	bits: number;
+	groupSize: number;
+	mode: string;
+}
+
+const MLX_MODE_DEFAULTS: Readonly<Record<string, { bits: number; groupSize: number }>> = {
+	affine: { bits: 4, groupSize: 64 },
+	mxfp4: { bits: 4, groupSize: 32 },
+	nvfp4: { bits: 4, groupSize: 16 },
+	mxfp8: { bits: 8, groupSize: 32 },
+};
+
+/** Validates a complete set of MLX parameters. Config is untrusted and defines the safety cap. */
+function parseMlxQuantizationParameters(
+	bits: unknown,
+	groupSize: unknown,
+	mode: unknown,
+): MlxQuantizationParameters | undefined {
+	if (mode !== undefined && typeof mode !== "string") {
+		return undefined;
+	}
+	const normalizedMode = (mode ?? "affine").toLowerCase();
+	if (!MLX_QUANTIZATION_MODES.has(normalizedMode)) {
+		return undefined;
+	}
+	const defaults = MLX_MODE_DEFAULTS[normalizedMode];
+	const resolvedBits = bits ?? defaults.bits;
+	const resolvedGroupSize = groupSize ?? defaults.groupSize;
+	if (
+		typeof resolvedBits !== "number" ||
+		!Number.isInteger(resolvedBits) ||
+		typeof resolvedGroupSize !== "number" ||
+		!Number.isInteger(resolvedGroupSize)
+	) {
+		return undefined;
+	}
+
+	const valid =
+		(normalizedMode === "affine" &&
+			MLX_AFFINE_BITS.has(resolvedBits) &&
+			MLX_AFFINE_GROUP_SIZES.has(resolvedGroupSize)) ||
+		(normalizedMode === "mxfp4" && resolvedBits === 4 && resolvedGroupSize === 32) ||
+		(normalizedMode === "nvfp4" && resolvedBits === 4 && resolvedGroupSize === 16) ||
+		(normalizedMode === "mxfp8" && resolvedBits === 8 && resolvedGroupSize === 32);
+	return valid ? { bits: resolvedBits, groupSize: resolvedGroupSize, mode: normalizedMode } : undefined;
+}
+
+function hasMlxParameterFields(value: Record<string, unknown>): boolean {
+	return "bits" in value || "group_size" in value || "mode" in value;
+}
+
+function hasValidMlxConfiguration(quantConfig: QuantizationConfig & Record<string, unknown>): boolean {
+	if (
+		hasMlxParameterFields(quantConfig) &&
+		parseMlxQuantizationParameters(quantConfig.bits, quantConfig.group_size, quantConfig.mode)
+	) {
+		return true;
+	}
+	return Object.values(quantConfig).some(
+		(value) =>
+			typeof value === "object" &&
+			value !== null &&
+			hasMlxParameterFields(value as Record<string, unknown>) &&
+			Boolean(
+				parseMlxQuantizationParameters(
+					(value as { bits?: unknown }).bits,
+					(value as { group_size?: unknown }).group_size,
+					(value as { mode?: unknown }).mode,
+				),
+			),
+	);
+}
+
+/**
+ * Normalizes MLX's `quantization` convention into the existing quantization dispatch.
+ *
+ * Current mlx-lm writes both `quantization` and `quantization_config`, but older repositories may
+ * only have the latter. Unlike Transformers quantizers, MLX does not write `quant_method`; its
+ * recognized `mode` plus a supported bit width is the identifying information.
+ */
+function getModelQuantizationConfig(modelConfig: ModelConfig | null): QuantizationConfig | undefined {
+	const mlxConfig = modelConfig?.quantization;
+	const mlxMethod = getQuantizationMethod(mlxConfig);
+	if (
+		mlxConfig &&
+		(mlxConfig.quant_method === undefined || mlxMethod === MLX_QUANTIZATION_METHOD) &&
+		hasValidMlxConfiguration(mlxConfig)
+	) {
+		return {
+			...mlxConfig,
+			quant_method: MLX_QUANTIZATION_METHOD,
+			mode: mlxConfig.mode ?? "affine",
+		};
+	}
+
+	const quantConfig = modelConfig?.quantization_config;
+	const quantMethod = getQuantizationMethod(quantConfig);
+	if (quantConfig && (quantConfig.quant_method === undefined || quantMethod === MLX_QUANTIZATION_METHOD)) {
+		const mode = quantConfig.mode ?? "affine";
+		if (hasValidMlxConfiguration(quantConfig as QuantizationConfig & Record<string, unknown>)) {
+			return { ...quantConfig, mode, quant_method: MLX_QUANTIZATION_METHOD };
+		}
+	}
+	return quantConfig;
+}
+
+/** Resolves MLX's optional per-module quantization override for one tensor. */
+function getMlxQuantizationParameters(
+	tensorName: string,
+	quantConfig: QuantizationConfig,
+): MlxQuantizationParameters | undefined {
+	const moduleName = getTensorModuleName(tensorName);
+	const moduleConfig = (quantConfig as QuantizationConfig & Record<string, unknown>)[moduleName];
+	if (moduleConfig === false) {
+		return undefined;
+	}
+
+	const override =
+		typeof moduleConfig === "object" && moduleConfig !== null
+			? (moduleConfig as { bits?: unknown; group_size?: unknown; mode?: unknown })
+			: undefined;
+	return override
+		? parseMlxQuantizationParameters(override.bits, override.group_size, override.mode)
+		: parseMlxQuantizationParameters(quantConfig.bits, quantConfig.group_size, quantConfig.mode);
+}
+
+function getTensorModuleName(tensorName: string): string {
+	const suffixIndex = tensorName.lastIndexOf(".");
+	return suffixIndex === -1 ? tensorName : tensorName.slice(0, suffixIndex);
+}
+
+/**
+ * Identifies actual MLX-packed modules across all shards. A global MLX config only applies where
+ * the serialized weights contain the sibling `.scales` tensor mlx-lm itself uses as its signal;
+ * affine modules also require their serialized zero points (`.biases`). Requiring a U32 `.weight`
+ * avoids dropping an unrelated learned tensor merely because its name ends in `.scales` or `.biases`.
+ */
+function getMlxQuantizedModules(
+	headers: SafetensorsFileHeader[],
+	quantConfig?: QuantizationConfig,
+): ReadonlySet<string> | undefined {
+	if (!quantConfig || getQuantizationMethod(quantConfig) !== MLX_QUANTIZATION_METHOD) {
+		return undefined;
+	}
+
+	const modulesWithScales = new Set<string>();
+	const modulesWithBiases = new Set<string>();
+	const modulesWithU32Weights = new Set<string>();
+	for (const header of headers) {
+		for (const [tensorName, info] of typedEntries(omit(header, "__metadata__"))) {
+			const suffix = getTensorSuffix(tensorName);
+			if (suffix === "scales") {
+				modulesWithScales.add(getTensorModuleName(tensorName));
+			} else if (suffix === "biases") {
+				modulesWithBiases.add(getTensorModuleName(tensorName));
+			} else if (suffix === "weight" && info.dtype === "U32") {
+				modulesWithU32Weights.add(getTensorModuleName(tensorName));
+			}
+		}
+	}
+
+	const quantizedModules = new Set<string>();
+	for (const moduleName of modulesWithU32Weights) {
+		const params = getMlxQuantizationParameters(`${moduleName}.weight`, quantConfig);
+		if (
+			params &&
+			modulesWithScales.has(moduleName) &&
+			(params.mode !== "affine" || modulesWithBiases.has(moduleName))
+		) {
+			quantizedModules.add(moduleName);
+		}
+	}
+	return quantizedModules;
 }
 
 /**
@@ -748,9 +1186,19 @@ export function globMatch(pattern: string, str: string): boolean {
  * so bare names like `"lm_head"` must match `"model.lm_head.weight"`. When the
  * pattern contains a `*` we fall back to proper glob matching for flexibility.
  */
-export function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
+export function isQuantizedTensor(
+	tensorName: string,
+	quantConfig?: QuantizationConfig,
+	mlxQuantizedModules?: ReadonlySet<string>,
+): boolean {
 	if (!quantConfig) {
 		return false;
+	}
+	if (getQuantizationMethod(quantConfig) === MLX_QUANTIZATION_METHOD) {
+		return (
+			getMlxQuantizationParameters(tensorName, quantConfig) !== undefined &&
+			(mlxQuantizedModules === undefined || mlxQuantizedModules.has(getTensorModuleName(tensorName)))
+		);
 	}
 	// compressed-tensors spells the same concept `ignore`, with `re:`-prefixed targets
 	if (quantConfig.ignore?.length) {
@@ -813,14 +1261,24 @@ export function getQuantizationMultiplier(
 	dtype: Dtype,
 	quantConfig?: QuantizationConfig,
 	expertDtype?: string,
+	mlxQuantizedModules?: ReadonlySet<string>,
 ): number {
-	if (!quantConfig || !isQuantizedTensor(tensorName, quantConfig)) {
+	if (!quantConfig || !isQuantizedTensor(tensorName, quantConfig, mlxQuantizedModules)) {
 		return 1;
 	}
 
-	const quantMethod = quantConfig.quant_method?.toLowerCase();
+	const quantMethod = getQuantizationMethod(quantConfig);
 
 	switch (quantMethod) {
+		case MLX_QUANTIZATION_METHOD: {
+			// MLX packs quantized weights into U32 containers. `scales` and `biases` are handled
+			// separately by shouldSkipTensor; singular `.bias` remains a real model parameter.
+			if (dtype !== "U32" || getTensorSuffix(tensorName) !== "weight") {
+				return 1;
+			}
+			return packingFactor(dtype, getMlxQuantizationParameters(tensorName, quantConfig)?.bits);
+		}
+
 		case "mxfp4":
 			if (dtype === "U8" && tensorName.includes("_blocks")) {
 				return 2;
@@ -871,19 +1329,32 @@ export function getQuantizationMultiplier(
 			return packingFactor(dtype, numBits);
 		}
 
+		case "modelopt": {
+			// NVIDIA ModelOpt NVFP4 packs two FP4 weights per U8
+			if (!INTEGER_CONTAINER_BITS[dtype]) {
+				return 1;
+			}
+			return packingFactor(dtype, getModelOptWeightBits(tensorName, quantConfig));
+		}
+
 		case "fp8": {
 			// fp8 weights live in F8_* dtypes at one value per byte, so nothing to do for them.
-			// But some fp8 MoEs keep their *experts* narrower still and declare it out-of-band in
-			// `expert_dtype` (DeepSeek-V4-Pro: "fp4"), storing them packed in an I8 container.
+			// But some fp8 MoEs keep their *experts* narrower still, storing them packed in I8/U8.
+			// `expert_dtype` is in quantization_config for DeepSeek-V4.1, or in the model config
+			// for DeepSeek-V4-Pro. Both declare "fp4", i.e. two weights per byte. MiMo-V2.6 declares
+			// the same packing as `store_dtype: "mxfp4"` in quantization_config instead.
 			// Those experts dominate the parameter count, so missing this halves the total.
 			//
-			// `expert_dtype` describes the experts and nothing else, so it must not be applied to
+			// These keys describe the experts and nothing else, so they must not be applied to
 			// every integer tensor in the model: a routing table or other integer bookkeeping would
 			// otherwise be inflated by the packing factor — 8x for an I32 one.
 			if (!isRoutedExpertTensor(tensorName)) {
 				return 1;
 			}
-			return packingFactor(dtype, bitsFromFormatString(expertDtype));
+			return packingFactor(
+				dtype,
+				bitsFromFormatString(quantConfig.expert_dtype ?? expertDtype ?? quantConfig.store_dtype),
+			);
 		}
 
 		case "bitsandbytes":
@@ -910,11 +1381,25 @@ export function computeNumOfParamsByDtypeSingleFile(
 	quantConfig?: QuantizationConfig,
 	expertDtype?: string,
 ): Partial<Record<Dtype, number>> {
+	return computeNumOfParamsByDtypeForHeader(
+		header,
+		quantConfig,
+		expertDtype,
+		getMlxQuantizedModules([header], quantConfig),
+	);
+}
+
+function computeNumOfParamsByDtypeForHeader(
+	header: SafetensorsFileHeader,
+	quantConfig?: QuantizationConfig,
+	expertDtype?: string,
+	mlxQuantizedModules?: ReadonlySet<string>,
+): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
 
 	for (const [tensorName, v] of typedEntries(tensors)) {
-		if (shouldSkipTensor(tensorName, v.dtype, quantConfig)) {
+		if (shouldSkipTensor(tensorName, v.dtype, quantConfig, mlxQuantizedModules)) {
 			continue;
 		}
 		if (v.shape.length === 0) {
@@ -925,7 +1410,9 @@ export function computeNumOfParamsByDtypeSingleFile(
 		if (!Number.isFinite(elements)) {
 			continue;
 		}
-		const multiplier = quantConfig ? getQuantizationMultiplier(tensorName, v.dtype, quantConfig, expertDtype) : 1;
+		const multiplier = quantConfig
+			? getQuantizationMultiplier(tensorName, v.dtype, quantConfig, expertDtype, mlxQuantizedModules)
+			: 1;
 		if (multiplier === 0) {
 			continue;
 		}
@@ -942,8 +1429,12 @@ function computeNumOfParamsByDtypeSharded(
 	expertDtype?: string,
 ): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
-	for (const header of Object.values(shardedMap)) {
-		for (const [k, v] of typedEntries(computeNumOfParamsByDtypeSingleFile(header, quantConfig, expertDtype))) {
+	const headers = Object.values(shardedMap);
+	const mlxQuantizedModules = getMlxQuantizedModules(headers, quantConfig);
+	for (const header of headers) {
+		for (const [k, v] of typedEntries(
+			computeNumOfParamsByDtypeForHeader(header, quantConfig, expertDtype, mlxQuantizedModules),
+		)) {
 			counter[k] = (counter[k] ?? 0) + (v ?? 0);
 		}
 	}
@@ -955,7 +1446,12 @@ function getTensorSuffix(tensorName: string): string {
 	return lastDotIndex === -1 ? tensorName : tensorName.slice(lastDotIndex + 1);
 }
 
-function shouldSkipTensor(tensorName: string, dtype: Dtype, quantConfig?: QuantizationConfig): boolean {
+function shouldSkipTensor(
+	tensorName: string,
+	dtype: Dtype,
+	quantConfig?: QuantizationConfig,
+	mlxQuantizedModules?: ReadonlySet<string>,
+): boolean {
 	// Exponent-only dtypes only ever hold MX block scales, so they're never parameters — true even
 	// with no quantization_config at all, since a model can ship scales without declaring a config.
 	if (SCALE_ONLY_DTYPES.has(dtype)) {
@@ -968,13 +1464,26 @@ function shouldSkipTensor(tensorName: string, dtype: Dtype, quantConfig?: Quanti
 	if (QUANTIZATION_AUXILIARY_SUFFIXES.includes(getTensorSuffix(tensorName))) {
 		return true;
 	}
-	const quantMethod = quantConfig.quant_method?.toLowerCase();
+	const quantMethod = getQuantizationMethod(quantConfig);
+
+	if (quantMethod === MLX_QUANTIZATION_METHOD && isQuantizedTensor(tensorName, quantConfig, mlxQuantizedModules)) {
+		const suffix = getTensorSuffix(tensorName);
+		const mode = getMlxQuantizationParameters(tensorName, quantConfig)?.mode;
+		return suffix === "scales" || (suffix === "biases" && mode === "affine");
+	}
 
 	// gpt-oss-style mxfp4 keeps the UE8M0 block exponents in `..._scales` next to `..._blocks`.
 	// Gated on the U8 container the scales actually use, so a learnable `*_scales` parameter in some
 	// other architecture is left alone.
 	if (quantMethod === "mxfp4") {
 		return dtype === "U8" && getTensorSuffix(tensorName).endsWith(MXFP4_SCALES_SUFFIX);
+	}
+
+	// ModelOpt names the scales of fused (3D) expert tensors after the tensor itself, e.g.
+	// `…experts.gate_up_proj_weight_scale`, so the dot-separated suffix check above can't see them.
+	if (quantMethod === "modelopt") {
+		const suffix = getTensorSuffix(tensorName);
+		return MODELOPT_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s));
 	}
 
 	if (quantMethod === "bitsandbytes") {

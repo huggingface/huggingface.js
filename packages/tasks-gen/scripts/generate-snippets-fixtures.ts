@@ -299,6 +299,17 @@ const TEST_CASES: {
 		providers: ["fal-ai"],
 	},
 	{
+		testName: "text-ranking",
+		task: "text-ranking",
+		model: {
+			id: "cross-encoder/ettin-reranker-68m-v1",
+			pipeline_tag: "text-ranking",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+	},
+	{
 		testName: "feature-extraction",
 		task: "feature-extraction",
 		model: {
@@ -451,15 +462,15 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, task, model, providers, lora, opts }) => {
+	for (const { testName, task, model, providers, lora, opts } of TEST_CASES) {
 		console.debug(`      ${testName} (${providers.join(", ")})`);
-		inferenceSnippetLanguages.forEach(async (language) => {
-			providers.forEach(async (provider) => {
+		for (const language of inferenceSnippetLanguages) {
+			for (const provider of providers) {
 				const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, opts);
 				await saveExpectedInferenceSnippet(testName, language, provider, generatedSnippets);
-			});
-		});
-	});
+			}
+		}
+	}
 	console.log("✅ All done!");
 	console.log("👉 Please check the generated fixtures before committing them.");
 }

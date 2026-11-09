@@ -81,19 +81,34 @@ describe("downloadFileToCacheDir", () => {
 		vi.mocked(lstat).mockRejectedValue(new Error("Do not exists"));
 	});
 
+	test("should reject a path escaping the cache dir", async () => {
+		for (const path of ["../evil", "a\\..\\..\\evil", "C:\\Windows\\evil", "\\\\attacker\\share\\evil"]) {
+			await expect(
+				downloadFileToCacheDir({
+					repo: DUMMY_REPO,
+					path,
+					fetch: fetchMock,
+				}),
+			).rejects.toThrowError(/Invalid filename/);
+		}
+		// rejected before any network call or filesystem write
+		expect(pathsInfo).not.toHaveBeenCalled();
+		expect(createSymlink).not.toHaveBeenCalled();
+	});
+
 	test("should throw an error if fileDownloadInfo return nothing", async () => {
 		await expect(async () => {
 			await downloadFileToCacheDir({
 				repo: DUMMY_REPO,
-				path: "/README.md",
+				path: "README.md",
 				fetch: fetchMock,
 			});
-		}).rejects.toThrowError("cannot get path info for /README.md");
+		}).rejects.toThrowError("cannot get path info for README.md");
 
 		expect(pathsInfo).toHaveBeenCalledWith(
 			expect.objectContaining({
 				repo: DUMMY_REPO,
-				paths: ["/README.md"],
+				paths: ["README.md"],
 				fetch: fetchMock,
 			}),
 		);
@@ -103,7 +118,7 @@ describe("downloadFileToCacheDir", () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
 		});
 		// stat ensure a symlink and the pointed file exists
@@ -111,7 +126,7 @@ describe("downloadFileToCacheDir", () => {
 
 		const output = await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			fetch: fetchMock,
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
 		});
@@ -130,7 +145,7 @@ describe("downloadFileToCacheDir", () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			revision: "main",
 		});
 		// stat ensure a symlink and the pointed file exists
@@ -152,7 +167,7 @@ describe("downloadFileToCacheDir", () => {
 
 		const output = await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			fetch: fetchMock,
 		});
 
@@ -171,7 +186,7 @@ describe("downloadFileToCacheDir", () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			revision: "dummy-commit-hash",
 		});
 		// <cache>/<repo>/blobs/<etag>
@@ -199,7 +214,7 @@ describe("downloadFileToCacheDir", () => {
 
 		const output = await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			fetch: fetchMock,
 		});
 
@@ -219,7 +234,7 @@ describe("downloadFileToCacheDir", () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			revision: "dummy-commit-hash",
 		});
 		// <cache>/<repo>/blobs/<etag>
@@ -247,7 +262,7 @@ describe("downloadFileToCacheDir", () => {
 
 		const output = await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			fetch: fetchMock,
 		});
 
@@ -262,7 +277,7 @@ describe("downloadFileToCacheDir", () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			revision: "dummy-commit-hash",
 		});
 		// <cache>/<repo>/blobs/<etag>
@@ -291,7 +306,7 @@ describe("downloadFileToCacheDir", () => {
 
 		await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
-			path: "/README.md",
+			path: "README.md",
 			fetch: fetchMock,
 		});
 

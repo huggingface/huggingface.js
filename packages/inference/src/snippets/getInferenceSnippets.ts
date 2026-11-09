@@ -128,6 +128,7 @@ const HF_JS_METHODS: Partial<Record<WidgetType, string>> = {
 	"image-classification": "imageClassification",
 	"question-answering": "questionAnswering",
 	"sentence-similarity": "sentenceSimilarity",
+	"text-ranking": "textRanking",
 	summarization: "summarization",
 	"table-question-answering": "tableQuestionAnswering",
 	"text-classification": "textClassification",
@@ -154,11 +155,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
 		/// Hacky: hard-code conversational templates here
 		let task = model.pipeline_tag as InferenceTask;
-		if (
-			model.pipeline_tag &&
-			["text-generation", "image-text-to-text"].includes(model.pipeline_tag) &&
-			model.tags.includes("conversational")
-		) {
+		if (model.pipeline_tag && ["text-generation", "image-text-to-text"].includes(model.pipeline_tag)) {
 			templateName = opts?.streaming ? "conversationalStream" : "conversational";
 			inputPreparationFn = prepareConversationalInput;
 			task = "conversational";
@@ -402,6 +399,7 @@ const snippets: Partial<
 	"object-detection": snippetGenerator("basicImage"),
 	"question-answering": snippetGenerator("questionAnswering", prepareQuestionAnsweringInput),
 	"sentence-similarity": snippetGenerator("basic"),
+	"text-ranking": snippetGenerator("basic"),
 	summarization: snippetGenerator("basic"),
 	"tabular-classification": snippetGenerator("tabular"),
 	"tabular-regression": snippetGenerator("tabular"),

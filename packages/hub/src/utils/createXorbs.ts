@@ -1,10 +1,20 @@
-import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } from "./XetBlob";
+import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme, XetBlob } from "./XetBlob";
 import { compress as lz4_compress } from "../vendor/lz4js";
 import { ChunkCache } from "./ChunkCache";
 import { xetWriteToken, type XetWriteTokenParams } from "./xetWriteToken";
 import type { ShardData } from "./shardParser";
 import { parseShardData } from "./shardParser";
 import { SplicedBlob } from "./SplicedBlob";
+import {
+	buildFreshFileCachePayload,
+	buildRangeEditCachePayload,
+	composeRepresentation,
+	computeComposedFileHash,
+	planRangeEdit,
+	windowSegments,
+} from "./rangeEdit";
+import type { RangeEditCache, RangeEditCachePayload, RangeEditPlan } from "./rangeEdit";
+import { sum } from "./sum";
 import {
 	createChunker,
 	nextBlock,
@@ -22,6 +32,11 @@ const TARGET_CHUNK_SIZE = 64 * 1024;
 const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
+/**
+ * Smallest chunk the chunker can emit (except for the last chunk of a file), used to bound the
+ * number of chunk headers needed for a given amount of data
+ */
+const MIN_CHUNK_SIZE = TARGET_CHUNK_SIZE / 8;
 const INTERVAL_BETWEEN_REMOTE_DEDUP = 4_000_000; // 4MB
 /**
  * 0 = only show progress when uploading the xorb
@@ -101,8 +116,29 @@ export class CurrentXorbInfo {
 		this.fileProcessedBytes = {};
 		this.fileUploadedBytes = {};
 		this.fileSize = {};
-		this.data = new Uint8Array(XORB_SIZE);
+		// Allocated lazily (and grown as needed) by `ensureCapacity`, so uploading small files
+		// doesn't allocate a full-size xorb buffer
+		this.data = new Uint8Array(0);
 		this.immutableData = null;
+	}
+
+	/**
+	 * Make sure the xorb buffer can hold `needed` bytes.
+	 *
+	 * @param remainingBytesHint Upper bound of the raw bytes still to be written for the current file. Used
+	 * to size the buffer in one go for big files, while small files only get a small buffer.
+	 */
+	ensureCapacity(needed: number, remainingBytesHint: number): void {
+		if (needed <= this.data.length) {
+			return;
+		}
+		// Raw data is an upper bound of the stored data, since chunks are only stored compressed when it's smaller
+		const estimatedSize =
+			this.offset + remainingBytesHint + XET_CHUNK_HEADER_BYTES * (Math.ceil(remainingBytesHint / MIN_CHUNK_SIZE) + 1);
+		const newCapacity = Math.min(XORB_SIZE, Math.max(needed, estimatedSize, this.data.length * 2));
+		const newData = new Uint8Array(newCapacity);
+		newData.set(this.data.subarray(0, this.offset));
+		this.data = newData;
 	}
 
 	event(computeXorbHash: (chunks: { hash: string; length: number }[]) => string): XorbEvent {
@@ -133,6 +169,8 @@ export async function* createXorbs(
 	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256?: string }>,
 	params: XetWriteTokenParams & {
 		yieldCallback?: (event: { event: "fileProgress"; path: string; progress: number }) => void;
+		/** When provided, appends/tail edits of files uploaded earlier through this cache skip the CAS metadata calls */
+		rangeEditCache?: RangeEditCache;
 	},
 ): AsyncGenerator<
 	| XorbEvent
@@ -151,6 +189,8 @@ export async function* createXorbs(
 				length: number;
 				rangeHash: string;
 			}>;
+			/** Present when a range-edit cache is active: state for future appends to this file */
+			rangeEditCachePayload?: RangeEditCachePayload;
 	  },
 	void,
 	undefined
@@ -187,9 +227,14 @@ export async function* createXorbs(
 			length: number;
 			rangeHash: string;
 		}>;
+		rangeEditCachePayload?: RangeEditCachePayload;
 	}> = [];
 
 	const remoteXorbHashes: string[] = [""]; // starts at index 1 (to simplify implem a bit)
+
+	/** Local xorb ids stay numeric; negative ids map to remote xorb hashes; string ids are already remote hashes */
+	const resolveXorbId = (xorbId: number | string): number | string =>
+		typeof xorbId === "string" ? xorbId : xorbId >= 0 ? xorbId : remoteXorbHashes[-xorbId];
 
 	for await (const fileSource of fileSources) {
 		params.yieldCallback?.({
@@ -209,31 +254,47 @@ export async function* createXorbs(
 			alreadyDoneFileSha256s.add(fileSource.sha256);
 		}
 
-		const chunker = createChunker(TARGET_CHUNK_SIZE);
 		{
 			xorb.fileSize[fileSource.path] = fileSource.content.size;
 
-			// Load dedup info for the first chunk of the file, if it's potentially modified by the splice
-			if (fileSource.content instanceof SplicedBlob && fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE) {
-				await loadDedupInfoToCache(
-					fileSource.content.originalBlob.slice(0, MAX_CHUNK_SIZE),
-					remoteXorbHashes,
-					params,
-					chunkCache,
-					computeHmacHex,
-					{
-						maxChunks: 1,
-						isAtBeginning: true,
-					},
-				);
+			// When editing an existing xet file, ask the CAS server for the chunk-aligned
+			// windows that need re-chunking and partial merkle data for the rest, so only
+			// the modified regions of the file are downloaded and processed.
+			let rangeEditPlan: RangeEditPlan | undefined;
+			if (
+				fileSource.content instanceof SplicedBlob &&
+				fileSource.content.originalBlob instanceof XetBlob &&
+				fileSource.content.originalBlob.hash !== undefined &&
+				fileSource.content.originalBlob.size > 0
+			) {
+				rangeEditPlan = await planRangeEdit(fileSource.content, fileSource.content.originalBlob, params);
+			}
+
+			// Prime the chunk cache with the original file's dedup info (one query on its first
+			// chunk returns the whole shard, ie the chunk => xorb mapping of the original file),
+			// so unchanged window bytes dedup against the original xorbs instead of re-uploading.
+			//
+			// Only the first chunk's bytes are needed: for a XetBlob the slice is fetched with a
+			// range-scoped CAS reconstruction, so only that chunk's byte range is downloaded,
+			// not the whole xorb.
+			if (
+				fileSource.content instanceof SplicedBlob &&
+				(rangeEditPlan !== undefined || fileSource.content.firstSpliceIndex < MAX_CHUNK_SIZE)
+			) {
+				await loadFirstChunkDedupInfo(fileSource.content, remoteXorbHashes, params, chunkCache);
 			}
 			let bytesSinceRemoteDedup = Infinity;
 			let bytesSinceLastProgressEvent = 0;
-			let isFirstFileChunk = true;
+			let dedupNextChunk = true;
 			const sourceChunks: Array<Uint8Array> = [];
 
-			const reader = fileSource.content.stream().getReader();
 			let processedBytes = 0;
+			/** Raw bytes of this file that will go through the chunker (only the windows for range edits) */
+			const bytesToChunk =
+				rangeEditPlan !== undefined
+					? sum(rangeEditPlan.windows.map((window) => window.newSize))
+					: fileSource.content.size;
+			let chunkedBytes = 0;
 			let dedupedBytes = 0; // Track bytes that were deduplicated
 			// Needed to compute the final file hash
 			// todo: have the wasm function to compute file hash be able to take data chunk by chunk instead of all at once
@@ -248,9 +309,9 @@ export async function* createXorbs(
 
 			const addChunks = async function* (chunks: Array<{ hash: string; length: number; dedup: boolean }>) {
 				for (const chunk of chunks) {
-					if (isFirstFileChunk) {
+					if (dedupNextChunk) {
 						chunk.dedup = true;
-						isFirstFileChunk = false;
+						dedupNextChunk = false;
 					}
 					let chunkIndex = xorb.chunks.length;
 					let chunkXorbId = xorbId;
@@ -294,8 +355,11 @@ export async function* createXorbs(
 							}
 						}
 					}
+					// Includes the current chunk
+					const remainingBytesHint = Math.max(bytesToChunk - chunkedBytes, chunk.length);
+					chunkedBytes += chunk.length;
 					if (cacheData === undefined) {
-						if (!writeChunk(xorb, chunkToCopy, chunk.hash)) {
+						if (!writeChunk(xorb, chunkToCopy, chunk.hash, remainingBytesHint)) {
 							// Failure to write chunk, maybe because it went over xorb size limit
 							yield nextXorb({ path: fileSource.path, uploadedBytes: processedBytes, size: fileSource.content.size });
 
@@ -305,13 +369,13 @@ export async function* createXorbs(
 							for (const event of pendingFileEvents) {
 								event.representation = event.representation.map((rep) => ({
 									...rep,
-									xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
+									xorbId: resolveXorbId(rep.xorbId),
 								}));
 								yield event;
 							}
 							pendingFileEvents.length = 0;
 
-							if (!writeChunk(xorb, chunkToCopy, chunk.hash)) {
+							if (!writeChunk(xorb, chunkToCopy, chunk.hash, remainingBytesHint)) {
 								throw new Error("Failed to write chunk into xorb");
 							}
 						}
@@ -358,7 +422,7 @@ export async function* createXorbs(
 						for (const event of pendingFileEvents) {
 							event.representation = event.representation.map((rep) => ({
 								...rep,
-								xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
+								xorbId: resolveXorbId(rep.xorbId),
 							}));
 							yield event;
 						}
@@ -367,31 +431,108 @@ export async function* createXorbs(
 				}
 			};
 
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) {
-					yield* addChunks(finalizeChunker(chunker));
-					break;
+			/** Stream a blob's data into the chunker, yielding xorb events as they fill up */
+			const pumpBlob = async function* (chunker: ReturnType<typeof createChunker>, blob: Blob) {
+				const reader = blob.stream().getReader();
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) {
+						break;
+					}
+					processedBytes += value.length;
+					sourceChunks.push(value);
+					yield* addChunks(addDataToChunker(value, chunker));
 				}
-				processedBytes += value.length;
-				sourceChunks.push(value);
-				yield* addChunks(addDataToChunker(value, chunker));
+			};
+
+			let fileRepresentation: Array<{
+				xorbId: number | string;
+				indexStart: number;
+				indexEnd: number;
+				length: number;
+				rangeHash: string;
+			}>;
+			let fileHashHex: string;
+			let dedupRatio: number;
+			let rangeEditCachePayload: RangeEditCachePayload | undefined;
+
+			if (rangeEditPlan !== undefined) {
+				const originalBlob = (fileSource.content as SplicedBlob).originalBlob;
+				// Index ranges of each window's chunks within fileChunks / chunkMetadata
+				const windowBounds: Array<[number, number]> = [];
+
+				for (const window of rangeEditPlan.windows) {
+					const chunker = createChunker(TARGET_CHUNK_SIZE);
+					dedupNextChunk = true;
+					const startIndex = fileChunks.length;
+
+					// The window's segments are XetBlob slices: the CAS reconstruction request is
+					// range-scoped, so only the window's chunk byte ranges are fetched, not the
+					// whole xorb.
+					for (const segment of windowSegments(window, originalBlob)) {
+						yield* pumpBlob(chunker, segment);
+					}
+					yield* addChunks(finalizeChunker(chunker));
+
+					windowBounds.push([startIndex, fileChunks.length]);
+				}
+
+				// The reused (non-window) bytes are neither downloaded nor uploaded: count
+				// them as processed & uploaded right away for progress reporting.
+				const windowNewBytes = sum(rangeEditPlan.windows.map((window) => window.newSize));
+				const reusedBytes = fileSource.content.size - windowNewBytes;
+				processedBytes += reusedBytes;
+				xorb.fileUploadedBytes[fileSource.path] = (xorb.fileUploadedBytes[fileSource.path] ?? 0) + reusedBytes;
+				xorb.fileProcessedBytes[fileSource.path] = processedBytes;
+
+				// Build the window representations only now: remote dedup backtracking during a
+				// later window can still remap chunk metadata of an earlier one.
+				const windowRepresentations = windowBounds.map(([start, end]) =>
+					buildFileRepresentation(
+						chunkMetadata.slice(start, end),
+						fileChunks.slice(start, end),
+						computeVerificationHashHex,
+					),
+				);
+				fileRepresentation = composeRepresentation(rangeEditPlan, windowRepresentations);
+				fileHashHex = computeComposedFileHash(
+					rangeEditPlan,
+					windowBounds.map(([start, end]) => fileChunks.slice(start, end)),
+				);
+				dedupRatio = fileSource.content.size > 0 ? (reusedBytes + dedupedBytes) / fileSource.content.size : 0;
+				if (params.rangeEditCache) {
+					rangeEditCachePayload = buildRangeEditCachePayload(
+						rangeEditPlan,
+						windowBounds.map(([start, end]) => fileChunks.slice(start, end)),
+						fileRepresentation,
+					);
+				}
+			} else {
+				const chunker = createChunker(TARGET_CHUNK_SIZE);
+				yield* pumpBlob(chunker, fileSource.content);
+				yield* addChunks(finalizeChunker(chunker));
+
+				fileRepresentation = buildFileRepresentation(chunkMetadata, fileChunks, computeVerificationHashHex);
+				fileHashHex = computeFileHashHex(fileChunks);
+				dedupRatio = fileSource.content.size > 0 ? dedupedBytes / fileSource.content.size : 0;
+				if (params.rangeEditCache) {
+					rangeEditCachePayload = buildFreshFileCachePayload(fileChunks, fileRepresentation);
+				}
 			}
 
-			const fileRepresentation = buildFileRepresentation(chunkMetadata, fileChunks, computeVerificationHashHex);
 			xorb.immutableData = {
 				chunkIndex: xorb.chunks.length,
 				offset: xorb.offset,
 			};
-			const dedupRatio = fileSource.content.size > 0 ? dedupedBytes / fileSource.content.size : 0;
 
 			pendingFileEvents.push({
 				event: "file" as const,
 				path: fileSource.path,
-				hash: computeFileHashHex(fileChunks),
+				hash: fileHashHex,
 				sha256: fileSource.sha256,
 				dedupRatio,
 				representation: fileRepresentation,
+				rangeEditCachePayload,
 			});
 		}
 	}
@@ -403,7 +544,7 @@ export async function* createXorbs(
 	for (const event of pendingFileEvents) {
 		event.representation = event.representation.map((rep) => ({
 			...rep,
-			xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
+			xorbId: resolveXorbId(rep.xorbId),
 		}));
 		yield event;
 	}
@@ -558,16 +699,18 @@ function removeChunkFromSourceData(sourceChunks: Array<Uint8Array>, chunkLength:
  *
  * If it returns 0, it means there wasn't enough space in the xorb
  */
-function writeChunk(xorb: CurrentXorbInfo, chunk: Uint8Array, hash: string): boolean {
+function writeChunk(xorb: CurrentXorbInfo, chunk: Uint8Array, hash: string, remainingBytesHint: number): boolean {
 	const regularCompressedChunk = lz4_compress(chunk);
 	const bgCompressedChunk = lz4_compress(bg4_split_bytes(chunk));
 	const compressedChunk =
 		bgCompressedChunk.length < regularCompressedChunk.length ? bgCompressedChunk : regularCompressedChunk;
 	const chunkToWrite = compressedChunk.length < chunk.length ? compressedChunk : chunk;
 
-	if (xorb.offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length > XORB_SIZE) {
+	const needed = xorb.offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length;
+	if (needed > XORB_SIZE) {
 		return false;
 	}
+	xorb.ensureCapacity(needed, remainingBytesHint);
 
 	xorb.data[xorb.offset] = 0;
 	xorb.data[xorb.offset + 1] = chunkToWrite.length & 0xff;
@@ -663,6 +806,35 @@ const buildFileRepresentation = (
 
 	return representation;
 };
+
+/**
+ * Prime the chunk cache with the original file's dedup info (one query on its first chunk
+ * returns the whole shard, ie the chunk => xorb mapping of the original file), so unchanged
+ * bytes of a splice/edit dedup against the file's existing xorbs instead of being
+ * re-uploaded.
+ *
+ * Only the first chunk's bytes are needed; for a {@link XetBlob} the slice is fetched with
+ * a range-scoped CAS reconstruction, so only that chunk's byte range is downloaded rather
+ * than the whole xorb.
+ */
+async function loadFirstChunkDedupInfo(
+	content: SplicedBlob,
+	remoteXorbHashes: string[],
+	params: XetWriteTokenParams,
+	chunkCache: ChunkCache,
+): Promise<void> {
+	await loadDedupInfoToCache(
+		content.originalBlob.slice(0, MAX_CHUNK_SIZE),
+		remoteXorbHashes,
+		params,
+		chunkCache,
+		computeHmacHex,
+		{
+			maxChunks: 1,
+			isAtBeginning: true,
+		},
+	);
+}
 
 /**
  * Helper to load dedup info for blob contents into cache.
