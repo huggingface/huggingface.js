@@ -129,6 +129,17 @@ print(output)`);
 			expect(snippet).not.toContain("config.yaml");
 		});
 
+		it("keeps the robot run in its own section after the simulation one", () => {
+			const sections = unitree({ id: "user/g1-velocity", tags: ["unitree-g1-29dof", "mjlab"], inference: "" });
+
+			expect(sections).toHaveLength(4);
+			expect(sections[2]).toContain("./g1_ctrl --network=lo");
+			expect(sections[2]).not.toContain("eth0");
+			expect(sections[3]).toBe(
+				"# 4. Run on the robot (stop the on-board control program first), over its Ethernet interface\n./g1_ctrl --network eth0",
+			);
+		});
+
 		it("uses the training log folder for unitree_rl_lab robots without a shipped policy", () => {
 			const snippet = unitree({ id: "user/go2", tags: ["unitree-go2", "isaaclab"], inference: "" }).join("\n");
 

@@ -3200,8 +3200,8 @@ ${install}`,
 		`# 2. Build the controller (requires unitree_sdk2)
 mkdir -p build && cd build && cmake .. && make`,
 		`# 3. Test in simulation first: start unitree_mujoco, then run
-./${bin}${simFlag}
-# On the robot (stop the on-board control program first), use its Ethernet interface:
+./${bin}${simFlag}`,
+		`# 4. Run on the robot (stop the on-board control program first), over its Ethernet interface
 ./${bin} --network eth0`,
 	];
 };
