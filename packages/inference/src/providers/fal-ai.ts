@@ -395,12 +395,22 @@ export class FalAIImageTextToImageTask extends FalAIImageToImageTask implements 
 		if (args.inputs) {
 			return super.preparePayloadAsync(args as ImageToImageArgs);
 		}
+		const parameters: Record<string, unknown> = { ...(args.parameters as Record<string, unknown>) };
+		// fal expects the output resolution as `image_size`
+		if (parameters.target_size !== undefined) {
+			parameters.image_size = parameters.target_size;
+			delete parameters.target_size;
+		} else if (typeof parameters.width === "number" && typeof parameters.height === "number") {
+			parameters.image_size = { width: parameters.width, height: parameters.height };
+			delete parameters.width;
+			delete parameters.height;
+		}
 		return {
 			...omit(args, ["inputs", "parameters"]),
-			...(args.parameters as Record<string, unknown>),
+			...parameters,
 			prompt: args.parameters?.prompt,
 			urlTransform: dropEndpointSegmentOnDirectCalls,
-		} as RequestArgs;
+		} as unknown as RequestArgs;
 	}
 }
 

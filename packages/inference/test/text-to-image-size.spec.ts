@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FalAITextToImageTask, FalAIImageToImageTask } from "../src/providers/fal-ai.js";
+import { FalAITextToImageTask, FalAIImageToImageTask, FalAIImageTextToImageTask } from "../src/providers/fal-ai.js";
 import { NscaleTextToImageTask } from "../src/providers/nscale.js";
 import { ZaiTextToImageTask } from "../src/providers/zai-org.js";
 
@@ -39,6 +39,25 @@ describe("text-to-image resolution parameter mapping", () => {
 			expect((payload as Record<string, unknown>).image_size).toEqual({ width: 512, height: 512 });
 			expect((payload as Record<string, unknown>).target_size).toBeUndefined();
 			expect((payload as Record<string, unknown>).strength).toBe(0.8);
+		});
+	});
+
+	describe("fal-ai image-text-to-image (prompt-only)", () => {
+		it("renames target_size to image_size", async () => {
+			const payload = await new FalAIImageTextToImageTask().preparePayloadAsync({
+				parameters: { prompt: "a cat", target_size: { width: 512, height: 512 } },
+			} as never);
+			expect((payload as Record<string, unknown>).image_size).toEqual({ width: 512, height: 512 });
+			expect((payload as Record<string, unknown>).target_size).toBeUndefined();
+		});
+
+		it("maps width+height to an image_size object", async () => {
+			const payload = await new FalAIImageTextToImageTask().preparePayloadAsync({
+				parameters: { prompt: "a cat", width: 512, height: 768 },
+			} as never);
+			expect((payload as Record<string, unknown>).image_size).toEqual({ width: 512, height: 768 });
+			expect((payload as Record<string, unknown>).width).toBeUndefined();
+			expect((payload as Record<string, unknown>).height).toBeUndefined();
 		});
 	});
 
