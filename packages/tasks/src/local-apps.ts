@@ -435,6 +435,23 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const snippetBasalt = (model: ModelData): LocalAppSnippet[] => [
+	{
+		title: "Run an OpenAI- and Anthropic-compatible server",
+		setup: [
+			"# Install basalt (builds from source, needs Xcode)",
+			"brew tap goodmai/basalt https://github.com/goodmai/basalt",
+			"brew install goodmai/basalt/basalt",
+		].join("\n"),
+		content: [
+			"# Start the server on :8080",
+			`basalt serve --model "${model.id}" --rest`,
+			"# Or chat in the terminal",
+			`basalt chat --model "${model.id}"`,
+		].join("\n"),
+	},
+];
+
 const getLocalServerStep = (model: ModelData, filepath?: string): LocalAppSnippet => {
 	return isMlxModel(model)
 		? {
@@ -648,6 +665,14 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
 		snippet: snippetMlxLm,
+	},
+	basalt: {
+		prettyLabel: "basalt",
+		docsUrl: "https://github.com/goodmai/basalt",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
+		snippet: snippetBasalt,
 	},
 	tgi: {
 		prettyLabel: "TGI",
