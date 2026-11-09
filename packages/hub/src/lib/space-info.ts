@@ -6,6 +6,7 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { pick } from "../utils/pick";
 import type { SPACE_EXPANDABLE_KEYS, SpaceEntry } from "./list-spaces";
 import { SPACE_EXPAND_KEYS } from "./list-spaces";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function spaceInfo<
 	const T extends Exclude<(typeof SPACE_EXPANDABLE_KEYS)[number], (typeof SPACE_EXPAND_KEYS)[number]> = never,
@@ -31,7 +32,7 @@ export async function spaceInfo<
 		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
 	]).toString();
 
-	const response = await (params.fetch || fetch)(
+	const response = await fetchWithServerWarnings(params.fetch)(
 		`${params?.hubUrl || HUB_URL}/api/spaces/${params.name}/revision/${encodeURIComponent(
 			params.revision ?? "HEAD",
 		)}?${search.toString()}`,

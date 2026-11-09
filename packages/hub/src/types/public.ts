@@ -71,7 +71,15 @@ export type SpaceHardwareFlavor =
 	| "a10g-largex4"
 	| "a100-large"
 	| "a100x4"
-	| "a100x8";
+	| "a100x8"
+	| "h200"
+	| "h200x2"
+	| "h200x4"
+	| "h200x8"
+	| "rtx-pro-6000"
+	| "rtx-pro-6000x2"
+	| "rtx-pro-6000x4"
+	| "rtx-pro-6000x8";
 
 export type SpaceSdk = "streamlit" | "gradio" | "docker" | "static";
 

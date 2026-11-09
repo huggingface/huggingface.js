@@ -114,4 +114,27 @@ describe("listCommits", () => {
 			},
 		]);
 	});
+
+	it("should URL-encode the revision", async () => {
+		const urls: string[] = [];
+		const commits: CommitData[] = [];
+		for await (const commit of listCommits({
+			repo: {
+				name: "openai-community/gpt2",
+				type: "model",
+			},
+			revision: "refs/pr/1",
+			fetch: async (url) => {
+				urls.push(String(url));
+				return new Response("[]", { headers: { "Content-Type": "application/json" } });
+			},
+		})) {
+			commits.push(commit);
+		}
+
+		assert.deepStrictEqual(commits, []);
+		assert.deepStrictEqual(urls, [
+			"https://huggingface.co/api/models/openai-community/gpt2/commits/refs%2Fpr%2F1?limit=100",
+		]);
+	});
 });
