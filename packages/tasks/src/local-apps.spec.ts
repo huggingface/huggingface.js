@@ -37,6 +37,34 @@ llama cli -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`,
 		]);
 	});
 
+	it("llama.cpp embedding", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
+		const model: ModelData = {
+			id: "ggml-org/embeddinggemma-300M-GGUF",
+			tags: ["feature-extraction"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toEqual([
+			`# Start a local OpenAI-compatible embeddings server:
+llama serve -hf ggml-org/embeddinggemma-300M-GGUF:{{QUANT_TAG}} --embeddings`,
+		]);
+		expect(snippet.map((s) => s.title)).not.toContain("Use Docker");
+	});
+
+	it("llama.cpp decision model is not treated as an embedding model", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
+		const model: ModelData = {
+			id: "ggml-org/Julia-1-GGUF",
+			tags: ["feature-extraction", "decision-model"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content[0]).not.toContain("--embeddings");
+	});
+
 	it("vLLM conversational llm", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["vllm"];
 		const model: ModelData = {
@@ -298,6 +326,22 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 
 		expect(displayOnModelPage(model)).toBe(false);
+	});
+
+	it("llama deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["llama-app"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe("llama://install?repo=bartowski/Llama-3.2-3B-Instruct-GGUF");
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf").href).toBe(
+			"llama://install?repo=bartowski/Llama-3.2-3B-Instruct-GGUF&quant=Q4_K_M",
+		);
 	});
 
 	it("unsloth tagged model", async () => {
