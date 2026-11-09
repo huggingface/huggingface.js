@@ -215,6 +215,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 4_000,
 		power: 250,
 		releaseYear: 2023,
+		aliases: ["NVIDIA RTX 5000 Ada Generation"],
 	},
 	"RTX 5000 Ada Generation Laptop GPU": {
 		tflops: 40.9,
@@ -232,6 +233,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 2_250,
 		power: 210,
 		releaseYear: 2023,
+		aliases: ["NVIDIA RTX 4500 Ada Generation"],
 	},
 	"RTX 4000 Ada": {
 		tflops: 26.7,
@@ -240,10 +242,11 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 1_250,
 		power: 130,
 		releaseYear: 2023,
+		aliases: ["NVIDIA RTX 4000 Ada Generation"],
 	},
 	"RTX 4000 Ada Generation Laptop GPU": {
-		tflops: 19.2,
-		memory: [16],
+		tflops: 33.6,
+		memory: [12],
 		computeCapability: 8.9,
 		msrp: 2_500,
 		power: 140,
@@ -274,6 +277,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 650,
 		power: 70,
 		releaseYear: 2024,
+		aliases: ["NVIDIA RTX 2000 Ada Generation"],
 	},
 	"RTX 2000 Ada Generation Laptop GPU": {
 		tflops: 11.0,

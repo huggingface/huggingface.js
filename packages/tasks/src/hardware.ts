@@ -79,7 +79,7 @@ export const SKUS = {
 		AMD: AMD_GPU_SKUS,
 		INTEL: {
 			"Intel Arc Graphics (Core Ultra 100H)": {
-				tflops: 4.9,
+				tflops: 9.4,
 				msrp: 0,
 				power: 28,
 				releaseYear: 2023,
