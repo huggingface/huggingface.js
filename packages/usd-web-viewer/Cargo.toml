@@ -1,0 +1,15 @@
+[workspace]
+resolver = "3"
+members = ["crate"]
+
+[workspace.dependencies]
+openusd = "0.8.0"
+openusd-schemas = { version = "0.8.0", features = ["geom", "shade"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+# Keeps function names for scripts/stub-writers.mjs; wasm-opt strips them from the shipped module.
+strip = "debuginfo"

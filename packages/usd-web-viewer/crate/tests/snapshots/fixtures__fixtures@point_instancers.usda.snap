@@ -1,0 +1,43 @@
+---
+source: crate/tests/fixtures.rs
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/point_instancers.usda
+---
+upAxis Y, metersPerUnit 0.01
+prims 17, meshes 10, triangles 19
+
+instances:
+  /W/I/Protos/A/M[0]: geometry 0, material 1
+    at (1, 5, 10), world (1, 5, 10)..(2, 6, 10)
+  /W/I/Protos/A/M[1]: geometry 0, material 1
+    at (-7.998, 0.002, 10), world (-9.997, 0.002, 10)..(-7.997, 2.002, 10)
+  /W/I/Protos/B[2]: geometry 1, material 1
+    at (3, 0, 10), world (3, 0, 10)..(4, 1, 10)
+  /Unused/A[0]: geometry 2, material 1
+    at (10, 0, 0), world (10, 0, 0)..(11, 1, 0)
+  /Outer/P/Inner/Q[0][0]: geometry 3, material 1
+    at (0, 0, 1), world (0, 0, 1)..(1, 1, 1)
+  /Outer/P/Inner/Q[0][1]: geometry 3, material 1
+    at (0, 5, 1), world (0, 5, 1)..(1, 6, 1)
+  /Outer/P/Inner/Q[1][0]: geometry 3, material 1
+    at (10, 0, 1), world (10, 0, 1)..(11, 1, 1)
+  /Outer/P/Inner/Q[1][1]: geometry 3, material 1
+    at (10, 5, 1), world (10, 5, 1)..(11, 6, 1)
+  /Outer/P/Inner/Q[2][0]: geometry 3, material 1
+    at (20, 0, 1), world (20, 0, 1)..(21, 1, 1)
+  /Outer/P/Inner/Q[2][1]: geometry 3, material 1
+    at (20, 5, 1), world (20, 5, 1)..(21, 6, 1)
+
+geometries:
+  0 /W/I/Protos/A/M: 2 triangles (all outward), 4 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x4
+  1 /W/I/Protos/B: 2 triangles (all outward), 4 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x4
+  2 /Unused/A: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+  3 /Outer/P/Inner/Q: 2 triangles (all outward), 4 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x4
+
+materials:
+  0 (unbound) displayColor: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0, color from primvar displayColor
+  1 (unbound) fallback: color (0.7, 0.7, 0.7), opacity 1, roughness 0.5, metallic 0
