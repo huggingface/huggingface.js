@@ -104,4 +104,25 @@ describe("duplicateRepo", () => {
 			}).catch(() => undefined);
 		}
 	});
+
+	it("should default the destination to the source name when toRepo is omitted", async () => {
+		const bodies: string[] = [];
+		const mockFetch = (async (_url: string | URL | Request, init?: RequestInit) => {
+			bodies.push(String(init?.body));
+			return new Response(JSON.stringify({ url: "https://hub-ci.huggingface.co/hub.js/gpt2" }), {
+				status: 200,
+				headers: { "content-type": "application/json" },
+			});
+		}) as typeof fetch;
+
+		const duplicated = await duplicateRepo({
+			fromRepo: { type: "model", name: "gpt2" },
+			accessToken: TEST_ACCESS_TOKEN,
+			hubUrl: TEST_HUB_URL,
+			fetch: mockFetch,
+		});
+
+		assert.equal(JSON.parse(bodies[0] ?? "{}").repository, "gpt2");
+		assert.ok(duplicated.url.includes("hub.js/gpt2"));
+	});
 });

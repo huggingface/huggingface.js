@@ -46,7 +46,7 @@ export async function duplicateRepo(params: {
 		);
 	}
 
-	const destination = toId ? toId.name : fromId.name.split("/").slice(1).join("/");
+	const destination = toId ? toId.name : (fromId.name.split("/").pop() ?? fromId.name);
 
 	const res = await fetchWithServerWarnings(params.fetch)(
 		`${params.hubUrl ?? HUB_URL}/api/${fromId.type}s/${fromId.name}/duplicate`,
