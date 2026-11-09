@@ -129,7 +129,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Asimov",
 		repoUrl: "https://github.com/menloresearch/humanoid-policy-viewer",
 		snippets: snippets.asimov,
-		filter: false,
+		filter: true,
 		countDownloads: `path:"env.yaml"`,
 	},
 	"aviation-ner": {
