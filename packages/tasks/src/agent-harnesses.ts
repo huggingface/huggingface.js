@@ -203,6 +203,96 @@ export const AGENT_HARNESSES = {
 		description: "High-performance code editor with an integrated AI agent panel and terminal.",
 		envVars: { ZED_TERM: "*" },
 	},
+	workbuddy: {
+		prettyLabel: "WorkBuddy",
+		description:
+			"Tencent's AI workspace that plans workflows, uses tools, and creates finished documents, spreadsheets, presentations, and other work.",
+		envVars: { WORKBUDDY_APPLICATION_NAME: "*", WORKBUDDY_APP_NAME: "*" },
+	},
+	"grok-bot": {
+		prettyLabel: "Grok Bot",
+		description:
+			"AI teammates that retain context and complete tasks across apps and websites on a persistent cloud computer.",
+		envVars: { SAND_AGENT: "*" },
+	},
+	qwenwork: {
+		prettyLabel: "QwenWork",
+		description:
+			"Alibaba's AI office platform for completing tasks and delivering documents, spreadsheets, presentations, websites, and other work products.",
+		envVars: { QODER_WORK_INTEGRATION_PRODUCT: "*" },
+	},
+	cue: {
+		prettyLabel: "Cue",
+		description:
+			"Manus’s personal agent app, where agents have their own identities, tools and permissions and can collaborate on tasks.",
+		envVars: { MANUS_LONG_DESKTOP_WORKER: "*", MANUS_OPERATOR_PLATFORM: "*" },
+	},
+	muse: {
+		prettyLabel: "Muse",
+		description:
+			"Meta’s personal AI agent that handles tasks and projects across everyday apps and turns long-term goals into action plans.",
+		envVars: { JARVIS_IS_ASSIGNED: "*", JARVIS_TOOL_CALL_ID: "*" },
+	},
+	manus: {
+		prettyLabel: "Manus",
+		description:
+			"General-purpose AI agent for automating workflows, conducting research and turning instructions into completed work.",
+		envVars: { MANUS_ADDON_RUNTIME_SPEC_PATH: "*", MANUS_ADDON_RUNTIME_SPECS_REVISION: "*" },
+	},
+	"doubao-work": {
+		prettyLabel: "Doubao Work",
+		description:
+			"AI work platform for individuals and teams that executes tasks and creates documents, spreadsheets, presentations and applications with Feishu integration.",
+		envVars: { DOUBAO_OFFICE_AGENT_NAME: "*" },
+	},
+	kimi: {
+		prettyLabel: "Kimi Code",
+		description: "Kimi Code CLI  —  The Starting Point for Next-Gen Agents",
+		envVars: { KIMI_PLUGIN_ROOT: "*" },
+	},
+	"grok-build": {
+		prettyLabel: "Grok Build",
+		description: "SpaceXAI's coding agent harness and TUI. Fullscreen, mouse interactive, extensible.",
+		envVars: { GROK_AGENT: "1", GROK_PLUGIN_ROOT: "*", GROK_PLUGIN_DATA: "*" },
+	},
+	"qwen-code": {
+		prettyLabel: "Qwen Code",
+		description: "An open-source AI coding agent that lives in your terminal.",
+		envVars: { QWEN_CODE: "*" },
+	},
+	"roo-code": {
+		prettyLabel: "Roo Code",
+		description: "Roo Code gives you a whole dev team of AI agents in your code editor.",
+		envVars: { ROO_ACTIVE: "*", ROO_CLI_RUNTIME: "*" },
+	},
+	junie: {
+		prettyLabel: "Junie",
+		description:
+			"An AI coding agent by JetBrains that ships code from your terminal, IDE, or CI/CD pipeline - powered by any LLM you choose",
+		envVars: { JUNIE_SHIM_PATH: "*" },
+	},
+	devin: {
+		prettyLabel: "Devin",
+		docsUrl: "https://devin.ai",
+		description: "Autonomous AI software engineer from Cognition.",
+		envVars: { DEVIN_DIR: "*", DEVIN_DISABLE_HISTEXPAND: "*" },
+	},
+	instinct: {
+		prettyLabel: "Instinct",
+		description:
+			"Personal assistant that understands your work and priorities, accepts texts or calls, and uses phones and computers to complete tasks.",
+		envVars: {
+			INSTINCT_OUTER_TOOL_USE_ID: "*",
+			INSTINCT_OUTER_TOOL_USE_STARTED_AT: "*",
+			INSTINCT_OUTER_TOOL_USE_TIMEOUT_SECONDS: "*",
+		},
+	},
+	lingguang: {
+		prettyLabel: "Lingguang",
+		description:
+			"Ant Group’s multimodal personal AI agent that identifies needs and manages tasks over time with user authorization.",
+		envVars: { EXEC_FROM: "*" },
+	},
 	"cursor-cli": {
 		// Kept near the bottom (and before `cursor`): when another agent runs inside the Cursor editor's terminal,
 		// its child processes inherit `CURSOR_TRACE_ID`, so `cursor` must stay a low-priority fallback and lose to
@@ -212,16 +302,17 @@ export const AGENT_HARNESSES = {
 		description: "Cursor's coding agent for the command line.",
 		envVars: { CURSOR_AGENT: "*" },
 	},
+	"deepseek-harness": {
+		prettyLabel: "DeepSeek Harness",
+		repoUrl: "https://github.com/deepseek-ai/deepseek-harness",
+		description: "DeepSeek Harness: Everything is a Plugin.",
+		envVars: { DSH_SHELL: "*" },
+	},
 	cursor: {
 		prettyLabel: "Cursor",
 		docsUrl: "https://cursor.com",
 		description: "AI-powered code editor.",
 		envVars: { CURSOR_TRACE_ID: "*" },
-	},
-	devin: {
-		prettyLabel: "Devin",
-		docsUrl: "https://devin.ai",
-		description: "Autonomous AI software engineer from Cognition.",
 	},
 } satisfies Record<string, AgentHarness>;
 
