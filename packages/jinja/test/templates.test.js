@@ -6725,6 +6725,11 @@ describe("Feature regressions", () => {
 				expected: "I|O",
 			},
 			{
+				name: "keeps ordinary caller bindings callable",
+				source: `{% macro callback() %}C{% endmacro %}{% macro local() %}{% set caller = callback %}{{ caller() }}{% endmacro %}{% macro parameter(caller=none) %}{{ caller() }}{% endmacro %}{{ local() }}|{{ parameter(callback) }}`,
+				expected: "C|C",
+			},
+			{
 				name: "invokes caller inside a loop in the macro body",
 				source: `{% macro m() %}{% for i in [1, 2] %}{{ caller() }}{% endfor %}{% endmacro %}{% call m() %}c{% endcall %}`,
 				expected: "cc",
@@ -6753,6 +6758,14 @@ describe("Feature regressions", () => {
 				name: "a nested macro saved and invoked later",
 				source: `{% set ns = namespace() %}{% macro outer() %}{% macro inner() %}{{ caller() }}{% endmacro %}{% set ns.inner = inner %}{% endmacro %}{% call outer() %}C{% endcall %}{{ ns.inner() }}`,
 			},
+			{
+				name: "a macro called with a local caller alias",
+				source: `{% macro b() %}{{ caller() }}{% endmacro %}{% macro a() %}{% set caller = callback %}{{ b() }}{% endmacro %}{% macro callback() %}C{% endmacro %}{{ a() }}`,
+			},
+			{
+				name: "a macro called with an explicit caller parameter",
+				source: `{% macro b() %}{{ caller() }}{% endmacro %}{% macro a(caller=none) %}{{ b() }}{% endmacro %}{% macro callback() %}C{% endmacro %}{{ a(callback) }}`,
+			},
 		])("does not leak caller into $name", ({ source }) => {
 			expect(() => new Template(source).render()).toThrowError(
 				"Cannot call something that is not a function: got UndefinedValue",
@@ -6761,6 +6774,34 @@ describe("Feature regressions", () => {
 	});
 
 	describe("Macro special arguments", () => {
+		it("updates macro collectors after editing a rendered template's AST", () => {
+			const template = new Template(`{% macro m() %}X{% endmacro %}{{ m() }}`);
+			expect(template.render()).toBe("X");
+
+			const macro = template.parsed.body[0];
+			macro.body = parse(tokenize(`{{ kwargs.value }}`)).body;
+			template.parsed.body[1].args = parse(tokenize(`{{ m(value='Y') }}`)).body[0].args;
+			expect(template.render()).toBe("Y");
+
+			macro.body = parse(tokenize(`X`)).body;
+			expect(() => template.render()).toThrowError("macro 'm' takes no keyword argument 'value'");
+		});
+
+		it("updates call-block collectors after editing a rendered template's AST", () => {
+			const template = new Template(
+				`{% macro m() %}{{ caller(value='Y') }}{% endmacro %}{% call(value='X') m() %}{{ value }}{% endcall %}`,
+			);
+			expect(template.render()).toBe("Y");
+
+			template.parsed.body[0].body[0].args[0].key.value = "extra";
+			const callBlock = template.parsed.body[1];
+			callBlock.body = parse(tokenize(`{{ kwargs.extra }}`)).body;
+			expect(template.render()).toBe("Y");
+
+			callBlock.body = parse(tokenize(`{{ value }}`)).body;
+			expect(() => template.render()).toThrowError("macro None takes no keyword argument 'extra'");
+		});
+
 		it.each([
 			{
 				name: "explicit kwargs parameter",

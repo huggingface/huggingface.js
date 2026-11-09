@@ -595,10 +595,14 @@ function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntim
 	return [key, value];
 }
 
+const CALL_BLOCK_SCOPE = Symbol("callBlockScope");
+
 /**
  * Represents the current environment (scope) at runtime.
  */
 export class Environment {
+	declare [CALL_BLOCK_SCOPE]?: boolean;
+
 	/**
 	 * The variables declared in this environment.
 	 */
@@ -1055,26 +1059,6 @@ function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statem
 		declareArgument(parameter);
 	}
 	visit(body);
-	return accessed;
-}
-
-/**
- * The scan above is a pure function of the AST, so its result is cached per `Macro`/`CallStatement`
- * node. A parsed template is reused across renders, so each macro and call block is scanned at most
- * once, however often it is rendered and however deeply it is nested inside a loop.
- */
-const specialMacroArgumentCache = new WeakMap<Macro | CallStatement, Set<SpecialMacroArgument>>();
-
-function getAccessedSpecialMacroArguments(
-	node: Macro | CallStatement,
-	parameters: Parameter[],
-	body: Statement[],
-): Set<SpecialMacroArgument> {
-	let accessed = specialMacroArgumentCache.get(node);
-	if (accessed === undefined) {
-		accessed = findAccessedSpecialMacroArguments(parameters, body);
-		specialMacroArgumentCache.set(node, accessed);
-	}
 	return accessed;
 }
 
@@ -2089,7 +2073,7 @@ export class Interpreter {
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
-		const specialArguments = getAccessedSpecialMacroArguments(node, node.args, node.body);
+		const specialArguments = findAccessedSpecialMacroArguments(node.args, node.body);
 		environment.setVariable(
 			node.name.value,
 			new FunctionValue((args, callSite) => {
@@ -2099,7 +2083,7 @@ export class Interpreter {
 				// in the defining scope after the macro is declared is still visible to the body.
 				// A caller belongs only to this invocation. Shadow any captured caller, even when this
 				// call has none, and keep it in a separate layer so ordinary calls do not forward it.
-				const caller = callSite.variables.get("caller");
+				const caller = callSite[CALL_BLOCK_SCOPE] ? callSite.variables.get("caller") : undefined;
 				const parent = new Environment(environment);
 				parent.setVariable("caller", caller ?? new UndefinedValue());
 
@@ -2116,7 +2100,7 @@ export class Interpreter {
 	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
 		// Call blocks use anonymous-macro argument rules; Jinja labels them `None` in errors.
 		const parameters = node.callerArgs ?? [];
-		const specialArguments = getAccessedSpecialMacroArguments(node, parameters, node.body);
+		const specialArguments = findAccessedSpecialMacroArguments(parameters, node.body);
 		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[]) => {
 			const callBlockEnv = new Environment(environment);
 			this.bindMacroArguments("None", parameters, specialArguments, callerArguments, callBlockEnv);
@@ -2130,6 +2114,7 @@ export class Interpreter {
 			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
 		}
 		const newEnv = new Environment(environment);
+		newEnv[CALL_BLOCK_SCOPE] = true;
 		newEnv.setVariable("caller", callerFn);
 		return (fn as FunctionValue).value(macroArgs, newEnv);
 	}
