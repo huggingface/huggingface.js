@@ -149,16 +149,14 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 	let lastIndex = 0;
 	// Start at a literal delimiter so unmatched whitespace is never scanned repeatedly.
 	for (const match of template.matchAll(/{%(-?)\s*(?:end)?generation\s*(-?)%}(\s*)/gs)) {
-		const [tag, lstrip, rstrip, after] = match;
+		const [fullMatch, lstrip, rstrip, after] = match;
 		let endIndex = match.index;
-		if (lstrip) {
-			// Whitespace consumed by a preceding tag belongs to that tag's right strip.
-			while (endIndex > lastIndex && isWhitespace(template[endIndex - 1])) {
-				--endIndex;
-			}
+		// Preserve whitespace already consumed by the preceding match.
+		while (lstrip && endIndex > lastIndex && isWhitespace(template[endIndex - 1])) {
+			--endIndex;
 		}
 		result += template.slice(lastIndex, endIndex) + (rstrip ? "" : after);
-		lastIndex = match.index + tag.length;
+		lastIndex = match.index + fullMatch.length;
 	}
 	return result + template.slice(lastIndex);
 }
