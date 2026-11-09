@@ -277,6 +277,56 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain('openclaw agent --local --agent main --message "Hello from Hugging Face"');
 	});
 
+	it("orca connect", async () => {
+		const { snippet: snippetFunc, displayOnModelPage } = LOCAL_APPS["orca-connect"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(snippet[0].content).toContain(
+			"llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}} --port 8080",
+		);
+		expect(snippet[1].setup).toContain("curl -fsSL https://get.orcarouter.ai/orca-connect/latest/install.sh | sh");
+		expect(snippet[1].content).toContain("orca-connect login");
+		expect(snippet[1].content).toContain("orca-connect expose bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}");
+		expect(snippet[1].content).toContain("orca-connect serve");
+		expect(snippet[2].content).toContain('"model": "local/<rig>/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"');
+	});
+
+	it("orca connect - mlx", async () => {
+		const { snippet: snippetFunc, displayOnModelPage } = LOCAL_APPS["orca-connect"];
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-mlx",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
+		expect(snippet[0].content).not.toContain("--port");
+		expect(snippet[1].content).toContain("orca-connect expose mlx-community/Llama-3.2-3B-Instruct-mlx");
+		expect(snippet[2].content).toContain('"model": "local/<rig>/mlx-community/Llama-3.2-3B-Instruct-mlx"');
+	});
+
+	it("orca connect not shown for non-conversational models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["orca-connect"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-GGUF",
+			tags: [],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("docker model runner", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
 		const model: ModelData = {
