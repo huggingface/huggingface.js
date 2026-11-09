@@ -3,6 +3,7 @@ import { createApiError } from "../error";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function fileExists(
 	params: {
@@ -24,9 +25,9 @@ export async function fileExists(
 	const endpoint = repoId.type === "bucket" ? "resolve" : "raw";
 	const url = `${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/${endpoint}${
 		revision ? `/${encodeURIComponent(revision)}` : ""
-	}/${params.path}`;
+	}/${params.path.split("/").map(encodeURIComponent).join("/")}`;
 
-	const resp = await (params.fetch ?? fetch)(url, {
+	const resp = await fetchWithServerWarnings(params.fetch)(url, {
 		method: "HEAD",
 		headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
 	});

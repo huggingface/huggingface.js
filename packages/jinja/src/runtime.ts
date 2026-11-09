@@ -368,9 +368,10 @@ function toJSON(
 			const basePadding = "\n" + indentValue.repeat(depth);
 			const childrenPadding = basePadding + indentValue; // Depth + 1
 
+			// Like Python's json.dumps, empty containers render as [] and {} even when indenting.
 			if (input.type === "ArrayValue") {
 				const core = (input as ArrayValue).value.map((x) => toJSON(x, options, depth + 1, convertUndefinedToNull));
-				return indent
+				return indent && core.length > 0
 					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
 					: `[${core.join(itemSeparator)}]`;
 			} else {
@@ -386,7 +387,9 @@ function toJSON(
 					const v = `${keyStr}${keySeparator}${toJSON(value, options, depth + 1, convertUndefinedToNull)}`;
 					return indent ? `${childrenPadding}${v}` : v;
 				});
-				return indent ? `{${core.join(itemSeparator)}${basePadding}}` : `{${core.join(itemSeparator)}}`;
+				return indent && core.length > 0
+					? `{${core.join(itemSeparator)}${basePadding}}`
+					: `{${core.join(itemSeparator)}}`;
 			}
 		}
 		default:
@@ -1712,7 +1715,7 @@ export class Interpreter {
 
 		switch (node.operator.value) {
 			case "not":
-				return new BooleanValue(!argument.value);
+				return new BooleanValue(!argument.__bool__().value);
 			case "+":
 			case "-": {
 				const sign = node.operator.value === "-" ? -1 : 1;
