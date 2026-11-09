@@ -28,6 +28,52 @@ model = AadyaM1Forecaster(weights)
 pmf = model.forecast([28, 30, 27], elapsed=0)`,
 ];
 
+export const minicpmOcr = (model: ModelData): string[] => {
+	const isGguf = !!model.gguf?.context_length;
+	const backend = isGguf ? "llamacpp" : "vllm";
+	const device = isGguf ? "cpu" : "cuda:0";
+	const contextLength = isGguf ? 8192 : 40960;
+	const guide = isGguf ? "llamacpp_deploy.md" : "vllm_deploy_en.md";
+	const serviceSettings = isGguf
+		? "# llama.cpp: load the model and vision projector; use --port 8080,\n# --alias minicpm-ocr, --ctx-size 8192, --parallel 1, --jinja --reasoning off."
+		: "# vLLM: load the model above; use --port 8080,\n# --served-model-name minicpm-ocr and --max-model-len 40960.";
+	const pipeline = isGguf
+		? '{"queue_mode": "serial", "max_workers": 1, "render_workers": 1}'
+		: '{"overlap_layout": True, "render_workers": 1}';
+
+	return [
+		`pip install "minicpm-ocr[all]" huggingface_hub
+
+# Deploy ${model.id} as a recognition service before running the Python example:
+# https://github.com/OpenBMB/MiniCPM-OCR/blob/main/docs/${guide}
+${serviceSettings}
+# Layout detection uses ${device}; recognition runs on the deployed service.`,
+		`from importlib.resources import files
+from pathlib import Path
+
+from minicpmvocr import load_config, pipelined_run
+from huggingface_hub import snapshot_download
+
+layout_model = snapshot_download("PaddlePaddle/PP-DocLayoutV3")
+cfg = load_config(
+    str(files("minicpmvocr").joinpath("configs/minicpmvocr.yaml")),
+    overrides={
+        "input": {"file_path": str(Path("demo.png").resolve())},
+        "engine": {
+            "type": "${backend}",
+            "server_url": "http://127.0.0.1:8080",
+            "model_name": "minicpm-ocr",
+            "max_model_len": ${contextLength},
+        },
+        "layout": {"model_dir": layout_model, "device": "${device}"},
+        # Render PDFs in-process so this example also works without a main guard.
+        "pipeline": ${pipeline},
+    },
+)
+pipelined_run(cfg)`,
+	];
+};
+
 export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
 
@@ -36,6 +82,16 @@ model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
 	)}")
 model.load_adapter("${model.id}", set_active=True)`,
 ];
+
+export const alkove = (model: ModelData): string[] => {
+	const name = /^alkove-([a-z]+)-/.exec(model.id.split("/").pop() ?? "")?.[1] ?? "focus";
+	return [
+		`# pip install alkove
+import alkove
+
+models = alkove.Models.load(["${name}"])`,
+	];
+};
 
 const allennlpUnknown = (model: ModelData) => [
 	`import allennlp_models
@@ -141,6 +197,20 @@ export const bm25s = (model: ModelData): string[] => [
 	`from bm25s.hf import BM25HF
 
 retriever = BM25HF.load_from_hub("${model.id}")`,
+];
+
+export const case_model = (): string[] => [
+	`pip install git+https://github.com/SAP-samples/case`,
+	`import pandas as pd
+from case.embedding import CaseTransformer
+X = pd.DataFrame({
+    "job": ["Junior Data Scientist", "Senior Data Scientist", "Engineering Manager", "Product Executive"],
+    "years_experience": [1.5, 10.0, 12.0, 14.0],
+})
+y = pd.Series([72000, 130000, 165000, 210000], name="income")
+case_embedder = CaseTransformer()
+X_enhanced = case_embedder.fit_transform(X, y)
+# X_enhanced can now be fed to any tabular learner (e.g. TabICL)`,
 ];
 
 export const chatterbox = (): string[] => [
@@ -446,6 +516,24 @@ dam = DescribeAnythingModel(
 	prompt_mode="focal_prompt",
 )`,
 ];
+
+export const dew = (model: ModelData): string[] => {
+	if (model.pipeline_tag === "text-to-image") {
+		return [
+			`# pip install dewml --extra-index-url https://pypi.dewml.dev/simple
+import dew
+
+pipe = dew.pipeline("${model.id}")
+images = pipe(["a red fox in a snowy forest"], steps=20, key=0).host().images`,
+		];
+	}
+	return [
+		`# pip install dewml --extra-index-url https://pypi.dewml.dev/simple
+import dew
+
+task = dew.pipeline("${model.id}")`,
+	];
+};
 
 const diffusers_install = "pip install -U diffusers transformers accelerate";
 
@@ -891,6 +979,28 @@ print(f'Accuracy {accuracy_score(y_test, predictions):.2%}')
 	return [installSnippet, classificationSnippet, regressionsSnippet, matchingSnippet];
 };
 
+export const fse = (model: ModelData): string[] => {
+	if (model.config?.model_type === "fse") {
+		return [
+			`pip install "fse>=2.0"`,
+			`from fse import Encoder
+
+encoder = Encoder.from_pretrained("${model.id}")
+vectors = encoder.encode(["A sentence.", "Another sentence."])`,
+		];
+	}
+	return [
+		`pip install "fse<2"`,
+		`from fse import SIF, IndexedList, Vectors
+
+vectors = Vectors.from_pretrained("${nameWithoutNamespace(model.id)}")
+model = SIF(vectors)
+sentences = IndexedList([["hello", "world"], ["fast", "sentence", "embeddings"]])
+model.train(sentences)
+vector = model.sv[0]`,
+	];
+};
+
 export const gaussianformer = (model: ModelData): string[] => [
 	`# pip install "gaussianformer @ git+https://github.com/SVLwoof/gaussianformer"
 from gaussianformer import GaussianFormerRenderingPipeline, load_ply
@@ -1162,6 +1272,15 @@ audio = m.generate("This high quality TTS model works without a GPU")
 # Save the audio
 import soundfile as sf
 sf.write('output.wav', audio, 24000)`,
+];
+
+export const konfai = (model: ModelData): string[] => [
+	`pip install "konfai[imaging]" konfai-apps`,
+	`# List the apps this repository holds
+konfai-apps list ${model.id}
+
+# Run one of them on an image
+konfai-apps infer ${model.id}:<app> -i image.nii.gz -o Output`,
 ];
 
 /**
@@ -1481,6 +1600,27 @@ model.score("query", ["doc1", "doc2", "doc3"])`,
 	];
 };
 
+export const linnet_tts = (model: ModelData): string[] => [
+	`# pip install linnet-tts soundfile
+import linnet_tts, soundfile as sf
+from huggingface_hub import hf_hub_download
+
+model = linnet_tts.Model(
+    hf_hub_download("${model.id}", "linnet-en-35m.fp16.safetensors"),
+    hf_hub_download("${model.id}", "tokenizer.model"),
+)
+voice = model.load_voice(hf_hub_download("${model.id}", "voices/linnet-en-f1.npy"))
+
+audio = model.synthesize("Hello there.", voice, temp=0.3, cfg=2.0, seed=0)
+sf.write("hello.wav", audio, model.sample_rate)  # float32, 24 kHz
+
+# streaming: one chunk per 80 ms step
+session = model.session(voice, seed=0)
+session.prime("Streaming gives the first chunk of audio after one step.")
+for chunk in session:
+    ...`,
+];
+
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
 		`# !pip install llama-cpp-python
@@ -1717,6 +1857,22 @@ opendde doctor
 opendde pred -i examples/input.json -o ./output -n opendde_v1`,
 ];
 
+export const opendecision = (model: ModelData): string[] => [
+	`# pip install tokz-opendecision
+from opendecision import OpenDecision, Choice, Bool, MultiLabel
+
+model = OpenDecision.from_pretrained("${model.id}")
+out = model.decide(
+    "I was charged twice for my May invoice and the app keeps logging me out.",
+    {
+        "queue": Choice(["billing", "technical", "account", "sales"]),
+        "tags": MultiLabel(["double_charge", "login_issue", "refund_request", "outage"]),
+        "urgent": Bool(),
+    },
+)
+print(out["queue"].best, out["tags"].selected, out["urgent"].policy)`,
+];
+
 export const paddlenlp = (model: ModelData): string[] => {
 	const architecture = model.config?.architectures?.[0];
 	// interpolated as a Python class name, so a non-identifier is treated as absent
@@ -1846,6 +2002,40 @@ wan_i2v = WanI2V(
 text_prompt = "A cat playing with a ball of yarn"
 image_prompt = Image.open("path/to/image.jpg").convert("RGB")
 video = wan_i2v.generate(text_prompt, image_prompt)`,
+];
+
+export const pika_h3_flex = (model: ModelData): string[] => [
+	`# pip install -r examples/requirements-diffusers.txt (see the examples/ folder of this repo)
+import torch
+from diffusers import ComponentsManager, ModularPipeline
+from diffusers.utils.export_utils import encode_video
+from PIL import Image
+
+workflow = "fl2va"  # "fl2va" (first-frame to video+audio) or "ref2va" (reference images/video to video+audio)
+
+manager = ComponentsManager()
+manager.enable_auto_cpu_offload(device="cuda:0")
+pipe = ModularPipeline.from_pretrained("${model.id}", workflow=workflow, components_manager=manager)
+pipe.load_components(
+    pretrained_model_name_or_path="${model.id}",
+    dtype={"vae": torch.float32, "audio_vae": torch.float32, "default": torch.bfloat16},
+)
+# The bundled base components are not Pika-adapted weights: load the matching adapter.
+pipe.load_lora_weights("${model.id}", weight_name=f"{workflow}/adapter.safetensors")
+
+result = pipe(
+    prompt="A cat walks through a sunlit cafe and jumps onto the counter",
+    image=Image.open("first_frame.png").convert("RGB"),
+    height=480,
+    width=832,
+    num_frames=121,
+    generator=torch.Generator("cuda:0").manual_seed(0),
+    output=["videos", "audio", "sampling_rate"],
+)
+encode_video(
+    result["videos"][0], fps=24, output_path="output.mp4",
+    audio=result["audio"][0].float().cpu(), audio_sample_rate=result["sampling_rate"],
+)`,
 ];
 
 export const pocket_tts = (model: ModelData): string[] => [
