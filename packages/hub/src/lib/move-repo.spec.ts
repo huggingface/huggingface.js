@@ -44,7 +44,7 @@ describe("moveRepo", () => {
 					repo: toRepo,
 					accessToken: TEST_ACCESS_TOKEN,
 					hubUrl: TEST_HUB_URL,
-				})
+				}),
 			);
 
 			const content = await downloadFile({
@@ -56,11 +56,18 @@ describe("moveRepo", () => {
 
 			assert.equal(await content?.text(), "file content");
 		} finally {
+			// After a successful move the old name redirects to the new one, so deleting either
+			// name removes the moved repo; if the move failed, only fromRepo exists.
 			await deleteRepo({
 				repo: toRepo,
 				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
-			});
+			}).catch(() => undefined);
+			await deleteRepo({
+				repo: fromRepo,
+				accessToken: TEST_ACCESS_TOKEN,
+				hubUrl: TEST_HUB_URL,
+			}).catch(() => undefined);
 		}
 	});
 });
