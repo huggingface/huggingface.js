@@ -3147,7 +3147,7 @@ const UNITREE_ROBOTS: Record<string, { bin: string; isaaclab?: string; mjlab?: s
 };
 
 export const unitree = (model: ModelData): string[] => {
-	// Model-card tag convention: tags: [unitree-g1-29dof, isaaclab | mjlab, velocity | mimic]
+	// Everything comes from the model card tags: unitree-<robot>, isaaclab | mjlab, velocity | mimic
 	const framework = model.tags.includes("mjlab") ? "mjlab" : "isaaclab";
 	const repo = framework === "mjlab" ? "unitree_rl_mjlab" : "unitree_rl_lab";
 	const robotTags = Object.keys(UNITREE_ROBOTS).filter((tag) => model.tags.includes(tag));
@@ -3159,29 +3159,50 @@ export const unitree = (model: ModelData): string[] => {
 		.map((r) => r[framework])
 		.filter((d): d is string => d !== undefined);
 	const prefix = dir ? "" : `# Replace ROBOT with the robot named in the model card (${supported.join(", ")}).\n`;
-	const isMimic = model.tags.includes("mimic");
 	const name = model.id.split("/").pop() ?? model.id;
-	// Mimic states replay the reference motion shipped in the repo (params/motion.csv or .npz).
-	const mimicLines = isMimic
-		? framework === "mjlab"
-			? `\n#     motion_file: config/policy/hub/${name}/params/motion.npz`
-			: `\n#     motion_file: config/policy/hub/${name}/params/motion.csv\n#     fps: 60`
-		: "";
+	const simFlag = framework === "mjlab" ? " --network=lo" : "";
+
+	let install: string;
+	if (model.tags.includes("mimic")) {
+		const policyDir = `config/policy/mimic/${name}`;
+		const motion =
+			framework === "mjlab"
+				? `#       motion_file: ${policyDir}/params/motion.npz`
+				: `#       motion_file: ${policyDir}/params/motion.csv\n#       fps: 60`;
+		install = `hf download ${model.id} --local-dir ${policyDir}
+# Enable the policy in config/config.yaml:
+#   FSM:
+#     _:
+#       Mimic_Hub: {id: 110, type: Mimic}
+#     Velocity:
+#       transitions:
+#         Mimic_Hub: LT(2s) + up.on_pressed
+#     Mimic_Hub:
+#       transitions:
+#         Passive: LT + B.on_pressed
+#         Velocity: RB + X.on_pressed
+#       policy_dir: ${policyDir}/
+${motion}`;
+	} else {
+		const velocityDir =
+			framework === "mjlab" || dir === "g1_29dof"
+				? "config/policy/velocity"
+				: `../../../logs/rsl_rl/unitree_${robotDir}_velocity`;
+		install = `# The Velocity state runs the last policy folder in ${velocityDir} (after the shipped ones)
+hf download ${model.id} --local-dir ${velocityDir}/v1`;
+	}
 
 	return [
-		`${prefix}# 1. Download the policy (exported/policy.onnx + params/deploy.yaml) into Unitree's controller
+		`${prefix}# 1. Get the deploy controller and the policy (exported/policy.onnx + params/deploy.yaml)
 git clone https://github.com/unitreerobotics/${repo}
 cd ${repo}/deploy/robots/${robotDir}
-hf download ${model.id} --local-dir config/policy/hub/${name}`,
-		`# 2. Add it as a controller state in config/config.yaml, then build (requires unitree_sdk2)
-#   Hub_Policy:
-#     id: 200
-#     type: ${isMimic ? "Mimic" : "RLBase"}
-#     policy_dir: config/policy/hub/${name}/${mimicLines}
+${install}`,
+		`# 2. Build the controller (requires unitree_sdk2)
 mkdir -p build && cd build && cmake .. && make`,
-		`# 3. Always test in simulation first (unitree_mujoco), then on the robot
-./${bin}                   # sim2sim against unitree_mujoco
-./${bin} --network eth0    # real robot (stop the on-board control program first)`,
+		`# 3. Test in simulation first: start unitree_mujoco, then run
+./${bin}${simFlag}
+# On the robot (stop the on-board control program first), use its Ethernet interface:
+./${bin} --network eth0`,
 	];
 };
 

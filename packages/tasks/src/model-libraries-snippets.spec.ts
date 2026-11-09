@@ -113,7 +113,7 @@ print(output)`);
 	});
 
 	describe("unitree", () => {
-		it("deploys an Isaac Lab velocity policy into unitree_rl_lab", () => {
+		it("drops an Isaac Lab velocity policy where the G1 controller's Velocity state loads it", () => {
 			const snippet = unitree({
 				id: "user/g1-velocity",
 				tags: ["unitree", "unitree-g1-29dof", "isaaclab", "velocity"],
@@ -122,14 +122,21 @@ print(output)`);
 
 			expect(snippet).toContain("git clone https://github.com/unitreerobotics/unitree_rl_lab");
 			expect(snippet).toContain("cd unitree_rl_lab/deploy/robots/g1_29dof");
-			expect(snippet).toContain("hf download user/g1-velocity --local-dir config/policy/hub/g1-velocity");
-			expect(snippet).toContain("#     type: RLBase");
+			expect(snippet).toContain("hf download user/g1-velocity --local-dir config/policy/velocity/v1");
+			expect(snippet).toContain("./g1_ctrl\n");
 			expect(snippet).toContain("./g1_ctrl --network eth0");
 			expect(snippet).not.toContain("ROBOT");
-			expect(snippet).not.toContain("motion_file");
+			expect(snippet).not.toContain("config.yaml");
 		});
 
-		it("deploys an mjlab mimic policy into unitree_rl_mjlab with its motion file", () => {
+		it("uses the training log folder for unitree_rl_lab robots without a shipped policy", () => {
+			const snippet = unitree({ id: "user/go2", tags: ["unitree-go2", "isaaclab"], inference: "" }).join("\n");
+
+			expect(snippet).toContain("--local-dir ../../../logs/rsl_rl/unitree_go2_velocity/v1");
+			expect(snippet).toContain("./go2_ctrl");
+		});
+
+		it("adds an mjlab mimic policy as a new controller state with its motion file", () => {
 			const snippet = unitree({
 				id: "user/g1-dance",
 				tags: ["unitree", "unitree-g1-29dof", "mjlab", "mimic"],
@@ -137,9 +144,25 @@ print(output)`);
 			}).join("\n");
 
 			expect(snippet).toContain("cd unitree_rl_mjlab/deploy/robots/g1");
-			expect(snippet).toContain("#     type: Mimic");
-			expect(snippet).toContain("#     motion_file: config/policy/hub/g1-dance/params/motion.npz");
+			expect(snippet).toContain("hf download user/g1-dance --local-dir config/policy/mimic/g1-dance");
+			expect(snippet).toContain("#       Mimic_Hub: {id: 110, type: Mimic}");
+			expect(snippet).toContain("#       policy_dir: config/policy/mimic/g1-dance/");
+			expect(snippet).toContain("#       motion_file: config/policy/mimic/g1-dance/params/motion.npz");
 			expect(snippet).not.toContain("fps");
+			expect(snippet).toContain("./g1_ctrl --network=lo");
+		});
+
+		it("reads only tags, not config or card data", () => {
+			const fromTags = unitree({ id: "user/p", tags: ["unitree-go2", "mjlab"], inference: "" });
+			const withNoise = unitree({
+				id: "user/p",
+				tags: ["unitree-go2", "mjlab"],
+				inference: "",
+				config: { architectures: ["something"] },
+				cardData: { base_model: "x" },
+			} as ModelData);
+
+			expect(withNoise).toEqual(fromTags);
 		});
 
 		it.each([
