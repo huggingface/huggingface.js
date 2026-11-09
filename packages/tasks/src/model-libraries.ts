@@ -129,7 +129,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Asimov",
 		repoUrl: "https://github.com/menloresearch/humanoid-policy-viewer",
 		snippets: snippets.asimov,
-		filter: false,
+		filter: true,
 		countDownloads: `path:"env.yaml"`,
 	},
 	"aviation-ner": {
@@ -911,6 +911,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/KittenML/KittenTTS",
 		snippets: snippets.kittentts,
 	},
+	konfai: {
+		prettyLabel: "KonfAI",
+		repoName: "KonfAI",
+		repoUrl: "https://github.com/fideus-labs/KonfAI",
+		docsUrl: "https://konfai.readthedocs.io/en/latest/usage/apps.html",
+		snippets: snippets.konfai,
+		filter: false,
+		countDownloads: `path_filename:"app" AND path_extension:"json"`,
+	},
 	kronos: {
 		prettyLabel: "KRONOS",
 		repoName: "KRONOS",
@@ -1003,6 +1012,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/limxdynamics/limxdynamics",
 		filter: false,
 		countDownloads: `(path_filename:"params" AND path_extension:"yaml") OR (path_filename:"controllers" AND path_extension:"yaml") OR (path_filename:"norm_stats" AND path_extension:"json")`,
+	},
+	"lingbot-map": {
+		prettyLabel: "LingBot-Map",
+		repoName: "lingbot-map",
+		repoUrl: "https://github.com/Robbyant/lingbot-map",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
@@ -1297,6 +1313,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	opendecision: {
+		prettyLabel: "OpenDecision",
+		repoName: "OpenDecision",
+		repoUrl: "https://github.com/tokz-labs/OpenDecision",
+		snippets: snippets.opendecision,
+		filter: false,
+	},
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
 		repoName: "OpenPeerLLM",
@@ -1386,6 +1409,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pocket_tts,
 		filter: false,
 		countDownloads: `path:"tts_b6369a24.safetensors"`,
+	},
+	protomotions: {
+		prettyLabel: "ProtoMotions",
+		repoName: "ProtoMotions",
+		repoUrl: "https://github.com/NVlabs/ProtoMotions",
+		docsUrl: "https://nvlabs.github.io/ProtoMotions/",
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR ((path_filename:"inference_last" OR path_filename:"inference" OR path_filename:"last") AND path_extension:"ckpt")`,
 	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
