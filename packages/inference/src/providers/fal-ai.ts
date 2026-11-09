@@ -254,6 +254,13 @@ export class FalAITextToImageTask extends FalAiQueueTask implements TextToImageT
 			prompt: params.args.inputs,
 		};
 
+		// fal expects the output resolution as an `image_size` object, not top-level width/height
+		if (typeof payload.width === "number" && typeof payload.height === "number") {
+			payload.image_size = { width: payload.width, height: payload.height };
+			delete payload.width;
+			delete payload.height;
+		}
+
 		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
 			payload.loras = [
 				{
@@ -330,13 +337,19 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 		const imageDataUrl = `data:${mimeType};base64,${base64FromBytes(
 			new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer()),
 		)}`;
+		const parameters: Record<string, unknown> = { ...(args.parameters as Record<string, unknown>) };
+		// fal expects the output resolution as `image_size`
+		if (parameters.target_size !== undefined) {
+			parameters.image_size = parameters.target_size;
+			delete parameters.target_size;
+		}
 		return {
 			...omit(args, ["inputs", "parameters"]),
-			...args.parameters,
+			...parameters,
 			image_url: imageDataUrl,
 			// Some fal endpoints (e.g. FLUX.2-dev) expect `image_urls` (array) instead of `image_url`
 			image_urls: [imageDataUrl],
-		} as RequestArgs;
+		} as unknown as RequestArgs;
 	}
 
 	override async getResponse(
