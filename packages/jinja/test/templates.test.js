@@ -6516,6 +6516,44 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Generation tags", () => {
+		it.each([
+			{
+				name: "preserves whitespace around plain tags",
+				source: `A {% generation %} B {% endgeneration %} C`,
+				expected: "A  B  C",
+			},
+			{
+				name: "strips Unicode whitespace with both modifiers",
+				source: `A\u200b \u00a0\t{%- generation -%}\u2028\u3000B\u2003{%- endgeneration -%}\ufeff C`,
+				expected: "A\u200bBC",
+			},
+			{
+				name: "keeps whitespace already consumed by the preceding tag",
+				source: `A{% generation %}  {%- endgeneration %}B`,
+				expected: "A  B",
+			},
+			{
+				name: "combines block options with strip modifiers",
+				source: `A \t{%- generation %}\nB {% endgeneration -%}\r\n C`,
+				expected: "AB C",
+			},
+		])("$name", ({ source, expected }) => {
+			expect(new Template(source).render()).toBe(expected);
+		});
+
+		it("handles long whitespace without quadratic preprocessing", () => {
+			const padding = " ".repeat(160_000);
+			// Include both a delimiter and the keyword so substring guards cannot hide the slow path.
+			const source = `{% if true %}${padding}generation{% endif %}`;
+			const start = performance.now();
+			const template = new Template(source);
+			// Allow ample headroom; the quadratic regex takes several seconds for this input.
+			expect(performance.now() - start).toBeLessThan(2_000);
+			expect(template.render()).toBe(`${padding}generation`);
+		});
+	});
+
 	describe("Member access", () => {
 		it.each([3, -4])("returns undefined for out-of-range string index %i", (index) => {
 			const template = new Template(

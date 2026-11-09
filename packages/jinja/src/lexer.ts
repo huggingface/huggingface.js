@@ -145,10 +145,22 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 	// See https://github.com/huggingface/transformers/pull/30650 for more information.
 	// Also honors `{%-` / `-%}` whitespace-stripping modifiers by trimming
 	// surrounding whitespace before removing the tag.
-	return template.replace(
-		/(\s*){%(-?)\s*(?:end)?generation\s*(-?)%}(\s*)/gs,
-		(_, before, lstrip, rstrip, after) => (lstrip ? "" : before) + (rstrip ? "" : after),
-	);
+	let result = "";
+	let lastIndex = 0;
+	// Start at a literal delimiter so unmatched whitespace is never scanned repeatedly.
+	for (const match of template.matchAll(/{%(-?)\s*(?:end)?generation\s*(-?)%}(\s*)/gs)) {
+		const [tag, lstrip, rstrip, after] = match;
+		let endIndex = match.index;
+		if (lstrip) {
+			// Whitespace consumed by a preceding tag belongs to that tag's right strip.
+			while (endIndex > lastIndex && isWhitespace(template[endIndex - 1])) {
+				--endIndex;
+			}
+		}
+		result += template.slice(lastIndex, endIndex) + (rstrip ? "" : after);
+		lastIndex = match.index + tag.length;
+	}
+	return result + template.slice(lastIndex);
 }
 
 /**
