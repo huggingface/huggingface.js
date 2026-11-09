@@ -3155,10 +3155,7 @@ export const unitree = (model: ModelData): string[] => {
 	const dir = robot?.[framework];
 	const robotDir = dir ?? "ROBOT";
 	const bin = dir && robot ? robot.bin : "ROBOT_ctrl";
-	const supported = Object.values(UNITREE_ROBOTS)
-		.map((r) => r[framework])
-		.filter((d): d is string => d !== undefined);
-	const prefix = dir ? "" : `# Replace ROBOT with the robot named in the model card (${supported.join(", ")}).\n`;
+	const prefix = dir ? "" : `# Replace ROBOT with the robot named in the model card.\n`;
 	const name = model.id.split("/").pop() ?? model.id;
 	const simFlag = framework === "mjlab" ? " --network=lo" : "";
 
@@ -3188,20 +3185,20 @@ ${motion}`;
 			framework === "mjlab" || dir === "g1_29dof"
 				? "config/policy/velocity"
 				: `../../../logs/rsl_rl/unitree_${robotDir}_velocity`;
-		install = `# The Velocity state runs the last policy folder in ${velocityDir} (after the shipped ones)
+		install = `# The Velocity state runs the last policy folder in ${velocityDir}
 hf download ${model.id} --local-dir ${velocityDir}/v1`;
 	}
 
 	return [
-		`${prefix}# 1. Get the deploy controller and the policy (exported/policy.onnx + params/deploy.yaml)
+		`${prefix}# 1. Get the deploy controller and the policy
 git clone https://github.com/unitreerobotics/${repo}
 cd ${repo}/deploy/robots/${robotDir}
 ${install}`,
-		`# 2. Build the controller (requires unitree_sdk2)
+		`# 2. Build the controller
 mkdir -p build && cd build && cmake .. && make`,
 		`# 3. Test in simulation first: start unitree_mujoco, then run
 ./${bin}${simFlag}`,
-		`# 4. Run on the robot (stop the on-board control program first), over its Ethernet interface
+		`# 4. Run on the robot, over its Ethernet interface
 ./${bin} --network eth0`,
 	];
 };

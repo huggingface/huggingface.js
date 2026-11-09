@@ -135,9 +135,7 @@ print(output)`);
 			expect(sections).toHaveLength(4);
 			expect(sections[2]).toContain("./g1_ctrl --network=lo");
 			expect(sections[2]).not.toContain("eth0");
-			expect(sections[3]).toBe(
-				"# 4. Run on the robot (stop the on-board control program first), over its Ethernet interface\n./g1_ctrl --network eth0",
-			);
+			expect(sections[3]).toBe("# 4. Run on the robot, over its Ethernet interface\n./g1_ctrl --network eth0");
 		});
 
 		it("uses the training log folder for unitree_rl_lab robots without a shipped policy", () => {
