@@ -676,14 +676,9 @@ export const SKUS = {
 				releaseYear: 2026,
 			},
 			"Apple M6": {
-				// Measured FP16 FMA throughput for the 12-core GPU (Table I):
-				// https://arxiv.org/html/2609.32237v1
 				tflops: 8.46,
-				// https://www.apple.com/shop/buy-mac/macbook-pro/14-inch-m6
 				memory: [16, 24, 32],
-				// Approximate price of a 14-inch MacBook Pro with 32GB unified memory.
 				msrp: 2_400,
-				// Estimated package power; Apple does not publish SoC TDP.
 				power: 25,
 				releaseYear: 2026,
 			},
