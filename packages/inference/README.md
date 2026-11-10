@@ -49,15 +49,9 @@ You can send inference requests to third-party providers with the inference clie
 Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
-- [Novita](https://novita.ai)
-- [Nscale](https://nscale.com)
 - [OpenRouter](https://openrouter.ai)
 - [Replicate](https://replicate.com)
-- [Scaleway](https://www.scaleway.com/en/generative-apis/)
-- [Together](https://together.xyz)
-- [DeepInfra](https://deepinfra.com)
 - [Wavespeed.ai](https://wavespeed.ai/)
-- [Z.ai](https://z.ai/)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. The default value of the `provider` parameter is "auto", which will select the first of the providers available for the model, sorted by your preferred order in https://hf.co/settings/inference-providers.
 
@@ -81,15 +75,9 @@ Chat completion (`chatCompletion` and `chatCompletionStream`) always goes throug
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
 - [HF Inference supported models](https://huggingface.co/api/partners/hf-inference/models)
-- [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
 - [OpenRouter supported models](https://huggingface.co/api/partners/openrouter/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
-- [Scaleway supported models](https://huggingface.co/api/partners/scaleway/models)
-- [Together supported models](https://huggingface.co/api/partners/together/models)
-- [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
-- [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
-- [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
 This is not an issue for LLMs as everyone converged on the OpenAI API anyways, but can be more tricky for other tasks like "text-to-image" or "automatic-speech-recognition" where there exists no standard API. Let us know if any help is needed or if we can make things easier for you!

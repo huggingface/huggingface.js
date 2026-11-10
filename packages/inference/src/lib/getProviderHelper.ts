@@ -1,8 +1,5 @@
-import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
 import * as HFInference from "../providers/hf-inference.js";
-import * as Novita from "../providers/novita.js";
-import * as Nscale from "../providers/nscale.js";
 import * as OpenRouter from "../providers/openrouter.js";
 import type {
 	AudioClassificationTaskHelper,
@@ -41,20 +38,11 @@ import type {
 	ZeroShotImageClassificationTaskHelper,
 } from "../providers/providerHelper.js";
 import * as Replicate from "../providers/replicate.js";
-import * as Scaleway from "../providers/scaleway.js";
-import * as Together from "../providers/together.js";
 import * as Wavespeed from "../providers/wavespeed.js";
-import * as Zai from "../providers/zai-org.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
-	deepinfra: {
-		"automatic-speech-recognition": new DeepInfra.DeepInfraAutomaticSpeechRecognitionTask(),
-		"feature-extraction": new DeepInfra.DeepInfraFeatureExtractionTask(),
-		"text-to-image": new DeepInfra.DeepInfraTextToImageTask(),
-		"text-to-speech": new DeepInfra.DeepInfraTextToSpeechTask(),
-	},
 	"fal-ai": {
 		"audio-to-audio": new FalAI.FalAIAudioToAudioTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
@@ -99,13 +87,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"tabular-regression": new HFInference.HFInferenceTabularRegressionTask(),
 		"text-to-audio": new HFInference.HFInferenceTextToAudioTask(),
 	},
-	novita: {
-		"image-text-to-video": new Novita.NovitaImageTextToVideoTask(),
-		"text-to-video": new Novita.NovitaTextToVideoTask(),
-	},
-	nscale: {
-		"text-to-image": new Nscale.NscaleTextToImageTask(),
-	},
 	openrouter: {
 		conversational: new OpenRouter.OpenRouterConversationalTask(),
 	},
@@ -116,18 +97,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"image-to-image": new Replicate.ReplicateImageToImageTask(),
 		"automatic-speech-recognition": new Replicate.ReplicateAutomaticSpeechRecognitionTask(),
 	},
-	scaleway: {
-		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
-	},
-	together: {
-		"text-to-image": new Together.TogetherTextToImageTask(),
-		"image-to-image": new Together.TogetherImageToImageTask(),
-		"text-to-video": new Together.TogetherTextToVideoTask(),
-		"image-to-video": new Together.TogetherImageToVideoTask(),
-		"feature-extraction": new Together.TogetherFeatureExtractionTask(),
-		"text-to-speech": new Together.TogetherTextToSpeechTask(),
-		"automatic-speech-recognition": new Together.TogetherAutomaticSpeechRecognitionTask(),
-	},
 	wavespeed: {
 		"text-to-image": new Wavespeed.WavespeedAITextToImageTask(),
 		"text-to-video": new Wavespeed.WavespeedAITextToVideoTask(),
@@ -135,10 +104,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"image-to-video": new Wavespeed.WavespeedAIImageToVideoTask(),
 		"image-text-to-image": new Wavespeed.WavespeedAIImageTextToImageTask(),
 		"image-text-to-video": new Wavespeed.WavespeedAIImageTextToVideoTask(),
-	},
-	"zai-org": {
-		"text-to-image": new Zai.ZaiTextToImageTask(),
-		"image-to-text": new Zai.ZaiImageToTextTask(),
 	},
 };
 

@@ -18,15 +18,9 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	 * Example:
 	 * "Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",
 	 */
-	deepinfra: {},
 	"fal-ai": {},
 	"hf-inference": {},
-	novita: {},
-	nscale: {},
 	openrouter: {},
 	replicate: {},
-	scaleway: {},
-	together: {},
 	wavespeed: {},
-	"zai-org": {},
 };
