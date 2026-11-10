@@ -14,12 +14,11 @@
  *
  * Thanks!
  */
-import type { FeatureExtractionOutput, TextGenerationOutput } from "@huggingface/tasks";
+import type { FeatureExtractionOutput } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
-import { InferenceClientProviderOutputError } from "../errors.js";
 
 import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
-import { TaskProviderHelper, BaseTextGenerationTask } from "./providerHelper.js";
+import { TaskProviderHelper } from "./providerHelper.js";
 
 const SCALEWAY_API_BASE_URL = "https://api.scaleway.ai";
 
@@ -27,44 +26,6 @@ interface ScalewayEmbeddingsResponse {
 	data: Array<{
 		embedding: number[];
 	}>;
-}
-
-export class ScalewayTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("scaleway", SCALEWAY_API_BASE_URL);
-	}
-
-	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
-			model: params.model,
-			...params.args,
-			prompt: params.args.inputs,
-		};
-	}
-
-	override async getResponse(response: unknown): Promise<TextGenerationOutput> {
-		if (
-			typeof response === "object" &&
-			response !== null &&
-			"choices" in response &&
-			Array.isArray(response.choices) &&
-			response.choices.length > 0
-		) {
-			const completion: unknown = response.choices[0];
-			if (
-				typeof completion === "object" &&
-				!!completion &&
-				"text" in completion &&
-				completion.text &&
-				typeof completion.text === "string"
-			) {
-				return {
-					generated_text: completion.text,
-				};
-			}
-		}
-		throw new InferenceClientProviderOutputError("Received malformed response from Scaleway text generation API");
-	}
 }
 
 export class ScalewayFeatureExtractionTask extends TaskProviderHelper implements FeatureExtractionTaskHelper {

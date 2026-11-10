@@ -19,18 +19,13 @@ model to DeepInfra, please open an issue on the present repo
 * Thanks!
 */
 
-import type {
-	AutomaticSpeechRecognitionOutput,
-	FeatureExtractionOutput,
-	TextGenerationOutput,
-} from "@huggingface/tasks";
+import type { AutomaticSpeechRecognitionOutput, FeatureExtractionOutput } from "@huggingface/tasks";
 import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { BodyParams, OutputType, RequestArgs } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
-	BaseTextGenerationTask,
 	type FeatureExtractionTaskHelper,
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
@@ -66,15 +61,6 @@ function mimeTypeToExtension(mimeType: string | undefined): string {
 	return AUDIO_MIME_TO_EXT[baseType] ?? "wav";
 }
 
-interface DeepInfraCompletionChoice {
-	text?: string;
-}
-
-interface DeepInfraCompletionResponse {
-	choices: DeepInfraCompletionChoice[];
-	model: string;
-}
-
 interface DeepInfraAudioTranscriptionSegment {
 	start: number;
 	end: number;
@@ -101,50 +87,6 @@ interface DeepInfraImageGenerationResponse {
 		b64_json?: string;
 		url?: string;
 	}>;
-}
-
-export class DeepInfraTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("deepinfra", DEEPINFRA_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "v1/openai/completions";
-	}
-
-	override preparePayload(params: BodyParams): Record<string, unknown> {
-		const parameters = params.args.parameters as Record<string, unknown> | undefined;
-		const res = {
-			model: params.model,
-			prompt: params.args.inputs,
-			...omit(params.args, ["inputs", "parameters"]),
-			...(parameters
-				? {
-						max_tokens: parameters.max_new_tokens,
-						...omit(parameters, ["max_new_tokens"]),
-					}
-				: undefined),
-		};
-		return res;
-	}
-
-	override async getResponse(response: DeepInfraCompletionResponse): Promise<TextGenerationOutput> {
-		if (
-			typeof response === "object" &&
-			response !== null &&
-			Array.isArray(response.choices) &&
-			response.choices.length > 0
-		) {
-			const completion = response.choices[0].text;
-			if (typeof completion === "string") {
-				return { generated_text: completion };
-			}
-		}
-
-		throw new InferenceClientProviderOutputError(
-			"Received malformed response from DeepInfra text-generation API: expected OpenAI completion payload",
-		);
-	}
 }
 
 export class DeepInfraAutomaticSpeechRecognitionTask

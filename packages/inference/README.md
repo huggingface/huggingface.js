@@ -48,17 +48,14 @@ You can send inference requests to third-party providers with the inference clie
 
 Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
-- [Featherless AI](https://featherless.ai)
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
 - [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
 - [OpenRouter](https://openrouter.ai)
-- [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
 - [Replicate](https://replicate.com)
 - [Scaleway](https://www.scaleway.com/en/generative-apis/)
 - [Together](https://together.xyz)
 - [DeepInfra](https://deepinfra.com)
-- [Groq](https://groq.com)
 - [Wavespeed.ai](https://wavespeed.ai/)
 - [Z.ai](https://z.ai/)
 
@@ -83,16 +80,13 @@ Chat completion (`chatCompletion` and `chatCompletionStream`) always goes throug
 
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
-- [Featherless AI supported models](https://huggingface.co/api/partners/featherless-ai/models)
 - [HF Inference supported models](https://huggingface.co/api/partners/hf-inference/models)
 - [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
 - [OpenRouter supported models](https://huggingface.co/api/partners/openrouter/models)
-- [OVHcloud supported models](https://huggingface.co/api/partners/ovhcloud/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Scaleway supported models](https://huggingface.co/api/partners/scaleway/models)
 - [Together supported models](https://huggingface.co/api/partners/together/models)
 - [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
-- [Groq supported models](https://console.groq.com/docs/models)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
 - [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
@@ -226,18 +220,16 @@ This error occurs when input parameters are invalid or missing. The error messag
 
 #### Text Generation
 
-Generates text from an input prompt.
+Generates text from an input prompt. Third-party providers serve LLMs through [Chat Completion](#chat-completion) only, so text generation runs on `hf-inference` or on your own endpoint (`endpointUrl`, see [Using Inference Endpoints](#using-inference-endpoints)).
 
 ```typescript
-await hf.textGeneration({
-  model: 'mistralai/Mixtral-8x7B-v0.1',
-  provider: "together",
+const endpoint = hf.endpoint("https://<your-endpoint>.endpoints.huggingface.cloud");
+
+await endpoint.textGeneration({
   inputs: 'The answer to the universe is'
 })
 
-for await (const output of hf.textGenerationStream({
-  model: "mistralai/Mixtral-8x7B-v0.1",
-  provider: "together",
+for await (const output of endpoint.textGenerationStream({
   inputs: 'repeat "one two three four"',
   parameters: { max_new_tokens: 250 }
 })) {

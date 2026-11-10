@@ -20,13 +20,10 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	 */
 	deepinfra: {},
 	"fal-ai": {},
-	"featherless-ai": {},
-	groq: {},
 	"hf-inference": {},
 	novita: {},
 	nscale: {},
 	openrouter: {},
-	ovhcloud: {},
 	replicate: {},
 	scaleway: {},
 	together: {},

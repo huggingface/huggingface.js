@@ -21,12 +21,7 @@ import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import {
-	BaseTextGenerationTask,
-	type ImageTextToVideoTaskHelper,
-	TaskProviderHelper,
-	type TextToVideoTaskHelper,
-} from "./providerHelper.js";
+import { type ImageTextToVideoTaskHelper, TaskProviderHelper, type TextToVideoTaskHelper } from "./providerHelper.js";
 import {
 	InferenceClientInputError,
 	InferenceClientProviderApiError,
@@ -72,16 +67,6 @@ interface NovitaImageTextToVideoResponse {
 		content?: { url: string };
 		error?: { message?: string };
 	};
-}
-
-export class NovitaTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("novita", NOVITA_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "/v3/openai/chat/completions";
-	}
 }
 
 export class NovitaImageTextToVideoTask extends TaskProviderHelper implements ImageTextToVideoTaskHelper {

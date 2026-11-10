@@ -1,12 +1,9 @@
 import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
-import * as FeatherlessAI from "../providers/featherless-ai.js";
-import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenRouter from "../providers/openrouter.js";
-import * as OvhCloud from "../providers/ovhcloud.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -55,7 +52,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	deepinfra: {
 		"automatic-speech-recognition": new DeepInfra.DeepInfraAutomaticSpeechRecognitionTask(),
 		"feature-extraction": new DeepInfra.DeepInfraFeatureExtractionTask(),
-		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
 		"text-to-image": new DeepInfra.DeepInfraTextToImageTask(),
 		"text-to-speech": new DeepInfra.DeepInfraTextToSpeechTask(),
 	},
@@ -71,9 +67,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new FalAI.FalAITextToImageTask(),
 		"text-to-speech": new FalAI.FalAITextToSpeechTask(),
 		"text-to-video": new FalAI.FalAITextToVideoTask(),
-	},
-	"featherless-ai": {
-		"text-generation": new FeatherlessAI.FeatherlessAITextGenerationTask(),
 	},
 	"hf-inference": {
 		"text-to-image": new HFInference.HFInferenceTextToImageTask(),
@@ -106,12 +99,8 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"tabular-regression": new HFInference.HFInferenceTabularRegressionTask(),
 		"text-to-audio": new HFInference.HFInferenceTextToAudioTask(),
 	},
-	groq: {
-		"text-generation": new Groq.GroqTextGenerationTask(),
-	},
 	novita: {
 		"image-text-to-video": new Novita.NovitaImageTextToVideoTask(),
-		"text-generation": new Novita.NovitaTextGenerationTask(),
 		"text-to-video": new Novita.NovitaTextToVideoTask(),
 	},
 	nscale: {
@@ -119,9 +108,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	openrouter: {
 		conversational: new OpenRouter.OpenRouterConversationalTask(),
-	},
-	ovhcloud: {
-		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
 	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
@@ -131,7 +117,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"automatic-speech-recognition": new Replicate.ReplicateAutomaticSpeechRecognitionTask(),
 	},
 	scaleway: {
-		"text-generation": new Scaleway.ScalewayTextGenerationTask(),
 		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
 	},
 	together: {
@@ -139,7 +124,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"image-to-image": new Together.TogetherImageToImageTask(),
 		"text-to-video": new Together.TogetherTextToVideoTask(),
 		"image-to-video": new Together.TogetherImageToVideoTask(),
-		"text-generation": new Together.TogetherTextGenerationTask(),
 		"feature-extraction": new Together.TogetherFeatureExtractionTask(),
 		"text-to-speech": new Together.TogetherTextToSpeechTask(),
 		"automatic-speech-recognition": new Together.TogetherAutomaticSpeechRecognitionTask(),

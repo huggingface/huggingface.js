@@ -2,7 +2,7 @@ import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { HfInference, InferenceClient, textGeneration } from "../src/index.js";
+import { HfInference, InferenceClient } from "../src/index.js";
 import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../src/providers/consts.js";
 import { readTestFile } from "./test-files.js";
 
@@ -1082,44 +1082,6 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
-		"Featherless",
-		() => {
-			HARDCODED_MODEL_INFERENCE_MAPPING["featherless-ai"] = {
-				"meta-llama/Llama-3.1-8B": {
-					provider: "featherless-ai",
-					providerId: "meta-llama/Meta-Llama-3.1-8B",
-					hfModelId: "meta-llama/Llama-3.1-8B",
-					task: "text-generation",
-					status: "live",
-				},
-				"meta-llama/Llama-3.1-8B-Instruct": {
-					provider: "featherless-ai",
-					providerId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
-					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
-					task: "text-generation",
-					status: "live",
-				},
-			};
-
-			it("textGeneration", async () => {
-				const res = await textGeneration({
-					accessToken: env.HF_FEATHERLESS_KEY ?? "dummy",
-					model: "meta-llama/Llama-3.1-8B",
-					provider: "featherless-ai",
-					inputs: "Paris is a city of ",
-					parameters: {
-						temperature: 0,
-						top_p: 0.01,
-						max_tokens: 10,
-					},
-				});
-				expect(res).toMatchObject({ generated_text: "2.2 million people, and it is the" });
-			});
-		},
-		TIMEOUT,
-	);
-
-	describe.concurrent(
 		"Replicate",
 		() => {
 			const client = new InferenceClient(env.HF_REPLICATE_KEY ?? "dummy");
@@ -1255,17 +1217,6 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
-
-			it("textGeneration", async () => {
-				const res = await client.textGeneration({
-					model: "mistralai/Mixtral-8x7B-v0.1",
-					provider: "together",
-					inputs: "Paris is",
-					temperature: 0,
-					max_tokens: 10,
-				});
-				expect(res).toMatchObject({ generated_text: " a city of love, and it’s also" });
-			});
 		},
 		TIMEOUT,
 	);
@@ -1292,21 +1243,6 @@ describe.skip("InferenceClient", () => {
 				},
 			};
 
-			it("textGeneration", async () => {
-				const res = await client.textGeneration({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "scaleway",
-					inputs: "Once upon a time,",
-					temperature: 0,
-					max_tokens: 19,
-				});
-
-				expect(res).toMatchObject({
-					generated_text:
-						" in a small village nestled in the rolling hills of the countryside, there lived a young girl named",
-				});
-			});
-
 			it("featureExtraction", async () => {
 				const res = await client.featureExtraction({
 					model: "BAAI/bge-multilingual-gemma2",
@@ -1326,9 +1262,6 @@ describe.skip("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.DEEPINFRA_API_KEY ?? env.HF_DEEPINFRA_KEY ?? "dummy");
 
-			const HF_MODEL = "google/gemma-3-4b-it";
-			const PROVIDER_ID = "google/gemma-3-4b-it";
-
 			const ASR_HF_MODEL = "nvidia/nemotron-3.5-asr-streaming-0.6b";
 			const ASR_PROVIDER_ID = "nvidia/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b";
 
@@ -1340,18 +1273,6 @@ describe.skip("InferenceClient", () => {
 
 			const T2I_HF_MODEL = "stabilityai/sdxl-turbo";
 			const T2I_PROVIDER_ID = "stabilityai/sdxl-turbo";
-
-			const setMapping = (task: "conversational" | "text-generation") => {
-				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
-					[HF_MODEL]: {
-						provider: "deepinfra",
-						hfModelId: HF_MODEL,
-						providerId: PROVIDER_ID,
-						status: "live",
-						task,
-					},
-				};
-			};
 
 			const setAsrMapping = () => {
 				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
@@ -1400,18 +1321,6 @@ describe.skip("InferenceClient", () => {
 					},
 				};
 			};
-
-			it("textGeneration", async () => {
-				setMapping("text-generation");
-				const generation = await client.textGeneration({
-					model: HF_MODEL,
-					provider: "deepinfra",
-					inputs: "Describe Hugging Face in one short sentence.",
-					parameters: { max_new_tokens: 64 },
-				});
-				expect(typeof generation.generated_text).toBe("string");
-				expect(generation.generated_text?.length ?? 0).toBeGreaterThan(0);
-			});
 
 			it("automaticSpeechRecognition", async () => {
 				setAsrMapping();
@@ -1528,68 +1437,6 @@ describe.skip("InferenceClient", () => {
 						"A cute little kitten sitting on a sunny windowsill, with the background of blue sky and white clouds.",
 				});
 				expect(res).toBeInstanceOf(Blob);
-			});
-		},
-		TIMEOUT,
-	);
-	describe.concurrent(
-		"OVHcloud",
-		() => {
-			const client = new HfInference(env.HF_OVHCLOUD_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["ovhcloud"] = {
-				"meta-llama/llama-3.1-8b-instruct": {
-					provider: "ovhcloud",
-					hfModelId: "meta-llama/llama-3.1-8b-instruct",
-					providerId: "Llama-3.1-8B-Instruct",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("textGeneration", async () => {
-				const res = await client.textGeneration({
-					model: "meta-llama/llama-3.1-8b-instruct",
-					provider: "ovhcloud",
-					inputs: "A B C ",
-					parameters: {
-						seed: 42,
-						temperature: 0,
-						top_p: 0.01,
-						max_new_tokens: 1,
-					},
-				});
-				expect(res.generated_text.length > 0);
-				expect(res.generated_text).toContain("D");
-			});
-
-			it("textGeneration stream", async () => {
-				const stream = client.textGenerationStream({
-					model: "meta-llama/llama-3.1-8b-instruct",
-					provider: "ovhcloud",
-					inputs: "A B C ",
-					stream: true,
-					parameters: {
-						seed: 42,
-						temperature: 0,
-						top_p: 0.01,
-						max_new_tokens: 1,
-					},
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].text;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse).toContain("D");
 			});
 		},
 		TIMEOUT,

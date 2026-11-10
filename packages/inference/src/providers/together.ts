@@ -14,19 +14,12 @@
  *
  * Thanks!
  */
-import type {
-	AutomaticSpeechRecognitionOutput,
-	ChatCompletionOutput,
-	FeatureExtractionOutput,
-	TextGenerationOutput,
-	TextGenerationOutputFinishReason,
-} from "@huggingface/tasks";
+import type { AutomaticSpeechRecognitionOutput, FeatureExtractionOutput } from "@huggingface/tasks";
 import type { BodyParams, OutputType, RequestArgs } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import {
-	BaseTextGenerationTask,
 	TaskProviderHelper,
 	type AutomaticSpeechRecognitionTaskHelper,
 	type FeatureExtractionTaskHelper,
@@ -69,16 +62,6 @@ function mimeTypeToExtension(mimeType: string | undefined): string {
 	return AUDIO_MIME_TO_EXT[mimeType.toLowerCase()] ?? "wav";
 }
 
-interface TogetherTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
-	choices: Array<{
-		text: string;
-		finish_reason: TextGenerationOutputFinishReason;
-		seed: number;
-		logprobs: unknown;
-		index: number;
-	}>;
-}
-
 interface TogetherImageGeneration {
 	data: Array<{
 		b64_json?: string;
@@ -117,39 +100,6 @@ interface TogetherVideoJobResponse {
 	error?: {
 		message?: string;
 	};
-}
-
-export class TogetherTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("together", TOGETHER_API_BASE_URL);
-	}
-
-	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
-			model: params.model,
-			...params.args,
-			prompt: params.args.inputs,
-		};
-	}
-
-	override async getResponse(response: TogetherTextCompletionOutput): Promise<TextGenerationOutput> {
-		if (
-			typeof response === "object" &&
-			"choices" in response &&
-			Array.isArray(response?.choices) &&
-			typeof response?.model === "string"
-		) {
-			const completion = response.choices[0];
-			return {
-				generated_text: completion.text,
-				details: {
-					finish_reason: completion.finish_reason,
-					seed: completion.seed,
-				} as TextGenerationOutput["details"],
-			};
-		}
-		throw new InferenceClientProviderOutputError("Received malformed response from Together text generation API");
-	}
 }
 
 export class TogetherTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
