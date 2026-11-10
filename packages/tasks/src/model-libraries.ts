@@ -307,6 +307,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	chessqueries: {
+		prettyLabel: "ChessQueries",
+		repoName: "chessqueries",
+		repoUrl: "https://github.com/JSeytre/chessqueries",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path:*.mlpackage.zip`,
+	},
 	chexmix: {
 		prettyLabel: "CheXmix",
 		repoName: "CheXmix",
