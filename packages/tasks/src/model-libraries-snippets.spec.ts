@@ -16,6 +16,7 @@ import {
 	llama_cpp_python,
 	microduck,
 	mlAgents,
+	mlx,
 	mlxim,
 	multimolecule,
 	paddlenlp,
@@ -532,6 +533,19 @@ print(output)`);
 					expect(snippet).not.toMatch(/[(=,]\s*org\/some-model/);
 				}
 			}
+		});
+
+		it("mlx: text-generation snippets point Linux users at the mlx-lm backend extras", () => {
+			// `pip install mlx-lm` only pulls in an MLX backend on macOS
+			const textModel = { ...base, pipeline_tag: "text-generation" } as ModelData;
+			const chatModel = { ...textModel, tags: ["conversational"] } as ModelData;
+			for (const [snippet] of [mlx(textModel), mlx(chatModel)]) {
+				expect(snippet).toContain("# pip install --upgrade mlx-lm\n");
+				expect(snippet).toContain(`pip install --upgrade "mlx-lm[cuda12]" (or [cuda13], [cpu])`);
+				expect(snippet).toContain(`model, tokenizer = load("user/model")`);
+			}
+			expect(mlx(chatModel)[0]).toContain("tokenizer.apply_chat_template(");
+			expect(mlx(textModel)[0]).not.toContain("apply_chat_template");
 		});
 
 		it("mlx-image: create_model receives the registry name, not the repo id", () => {

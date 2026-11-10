@@ -189,6 +189,40 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain("pi");
 	});
 
+	it("mlx-lm conversational", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["mlx-lm"];
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet).toHaveLength(2);
+		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
+		expect(snippet[0].content).toContain('mlx_lm.chat --model "mlx-community/Llama-3.2-3B-Instruct-4bit"');
+		expect(snippet[1].content).toContain('mlx_lm.server --model "mlx-community/Llama-3.2-3B-Instruct-4bit"');
+		// the curl example has to target the port mlx_lm.server listens on by default
+		expect(snippet[1].content).toContain('curl -X POST "http://localhost:8080/v1/chat/completions"');
+	});
+
+	it("mlx-lm non-conversational", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["mlx-lm"];
+		const model: ModelData = {
+			id: "mlx-community/gemma-2b",
+			tags: ["mlx"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet).toHaveLength(1);
+		expect(snippet[0].content).toContain(
+			'mlx_lm.generate --model "mlx-community/gemma-2b" --prompt "Once upon a time"',
+		);
+	});
+
 	it("hermes-agent", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["hermes-agent"];
 		const model: ModelData = {
