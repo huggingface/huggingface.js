@@ -48,25 +48,10 @@ You can send inference requests to third-party providers with the inference clie
 
 Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
-- [Featherless AI](https://featherless.ai)
-- [Fireworks AI](https://fireworks.ai)
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
-- [Humain AI](https://node.humain.com/)
-- [Novita](https://novita.ai)
-- [Nscale](https://nscale.com)
 - [OpenRouter](https://openrouter.ai)
-- [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
-- [Public AI](https://publicai.co)
 - [Replicate](https://replicate.com)
-- [Scaleway](https://www.scaleway.com/en/generative-apis/)
-- [Together](https://together.xyz)
-- [Baseten](https://baseten.co)
-- [Cohere](https://cohere.com)
-- [Cerebras](https://cerebras.ai/)
-- [DeepInfra](https://deepinfra.com)
-- [Groq](https://groq.com)
 - [Wavespeed.ai](https://wavespeed.ai/)
-- [Z.ai](https://z.ai/)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. The default value of the `provider` parameter is "auto", which will select the first of the providers available for the model, sorted by your preferred order in https://hf.co/settings/inference-providers.
 
@@ -85,28 +70,14 @@ You also have to make sure your request is authenticated with an access token.
 When authenticated with a Hugging Face access token, the request is routed through https://huggingface.co.
 When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
 
-Chat completion with a Hugging Face access token goes through the router's https://router.huggingface.co/v1/chat/completions, with the provider pinned as `model:provider`.
+Chat completion (`chatCompletion` and `chatCompletionStream`) with a Hugging Face access token goes through the router at https://router.huggingface.co/v1/chat/completions. The router picks a provider for the model, or runs it on the one you pass as `provider` (sent as `model:provider`, e.g. `"together"`). With a provider API key, it calls that provider directly. To list the providers serving a model, check its model page on the Hub.
 
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
-- [Featherless AI supported models](https://huggingface.co/api/partners/featherless-ai/models)
-- [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
 - [HF Inference supported models](https://huggingface.co/api/partners/hf-inference/models)
-- [Humain AI supported models](https://huggingface.co/api/partners/humain-ai/models)
-- [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
 - [OpenRouter supported models](https://huggingface.co/api/partners/openrouter/models)
-- [OVHcloud supported models](https://huggingface.co/api/partners/ovhcloud/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
-- [Scaleway supported models](https://huggingface.co/api/partners/scaleway/models)
-- [Together supported models](https://huggingface.co/api/partners/together/models)
-- [Baseten supported models](https://huggingface.co/api/partners/baseten/models)
-- [Cohere supported models](https://huggingface.co/api/partners/cohere/models)
-- [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
-- [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
-- [Groq supported models](https://console.groq.com/docs/models)
-- [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
-- [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
 This is not an issue for LLMs as everyone converged on the OpenAI API anyways, but can be more tricky for other tasks like "text-to-image" or "automatic-speech-recognition" where there exists no standard API. Let us know if any help is needed or if we can make things easier for you!
@@ -237,18 +208,16 @@ This error occurs when input parameters are invalid or missing. The error messag
 
 #### Text Generation
 
-Generates text from an input prompt.
+Generates text from an input prompt, on `hf-inference` or on your own endpoint (see [Using Inference Endpoints](#using-inference-endpoints)). For LLMs served by third-party providers, use [Chat Completion](#chat-completion).
 
 ```typescript
-await hf.textGeneration({
-  model: 'mistralai/Mixtral-8x7B-v0.1',
-  provider: "together",
+const endpoint = hf.endpoint("https://<your-endpoint>.endpoints.huggingface.cloud");
+
+await endpoint.textGeneration({
   inputs: 'The answer to the universe is'
 })
 
-for await (const output of hf.textGenerationStream({
-  model: "mistralai/Mixtral-8x7B-v0.1",
-  provider: "together",
+for await (const output of endpoint.textGenerationStream({
   inputs: 'repeat "one two three four"',
   parameters: { max_new_tokens: 250 }
 })) {
@@ -263,8 +232,8 @@ Generate a model response from a list of messages comprising a conversation.
 ```typescript
 // Non-streaming API
 const out = await hf.chatCompletion({
-  model: "Qwen/Qwen3-32B",
-  provider: "cerebras",
+  model: "deepseek-ai/DeepSeek-V4.1-Flash",
+  provider: "together", // optional, the router picks one by default
   messages: [{ role: "user", content: "Hello, nice to meet you!" }],
   max_tokens: 512,
   temperature: 0.1,
@@ -273,8 +242,8 @@ const out = await hf.chatCompletion({
 // Streaming API
 let out = "";
 for await (const chunk of hf.chatCompletionStream({
-  model: "Qwen/Qwen3-32B",
-  provider: "cerebras",
+  model: "deepseek-ai/DeepSeek-V4.1-Flash",
+  provider: "together",
   messages: [
     { role: "user", content: "Can you help me solve an equation?" },
   ],
