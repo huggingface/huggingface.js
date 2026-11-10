@@ -6,7 +6,7 @@ const client = new OpenAI({
 });
 
 const stream = await client.chat.completions.create({
-    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:together",
+    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
     messages: [
         {
             role: "user",

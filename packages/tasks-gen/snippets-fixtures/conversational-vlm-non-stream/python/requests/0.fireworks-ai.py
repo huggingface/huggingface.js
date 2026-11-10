@@ -1,14 +1,17 @@
 import os
-from openai import OpenAI
+import requests
 
-client = OpenAI(
-    base_url="https://router.huggingface.co/v1",
-    api_key=os.environ["HF_TOKEN"],
-)
+API_URL = "https://router.huggingface.co/v1/chat/completions"
+headers = {
+    "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
+}
 
-stream = client.chat.completions.create(
-    model="meta-llama/Llama-3.2-11B-Vision-Instruct:together",
-    messages=[
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+
+response = query({
+    "messages": [
         {
             "role": "user",
             "content": [
@@ -25,8 +28,7 @@ stream = client.chat.completions.create(
             ]
         }
     ],
-    stream=True,
-)
+    "model": "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai"
+})
 
-for chunk in stream:
-    print(chunk.choices[0].delta.content, end="")
+print(response["choices"][0]["message"])

@@ -2,8 +2,10 @@ import { InferenceClient } from "@huggingface/inference";
 
 const client = new InferenceClient(process.env.HF_TOKEN);
 
-const chatCompletion = await client.chatCompletion({
-    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:together",
+let out = "";
+
+const stream = client.chatCompletionStream({
+    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
     messages: [
         {
             role: "user",
@@ -23,4 +25,10 @@ const chatCompletion = await client.chatCompletion({
     ],
 });
 
-console.log(chatCompletion.choices[0].message);
+for await (const chunk of stream) {
+	if (chunk.choices && chunk.choices.length > 0) {
+		const newContent = chunk.choices[0].delta.content;
+		out += newContent;
+		console.log(newContent);
+	}
+}

@@ -19,6 +19,6 @@ curl https://router.huggingface.co/v1/chat/completions \
                 ]
             }
         ],
-        "model": "meta-llama/Llama-3.2-11B-Vision-Instruct:together",
+        "model": "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
         "stream": false
     }'

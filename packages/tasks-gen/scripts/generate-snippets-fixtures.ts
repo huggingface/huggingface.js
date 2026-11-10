@@ -79,7 +79,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["hf-inference", "together", "auto"],
+		providers: ["hf-inference", "fireworks-ai", "auto"],
 		opts: { streaming: false },
 	},
 	{
@@ -91,7 +91,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["hf-inference", "together", "auto"],
+		providers: ["hf-inference", "fireworks-ai", "auto"],
 		opts: { streaming: true },
 	},
 	{

@@ -1,12 +1,9 @@
-import { OpenAI } from "openai";
+import { InferenceClient } from "@huggingface/inference";
 
-const client = new OpenAI({
-	baseURL: "https://router.huggingface.co/v1",
-	apiKey: process.env.HF_TOKEN,
-});
+const client = new InferenceClient(process.env.HF_TOKEN);
 
-const chatCompletion = await client.chat.completions.create({
-	model: "meta-llama/Llama-3.2-11B-Vision-Instruct:together",
+const chatCompletion = await client.chatCompletion({
+    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
     messages: [
         {
             role: "user",

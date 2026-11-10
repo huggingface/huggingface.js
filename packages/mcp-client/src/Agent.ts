@@ -58,26 +58,31 @@ export class Agent extends McpClient {
 	public readonly prompt: string;
 	protected messages: ChatCompletionInputMessage[];
 
-	constructor(
-		params: (
-			| {
-					provider: string;
-					endpointUrl?: undefined;
-			  }
-			| {
-					endpointUrl: string;
-					provider?: undefined;
-			  }
-		) & {
-			model: string;
-			apiKey?: string;
-			servers: (ServerConfig | StdioServerParameters)[];
-			prompt?: string;
-		},
-	) {
-		super(params);
-		this.servers = params.servers;
-		this.prompt = params.prompt ?? DEFAULT_SYSTEM_PROMPT;
+	constructor({
+		provider,
+		endpointUrl,
+		model,
+		apiKey,
+		servers,
+		prompt,
+	}: (
+		| {
+				provider: string;
+				endpointUrl?: undefined;
+		  }
+		| {
+				endpointUrl: string;
+				provider?: undefined;
+		  }
+	) & {
+		model: string;
+		apiKey?: string;
+		servers: (ServerConfig | StdioServerParameters)[];
+		prompt?: string;
+	}) {
+		super({ provider, endpointUrl, model, apiKey } as ConstructorParameters<typeof McpClient>[0]);
+		this.servers = servers;
+		this.prompt = prompt ?? DEFAULT_SYSTEM_PROMPT;
 		this.messages = [
 			{
 				role: "system",
