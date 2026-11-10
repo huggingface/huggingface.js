@@ -1,0 +1,32 @@
+---
+source: crate/tests/fixtures.rs
+expression: "out.replace(&dir, \"\")"
+input_file: fixtures/textures.usda
+---
+upAxis Y, metersPerUnit 0.01
+prims 11, meshes 3, triangles 4
+
+instances:
+  /Preview: geometry 0, material 0
+    at (0, 0, 0), world (0, 0, 0)..(1, 1, 0)
+  /OmniPBR: geometry 1, material 1
+    at (0, 0, 0), world (0, 0, 0)..(1, 1, 0)
+  /Quad: geometry 2, material 2
+    at (0, 0, 0), world (-1, -1, 0)..(1, 1, 0)
+
+geometries:
+  0 /Preview: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+  1 /OmniPBR: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+    normals (0, 0, 1) x3
+  2 /Quad: 2 triangles (all outward), 4 vertices, bounds (-1, -1, 0)..(1, 1, 0)
+    normals (0, 0, 1) x4
+
+materials:
+  0 /PreviewMat preview: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0
+    diffuseColor <- missing.png.rgb, value (0, 0, 1)
+    roughness <- missing.png.g, value (0.5, 0.5, 0.5)
+    occlusion <- missing.png.r, value (1, 1, 1)
+  1 /OmniPBRMat omnipbr: color (1, 1, 1), opacity 1, roughness 0.5, metallic 0
+    diffuseColor <- missing.png.rgb, value (0.3, 0.4, 0.5)
+  2 /FallbackMat preview: color (0, 1, 0), opacity 1, roughness 1, metallic 0

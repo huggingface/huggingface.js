@@ -3,6 +3,7 @@ import type { FetchOptions, RandomAccessFile } from "./http";
 import type { LeRobotEpisode, LeRobotEpisodeData, LeRobotEpisodeVideo, LeRobotInfo } from "./types";
 
 import { fetchRange, HttpError, openRemoteFile, TAIL_PROBE_BYTES } from "./http";
+import { loadParquet } from "./parquet";
 import { formatPathTemplate } from "./paths";
 
 /** v3 keeps its episode index in parquet under a fixed layout; the path is not templated in info.json. */
@@ -14,25 +15,21 @@ export function episodesMetadataPath(chunkIndex: number, fileIndex: number): str
 
 /** Enough for ~10 episodes of `meta/episodes.jsonl`, the page most callers ask for first. */
 const JSONL_FIRST_READ_BYTES = 8 * 1024;
-/**
- * One read's bytes, text and lines are all in memory at once, so the largest indexes (near 100 MB) are
- * read in a few requests rather than held whole.
- */
+/** Caps one read, so the largest indexes (near 100 MB) are never held whole. */
 const JSONL_MAX_READ_BYTES = 16 * 1024 * 1024;
 /**
- * The file is user-controlled and nothing in it bounds how far a listing reads (a line only counts once
- * it parses, and `total_episodes` comes from the same author), so reading stops here: well above the
- * largest published index, 97 MB. A listing that needs more throws rather than coming back short.
+ * Nothing in the user-controlled file bounds a listing, so reading stops here (the largest index is
+ * 97 MB). A listing that needs more throws rather than coming back short.
  */
 const JSONL_MAX_BYTES = 256 * 1024 * 1024;
 /** Real lines are under a kilobyte; a file without line breaks would otherwise be held whole. */
 const JSONL_MAX_LINE_LENGTH = 1024 * 1024;
 /**
- * Bounds the shard walk so a server that keeps answering cannot loop it forever (CWE-835). LeRobot starts
- * a new index file on every resumed recording, so real indexes reach a thousand files or more.
+ * Bounds the walk against a server that keeps answering. Resumed recordings each add a file, so real
+ * indexes reach a thousand.
  */
 const MAX_INDEX_FILES = 10_000;
-/** Index files requested ahead of the walk when the page lies further on; a browser's HTTP/1.1 limit per host. */
+/** Index files requested ahead of the walk: a browser's HTTP/1.1 connections per host. */
 const INDEX_FILES_AHEAD = 6;
 
 /** An index file found by an earlier walk, so a later one can skip it without a request. */
@@ -120,12 +117,8 @@ function buildEpisode(raw: RawEpisode, info: LeRobotInfo, toUrl: (path: string) 
 }
 
 /**
- * Reads `meta/episodes.jsonl` (v2.0 / v2.1).
- *
- * The file is read from its start up to the last requested line, each read continuing where the
- * previous one stopped: the largest published LeRobot datasets have an index of nearly 100 MB, and
- * the first handful of episodes live in its first kilobyte. `until` ends the read early, once a line
- * satisfies it.
+ * Reads `meta/episodes.jsonl` (v2.x) from its start up to the last line asked for, each read continuing
+ * where the previous one stopped. `until` ends the read early, once a line satisfies it.
  */
 async function readEpisodesV2(
 	url: string,
@@ -161,14 +154,13 @@ async function readEpisodesV2(
 				throw error;
 			}
 		}
-		/// A 200 is a server that ignored Range and sent the whole file, from its first byte. Its length
-		/// cannot tell: a file exactly as long as the first read asked for would be read, and counted, twice.
+		/// A 200 is the whole file (Range ignored). Its length can't tell: a file the size of the first read
+		/// would be counted twice.
 		if (whole) {
 			bytes = bytes.subarray(readTo);
 		}
 		readTo += bytes.byteLength;
-		/// Once Content-Range has given the size, a short read is not the end, since a server may cap how
-		/// much one response carries. An empty one still is, so a misbehaving server cannot loop forever.
+		/// With a known size, a short read is not the end (servers may cap a response), but an empty one is.
 		const eof =
 			whole || bytes.byteLength === 0 || (total === undefined ? bytes.byteLength < requested : readTo >= total);
 		/// `stream` holds back a multi-byte character the read cut, until the next read completes it.
@@ -214,26 +206,15 @@ async function readEpisodesV2(
 		if (readTo >= JSONL_MAX_BYTES) {
 			throw new Error(`Stopped reading ${url} at ${JSONL_MAX_BYTES} bytes, before the episodes asked for`);
 		}
-		/// Sized from the bytes per line so far, so a deep page or a whole listing usually takes one or two
-		/// more reads up to 16 MiB, then one per 16 MiB. Never less than what has been read, so lines that
-		/// get longer further in still cost only a logarithmic number of reads.
+		/// Sized from the bytes per line so far, and never less than what has been read, so reads stay few.
 		const target = readTo + Math.max(readTo, Math.ceil(((wanted - position) * readTo * 1.25) / Math.max(1, position)));
-		/// Ends rounded up to 8 KiB times a power of 2, and past 16 MiB to whole 16 MiB blocks, so calls
-		/// for nearby pages send the same ranges and a caller's range cache can answer them.
+		/// Rounded to 8 KiB times a power of 2, then whole 16 MiB blocks, so nearby pages send the same ranges.
 		stop = JSONL_FIRST_READ_BYTES;
 		while (stop < target) {
 			stop *= 2;
 		}
 		stop = Math.min(stop, (Math.floor(readTo / JSONL_MAX_READ_BYTES) + 1) * JSONL_MAX_READ_BYTES);
 	}
-}
-
-/**
- * hyparquet is a hard dependency but is still loaded on demand: callers that only need `info()` or a
- * v2 dataset never pay for the parquet reader.
- */
-async function loadHyparquet() {
-	return import("hyparquet");
 }
 
 function toRawEpisodeV3(row: Record<string, unknown>, info: LeRobotInfo): RawEpisode {
@@ -273,7 +254,7 @@ function columnStatistics(group: RowGroup | undefined, name: string) {
 }
 
 function lastEpisodeIndex(metadata: FileMetaData): number | undefined {
-	/// An empty file holds no episode, so a lookup can pass it over like one whose episodes all come before.
+	/// -1 for an empty file, so a lookup passes it over.
 	let last = -1;
 	for (const group of metadata.row_groups) {
 		const max = toNumber(columnStatistics(group, "episode_index")?.max_value);
@@ -303,11 +284,8 @@ interface IndexFile {
 }
 
 /**
- * Opens the v3.0 episode index files under `meta/episodes/` in order, until `walk.end` rows or the first
- * missing file.
- *
- * The index is sharded: `chunks_size` files per chunk directory, so a request can span several of
- * them. `shards` remembers the files already walked, so a later walk skips them without a request.
+ * Opens the v3.0 index files in order, until `walk.end` rows or the first missing file. `shards`
+ * remembers the files already walked, so a later walk skips them without a request.
  */
 async function* walkIndexFiles(
 	toUrl: (path: string) => string,
@@ -316,7 +294,7 @@ async function* walkIndexFiles(
 	walk: IndexWalk,
 	options?: FetchOptions,
 ): AsyncGenerator<IndexFile> {
-	const { parquetMetadataAsync } = await loadHyparquet();
+	const { parquetMetadataAsync } = await loadParquet();
 	/// Files requested ahead of the walk, until it takes them; a long walk holds only those few.
 	const opening = new Map<string, Promise<{ file: RandomAccessFile; metadata: FileMetaData } | undefined>>();
 	const open = (chunk: number, file: number) => {
@@ -350,8 +328,8 @@ async function* walkIndexFiles(
 		file + 1 < info.chunksSize ? { chunk, file: file + 1 } : { chunk: chunk + 1, file: 0 };
 
 	const { end } = walk;
-	/// LeRobot writes no empty index file, so `end` files hold the rows walked. Without this bound, a server
-	/// answering every path with an empty file would cost one request per file up to MAX_INDEX_FILES.
+	/// LeRobot writes no empty index file, so `end` files are enough; this stops a server that answers
+	/// every path with an empty one.
 	const maxFiles = Math.min(MAX_INDEX_FILES, end);
 	let next = { chunk: 0, file: 0 };
 	let seen = 0;
@@ -370,8 +348,8 @@ async function* walkIndexFiles(
 		}
 
 		const { chunk: chunkIndex, file: fileIndex } = known ?? next;
-		/// LeRobot fills each chunk with `chunks_size` files, so a missing file ends the index. Trying the next
-		/// chunk instead would turn a transient 404 into a wrong position that `shards` keeps.
+		/// A missing file ends the index. Trying the next chunk would turn a transient 404 into a wrong
+		/// position that `shards` keeps.
 		const opened = await take(chunkIndex, fileIndex);
 		if (opened === undefined) {
 			return;
@@ -386,8 +364,7 @@ async function* walkIndexFiles(
 		shards[position] = shard;
 		next = nextFile(chunkIndex, fileIndex);
 
-		/// Rather than one round trip per file, request the next few at once: as many as the walk needs if
-		/// they hold as many rows as this file. When they hold more, the last few go unused.
+		/// The next few files at once, as many as the walk needs if they hold as many rows as this one.
 		const ahead = Math.min(INDEX_FILES_AHEAD, Math.ceil(walk.rowsAfter(shard, seen) / Math.max(shard.rows, 1)));
 		let upcoming = next;
 		for (let i = 0; i < ahead; i++) {
@@ -406,9 +383,8 @@ async function readIndexRows(
 	rowStart: number,
 	rowEnd: number,
 ): Promise<RawEpisode[]> {
-	const { parquetReadObjects, parquetSchema } = await loadHyparquet();
-	/// Only what `toRawEpisodeV3` reads. The index also has per-episode `stats/*` list columns, which
-	/// hyparquet would decode for the whole row group however few rows are asked for.
+	const { compressors, parquetReadObjects, parquetSchema } = await loadParquet();
+	/// Only what `toRawEpisodeV3` reads: hyparquet would decode the `stats/*` list columns for the whole row group.
 	const wanted = [
 		"episode_index",
 		"length",
@@ -424,7 +400,7 @@ async function readIndexRows(
 	/// hyparquet throws on a column the file lacks; `toRawEpisodeV3` defaults the absent ones.
 	const present = new Set(parquetSchema(metadata).children.map((child) => child.element.name));
 	const columns = wanted.filter((column) => present.has(column));
-	const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd });
+	const rows = await parquetReadObjects({ file, metadata, columns, rowStart, rowEnd, compressors });
 	return rows.map((row) => toRawEpisodeV3(row, info));
 }
 
@@ -457,11 +433,9 @@ async function readEpisodesV3(
 }
 
 /**
- * Finds the row of the v3.0 episode index whose `episode_index` is `index`, among its first `end` rows.
- *
- * Files and row groups whose footer statistics leave `index` out are passed over. In a row group that
- * may hold it, row `index - min` is tried first, which is where it is when the group numbers its
- * episodes without gaps; otherwise only the group's `episode_index` column is read to find it.
+ * Finds the v3.0 index row whose `episode_index` is `index`, among the first `end`. Footer statistics
+ * skip files and row groups; in one that may hold it, row `index - min` is tried before reading the
+ * group's `episode_index` column.
  */
 async function findEpisodeV3(
 	toUrl: (path: string) => string,
@@ -471,7 +445,7 @@ async function findEpisodeV3(
 	shards: IndexShard[],
 	options?: FetchOptions,
 ): Promise<{ raw: RawEpisode; position: number } | undefined> {
-	const { parquetReadObjects } = await loadHyparquet();
+	const { compressors, parquetReadObjects } = await loadParquet();
 	const walk: IndexWalk = {
 		end,
 		skip: (shard) => shard.lastIndex !== undefined && shard.lastIndex < index,
@@ -511,7 +485,14 @@ async function findEpisodeV3(
 				}
 			}
 			const indexes = (
-				await parquetReadObjects({ file, metadata, columns: ["episode_index"], rowStart: groupStart, rowEnd })
+				await parquetReadObjects({
+					file,
+					metadata,
+					columns: ["episode_index"],
+					rowStart: groupStart,
+					rowEnd,
+					compressors,
+				})
 			).map((row) => toNumber(row.episode_index));
 			const row = indexes.indexOf(index);
 			if (row !== -1) {
@@ -539,8 +520,7 @@ export async function readEpisodes(
 			? await readEpisodesV3(toUrl, info, offset, limit, indexShards, options)
 			: await readEpisodesV2(toUrl("meta/episodes.jsonl"), offset, limit, options);
 	const built = raw.map((episode) => buildEpisode(episode, info, toUrl));
-	/// toFileRows reads positions (an episode starting a file follows one from another file), so the
-	/// repeats go only after it.
+	/// After toFileRows, which reads episodes by position.
 	const episodes = info.codebaseVersion === "v3.0" ? await toFileRows(built, offset, options) : built;
 	return firstPerIndex(episodes);
 }
@@ -553,8 +533,7 @@ export async function readEpisode(
 	indexShards: IndexShard[],
 	options?: FetchOptions,
 ): Promise<LeRobotEpisode | undefined> {
-	/// LeRobot numbers episodes in ascending order, so episode `index` is at most at position `index`.
-	/// Positions past info.json's count are a stale index file's, as in `episodes()`.
+	/// Indexes ascend, so episode `index` is at most at position `index`; past info.json's count is stale.
 	const end = Math.min(index + 1, info.totalEpisodes);
 	if (end <= 0) {
 		return undefined;
@@ -579,10 +558,7 @@ export async function readEpisode(
 	return episode;
 }
 
-/**
- * Callers look episodes up by index, so an index file that repeats one (a malformed dataset numbering
- * its rows 0, 1, 2, 0, 1, 2, ...) keeps its first row for it.
- */
+/** The first row for an index a malformed dataset repeats (0, 1, 2, 0, 1, 2, ...). */
 function firstPerIndex(episodes: LeRobotEpisode[]): LeRobotEpisode[] {
 	const seen = new Set<number>();
 	return episodes.filter((episode) => {
@@ -594,17 +570,14 @@ function firstPerIndex(episodes: LeRobotEpisode[]): LeRobotEpisode[] {
 	});
 }
 
-/**
- * First `index` of a v3 data file. Taken from the footer's column statistics when present, so the
- * column itself is not downloaded; data files are written in `index` order, so the minimum is row 0.
- */
+/** First `index` of a v3 data file, from the footer's statistics when present (files are in `index` order). */
 async function readFileStart(url: string, options?: FetchOptions): Promise<number> {
-	const { parquetMetadataAsync, parquetReadObjects } = await loadHyparquet();
+	const { compressors, parquetMetadataAsync, parquetReadObjects } = await loadParquet();
 	const file = await openRemoteFile(url, options);
 	const metadata = await parquetMetadataAsync(file, { initialFetchSize: TAIL_PROBE_BYTES });
 	let start = toNumber(columnStatistics(metadata.row_groups[0], "index")?.min_value);
 	if (start === undefined) {
-		const [first] = await parquetReadObjects({ file, metadata, columns: ["index"], rowEnd: 1 });
+		const [first] = await parquetReadObjects({ file, metadata, columns: ["index"], rowEnd: 1, compressors });
 		start = toNumber(first?.index);
 	}
 	if (start === undefined || !Number.isSafeInteger(start) || start < 0) {
@@ -614,11 +587,8 @@ async function readFileStart(url: string, options?: FetchOptions): Promise<numbe
 }
 
 /**
- * v3 metadata carries dataset-wide frame indexes; callers need row offsets inside `data.url`.
- *
- * Data files are written in episode order, so an episode whose file differs from the previous
- * episode's is the first in its file, and that file starts at the episode's own dataset index. Only a
- * file whose first episode falls before the requested page needs a remote read.
+ * Turns v3's dataset-wide frame indexes into row offsets inside `data.url`. An episode in a different
+ * file than the one before starts that file, so only files starting before the page need a read.
  */
 async function toFileRows(episodes: BuiltEpisode[], offset: number, options?: FetchOptions): Promise<LeRobotEpisode[]> {
 	const fileStarts = new Map<string, Promise<number | undefined>>();
