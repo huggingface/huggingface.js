@@ -1861,7 +1861,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/yayaiu6/Verto-Arabic-ASR#javascript-quickstart",
 		filter: false,
 		countDownloads: `path:"metro.int8.onnx"`,
-		snippets: snippets.vertoASR,
 	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
