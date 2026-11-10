@@ -410,4 +410,19 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			{ label: "Releases", url: "https://github.com/bartowski/Llama-3.2-3B-Instruct-GGUF/releases" },
 		]);
 	});
+	it("tqllm", async () => {
+		const { snippet: snippetFunc, displayOnModelPage } = LOCAL_APPS["tqllm"];
+		const model: ModelData = {
+			id: "YTan2000/Qwen3.8-27B-TQ3_4S",
+			tags: [],
+			inference: "",
+			gguf: { total: 1, architecture: "qwen35", context_length: 262144 },
+		};
+		const snippet = snippetFunc(model, "Qwen3.8-27B-TQ3_4S-v2.gguf");
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(displayOnModelPage({ ...model, gguf: { total: 1, architecture: "llama", context_length: 8192 } })).toBe(false);
+		expect(snippet[0].setup).toEqual("hf download YTan2000/Qwen3.8-27B-TQ3_4S Qwen3.8-27B-TQ3_4S-v2.gguf --local-dir models");
+		expect(snippet[0].content).toContain("--model /models/Qwen3.8-27B-TQ3_4S-v2.gguf");
+	});
 });
