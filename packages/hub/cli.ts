@@ -7,9 +7,11 @@ import {
 	createRepo,
 	deleteBranch,
 	deleteRepo,
+	downloadFile,
 	getJob,
 	listJobHardware,
 	listJobs,
+	listFiles,
 	listModels,
 	repoExists,
 	runJob,
@@ -19,12 +21,49 @@ import {
 	type SpaceHardwareFlavor,
 } from "./src";
 import { pathToFileURL } from "node:url";
-import { stat } from "node:fs/promises";
-import { basename, join } from "node:path";
+import { createWriteStream } from "node:fs";
+import { mkdir, rename, stat, unlink } from "node:fs/promises";
+import { Readable } from "node:stream";
+import type { ReadableStream } from "node:stream/web";
+import { pipeline } from "node:stream/promises";
+import { basename, dirname, join } from "node:path";
+import { globMatch } from "./src/lib/parse-safetensors-metadata";
+import { validateRelativeFilename } from "./src/utils/validateRelativeFilename";
 import { HUB_URL } from "./src/consts";
 import { version } from "./package.json";
 import type { CommitProgressEvent } from "./src/lib/commit";
 import type { MultiBar, SingleBar } from "cli-progress";
+
+/**
+ * Stream a (potentially lazy) Blob to a local file path.
+ *
+ * @param onProgress called after each chunk with the cumulative number of bytes written so far.
+ * Writes to `<filePath>.incomplete` and renames on success, so a failed transfer never touches an existing file.
+ */
+async function streamBlobToFile(
+	blob: Blob,
+	filePath: string,
+	onProgress?: (bytesWritten: number) => void,
+): Promise<void> {
+	let bytesWritten = 0;
+	const source = Readable.fromWeb(blob.stream() as ReadableStream);
+
+	if (onProgress) {
+		source.on("data", (chunk: Buffer) => {
+			bytesWritten += chunk.byteLength;
+			onProgress(bytesWritten);
+		});
+	}
+
+	const incompletePath = `${filePath}.incomplete`;
+	try {
+		await pipeline(source, createWriteStream(incompletePath));
+		await rename(incompletePath, filePath);
+	} catch (error) {
+		await unlink(incompletePath).catch(() => {});
+		throw error;
+	}
+}
 
 // Progress bar manager for handling multiple file uploads
 class UploadProgressManager {
@@ -241,6 +280,62 @@ const commands = {
 			},
 		] as const,
 	} satisfies SingleCommand,
+	download: {
+		description: "Download files from a repo on the Hub",
+		args: [
+			{
+				name: "repo-name" as const,
+				description:
+					"The name of the repo to download from. You can also prefix the repo name with the type, e.g. datasets/username/repo-name or kernels/username/repo-name",
+				positional: true,
+				required: true,
+			},
+			{
+				name: "filenames" as const,
+				description: "Files to download from the repo. Defaults to the whole repo",
+				positional: true,
+				multiple: true,
+			},
+			{
+				name: "repo-type" as const,
+				enum: ["dataset", "model", "space", "kernel"],
+				description:
+					"The type of repo to download from. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+			},
+			{
+				name: "revision" as const,
+				description: "The revision to download from. Defaults to the main branch",
+				default: "main",
+			},
+			{
+				name: "include" as const,
+				description: "Glob patterns of files to download. Ignored if filenames are given",
+				multiple: true,
+			},
+			{
+				name: "exclude" as const,
+				description: "Glob patterns of files to skip. Ignored if filenames are given",
+				multiple: true,
+			},
+			{
+				name: "local-dir" as const,
+				description: "The directory to download files to. Defaults to the current working directory",
+				default: ".",
+			},
+			{
+				name: "quiet" as const,
+				short: "q",
+				description: "Suppress all output",
+				boolean: true,
+			},
+			{
+				name: "token" as const,
+				description:
+					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+				default: process.env.HF_TOKEN,
+			},
+		] as const,
+	},
 	branch: {
 		description: "Manage repository branches",
 		subcommands: {
@@ -668,6 +763,76 @@ async function run() {
 				throw error;
 			} finally {
 				progressManager.stop();
+			}
+			break;
+		}
+		case "download": {
+			const cmdDef = commands.download;
+			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
+				console.log(detailedUsageForCommand("download"));
+				break;
+			}
+			const parsedArgs = advParseArgs(cliArgs, cmdDef.args, "download");
+			const { repoName, filenames, repoType, revision, include, exclude, localDir, token, quiet } = parsedArgs;
+
+			const repo = repoType ? { type: repoType as "model" | "dataset" | "space" | "kernel", name: repoName } : repoName;
+			const hubUrl = process.env.HF_ENDPOINT ?? HUB_URL;
+
+			const paths: string[] = filenames ?? [];
+			if (!paths.length) {
+				for await (const entry of listFiles({ repo, revision, recursive: true, accessToken: token, hubUrl })) {
+					if (entry.type !== "file") {
+						continue;
+					}
+					if (include?.length && !include.some((pattern) => globMatch(pattern, entry.path))) {
+						continue;
+					}
+					if (exclude?.some((pattern) => globMatch(pattern, entry.path))) {
+						continue;
+					}
+					paths.push(entry.path);
+				}
+			}
+
+			paths.forEach(validateRelativeFilename);
+
+			const cliProgress = quiet ? null : await import("cli-progress").catch(() => null);
+
+			for (const path of paths) {
+				const blob = await downloadFile({ repo, path, revision, accessToken: token, hubUrl, xet: true });
+				if (!blob) {
+					console.error(`Error: File '${path}' not found in repo '${repoName}'.`);
+					process.exitCode = 1;
+					break;
+				}
+
+				const destination = join(localDir, path);
+				await mkdir(dirname(destination), { recursive: true });
+
+				const bar =
+					cliProgress && blob.size
+						? new cliProgress.SingleBar(
+								{
+									clearOnComplete: false,
+									hideCursor: true,
+									format: " {bar} | {filename} | {percentage}%",
+									barCompleteChar: "█",
+									barIncompleteChar: "░",
+								},
+								cliProgress.Presets.shades_grey,
+							)
+						: null;
+				bar?.start(blob.size, 0, { filename: path });
+
+				try {
+					await streamBlobToFile(blob, destination, (bytesWritten) => bar?.update(bytesWritten));
+				} finally {
+					bar?.stop();
+				}
+			}
+
+			if (!quiet && !process.exitCode) {
+				console.log(`✅ Downloaded ${paths.length} file(s) to ${localDir}`);
 			}
 			break;
 		}

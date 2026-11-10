@@ -5,6 +5,7 @@ import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { pick } from "../utils/pick";
 import { type DATASET_EXPANDABLE_KEYS, DATASET_EXPAND_KEYS, type DatasetEntry } from "./list-datasets";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function datasetInfo<
 	const T extends Exclude<(typeof DATASET_EXPANDABLE_KEYS)[number], (typeof DATASET_EXPAND_KEYS)[number]> = never,
@@ -30,7 +31,7 @@ export async function datasetInfo<
 		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
 	]).toString();
 
-	const response = await (params.fetch || fetch)(
+	const response = await fetchWithServerWarnings(params.fetch)(
 		`${params?.hubUrl || HUB_URL}/api/datasets/${params.name}/revision/${encodeURIComponent(
 			params.revision ?? "HEAD",
 		)}?${search.toString()}`,

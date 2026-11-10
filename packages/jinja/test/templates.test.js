@@ -18,6 +18,7 @@ const TEST_STRINGS = {
 	LOGICAL_OR: `{{ true or true }}{{ true or false }}{{ false or true }}{{ false or false }}`,
 	LOGICAL_NOT: `{{ not true }}{{ not false }}`,
 	LOGICAL_NOT_NOT: `{{ not not true }}{{ not not false }}`,
+	LOGICAL_NOT_EMPTY_CONTAINERS: `|{{ not arr }}|{{ not obj }}|{{ not [] }}|{{ not {} }}|{{ not [1] }}|{{ not not arr }}|{% if not arr %}empty{% else %}non-empty{% endif %}|`,
 	LOGICAL_AND_OR: `{{ true and true or false }}{{ true and false or true }}{{ false and true or true }}{{ false and false or true }}{{ false and false or false }}`,
 	LOGICAL_AND_NOT: `{{ true and not true }}{{ true and not false }}{{ false and not true }}{{ false and not false }}`,
 	LOGICAL_OR_NOT: `{{ true or not true }}{{ true or not false }}{{ false or not true }}{{ false or not false }}`,
@@ -130,6 +131,7 @@ const TEST_STRINGS = {
 	TOJSON_SORT_KEYS: `{{ obj | tojson(sort_keys=true) }}`,
 	TOJSON_COMBINED: `{{ obj | tojson(separators=(',', ':'), sort_keys=true) }}`,
 	TOJSON_INDENT_WITH_SEPARATORS: `{{ obj | tojson(indent=2, separators=(',', ': ')) }}`,
+	TOJSON_INDENT_EMPTY: `{{ obj | tojson(indent=2) }}|{{ empty_list | tojson(indent=2) }}|{{ empty_obj | tojson(indent=2) }}`,
 	FILTER_OPERATOR_DICTSORT_1: `{% for key, value in mydict | dictsort %}{{ key }}:{{ value }},{% endfor %}`,
 	FILTER_OPERATOR_DICTSORT_2: `{% for key, value in mydict | dictsort(by='value') %}{{ key }}:{{ value }},{% endfor %}`,
 	FILTER_OPERATOR_DICTSORT_3: `{% for key, value in mydict | dictsort(reverse=true) %}{{ key }}:{{ value }},{% endfor %}`,
@@ -378,6 +380,58 @@ const TEST_PARSED = {
 		{ value: "not", type: "Identifier" },
 		{ value: "false", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+	LOGICAL_NOT_EMPTY_CONTAINERS: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "Identifier" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "Identifier" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "Identifier" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "Identifier" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "Identifier" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "Identifier" },
+		{ value: "not", type: "Identifier" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "Identifier" },
+		{ value: "not", type: "Identifier" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "empty", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "non-empty", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
 	],
 	LOGICAL_AND_OR: [
 		{ value: "{{", type: "OpenExpression" },
@@ -2892,6 +2946,40 @@ const TEST_PARSED = {
 		{ value: ",", type: "Comma" },
 		{ value: ": ", type: "StringLiteral" },
 		{ value: ")", type: "CloseParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	TOJSON_INDENT_EMPTY: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "empty_list", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "empty_obj", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
 		{ value: ")", type: "CloseParen" },
 		{ value: "}}", type: "CloseExpression" },
 	],
@@ -5581,6 +5669,7 @@ const TEST_CONTEXT = {
 	LOGICAL_OR: {},
 	LOGICAL_NOT: {},
 	LOGICAL_NOT_NOT: {},
+	LOGICAL_NOT_EMPTY_CONTAINERS: { arr: [], obj: {} },
 	LOGICAL_AND_OR: {},
 	LOGICAL_AND_NOT: {},
 	LOGICAL_OR_NOT: {},
@@ -5829,6 +5918,11 @@ const TEST_CONTEXT = {
 	TOJSON_INDENT_WITH_SEPARATORS: {
 		obj: { a: 1, b: [1, 2] },
 	},
+	TOJSON_INDENT_EMPTY: {
+		obj: { a: [], b: {}, c: [1, {}], d: { e: [] } },
+		empty_list: [],
+		empty_obj: {},
+	},
 	FILTER_OPERATOR_DICTSORT_1: {
 		mydict: { c: 3, a: 1, b: 2 },
 	},
@@ -6061,6 +6155,7 @@ const EXPECTED_OUTPUTS = {
 	LOGICAL_OR: `truetruetruefalse`,
 	LOGICAL_NOT: `falsetrue`,
 	LOGICAL_NOT_NOT: `truefalse`,
+	LOGICAL_NOT_EMPTY_CONTAINERS: `|true|true|true|true|false|false|empty|`,
 	LOGICAL_AND_OR: `truetruetruetruefalse`,
 	LOGICAL_AND_NOT: `falsetruefalsefalse`,
 	LOGICAL_OR_NOT: `truetruefalsetrue`,
@@ -6173,6 +6268,7 @@ const EXPECTED_OUTPUTS = {
 	TOJSON_SORT_KEYS: `{"a": 1, "b": 2, "c": 3}`,
 	TOJSON_COMBINED: `{"a":1,"b":2,"c":3}`,
 	TOJSON_INDENT_WITH_SEPARATORS: `{\n  "a": 1,\n  "b": [\n    1,\n    2\n  ]\n}`,
+	TOJSON_INDENT_EMPTY: `{\n  "a": [],\n  "b": {},\n  "c": [\n    1,\n    {}\n  ],\n  "d": {\n    "e": []\n  }\n}|[]|{}`,
 	FILTER_OPERATOR_DICTSORT_1: `a:1,b:2,c:3,`,
 	FILTER_OPERATOR_DICTSORT_2: `a:1,b:2,c:3,`,
 	FILTER_OPERATOR_DICTSORT_3: `c:3,b:2,a:1,`,
@@ -6330,6 +6426,44 @@ describe("Templates", () => {
 		// TODO add failure cases
 	});
 
+	describe("Hexadecimal string escapes", () => {
+		it.each([
+			[String.raw`\x00`, "\0"],
+			[String.raw`\x41\x42\xAf\xff`, "AB¯ÿ"],
+			[String.raw`\x001`, "\u00001"],
+			[String.raw`\x22\x27\x5c`, "\"'\\"],
+			[String.raw`\u0000\u0041\u00e9\u4F60\u597D`, "\0Aé你好"],
+			[String.raw`\uD83E\uDD17`, "🤗"],
+			[String.raw`\x5cx41`, String.raw`\x41`],
+			[String.raw`\\x41\\u0041`, String.raw`\x41\u0041`],
+		])("decodes %s and preserves it when formatting", (escaped, expected) => {
+			for (const quote of ["'", '"']) {
+				const template = new Template(`{{ ${quote}${escaped}${quote} }}`);
+				expect(template.render()).toBe(expected);
+				expect(new Template(template.format()).render()).toBe(expected);
+			}
+		});
+
+		it.each([
+			String.raw`\x`,
+			String.raw`\x0`,
+			String.raw`\xGG`,
+			String.raw`\x1g`,
+			String.raw`\u`,
+			String.raw`\u123`,
+			String.raw`\u12g4`,
+			"\\xA\n",
+		])("rejects malformed escape %s", (escaped) => {
+			expect(() => new Template(`{{ '${escaped}' }}`)).toThrowError(SyntaxError);
+			expect(() => new Template(`{{ '${escaped}`)).toThrowError(SyntaxError);
+		});
+
+		it("removes null characters with the flint replacement filter", () => {
+			const template = new Template(String.raw`{{ content | replace("\x00", "") }}`);
+			expect(template.render({ content: "a\0b\0c" })).toBe("abc");
+		});
+	});
+
 	describe("Parsing and interpretation", () => {
 		describe("should interpret an AST", () => {
 			for (const [name, text] of Object.entries(TEST_PARSED)) {
@@ -6382,6 +6516,102 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Indent filter", () => {
+		it("uses a positional string width as a literal prefix", () => {
+			const template = new Template('{{ text | indent("> ") }}');
+			expect(template.render({ text: "first\n\nlast" })).toBe("first\n\n> last");
+		});
+
+		it("uses a string width with first and blank", () => {
+			const template = new Template("{{ text | indent(width=prefix, first=true, blank=true) }}");
+			expect(template.render({ text: "first\n\nlast", prefix: "> " })).toBe("> first\n> \n> last");
+		});
+
+		it("treats a negative integer width as an empty prefix", () => {
+			const template = new Template("{{ text | indent(-2, first=true) }}");
+			expect(template.render({ text: "first\nlast" })).toBe("first\nlast");
+		});
+	});
+
+	describe("String split", () => {
+		it.each([
+			[`{{ "a,b,c".split(",", -2) | tojson }}`, `["a", "b", "c"]`],
+			[`{{ "  a b  c  ".split(none, -2) | tojson }}`, `["a", "b", "c"]`],
+		])("treats a negative maxsplit as unlimited: %s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+	});
+
+	describe("Concatenation with undefined values", () => {
+		// https://github.com/huggingface/huggingface.js/issues/2710
+		// Python Jinja2 renders undefined values as an empty string in `~` concatenation.
+		it.each([
+			[`{{ "a" ~ x ~ "b" }}`, {}, "ab"],
+			[`{{ x ~ "b" }}`, {}, "b"],
+			[`{{ "a" ~ x }}`, {}, "a"],
+			[`{{ x ~ y }}`, {}, ""],
+			[`{{ x ~ 1 ~ true }}`, {}, "1true"],
+			[`{{ object.undefined_attribute ~ "!" }}`, { object: {} }, "!"],
+		])("concatenates undefined as an empty string: %s", (source, context, expected) => {
+			const template = new Template(source);
+			expect(template.render(context)).toBe(expected);
+		});
+
+		it("supports appending to a variable that was never set (Llama 4 chat template pattern)", () => {
+			// Mirrors `{%- set tool_definition = tool_definition ~ (tools | tojson(indent=4)) %}` from the
+			// official Llama 4 Scout chat template, which appends to a variable that was never set.
+			const template = new Template(
+				`{% set tool_definition = tool_definition ~ (tools | tojson) %}{{ tool_definition }}`,
+			);
+			expect(template.render({ tools: ["a", "b"] })).toBe('["a", "b"]');
+		});
+
+		it.each([`{{ x + 1 }}`, `{{ x * 2 }}`, `{{ 1 - x }}`])(
+			"still throws for other binary operations on undefined: %s",
+			(source) => {
+				expect(() => new Template(source).render({})).toThrowError(/Cannot perform operation .* on undefined values/);
+			},
+		);
+	});
+
+	describe("Generation tags", () => {
+		it.each([
+			{
+				name: "preserves whitespace around plain tags",
+				source: `A {% generation %} B {% endgeneration %} C`,
+				expected: "A  B  C",
+			},
+			{
+				name: "strips Unicode whitespace with both modifiers",
+				source: `A\u200b \u00a0\t{%- generation -%}\u2028\u3000B\u2003{%- endgeneration -%}\ufeff C`,
+				expected: "A\u200bBC",
+			},
+			{
+				name: "keeps whitespace already consumed by the preceding tag",
+				source: `A{% generation %}  {%- endgeneration %}B`,
+				expected: "A  B",
+			},
+			{
+				name: "combines block options with strip modifiers",
+				source: `A \t{%- generation %}\nB {% endgeneration -%}\r\n C`,
+				expected: "AB C",
+			},
+		])("$name", ({ source, expected }) => {
+			expect(new Template(source).render()).toBe(expected);
+		});
+
+		it("handles long whitespace without quadratic preprocessing", () => {
+			const padding = " ".repeat(160_000);
+			// Include both a delimiter and the keyword so substring guards cannot hide the slow path.
+			const source = `{% if true %}${padding}generation{% endif %}`;
+			const start = performance.now();
+			const template = new Template(source);
+			// Allow ample headroom; the quadratic regex takes several seconds for this input.
+			expect(performance.now() - start).toBeLessThan(2_000);
+			expect(template.render()).toBe(`${padding}generation`);
+		});
+	});
+
 	describe("Member access", () => {
 		it.each([3, -4])("returns undefined for out-of-range string index %i", (index) => {
 			const template = new Template(
@@ -6503,6 +6733,112 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("Macro scoping", () => {
+		it.each([
+			{
+				name: "resolves a free name in the defining scope, not at the call site",
+				source: `{% macro m() %}[{{ i }}]{% endmacro %}{% for i in [1] %}{{ m() }}{% endfor %}`,
+				expected: "[]",
+			},
+			{
+				name: "prefers the defining scope over a caller local of the same name",
+				source: `{% set v = 'outer' %}{% macro m() %}[{{ v }}]{% endmacro %}{% macro w() %}{% set v = 'inner' %}{{ m() }}{% endmacro %}{{ w() }}|{{ m() }}`,
+				expected: "[outer]|[outer]",
+			},
+			{
+				name: "binds names in the defining scope late",
+				source: `{% macro m() %}[{{ later }}]{% endmacro %}{{ m() }}{% set later = 'x' %}{{ m() }}`,
+				expected: "[][x]",
+			},
+			{
+				name: "ignores a name assigned in a nested scope after the definition",
+				source: `{% macro m() %}[{{ later }}]{% endmacro %}{% for _ in [1] %}{% set later = 'x' %}{{ m() }}{% endfor %}`,
+				expected: "[]",
+			},
+			{
+				name: "ignores the locals of a macro that calls it",
+				source: `{% macro outer() %}{% set s = 'S' %}{{ inner() }}{% endmacro %}{% macro inner() %}[{{ s }}]{% endmacro %}{{ outer() }}`,
+				expected: "[]",
+			},
+			{
+				name: "captures the loop variable when defined inside a loop",
+				source: `{% for i in [1, 2] %}{% macro m() %}[{{ i }}]{% endmacro %}{{ m() }}{% endfor %}`,
+				expected: "[1][2]",
+			},
+			{
+				name: "sees the locals of the macro it is defined in",
+				source: `{% macro outer() %}{% set s = 'S' %}{% macro inner() %}[{{ s }}]{% endmacro %}{{ inner() }}{% endmacro %}{{ outer() }}`,
+				expected: "[S]",
+			},
+			{
+				name: "keeps the defining scope across recursive calls",
+				source: `{% set s = '.' %}{% macro f(n) %}{% if n > 0 %}{{ s }}{{ f(n - 1) }}{% endif %}{% endmacro %}{% for s in ['!'] %}{{ f(3) }}{% endfor %}`,
+				expected: "...",
+			},
+			{
+				name: "reads an outer name before a later local assignment",
+				source: `{% set v = 'OUTER' %}{% macro m() %}[{{ v }}]{% set v = 'INNER' %}[{{ v }}]{% endmacro %}{{ m() }}`,
+				expected: "[OUTER][INNER]",
+			},
+			{
+				name: "resolves a call block body in its own defining scope",
+				source: `{% macro m() %}[{{ caller() }}]{% endmacro %}{% for i in [1, 2] %}{% call m() %}{{ i }}{% endcall %}{% endfor %}`,
+				expected: "[1][2]",
+			},
+			{
+				name: "nests call blocks",
+				source: `{% macro o() %}[{{ caller() }}]{% endmacro %}{% macro i() %}({{ caller() }}){% endmacro %}{% call o() %}{% call i() %}z{% endcall %}{% endcall %}`,
+				expected: "[(z)]",
+			},
+			{
+				name: "passes a nested macro its own caller",
+				source: `{% macro outer() %}{% macro inner() %}{{ caller() }}{% endmacro %}{% call inner() %}I{% endcall %}|{{ caller() }}{% endmacro %}{% call outer() %}O{% endcall %}`,
+				expected: "I|O",
+			},
+			{
+				name: "keeps ordinary caller bindings callable",
+				source: `{% macro callback() %}C{% endmacro %}{% macro local() %}{% set caller = callback %}{{ caller() }}{% endmacro %}{% macro parameter(caller=none) %}{{ caller() }}{% endmacro %}{{ local() }}|{{ parameter(callback) }}`,
+				expected: "C|C",
+			},
+		])("$name", ({ source, expected }) => {
+			expectTemplateToRender(source, expected);
+		});
+
+		it("resolves a render-time variable shadowed at the call site", () => {
+			const template = new Template(
+				`{% macro m() %}[{{ rt }}]{% endmacro %}{% for rt in ['L'] %}{{ m() }}{% endfor %}`,
+			);
+			expect(template.render({ rt: "RT" })).toBe("[RT]");
+		});
+
+		it.each([
+			{
+				name: "an ordinary macro call",
+				source: `{% macro b() %}[{{ caller() }}]{% endmacro %}{% macro a() %}{{ b() }}{% endmacro %}{% call a() %}C{% endcall %}`,
+			},
+			{
+				name: "an immediately invoked nested macro",
+				source: `{% macro outer() %}{% macro inner() %}{{ caller() }}{% endmacro %}{{ inner() }}{% endmacro %}{% call outer() %}C{% endcall %}`,
+			},
+			{
+				name: "a nested macro saved and invoked later",
+				source: `{% set ns = namespace() %}{% macro outer() %}{% macro inner() %}{{ caller() }}{% endmacro %}{% set ns.inner = inner %}{% endmacro %}{% call outer() %}C{% endcall %}{{ ns.inner() }}`,
+			},
+			{
+				name: "a macro called with a local caller alias",
+				source: `{% macro b() %}{{ caller() }}{% endmacro %}{% macro a() %}{% set caller = callback %}{{ b() }}{% endmacro %}{% macro callback() %}C{% endmacro %}{{ a() }}`,
+			},
+			{
+				name: "a macro called with an explicit caller parameter",
+				source: `{% macro b() %}{{ caller() }}{% endmacro %}{% macro a(caller=none) %}{{ b() }}{% endmacro %}{% macro callback() %}C{% endmacro %}{{ a(callback) }}`,
+			},
+		])("does not leak caller into $name", ({ source }) => {
+			expect(() => new Template(source).render()).toThrowError(
+				"Cannot call something that is not a function: got UndefinedValue",
+			);
+		});
+	});
+
 	describe("Macro special arguments", () => {
 		it.each([
 			{
@@ -6559,6 +6895,26 @@ describe("Feature regressions", () => {
 
 	describe("Macro parameter defaults", () => {
 		it.each([
+			{
+				name: "resolves a lexical caller used only in a default",
+				source: `{% set caller='C' %}{% macro m(x=caller) %}{{ x }}{% endmacro %}{{ m() }}`,
+				expected: "C",
+			},
+			{
+				name: "captures an enclosing call block's caller through a default",
+				source: `{% macro outer() %}{% macro inner(x=caller) %}{{ x() }}{% endmacro %}{{ inner() }}{% endmacro %}{% call outer() %}C{% endcall %}`,
+				expected: "C",
+			},
+			{
+				name: "keeps a default lexical when caller is assigned locally",
+				source: `{% set caller='C' %}{% macro m(x=caller) %}{% set caller='L' %}{{ x }}|{{ caller }}{% endmacro %}{{ m() }}`,
+				expected: "C|L",
+			},
+			{
+				name: "shadows caller in defaults when the body needs implicit caller",
+				source: `{% set caller='C' %}{% macro m(x=caller) %}{{ x }}|{{ caller is defined }}{% endmacro %}{{ m() }}`,
+				expected: "|false",
+			},
 			{
 				name: "makes collected kwargs visible",
 				source: `{% macro f(x=kwargs) %}{{ x.a }}|{{ kwargs.a }}{% endmacro %}{{ f(a=1) }}`,

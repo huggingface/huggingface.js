@@ -145,10 +145,20 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 	// See https://github.com/huggingface/transformers/pull/30650 for more information.
 	// Also honors `{%-` / `-%}` whitespace-stripping modifiers by trimming
 	// surrounding whitespace before removing the tag.
-	return template.replace(
-		/(\s*){%(-?)\s*(?:end)?generation\s*(-?)%}(\s*)/gs,
-		(_, before, lstrip, rstrip, after) => (lstrip ? "" : before) + (rstrip ? "" : after),
-	);
+	let result = "";
+	let lastIndex = 0;
+	// Start at a literal delimiter so unmatched whitespace is never scanned repeatedly.
+	for (const match of template.matchAll(/{%(-?)\s*(?:end)?generation\s*(-?)%}(\s*)/gs)) {
+		const [fullMatch, lstrip, rstrip, after] = match;
+		let endIndex = match.index;
+		// Preserve whitespace already consumed by the preceding match.
+		while (lstrip && endIndex > lastIndex && isWhitespace(template[endIndex - 1])) {
+			--endIndex;
+		}
+		result += template.slice(lastIndex, endIndex) + (rstrip ? "" : after);
+		lastIndex = match.index + fullMatch.length;
+	}
+	return result + template.slice(lastIndex);
 }
 
 /**
@@ -175,6 +185,17 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 
 				// Add the escaped character
 				const escaped = src[cursorPosition++];
+				if (escaped === "x" || escaped === "u") {
+					const length = escaped === "x" ? 2 : 4;
+					const hex = src.slice(cursorPosition, cursorPosition + length);
+					if (hex.length !== length || /[^0-9a-f]/i.test(hex)) {
+						throw new SyntaxError(`Invalid hexadecimal escape sequence: \\${escaped}${hex}`);
+					}
+					str += String.fromCharCode(parseInt(hex, 16));
+					cursorPosition += length;
+					continue;
+				}
+
 				const unescaped = ESCAPE_CHARACTERS.get(escaped);
 				if (unescaped === undefined) {
 					throw new SyntaxError(`Unexpected escaped character: ${escaped}`);

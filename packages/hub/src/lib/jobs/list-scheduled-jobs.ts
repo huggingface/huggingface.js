@@ -3,6 +3,7 @@ import { createApiError } from "../../error";
 import type { CredentialsParams } from "../../types/public";
 import { checkCredentials } from "../../utils/checkCredentials";
 import type { ApiScheduledJob } from "../../types/api/api-jobs";
+import { fetchWithServerWarnings } from "../../utils/serverWarnings";
 
 /**
  * List scheduled jobs for a namespace.
@@ -22,11 +23,14 @@ export async function listScheduledJobs(
 ): Promise<ApiScheduledJob[]> {
 	const accessToken = checkCredentials(params);
 
-	const response = await (params.fetch || fetch)(`${params.hubUrl || HUB_URL}/api/scheduled-jobs/${params.namespace}`, {
-		headers: {
-			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+	const response = await fetchWithServerWarnings(params.fetch)(
+		`${params.hubUrl || HUB_URL}/api/scheduled-jobs/${params.namespace}`,
+		{
+			headers: {
+				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+			},
 		},
-	});
+	);
 
 	if (!response.ok) {
 		throw await createApiError(response);
