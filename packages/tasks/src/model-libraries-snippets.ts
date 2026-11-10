@@ -3198,13 +3198,10 @@ pip install huggingface_hub[hf_xet]
 hf download ${model.id} --local-dir ${nameWithoutNamespace(model.id)}`,
 ];
 
-// On Linux, `pip install mlx-lm` does not pull in an MLX backend: it comes from one of the mlx-lm extras
-const mlxLmInstall = `# Make sure mlx-lm is installed
-# pip install --upgrade mlx-lm
-# on Linux, pick a backend: pip install --upgrade "mlx-lm[cuda12]" (or [cuda13], [cpu])`;
-
 const mlxlm = (model: ModelData): string[] => [
-	`${mlxLmInstall}
+	`# Make sure mlx-lm is installed
+# pip install --upgrade mlx-lm
+# if on a CUDA device, also pip install mlx[cuda]
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
@@ -3216,7 +3213,8 @@ text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
 ];
 
 const mlxchat = (model: ModelData): string[] => [
-	`${mlxLmInstall}
+	`# Make sure mlx-lm is installed
+# pip install --upgrade mlx-lm
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
