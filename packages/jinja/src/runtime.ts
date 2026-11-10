@@ -897,14 +897,14 @@ function getParameterDescriptor(argument: Parameter): ParameterDescriptor {
 	return { name: keywordArgument.key.value, defaultValue: keywordArgument.value };
 }
 
-type SpecialMacroArgument = "kwargs" | "varargs";
+type SpecialMacroArgument = "caller" | "kwargs" | "varargs";
 
 function isSpecialMacroArgument(name: string): name is SpecialMacroArgument {
-	return name === "kwargs" || name === "varargs";
+	return name === "caller" || name === "kwargs" || name === "varargs";
 }
 
 /**
- * Find `kwargs` and `varargs` loads that precede a declaration, following Jinja's AST visit order.
+ * Find special-argument body loads that precede a declaration, following Jinja's AST visit order.
  */
 function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statement[]): Set<SpecialMacroArgument> {
 	const declared = new Set<SpecialMacroArgument>();
@@ -2081,11 +2081,12 @@ export class Interpreter {
 				// macro was defined in, not the one it is called from. Capturing that environment by
 				// reference rather than copying it also preserves Jinja's late binding, so a name assigned
 				// in the defining scope after the macro is declared is still visible to the body.
-				// A caller belongs only to this invocation. Shadow any captured caller, even when this
-				// call has none, and keep it in a separate layer so ordinary calls do not forward it.
+				// Only body loads need an invocation-local caller; default-only loads stay lexical.
 				const caller = callSite[CALL_BLOCK_SCOPE] ? callSite.variables.get("caller") : undefined;
 				const parent = new Environment(environment);
-				parent.setVariable("caller", caller ?? new UndefinedValue());
+				if (specialArguments.has("caller")) {
+					parent.setVariable("caller", caller ?? new UndefinedValue());
+				}
 
 				const macroScope = new Environment(parent);
 				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);

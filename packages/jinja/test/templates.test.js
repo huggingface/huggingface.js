@@ -6916,6 +6916,26 @@ describe("Feature regressions", () => {
 	describe("Macro parameter defaults", () => {
 		it.each([
 			{
+				name: "resolves a lexical caller used only in a default",
+				source: `{% set caller='C' %}{% macro m(x=caller) %}{{ x }}{% endmacro %}{{ m() }}`,
+				expected: "C",
+			},
+			{
+				name: "captures an enclosing call block's caller through a default",
+				source: `{% macro outer() %}{% macro inner(x=caller) %}{{ x() }}{% endmacro %}{{ inner() }}{% endmacro %}{% call outer() %}C{% endcall %}`,
+				expected: "C",
+			},
+			{
+				name: "keeps a default lexical when caller is assigned locally",
+				source: `{% set caller='C' %}{% macro m(x=caller) %}{% set caller='L' %}{{ x }}|{{ caller }}{% endmacro %}{{ m() }}`,
+				expected: "C|L",
+			},
+			{
+				name: "shadows caller in defaults when the body needs implicit caller",
+				source: `{% set caller='C' %}{% macro m(x=caller) %}{{ x }}|{{ caller is defined }}{% endmacro %}{{ m() }}`,
+				expected: "|false",
+			},
+			{
 				name: "makes collected kwargs visible",
 				source: `{% macro f(x=kwargs) %}{{ x.a }}|{{ kwargs.a }}{% endmacro %}{{ f(a=1) }}`,
 				expected: "1|1",
