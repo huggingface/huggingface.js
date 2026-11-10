@@ -9,6 +9,7 @@ import {
 import type { PipelineType, WidgetType } from "@huggingface/tasks";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks";
 import { getProviderHelper } from "../lib/getProviderHelper.js";
+import { AutoRouterConversationalTask } from "../providers/providerHelper.js";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.js";
 import type { InferenceProviderMappingEntry, InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
 import { templates } from "./templates.exported.js";
@@ -162,7 +163,11 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		}
 		let providerHelper: ReturnType<typeof getProviderHelper>;
 		try {
-			providerHelper = getProviderHelper(provider, task);
+			/// Chat snippets call the router's /v1/chat/completions, which picks the provider
+			providerHelper =
+				task === "conversational" && !opts?.endpointUrl && !opts?.directRequest
+					? new AutoRouterConversationalTask()
+					: getProviderHelper(provider, task);
 		} catch (e) {
 			logger.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];

@@ -49,20 +49,14 @@ You can send inference requests to third-party providers with the inference clie
 Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
 - [Featherless AI](https://featherless.ai)
-- [Fireworks AI](https://fireworks.ai)
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
-- [Humain AI](https://node.humain.com/)
 - [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
 - [OpenRouter](https://openrouter.ai)
 - [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
-- [Public AI](https://publicai.co)
 - [Replicate](https://replicate.com)
 - [Scaleway](https://www.scaleway.com/en/generative-apis/)
 - [Together](https://together.xyz)
-- [Baseten](https://baseten.co)
-- [Cohere](https://cohere.com)
-- [Cerebras](https://cerebras.ai/)
 - [DeepInfra](https://deepinfra.com)
 - [Groq](https://groq.com)
 - [Wavespeed.ai](https://wavespeed.ai/)
@@ -85,21 +79,18 @@ You also have to make sure your request is authenticated with an access token.
 When authenticated with a Hugging Face access token, the request is routed through https://huggingface.co.
 When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
 
+Chat completion (`chatCompletion` and `chatCompletionStream`) always goes through the Hugging Face router at https://router.huggingface.co/v1/chat/completions, so it needs a Hugging Face access token. The router picks a provider for the model, and `provider` pins one: any provider the router routes chat to works, for example `"together"` or `"mistral"`. To call OpenRouter directly instead, use `provider: "openrouter"` with an OpenRouter API key. To call your own endpoint, use `endpointUrl`, see below.
+
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
 - [Featherless AI supported models](https://huggingface.co/api/partners/featherless-ai/models)
-- [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
 - [HF Inference supported models](https://huggingface.co/api/partners/hf-inference/models)
-- [Humain AI supported models](https://huggingface.co/api/partners/humain-ai/models)
 - [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
 - [OpenRouter supported models](https://huggingface.co/api/partners/openrouter/models)
 - [OVHcloud supported models](https://huggingface.co/api/partners/ovhcloud/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Scaleway supported models](https://huggingface.co/api/partners/scaleway/models)
 - [Together supported models](https://huggingface.co/api/partners/together/models)
-- [Baseten supported models](https://huggingface.co/api/partners/baseten/models)
-- [Cohere supported models](https://huggingface.co/api/partners/cohere/models)
-- [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
 - [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
 - [Groq supported models](https://console.groq.com/docs/models)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
@@ -261,8 +252,8 @@ Generate a model response from a list of messages comprising a conversation.
 ```typescript
 // Non-streaming API
 const out = await hf.chatCompletion({
-  model: "Qwen/Qwen3-32B",
-  provider: "cerebras",
+  model: "deepseek-ai/DeepSeek-V4.1-Flash",
+  provider: "together", // optional, the router picks one by default
   messages: [{ role: "user", content: "Hello, nice to meet you!" }],
   max_tokens: 512,
   temperature: 0.1,
@@ -271,8 +262,8 @@ const out = await hf.chatCompletion({
 // Streaming API
 let out = "";
 for await (const chunk of hf.chatCompletionStream({
-  model: "Qwen/Qwen3-32B",
-  provider: "cerebras",
+  model: "deepseek-ai/DeepSeek-V4.1-Flash",
+  provider: "together",
   messages: [
     { role: "user", content: "Can you help me solve an equation?" },
   ],

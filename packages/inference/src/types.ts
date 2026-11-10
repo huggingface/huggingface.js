@@ -45,22 +45,15 @@ export interface Options {
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
-	"baseten",
-	"cerebras",
-	"cohere",
 	"deepinfra",
 	"fal-ai",
 	"featherless-ai",
-	"fireworks-ai",
 	"groq",
 	"hf-inference",
-	"humain-ai",
 	"novita",
 	"nscale",
-	"openai",
 	"openrouter",
 	"ovhcloud",
-	"publicai",
 	"replicate",
 	"scaleway",
 	"together",
@@ -80,22 +73,15 @@ export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
  * Whenever possible, InferenceProvider should == org namespace
  */
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
-	baseten: "baseten",
-	cerebras: "cerebras",
-	cohere: "CohereLabs",
 	deepinfra: "DeepInfra",
 	"fal-ai": "fal",
 	"featherless-ai": "featherless-ai",
-	"fireworks-ai": "fireworks-ai",
 	groq: "groq",
 	"hf-inference": "hf-inference",
-	"humain-ai": "humain-ai",
 	novita: "novita",
 	nscale: "nscale",
-	openai: "openai",
 	openrouter: "OpenRouter",
 	ovhcloud: "ovhcloud",
-	publicai: "publicai",
 	replicate: "replicate",
 	scaleway: "scaleway",
 	together: "togethercomputer",
@@ -148,6 +134,12 @@ export interface BaseArgs {
 	 */
 	provider?: InferenceProviderOrPolicy;
 }
+
+/** Chat also accepts any provider the Hugging Face router routes to, e.g. "mistral" */
+export type ChatCompletionArgs = Omit<BaseArgs, "provider"> &
+	ChatCompletionInput & {
+		provider?: InferenceProviderOrPolicy | (string & NonNullable<unknown>);
+	};
 
 export type RequestArgs = BaseArgs &
 	(

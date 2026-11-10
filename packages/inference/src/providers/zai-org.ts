@@ -27,12 +27,7 @@ import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import type { ImageToTextArgs } from "../tasks/cv/imageToText.js";
-import {
-	BaseConversationalTask,
-	TaskProviderHelper,
-	type ImageToTextTaskHelper,
-	type TextToImageTaskHelper,
-} from "./providerHelper.js";
+import { TaskProviderHelper, type ImageToTextTaskHelper, type TextToImageTaskHelper } from "./providerHelper.js";
 
 const ZAI_API_BASE_URL = "https://api.z.ai";
 
@@ -46,23 +41,6 @@ abstract class ZaiTask extends TaskProviderHelper {
 		headers["x-source-channel"] = "hugging_face";
 		headers["accept-language"] = "en-US,en";
 		return headers;
-	}
-}
-
-export class ZaiConversationalTask extends BaseConversationalTask {
-	constructor() {
-		super("zai-org", ZAI_API_BASE_URL);
-	}
-
-	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
-		const headers = super.prepareHeaders(params, binary);
-		headers["x-source-channel"] = "hugging_face";
-		headers["accept-language"] = "en-US,en";
-		return headers;
-	}
-
-	override makeRoute(): string {
-		return "/api/paas/v4/chat/completions";
 	}
 }
 

@@ -1,5 +1,4 @@
 import os
-import json
 import requests
 
 API_URL = "https://router.huggingface.co/v1/chat/completions"
@@ -8,15 +7,10 @@ headers = {
 }
 
 def query(payload):
-    response = requests.post(API_URL, headers=headers, json=payload, stream=True)
-    for line in response.iter_lines():
-        if not line.startswith(b"data:"):
-            continue
-        if line.strip() == b"data: [DONE]":
-            return
-        yield json.loads(line.decode("utf-8").lstrip("data:").rstrip("/n"))
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
 
-chunks = query({
+response = query({
     "messages": [
         {
             "role": "user",
@@ -34,9 +28,7 @@ chunks = query({
             ]
         }
     ],
-    "model": "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
-    "stream": True,
+    "model": "meta-llama/Llama-3.2-11B-Vision-Instruct:together"
 })
 
-for chunk in chunks:
-    print(chunk["choices"][0]["delta"]["content"], end="")
+print(response["choices"][0]["message"])

@@ -1,20 +1,11 @@
-async function query(data) {
-	const response = await fetch(
-		"https://router.huggingface.co/v1/chat/completions",
-		{
-			headers: {
-				Authorization: `Bearer ${process.env.HF_TOKEN}`,
-				"Content-Type": "application/json",
-			},
-			method: "POST",
-			body: JSON.stringify(data),
-		}
-	);
-	const result = await response.json();
-	return result;
-}
+import { InferenceClient } from "@huggingface/inference";
 
-query({ 
+const client = new InferenceClient(process.env.HF_TOKEN);
+
+let out = "";
+
+const stream = client.chatCompletionStream({
+    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:together",
     messages: [
         {
             role: "user",
@@ -32,7 +23,12 @@ query({
             ],
         },
     ],
-    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
-}).then((response) => {
-    console.log(JSON.stringify(response));
 });
+
+for await (const chunk of stream) {
+	if (chunk.choices && chunk.choices.length > 0) {
+		const newContent = chunk.choices[0].delta.content;
+		out += newContent;
+		console.log(newContent);
+	}
+}

@@ -5,7 +5,7 @@ import type {
 	TextGenerationOutputFinishReason,
 } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
-import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
+import { BaseTextGenerationTask } from "./providerHelper.js";
 import { omit } from "../utils/omit.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
 
@@ -20,12 +20,6 @@ interface FeatherlessAITextCompletionOutput extends Omit<ChatCompletionOutput, "
 }
 
 const FEATHERLESS_API_BASE_URL = "https://api.featherless.ai";
-
-export class FeatherlessAIConversationalTask extends BaseConversationalTask {
-	constructor() {
-		super("featherless-ai", FEATHERLESS_API_BASE_URL);
-	}
-}
 
 export class FeatherlessAITextGenerationTask extends BaseTextGenerationTask {
 	constructor() {

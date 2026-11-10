@@ -15,7 +15,7 @@
  * Thanks!
  */
 
-import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
+import { BaseTextGenerationTask } from "./providerHelper.js";
 import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
@@ -31,12 +31,6 @@ interface OvhCloudTextCompletionOutput extends Omit<ChatCompletionOutput, "choic
 		logprobs: unknown;
 		index: number;
 	}>;
-}
-
-export class OvhCloudConversationalTask extends BaseConversationalTask {
-	constructor() {
-		super("ovhcloud", OVHCLOUD_API_BASE_URL);
-	}
 }
 
 export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {

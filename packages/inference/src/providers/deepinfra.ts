@@ -30,7 +30,6 @@ import type { BodyParams, OutputType, RequestArgs } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
-	BaseConversationalTask,
 	BaseTextGenerationTask,
 	type FeatureExtractionTaskHelper,
 	TaskProviderHelper,
@@ -102,16 +101,6 @@ interface DeepInfraImageGenerationResponse {
 		b64_json?: string;
 		url?: string;
 	}>;
-}
-
-export class DeepInfraConversationalTask extends BaseConversationalTask {
-	constructor() {
-		super("deepinfra", DEEPINFRA_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "v1/openai/chat/completions";
-	}
 }
 
 export class DeepInfraTextGenerationTask extends BaseTextGenerationTask {

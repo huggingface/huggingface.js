@@ -1,12 +1,20 @@
-import { OpenAI } from "openai";
+async function query(data) {
+	const response = await fetch(
+		"https://router.huggingface.co/v1/chat/completions",
+		{
+			headers: {
+				Authorization: `Bearer ${process.env.HF_TOKEN}`,
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+			body: JSON.stringify(data),
+		}
+	);
+	const result = await response.json();
+	return result;
+}
 
-const client = new OpenAI({
-	baseURL: "https://router.huggingface.co/v1",
-	apiKey: process.env.HF_TOKEN,
-});
-
-const chatCompletion = await client.chat.completions.create({
-	model: "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
+query({ 
     messages: [
         {
             role: "user",
@@ -24,6 +32,7 @@ const chatCompletion = await client.chat.completions.create({
             ],
         },
     ],
+    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:together",
+}).then((response) => {
+    console.log(JSON.stringify(response));
 });
-
-console.log(chatCompletion.choices[0].message);

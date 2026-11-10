@@ -26,7 +26,6 @@ import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import {
-	BaseConversationalTask,
 	BaseTextGenerationTask,
 	TaskProviderHelper,
 	type AutomaticSpeechRecognitionTaskHelper,
@@ -42,7 +41,6 @@ import {
 	InferenceClientProviderApiError,
 	InferenceClientProviderOutputError,
 } from "../errors.js";
-import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
@@ -119,28 +117,6 @@ interface TogetherVideoJobResponse {
 	error?: {
 		message?: string;
 	};
-}
-
-export class TogetherConversationalTask extends BaseConversationalTask {
-	constructor() {
-		super("together", TOGETHER_API_BASE_URL);
-	}
-
-	override preparePayload(params: BodyParams<ChatCompletionInput>): Record<string, unknown> {
-		const payload = super.preparePayload(params);
-		const response_format = payload.response_format as
-			| { type: "json_schema"; json_schema: { schema: unknown } }
-			| undefined;
-
-		if (response_format?.type === "json_schema" && response_format?.json_schema?.schema) {
-			payload.response_format = {
-				type: "json_schema",
-				schema: response_format.json_schema.schema,
-			};
-		}
-
-		return payload;
-	}
 }
 
 export class TogetherTextGenerationTask extends BaseTextGenerationTask {

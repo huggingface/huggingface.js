@@ -80,7 +80,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["hf-inference", "fireworks-ai", "auto"],
+		providers: ["hf-inference", "together", "auto"],
 		opts: { streaming: false },
 	},
 	{
@@ -92,7 +92,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["hf-inference", "fireworks-ai", "auto"],
+		providers: ["hf-inference", "together", "auto"],
 		opts: { streaming: true },
 	},
 	{
@@ -277,14 +277,14 @@ const TEST_CASES: {
 	},
 	{
 		testName: "explicit-direct-request",
-		task: "conversational",
+		task: "text-to-image",
 		model: {
-			id: "meta-llama/Llama-3.1-8B-Instruct",
-			pipeline_tag: "text-generation",
-			tags: ["conversational"],
+			id: "black-forest-labs/FLUX.1-schnell",
+			pipeline_tag: "text-to-image",
+			tags: [],
 			inference: "",
 		},
-		providers: ["together"],
+		providers: ["fal-ai"],
 		opts: { directRequest: true },
 	},
 	{

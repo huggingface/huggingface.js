@@ -1,4 +1,4 @@
-import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
+import { BaseTextGenerationTask } from "./providerHelper.js";
 
 /**
  * See the registered mapping of HF model ID => Groq model ID here:
@@ -20,16 +20,6 @@ import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper
 const GROQ_API_BASE_URL = "https://api.groq.com";
 
 export class GroqTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("groq", GROQ_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "/openai/v1/chat/completions";
-	}
-}
-
-export class GroqConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("groq", GROQ_API_BASE_URL);
 	}

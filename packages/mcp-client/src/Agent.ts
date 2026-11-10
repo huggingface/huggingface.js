@@ -1,4 +1,3 @@
-import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import type { ChatCompletionInputMessageTool } from "./McpClient";
 import { McpClient } from "./McpClient";
 import type { ChatCompletionInputMessage, ChatCompletionStreamOutput } from "@huggingface/tasks";
@@ -59,32 +58,26 @@ export class Agent extends McpClient {
 	public readonly prompt: string;
 	protected messages: ChatCompletionInputMessage[];
 
-	constructor({
-		provider,
-		endpointUrl,
-		model,
-		apiKey,
-		servers,
-		prompt,
-	}: (
-		| {
-				provider: InferenceProviderOrPolicy;
-				endpointUrl?: undefined;
-		  }
-		| {
-				endpointUrl: string;
-				provider?: undefined;
-		  }
-	) & {
-		model: string;
-		apiKey?: string;
-		servers: (ServerConfig | StdioServerParameters)[];
-		prompt?: string;
-	}) {
-		super(provider ? { provider, endpointUrl, model, apiKey } : { provider, endpointUrl, model, apiKey });
-		/// ^This shenanigan is just here to please an overzealous TS type-checker.
-		this.servers = servers;
-		this.prompt = prompt ?? DEFAULT_SYSTEM_PROMPT;
+	constructor(
+		params: (
+			| {
+					provider: string;
+					endpointUrl?: undefined;
+			  }
+			| {
+					endpointUrl: string;
+					provider?: undefined;
+			  }
+		) & {
+			model: string;
+			apiKey?: string;
+			servers: (ServerConfig | StdioServerParameters)[];
+			prompt?: string;
+		},
+	) {
+		super(params);
+		this.servers = params.servers;
+		this.prompt = params.prompt ?? DEFAULT_SYSTEM_PROMPT;
 		this.messages = [
 			{
 				role: "system",

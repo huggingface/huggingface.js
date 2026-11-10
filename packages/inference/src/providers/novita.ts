@@ -22,7 +22,6 @@ import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import {
-	BaseConversationalTask,
 	BaseTextGenerationTask,
 	type ImageTextToVideoTaskHelper,
 	TaskProviderHelper,
@@ -76,16 +75,6 @@ interface NovitaImageTextToVideoResponse {
 }
 
 export class NovitaTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("novita", NOVITA_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "/v3/openai/chat/completions";
-	}
-}
-
-export class NovitaConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("novita", NOVITA_API_BASE_URL);
 	}

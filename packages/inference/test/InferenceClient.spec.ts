@@ -2,7 +2,7 @@ import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { chatCompletion, chatCompletionStream, HfInference, InferenceClient, textGeneration } from "../src/index.js";
+import { HfInference, InferenceClient, textGeneration } from "../src/index.js";
 import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../src/providers/consts.js";
 import { readTestFile } from "./test-files.js";
 
@@ -990,31 +990,6 @@ describe.skip("InferenceClient", () => {
 				}
 				expect(out).toContain("The answer to one + one is two.");
 			});
-			it("custom openai - OpenAI Specs", async () => {
-				const OPENAI_KEY = env.OPENAI_KEY;
-				const hf = new InferenceClient(OPENAI_KEY);
-				const stream = hf.chatCompletionStream({
-					provider: "openai",
-					model: "openai/gpt-3.5-turbo",
-					messages: [{ role: "user", content: "Complete the equation one + one =" }],
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-				let out = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						out += chunk.choices[0].delta.content;
-					}
-				}
-				expect(out).toContain("two");
-			});
-			it("OpenAI client side routing - model should have provider as prefix", async () => {
-				await expect(
-					new InferenceClient("dummy_token").chatCompletion({
-						model: "gpt-3.5-turbo", // must be "openai/gpt-3.5-turbo"
-						provider: "openai",
-						messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					}),
-				).rejects.toThrowError(`Models from openai must be prefixed by "openai/". Got "gpt-3.5-turbo".`);
-			});
 		},
 		TIMEOUT,
 	);
@@ -1125,43 +1100,6 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 				},
 			};
-
-			it("chatCompletion", async () => {
-				const res = await chatCompletion({
-					accessToken: env.HF_FEATHERLESS_KEY ?? "dummy",
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "featherless-ai",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					temperature: 0.1,
-				});
-
-				expect(res).toBeDefined();
-				expect(res.choices).toBeDefined();
-				expect(res.choices?.length).toBeGreaterThan(0);
-
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toBeDefined();
-					expect(typeof completion).toBe("string");
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = chatCompletionStream({
-					accessToken: env.HF_FEATHERLESS_KEY ?? "dummy",
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "featherless-ai",
-					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-				let out = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						out += chunk.choices[0].delta.content;
-					}
-				}
-				expect(out).toContain("2");
-			});
 
 			it("textGeneration", async () => {
 				const res = await textGeneration({
@@ -1309,33 +1247,6 @@ describe.skip("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_TOGETHER_KEY ?? "dummy");
 
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/Llama-3.3-70B-Instruct",
-					provider: "together",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "meta-llama/Llama-3.3-70B-Instruct",
-					provider: "together",
-					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-				let out = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						out += chunk.choices[0].delta.content;
-					}
-				}
-				expect(out).toContain("2");
-			});
-
 			it("textToImage", async () => {
 				const res = await client.textToImage({
 					model: "stabilityai/stable-diffusion-xl-base-1.0",
@@ -1379,66 +1290,7 @@ describe.skip("InferenceClient", () => {
 					task: "feature-extraction",
 					status: "live",
 				},
-				"google/gemma-3-27b-it": {
-					provider: "scaleway",
-					hfModelId: "google/gemma-3-27b-it",
-					providerId: "gemma-3-27b-it",
-					task: "conversational",
-					status: "live",
-				},
 			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "scaleway",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					tool_choice: "none",
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toMatch(/(to )?(two|2)/i);
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "scaleway",
-					messages: [{ role: "system", content: "Complete the equation 1 + 1 = , just the answer" }],
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-				let out = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						out += chunk.choices[0].delta.content;
-					}
-				}
-				expect(out).toMatch(/(two|2)/i);
-			});
-
-			it("chatCompletion multimodal", async () => {
-				const res = await client.chatCompletion({
-					model: "google/gemma-3-27b-it",
-					provider: "scaleway",
-					messages: [
-						{
-							role: "user",
-							content: [
-								{
-									type: "image_url",
-									image_url: {
-										url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
-									},
-								},
-								{ type: "text", text: "What is this?" },
-							],
-						},
-					],
-				});
-				expect(res.choices).toBeDefined();
-				expect(res.choices?.length).toBeGreaterThan(0);
-				expect(res.choices?.[0].message?.content).toContain("Statue of Liberty");
-			});
 
 			it("textGeneration", async () => {
 				const res = await client.textGeneration({
@@ -1469,192 +1321,6 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT,
 	);
 
-	describe.concurrent("3rd party providers", () => {
-		it("chatCompletion - fails with unsupported model", async () => {
-			expect(
-				chatCompletion({
-					model: "black-forest-labs/Flux.1-dev",
-					provider: "together",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					accessToken: env.HF_TOGETHER_KEY ?? "dummy",
-				}),
-			).rejects.toThrowError(
-				"Model black-forest-labs/Flux.1-dev is not supported for task conversational and provider together",
-			);
-		});
-	});
-
-	describe.concurrent(
-		"Fireworks",
-		() => {
-			const client = new InferenceClient(env.HF_FIREWORKS_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["fireworks-ai"] = {
-				"deepseek-ai/DeepSeek-R1": {
-					provider: "fireworks-ai",
-					hfModelId: "deepseek-ai/DeepSeek-R1",
-					providerId: "accounts/fireworks/models/deepseek-r1",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "deepseek-ai/DeepSeek-R1",
-					provider: "fireworks-ai",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "deepseek-ai/DeepSeek-R1",
-					provider: "fireworks-ai",
-					messages: [{ role: "user", content: "Say this is a test" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-			});
-		},
-		TIMEOUT,
-	);
-
-	describe.concurrent(
-		"Novita",
-		() => {
-			const client = new InferenceClient(env.HF_NOVITA_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["novita"] = {
-				"meta-llama/llama-3.1-8b-instruct": {
-					provider: "novita",
-					hfModelId: "meta-llama/llama-3.1-8b-instruct",
-					providerId: "meta-llama/llama-3.1-8b-instruct",
-					status: "live",
-					task: "conversational",
-				},
-				"deepseek/deepseek-r1-distill-qwen-14b": {
-					provider: "novita",
-					hfModelId: "deepseek/deepseek-r1-distill-qwen-14b",
-					providerId: "deepseek/deepseek-r1-distill-qwen-14b",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/llama-3.1-8b-instruct",
-					provider: "novita",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "deepseek/deepseek-r1-distill-qwen-14b",
-					provider: "novita",
-					messages: [{ role: "user", content: "Say this is a test" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-			});
-		},
-		TIMEOUT,
-	);
-	describe.concurrent(
-		"Cohere",
-		() => {
-			const client = new InferenceClient(env.HF_COHERE_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["cohere"] = {
-				"CohereForAI/c4ai-command-r7b-12-2024": {
-					provider: "cohere",
-					hfModelId: "CohereForAI/c4ai-command-r7b-12-2024",
-					providerId: "command-r7b-12-2024",
-					status: "live",
-					task: "conversational",
-				},
-				"CohereForAI/aya-expanse-8b": {
-					provider: "cohere",
-					hfModelId: "CohereForAI/aya-expanse-8b",
-					providerId: "c4ai-aya-expanse-8b",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "CohereForAI/c4ai-command-r7b-12-2024",
-					provider: "cohere",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "CohereForAI/c4ai-command-r7b-12-2024",
-					provider: "cohere",
-					messages: [{ role: "user", content: "Say 'this is a test'" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-			});
-		},
-		TIMEOUT,
-	);
 	describe.concurrent(
 		"DeepInfra",
 		() => {
@@ -1735,46 +1401,6 @@ describe.skip("InferenceClient", () => {
 				};
 			};
 
-			it("chatCompletion", async () => {
-				setMapping("conversational");
-				const res = await client.chatCompletion({
-					model: HF_MODEL,
-					provider: "deepinfra",
-					messages: [{ role: "user", content: "Name one use case for open-source AI." }],
-					max_tokens: 64,
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(typeof completion).toBe("string");
-					expect(completion?.length ?? 0).toBeGreaterThan(0);
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				setMapping("conversational");
-				const stream = client.chatCompletionStream({
-					model: HF_MODEL,
-					provider: "deepinfra",
-					messages: [
-						{
-							role: "user",
-							content: "Respond with a two-word description of Hugging Face.",
-						},
-					],
-					max_tokens: 32,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-				let streamed = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const delta = chunk.choices[0].delta?.content;
-						if (delta) {
-							streamed += delta;
-						}
-					}
-				}
-				expect(streamed.trim().length).toBeGreaterThan(0);
-			});
-
 			it("textGeneration", async () => {
 				setMapping("text-generation");
 				const generation = await client.textGeneration({
@@ -1844,58 +1470,7 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT,
 	);
-	describe.concurrent(
-		"Cerebras",
-		() => {
-			const client = new InferenceClient(env.HF_CEREBRAS_KEY ?? "dummy");
 
-			HARDCODED_MODEL_INFERENCE_MAPPING["cerebras"] = {
-				"meta-llama/llama-3.1-8b-instruct": {
-					provider: "cerebras",
-					hfModelId: "meta-llama/llama-3.1-8b-instruct",
-					providerId: "llama3.1-8b",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/llama-3.1-8b-instruct",
-					provider: "cerebras",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "meta-llama/llama-3.1-8b-instruct",
-					provider: "cerebras",
-					messages: [{ role: "user", content: "Say 'this is a test'" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-			});
-		},
-		TIMEOUT,
-	);
 	describe.concurrent(
 		"Nscale",
 		() => {
@@ -1918,36 +1493,6 @@ describe.skip("InferenceClient", () => {
 				},
 			};
 
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "nscale",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "nscale",
-					messages: [{ role: "user", content: "Say 'this is a test'" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-			});
 			it("textToImage", async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
@@ -1959,122 +1504,6 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT,
 	);
-	describe.concurrent(
-		"Groq",
-		() => {
-			const client = new InferenceClient(env.HF_GROQ_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["groq"] = {
-				"meta-llama/Llama-3.3-70B-Instruct": {
-					provider: "groq",
-					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
-					providerId: "llama-3.3-70b-versatile",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/Llama-3.3-70B-Instruct",
-					provider: "groq",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "meta-llama/Llama-3.3-70B-Instruct",
-					provider: "groq",
-					messages: [{ role: "user", content: "Say 'this is a test'" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-			});
-		},
-		TIMEOUT,
-	);
-	describe.concurrent(
-		"HUMAIN",
-		() => {
-			const client = new InferenceClient(env.HF_HUMAIN_KEY ?? "dummy");
-			const hfModelId = "humain-ai/humain-m3";
-			const providerModelId = "humain-m3";
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["humain-ai"] = {
-				[hfModelId]: {
-					provider: "humain-ai",
-					hfModelId,
-					providerId: providerModelId,
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion", async () => {
-				const response = await client.chatCompletion({
-					model: hfModelId,
-					provider: "humain-ai",
-					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
-				});
-
-				expect(response.choices[0]?.message.content).toBeTruthy();
-				expect(response.usage).toEqual(
-					expect.objectContaining({
-						prompt_tokens: expect.any(Number),
-						completion_tokens: expect.any(Number),
-						total_tokens: expect.any(Number),
-					}),
-				);
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: hfModelId,
-					provider: "humain-ai",
-					messages: [{ role: "user", content: "Reply with exactly: this is a test" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let content = "";
-				let usage: ChatCompletionStreamOutput["usage"];
-
-				for await (const chunk of stream) {
-					content += chunk.choices[0]?.delta.content ?? "";
-					if (chunk.usage) {
-						usage = chunk.usage;
-					}
-				}
-
-				expect(content).toBeTruthy();
-				expect(usage).toEqual(
-					expect.objectContaining({
-						prompt_tokens: expect.any(Number),
-						completion_tokens: expect.any(Number),
-						total_tokens: expect.any(Number),
-					}),
-				);
-			});
-		},
-		TIMEOUT,
-	);
 
 	describe.concurrent(
 		"ZAI",
@@ -2082,13 +1511,6 @@ describe.skip("InferenceClient", () => {
 			const client = new InferenceClient(env.HF_ZAI_KEY ?? "dummy");
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["zai-org"] = {
-				"zai-org/GLM-4.5": {
-					provider: "zai-org",
-					hfModelId: "zai-org/GLM-4.5",
-					providerId: "glm-4.5",
-					status: "live",
-					task: "conversational",
-				},
 				"zai-org/glm-image": {
 					provider: "zai-org",
 					hfModelId: "zai-org/glm-image",
@@ -2097,41 +1519,6 @@ describe.skip("InferenceClient", () => {
 					task: "text-to-image",
 				},
 			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "zai-org/GLM-4.5",
-					provider: "zai-org",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "zai-org/GLM-4.5",
-					provider: "zai-org",
-					messages: [{ role: "user", content: "Say 'this is a test'" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-			});
 
 			it("textToImage", async () => {
 				const res = await client.textToImage({
@@ -2159,48 +1546,6 @@ describe.skip("InferenceClient", () => {
 					task: "conversational",
 				},
 			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "meta-llama/llama-3.1-8b-instruct",
-					provider: "ovhcloud",
-					messages: [{ role: "user", content: "A, B, C, " }],
-					seed: 42,
-					temperature: 0,
-					top_p: 0.01,
-					max_tokens: 1,
-				});
-				expect(res.choices && res.choices.length > 0);
-				const completion = res.choices[0].message?.content;
-				expect(completion).toContain("D");
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "meta-llama/llama-3.1-8b-instruct",
-					provider: "ovhcloud",
-					messages: [{ role: "user", content: "A, B, C, " }],
-					stream: true,
-					seed: 42,
-					temperature: 0,
-					top_p: 0.01,
-					max_tokens: 1,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse).toContain("D");
-			});
 
 			it("textGeneration", async () => {
 				const res = await client.textGeneration({
@@ -2421,117 +1766,6 @@ describe.skip("InferenceClient", () => {
 					},
 				});
 				expect(res).toBeInstanceOf(Blob);
-			});
-		},
-		TIMEOUT,
-	);
-
-	describe.concurrent(
-		"PublicAI",
-		() => {
-			const client = new InferenceClient(env.HF_PUBLICAI_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["publicai"] = {
-				"swiss-ai/Apertus-8B-Instruct-2509": {
-					provider: "publicai",
-					hfModelId: "swiss-ai/Apertus-8B-Instruct-2509",
-					providerId: "swiss-ai/apertus-8b-instruct",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion", async () => {
-				const res = await client.chatCompletion({
-					model: "swiss-ai/Apertus-8B-Instruct-2509",
-					provider: "publicai",
-					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toContain("two");
-				}
-			});
-
-			it("chatCompletion stream", async () => {
-				const stream = client.chatCompletionStream({
-					model: "swiss-ai/Apertus-8B-Instruct-2509",
-					provider: "publicai",
-					messages: [{ role: "user", content: "Say 'this is a test'" }],
-					stream: true,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-			});
-		},
-		TIMEOUT,
-	);
-
-	describe.concurrent(
-		"Baseten",
-		() => {
-			const client = new InferenceClient(env.HF_BASETEN_KEY ?? "dummy");
-
-			HARDCODED_MODEL_INFERENCE_MAPPING["baseten"] = {
-				"Qwen/Qwen3-235B-A22B-Instruct-2507": {
-					provider: "baseten",
-					hfModelId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
-					providerId: "Qwen/Qwen3-235B-A22B-Instruct-2507",
-					status: "live",
-					task: "conversational",
-				},
-			};
-
-			it("chatCompletion - Qwen3 235B Instruct", async () => {
-				const res = await client.chatCompletion({
-					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
-					provider: "baseten",
-					messages: [{ role: "user", content: "What is 5 + 3?" }],
-					max_tokens: 20,
-				});
-				if (res.choices && res.choices.length > 0) {
-					const completion = res.choices[0].message?.content;
-					expect(completion).toBeDefined();
-					expect(typeof completion).toBe("string");
-					expect(completion).toMatch(/(eight|8)/i);
-				}
-			});
-
-			it("chatCompletion stream - Qwen3 235B", async () => {
-				const stream = client.chatCompletionStream({
-					model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
-					provider: "baseten",
-					messages: [{ role: "user", content: "Count from 1 to 3" }],
-					stream: true,
-					max_tokens: 20,
-				}) as AsyncGenerator<ChatCompletionStreamOutput>;
-
-				let fullResponse = "";
-				for await (const chunk of stream) {
-					if (chunk.choices && chunk.choices.length > 0) {
-						const content = chunk.choices[0].delta?.content;
-						if (content) {
-							fullResponse += content;
-						}
-					}
-				}
-
-				// Verify we got a meaningful response
-				expect(fullResponse).toBeTruthy();
-				expect(fullResponse.length).toBeGreaterThan(0);
-				expect(fullResponse).toMatch(/1.*2.*3/);
 			});
 		},
 		TIMEOUT,

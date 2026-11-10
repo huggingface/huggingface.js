@@ -19,7 +19,7 @@ import type { BodyParams } from "../types.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
 
 import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
-import { BaseConversationalTask, TaskProviderHelper, BaseTextGenerationTask } from "./providerHelper.js";
+import { TaskProviderHelper, BaseTextGenerationTask } from "./providerHelper.js";
 
 const SCALEWAY_API_BASE_URL = "https://api.scaleway.ai";
 
@@ -27,12 +27,6 @@ interface ScalewayEmbeddingsResponse {
 	data: Array<{
 		embedding: number[];
 	}>;
-}
-
-export class ScalewayConversationalTask extends BaseConversationalTask {
-	constructor() {
-		super("scaleway", SCALEWAY_API_BASE_URL);
-	}
 }
 
 export class ScalewayTextGenerationTask extends BaseTextGenerationTask {

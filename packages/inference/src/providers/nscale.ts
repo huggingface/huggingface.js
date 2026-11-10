@@ -17,7 +17,7 @@
 import type { TextToImageInput } from "@huggingface/tasks";
 import type { BodyParams, OutputType } from "../types.js";
 import { omit } from "../utils/omit.js";
-import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
+import { TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
 import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 
 const NSCALE_API_BASE_URL = "https://inference.api.nscale.com";
@@ -26,12 +26,6 @@ interface NscaleCloudBase64ImageGeneration {
 	data: Array<{
 		b64_json: string;
 	}>;
-}
-
-export class NscaleConversationalTask extends BaseConversationalTask {
-	constructor() {
-		super("nscale", NSCALE_API_BASE_URL);
-	}
 }
 
 export class NscaleTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {

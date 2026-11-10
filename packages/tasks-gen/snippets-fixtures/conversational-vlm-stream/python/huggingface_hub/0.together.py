@@ -5,8 +5,8 @@ client = InferenceClient(
     api_key=os.environ["HF_TOKEN"],
 )
 
-completion = client.chat.completions.create(
-    model="meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
+stream = client.chat.completions.create(
+    model="meta-llama/Llama-3.2-11B-Vision-Instruct:together",
     messages=[
         {
             "role": "user",
@@ -24,6 +24,8 @@ completion = client.chat.completions.create(
             ]
         }
     ],
+    stream=True,
 )
 
-print(completion.choices[0].message)
+for chunk in stream:
+    print(chunk.choices[0].delta.content, end="")
