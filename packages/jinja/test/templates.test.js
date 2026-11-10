@@ -6967,6 +6967,15 @@ describe("Feature regressions", () => {
 			expect(() => new Template(source).render()).toThrowError();
 		});
 	});
+
+	describe("Numeric filters", () => {
+		it("converts numbers with int and float like Python", () => {
+			const template = new Template(
+				`|{{ x | int }}|{{ x | int(0) }}|{{ 3.7 | int(default=0) }}|{{ 3 | float(0.0) }}|{{ y | int | float }}|{{ y | int(0) | float }}|`,
+			);
+			expect(template.render({ x: -3.7, y: -0.7 })).toBe("|-3|-3|3|3.0|0.0|0.0|");
+		});
+	});
 });
 
 describe("Error checking", () => {

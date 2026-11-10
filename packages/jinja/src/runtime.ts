@@ -1375,7 +1375,7 @@ export class Interpreter {
 							? new IntegerValue(Math.abs(operand.value))
 							: new FloatValue(Math.abs(operand.value));
 					case "int":
-						return new IntegerValue(Math.floor(operand.value));
+						return new IntegerValue(Math.trunc(operand.value) + 0);
 					case "float":
 						return new FloatValue(operand.value);
 					case "string":
@@ -1498,7 +1498,7 @@ export class Interpreter {
 					const val = filterName === "int" ? parseInt(operand.value, 10) : parseFloat(operand.value);
 					return isNaN(val) ? defaultValue : filterName === "int" ? new IntegerValue(val) : new FloatValue(val);
 				} else if (operand instanceof IntegerValue || operand instanceof FloatValue) {
-					return operand;
+					return filterName === "int" ? new IntegerValue(Math.trunc(operand.value) + 0) : new FloatValue(operand.value);
 				} else if (operand instanceof BooleanValue) {
 					return filterName === "int"
 						? new IntegerValue(operand.value ? 1 : 0)
