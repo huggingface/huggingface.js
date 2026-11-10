@@ -6516,6 +6516,105 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Loop control keeps rendered output", () => {
+		// https://github.com/huggingface/huggingface.js/issues/2821
+		// Python Jinja2 (with jinja2.ext.loopcontrols) keeps what the current
+		// iteration already rendered before `break` / `continue`.
+		it.each([
+			[
+				"break keeps the current iteration's output",
+				`{% for x in [1, 2, 3] %}{{ x }}{% if x == 2 %}{% break %}{% endif %}{% endfor %}`,
+				{},
+				"12",
+			],
+			[
+				"continue keeps the current iteration's output",
+				`{% for x in [1, 2, 3] %}{{ x }}{% if x == 2 %}{% continue %}{% endif %};{% endfor %}`,
+				{},
+				"1;23;",
+			],
+			[
+				"break only exits the innermost loop and keeps its output",
+				`{% for x in [1, 2] %}{% for y in [1, 2] %}{{ x }}{{ y }}{% break %}{% endfor %}|{% endfor %}`,
+				{},
+				"11|21|",
+			],
+			[
+				"continue keeps output rendered earlier in the same iteration",
+				`{% for m in messages %}<{{ m.role }}>{% if m.role == 'system' %}{% continue %}{% endif %}{{ m.content }}{% endfor %}`,
+				{
+					messages: [
+						{ role: "system", content: "S" },
+						{ role: "user", content: "U" },
+					],
+				},
+				"<system><user>U",
+			],
+			[
+				"output before break inside a nested block is kept",
+				`{% for x in [1, 2, 3] %}{% if x > 1 %}x{{ x }}{% break %}{% endif %}{{ x }}{% endfor %}`,
+				{},
+				"1x2",
+			],
+		])("%s", (_name, source, context, expected) => {
+			const template = new Template(source);
+			expect(template.render(context)).toBe(expected);
+		});
+	});
+
+	describe("Loop control inside capturing blocks", () => {
+		// Captured text (set blocks, filter blocks) is not template output:
+		// when `break` / `continue` aborts the capture, Python Jinja2 drops the
+		// incomplete capture instead of emitting it.
+		it.each([
+			[
+				"break inside a set block does not leak the partial capture",
+				`{% for x in [1, 2] %}{{ x }}{% set y %}a{% break %}b{% endset %}{% endfor %}`,
+				{},
+				"1",
+			],
+			[
+				"break inside a nested block of a set block does not leak the partial capture",
+				`{% for x in [1, 2] %}{{ x }}{% set y %}{% if x > 0 %}a{% endif %}{% break %}{% endset %}{% endfor %}`,
+				{},
+				"1",
+			],
+			[
+				"continue inside a set block does not leak the partial capture",
+				`{% for x in [1, 2, 3] %}{{ x }}{% if x == 2 %}{% set y %}a{% continue %}{% endset %}{% endif %};{% endfor %}`,
+				{},
+				"1;23;",
+			],
+			[
+				"break inside a filter block does not leak the partial capture",
+				`{% for x in [1, 2] %}{{ x }}{% filter upper %}a{% break %}{% endfilter %}{% endfor %}`,
+				{},
+				"1",
+			],
+			[
+				"a completed capture before break is kept",
+				`{% set y %}a{% endset %}{% for x in [1, 2] %}{{ y }}{{ x }}{% break %}{% endfor %}`,
+				{},
+				"a1",
+			],
+			[
+				"a loop nested inside a set block keeps its partial output on break",
+				`{% set y %}{% for x in [1, 2, 3] %}{{ x }}{% break %}{% endfor %}{% endset %}[{{ y }}]`,
+				{},
+				"[1]",
+			],
+			[
+				"a loop nested inside a set block keeps all iterations before break",
+				`{% set y %}{% for x in [1, 2, 3] %}{{ x }}{% if x == 2 %}{% break %}{% endif %}{% endfor %}{% endset %}[{{ y }}]`,
+				{},
+				"[12]",
+			],
+		])("%s", (_name, source, context, expected) => {
+			const template = new Template(source);
+			expect(template.render(context)).toBe(expected);
+		});
+	});
+
 	describe("Member access", () => {
 		it.each([3, -4])("returns undefined for out-of-range string index %i", (index) => {
 			const template = new Template(
