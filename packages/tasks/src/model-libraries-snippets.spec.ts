@@ -31,7 +31,6 @@ import {
 	transformers,
 	transformersJS,
 	ultralytics,
-	unitree,
 	vui,
 } from "./model-libraries-snippets.js";
 
@@ -112,81 +111,6 @@ print(output)`);
 		});
 	});
 
-	describe("unitree", () => {
-		it("drops an Isaac Lab velocity policy where the G1 controller's Velocity state loads it", () => {
-			const snippet = unitree({
-				id: "user/g1-velocity",
-				tags: ["unitree", "unitree-g1-29dof", "isaaclab", "velocity"],
-				inference: "",
-			}).join("\n");
-
-			expect(snippet).toContain("git clone https://github.com/unitreerobotics/unitree_rl_lab");
-			expect(snippet).toContain("cd unitree_rl_lab/deploy/robots/g1_29dof");
-			expect(snippet).toContain("hf download user/g1-velocity --local-dir config/policy/velocity/v1");
-			expect(snippet).toContain("./g1_ctrl\n");
-			expect(snippet).toContain("./g1_ctrl --network eth0");
-			expect(snippet).not.toContain("ROBOT");
-			expect(snippet).not.toContain("config.yaml");
-		});
-
-		it("keeps the robot run in its own section after the simulation one", () => {
-			const sections = unitree({ id: "user/g1-velocity", tags: ["unitree-g1-29dof", "mjlab"], inference: "" });
-
-			expect(sections).toHaveLength(4);
-			expect(sections[2]).toContain("./g1_ctrl --network=lo");
-			expect(sections[2]).not.toContain("eth0");
-			expect(sections[3]).toBe("# 4. Run on the robot, over its Ethernet interface\n./g1_ctrl --network eth0");
-		});
-
-		it("uses the training log folder for unitree_rl_lab robots without a shipped policy", () => {
-			const snippet = unitree({ id: "user/go2", tags: ["unitree-go2", "isaaclab"], inference: "" }).join("\n");
-
-			expect(snippet).toContain("--local-dir ../../../logs/rsl_rl/unitree_go2_velocity/v1");
-			expect(snippet).toContain("./go2_ctrl");
-		});
-
-		it("adds an mjlab mimic policy as a new controller state with its motion file", () => {
-			const snippet = unitree({
-				id: "user/g1-dance",
-				tags: ["unitree", "unitree-g1-29dof", "mjlab", "mimic"],
-				inference: "",
-			}).join("\n");
-
-			expect(snippet).toContain("cd unitree_rl_mjlab/deploy/robots/g1");
-			expect(snippet).toContain("hf download user/g1-dance --local-dir config/policy/mimic/g1-dance");
-			expect(snippet).toContain("#       Mimic_Hub: {id: 110, type: Mimic}");
-			expect(snippet).toContain("#       policy_dir: config/policy/mimic/g1-dance/");
-			expect(snippet).toContain("#       motion_file: config/policy/mimic/g1-dance/params/motion.npz");
-			expect(snippet).not.toContain("fps");
-			expect(snippet).toContain("./g1_ctrl --network=lo");
-		});
-
-		it("reads only tags, not config or card data", () => {
-			const fromTags = unitree({ id: "user/p", tags: ["unitree-go2", "mjlab"], inference: "" });
-			const withNoise = unitree({
-				id: "user/p",
-				tags: ["unitree-go2", "mjlab"],
-				inference: "",
-				config: { architectures: ["something"] },
-				cardData: { base_model: "x" },
-			} as ModelData);
-
-			expect(withNoise).toEqual(fromTags);
-		});
-
-		it.each([
-			{ scenario: "missing robot tag", tags: ["unitree", "isaaclab"] },
-			{ scenario: "conflicting robot tags", tags: ["unitree-g1-29dof", "unitree-go2"] },
-			{ scenario: "robot not supported by the framework", tags: ["unitree-a2", "isaaclab"] },
-		])("asks for the robot on $scenario", ({ tags }) => {
-			const snippet = unitree({ id: "user/policy", tags, inference: "" }).join("\n");
-
-			expect(snippet).toContain("# Replace ROBOT with the robot named in the model card");
-			expect(snippet).toContain("cd unitree_rl_lab/deploy/robots/ROBOT");
-			expect(snippet).toContain("./ROBOT_ctrl");
-		});
-	});
-
 	// a repo owner can put anything in config.json / the model card, so every interpolated value
 	// must either be escaped (string literals) or rejected (bare identifiers)
 	describe("repo-controlled values are not injectable", () => {
@@ -197,7 +121,6 @@ print(output)`);
 			["diffusers", diffusers, { tags: ["lora"], cardData: { base_model: PAYLOAD, instance_prompt: PAYLOAD } }],
 			["keras_hub", keras_hub, { config: { keras_hub: { tasks: [PAYLOAD, "TextClassifier"] } } }],
 			["microduck", microduck, { tags: [`microduck-slot:${PAYLOAD}`] }],
-			["unitree", unitree, { tags: ["unitree-g1-29dof", PAYLOAD] }],
 			["paddlenlp", paddlenlp, { config: { architectures: [PAYLOAD] } }],
 			["peft", peft, { config: { peft: { base_model_name_or_path: PAYLOAD, task_type: "CAUSAL_LM" } } }],
 			["multimolecule", multimolecule, { widgetData: [{ text: PAYLOAD }] }],

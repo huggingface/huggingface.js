@@ -1912,7 +1912,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
-	unitree: {
+	"unitree-rl": {
 		prettyLabel: "Unitree",
 		repoName: "unitree_rl_lab",
 		repoUrl: "https://github.com/unitreerobotics/unitree_rl_lab",
