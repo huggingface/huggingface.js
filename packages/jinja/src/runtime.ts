@@ -225,7 +225,7 @@ export class StringValue extends RuntimeValue<string> {
 						// Trailing whitespace may be present when maxsplit is specified and there aren't sufficient matches in the string.
 						const text = this.value.trimStart();
 						for (const { 0: match, index } of text.matchAll(/\S+/g)) {
-							if (maxsplit.value !== -1 && result.length >= maxsplit.value && index !== undefined) {
+							if (maxsplit.value >= 0 && result.length >= maxsplit.value && index !== undefined) {
 								result.push(match + text.slice(index + match.length));
 								break;
 							}
@@ -237,7 +237,7 @@ export class StringValue extends RuntimeValue<string> {
 							throw new Error("empty separator");
 						}
 						result = this.value.split(sep.value);
-						if (maxsplit.value !== -1 && result.length > maxsplit.value) {
+						if (maxsplit.value >= 0 && result.length > maxsplit.value) {
 							// Follow Python's behavior: If maxsplit is given, at most maxsplit splits are done,
 							// with any remaining text returned as the final element of the list.
 							result.push(result.splice(maxsplit.value).join(sep.value));
@@ -368,9 +368,10 @@ function toJSON(
 			const basePadding = "\n" + indentValue.repeat(depth);
 			const childrenPadding = basePadding + indentValue; // Depth + 1
 
+			// Like Python's json.dumps, empty containers render as [] and {} even when indenting.
 			if (input.type === "ArrayValue") {
 				const core = (input as ArrayValue).value.map((x) => toJSON(x, options, depth + 1, convertUndefinedToNull));
-				return indent
+				return indent && core.length > 0
 					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
 					: `[${core.join(itemSeparator)}]`;
 			} else {
@@ -386,7 +387,9 @@ function toJSON(
 					const v = `${keyStr}${keySeparator}${toJSON(value, options, depth + 1, convertUndefinedToNull)}`;
 					return indent ? `${childrenPadding}${v}` : v;
 				});
-				return indent ? `{${core.join(itemSeparator)}${basePadding}}` : `{${core.join(itemSeparator)}}`;
+				return indent && core.length > 0
+					? `{${core.join(itemSeparator)}${basePadding}}`
+					: `{${core.join(itemSeparator)}}`;
 			}
 		}
 		default:
@@ -592,10 +595,14 @@ function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntim
 	return [key, value];
 }
 
+const CALL_BLOCK_SCOPE = Symbol("callBlockScope");
+
 /**
  * Represents the current environment (scope) at runtime.
  */
 export class Environment {
+	declare [CALL_BLOCK_SCOPE]?: boolean;
+
 	/**
 	 * The variables declared in this environment.
 	 */
@@ -732,9 +739,9 @@ export class Environment {
 	/**
 	 * Resolve the environment in which the variable is declared.
 	 * @param {string} name The name of the variable.
-	 * @returns {Environment} The environment in which the variable is declared.
+	 * @returns {Environment | undefined} The environment containing the variable, if declared.
 	 */
-	private resolve(name: string): Environment {
+	private resolve(name: string): Environment | undefined {
 		if (this.variables.has(name)) {
 			return this;
 		}
@@ -744,12 +751,12 @@ export class Environment {
 			return this.parent.resolve(name);
 		}
 
-		throw new Error(`Unknown variable: ${name}`);
+		return undefined;
 	}
 
 	lookupVariable(name: string): AnyRuntimeValue {
 		try {
-			return this.resolve(name).variables.get(name) ?? new UndefinedValue();
+			return this.resolve(name)?.variables.get(name) ?? new UndefinedValue();
 		} catch {
 			return new UndefinedValue();
 		}
@@ -890,14 +897,14 @@ function getParameterDescriptor(argument: Parameter): ParameterDescriptor {
 	return { name: keywordArgument.key.value, defaultValue: keywordArgument.value };
 }
 
-type SpecialMacroArgument = "kwargs" | "varargs";
+type SpecialMacroArgument = "caller" | "kwargs" | "varargs";
 
 function isSpecialMacroArgument(name: string): name is SpecialMacroArgument {
-	return name === "kwargs" || name === "varargs";
+	return name === "caller" || name === "kwargs" || name === "varargs";
 }
 
 /**
- * Find `kwargs` and `varargs` loads that precede a declaration, following Jinja's AST visit order.
+ * Find special-argument body loads that precede a declaration, following Jinja's AST visit order.
  */
 function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statement[]): Set<SpecialMacroArgument> {
 	const declared = new Set<SpecialMacroArgument>();
@@ -1097,6 +1104,12 @@ export class Interpreter {
 			if (right instanceof UndefinedValue && ["in", "not in"].includes(node.operator.value)) {
 				// Special case: `anything in undefined` is `false` and `anything not in undefined` is `true`
 				return new BooleanValue(node.operator.value === "not in");
+			}
+			if (node.operator.value === "~" && !(left instanceof NullValue || right instanceof NullValue)) {
+				// Special case: Jinja concatenates undefined values as empty strings
+				const lhs = left instanceof UndefinedValue ? "" : left.value.toString();
+				const rhs = right instanceof UndefinedValue ? "" : right.value.toString();
+				return new StringValue(lhs + rhs);
 			}
 			throw new Error(`Cannot perform operation ${node.operator.value} on undefined values`);
 		} else if (left instanceof NullValue || right instanceof NullValue) {
@@ -1362,7 +1375,7 @@ export class Interpreter {
 							? new IntegerValue(Math.abs(operand.value))
 							: new FloatValue(Math.abs(operand.value));
 					case "int":
-						return new IntegerValue(Math.floor(operand.value));
+						return new IntegerValue(Math.trunc(operand.value) + 0);
 					case "float":
 						return new FloatValue(operand.value);
 					case "string":
@@ -1485,7 +1498,7 @@ export class Interpreter {
 					const val = filterName === "int" ? parseInt(operand.value, 10) : parseFloat(operand.value);
 					return isNaN(val) ? defaultValue : filterName === "int" ? new IntegerValue(val) : new FloatValue(val);
 				} else if (operand instanceof IntegerValue || operand instanceof FloatValue) {
-					return operand;
+					return filterName === "int" ? new IntegerValue(Math.trunc(operand.value) + 0) : new FloatValue(operand.value);
 				} else if (operand instanceof BooleanValue) {
 					return filterName === "int"
 						? new IntegerValue(operand.value ? 1 : 0)
@@ -1625,14 +1638,14 @@ export class Interpreter {
 						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
 
 						const width = args.at(0) ?? kwargs.get("width") ?? new IntegerValue(4);
-						if (!(width instanceof IntegerValue)) {
-							throw new Error("width must be a number");
+						if (!(width instanceof IntegerValue || width instanceof StringValue)) {
+							throw new Error("width must be an integer or a string");
 						}
 						const first = args.at(1) ?? kwargs.get("first") ?? new BooleanValue(false);
 						const blank = args.at(2) ?? kwargs.get("blank") ?? new BooleanValue(false);
 
 						const lines = operand.value.split("\n");
-						const indent = " ".repeat(width.value);
+						const indent = width instanceof StringValue ? width.value : " ".repeat(Math.max(0, width.value));
 						const indented = lines.map((x, i) =>
 							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x,
 						);
@@ -1712,7 +1725,7 @@ export class Interpreter {
 
 		switch (node.operator.value) {
 			case "not":
-				return new BooleanValue(!argument.value);
+				return new BooleanValue(!argument.__bool__().value);
 			case "+":
 			case "-": {
 				const sign = node.operator.value === "-" ? -1 : 1;
@@ -2069,8 +2082,19 @@ export class Interpreter {
 		const specialArguments = findAccessedSpecialMacroArguments(node.args, node.body);
 		environment.setVariable(
 			node.name.value,
-			new FunctionValue((args, scope) => {
-				const macroScope = new Environment(scope);
+			new FunctionValue((args, callSite) => {
+				// Macros are lexically scoped: the body resolves free names against the environment the
+				// macro was defined in, not the one it is called from. Capturing that environment by
+				// reference rather than copying it also preserves Jinja's late binding, so a name assigned
+				// in the defining scope after the macro is declared is still visible to the body.
+				// Only body loads need an invocation-local caller; default-only loads stay lexical.
+				const caller = callSite[CALL_BLOCK_SCOPE] ? callSite.variables.get("caller") : undefined;
+				const parent = new Environment(environment);
+				if (specialArguments.has("caller")) {
+					parent.setVariable("caller", caller ?? new UndefinedValue());
+				}
+
+				const macroScope = new Environment(parent);
 				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);
 				return this.evaluateBlock(node.body, macroScope);
 			}),
@@ -2097,6 +2121,7 @@ export class Interpreter {
 			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
 		}
 		const newEnv = new Environment(environment);
+		newEnv[CALL_BLOCK_SCOPE] = true;
 		newEnv.setVariable("caller", callerFn);
 		return (fn as FunctionValue).value(macroArgs, newEnv);
 	}

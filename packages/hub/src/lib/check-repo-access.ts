@@ -4,6 +4,7 @@ import { createApiError, type HubApiError } from "../error";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 /**
  * Check if we have read access to a repository.
@@ -20,11 +21,14 @@ export async function checkRepoAccess(
 	const accessToken = params && checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 
-	const response = await (params.fetch || fetch)(`${params?.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}`, {
-		headers: {
-			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+	const response = await fetchWithServerWarnings(params.fetch)(
+		`${params?.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}`,
+		{
+			headers: {
+				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+			},
 		},
-	});
+	);
 
 	if (!response.ok) {
 		throw await createApiError(response);
