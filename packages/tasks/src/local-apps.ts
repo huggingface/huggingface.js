@@ -252,7 +252,7 @@ const snippetCortiq = (model: ModelData, filepath?: string): LocalAppSnippet[] =
 	return [
 		{
 			title: "Install and download",
-			setup: "cargo install cortiq-cli",
+			setup: "cargo install cortiq-cli --locked",
 			content: download,
 		},
 		{

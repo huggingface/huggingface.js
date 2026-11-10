@@ -303,13 +303,13 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(true);
 		expect(snippetFunc(model)[0]).toEqual({
 			title: "Install and download",
-			setup: "cargo install cortiq-cli",
+			setup: "cargo install cortiq-cli --locked",
 			content: 'hf download infosave/Bonsai-1.7Bcmf --include "*.cmf" --local-dir .',
 		});
 		expect(snippetFunc(model, "bonsai-1.7b-q4tp.cmf")).toEqual([
 			{
 				title: "Install and download",
-				setup: "cargo install cortiq-cli",
+				setup: "cargo install cortiq-cli --locked",
 				content: 'hf download infosave/Bonsai-1.7Bcmf "bonsai-1.7b-q4tp.cmf" --local-dir .',
 			},
 			{
