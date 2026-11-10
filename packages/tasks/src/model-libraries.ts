@@ -2129,6 +2129,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Wan-Video/Wan2.2",
 		countDownloads: `path_filename:"config" AND path_extension:"json"`,
 	},
+	wavegen: {
+		prettyLabel: "WaveGen",
+		repoName: "WaveGen",
+		repoUrl: "https://github.com/sh-lee-prml/WaveGen",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	wham: {
 		prettyLabel: "WHAM",
 		repoName: "wham",
