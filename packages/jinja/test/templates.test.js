@@ -6516,6 +6516,15 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("String split", () => {
+		it.each([
+			[`{{ "a,b,c".split(",", -2) | tojson }}`, `["a", "b", "c"]`],
+			[`{{ "  a b  c  ".split(none, -2) | tojson }}`, `["a", "b", "c"]`],
+		])("treats a negative maxsplit as unlimited: %s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+	});
+
 	describe("Concatenation with undefined values", () => {
 		// https://github.com/huggingface/huggingface.js/issues/2710
 		// Python Jinja2 renders undefined values as an empty string in `~` concatenation.
