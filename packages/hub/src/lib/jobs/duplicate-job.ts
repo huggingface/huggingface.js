@@ -3,6 +3,7 @@ import { createApiError } from "../../error";
 import type { CredentialsParams } from "../../types/public";
 import { checkCredentials } from "../../utils/checkCredentials";
 import type { ApiJob } from "../../types/api/api-jobs";
+import { fetchWithServerWarnings } from "../../utils/serverWarnings";
 
 /**
  * Duplicate a job (re-run with the same spec).
@@ -26,7 +27,7 @@ export async function duplicateJob(
 ): Promise<ApiJob> {
 	const accessToken = checkCredentials(params);
 
-	const response = await (params.fetch || fetch)(
+	const response = await fetchWithServerWarnings(params.fetch)(
 		`${params.hubUrl || HUB_URL}/api/jobs/${params.namespace}/${params.jobId}/duplicate`,
 		{
 			method: "POST",
