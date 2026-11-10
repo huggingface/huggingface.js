@@ -5,8 +5,14 @@ import type { EventSourceMessage } from "../vendor/fetch-event-source/parse.js";
 import { getLines, getMessages } from "../vendor/fetch-event-source/parse.js";
 import { InferenceClientProviderApiError } from "../errors.js";
 import type { JsonObject } from "../vendor/type-fest/basic.js";
+import { delay } from "./delay.js";
 
 const MAX_503_RETRIES = 10;
+
+function waitFor503Retry(retries: number, signal?: AbortSignal): Promise<void> {
+	// A pending retry must keep Node alive even when there is no active fetch.
+	return delay(Math.min(1_000 * 2 ** retries, 30_000), signal, { ref: true });
+}
 
 export interface ResponseWrapper<T> {
 	data: T;
@@ -56,6 +62,8 @@ export async function innerRequest<T>(
 	const requestContext: ResponseWrapper<T>["requestContext"] = { url, info };
 
 	if (options?.retry_on_error !== false && response.status === 503 && _retries < MAX_503_RETRIES) {
+		await response.body?.cancel();
+		await waitFor503Retry(_retries, options?.signal);
 		return innerRequest(args, providerHelper, options, _retries + 1);
 	}
 
@@ -74,7 +82,11 @@ export async function innerRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						requestId: response.headers.get("x-request-id") ?? "",
+						status: response.status,
+						body: output,
+					},
 				);
 			}
 			if (typeof output.error === "string" || typeof output.detail === "string" || typeof output.message === "string") {
@@ -86,7 +98,11 @@ export async function innerRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						requestId: response.headers.get("x-request-id") ?? "",
+						status: response.status,
+						body: output,
+					},
 				);
 			} else {
 				throw new InferenceClientProviderApiError(
@@ -97,7 +113,11 @@ export async function innerRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						requestId: response.headers.get("x-request-id") ?? "",
+						status: response.status,
+						body: output,
+					},
 				);
 			}
 		}
@@ -110,7 +130,11 @@ export async function innerRequest<T>(
 				headers: info.headers as Record<string, string>,
 				body: bodyToJson(info.body),
 			},
-			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: message ?? "" },
+			{
+				requestId: response.headers.get("x-request-id") ?? "",
+				status: response.status,
+				body: message ?? "",
+			},
 		);
 	}
 
@@ -142,6 +166,8 @@ export async function* innerStreamingRequest<T>(
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503 && _retries < MAX_503_RETRIES) {
+		await response.body?.cancel();
+		await waitFor503Retry(_retries, options?.signal);
 		return yield* innerStreamingRequest(args, providerHelper, options, _retries + 1);
 	}
 	if (!response.ok) {
@@ -158,7 +184,11 @@ export async function* innerStreamingRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						requestId: response.headers.get("x-request-id") ?? "",
+						status: response.status,
+						body: output,
+					},
 				);
 			}
 			if (typeof output.error === "string") {
@@ -170,7 +200,11 @@ export async function* innerStreamingRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						requestId: response.headers.get("x-request-id") ?? "",
+						status: response.status,
+						body: output,
+					},
 				);
 			}
 			if (output.error && "message" in output.error && typeof output.error.message === "string") {
@@ -183,7 +217,11 @@ export async function* innerStreamingRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						requestId: response.headers.get("x-request-id") ?? "",
+						status: response.status,
+						body: output,
+					},
 				);
 			}
 			// Some providers return a top-level `message` on error
@@ -196,7 +234,11 @@ export async function* innerStreamingRequest<T>(
 						headers: info.headers as Record<string, string>,
 						body: bodyToJson(info.body),
 					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						requestId: response.headers.get("x-request-id") ?? "",
+						status: response.status,
+						body: output,
+					},
 				);
 			}
 		}
@@ -277,7 +319,11 @@ export async function* innerStreamingRequest<T>(
 								headers: info.headers as Record<string, string>,
 								body: bodyToJson(info.body),
 							},
-							{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: data },
+							{
+								requestId: response.headers.get("x-request-id") ?? "",
+								status: response.status,
+								body: data,
+							},
 						);
 					}
 					yield data as T;
