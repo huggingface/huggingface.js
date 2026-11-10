@@ -46,10 +46,9 @@ Your access token should be kept private. If you need to protect it in front-end
 
 You can send inference requests to third-party providers with the inference client.
 
-Currently, we support the following providers:
+Currently, chat model inference is powered by [OpenRouter](https://openrouter.ai), and the other tasks are served by the following providers:
 - [Fal.ai](https://fal.ai)
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
-- [OpenRouter](https://openrouter.ai)
 - [Replicate](https://replicate.com)
 - [Wavespeed.ai](https://wavespeed.ai/)
 
