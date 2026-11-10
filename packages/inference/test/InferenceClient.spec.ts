@@ -2480,6 +2480,58 @@ describe.skip("InferenceClient", () => {
 	);
 
 	describe.concurrent(
+		"ai&",
+		() => {
+			const client = new InferenceClient(env.HF_AIAND_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["aiand"] = {
+				"Qwen/Qwen3.8-27B": {
+					provider: "aiand",
+					hfModelId: "Qwen/Qwen3.8-27B",
+					providerId: "qwen/qwen3.8-27b",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "Qwen/Qwen3.8-27B",
+					provider: "aiand",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "Qwen/Qwen3.8-27B",
+					provider: "aiand",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
+
+	describe.concurrent(
 		"Baseten",
 		() => {
 			const client = new InferenceClient(env.HF_BASETEN_KEY ?? "dummy");
