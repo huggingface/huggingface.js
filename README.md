@@ -31,7 +31,6 @@ await uploadFile({
 
 await inference.chatCompletion({
   model: "deepseek-ai/DeepSeek-V4.1-Flash",
-  provider: "together", // optional, the router picks one by default
   messages: [
     {
       role: "user",
@@ -149,13 +148,6 @@ for await (const chunk of client.chatCompletionStream({
 }
 
 /// Using a third-party provider:
-await client.chatCompletion({
-  model: "deepseek-ai/DeepSeek-V4.1-Flash",
-  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
-  max_tokens: 512,
-  provider: "together", // optional, the router picks one by default
-})
-
 await client.textToImage({
   model: "black-forest-labs/FLUX.1-dev",
   inputs: "a picture of a green bird",

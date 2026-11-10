@@ -233,7 +233,6 @@ Generate a model response from a list of messages comprising a conversation.
 // Non-streaming API
 const out = await hf.chatCompletion({
   model: "deepseek-ai/DeepSeek-V4.1-Flash",
-  provider: "together", // optional, the router picks one by default
   messages: [{ role: "user", content: "Hello, nice to meet you!" }],
   max_tokens: 512,
   temperature: 0.1,
@@ -243,7 +242,6 @@ const out = await hf.chatCompletion({
 let out = "";
 for await (const chunk of hf.chatCompletionStream({
   model: "deepseek-ai/DeepSeek-V4.1-Flash",
-  provider: "together",
   messages: [
     { role: "user", content: "Can you help me solve an equation?" },
   ],
