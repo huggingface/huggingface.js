@@ -50,6 +50,7 @@ import type {
 	ZeroShotClassificationTaskHelper,
 	ZeroShotImageClassificationTaskHelper,
 } from "../providers/providerHelper.js";
+import * as Raindragon from "../providers/raindragon.js";
 import * as Replicate from "../providers/replicate.js";
 import * as Scaleway from "../providers/scaleway.js";
 import * as Together from "../providers/together.js";
@@ -156,6 +157,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	publicai: {
 		conversational: new PublicAI.PublicAIConversationalTask(),
+	},
+	raindragon: {
+		conversational: new Raindragon.RaindragonConversationalTask(),
 	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
