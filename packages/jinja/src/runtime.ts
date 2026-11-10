@@ -595,10 +595,14 @@ function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntim
 	return [key, value];
 }
 
+const CALL_BLOCK_SCOPE = Symbol("callBlockScope");
+
 /**
  * Represents the current environment (scope) at runtime.
  */
 export class Environment {
+	declare [CALL_BLOCK_SCOPE]?: boolean;
+
 	/**
 	 * The variables declared in this environment.
 	 */
@@ -735,9 +739,9 @@ export class Environment {
 	/**
 	 * Resolve the environment in which the variable is declared.
 	 * @param {string} name The name of the variable.
-	 * @returns {Environment} The environment in which the variable is declared.
+	 * @returns {Environment | undefined} The environment containing the variable, if declared.
 	 */
-	private resolve(name: string): Environment {
+	private resolve(name: string): Environment | undefined {
 		if (this.variables.has(name)) {
 			return this;
 		}
@@ -747,12 +751,12 @@ export class Environment {
 			return this.parent.resolve(name);
 		}
 
-		throw new Error(`Unknown variable: ${name}`);
+		return undefined;
 	}
 
 	lookupVariable(name: string): AnyRuntimeValue {
 		try {
-			return this.resolve(name).variables.get(name) ?? new UndefinedValue();
+			return this.resolve(name)?.variables.get(name) ?? new UndefinedValue();
 		} catch {
 			return new UndefinedValue();
 		}
@@ -893,14 +897,14 @@ function getParameterDescriptor(argument: Parameter): ParameterDescriptor {
 	return { name: keywordArgument.key.value, defaultValue: keywordArgument.value };
 }
 
-type SpecialMacroArgument = "kwargs" | "varargs";
+type SpecialMacroArgument = "caller" | "kwargs" | "varargs";
 
 function isSpecialMacroArgument(name: string): name is SpecialMacroArgument {
-	return name === "kwargs" || name === "varargs";
+	return name === "caller" || name === "kwargs" || name === "varargs";
 }
 
 /**
- * Find `kwargs` and `varargs` loads that precede a declaration, following Jinja's AST visit order.
+ * Find special-argument body loads that precede a declaration, following Jinja's AST visit order.
  */
 function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statement[]): Set<SpecialMacroArgument> {
 	const declared = new Set<SpecialMacroArgument>();
@@ -2072,8 +2076,19 @@ export class Interpreter {
 		const specialArguments = findAccessedSpecialMacroArguments(node.args, node.body);
 		environment.setVariable(
 			node.name.value,
-			new FunctionValue((args, scope) => {
-				const macroScope = new Environment(scope);
+			new FunctionValue((args, callSite) => {
+				// Macros are lexically scoped: the body resolves free names against the environment the
+				// macro was defined in, not the one it is called from. Capturing that environment by
+				// reference rather than copying it also preserves Jinja's late binding, so a name assigned
+				// in the defining scope after the macro is declared is still visible to the body.
+				// Only body loads need an invocation-local caller; default-only loads stay lexical.
+				const caller = callSite[CALL_BLOCK_SCOPE] ? callSite.variables.get("caller") : undefined;
+				const parent = new Environment(environment);
+				if (specialArguments.has("caller")) {
+					parent.setVariable("caller", caller ?? new UndefinedValue());
+				}
+
+				const macroScope = new Environment(parent);
 				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);
 				return this.evaluateBlock(node.body, macroScope);
 			}),
@@ -2100,6 +2115,7 @@ export class Interpreter {
 			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
 		}
 		const newEnv = new Environment(environment);
+		newEnv[CALL_BLOCK_SCOPE] = true;
 		newEnv.setVariable("caller", callerFn);
 		return (fn as FunctionValue).value(macroArgs, newEnv);
 	}
