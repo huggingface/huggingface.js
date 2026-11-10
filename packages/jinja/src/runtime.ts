@@ -106,6 +106,34 @@ export class FloatValue extends RuntimeValue<number> {
 	}
 }
 
+/** A Python string-method range: invalid ranges must not match even an empty affix. */
+function affixRange(value: string, args: AnyRuntimeValue[], method: string): string | undefined {
+	if (args.length > 3) {
+		throw new Error(`${method}() takes at most three arguments`);
+	}
+	if (args.length === 1) return value;
+
+	const index = (arg: AnyRuntimeValue | undefined, fallback: number | undefined): number | undefined => {
+		if (arg === undefined || arg instanceof NullValue) return fallback;
+		if (arg instanceof IntegerValue || arg instanceof BooleanValue) return Number(arg.value);
+		throw new Error(`${method}() slice indices must be integers or none`);
+	};
+	let start = index(args[1], 0) ?? 0;
+	let end = index(args[2], undefined);
+	if (start === 0 && end === undefined) return value;
+
+	const characters = [...value];
+	start = start < 0 ? Math.max(characters.length + start, 0) : start;
+	end =
+		end === undefined
+			? characters.length
+			: end < 0
+				? Math.max(characters.length + end, 0)
+				: Math.min(end, characters.length);
+	if (start > characters.length || start > end) return undefined;
+	return slice(characters, start, end).join("");
+}
+
 /**
  * Represents a string value at runtime.
  */
@@ -164,15 +192,16 @@ export class StringValue extends RuntimeValue<string> {
 					if (args.length === 0) {
 						throw new Error("startswith() requires at least one argument");
 					}
+					const value = affixRange(this.value, args, "startswith");
 					const pattern = args[0];
 					if (pattern instanceof StringValue) {
-						return new BooleanValue(this.value.startsWith(pattern.value));
+						return new BooleanValue(value !== undefined && value.startsWith(pattern.value));
 					} else if (pattern instanceof ArrayValue) {
 						for (const item of pattern.value) {
 							if (!(item instanceof StringValue)) {
 								throw new Error("startswith() tuple elements must be strings");
 							}
-							if (this.value.startsWith(item.value)) {
+							if (value !== undefined && value.startsWith(item.value)) {
 								return new BooleanValue(true);
 							}
 						}
@@ -187,15 +216,16 @@ export class StringValue extends RuntimeValue<string> {
 					if (args.length === 0) {
 						throw new Error("endswith() requires at least one argument");
 					}
+					const value = affixRange(this.value, args, "endswith");
 					const pattern = args[0];
 					if (pattern instanceof StringValue) {
-						return new BooleanValue(this.value.endsWith(pattern.value));
+						return new BooleanValue(value !== undefined && value.endsWith(pattern.value));
 					} else if (pattern instanceof ArrayValue) {
 						for (const item of pattern.value) {
 							if (!(item instanceof StringValue)) {
 								throw new Error("endswith() tuple elements must be strings");
 							}
-							if (this.value.endsWith(item.value)) {
+							if (value !== undefined && value.endsWith(item.value)) {
 								return new BooleanValue(true);
 							}
 						}
