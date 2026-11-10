@@ -2006,6 +2006,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
+	"unitree-rl": {
+		prettyLabel: "Unitree",
+		repoName: "unitree_rl_lab",
+		repoUrl: "https://github.com/unitreerobotics/unitree_rl_lab",
+		snippets: snippets.unitree,
+		filter: true,
+		countDownloads: `path:"params/deploy.yaml"`,
+	},
 	univa: {
 		prettyLabel: "univa",
 		repoName: "univa",
