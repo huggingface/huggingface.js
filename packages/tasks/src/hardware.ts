@@ -532,6 +532,8 @@ export const SKUS = {
 		},
 	},
 	"Apple Silicon": {
+		// Preserve legacy memory options: removing unsupported capacities breaks Hub persisted-item validation.
+		// A data migration is required first: https://github.com/huggingface/huggingface.js/pull/1937
 		"-": {
 			"Apple MacBook Neo": {
 				tflops: 1.9,
@@ -671,6 +673,18 @@ export const SKUS = {
 				memory: [96, 256, 512],
 				msrp: 22_299,
 				power: 220,
+				releaseYear: 2026,
+			},
+			"Apple M6": {
+				// Measured FP16 FMA throughput for the 12-core GPU (Table I):
+				// https://arxiv.org/html/2609.32237v1
+				tflops: 8.46,
+				// https://www.apple.com/shop/buy-mac/macbook-pro/14-inch-m6
+				memory: [16, 24, 32],
+				// Approximate price of a 14-inch MacBook Pro with 32GB unified memory.
+				msrp: 2_400,
+				// Estimated package power; Apple does not publish SoC TDP.
+				power: 25,
 				releaseYear: 2026,
 			},
 		},
