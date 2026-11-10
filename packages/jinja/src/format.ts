@@ -17,6 +17,7 @@ import type {
 	TupleLiteral,
 	ObjectLiteral,
 	BinaryExpression,
+	ChainedComparison,
 	FilterExpression,
 	SelectExpression,
 	TestExpression,
@@ -77,6 +78,8 @@ function getPrecedence(node: Expression): number {
 			return PRECEDENCE.CONDITIONAL;
 		case "BinaryExpression":
 			return getBinaryOperatorPrecedence(node as BinaryExpression);
+		case "ChainedComparison":
+			return PRECEDENCE.COMPARISON;
 		case "UnaryExpression":
 			return (node as UnaryExpression).operator.value === "not" ? PRECEDENCE.LOGICAL_NOT : PRECEDENCE.UNARY_SIGN;
 		case "TestExpression":
@@ -287,9 +290,18 @@ function formatExpression(node: Expression): string {
 			const n = node as BinaryExpression;
 			const thisPrecedence = getBinaryOperatorPrecedence(n);
 			// All binary operators are left-associative, so the right operand slot is the next-tighter level.
-			const left = formatOperand(n.left, thisPrecedence);
+			// Comparisons are the exception: they chain (`a < b < c`), so a comparison operand needs parentheses.
+			const left = formatOperand(
+				n.left,
+				thisPrecedence === PRECEDENCE.COMPARISON ? thisPrecedence + 1 : thisPrecedence,
+			);
 			const right = formatOperand(n.right, thisPrecedence + 1);
 			return `${left} ${n.operator.value} ${right}`;
+		}
+		case "ChainedComparison": {
+			const n = node as ChainedComparison;
+			const operands = n.operands.map((operand) => formatOperand(operand, PRECEDENCE.COMPARISON + 1));
+			return operands.map((operand, i) => (i === 0 ? operand : `${n.operators[i - 1].value} ${operand}`)).join(" ");
 		}
 		case "UnaryExpression": {
 			const n = node as UnaryExpression;
