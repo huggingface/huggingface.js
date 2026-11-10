@@ -143,7 +143,7 @@ export async function listDailyPapers(
  * Search papers published on the Hub.
  */
 export async function listPapers(
-	params: PapersParams & { query?: string; limit?: number },
+	params: PapersParams & { query?: string; limit?: number } = {},
 ): Promise<PaperSearchResult[]> {
 	const query: Record<string, string> = {};
 	if (params.query !== undefined) {

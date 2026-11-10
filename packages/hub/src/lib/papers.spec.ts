@@ -11,6 +11,20 @@ describe("papers", () => {
 		assert.ok(Array.isArray(papers));
 	});
 
+	it("should allow calling the list helpers without arguments", async () => {
+		const urls: string[] = [];
+		const fetchImpl = async (url: string | URL | Request) => {
+			urls.push(String(url));
+			return new Response("[]", { headers: { "Content-Type": "application/json" } });
+		};
+		await listDailyPapers({ fetch: fetchImpl });
+		await listPapers({ fetch: fetchImpl });
+		assert.deepStrictEqual(urls, [
+			"https://huggingface.co/api/daily_papers",
+			"https://huggingface.co/api/papers/search",
+		]);
+	});
+
 	it("should serialize daily paper filters as query params", async () => {
 		let calledUrl = "";
 		await listDailyPapers({
