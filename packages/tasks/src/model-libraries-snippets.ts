@@ -3194,7 +3194,7 @@ hf download ${model.id} --local-dir ${velocityDir}/v1`;
 git clone https://github.com/unitreerobotics/${repo}
 cd ${repo}/deploy/robots/${robotDir}
 ${install}`,
-		`# 2. Build the controller
+		`# 2. Build the controller on Linux, with unitree_sdk2 and its dependencies installed
 mkdir -p build && cd build && cmake .. && make`,
 		`# 3. Test in simulation first: start unitree_mujoco, then run
 ./${bin}${simFlag}`,
