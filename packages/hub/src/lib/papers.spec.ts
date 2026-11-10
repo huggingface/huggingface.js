@@ -1,8 +1,11 @@
-import { assert, it, describe } from "vitest";
+import { assert, it, describe, vi, afterEach } from "vitest";
 import { TEST_ACCESS_TOKEN, TEST_HUB_URL } from "../test/consts";
 import { listDailyPapers, listPapers, paperInfo } from "./papers";
 
 describe("papers", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
 	it("should list daily papers (E2E on hub-ci)", async () => {
 		const papers = await listDailyPapers({
 			accessToken: TEST_ACCESS_TOKEN,
@@ -11,14 +14,14 @@ describe("papers", () => {
 		assert.ok(Array.isArray(papers));
 	});
 
-	it("should allow calling the list helpers without arguments", async () => {
+	it("should allow calling the list helpers with no arguments at all", async () => {
 		const urls: string[] = [];
-		const fetchImpl = async (url: string | URL | Request) => {
+		vi.stubGlobal("fetch", async (url: string | URL | Request) => {
 			urls.push(String(url));
 			return new Response("[]", { headers: { "Content-Type": "application/json" } });
-		};
-		await listDailyPapers({ fetch: fetchImpl });
-		await listPapers({ fetch: fetchImpl });
+		});
+		await listDailyPapers();
+		await listPapers();
 		assert.deepStrictEqual(urls, [
 			"https://huggingface.co/api/daily_papers",
 			"https://huggingface.co/api/papers/search",

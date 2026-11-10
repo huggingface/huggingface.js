@@ -78,10 +78,10 @@ type PapersParams = {
 
 async function papersRequest<T>(params: PapersParams, path: string, query?: Record<string, string>): Promise<T> {
 	const accessToken = params && checkCredentials(params);
-	const searchParams = new URLSearchParams(query);
+	const queryString = new URLSearchParams(query).toString();
 
-	const response = await fetchWithServerWarnings(params.fetch)(
-		`${params?.hubUrl || HUB_URL}${path}${searchParams.size > 0 ? `?${searchParams.toString()}` : ""}`,
+	const response = await fetchWithServerWarnings(params?.fetch)(
+		`${params?.hubUrl || HUB_URL}${path}${queryString ? `?${queryString}` : ""}`,
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
@@ -112,7 +112,7 @@ export async function listDailyPapers(
 		/** ISO month (YYYY-MM), e.g. "2025-02" */
 		month?: string;
 		submitter?: string;
-	},
+	} = {},
 ): Promise<DailyPaper[]> {
 	const query: Record<string, string> = {};
 	if (params.p !== undefined) {
