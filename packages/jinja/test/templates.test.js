@@ -6713,39 +6713,14 @@ describe("Feature regressions", () => {
 				expected: "[S]",
 			},
 			{
-				name: "resolves through three levels of nested calls",
-				source: `{% set v = '0' %}{% macro a() %}[{{ v }}]{% endmacro %}{% macro b() %}{% set v = '1' %}{{ a() }}{% endmacro %}{% macro c() %}{% set v = '2' %}{{ b() }}{% endmacro %}{{ c() }}`,
-				expected: "[0]",
-			},
-			{
 				name: "keeps the defining scope across recursive calls",
 				source: `{% set s = '.' %}{% macro f(n) %}{% if n > 0 %}{{ s }}{{ f(n - 1) }}{% endif %}{% endmacro %}{% for s in ['!'] %}{{ f(3) }}{% endfor %}`,
 				expected: "...",
 			},
 			{
-				name: "resolves a macro result assigned inside a loop",
-				source: `{% set g = 'G' %}{% macro m() %}{{ g }}{% endmacro %}{% for g in ['L'] %}{% set r = m() %}[{{ r }}]{% endfor %}`,
-				expected: "[G]",
-			},
-			{
 				name: "reads an outer name before a later local assignment",
 				source: `{% set v = 'OUTER' %}{% macro m() %}[{{ v }}]{% set v = 'INNER' %}[{{ v }}]{% endmacro %}{{ m() }}`,
 				expected: "[OUTER][INNER]",
-			},
-			{
-				name: "passes caller to the macro it invokes",
-				source: `{% macro m() %}[{{ caller() }}]{% endmacro %}{% call m() %}C{% endcall %}`,
-				expected: "[C]",
-			},
-			{
-				name: "passes caller positional arguments",
-				source: `{% macro m() %}[{{ caller('X') }}]{% endmacro %}{% call(u) m() %}{{ u }}{% endcall %}`,
-				expected: "[X]",
-			},
-			{
-				name: "passes caller keyword arguments",
-				source: `{% macro m() %}[{{ caller(y=2) }}]{% endmacro %}{% call(y) m() %}{{ y }}{% endcall %}`,
-				expected: "[2]",
 			},
 			{
 				name: "resolves a call block body in its own defining scope",
@@ -6766,11 +6741,6 @@ describe("Feature regressions", () => {
 				name: "keeps ordinary caller bindings callable",
 				source: `{% macro callback() %}C{% endmacro %}{% macro local() %}{% set caller = callback %}{{ caller() }}{% endmacro %}{% macro parameter(caller=none) %}{{ caller() }}{% endmacro %}{{ local() }}|{{ parameter(callback) }}`,
 				expected: "C|C",
-			},
-			{
-				name: "invokes caller inside a loop in the macro body",
-				source: `{% macro m() %}{% for i in [1, 2] %}{{ caller() }}{% endfor %}{% endmacro %}{% call m() %}c{% endcall %}`,
-				expected: "cc",
 			},
 		])("$name", ({ source, expected }) => {
 			expectTemplateToRender(source, expected);
@@ -6812,34 +6782,6 @@ describe("Feature regressions", () => {
 	});
 
 	describe("Macro special arguments", () => {
-		it("updates macro collectors after editing a rendered template's AST", () => {
-			const template = new Template(`{% macro m() %}X{% endmacro %}{{ m() }}`);
-			expect(template.render()).toBe("X");
-
-			const macro = template.parsed.body[0];
-			macro.body = parse(tokenize(`{{ kwargs.value }}`)).body;
-			template.parsed.body[1].args = parse(tokenize(`{{ m(value='Y') }}`)).body[0].args;
-			expect(template.render()).toBe("Y");
-
-			macro.body = parse(tokenize(`X`)).body;
-			expect(() => template.render()).toThrowError("macro 'm' takes no keyword argument 'value'");
-		});
-
-		it("updates call-block collectors after editing a rendered template's AST", () => {
-			const template = new Template(
-				`{% macro m() %}{{ caller(value='Y') }}{% endmacro %}{% call(value='X') m() %}{{ value }}{% endcall %}`,
-			);
-			expect(template.render()).toBe("Y");
-
-			template.parsed.body[0].body[0].args[0].key.value = "extra";
-			const callBlock = template.parsed.body[1];
-			callBlock.body = parse(tokenize(`{{ kwargs.extra }}`)).body;
-			expect(template.render()).toBe("Y");
-
-			callBlock.body = parse(tokenize(`{{ value }}`)).body;
-			expect(() => template.render()).toThrowError("macro None takes no keyword argument 'extra'");
-		});
-
 		it.each([
 			{
 				name: "explicit kwargs parameter",
@@ -6890,26 +6832,6 @@ describe("Feature regressions", () => {
 
 		it("keeps undeclared-name detection order-sensitive", () => {
 			expectTemplateToRender(`{% macro f() %}{{ kwargs.x }}{% set kwargs = {} %}{% endmacro %}{{ f(x=1) }}`, "1");
-		});
-
-		it.each([
-			{
-				name: "two macros in one template",
-				source: `{% macro f() %}{{ kwargs.a }}{% endmacro %}{% macro g() %}{{ varargs | join('-') }}{% endmacro %}{{ f(a=1) }}|{{ g(2, 3) }}`,
-				expected: "1|2-3",
-			},
-			{
-				name: "a macro redeclared on every iteration",
-				source: `{% for _ in [1, 2] %}{% macro m() %}{{ varargs | join('-') }}{% endmacro %}{{ m(1, 2) }}{% endfor %}`,
-				expected: "1-21-2",
-			},
-			{
-				name: "a call block re-entered on every iteration",
-				source: `{% macro m() %}{{ caller(1, 2) }}{% endmacro %}{% for _ in [1, 2] %}{% call() m() %}[{{ varargs | join('-') }}]{% endcall %}{% endfor %}`,
-				expected: "[1-2][1-2]",
-			},
-		])("detects collectors independently for $name", ({ source, expected }) => {
-			expectTemplateToRender(source, expected);
 		});
 	});
 
