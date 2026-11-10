@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { FalAITextToImageTask } from "../src/providers/fal-ai.js";
+import { ZaiImageToTextTask } from "../src/providers/zai-org.js";
 
 const itWithFakeTimers = typeof window !== "undefined" && typeof window.document !== "undefined" ? it.skip : it;
 
@@ -75,5 +76,23 @@ describe("Provider abort signal propagation", () => {
 		controller.abort();
 
 		await expect(responsePromise).rejects.toThrow(/aborted/i);
+	});
+
+	it("passes the abort signal to zai image input downloads", async () => {
+		const fetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>(() =>
+			Promise.resolve(new Response(new Blob(["image"], { type: "image/png" }))),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		const task = new ZaiImageToTextTask();
+		const controller = new AbortController();
+
+		const payload = await task.preparePayloadAsync(
+			{ inputs: "https://example.com/image.png" } as never,
+			controller.signal,
+		);
+
+		expect((payload as Record<string, unknown>).inputs).toMatch(/^data:image\/png;base64,/);
+		expect(fetchMock).toHaveBeenCalledWith("https://example.com/image.png", { signal: controller.signal });
 	});
 });

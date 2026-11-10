@@ -19,6 +19,7 @@ import { existsSync as pathExists } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
+import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import { snippets } from "@huggingface/inference";
 import type { InferenceSnippet, ModelDataMinimal, SnippetInferenceProvider, WidgetType } from "@huggingface/tasks";
 import { inferenceSnippetLanguages } from "@huggingface/tasks";
@@ -31,7 +32,7 @@ const TEST_CASES: {
 	testName: string;
 	task: WidgetType;
 	model: ModelDataMinimal;
-	providers: SnippetInferenceProvider[];
+	providers: InferenceProviderOrPolicy[];
 	lora?: boolean;
 	opts?: snippets.InferenceSnippetOptions;
 }[] = [
@@ -276,14 +277,14 @@ const TEST_CASES: {
 	},
 	{
 		testName: "explicit-direct-request",
-		task: "text-to-image",
+		task: "conversational",
 		model: {
-			id: "black-forest-labs/FLUX.1-schnell",
-			pipeline_tag: "text-to-image",
-			tags: [],
+			id: "meta-llama/Llama-3.1-8B-Instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["fal-ai"],
+		providers: ["together"],
 		opts: { directRequest: true },
 	},
 	{
@@ -364,7 +365,7 @@ function getFixtureFolder(testName: string): string {
 function generateInferenceSnippet(
 	model: ModelDataMinimal,
 	language: Language,
-	provider: SnippetInferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: WidgetType,
 	lora: boolean = false,
 	opts?: Record<string, unknown>,

@@ -9,15 +9,11 @@ import {
 import type { PipelineType, WidgetType } from "@huggingface/tasks";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks";
 import { getProviderHelper } from "../lib/getProviderHelper.js";
-import { AutoRouterConversationalTask } from "../providers/providerHelper.js";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.js";
 import type { InferenceProviderMappingEntry, InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
 import { templates } from "./templates.exported.js";
 import { getLogger } from "../lib/logger.js";
 import { HF_ROUTER_AUTO_ENDPOINT } from "../config.js";
-
-/// Chat snippets accept any provider the Hugging Face router routes to, e.g. "together"
-type SnippetProvider = InferenceProviderOrPolicy | (string & NonNullable<unknown>);
 
 export type InferenceSnippetOptions = {
 	streaming?: boolean;
@@ -57,7 +53,7 @@ interface TemplateParams {
 	providerInputs?: object;
 	autoInputs?: object;
 	model?: ModelDataMinimal;
-	provider?: SnippetProvider;
+	provider?: InferenceProviderOrPolicy;
 	providerModelId?: string;
 	billTo?: string;
 	methodName?: string; // specific to snippetBasic
@@ -151,7 +147,7 @@ const ACCESS_TOKEN_DIRECT_REQUEST_PLACEHOLDER = "not_hf_token_placeholder";
 const snippetGenerator = (templateName: string, inputPreparationFn?: InputPreparationFn) => {
 	return (
 		model: ModelDataMinimal,
-		provider: SnippetProvider,
+		provider: InferenceProviderOrPolicy,
 		inferenceProviderMapping?: InferenceProviderMappingEntry,
 		opts?: InferenceSnippetOptions,
 	): InferenceSnippet[] => {
@@ -166,11 +162,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		}
 		let providerHelper: ReturnType<typeof getProviderHelper>;
 		try {
-			/// Chat snippets call the router's /v1/chat/completions, which picks the provider
-			providerHelper =
-				task === "conversational" && !opts?.endpointUrl && !opts?.directRequest
-					? new AutoRouterConversationalTask()
-					: getProviderHelper(provider as InferenceProviderOrPolicy, task);
+			providerHelper = getProviderHelper(provider, task);
 		} catch (e) {
 			logger.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
@@ -384,7 +376,7 @@ const snippets: Partial<
 		PipelineType,
 		(
 			model: ModelDataMinimal,
-			provider: SnippetProvider,
+			provider: InferenceProviderOrPolicy,
 			inferenceProviderMapping?: InferenceProviderMappingEntry,
 			opts?: InferenceSnippetOptions,
 		) => InferenceSnippet[]
@@ -426,7 +418,7 @@ const snippets: Partial<
 
 export function getInferenceSnippets(
 	model: ModelDataMinimal,
-	provider: SnippetProvider,
+	provider: InferenceProviderOrPolicy,
 	inferenceProviderMapping?: InferenceProviderMappingEntry,
 	opts?: Record<string, unknown>,
 ): InferenceSnippet[] {
@@ -512,7 +504,7 @@ function replaceAccessTokenPlaceholder(
 	placeholder: string,
 	snippet: string,
 	language: InferenceSnippetLanguage,
-	provider: SnippetProvider,
+	provider: InferenceProviderOrPolicy,
 	endpointUrl?: string,
 ): string {
 	// If "opts.accessToken" is not set, the snippets are generated with a placeholder.

@@ -44,7 +44,29 @@ export interface Options {
 
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
-export const INFERENCE_PROVIDERS = ["fal-ai", "hf-inference", "openrouter", "replicate", "wavespeed"] as const;
+export const INFERENCE_PROVIDERS = [
+	"baseten",
+	"cerebras",
+	"cohere",
+	"deepinfra",
+	"fal-ai",
+	"featherless-ai",
+	"fireworks-ai",
+	"groq",
+	"hf-inference",
+	"humain-ai",
+	"novita",
+	"nscale",
+	"openai",
+	"openrouter",
+	"ovhcloud",
+	"publicai",
+	"replicate",
+	"scaleway",
+	"together",
+	"wavespeed",
+	"zai-org",
+] as const;
 
 export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
 
@@ -58,11 +80,27 @@ export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
  * Whenever possible, InferenceProvider should == org namespace
  */
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
+	baseten: "baseten",
+	cerebras: "cerebras",
+	cohere: "CohereLabs",
+	deepinfra: "DeepInfra",
 	"fal-ai": "fal",
+	"featherless-ai": "featherless-ai",
+	"fireworks-ai": "fireworks-ai",
+	groq: "groq",
 	"hf-inference": "hf-inference",
+	"humain-ai": "humain-ai",
+	novita: "novita",
+	nscale: "nscale",
+	openai: "openai",
 	openrouter: "OpenRouter",
+	ovhcloud: "ovhcloud",
+	publicai: "publicai",
 	replicate: "replicate",
+	scaleway: "scaleway",
+	together: "togethercomputer",
 	wavespeed: "wavespeed",
+	"zai-org": "zai-org",
 };
 
 export interface InferenceProviderMappingEntry {
@@ -82,7 +120,7 @@ export interface BaseArgs {
 	 *
 	 * Can be created for free in hf.co/settings/token
 	 *
-	 * You can also pass an external Inference provider's key if you intend to call a compatible provider like Replicate or fal...
+	 * You can also pass an external Inference provider's key if you intend to call a compatible provider like Together, Replicate, Cohere...
 	 */
 	accessToken?: string;
 
@@ -110,12 +148,6 @@ export interface BaseArgs {
 	 */
 	provider?: InferenceProviderOrPolicy;
 }
-
-/** Chat also accepts any provider the Hugging Face router routes to, e.g. "mistral" */
-export type ChatCompletionArgs = Omit<BaseArgs, "provider"> &
-	ChatCompletionInput & {
-		provider?: InferenceProviderOrPolicy | (string & NonNullable<unknown>);
-	};
 
 export type RequestArgs = BaseArgs &
 	(

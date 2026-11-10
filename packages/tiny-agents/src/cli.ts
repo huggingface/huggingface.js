@@ -3,6 +3,7 @@ import { parseArgs } from "node:util";
 import * as readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { z } from "zod";
+import { PROVIDERS_OR_POLICIES } from "@huggingface/inference";
 import type { ServerConfig } from "@huggingface/mcp-client";
 import { Agent } from "@huggingface/mcp-client";
 import { version as packageVersion } from "../package.json";
@@ -70,7 +71,7 @@ async function main() {
 	const ConfigSchema = z
 		.object({
 			model: z.string(),
-			provider: z.string().optional(),
+			provider: z.enum(PROVIDERS_OR_POLICIES).optional(),
 			endpointUrl: z.string().optional(),
 			apiKey: z.string().optional(),
 			inputs: z.array(InputConfigSchema).optional(),

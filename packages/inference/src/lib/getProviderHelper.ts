@@ -1,6 +1,19 @@
+import * as Baseten from "../providers/baseten.js";
+import * as Cerebras from "../providers/cerebras.js";
+import * as Cohere from "../providers/cohere.js";
+import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
+import * as FeatherlessAI from "../providers/featherless-ai.js";
+import * as Fireworks from "../providers/fireworks-ai.js";
+import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
+import * as Humain from "../providers/humain-ai.js";
+import * as Novita from "../providers/novita.js";
+import * as Nscale from "../providers/nscale.js";
+import * as OpenAI from "../providers/openai.js";
 import * as OpenRouter from "../providers/openrouter.js";
+import * as OvhCloud from "../providers/ovhcloud.js";
+import * as PublicAI from "../providers/publicai.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -38,11 +51,31 @@ import type {
 	ZeroShotImageClassificationTaskHelper,
 } from "../providers/providerHelper.js";
 import * as Replicate from "../providers/replicate.js";
+import * as Scaleway from "../providers/scaleway.js";
+import * as Together from "../providers/together.js";
 import * as Wavespeed from "../providers/wavespeed.js";
+import * as Zai from "../providers/zai-org.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
 import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
+	baseten: {
+		conversational: new Baseten.BasetenConversationalTask(),
+	},
+	cerebras: {
+		conversational: new Cerebras.CerebrasConversationalTask(),
+	},
+	cohere: {
+		conversational: new Cohere.CohereConversationalTask(),
+	},
+	deepinfra: {
+		"automatic-speech-recognition": new DeepInfra.DeepInfraAutomaticSpeechRecognitionTask(),
+		conversational: new DeepInfra.DeepInfraConversationalTask(),
+		"feature-extraction": new DeepInfra.DeepInfraFeatureExtractionTask(),
+		"text-generation": new DeepInfra.DeepInfraTextGenerationTask(),
+		"text-to-image": new DeepInfra.DeepInfraTextToImageTask(),
+		"text-to-speech": new DeepInfra.DeepInfraTextToSpeechTask(),
+	},
 	"fal-ai": {
 		"audio-to-audio": new FalAI.FalAIAudioToAudioTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
@@ -55,6 +88,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new FalAI.FalAITextToImageTask(),
 		"text-to-speech": new FalAI.FalAITextToSpeechTask(),
 		"text-to-video": new FalAI.FalAITextToVideoTask(),
+	},
+	"featherless-ai": {
+		conversational: new FeatherlessAI.FeatherlessAIConversationalTask(),
+		"text-generation": new FeatherlessAI.FeatherlessAITextGenerationTask(),
 	},
 	"hf-inference": {
 		"text-to-image": new HFInference.HFInferenceTextToImageTask(),
@@ -87,8 +124,38 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"tabular-regression": new HFInference.HFInferenceTabularRegressionTask(),
 		"text-to-audio": new HFInference.HFInferenceTextToAudioTask(),
 	},
+	"fireworks-ai": {
+		conversational: new Fireworks.FireworksConversationalTask(),
+	},
+	groq: {
+		conversational: new Groq.GroqConversationalTask(),
+		"text-generation": new Groq.GroqTextGenerationTask(),
+	},
+	"humain-ai": {
+		conversational: new Humain.HumainAIConversationalTask(),
+	},
+	novita: {
+		conversational: new Novita.NovitaConversationalTask(),
+		"image-text-to-video": new Novita.NovitaImageTextToVideoTask(),
+		"text-generation": new Novita.NovitaTextGenerationTask(),
+		"text-to-video": new Novita.NovitaTextToVideoTask(),
+	},
+	nscale: {
+		"text-to-image": new Nscale.NscaleTextToImageTask(),
+		conversational: new Nscale.NscaleConversationalTask(),
+	},
+	openai: {
+		conversational: new OpenAI.OpenAIConversationalTask(),
+	},
 	openrouter: {
 		conversational: new OpenRouter.OpenRouterConversationalTask(),
+	},
+	ovhcloud: {
+		conversational: new OvhCloud.OvhCloudConversationalTask(),
+		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
+	},
+	publicai: {
+		conversational: new PublicAI.PublicAIConversationalTask(),
 	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
@@ -97,6 +164,22 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"image-to-image": new Replicate.ReplicateImageToImageTask(),
 		"automatic-speech-recognition": new Replicate.ReplicateAutomaticSpeechRecognitionTask(),
 	},
+	scaleway: {
+		conversational: new Scaleway.ScalewayConversationalTask(),
+		"text-generation": new Scaleway.ScalewayTextGenerationTask(),
+		"feature-extraction": new Scaleway.ScalewayFeatureExtractionTask(),
+	},
+	together: {
+		"text-to-image": new Together.TogetherTextToImageTask(),
+		"image-to-image": new Together.TogetherImageToImageTask(),
+		"text-to-video": new Together.TogetherTextToVideoTask(),
+		"image-to-video": new Together.TogetherImageToVideoTask(),
+		conversational: new Together.TogetherConversationalTask(),
+		"text-generation": new Together.TogetherTextGenerationTask(),
+		"feature-extraction": new Together.TogetherFeatureExtractionTask(),
+		"text-to-speech": new Together.TogetherTextToSpeechTask(),
+		"automatic-speech-recognition": new Together.TogetherAutomaticSpeechRecognitionTask(),
+	},
 	wavespeed: {
 		"text-to-image": new Wavespeed.WavespeedAITextToImageTask(),
 		"text-to-video": new Wavespeed.WavespeedAITextToVideoTask(),
@@ -104,6 +187,11 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"image-to-video": new Wavespeed.WavespeedAIImageToVideoTask(),
 		"image-text-to-image": new Wavespeed.WavespeedAIImageTextToImageTask(),
 		"image-text-to-video": new Wavespeed.WavespeedAIImageTextToVideoTask(),
+	},
+	"zai-org": {
+		conversational: new Zai.ZaiConversationalTask(),
+		"text-to-image": new Zai.ZaiTextToImageTask(),
+		"image-to-text": new Zai.ZaiImageToTextTask(),
 	},
 };
 

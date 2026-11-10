@@ -30,8 +30,8 @@ await uploadFile({
 // Use all supported Inference Providers!
 
 await inference.chatCompletion({
-  model: "deepseek-ai/DeepSeek-V4.1-Flash",
-  provider: "together", // optional, any provider the Hugging Face router routes chat to
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  provider: "sambanova", // or together, fal-ai, replicate, cohere …
   messages: [
     {
       role: "user",
@@ -150,10 +150,10 @@ for await (const chunk of client.chatCompletionStream({
 
 /// Using a third-party provider:
 await client.chatCompletion({
-  model: "deepseek-ai/DeepSeek-V4.1-Flash",
+  model: "meta-llama/Llama-3.1-8B-Instruct",
   messages: [{ role: "user", content: "Hello, nice to meet you!" }],
   max_tokens: 512,
-  provider: "together", // optional, any provider the Hugging Face router routes chat to
+  provider: "sambanova", // or together, fal-ai, replicate, cohere …
 })
 
 await client.textToImage({
