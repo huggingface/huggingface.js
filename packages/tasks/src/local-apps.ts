@@ -435,6 +435,8 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const getLocalServerPort = (model: ModelData): number => (isMlxModel(model) ? 8080 : 9931);
+
 const getLocalServerStep = (model: ModelData, filepath?: string): LocalAppSnippet => {
 	return isMlxModel(model)
 		? {
@@ -458,7 +460,7 @@ const snippetPi = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 		{
 			providers: {
 				[isMLX ? "mlx-lm" : "llama-cpp"]: {
-					baseUrl: "http://localhost:8080/v1",
+					baseUrl: `http://localhost:${getLocalServerPort(model)}/v1`,
 					api: "openai-completions",
 					apiKey: "none",
 					models: [{ id: modelId }],
@@ -499,7 +501,7 @@ const snippetHermesAgent = (model: ModelData, filepath?: string): LocalAppSnippe
 			content: [
 				"# Point Hermes at the local server:",
 				"hermes config set model.provider custom",
-				"hermes config set model.base_url http://127.0.0.1:8080/v1",
+				`hermes config set model.base_url http://127.0.0.1:${getLocalServerPort(model)}/v1`,
 				`hermes config set model.default ${modelId}`,
 			].join("\n"),
 		},
@@ -525,7 +527,7 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"# Register the local server and set it as the default model:",
 				"openclaw onboard --non-interactive --mode local \\",
 				"  --auth-choice custom-api-key \\",
-				"  --custom-base-url http://127.0.0.1:8080/v1 \\",
+				`  --custom-base-url http://127.0.0.1:${getLocalServerPort(model)}/v1 \\`,
 				`  --custom-model-id "${modelId}" \\`,
 				`  --custom-provider-id ${providerId} \\`,
 				"  --custom-compatibility openai \\",
