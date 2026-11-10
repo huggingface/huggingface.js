@@ -6516,6 +6516,23 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Indent filter", () => {
+		it("uses a positional string width as a literal prefix", () => {
+			const template = new Template('{{ text | indent("> ") }}');
+			expect(template.render({ text: "first\n\nlast" })).toBe("first\n\n> last");
+		});
+
+		it("uses a string width with first and blank", () => {
+			const template = new Template("{{ text | indent(width=prefix, first=true, blank=true) }}");
+			expect(template.render({ text: "first\n\nlast", prefix: "> " })).toBe("> first\n> \n> last");
+		});
+
+		it("treats a negative integer width as an empty prefix", () => {
+			const template = new Template("{{ text | indent(-2, first=true) }}");
+			expect(template.render({ text: "first\nlast" })).toBe("first\nlast");
+		});
+	});
+
 	describe("String split", () => {
 		it.each([
 			[`{{ "a,b,c".split(",", -2) | tojson }}`, `["a", "b", "c"]`],

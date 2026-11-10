@@ -1638,14 +1638,14 @@ export class Interpreter {
 						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
 
 						const width = args.at(0) ?? kwargs.get("width") ?? new IntegerValue(4);
-						if (!(width instanceof IntegerValue)) {
-							throw new Error("width must be a number");
+						if (!(width instanceof IntegerValue || width instanceof StringValue)) {
+							throw new Error("width must be an integer or a string");
 						}
 						const first = args.at(1) ?? kwargs.get("first") ?? new BooleanValue(false);
 						const blank = args.at(2) ?? kwargs.get("blank") ?? new BooleanValue(false);
 
 						const lines = operand.value.split("\n");
-						const indent = " ".repeat(width.value);
+						const indent = width instanceof StringValue ? width.value : " ".repeat(Math.max(0, width.value));
 						const indented = lines.map((x, i) =>
 							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x,
 						);
