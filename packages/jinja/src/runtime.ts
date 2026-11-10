@@ -1375,7 +1375,7 @@ export class Interpreter {
 							? new IntegerValue(Math.abs(operand.value))
 							: new FloatValue(Math.abs(operand.value));
 					case "int":
-						return new IntegerValue(Math.trunc(operand.value));
+						return new IntegerValue(Math.trunc(operand.value) + 0);
 					case "float":
 						return new FloatValue(operand.value);
 					case "string":
