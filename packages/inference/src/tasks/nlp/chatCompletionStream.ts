@@ -28,6 +28,7 @@ export async function* chatCompletionStream(
 	) {
 		// With a HF token, the router resolves `model:provider` server-side, no Hub mapping lookup.
 		// Provider keys still call the provider directly.
+		// `hf-inference` and `openrouter` keep their dedicated routes.
 		providerHelper = new AutoRouterConversationalTask();
 		args = { ...args, model: `${args.model}:${args.provider}` };
 	} else {
