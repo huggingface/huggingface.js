@@ -2640,13 +2640,47 @@ const autoModelClass = (model: ModelData): string | undefined => {
 	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
 };
 
+// Decision models answer structured questions about a free-text state through the "decision" pipeline.
+// Keyed on the tag rather than pipeline_tag: "decision" is not a Hub task, and these repos usually carry
+// a generic pipeline_tag (e.g. text-generation) whose snippet would not match the pipeline's input format.
+const TAG_DECISION_MODELS = "decision-models";
+
+const transformersDecisionSnippet = (model: ModelData, remote_code_snippet: string): string =>
+	[
+		"# Use a pipeline as a high-level helper",
+		"from transformers import pipeline",
+		"",
+		`decide = pipeline("decision", model="${model.id}"` + remote_code_snippet + ")",
+		"decision = decide(",
+		"    {",
+		'        "state": "I was charged twice for my order and want a refund.",',
+		'        "questions": {',
+		'            "department": {',
+		'                "type": "choice",',
+		'                "instructions": "Which team should handle this?",',
+		'                "criteria": {',
+		'                    "billing": "Payments and refunds",',
+		'                    "technical": "Bugs and technical issues",',
+		'                    "sales": "Pricing and subscriptions",',
+		"                },",
+		"            },",
+		"        },",
+		"    }",
+		")",
+	].join("\n");
+
 export const transformers = (model: ModelData): string[] => {
+	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	// checked before transformersInfo / pipeline_tag / conversational, which would otherwise pick a different snippet
+	if (model.tags.includes(TAG_DECISION_MODELS)) {
+		return [transformersDecisionSnippet(model, remote_code_snippet)];
+	}
+
 	const info = transformersSnippetInfo(model);
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
 	const auto_model = autoModelClass(model) ?? "AutoModel";
-	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
 	const autoSnippet = [];
 	if (info.processor) {
