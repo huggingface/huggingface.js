@@ -532,8 +532,6 @@ export const SKUS = {
 		},
 	},
 	"Apple Silicon": {
-		// Preserve legacy memory options: removing unsupported capacities breaks Hub persisted-item validation.
-		// A data migration is required first: https://github.com/huggingface/huggingface.js/pull/1937
 		"-": {
 			"Apple MacBook Neo": {
 				tflops: 1.9,
@@ -676,7 +674,7 @@ export const SKUS = {
 				releaseYear: 2026,
 			},
 			"Apple M6": {
-				tflops: 8.46,
+				tflops: 6.2,
 				memory: [16, 24, 32],
 				msrp: 2_400,
 				power: 25,
