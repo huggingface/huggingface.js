@@ -403,7 +403,7 @@ const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	const openaiCurl = [
 		"# Calling the OpenAI-compatible server with curl",
-		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`curl -X POST "http://localhost:8080/v1/chat/completions" \\`,
 		`   -H "Content-Type: application/json" \\`,
 		`   --data '{`,
 		`     "model": "${model.id}",`,
