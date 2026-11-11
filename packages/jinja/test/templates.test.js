@@ -6840,6 +6840,14 @@ describe("Feature regressions", () => {
 	});
 
 	describe("Macro special arguments", () => {
+		it("resolves special arguments per macro on every render", () => {
+			const template = new Template(
+				`{% macro a() %}{{ kwargs | length }}{{ varargs | length }}{% endmacro %}{% macro b(x) %}{{ x }}{{ caller is defined }}{% endmacro %}{% macro c() %}{{ caller() }}{% endmacro %}{{ a(1, 2, k=3) }}{{ b(1) }}{% call c() %}in{% endcall %}`,
+			);
+			expect(template.render()).toBe("121falsein");
+			expect(template.render()).toBe("121falsein");
+		});
+
 		it.each([
 			{
 				name: "explicit kwargs parameter",
@@ -6968,6 +6976,66 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("For loops", () => {
+		it.each([
+			{
+				name: "keeps the loop object of an earlier iteration",
+				source: `{% set ns = namespace(saved=none) %}{% for x in [10, 20, 30] %}{% if loop.index == 2 %}{% set ns.saved = loop %}{% endif %}{% endfor %}{{ ns.saved.index }}|{{ ns.saved.previtem }}|{{ ns.saved.nextitem }}|{{ ns.saved.last }}|{{ ns.saved | length }}`,
+				target: "2|10|30|false|9",
+			},
+			{
+				name: "resolves an outer loop inside an inner loop",
+				source: `{% for a in [1, 2] %}{% set outer = loop %}{% for b in [1, 2, 3] %}{{ outer.index }}{{ loop.index }}{{ loop.length }} {% endfor %}{% endfor %}`,
+				target: "113 123 133 213 223 233 ",
+			},
+			{
+				name: "filters and unpacks items before the first iteration",
+				source: `{% for k, v in [['a', 1], ['b', 2], ['c', 3]] if v != 2 %}{{ k }}{{ v }}{{ loop.index }}{{ loop.length }} {% endfor %}`,
+				target: "a112 c322 ",
+			},
+			{
+				name: "evaluates the loop filter against the outer loop",
+				source: `{% for a in [1, 2] %}{% for b in [1, 2, 3] if loop.index == b %}{{ a }}{{ b }} {% endfor %}{% endfor %}`,
+				target: "11 22 ",
+			},
+			{
+				name: "renders the else block if every iteration continues",
+				source: `{% for x in [1, 2] %}{% continue %}{% else %}else:{{ loop.index }}{% endfor %}`,
+				target: "else:2",
+			},
+			{
+				name: "keeps loop variables in the loop scope",
+				source: `{% set x = 'o' %}{% for x in [1] %}{% set y = 2 %}{{ x }}{{ y }}{% endfor %}{{ x }}{{ y is defined }}`,
+				target: "12ofalse",
+			},
+		])("$name", ({ source, target }) => {
+			const template = new Template(source);
+			expect(template.render()).toBe(target);
+			expect(template.render()).toBe(target);
+		});
+
+		it("passes the loop object to functions as a mapping", () => {
+			const seen = [];
+			const peek = (loop, [nested]) => {
+				seen.push([[...loop.keys()].join(), nested.type, nested.value.get("index").value]);
+				return "";
+			};
+			new Template(`{% for x in [1, 2] %}{{ peek(loop, [loop]) }}{% endfor %}`).render({ peek });
+			const keys = "index,index0,revindex,revindex0,first,last,length,previtem,nextitem";
+			expect(seen).toEqual([
+				[keys, "ObjectValue", 1],
+				[keys, "ObjectValue", 2],
+			]);
+		});
+
+		it("validates unpacking of every item before the first iteration", () => {
+			const calls = [];
+			const template = new Template(`{% for a, b in [[1, 2], [3]] %}{{ record(a) }}{% endfor %}`);
+			expect(() => template.render({ record: (x) => calls.push(x) })).toThrowError("Too few items to unpack");
+			expect(calls).toEqual([]);
+		});
+	});
+
 	describe("Numeric filters", () => {
 		it("converts numbers with int and float like Python", () => {
 			const template = new Template(
@@ -6997,6 +7065,16 @@ describe("Error checking", () => {
 		it("Invalid quote character", () => {
 			const text = "{{ \u2018text\u2019 }}";
 			expect(() => tokenize(text)).toThrowError();
+		});
+
+		it.each([
+			{ name: "comment", text: "a {# comment", error: "Missing end of comment tag" },
+			{ name: "string escape", text: "{{ 'a\\", error: "Unexpected end of input" },
+			{ name: "identifier", text: "{{ variable", error: "Unexpected end of input" },
+			{ name: "number", text: "{{ -1", error: "Unexpected end of input" },
+			{ name: "whitespace", text: "{{ a ", error: "Unexpected end of input" },
+		])("Unterminated $name", ({ text, error }) => {
+			expect(() => tokenize(text)).toThrowError(error);
 		});
 	});
 
