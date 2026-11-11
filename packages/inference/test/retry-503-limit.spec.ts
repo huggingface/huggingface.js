@@ -31,7 +31,15 @@ async function invoke(mode: Mode, mockFetch: typeof fetch, options: Options = {}
 		messages: [],
 	};
 	const helper = getProviderHelper("hf-inference", "conversational");
-	const requestOptions = { ...options, fetch: mockFetch, task: "conversational" as const };
+	let calls = 0;
+	const boundedFetch: typeof fetch = (...args) => {
+		// A synchronous retry regression can starve fake timers; fail before it exhausts the worker's memory.
+		if (++calls > 12) {
+			throw new Error("Request exceeded the test's fetch budget");
+		}
+		return mockFetch(...args);
+	};
+	const requestOptions = { ...options, fetch: boundedFetch, task: "conversational" as const };
 	if (mode === "HTTP") {
 		return (await innerRequest(args, helper, requestOptions)).data;
 	}

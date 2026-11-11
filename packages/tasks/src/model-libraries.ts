@@ -172,6 +172,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
 	},
+	basedecision: {
+		prettyLabel: "BaseDecision",
+		repoName: "BaseDecision",
+		repoUrl: "https://github.com/hrudayaditya/BaseDecision",
+		docsUrl: "https://github.com/hrudayaditya/BaseDecision/blob/main/docs/API.md",
+		snippets: snippets.basedecision,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
 	bboxmaskpose: {
 		prettyLabel: "BBoxMaskPose",
 		repoName: "BBoxMaskPose",
@@ -565,6 +574,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	"fahr-face": {
+		prettyLabel: "FAHR-Face",
+		repoName: "FAHR-Face",
+		repoUrl: "https://github.com/AIM-Harvard/FAHR-Face",
+		docsUrl: "https://huggingface.co/fridolin22/FAHR-Face",
+		filter: false,
+		countDownloads: `path:"fahr_face.pth" OR path:"fahr_faceage.pth"`,
+	},
 	fairseq: {
 		prettyLabel: "Fairseq",
 		repoName: "fairseq",
@@ -690,6 +707,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/zai-org/GLM-TTS",
 		filter: false,
 		countDownloads: `path:"flow/flow.pt"`,
+	},
+	glyd: {
+		prettyLabel: "Glyd",
+		repoName: "Glyd",
+		repoUrl: "https://github.com/surya-koritala/Glyd",
+		docsUrl: "https://getglyd.com",
+		filter: false,
 	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
@@ -1162,6 +1186,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/mit-nlp/MITIE",
 		countDownloads: `path_filename:"total_word_feature_extractor"`,
 	},
+	mjlab: {
+		prettyLabel: "MJLab",
+		repoName: "MJLab",
+		repoUrl: "https://github.com/mujocolab/mjlab",
+		docsUrl: "https://mujocolab.github.io/mjlab/",
+		filter: false,
+		countDownloads: `path:"policy.onnx" OR path:"final.onnx"`,
+	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
 		repoName: "ml-agents",
@@ -1402,6 +1434,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"onnx" OR path_extension:"ckpt"`,
 	},
+	pixeldense: {
+		prettyLabel: "PixelDense",
+		repoName: "PixelDense",
+		repoUrl: "https://github.com/Hansxsourse/PixelDense",
+		filter: false,
+		countDownloads: `path:"PixelDense_XXL_T2I.ckpt"`,
+	},
 	"pocket-tts": {
 		prettyLabel: "Pocket-TTS",
 		repoName: "PocketTTS",
@@ -1409,6 +1448,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pocket_tts,
 		filter: false,
 		countDownloads: `path:"tts_b6369a24.safetensors"`,
+	},
+	pqgan: {
+		prettyLabel: "PQGAN",
+		repoName: "PQGAN",
+		repoUrl: "https://github.com/vislearn/PQGAN",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	protomotions: {
 		prettyLabel: "ProtoMotions",
@@ -1545,6 +1591,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+		countDownloads: `(path_filename:"cfg" AND path_extension:"json") OR path:"config.json"`,
 	},
 	"sage-music": {
 		prettyLabel: "SAGE",
@@ -1788,6 +1835,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.supertonic,
 		filter: false,
 	},
+	svdtrunc: {
+		prettyLabel: "SVDtrunc",
+		repoName: "SVDtrunc",
+		repoUrl: "https://github.com/vislearn/SVDtrunc",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	swarmformer: {
 		prettyLabel: "SwarmFormer",
 		repoName: "SwarmFormer",
@@ -1899,6 +1953,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt" OR path_extension:"pth"`,
 	},
+	"torch-pointcloud": {
+		prettyLabel: "torch-pointcloud",
+		repoName: "torch-pointcloud",
+		repoUrl: "https://github.com/arthurdjn/pytorch-pointcloud",
+		docsUrl: "https://pytorch-pointcloud.org/",
+		snippets: snippets.torch_pointcloud,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
 	transformers: {
 		prettyLabel: "Transformers",
 		repoName: "🤗/transformers",
@@ -1943,6 +2006,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
+	"unitree-rl": {
+		prettyLabel: "Unitree",
+		repoName: "unitree_rl_lab",
+		repoUrl: "https://github.com/unitreerobotics/unitree_rl_lab",
+		snippets: snippets.unitree,
+		filter: true,
+		countDownloads: `path:"params/deploy.yaml"`,
+	},
 	univa: {
 		prettyLabel: "univa",
 		repoName: "univa",
@@ -1979,6 +2050,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-deepmind/videoprism",
 		countDownloads: `path_extension:"npz"`,
 		snippets: snippets.videoprism,
+	},
+	"verto-asr": {
+		prettyLabel: "Verto ASR",
+		repoName: "Verto-Arabic-ASR",
+		repoUrl: "https://github.com/yayaiu6/Verto-Arabic-ASR",
+		docsUrl: "https://github.com/yayaiu6/Verto-Arabic-ASR#javascript-quickstart",
+		filter: false,
+		countDownloads: `path:"metro.int8.onnx"`,
 	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
@@ -2050,6 +2129,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Wan-Video/Wan2.2",
 		countDownloads: `path_filename:"config" AND path_extension:"json"`,
 	},
+	wavegen: {
+		prettyLabel: "WaveGen",
+		repoName: "WaveGen",
+		repoUrl: "https://github.com/sh-lee-prml/WaveGen",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	wham: {
 		prettyLabel: "WHAM",
 		repoName: "wham",
@@ -2064,6 +2150,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
+	},
+	wilddet3d: {
+		prettyLabel: "WildDet3D",
+		repoName: "WildDet3D",
+		repoUrl: "https://github.com/allenai/WildDet3D",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	yolov10: {
 		// YOLOv10 is a fork of ultraLytics. Code snippets and download count are the same but the repo is different.
@@ -2080,6 +2173,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ultralytics/ultralytics",
 		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
+	},
+	zipsplat: {
+		prettyLabel: "ZipSplat",
+		repoName: "ZipSplat",
+		repoUrl: "https://github.com/cvg/ZipSplat",
+		filter: false,
+		countDownloads: `path_extension:"tar"`,
 	},
 	zonos: {
 		prettyLabel: "Zonos",
