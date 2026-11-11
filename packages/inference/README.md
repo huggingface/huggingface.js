@@ -74,7 +74,6 @@ Chat completion (`chatCompletion` and `chatCompletionStream`) with a Hugging Fac
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
 - [HF Inference supported models](https://huggingface.co/api/partners/hf-inference/models)
-- [OpenRouter supported models](https://huggingface.co/api/partners/openrouter/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
 
