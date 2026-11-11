@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 import { NovitaTextToVideoTask } from "../src/providers/novita.js";
-import { InferenceClientProviderOutputError } from "../src/errors.js";
 
 describe("NovitaTextToVideoTask.getResponse", () => {
 	it("preserves structured error when task result has wrong shape", async () => {
