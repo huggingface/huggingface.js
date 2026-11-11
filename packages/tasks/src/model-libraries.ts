@@ -360,7 +360,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "CooperScene",
 		repoUrl: "https://github.com/UCR-CISL/CooperScene",
 		filter: false,
-		countDownloads: `path_extension:"pth"`,
 	},
 	cosyvoice: {
 		prettyLabel: "CosyVoice",
