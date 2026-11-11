@@ -1591,6 +1591,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+		countDownloads: `(path_filename:"cfg" AND path_extension:"json") OR path:"config.json"`,
 	},
 	"sage-music": {
 		prettyLabel: "SAGE",
@@ -2005,6 +2006,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
+	"unitree-rl": {
+		prettyLabel: "Unitree",
+		repoName: "unitree_rl_lab",
+		repoUrl: "https://github.com/unitreerobotics/unitree_rl_lab",
+		snippets: snippets.unitree,
+		filter: true,
+		countDownloads: `path:"params/deploy.yaml"`,
+	},
 	univa: {
 		prettyLabel: "univa",
 		repoName: "univa",
@@ -2041,6 +2050,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-deepmind/videoprism",
 		countDownloads: `path_extension:"npz"`,
 		snippets: snippets.videoprism,
+	},
+	"verto-asr": {
+		prettyLabel: "Verto ASR",
+		repoName: "Verto-Arabic-ASR",
+		repoUrl: "https://github.com/yayaiu6/Verto-Arabic-ASR",
+		docsUrl: "https://github.com/yayaiu6/Verto-Arabic-ASR#javascript-quickstart",
+		filter: false,
+		countDownloads: `path:"metro.int8.onnx"`,
 	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
@@ -2111,6 +2128,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Wan2.2",
 		repoUrl: "https://github.com/Wan-Video/Wan2.2",
 		countDownloads: `path_filename:"config" AND path_extension:"json"`,
+	},
+	wavegen: {
+		prettyLabel: "WaveGen",
+		repoName: "WaveGen",
+		repoUrl: "https://github.com/sh-lee-prml/WaveGen",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	wham: {
 		prettyLabel: "WHAM",
