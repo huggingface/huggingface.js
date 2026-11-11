@@ -1591,7 +1591,6 @@ export const libreyolo = (model: ModelData): string[] => {
 	if (!model.pipeline_tag || !LIBREYOLO_LOADER_TASKS.has(model.pipeline_tag)) {
 		return [
 			`# pip install libreyolo
-# This model loads through a task-specific LibreYOLO class.
 # See the model card for usage: https://huggingface.co/${model.id}`,
 		];
 	}
