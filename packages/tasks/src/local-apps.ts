@@ -541,6 +541,26 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+function isTqllmModel(model: ModelData): boolean {
+	// tqLLM serves the Qwen3.5 / Qwen3.6 / Qwen3.8 dense architecture from GGUF (K-quants, IQ-quants and its own TQ formats)
+	return model.gguf?.architecture === "qwen35";
+}
+
+const snippetTqllm = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const file = filepath ?? "{{GGUF_FILE}}";
+	return [
+		{
+			title: "Docker (NVIDIA GPU, Linux or Windows with WSL 2)",
+			setup: `hf download ${model.id} ${file} --local-dir models`,
+			content: [
+				"# Start a local OpenAI-compatible server on port 8086:",
+				`docker run --rm --gpus all -p 127.0.0.1:8086:8086 -v "$PWD/models:/models:ro" --entrypoint tqserve \\`,
+				`  ghcr.io/turbo-tan/tqllm:latest --model /models/${file} --context 32768 --host 0.0.0.0`,
+			].join("\n"),
+		},
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	// Only add quant tag for GGUF models, not safetensors
 	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
@@ -778,6 +798,13 @@ export const LOCAL_APPS = {
 			}
 			return url;
 		},
+	},
+	tqllm: {
+		prettyLabel: "tqLLM",
+		docsUrl: "https://tqllm.com",
+		mainTask: "text-generation",
+		displayOnModelPage: isTqllmModel,
+		snippet: snippetTqllm,
 	},
 	"docker-model-runner": {
 		prettyLabel: "Docker Model Runner",
