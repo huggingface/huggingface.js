@@ -11,6 +11,7 @@ import * as Humain from "../providers/humain-ai.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
+import * as OpenRouter from "../providers/openrouter.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
 import * as PublicAI from "../providers/publicai.js";
 import type {
@@ -145,6 +146,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
+	},
+	openrouter: {
+		conversational: new OpenRouter.OpenRouterConversationalTask(),
 	},
 	ovhcloud: {
 		conversational: new OvhCloud.OvhCloudConversationalTask(),

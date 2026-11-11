@@ -20,10 +20,15 @@ export async function* chatCompletionStream(
 	} else if (!args.provider || args.provider === "auto") {
 		// Special case: we have a dedicated auto-router for conversational models. No need to fetch provider mapping.
 		providerHelper = new AutoRouterConversationalTask();
-	} else if (args.model && args.accessToken?.startsWith("hf_") && args.provider !== "hf-inference") {
+	} else if (
+		args.model &&
+		args.accessToken?.startsWith("hf_") &&
+		args.provider !== "hf-inference" &&
+		args.provider !== "openrouter"
+	) {
 		// With a HF token, the router resolves `model:provider` server-side, no Hub mapping lookup.
 		// Provider keys still call the provider directly.
-		// `hf-inference` keeps its dedicated route.
+		// `hf-inference` and `openrouter` keep their dedicated routes.
 		providerHelper = new AutoRouterConversationalTask();
 		args = { ...args, model: `${args.model}:${args.provider}` };
 	} else {
