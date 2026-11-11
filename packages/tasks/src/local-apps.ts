@@ -139,6 +139,30 @@ function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
 
+const HEARTHSCALE_DIFFUSION_TASKS: PipelineType[] = [
+	"text-to-image",
+	"image-to-image",
+	"text-to-video",
+	"image-to-video",
+];
+
+/**
+ * Hearthscale runs GGUF models of every kind it has a runtime for (language and vision, embeddings,
+ * reranking, image, video, transcription, speaker diarization, music and stem separation), and
+ * image and video checkpoints and LoRA adapters through stable-diffusion.cpp.
+ */
+function isHearthscaleModel(model: ModelData): boolean {
+	if (model.gguf || model.tags.includes("gguf")) {
+		return true;
+	}
+	if (model.library_name === "diffusion-single-file") {
+		return true;
+	}
+	return (
+		!!model.pipeline_tag && HEARTHSCALE_DIFFUSION_TASKS.includes(model.pipeline_tag) && model.tags.includes("diffusers")
+	);
+}
+
 function isEmbeddingModel(model: ModelData): boolean {
 	return (
 		!model.tags.includes("decision-model") &&
@@ -792,6 +816,20 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isAmdRyzenModel(model),
 		snippet: snippetLemonade,
+	},
+	hearthscale: {
+		prettyLabel: "Hearthscale",
+		docsUrl: "https://hearthscale.com",
+		mainTask: "text-generation",
+		displayOnModelPage: isHearthscaleModel,
+		deeplink: (model, filepath) => {
+			const url = new URL("hearthscale://model");
+			url.searchParams.set("repo", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
 	},
 	pi: {
 		prettyLabel: "Pi",
