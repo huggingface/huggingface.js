@@ -309,10 +309,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	chessqueries: {
 		prettyLabel: "ChessQueries",
-		repoName: "chessqueries",
+		repoName: "ChessQueries",
 		repoUrl: "https://github.com/JSeytre/chessqueries",
 		filter: false,
-		countDownloads: `path_extension:"safetensors" OR path:*.mlpackage.zip`,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"tflite" OR path:*.mlpackage.zip`,
 	},
 	chexmix: {
 		prettyLabel: "CheXmix",
