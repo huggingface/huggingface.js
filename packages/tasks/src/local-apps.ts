@@ -687,6 +687,21 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model) => new URL(`atomic-chat://models/huggingface/${model.id}`),
 	},
+	gezel: {
+		prettyLabel: "Gezel",
+		docsUrl: "https://gezel.com",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			(isLlamaCppGgufModel(model) || isMlxModel(model)) && model.tags.includes("conversational"),
+		deeplink: (model, filepath?: string) => {
+			const url = new URL(`gezel://model/huggingface/${model.id}`);
+			// Gezel takes a file only for GGUF; an MLX repo is reviewed as a whole.
+			if (filepath?.toLowerCase().endsWith(".gguf")) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
+	},
 	backyard: {
 		prettyLabel: "Backyard AI",
 		docsUrl: "https://backyard.ai",
