@@ -6649,6 +6649,31 @@ describe("Feature regressions", () => {
 		])("rejects $name", ({ source, error }) => {
 			expect(() => new Template(source).render()).toThrowError(error);
 		});
+
+		it.each([
+			{
+				name: "a loop body",
+				source: `{% set f = namespace %}{% for x in [1] %}{{ f == namespace }}|{{ f != namespace }}|{{ namespace in [f] }}{% endfor %}`,
+				target: "true|false|true",
+			},
+			{
+				name: "a loop filter",
+				source: `{% set f = namespace %}{% for x in [1] if f == namespace %}{{ x }}{% else %}none{% endfor %}`,
+				target: "1",
+			},
+			{
+				name: "a macro",
+				source: `{% set f = namespace %}{% macro m() %}{{ f == namespace }}{% endmacro %}{{ m() }}`,
+				target: "true",
+			},
+			{
+				name: "a call block",
+				source: `{% macro m() %}{{ caller() }}{% endmacro %}{% set f = namespace %}{% call m() %}{{ f == namespace }}{% endcall %}`,
+				target: "true",
+			},
+		])("compares namespace equal to itself in $name", ({ source, target }) => {
+			expect(new Template(source).render()).toBe(target);
+		});
 	});
 
 	describe("Macros and call statements", () => {
