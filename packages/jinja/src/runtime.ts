@@ -56,6 +56,8 @@ const EMPTY_BUILTINS: ReadonlyMap<string, AnyRuntimeValue> = new Map();
 abstract class RuntimeValue<T> {
 	// NOTE: These are assigned in the constructors instead of being initialized as class fields (which each
 	// subclass would then redefine), since runtime values are created often and this is much faster.
+	// The base constructor assigns both, so that their order is always `type`, `value` and so that
+	// subclasses may define `value` as an accessor (see LoopValue).
 	declare type: string;
 	declare value: T;
 
@@ -80,15 +82,7 @@ abstract class RuntimeValue<T> {
 	 * @returns {BooleanValue} BooleanValue(true) if the value is truthy, BooleanValue(false) otherwise.
 	 */
 	__bool__(): BooleanValue {
-		return new BooleanValue(this.isTruthy());
-	}
-
-	/**
-	 * Truthiness as a plain boolean, for callers that only branch on the result.
-	 * This function should be overridden by subclasses if it has custom truthiness criteria.
-	 */
-	isTruthy(): boolean {
-		return !!this.value;
+		return new BooleanValue(!!this.value);
 	}
 
 	toString(): string {
@@ -441,8 +435,8 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	 *  - JavaScript:  {} && 5 -> 5
 	 *  - Python:      {} and 5 -> {}
 	 */
-	override isTruthy(): boolean {
-		return this.value.size > 0;
+	override __bool__(): BooleanValue {
+		return new BooleanValue(this.value.size > 0);
 	}
 
 	override get builtins(): Map<string, AnyRuntimeValue> {
@@ -564,6 +558,7 @@ class LoopValue extends ObjectValue {
 }
 
 // TypeScript does not allow a subclass to turn a property into an accessor, so define it on the prototype.
+// The setter is needed since the RuntimeValue constructor assigns `value`.
 Object.defineProperty(LoopValue.prototype, "value", {
 	get(this: LoopValue): Map<string, AnyRuntimeValue> {
 		return (this.entries ??= this.createEntries());
@@ -571,7 +566,6 @@ Object.defineProperty(LoopValue.prototype, "value", {
 	set(this: LoopValue, entries: Map<string, AnyRuntimeValue> | undefined) {
 		this.entries = entries;
 	},
-	enumerable: true,
 	configurable: true,
 });
 
@@ -622,8 +616,8 @@ export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	 *  - JavaScript:  [] && 5 -> 5
 	 *  - Python:      [] and 5 -> []
 	 */
-	override isTruthy(): boolean {
-		return this.value.length > 0;
+	override __bool__(): BooleanValue {
+		return new BooleanValue(this.value.length > 0);
 	}
 	override toString(): string {
 		return toJSON(this, {}, 0, false);
@@ -1162,12 +1156,10 @@ function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statem
  */
 const ACCESSED_SPECIAL_ARGUMENTS = new WeakMap<Macro | CallStatement, Set<SpecialMacroArgument>>();
 
-function getAccessedSpecialMacroArguments(
-	node: Macro | CallStatement,
-	parameters: Parameter[],
-): Set<SpecialMacroArgument> {
+function getAccessedSpecialMacroArguments(node: Macro | CallStatement): Set<SpecialMacroArgument> {
 	let accessed = ACCESSED_SPECIAL_ARGUMENTS.get(node);
 	if (accessed === undefined) {
+		const parameters = node.type === "Macro" ? (node as Macro).args : ((node as CallStatement).callerArgs ?? []);
 		accessed = findAccessedSpecialMacroArguments(parameters, node.body);
 		ACCESSED_SPECIAL_ARGUMENTS.set(node, accessed);
 	}
@@ -1199,9 +1191,9 @@ export class Interpreter {
 		// NOTE: Short-circuiting is handled by the `evaluate` function
 		switch (operator) {
 			case "and":
-				return left.isTruthy() ? this.evaluate(node.right, environment) : left;
+				return left.__bool__().value ? this.evaluate(node.right, environment) : left;
 			case "or":
-				return left.isTruthy() ? left : this.evaluate(node.right, environment);
+				return left.__bool__().value ? left : this.evaluate(node.right, environment);
 		}
 
 		// Equality operators
@@ -1335,16 +1327,23 @@ export class Interpreter {
 	}
 
 	/**
-	 * Evaluates an argument list which consists of plain positional arguments only (the most common case).
-	 * @returns The argument values, or undefined if the list contains keyword arguments or unpacking.
+	 * Evaluates the arguments of a call in the calling convention of FunctionValue: the positional arguments,
+	 * followed by a single KeywordArgumentsValue with all keyword arguments (if there are any).
 	 */
-	private evaluatePositionalArguments(args: Expression[], environment: Environment): AnyRuntimeValue[] | undefined {
-		for (let i = 0; i < args.length; ++i) {
-			const type = args[i].type;
+	private evaluateCallArguments(args: Expression[], environment: Environment): AnyRuntimeValue[] {
+		// NOTE: The whole list is checked before any argument is evaluated, so that none is evaluated twice.
+		for (const argument of args) {
+			const type = argument.type;
 			if (type === "KeywordArgumentExpression" || type === "SpreadExpression" || type === "KeywordSpreadExpression") {
-				return undefined;
+				const [positionalArguments, keywordArguments] = this.evaluateArguments(args, environment);
+				if (keywordArguments.size > 0) {
+					positionalArguments.push(new KeywordArgumentsValue(keywordArguments));
+				}
+				return positionalArguments;
 			}
 		}
+
+		// Plain positional arguments only (the most common case)
 		const positionalArguments: AnyRuntimeValue[] = new Array(args.length);
 		for (let i = 0; i < args.length; ++i) {
 			positionalArguments[i] = this.evaluate(args[i], environment);
@@ -1647,7 +1646,7 @@ export class Interpreter {
 				if (!(booleanValue instanceof BooleanValue)) {
 					throw new Error("`default` filter flag must be a boolean");
 				}
-				if (operand instanceof UndefinedValue || (booleanValue.value && !operand.isTruthy())) {
+				if (operand instanceof UndefinedValue || (booleanValue.value && !operand.__bool__().value)) {
 					return defaultValue;
 				}
 				return operand;
@@ -1721,7 +1720,7 @@ export class Interpreter {
 							testFunction = test;
 						} else {
 							// Default to truthiness of first argument
-							testFunction = (...x: AnyRuntimeValue[]) => x[0].isTruthy();
+							testFunction = (...x: AnyRuntimeValue[]) => x[0].__bool__().value;
 						}
 
 						// Filter the array using the test function
@@ -1799,12 +1798,7 @@ export class Interpreter {
 				// Check if the filter exists in builtins for ObjectValue
 				const builtin = operand.builtins.get(filterName);
 				if (builtin && builtin instanceof FunctionValue) {
-					const [args, kwargs] = this.evaluateArguments(filter.args, environment);
-					// Pass keyword arguments as the last argument if present
-					if (kwargs.size > 0) {
-						args.push(new KeywordArgumentsValue(kwargs));
-					}
-					return builtin.value(args, environment);
+					return builtin.value(this.evaluateCallArguments(filter.args, environment), environment);
 				}
 				throw new Error(`Unknown ObjectValue filter: ${filterName}`);
 			} else {
@@ -1845,7 +1839,7 @@ export class Interpreter {
 	 */
 	private evaluateSelectExpression(node: SelectExpression, environment: Environment): AnyRuntimeValue {
 		const predicate = this.evaluate(node.test, environment);
-		if (!predicate.isTruthy()) {
+		if (!predicate.__bool__().value) {
 			return new UndefinedValue();
 		}
 		return this.evaluate(node.lhs, environment);
@@ -1859,7 +1853,7 @@ export class Interpreter {
 
 		switch (node.operator.value) {
 			case "not":
-				return new BooleanValue(!argument.isTruthy());
+				return new BooleanValue(!argument.__bool__().value);
 			case "+":
 			case "-": {
 				const sign = node.operator.value === "-" ? -1 : 1;
@@ -1877,7 +1871,9 @@ export class Interpreter {
 
 	private evaluateTernaryExpression(node: Ternary, environment: Environment): AnyRuntimeValue {
 		const cond = this.evaluate(node.condition, environment);
-		return cond.isTruthy() ? this.evaluate(node.trueExpr, environment) : this.evaluate(node.falseExpr, environment);
+		return cond.__bool__().value
+			? this.evaluate(node.trueExpr, environment)
+			: this.evaluate(node.falseExpr, environment);
 	}
 
 	private evalProgram(program: Program, environment: Environment): StringValue {
@@ -1927,17 +1923,7 @@ export class Interpreter {
 	}
 
 	private evaluateCallExpression(expr: CallExpression, environment: Environment): AnyRuntimeValue {
-		// Accumulate all keyword arguments into a single object, which will be
-		// used as the final argument in the call function.
-		let args = this.evaluatePositionalArguments(expr.args, environment);
-		if (args === undefined) {
-			let kwargs;
-			[args, kwargs] = this.evaluateArguments(expr.args, environment);
-
-			if (kwargs.size > 0) {
-				args.push(new KeywordArgumentsValue(kwargs));
-			}
-		}
+		const args = this.evaluateCallArguments(expr.args, environment);
 
 		const fn = this.evaluate(expr.callee, environment);
 		if (fn.type !== "FunctionValue") {
@@ -2063,7 +2049,7 @@ export class Interpreter {
 
 	private renderIf(node: If, environment: Environment): string {
 		const test = this.evaluate(node.test, environment);
-		return this.renderBlock(test.isTruthy() ? node.body : node.alternate, environment);
+		return this.renderBlock(test.__bool__().value ? node.body : node.alternate, environment);
 	}
 
 	/**
@@ -2110,7 +2096,7 @@ export class Interpreter {
 		const candidates = iterable.value;
 		let items: AnyRuntimeValue[];
 		if (loopvar.type === "Identifier" && !test) {
-			items = candidates.slice();
+			items = candidates.slice(); // Nothing to validate or select
 		} else {
 			items = [];
 			for (let i = 0; i < candidates.length; ++i) {
@@ -2128,7 +2114,7 @@ export class Interpreter {
 						throw new Error(`Too ${expected > actual ? "few" : "many"} items to unpack`);
 					}
 				} else if (loopvar.type !== "Identifier") {
-					throw new Error(`Invalid loop variable(s): ${node.loopvar.type}`);
+					throw new Error(`Invalid loop variable(s): ${loopvar.type}`);
 				}
 
 				if (test) {
@@ -2136,7 +2122,7 @@ export class Interpreter {
 					this.bindLoopVariable(loopvar, current, loopScope);
 
 					const testValue = this.evaluate(test, loopScope);
-					if (!testValue.isTruthy()) {
+					if (!testValue.__bool__().value) {
 						continue;
 					}
 				}
@@ -2231,7 +2217,7 @@ export class Interpreter {
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
-		const specialArguments = getAccessedSpecialMacroArguments(node, node.args);
+		const specialArguments = getAccessedSpecialMacroArguments(node);
 		environment.setVariable(
 			node.name.value,
 			new FunctionValue((args, callSite) => {
@@ -2260,7 +2246,7 @@ export class Interpreter {
 	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
 		// Call blocks use anonymous-macro argument rules; Jinja labels them `None` in errors.
 		const parameters = node.callerArgs ?? [];
-		const specialArguments = getAccessedSpecialMacroArguments(node, parameters);
+		const specialArguments = getAccessedSpecialMacroArguments(node);
 		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[]) => {
 			const callBlockEnv = new Environment(environment);
 			this.bindMacroArguments("None", parameters, specialArguments, callerArguments, callBlockEnv);

@@ -87,6 +87,55 @@ function isWhitespace(code: number): boolean {
 	);
 }
 
+/**
+ * A data structure which contains a list of rules to test
+ */
+const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
+	// Control sequences
+	["{%", TOKEN_TYPES.OpenStatement],
+	["%}", TOKEN_TYPES.CloseStatement],
+	["{{", TOKEN_TYPES.OpenExpression],
+	["}}", TOKEN_TYPES.CloseExpression],
+	// Single character tokens
+	["(", TOKEN_TYPES.OpenParen],
+	[")", TOKEN_TYPES.CloseParen],
+	["{", TOKEN_TYPES.OpenCurlyBracket],
+	["}", TOKEN_TYPES.CloseCurlyBracket],
+	["[", TOKEN_TYPES.OpenSquareBracket],
+	["]", TOKEN_TYPES.CloseSquareBracket],
+	[",", TOKEN_TYPES.Comma],
+	[".", TOKEN_TYPES.Dot],
+	[":", TOKEN_TYPES.Colon],
+	["|", TOKEN_TYPES.Pipe],
+	// Comparison operators
+	["<=", TOKEN_TYPES.ComparisonBinaryOperator],
+	[">=", TOKEN_TYPES.ComparisonBinaryOperator],
+	["==", TOKEN_TYPES.ComparisonBinaryOperator],
+	["!=", TOKEN_TYPES.ComparisonBinaryOperator],
+	["<", TOKEN_TYPES.ComparisonBinaryOperator],
+	[">", TOKEN_TYPES.ComparisonBinaryOperator],
+	// Arithmetic operators
+	["+", TOKEN_TYPES.AdditiveBinaryOperator],
+	["-", TOKEN_TYPES.AdditiveBinaryOperator],
+	["~", TOKEN_TYPES.AdditiveBinaryOperator],
+	["**", TOKEN_TYPES.ExponentiationBinaryOperator], // NOTE: must come before "*" so that "**" is matched first
+	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	["//", TOKEN_TYPES.MultiplicativeBinaryOperator], // NOTE: must come before "/" so that "//" is matched first
+	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	["%", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	// Assignment operator
+	["=", TOKEN_TYPES.Equals],
+];
+
+/**
+ * The rules of the mapping table (in the same order), indexed by the character code of their first character,
+ * so that only the rules which can match at a position are tested. All of them start with an ASCII character.
+ */
+const RULES_BY_FIRST_CHAR_CODE: ([string, TokenType][] | undefined)[] = new Array(128).fill(undefined);
+for (const rule of ORDERED_MAPPING_TABLE) {
+	(RULES_BY_FIRST_CHAR_CODE[rule[0].charCodeAt(0)] ??= []).push(rule);
+}
+
 const ESCAPE_CHARACTERS = new Map([
 	["n", "\n"], // New line
 	["t", "\t"], // Horizontal tab
@@ -160,7 +209,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 	const names = new Map<string, string>();
 
 	/**
-	 * Consume characters while the predicate holds. The input may not end with such a character.
+	 * Consume characters while the predicate holds. Throws if the input ends while it still holds.
 	 */
 	const consumeWhile = (predicate: (code: number) => boolean): string => {
 		const start = cursorPosition;
@@ -221,7 +270,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 	};
 
 	const stripTrailingWhitespace = () => {
-		const lastToken = tokens[tokens.length - 1];
+		const lastToken = tokens.at(-1);
 		if (lastToken && lastToken.type === TOKEN_TYPES.Text) {
 			lastToken.value = lastToken.value.trimEnd();
 			if (lastToken.value === "") {
@@ -237,9 +286,12 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 	};
 
 	// Build each token until end of input
-	while (cursorPosition < length) {
+	main: while (cursorPosition < length) {
+		// NOTE: Every branch below that changes the list of tokens continues the loop,
+		// so this remains the type of the last token throughout the iteration.
+		const lastTokenType = tokens.at(-1)?.type;
+
 		// First, consume all text that is outside of a Jinja statement or expression
-		const lastTokenType = tokens[tokens.length - 1]?.type;
 		if (
 			lastTokenType === undefined ||
 			lastTokenType === TOKEN_TYPES.CloseStatement ||
@@ -334,9 +386,10 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		consumeWhile(isWhitespace);
 
 		const char = src[cursorPosition];
-		const nextChar = src[cursorPosition + 1];
 
 		if (char === "-" && src[cursorPosition + 2] === "}") {
+			const nextChar = src[cursorPosition + 1];
+
 			// Check for closing statement with whitespace control -%}
 			if (nextChar === "%") {
 				tokens.push(new Token("%}", TOKEN_TYPES.CloseStatement));
@@ -356,7 +409,6 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 
 		// Check for unary operators
 		if (char === "-" || char === "+") {
-			const lastTokenType = tokens[tokens.length - 1]?.type;
 			if (lastTokenType === TOKEN_TYPES.Text || lastTokenType === undefined) {
 				throw new SyntaxError(`Unexpected character: ${char}`);
 			}
@@ -391,134 +443,30 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			}
 		}
 
-		// Try to match a control sequence or operator (preferring the longest match)
-		let seq: string | undefined;
-		let type: TokenType | undefined;
-		switch (char) {
-			// Control sequences
-			case "{":
-				if (nextChar === "%") {
-					seq = "{%";
-					type = TOKEN_TYPES.OpenStatement;
-				} else if (nextChar === "{") {
-					seq = "{{";
-					type = TOKEN_TYPES.OpenExpression;
-					curlyBracketDepth = 0;
-				} else {
-					seq = "{";
-					type = TOKEN_TYPES.OpenCurlyBracket;
-					++curlyBracketDepth;
-				}
-				break;
-			case "}":
+		// Try to match one of the tokens in the mapping table
+		const code = src.charCodeAt(cursorPosition);
+		const rules = RULES_BY_FIRST_CHAR_CODE[code];
+		if (rules !== undefined) {
+			for (const [seq, type] of rules) {
 				// inside an object literal, don't treat "}}" as expression-end
-				if (nextChar === "}" && curlyBracketDepth <= 0) {
-					seq = "}}";
-					type = TOKEN_TYPES.CloseExpression;
-				} else {
-					seq = "}";
-					type = TOKEN_TYPES.CloseCurlyBracket;
-					--curlyBracketDepth;
+				if (seq === "}}" && curlyBracketDepth > 0) {
+					continue;
 				}
-				break;
-			case "%":
-				if (nextChar === "}") {
-					seq = "%}";
-					type = TOKEN_TYPES.CloseStatement;
-				} else {
-					seq = "%";
-					type = TOKEN_TYPES.MultiplicativeBinaryOperator;
+				if (src.startsWith(seq, cursorPosition)) {
+					tokens.push(new Token(seq, type));
+
+					// possibly adjust the curly bracket depth
+					if (type === TOKEN_TYPES.OpenExpression) {
+						curlyBracketDepth = 0;
+					} else if (type === TOKEN_TYPES.OpenCurlyBracket) {
+						++curlyBracketDepth;
+					} else if (type === TOKEN_TYPES.CloseCurlyBracket) {
+						--curlyBracketDepth;
+					}
+					cursorPosition += seq.length;
+					continue main;
 				}
-				break;
-			// Single character tokens
-			case "(":
-				seq = "(";
-				type = TOKEN_TYPES.OpenParen;
-				break;
-			case ")":
-				seq = ")";
-				type = TOKEN_TYPES.CloseParen;
-				break;
-			case "[":
-				seq = "[";
-				type = TOKEN_TYPES.OpenSquareBracket;
-				break;
-			case "]":
-				seq = "]";
-				type = TOKEN_TYPES.CloseSquareBracket;
-				break;
-			case ",":
-				seq = ",";
-				type = TOKEN_TYPES.Comma;
-				break;
-			case ".":
-				seq = ".";
-				type = TOKEN_TYPES.Dot;
-				break;
-			case ":":
-				seq = ":";
-				type = TOKEN_TYPES.Colon;
-				break;
-			case "|":
-				seq = "|";
-				type = TOKEN_TYPES.Pipe;
-				break;
-			// Comparison operators
-			case "<":
-				seq = nextChar === "=" ? "<=" : "<";
-				type = TOKEN_TYPES.ComparisonBinaryOperator;
-				break;
-			case ">":
-				seq = nextChar === "=" ? ">=" : ">";
-				type = TOKEN_TYPES.ComparisonBinaryOperator;
-				break;
-			case "!":
-				if (nextChar === "=") {
-					seq = "!=";
-					type = TOKEN_TYPES.ComparisonBinaryOperator;
-				}
-				break;
-			case "=":
-				if (nextChar === "=") {
-					seq = "==";
-					type = TOKEN_TYPES.ComparisonBinaryOperator;
-				} else {
-					// Assignment operator
-					seq = "=";
-					type = TOKEN_TYPES.Equals;
-				}
-				break;
-			// Arithmetic operators
-			case "+":
-				seq = "+";
-				type = TOKEN_TYPES.AdditiveBinaryOperator;
-				break;
-			case "-":
-				seq = "-";
-				type = TOKEN_TYPES.AdditiveBinaryOperator;
-				break;
-			case "~":
-				seq = "~";
-				type = TOKEN_TYPES.AdditiveBinaryOperator;
-				break;
-			case "*":
-				if (nextChar === "*") {
-					seq = "**";
-					type = TOKEN_TYPES.ExponentiationBinaryOperator;
-				} else {
-					seq = "*";
-					type = TOKEN_TYPES.MultiplicativeBinaryOperator;
-				}
-				break;
-			case "/":
-				seq = nextChar === "/" ? "//" : "/";
-				type = TOKEN_TYPES.MultiplicativeBinaryOperator;
-				break;
-		}
-		if (seq !== undefined && type !== undefined) {
-			tokens.push(new Token(seq, type));
-			cursorPosition += seq.length;
-			continue;
+			}
 		}
 
 		if (char === "'" || char === '"') {
@@ -529,13 +477,12 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			continue;
 		}
 
-		const code = src.charCodeAt(cursorPosition);
 		if (isInteger(code)) {
 			// Consume integer part
 			let num = consumeWhile(isInteger);
 			// Possibly, consume fractional part
 			if (
-				tokens[tokens.length - 1]?.type !== TOKEN_TYPES.Dot &&
+				lastTokenType !== TOKEN_TYPES.Dot &&
 				src[cursorPosition] === "." &&
 				isInteger(src.charCodeAt(cursorPosition + 1))
 			) {
