@@ -2792,6 +2792,27 @@ console.log(logits.sigmoid().tolist()); // one relevance score per document`,
 		];
 	}
 
+	// transformers.js has no keypoint-detection pipeline (pipeline('keypoint-detection') throws "Unsupported pipeline"),
+	// so pose estimation models such as ViTPose are run directly and their heatmaps are post-processed instead.
+	if (model.pipeline_tag === "keypoint-detection") {
+		return [
+			`// npm i ${libName}
+import { AutoModel, AutoImageProcessor, RawImage } from '${libName}';
+
+const model = await AutoModel.from_pretrained('${model.id}');
+const processor = await AutoImageProcessor.from_pretrained('${model.id}');
+
+const image = await RawImage.read('https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/ryan-gosling.jpg');
+const inputs = await processor(image);
+const { heatmaps } = await model(inputs);
+
+// ViTPose is a top-down model: pass one box per person, in COCO format [x, y, width, height]
+const boxes = [[[0, 0, image.width, image.height]]];
+const results = processor.post_process_pose_estimation(heatmaps, boxes)[0][0];
+console.log(results); // { bbox, scores, labels, keypoints }`,
+		];
+	}
+
 	const task = TRANSFORMERS_JS_TASK_ALIASES[model.pipeline_tag] ?? model.pipeline_tag;
 
 	return [
