@@ -62,6 +62,7 @@ export async function fetchInferenceProviderMappingForModel(
 	accessToken?: string,
 	options?: {
 		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+		signal?: AbortSignal;
 	},
 ): Promise<InferenceProviderMappingEntry[]> {
 	let inferenceProviderMapping: InferenceProviderMappingEntry[] | null;
@@ -72,6 +73,7 @@ export async function fetchInferenceProviderMappingForModel(
 		const url = `${HF_HUB_URL}/api/models/${modelId}?expand[]=inferenceProviderMapping`;
 		const resp = await (options?.fetch ?? fetch)(url, {
 			headers: accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${accessToken}` } : {},
+			signal: options?.signal,
 		});
 		if (!resp.ok) {
 			if (resp.headers.get("Content-Type")?.startsWith("application/json")) {
@@ -99,6 +101,7 @@ export async function fetchInferenceProviderMappingForModel(
 		try {
 			payload = await resp.json();
 		} catch {
+			options?.signal?.throwIfAborted();
 			throw new InferenceClientHubApiError(
 				`Failed to fetch inference provider mapping for model ${modelId}: malformed API response, invalid JSON`,
 				{ url, method: "GET" },
@@ -127,6 +130,7 @@ export async function getInferenceProviderMapping(
 	},
 	options: {
 		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+		signal?: AbortSignal;
 	},
 ): Promise<InferenceProviderMappingEntry | null> {
 	const logger = getLogger();
@@ -170,7 +174,7 @@ export async function resolveProvider(
 	provider?: InferenceProviderOrPolicy,
 	modelId?: string,
 	endpointUrl?: string,
-	options?: Pick<Options, "fetch">,
+	options?: Pick<Options, "fetch" | "signal">,
 ): Promise<InferenceProvider> {
 	const logger = getLogger();
 	if (endpointUrl) {
