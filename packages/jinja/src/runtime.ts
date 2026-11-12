@@ -687,9 +687,10 @@ function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntim
 }
 
 /**
- * The `namespace` builtin, which every environment declares.
+ * Implements the `namespace` builtin. Each environment wraps it in its own `FunctionValue`, so that replacing
+ * one environment's `namespace` does not affect any other.
  */
-const NAMESPACE_FUNCTION = new FunctionValue((args) => {
+function namespaceBuiltin(args: AnyRuntimeValue[]): NamespaceValue {
 	// Copy top-level entries so namespace assignment does not mutate the input.
 	const positional = args.slice();
 	let kwargs: KeywordArgumentsValue | undefined;
@@ -721,7 +722,7 @@ const NAMESPACE_FUNCTION = new FunctionValue((args) => {
 		}
 	}
 	return new NamespaceValue(entries);
-});
+}
 
 const CALL_BLOCK_SCOPE = Symbol("callBlockScope");
 
@@ -734,7 +735,10 @@ export class Environment {
 	/**
 	 * The variables declared in this environment.
 	 */
-	variables: Map<string, AnyRuntimeValue> = new Map<string, AnyRuntimeValue>().set("namespace", NAMESPACE_FUNCTION);
+	variables: Map<string, AnyRuntimeValue> = new Map<string, AnyRuntimeValue>().set(
+		"namespace",
+		new FunctionValue(namespaceBuiltin),
+	);
 
 	/**
 	 * The tests available in this environment.
