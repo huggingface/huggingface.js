@@ -2640,15 +2640,10 @@ const autoModelClass = (model: ModelData): string | undefined => {
 	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
 };
 
-// Decision models answer structured questions about a free-text state through the "decision" pipeline.
-// Keyed on the tag rather than pipeline_tag: "decision" is not a Hub task, and these repos usually carry
-// a generic pipeline_tag (e.g. feature-extraction) whose snippet would not match the pipeline's input format.
-// Same Hub tag as local-apps.ts uses to keep decision models out of the embedding snippets.
 const TAG_DECISION_MODEL = "decision-model";
 
 const transformersDecisionSnippet = (model: ModelData, remote_code_snippet: string): string =>
 	[
-		"# Use a pipeline as a high-level helper",
 		"from transformers import pipeline",
 		"",
 		`decide = pipeline("decision", model="${model.id}"` + remote_code_snippet + ")",
@@ -2672,7 +2667,6 @@ const transformersDecisionSnippet = (model: ModelData, remote_code_snippet: stri
 
 export const transformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
-	// checked before transformersInfo / pipeline_tag / conversational, which would otherwise pick a different snippet
 	if (model.tags.includes(TAG_DECISION_MODEL)) {
 		return [transformersDecisionSnippet(model, remote_code_snippet)];
 	}
