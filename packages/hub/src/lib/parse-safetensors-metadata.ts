@@ -105,11 +105,10 @@ const MXFP4_SCALES_SUFFIX = "_scales";
 /** Underscore-joined scale names ModelOpt uses for fused expert tensors (see `shouldSkipTensor`). */
 const MODELOPT_FUSED_SCALE_SUFFIXES = ["_weight_scale", "_weight_scale_2", "_input_scale"];
 
-/**
- * Inkling 2 stores fused expert weights as `…experts.w13_weight` and names everything that belongs
- * to them after the tensor: block scales (`_weight_scale`, F8_E4M3 for NVFP4 but U8 for MXFP8), the
- * per-tensor `_weight_amax` and the `_weight_outer_scale_denominator`. None are parameters.
- */
+/** Inkling's NVFP4 state, e.g. `w13_weight.scale`; only under a `_weight` parent, as a bare `.scale` can be real. */
+const MODELOPT_NESTED_WEIGHT_STATE_SUFFIXES = ["scale", "scale2", "original_shape"];
+
+/** Inkling 2 names a fused weight's scales, amax and denominator after the tensor itself. */
 const INKLING2_BOOKKEEPING_SUFFIXES = ["_weight_scale", "_weight_amax", "_weight_outer_scale_denominator"];
 
 /**
@@ -371,7 +370,7 @@ export type SafetensorsParseFromRepo =
 	  };
 
 /**
- * Fetches and parses a small JSON file such as config.json, or null when it is missing or invalid
+ * Fetches and parses a small JSON file such as config.json
  */
 async function fetchJsonFile<T>(
 	params: {
@@ -395,16 +394,12 @@ async function fetchJsonFile<T>(
 		const json = JSON.parse(await blob.slice(0, MAX_CONFIG_LENGTH).text());
 		return json as T;
 	} catch (error) {
-		// File might not exist or be inaccessible
+		// Config file might not exist or be inaccessible
 		return null;
 	}
 }
 
-/**
- * Inkling 2 declares its quantization in `hf_quant_config.json` rather than config.json, so it is
- * looked up only when config.json declares none and a tensor sits in an integer container, which is
- * the only place packed weights can be. Unquantized repos don't pay for the extra request.
- */
+/** Only fetched when config.json has no quantization and a tensor could be packed, so unquantized repos skip the request. */
 async function fetchHfQuantConfig(
 	params: Parameters<typeof fetchJsonFile>[0],
 	headers: SafetensorsFileHeader[],
@@ -415,7 +410,7 @@ async function fetchHfQuantConfig(
 	if (!mayHavePackedWeights) {
 		return undefined;
 	}
-	return getInkling2QuantizationConfig(await fetchJsonFile<HfQuantConfigFile>(params, "hf_quant_config.json"));
+	return getHfQuantizationConfig(await fetchJsonFile<HfQuantConfigFile>(params, "hf_quant_config.json"));
 }
 
 async function parseSingleFile(
@@ -983,38 +978,40 @@ export interface MlxQuantizationConfig extends QuantizationConfig {
 	[key: string]: unknown;
 }
 
-/**
- * `hf_quant_config.json` as Inkling 2 writes it (`quant_method: "inkling2"`): parameter groups that
- * list the exact tensors stored in each format, e.g. `compute_dtype: "nvfp4"` for experts packed into
- * U8 and `"mxfp8"` for the ones kept in F8_E4M3. Both can be mixed across the layers of one model.
- */
+/** `hf_quant_config.json`: Inkling 2 `parameter_groups`, or a ModelOpt `quantization` block. */
 interface HfQuantConfigFile {
 	quant_method?: string;
 	model?: { parameter_groups?: Array<{ compute_dtype?: string; tensors?: string[] }> };
+	quantization?: Pick<QuantizationConfig, "quant_algo" | "quantized_layers">;
 }
 
-/**
- * Folds the sub-byte parameter groups into the `quantized_layers` map `getModelOptWeightBits` reads,
- * keyed by module like ModelOpt's. Groups that aren't sub-byte are left out: their weights are
- * unpacked, so there is nothing to record.
- */
-function getInkling2QuantizationConfig(file: HfQuantConfigFile | null): QuantizationConfig | undefined {
-	if (getQuantizationMethod(file ?? undefined) !== INKLING2_QUANTIZATION_METHOD) {
-		return undefined;
-	}
-	const groups = file?.model?.parameter_groups;
-	const quantizedLayers: Record<string, { quant_algo?: string }> = {};
-	for (const group of Array.isArray(groups) ? groups : []) {
-		if (bitsFromFormatString(group?.compute_dtype) === undefined || !Array.isArray(group.tensors)) {
-			continue;
-		}
-		for (const tensorName of group.tensors) {
-			if (typeof tensorName === "string") {
-				quantizedLayers[getTensorModuleName(tensorName)] = { quant_algo: group.compute_dtype };
+/** Maps the file onto the config the counting reads; only Inkling's sub-byte groups need recording. */
+function getHfQuantizationConfig(file: HfQuantConfigFile | null): QuantizationConfig | undefined {
+	if (getQuantizationMethod(file ?? undefined) === INKLING2_QUANTIZATION_METHOD) {
+		const groups = file?.model?.parameter_groups;
+		const quantizedLayers: Record<string, { quant_algo?: string }> = {};
+		for (const group of Array.isArray(groups) ? groups : []) {
+			if (bitsFromFormatString(group?.compute_dtype) === undefined || !Array.isArray(group.tensors)) {
+				continue;
+			}
+			for (const tensorName of group.tensors) {
+				if (typeof tensorName === "string") {
+					quantizedLayers[getTensorModuleName(tensorName)] = { quant_algo: group.compute_dtype };
+				}
 			}
 		}
+		return { quant_method: INKLING2_QUANTIZATION_METHOD, quantized_layers: quantizedLayers };
 	}
-	return { quant_method: INKLING2_QUANTIZATION_METHOD, quantized_layers: quantizedLayers };
+
+	const quantization = file?.quantization;
+	if (typeof quantization?.quant_algo !== "string") {
+		return undefined;
+	}
+	return {
+		quant_method: "modelopt",
+		quant_algo: quantization.quant_algo,
+		quantized_layers: quantization.quantized_layers,
+	};
 }
 
 function getQuantizationMethod(quantConfig: QuantizationConfig | undefined): string | undefined {
@@ -1550,7 +1547,10 @@ function shouldSkipTensor(
 	// `…experts.gate_up_proj_weight_scale`, so the dot-separated suffix check above can't see them.
 	if (quantMethod === "modelopt") {
 		const suffix = getTensorSuffix(tensorName);
-		return MODELOPT_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s));
+		return (
+			MODELOPT_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s)) ||
+			(MODELOPT_NESTED_WEIGHT_STATE_SUFFIXES.includes(suffix) && getTensorModuleName(tensorName).endsWith("_weight"))
+		);
 	}
 
 	if (quantMethod === INKLING2_QUANTIZATION_METHOD) {
