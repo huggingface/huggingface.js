@@ -526,32 +526,35 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 }
 
 /**
- * Represents the special `loop` variable of a for loop: an object whose entries are a function of the
- * iteration index and the items being iterated over, so they are only created if the template uses them.
+ * Represents the special `loop` variable of a for loop: an object whose entries are only created if the template
+ * uses them. It keeps only the values they depend on, rather than the whole sequence, so that a `loop` which outlives
+ * its iteration (e.g., stored in a namespace) does not keep every item alive.
  */
 class LoopValue extends ObjectValue {
 	declare entries?: Map<string, AnyRuntimeValue>;
 
 	constructor(
 		readonly iteration: number,
-		readonly sequence: AnyRuntimeValue[],
+		readonly length: number,
+		readonly previtem: AnyRuntimeValue | undefined,
+		readonly nextitem: AnyRuntimeValue | undefined,
 	) {
 		super();
 	}
 
 	createEntries(): Map<string, AnyRuntimeValue> {
 		const i = this.iteration;
-		const items = this.sequence;
+		const length = this.length;
 		return new Map<string, AnyRuntimeValue>([
 			["index", new IntegerValue(i + 1)],
 			["index0", new IntegerValue(i)],
-			["revindex", new IntegerValue(items.length - i)],
-			["revindex0", new IntegerValue(items.length - i - 1)],
+			["revindex", new IntegerValue(length - i)],
+			["revindex0", new IntegerValue(length - i - 1)],
 			["first", new BooleanValue(i === 0)],
-			["last", new BooleanValue(i === items.length - 1)],
-			["length", new IntegerValue(items.length)],
-			["previtem", i > 0 ? items[i - 1] : new UndefinedValue()],
-			["nextitem", i < items.length - 1 ? items[i + 1] : new UndefinedValue()],
+			["last", new BooleanValue(i === length - 1)],
+			["length", new IntegerValue(length)],
+			["previtem", this.previtem ?? new UndefinedValue()],
+			["nextitem", this.nextitem ?? new UndefinedValue()],
 		]);
 	}
 }
@@ -2136,7 +2139,15 @@ export class Interpreter {
 		let noIteration = true;
 		for (let i = 0; i < items.length; ++i) {
 			// Update the loop variable
-			scope.setVariable("loop", new LoopValue(i, items));
+			scope.setVariable(
+				"loop",
+				new LoopValue(
+					i,
+					items.length,
+					i > 0 ? items[i - 1] : undefined,
+					i < items.length - 1 ? items[i + 1] : undefined,
+				),
+			);
 
 			// Update scope for this iteration
 			this.bindLoopVariable(loopvar, items[i], scope);
