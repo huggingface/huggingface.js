@@ -259,15 +259,24 @@ describe("parseSafetensorsMetadata", () => {
 			dataBytes = 0,
 			config?: Record<string, unknown>,
 			declaredHeaderLength?: number,
+			hfQuantConfig?: unknown,
 		): typeof fetch => {
 			const headerBytes = new TextEncoder().encode(JSON.stringify(header));
 			const file = new Uint8Array(8 + headerBytes.length + dataBytes);
 			new DataView(file.buffer).setBigUint64(0, BigInt(declaredHeaderLength ?? headerBytes.length), true);
 			file.set(headerBytes, 8);
 			const configFile = config ? new TextEncoder().encode(JSON.stringify(config)) : undefined;
+			const hfQuantConfigFile =
+				hfQuantConfig !== undefined ? new TextEncoder().encode(JSON.stringify(hfQuantConfig)) : undefined;
 			return (async (input: RequestInfo | URL, init?: RequestInit) => {
 				const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-				const resource = url.endsWith(".safetensors") ? file : url.endsWith("config.json") ? configFile : undefined;
+				const resource = url.endsWith(".safetensors")
+					? file
+					: url.endsWith("/config.json")
+						? configFile
+						: url.endsWith("/hf_quant_config.json")
+							? hfQuantConfigFile
+							: undefined;
 				if (!resource) {
 					// The sharded index, existence probes... — `downloadFile` treats a 404 as "not
 					// found" only when the Hub's X-Error-Code says so.
@@ -511,6 +520,140 @@ describe("parseSafetensorsMetadata", () => {
 			// block scales are excluded.
 			assert.deepStrictEqual(parse.parameterCount, { U8: 16, F8_E4M3: 8, BF16: 4, F32: 2 });
 			assert.strictEqual(parse.parameterTotal, 30);
+		});
+
+		describe("hf_quant_config.json (Inkling 2)", () => {
+			const BYTES: Partial<Record<Dtype, number>> = { U8: 1, F8_E4M3: 1, BF16: 2, F32: 4 };
+			/** Lays tensors out back to back, the way a safetensors writer does. */
+			const layout = (tensors: Array<[name: string, dtype: Dtype, shape: number[]]>) => {
+				let offset = 0;
+				const header: Record<string, unknown> = { __metadata__: { format: "pt" } };
+				for (const [name, dtype, shape] of tensors) {
+					const end = offset + shape.reduce((a, b) => a * b) * (BYTES[dtype] ?? 1);
+					header[name] = { dtype, shape, data_offsets: [offset, end] };
+					offset = end;
+				}
+				return { header, dataBytes: offset };
+			};
+			const record = (inner: typeof fetch) => {
+				const urls: string[] = [];
+				const recorded = ((input: RequestInfo | URL, init?: RequestInit) => {
+					urls.push(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+					return inner(input, init);
+				}) as typeof fetch;
+				return { fetch: recorded, urls };
+			};
+
+			// Layer 0 packs its experts as NVFP4 (U8, two values per byte, one F8_E4M3 scale per 16 values)
+			// while layer 1 keeps them as MXFP8 (F8_E4M3, one U8 scale per 32 values), under the same names.
+			const inkling = layout([
+				["model.llm.layers.0.mlp.experts.w13_weight", "U8", [2, 8]],
+				["model.llm.layers.0.mlp.experts.w13_weight_scale", "F8_E4M3", [2, 1]],
+				["model.llm.layers.0.mlp.experts.w13_weight_amax", "F32", [1]],
+				["model.llm.layers.0.mlp.experts.w13_weight_outer_scale_denominator", "F32", [1]],
+				["model.llm.layers.1.mlp.experts.w13_weight", "F8_E4M3", [2, 16]],
+				["model.llm.layers.1.mlp.experts.w13_weight_scale", "U8", [2, 1]],
+				["model.llm.layers.0.attn.q_l2_clip.scale", "BF16", [4]],
+				["model.llm.layers.0.mlp.gate.bias", "F32", [2]],
+			]);
+			const hfQuantConfig = {
+				quant_method: "inkling2",
+				model: {
+					parameter_groups: [
+						{ compute_dtype: "float32", tensors: ["model.llm.layers.0.mlp.gate.bias"] },
+						{ compute_dtype: "bfloat16", tensors: ["model.llm.layers.0.attn.q_l2_clip.scale"] },
+						{ compute_dtype: "nvfp4", tensors: ["model.llm.layers.0.mlp.experts.w13_weight"] },
+						{ compute_dtype: "mxfp8", tensors: ["model.llm.layers.1.mlp.experts.w13_weight"] },
+					],
+				},
+			};
+			const parseInkling = (hfQuant: unknown, config: Record<string, unknown> = {}) =>
+				parseSafetensorsMetadata({
+					repo: "some-user/inkling-like-model",
+					computeParametersCount: true,
+					fetch: fetchForFile(inkling.header, inkling.dataBytes, config, undefined, hfQuant),
+				});
+
+			it("counts NVFP4 experts packed in U8 and leaves out the scale, amax and denominator tensors", async () => {
+				const parse = await parseInkling(hfQuantConfig);
+
+				assert(!parse.sharded);
+				// 16 packed bytes hold 32 NVFP4 values. The MXFP8 experts sharing the tensor name stay one per
+				// byte, and the learnable `.scale` and the router bias are real parameters.
+				assert.deepStrictEqual(parse.parameterCount, { U8: 32, F8_E4M3: 32, BF16: 4, F32: 2 });
+			});
+
+			it("counts an MXFP8-only export without its U8 block scales", async () => {
+				const mxfp8 = layout([
+					["model.llm.layers.0.mlp.experts.w13_weight", "F8_E4M3", [2, 32]],
+					["model.llm.layers.0.mlp.experts.w13_weight_scale", "U8", [2, 1]],
+				]);
+				const parse = await parseSafetensorsMetadata({
+					repo: "some-user/inkling-mxfp8",
+					computeParametersCount: true,
+					fetch: fetchForFile(mxfp8.header, mxfp8.dataBytes, {}, undefined, {
+						quant_method: "inkling2",
+						model: {
+							parameter_groups: [{ compute_dtype: "mxfp8", tensors: ["model.llm.layers.0.mlp.experts.w13_weight"] }],
+						},
+					}),
+				});
+
+				assert.deepStrictEqual(parse.parameterCount, { F8_E4M3: 64 });
+			});
+
+			it("does not request the file for a repo with no integer tensors", async () => {
+				const bf16 = layout([["model.layers.0.mlp.down_proj.weight", "BF16", [4, 4]]]);
+				const { fetch, urls } = record(fetchForFile(bf16.header, bf16.dataBytes, {}, undefined, hfQuantConfig));
+
+				const parse = await parseSafetensorsMetadata({ repo: "some-user/bf16", computeParametersCount: true, fetch });
+
+				assert.deepStrictEqual(parse.parameterCount, { BF16: 16 });
+				assert(!urls.some((url) => url.endsWith("hf_quant_config.json")));
+			});
+
+			it("does not request the file when config.json already declares the quantization", async () => {
+				const { fetch, urls } = record(
+					fetchForFile(
+						inkling.header,
+						inkling.dataBytes,
+						{ quantization_config: { quant_method: "modelopt", quant_algo: "NVFP4" } },
+						undefined,
+						hfQuantConfig,
+					),
+				);
+
+				await parseSafetensorsMetadata({ repo: "some-user/inkling-like-model", computeParametersCount: true, fetch });
+
+				assert(!urls.some((url) => url.endsWith("hf_quant_config.json")));
+			});
+
+			it.each([
+				["another quant_method", { ...hfQuantConfig, quant_method: "modelopt" }],
+				["a JSON null", null],
+				["a bare string", "inkling2"],
+			])("ignores a file that is %s", async (_name, file) => {
+				const parse = await parseInkling(file);
+
+				// every tensor at face value, as before this file was read
+				assert.deepStrictEqual(parse.parameterCount, { U8: 18, F8_E4M3: 34, BF16: 4, F32: 4 });
+			});
+
+			it.each([
+				["parameter_groups that is not a list", { quant_method: "inkling2", model: { parameter_groups: "nvfp4" } }],
+				[
+					"tensors that is not a list",
+					{ quant_method: "inkling2", model: { parameter_groups: [{ compute_dtype: "nvfp4", tensors: 5 }] } },
+				],
+				[
+					"a tensor entry that is not a string",
+					{ quant_method: "inkling2", model: { parameter_groups: [{ compute_dtype: "nvfp4", tensors: [{}, null] }] } },
+				],
+			])("packs nothing for %s but still leaves out the bookkeeping tensors", async (_name, file) => {
+				const parse = await parseInkling(file);
+
+				assert.deepStrictEqual(parse.parameterCount, { U8: 16, F8_E4M3: 32, BF16: 4, F32: 2 });
+			});
 		});
 
 		it("honors total_parameters for packed MLX weights without weakening the metadata cap", async () => {
@@ -1173,6 +1316,49 @@ describe("parseSafetensorsMetadata", () => {
 			});
 		});
 
+		describe("inkling2 (hf_quant_config.json)", () => {
+			const inkling2 = {
+				quant_method: "inkling2",
+				quantized_layers: { "model.llm.layers.0.mlp.experts": { quant_algo: "nvfp4" } },
+			};
+
+			it("packs the NVFP4 experts two per U8 byte", () => {
+				assert.strictEqual(getQuantizationMultiplier("model.llm.layers.0.mlp.experts.w13_weight", "U8", inkling2), 2);
+				assert.strictEqual(getQuantizationMultiplier("model.llm.layers.0.mlp.experts.w2_weight", "U8", inkling2), 2);
+			});
+
+			it("leaves MXFP8 layers and anything the config does not list alone", () => {
+				// same tensor name as the NVFP4 layer, but a layer the config doesn't list
+				assert.strictEqual(
+					getQuantizationMultiplier("model.llm.layers.40.mlp.experts.w13_weight", "F8_E4M3", inkling2),
+					1,
+				);
+				assert.strictEqual(getQuantizationMultiplier("model.llm.layers.40.mlp.experts.w13_weight", "U8", inkling2), 1);
+				assert.strictEqual(getQuantizationMultiplier("model.llm.layers.0.attn.q_proj.weight", "BF16", inkling2), 1);
+				// an unpacked tensor inside a listed module is not an integer container
+				assert.strictEqual(
+					getQuantizationMultiplier("model.llm.layers.0.mlp.experts.w13_weight", "F8_E4M3", inkling2),
+					1,
+				);
+			});
+
+			it("skips every scale-like tensor named after its weight, but not a learnable `.scale`", () => {
+				const tensor = (dtype: Dtype, shape: number[]): TensorInfo => ({ dtype, shape, data_offsets: [0, 0] });
+				const parameterCount = computeNumOfParamsByDtypeSingleFile(
+					{
+						"model.llm.layers.0.mlp.experts.w13_weight": tensor("U8", [4, 8]),
+						"model.llm.layers.0.mlp.experts.w13_weight_scale": tensor("F8_E4M3", [4, 1]),
+						"model.llm.layers.0.mlp.experts.w2_weight_amax": tensor("F32", [4]),
+						"model.llm.layers.0.mlp.experts.w2_weight_outer_scale_denominator": tensor("F32", [1]),
+						"model.llm.layers.40.mlp.experts.w13_weight_scale": tensor("U8", [4, 2]),
+						"model.llm.layers.0.attn.q_l2_clip.scale": tensor("BF16", [6]),
+					},
+					inkling2,
+				);
+				assert.deepStrictEqual(parameterCount, { U8: 64, BF16: 6 });
+			});
+		});
+
 		it("ignores fp6, which is stored in native F6_* dtypes rather than packed", () => {
 			// A 6-bit width in an 8-bit container has no reference implementation, so claiming any
 			// packing for it would be a guess.
@@ -1458,6 +1644,38 @@ describe("parseSafetensorsMetadata", () => {
 		});
 		// exactly the unquantized Qwen/Qwen3.6-35B-A3B parameter count
 		assert.strictEqual(sum(Object.values(parse.parameterCount)), 35_951_822_704);
+	});
+
+	it("counts the mixed NVFP4 / MXFP8 experts declared in hf_quant_config.json (thinkingmachines/Inkling-2-Small)", async () => {
+		// config.json has no `quantization_config`; `hf_quant_config.json` (`quant_method: "inkling2"`) lists
+		// layers 0-39 as NVFP4 experts packed two per U8 byte and layers 40-47 as MXFP8 in F8_E4M3. Counting
+		// every tensor at face value reported 383_072_987_216 for a 594B model: the packed experts at half
+		// their size, and the block scales (F8_E4M3 for NVFP4, U8 for MXFP8) counted as weights.
+		const parse = await parseSafetensorsMetadata({
+			repo: "thinkingmachines/Inkling-2-Small",
+			revision: "b0e7afb8892a07897c78ce1c5b801a0d9cbd5e7b",
+			computeParametersCount: true,
+		});
+
+		assert(parse.sharded);
+		assert.strictEqual(Object.keys(parse.headers).length, 24);
+		// NVFP4 expert: hidden size 4608 packed into 2304 bytes per row
+		assert.deepStrictEqual(
+			parse.headers["model-00001-of-00024.safetensors"]["model.llm.layers.0.mlp.experts.w13_weight"].shape,
+			[384, 4608, 2304],
+		);
+		// MXFP8 expert under the same name: one value per byte, left unpacked
+		const mxfp8Expert = parse.headers["model-00015-of-00024.safetensors"]["model.llm.layers.40.mlp.experts.w13_weight"];
+		assert.strictEqual(mxfp8Expert.dtype, "F8_E4M3");
+		assert.deepStrictEqual(mxfp8Expert.shape, [384, 4608, 4608]);
+		assert.deepStrictEqual(parse.parameterCount, {
+			F32: 534_528,
+			BF16: 6_981_765_120,
+			F8_E4M3: 97_844_723_712,
+			U8: 489_223_618_560, // 244_611_809_280 packed bytes x 2
+		});
+		// mtp.safetensors (1.7B) is not listed in the index, so it is not part of the total
+		assert.strictEqual(sum(Object.values(parse.parameterCount)), 594_050_641_920);
 	});
 });
 
