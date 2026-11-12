@@ -1650,7 +1650,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"strands-decider": {
 		prettyLabel: "Strands Decider",
-		repoName: "strands-decider",
+		repoName: "Strands Decider",
 		repoUrl: "https://github.com/strands-labs/strands-decider",
 		snippets: snippets.strandsDecider,
 		filter: false,
