@@ -129,9 +129,9 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 
 /**
  * The rules of the mapping table (in the same order), indexed by the character code of their first character,
- * so that only the rules which can match at a position are tested. All of them start with an ASCII character.
+ * so that only the rules which can match at a position are tested.
  */
-const RULES_BY_FIRST_CHAR_CODE: ([string, TokenType][] | undefined)[] = new Array(128).fill(undefined);
+const RULES_BY_FIRST_CHAR_CODE: ([string, TokenType][] | undefined)[] = [];
 for (const rule of ORDERED_MAPPING_TABLE) {
 	(RULES_BY_FIRST_CHAR_CODE[rule[0].charCodeAt(0)] ??= []).push(rule);
 }

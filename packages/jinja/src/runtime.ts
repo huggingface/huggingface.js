@@ -531,19 +531,18 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
  */
 class LoopValue extends ObjectValue {
 	declare entries?: Map<string, AnyRuntimeValue>;
-	declare readonly iteration: number;
-	declare readonly sequence: AnyRuntimeValue[];
 
-	constructor(iteration: number, sequence: AnyRuntimeValue[]) {
-		super(undefined as never);
-		this.iteration = iteration;
-		this.sequence = sequence;
+	constructor(
+		readonly iteration: number,
+		readonly sequence: AnyRuntimeValue[],
+	) {
+		super();
 	}
 
 	createEntries(): Map<string, AnyRuntimeValue> {
 		const i = this.iteration;
 		const items = this.sequence;
-		return new Map([
+		return new Map<string, AnyRuntimeValue>([
 			["index", new IntegerValue(i + 1)],
 			["index0", new IntegerValue(i)],
 			["revindex", new IntegerValue(items.length - i)],
@@ -553,11 +552,12 @@ class LoopValue extends ObjectValue {
 			["length", new IntegerValue(items.length)],
 			["previtem", i > 0 ? items[i - 1] : new UndefinedValue()],
 			["nextitem", i < items.length - 1 ? items[i + 1] : new UndefinedValue()],
-		] as [string, AnyRuntimeValue][]);
+		]);
 	}
 }
 
-// TypeScript does not allow a subclass to turn a property into an accessor, so define it on the prototype.
+// TypeScript does not allow a subclass to turn a property into an accessor (TS2611), since a class field in a base
+// class would shadow it. The base classes only declare `value`, so it is safe to define the accessor on the prototype.
 // The setter is needed since the RuntimeValue constructor assigns `value`.
 Object.defineProperty(LoopValue.prototype, "value", {
 	get(this: LoopValue): Map<string, AnyRuntimeValue> {
