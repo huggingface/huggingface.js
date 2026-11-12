@@ -6968,6 +6968,20 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("String comparisons", () => {
+		it("compares strings lexicographically like Python", () => {
+			const template = new Template(
+				`|{{ "a" < "b" }}|{{ "b" > "a" }}|{{ "a" <= "a" }}|{{ "b" >= "c" }}|{{ "Z" < "a" }}|{{ "ab" < "abc" }}|{{ "10" < "9" }}|`,
+			);
+			expect(template.render()).toBe("|true|true|true|false|true|true|true|");
+		});
+
+		it("supports string comparisons in conditions", () => {
+			const template = new Template(`{% for x in items %}{% if x >= "m" %}{{ x }}{% endif %}{% endfor %}`);
+			expect(template.render({ items: ["apple", "melon", "zucchini"] })).toBe("melonzucchini");
+		});
+	});
+
 	describe("Numeric filters", () => {
 		it("converts numbers with int and float like Python", () => {
 			const template = new Template(

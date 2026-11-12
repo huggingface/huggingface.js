@@ -1203,6 +1203,15 @@ export class Interpreter {
 					return new BooleanValue(right.value.includes(left.value));
 				case "not in":
 					return new BooleanValue(!right.value.includes(left.value));
+				// Lexicographic comparison, as in Python
+				case "<":
+					return new BooleanValue(left.value < right.value);
+				case ">":
+					return new BooleanValue(left.value > right.value);
+				case ">=":
+					return new BooleanValue(left.value >= right.value);
+				case "<=":
+					return new BooleanValue(left.value <= right.value);
 			}
 		}
 
