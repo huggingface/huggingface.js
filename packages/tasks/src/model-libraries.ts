@@ -2195,6 +2195,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 	},
+	"zao-lib": {
+		prettyLabel: "ZAO",
+		repoName: "ZAO",
+		repoUrl: "https://github.com/syntheticgestalt/zao",
+		snippets: snippets.zao,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
 	zipsplat: {
 		prettyLabel: "ZipSplat",
 		repoName: "ZipSplat",
