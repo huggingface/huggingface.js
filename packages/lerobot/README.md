@@ -78,6 +78,20 @@ starts. `data` is absent when that file cannot be read or disagrees with the epi
 Keep one `LeRobotDataset` while paging through episodes: like `info()`, it remembers the `v3.0` index
 files it has walked, so a later page or `episode()` lookup goes straight to the file that holds it.
 
+### Datasets in subdirectories
+
+Pass the directory containing `meta/info.json` as `path`:
+
+```ts
+const dataset = new LeRobotDataset("lerobot/community_dataset_v3", {
+	path: "00ri/so100_battery",
+});
+```
+
+The directory prefixes metadata, data and video URLs; omitting it selects the repo root.
+Templates and `fileUrl()` paths stay relative to the dataset directory. Paths are normalized
+and URL-encoded, and parent traversal is rejected.
+
 ### Pinning a revision
 
 Pass a commit sha whenever the result is stored or cached anywhere, so a later push cannot change what
