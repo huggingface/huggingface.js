@@ -346,6 +346,9 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("gpt-oss-20b-MXFP4.gguf")).toEqual("MXFP4");
 		expect(parseGGUFQuantLabel("gpt-oss-120b-MXFP4.gguf")).toEqual("MXFP4");
 		expect(parseGGUFQuantLabel("Qwable-v1-35B-A3B-MXFP4_MOE.gguf")).toEqual("MXFP4_MOE");
+		// ROCmFPX fork types that have no llama_ftype in upstream llama.cpp
+		expect(parseGGUFQuantLabel("flint-Q6_0_ROCMFPX.gguf")).toEqual("Q6_0_ROCMFPX");
+		expect(parseGGUFQuantLabel("flint-Q3_0_ROCMFPX.gguf")).toEqual("Q3_0_ROCMFPX");
 	});
 
 	it("parse quant label groups", async () => {
@@ -363,6 +366,7 @@ describe("gguf", () => {
 			sizeVariation: undefined,
 		});
 		expect(groups("gpt-oss-20b-MXFP4.gguf")).toEqual({ prefix: undefined, quant: "MXFP4", sizeVariation: undefined });
+		expect(groups("flint-Q6_0_ROCMFPX.gguf")).toEqual({ prefix: undefined, quant: "Q6_0", sizeVariation: "ROCMFPX" });
 	});
 
 	it("calculate tensor data offset", async () => {
