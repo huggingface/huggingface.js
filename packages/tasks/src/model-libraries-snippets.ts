@@ -173,6 +173,18 @@ function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
 	}
 }
 
+export const basedecision = (model: ModelData): string[] => [
+	`from basedecision import load_from_hub
+
+model = load_from_hub("${model.id}")
+result = model.choose(
+    context="Please refund my purchase.",
+    question="What does the customer request?",
+    options=["Refund", "Delivery status", "Change address"],
+)
+print(result.answer)`,
+];
+
 export const ben2 = (model: ModelData): string[] => [
 	`import requests
 from PIL import Image
@@ -2163,6 +2175,13 @@ export const timm = (model: ModelData): string[] => [
 model = timm.create_model("hf-hub:${model.id}", pretrained=True)`,
 ];
 
+// create_model() takes a name from the torch-pointcloud registry; the weights live in "torch-pointcloud/<name>"
+export const torch_pointcloud = (model: ModelData): string[] => [
+	`import torch_pointcloud as tp
+
+model = tp.create_model("${nameWithoutNamespace(model.id)}", pretrained=True)`,
+];
+
 export const saelens = (/* model: ModelData */): string[] => [
 	`# pip install sae-lens
 from sae_lens import SAE
@@ -2539,6 +2558,14 @@ export const stanza = (model: ModelData): string[] => [
 
 stanza.download("${nameWithoutNamespace(model.id).replace("stanza-", "")}")
 nlp = stanza.Pipeline("${nameWithoutNamespace(model.id).replace("stanza-", "")}")`,
+];
+
+export const strandsDecider = (model: ModelData): string[] => [
+	`# pip install strands-decider
+strands-decider ask ${model.id} \\
+  --state "Help! My payouts have been failing for 3 days!" \\
+  --choice "Which team should handle this?=billing,sales,retail" \\
+  --noul "Does this convey urgency?"`,
 ];
 
 const speechBrainMethod = (speechbrainInterface: string) => {
@@ -3157,6 +3184,77 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
+// Unitree deploy controllers live in two repos with slightly different robot folder names:
+// unitree_rl_lab (policies trained with Isaac Lab) and unitree_rl_mjlab (policies trained with mjlab).
+const UNITREE_ROBOTS: Record<string, { bin: string; isaaclab?: string; mjlab?: string }> = {
+	"unitree-g1-29dof": { bin: "g1_ctrl", isaaclab: "g1_29dof", mjlab: "g1" },
+	"unitree-g1-23dof": { bin: "g1_ctrl", isaaclab: "g1_23dof", mjlab: "g1_23dof" },
+	"unitree-go2": { bin: "go2_ctrl", isaaclab: "go2", mjlab: "go2" },
+	"unitree-go2w": { bin: "go2w_ctrl", isaaclab: "go2w" },
+	"unitree-h1": { bin: "h1_ctrl", isaaclab: "h1" },
+	"unitree-h1-2": { bin: "h1_2_ctrl", isaaclab: "h1_2", mjlab: "h1_2" },
+	"unitree-b2": { bin: "b2_ctrl", isaaclab: "b2" },
+	"unitree-a2": { bin: "a2_ctrl", mjlab: "a2" },
+	"unitree-r1": { bin: "r1_ctrl", mjlab: "r1" },
+};
+
+export const unitree = (model: ModelData): string[] => {
+	// Everything comes from the model card tags: unitree-<robot>, isaaclab | mjlab, velocity | mimic
+	const framework = model.tags.includes("mjlab") ? "mjlab" : "isaaclab";
+	const repo = framework === "mjlab" ? "unitree_rl_mjlab" : "unitree_rl_lab";
+	const robotTags = Object.keys(UNITREE_ROBOTS).filter((tag) => model.tags.includes(tag));
+	const robot = robotTags.length === 1 ? UNITREE_ROBOTS[robotTags[0]] : undefined;
+	const dir = robot?.[framework];
+	const robotDir = dir ?? "ROBOT";
+	const bin = dir && robot ? robot.bin : "ROBOT_ctrl";
+	const prefix = dir ? "" : `# Replace ROBOT with the robot named in the model card.\n`;
+	const name = model.id.split("/").pop() ?? model.id;
+	const simFlag = framework === "mjlab" ? " --network=lo" : "";
+
+	let install: string;
+	if (model.tags.includes("mimic")) {
+		const policyDir = `config/policy/mimic/${name}`;
+		const motion =
+			framework === "mjlab"
+				? `#       motion_file: ${policyDir}/params/motion.npz`
+				: `#       motion_file: ${policyDir}/params/motion.csv\n#       fps: 60`;
+		install = `hf download ${model.id} --local-dir ${policyDir}
+# Enable the policy in config/config.yaml:
+#   FSM:
+#     _:
+#       Mimic_Hub: {id: 110, type: Mimic}
+#     Velocity:
+#       transitions:
+#         Mimic_Hub: LT(2s) + up.on_pressed
+#     Mimic_Hub:
+#       transitions:
+#         Passive: LT + B.on_pressed
+#         Velocity: RB + X.on_pressed
+#       policy_dir: ${policyDir}/
+${motion}`;
+	} else {
+		const velocityDir =
+			framework === "mjlab" || dir === "g1_29dof"
+				? "config/policy/velocity"
+				: `../../../logs/rsl_rl/unitree_${robotDir}_velocity`;
+		install = `# The Velocity state runs the last policy folder in ${velocityDir}
+hf download ${model.id} --local-dir ${velocityDir}/v1`;
+	}
+
+	return [
+		`${prefix}# 1. Get the deploy controller and the policy
+git clone https://github.com/unitreerobotics/${repo}
+cd ${repo}/deploy/robots/${robotDir}
+${install}`,
+		`# 2. Build the controller on Linux, with unitree_sdk2 and its dependencies installed
+mkdir -p build && cd build && cmake .. && make`,
+		`# 3. Test in simulation first: start unitree_mujoco, then run
+./${bin}${simFlag}`,
+		`# 4. Run on the robot, over its Ethernet interface
+./${bin} --network eth0`,
+	];
+};
+
 export const univa = (model: ModelData): string[] => [
 	`# Follow installation instructions at https://github.com/PKU-YuanGroup/UniWorld-V1
 import torch
@@ -3514,6 +3612,15 @@ export const hezar = (model: ModelData): string[] => [
 	`from hezar import Model
 
 model = Model.load("${model.id}")`,
+];
+
+export const zao = (model: ModelData): string[] => [
+	`# pip install zao
+from zao import ZAOTransformer
+
+zao = ZAOTransformer(weights="${model.id}")
+X = zao.transform(["CC(=O)Oc1ccccc1C(=O)O", "c1ccc2[nH]ccc2c1"])
+X.shape  # (2, 2048)`,
 ];
 
 export const zonos = (model: ModelData): string[] => [

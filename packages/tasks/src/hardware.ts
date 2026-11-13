@@ -680,6 +680,13 @@ export const SKUS = {
 				power: 220,
 				releaseYear: 2026,
 			},
+			"Apple M6": {
+				tflops: 6.2,
+				memory: [16, 24, 32],
+				msrp: 2_400,
+				power: 25,
+				releaseYear: 2026,
+			},
 		},
 	},
 } satisfies Record<string, Record<string, Record<string, HardwareSpec>>>;
