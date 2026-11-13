@@ -113,3 +113,32 @@ export async function checkNonbucketUnionTypes(repo: {
 	const result = await pathsInfo({ repo, paths: ["file.txt"], expand: true });
 	result[0].lastCommit.date.getTime();
 }
+
+export async function checkGenericNonbucketDiscriminator<T extends "model" | "dataset">(type: T): Promise<void> {
+	const result = await pathsInfo({ repo: { type, name: "owner/repo" }, paths: ["file.txt"], expand: true });
+	result[0].lastCommit.date.getTime();
+}
+
+export async function checkGenericNonbucketObject<T extends { type: "model" | "dataset"; name: string }>(
+	repo: T,
+): Promise<void> {
+	const result = await pathsInfo({ repo, paths: ["file.txt"], expand: true });
+	result[0].lastCommit.date.getTime();
+}
+
+export async function checkGenericNonbucketStrings<
+	T extends `datasets/${string}` | `spaces/${string}` | `kernels/${string}`,
+>(repo: T): Promise<void> {
+	const result = await pathsInfo({ repo, paths: ["file.txt"], expand: true });
+	result[0].lastCommit.date.getTime();
+}
+
+export async function checkGenericModelPrefix<T extends `owner/${string}`>(repo: T): Promise<void> {
+	const result = await pathsInfo({ repo, paths: ["file.txt"], expand: true });
+	result[0].lastCommit.date.getTime();
+}
+
+export async function checkGenericModelLiteral<T extends "bert-base-uncased" | "gpt2">(repo: T): Promise<void> {
+	const result = await pathsInfo({ repo, paths: ["file.txt"], expand: true });
+	result[0].lastCommit.date.getTime();
+}

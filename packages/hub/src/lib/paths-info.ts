@@ -1,4 +1,4 @@
-import type { CredentialsParams, RepoDesignation } from "../types/public";
+import type { CredentialsParams, RepoDesignation, RepoType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 import { HUB_URL } from "../consts";
@@ -64,8 +64,23 @@ type ExpandedPathInfo<Repo extends RepoDesignation> = PathInfo & {
 				: { lastCommit: CommitInfo }
 			: never);
 
+// A concrete non-bucket overload also preserves generic discriminators such as
+// T extends "model" | "dataset", without deferring the return-type conditional.
 // Only require lastCommit when the designation excludes buckets. In particular,
 // wide strings, uncertain prefixes and RepoId.type unions can still be buckets.
+export function pathsInfo(
+	params: {
+		repo: { type: Exclude<RepoType, "bucket">; name: string };
+		paths: string[];
+		expand: true; // if expand true
+		revision?: string;
+		hubUrl?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>,
+): Promise<(PathInfo & { lastCommit: CommitInfo; securityFileStatus: SecurityFileStatus })[]>;
 export function pathsInfo<Repo extends RepoDesignation>(
 	params: {
 		repo: Repo;
