@@ -398,6 +398,41 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(false);
 	});
 
+	it("kapitsa - qwen3.5 family mlx", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS.kapitsa;
+		const model: ModelData = {
+			id: "mlx-community/Qwen3.6-35B-A3B-6bit",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "image-text-to-text",
+			config: { model_type: "qwen3_5_moe" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(snippet[0].setup).toContain("brew install nace-ai/tap/kapitsa");
+		expect(snippet[0].content).toContain('kapitsa serve --model "mlx-community/Qwen3.6-35B-A3B-6bit"');
+	});
+
+	it("kapitsa not shown for other models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.kapitsa;
+		const otherMlx: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+			tags: ["mlx", "conversational"],
+			config: { model_type: "llama" },
+			inference: "",
+		};
+		const qwenTransformers: ModelData = {
+			id: "Qwen/Qwen3.6-35B-A3B",
+			tags: ["transformers", "conversational"],
+			config: { model_type: "qwen3_5_moe" },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(otherMlx)).toBe(false);
+		expect(displayOnModelPage(qwenTransformers)).toBe(false);
+	});
+
 	it("links as a function", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
