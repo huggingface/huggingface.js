@@ -128,9 +128,14 @@ export interface ChatCompletionInputURL {
 }
 export type ChatCompletionInputMessageChunkType = "text" | "image_url";
 export interface ChatCompletionInputToolCall {
-	function: ChatCompletionInputFunctionDefinition;
+	function: ChatCompletionInputFunctionCall;
 	id: string;
 	type: string;
+	[property: string]: unknown;
+}
+export interface ChatCompletionInputFunctionCall {
+	arguments: string;
+	name: string;
 	[property: string]: unknown;
 }
 export interface ChatCompletionInputFunctionDefinition {
