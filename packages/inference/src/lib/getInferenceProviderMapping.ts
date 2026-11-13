@@ -12,6 +12,7 @@ import type {
 import { typedInclude } from "../utils/typedInclude.js";
 import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
 import { getLogger } from "./logger.js";
+import type { JsonObject } from "../vendor/type-fest/basic.js";
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMappingEntry[]>();
 
@@ -73,46 +74,41 @@ export async function fetchInferenceProviderMappingForModel(
 		const resp = await (options?.fetch ?? fetch)(url, {
 			headers: accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${accessToken}` } : {},
 		});
-		if (!resp.ok) {
-			if (resp.headers.get("Content-Type")?.startsWith("application/json")) {
-				const error = await resp.json();
-				if ("error" in error && typeof error.error === "string") {
-					throw new InferenceClientHubApiError(
-						`Failed to fetch inference provider mapping for model ${modelId}: ${error.error}`,
-						{ url, method: "GET" },
-						{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: error },
-					);
-				}
-			} else {
-				throw new InferenceClientHubApiError(
-					`Failed to fetch inference provider mapping for model ${modelId}`,
-					{ url, method: "GET" },
-					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() },
-				);
-			}
-		}
-		let payload: {
-			inferenceProviderMapping?:
-				| InferenceProviderMappingEntry[]
-				| Record<string, { providerId: string; status: "live" | "staging"; task: WidgetType }>;
-		} | null = null;
+		const text = await resp.text();
+		let payload: unknown;
 		try {
-			payload = await resp.json();
+			payload = JSON.parse(text);
 		} catch {
+			payload = undefined;
+		}
+		const json =
+			payload !== null && typeof payload === "object" && !Array.isArray(payload) ? (payload as JsonObject) : undefined;
+		const httpResponse = { requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: json ?? text };
+
+		if (!resp.ok) {
+			const reason = typeof json?.error === "string" ? `: ${json.error}` : "";
+			throw new InferenceClientHubApiError(
+				`Failed to fetch inference provider mapping for model ${modelId}${reason}`,
+				{ url, method: "GET" },
+				httpResponse,
+			);
+		}
+		if (payload === undefined) {
 			throw new InferenceClientHubApiError(
 				`Failed to fetch inference provider mapping for model ${modelId}: malformed API response, invalid JSON`,
 				{ url, method: "GET" },
-				{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() },
+				httpResponse,
 			);
 		}
-		if (!payload?.inferenceProviderMapping) {
+		const mapping = json?.inferenceProviderMapping as Parameters<typeof normalizeInferenceProviderMapping>[1];
+		if (!mapping) {
 			throw new InferenceClientHubApiError(
 				`We have not been able to find inference provider information for model ${modelId}.`,
 				{ url, method: "GET" },
-				{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() },
+				httpResponse,
 			);
 		}
-		inferenceProviderMapping = normalizeInferenceProviderMapping(modelId, payload.inferenceProviderMapping);
+		inferenceProviderMapping = normalizeInferenceProviderMapping(modelId, mapping);
 		inferenceProviderMappingCache.set(modelId, inferenceProviderMapping);
 	}
 	return inferenceProviderMapping;
