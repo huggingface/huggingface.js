@@ -331,6 +331,53 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(false);
 	});
 
+	it("gezel deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["gezel"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe("gezel://model/huggingface/bartowski/Llama-3.2-3B-Instruct-GGUF");
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf").href).toBe(
+			"gezel://model/huggingface/bartowski/Llama-3.2-3B-Instruct-GGUF?file=Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+		);
+		expect(deeplink(model, "Q8_0/Llama-3.2-3B-Instruct-Q8_0-00001-of-00002.gguf").href).toBe(
+			"gezel://model/huggingface/bartowski/Llama-3.2-3B-Instruct-GGUF?file=Q8_0%2FLlama-3.2-3B-Instruct-Q8_0-00001-of-00002.gguf",
+		);
+	});
+
+	it("gezel not shown for a GGUF without a chat template", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["gezel"];
+		const model: ModelData = {
+			id: "someone/base-model-GGUF",
+			tags: [],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
+	it("gezel deeplink - mlx", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["gezel"];
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe("gezel://model/huggingface/mlx-community/Llama-3.2-3B-Instruct-4bit");
+		expect(deeplink(model, "model.safetensors").href).toBe(
+			"gezel://model/huggingface/mlx-community/Llama-3.2-3B-Instruct-4bit",
+		);
+	});
+
 	it("llama deeplink", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS["llama-app"];
 		const model: ModelData = {
