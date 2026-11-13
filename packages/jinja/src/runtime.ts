@@ -1711,11 +1711,18 @@ export class Interpreter {
 						if (operand.value.some((item) => !isAttributeContainer(item))) {
 							throw new Error(`\`${filterName}\` can only be applied to array of objects`);
 						}
-						if (filter.args.some((x) => x.type !== "StringLiteral")) {
-							throw new Error(`arguments of \`${filterName}\` must be strings`);
+						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+						if (kwargs.size > 0) {
+							throw new Error(`\`${filterName}\` does not support keyword arguments`);
 						}
 
-						const [attr, testName, value] = filter.args.map((x) => this.evaluate(x, environment)) as StringValue[];
+						const [attr, testName, ...testArgs] = args;
+						if (!(attr instanceof StringValue)) {
+							throw new Error(`attribute of \`${filterName}\` must be a string`);
+						}
+						if (testName !== undefined && !(testName instanceof StringValue)) {
+							throw new Error(`test of \`${filterName}\` must be a string`);
+						}
 
 						let testFunction: (...x: AnyRuntimeValue[]) => boolean;
 						if (testName) {
@@ -1730,10 +1737,10 @@ export class Interpreter {
 							testFunction = (...x: AnyRuntimeValue[]) => x[0].__bool__().value;
 						}
 
-						// Filter the array using the test function
-						const filtered = (operand.value as AttributeContainer[]).filter((item) => {
-							const a = item.value.get(attr.value);
-							const result = a ? testFunction(a, value) : false;
+						// Filter the array using the test function. `attr` may be a dotted path, and a missing
+						// attribute is passed to the test as undefined (so e.g. the `undefined` test can match it).
+						const filtered = operand.value.filter((item) => {
+							const result = testFunction(getAttributeValue(item, attr.value), ...testArgs);
 							return select ? result : !result;
 						});
 
