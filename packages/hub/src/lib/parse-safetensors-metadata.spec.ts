@@ -966,6 +966,37 @@ describe("parseSafetensorsMetadata", () => {
 	describe("getQuantizationMultiplier", () => {
 		const EXPERT = "model.layers.0.ffn.experts.3.w1.weight";
 
+		describe("mxfp8 with moe_quant_format", () => {
+			// MiniMax-M3.1: mxfp8 dense layers, NVFP4 routed experts packed two per U8
+			const mxfp8 = {
+				quant_method: "mxfp8",
+				moe_quant_algo: "NVFP4",
+				moe_quant_format: "nvfp4-pack-quantized",
+			};
+			const PACKED = "language_model.model.layers.0.block_sparse_moe.experts.3.w1.weight_packed";
+
+			it("packs routed experts at the declared MoE width", () => {
+				assert.strictEqual(getQuantizationMultiplier(PACKED, "U8", mxfp8), 2);
+			});
+
+			it("falls back to moe_quant_algo when moe_quant_format is absent", () => {
+				assert.strictEqual(
+					getQuantizationMultiplier(PACKED, "U8", { quant_method: "mxfp8", moe_quant_algo: "NVFP4" }),
+					2,
+				);
+			});
+
+			it("leaves dense and shared-expert tensors alone", () => {
+				const shared = "language_model.model.layers.0.block_sparse_moe.shared_experts.up_proj.weight";
+				assert.strictEqual(getQuantizationMultiplier(shared, "F8_E4M3", mxfp8), 1);
+				assert.strictEqual(getQuantizationMultiplier(shared, "U8", mxfp8), 1);
+			});
+
+			it("is a no-op without an MoE width", () => {
+				assert.strictEqual(getQuantizationMultiplier(PACKED, "U8", { quant_method: "mxfp8" }), 1);
+			});
+		});
+
 		describe("fp8 with expert_dtype", () => {
 			const fp8 = { quant_method: "fp8" };
 
