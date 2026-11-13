@@ -1436,9 +1436,9 @@ export class Interpreter {
 					case "list":
 						return operand;
 					case "first":
-						return operand.value[0];
+						return operand.value[0] ?? new UndefinedValue();
 					case "last":
-						return operand.value[operand.value.length - 1];
+						return operand.value[operand.value.length - 1] ?? new UndefinedValue();
 					case "length":
 						return new IntegerValue(operand.value.length);
 					case "reverse":
