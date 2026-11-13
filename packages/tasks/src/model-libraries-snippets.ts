@@ -3486,20 +3486,23 @@ export const neurobrix = (model: ModelData): string[] => {
 		? model.cardData.base_model[0]
 		: model.cardData?.base_model;
 	const id = (typeof cardData?.neurobrix_id === "string" ? cardData.neurobrix_id : undefined) ?? baseModel ?? model.id;
-	let run = `neurobrix run --model ${id} --prompt "Hello"`;
-	if (model.pipeline_tag === "automatic-speech-recognition") {
-		run = `neurobrix run --model ${id} --audio recording.wav`;
-	} else if (model.pipeline_tag === "image-to-image") {
-		run = `neurobrix run --model ${id} --input-image photo.png --output result.png`;
-	} else if (model.pipeline_tag === "text-to-image") {
-		run = `neurobrix run --model ${id} --prompt "a lighthouse at dusk" --output image.png`;
-	} else if (model.pipeline_tag === "text-to-video" || model.pipeline_tag === "image-to-video") {
-		run = `neurobrix run --model ${id} --prompt "a hot air balloon over mountains" --output video.mp4`;
-	}
+	// One argument set per pipeline, as the CLI expects them (`neurobrix run --help`).
+	const args: Record<string, string> = {
+		"automatic-speech-recognition": `--audio recording.wav`,
+		"audio-text-to-text": `--audio recording.wav --prompt "Summarize this recording."`,
+		"image-to-image": `--input-image photo.png --output result.png`,
+		"image-text-to-text": `--input-image photo.jpg --prompt "What is in this image?"`,
+		"any-to-any": `--mode text --input-image photo.jpg --prompt "Describe this image."`,
+		"text-to-image": `--prompt "a lighthouse at dusk" --output image.png`,
+		"text-to-video": `--prompt "a hot air balloon over mountains" --output video.mp4`,
+		"image-to-video": `--input-image first_frame.png --prompt "the camera slowly pulls back" --output video.mp4`,
+		"text-to-speech": `--prompt "Hello from my own GPU."${id === "hexgrad/Kokoro-82M" ? " --speaker af_heart" : ""} --output speech.wav`,
+	};
+	const run = args[model.pipeline_tag ?? ""] ?? `--prompt "Hello"`;
 	return [
 		`# pip install neurobrix
 neurobrix import ${id} --accept-license
-${run}`,
+neurobrix run --model ${id} ${run}`,
 	];
 };
 
