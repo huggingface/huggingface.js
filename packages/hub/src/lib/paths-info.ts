@@ -1,4 +1,4 @@
-import type { CredentialsParams, RepoDesignation } from "../types/public";
+import type { CredentialsParams, RepoDesignation, RepoType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 import { HUB_URL } from "../consts";
@@ -48,10 +48,29 @@ export interface PathInfo {
 	securityFileStatus?: SecurityFileStatus;
 }
 
-// Define the overloaded signatures
+type ExpandedPathInfo<Repo extends RepoDesignation> = PathInfo & {
+	securityFileStatus: SecurityFileStatus;
+} & (Repo extends string
+		? Repo extends `${infer Prefix}/${string}`
+			? "buckets" extends Prefix
+				? unknown
+				: { lastCommit: CommitInfo }
+			: [Repo & `buckets/${string}`] extends [never]
+				? { lastCommit: CommitInfo }
+				: unknown
+		: Repo extends { type: infer Type }
+			? "bucket" extends Type
+				? unknown
+				: { lastCommit: CommitInfo }
+			: never);
+
+// A concrete non-bucket overload also preserves generic discriminators such as
+// T extends "model" | "dataset", without deferring the return-type conditional.
+// Only require lastCommit when the designation excludes buckets. In particular,
+// wide strings, uncertain prefixes and RepoId.type unions can still be buckets.
 export function pathsInfo(
 	params: {
-		repo: RepoDesignation;
+		repo: { type: Exclude<RepoType, "bucket">; name: string };
 		paths: string[];
 		expand: true; // if expand true
 		revision?: string;
@@ -62,6 +81,19 @@ export function pathsInfo(
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
 ): Promise<(PathInfo & { lastCommit: CommitInfo; securityFileStatus: SecurityFileStatus })[]>;
+export function pathsInfo<Repo extends RepoDesignation>(
+	params: {
+		repo: Repo;
+		paths: string[];
+		expand: true; // if expand true
+		revision?: string;
+		hubUrl?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>,
+): Promise<ExpandedPathInfo<Repo>[]>;
 export function pathsInfo(
 	params: {
 		repo: RepoDesignation;
