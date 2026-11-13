@@ -587,6 +587,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	executorch: {
+		prettyLabel: "ExecuTorch",
+		repoName: "ExecuTorch",
+		repoUrl: "https://github.com/pytorch/executorch",
+		docsUrl: "https://docs.pytorch.org/executorch",
+		snippets: snippets.executorch,
+		filter: false,
+		countDownloads: `path_extension:"pte"`,
+	},
 	"fahr-face": {
 		prettyLabel: "FAHR-Face",
 		repoName: "FAHR-Face",
