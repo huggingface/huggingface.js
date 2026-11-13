@@ -760,6 +760,24 @@ export const LOCAL_APPS = {
 			model.tags.includes("coreml") && model.tags.includes("joyfusion") && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://joyfusion.app/import_from_hf?repo_id=${model.id}`),
 	},
+	phosphene: {
+		prettyLabel: "Phosphene",
+		docsUrl: "https://phosphene.video",
+		mainTask: "text-to-video",
+		macOSOnly: true,
+		displayOnModelPage: (model) =>
+			[
+				"Lightricks/LTX-2.5",
+				"MiniMaxAI/MiniMax-H3",
+				"MiniMaxAI/MiniMax-H3-Image",
+				"Pika-Labs/Pika-H3-Flex",
+				"PrunaAI/P-H3-Image",
+				"black-forest-labs/flux-3-image-klein",
+				"Qwen/Qwen-Image-Edit-2511",
+				"Mrbizarro/Pika-H3-Flex-MLX",
+			].includes(model.id),
+		deeplink: () => new URL("https://phosphene.video/download/"),
+	},
 	ollama: {
 		prettyLabel: "Ollama",
 		docsUrl: "https://ollama.com",
