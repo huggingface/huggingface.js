@@ -54,8 +54,12 @@ const EMPTY_BUILTINS: ReadonlyMap<string, AnyRuntimeValue> = new Map();
  * Should not be instantiated directly.
  */
 abstract class RuntimeValue<T> {
-	type = "RuntimeValue";
-	value: T;
+	// NOTE: These are assigned in the constructors instead of being initialized as class fields (which each
+	// subclass would then redefine), since runtime values are created often and this is much faster.
+	// The base constructor assigns both, so that their order is always `type`, `value` and so that
+	// subclasses may define `value` as an accessor (see LoopValue).
+	declare type: string;
+	declare value: T;
 
 	/**
 	 * A collection of built-in functions for this type.
@@ -68,6 +72,7 @@ abstract class RuntimeValue<T> {
 	 * Creates a new RuntimeValue.
 	 */
 	constructor(value: T = undefined as unknown as T) {
+		this.type = "RuntimeValue";
 		this.value = value;
 	}
 
@@ -89,14 +94,20 @@ abstract class RuntimeValue<T> {
  * Represents an integer value at runtime.
  */
 export class IntegerValue extends RuntimeValue<number> {
-	override type = "IntegerValue";
+	constructor(value?: number) {
+		super(value);
+		this.type = "IntegerValue";
+	}
 }
 
 /**
  * Represents a float value at runtime.
  */
 export class FloatValue extends RuntimeValue<number> {
-	override type = "FloatValue";
+	constructor(value?: number) {
+		super(value);
+		this.type = "FloatValue";
+	}
 
 	override toString(): string {
 		if (Object.is(this.value, -0)) {
@@ -110,8 +121,12 @@ export class FloatValue extends RuntimeValue<number> {
  * Represents a string value at runtime.
  */
 export class StringValue extends RuntimeValue<string> {
-	override type = "StringValue";
 	private _builtins?: Map<string, AnyRuntimeValue>;
+
+	constructor(value?: string) {
+		super(value);
+		this.type = "StringValue";
+	}
 
 	override get builtins(): Map<string, AnyRuntimeValue> {
 		return (this._builtins ??= new Map<string, AnyRuntimeValue>([
@@ -225,7 +240,7 @@ export class StringValue extends RuntimeValue<string> {
 						// Trailing whitespace may be present when maxsplit is specified and there aren't sufficient matches in the string.
 						const text = this.value.trimStart();
 						for (const { 0: match, index } of text.matchAll(/\S+/g)) {
-							if (maxsplit.value !== -1 && result.length >= maxsplit.value && index !== undefined) {
+							if (maxsplit.value >= 0 && result.length >= maxsplit.value && index !== undefined) {
 								result.push(match + text.slice(index + match.length));
 								break;
 							}
@@ -237,7 +252,7 @@ export class StringValue extends RuntimeValue<string> {
 							throw new Error("empty separator");
 						}
 						result = this.value.split(sep.value);
-						if (maxsplit.value !== -1 && result.length > maxsplit.value) {
+						if (maxsplit.value >= 0 && result.length > maxsplit.value) {
 							// Follow Python's behavior: If maxsplit is given, at most maxsplit splits are done,
 							// with any remaining text returned as the final element of the list.
 							result.push(result.splice(maxsplit.value).join(sep.value));
@@ -282,7 +297,10 @@ export class StringValue extends RuntimeValue<string> {
  * Represents a boolean value at runtime.
  */
 export class BooleanValue extends RuntimeValue<boolean> {
-	override type = "BooleanValue";
+	constructor(value?: boolean) {
+		super(value);
+		this.type = "BooleanValue";
+	}
 }
 
 /**
@@ -368,9 +386,10 @@ function toJSON(
 			const basePadding = "\n" + indentValue.repeat(depth);
 			const childrenPadding = basePadding + indentValue; // Depth + 1
 
+			// Like Python's json.dumps, empty containers render as [] and {} even when indenting.
 			if (input.type === "ArrayValue") {
 				const core = (input as ArrayValue).value.map((x) => toJSON(x, options, depth + 1, convertUndefinedToNull));
-				return indent
+				return indent && core.length > 0
 					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
 					: `[${core.join(itemSeparator)}]`;
 			} else {
@@ -386,7 +405,9 @@ function toJSON(
 					const v = `${keyStr}${keySeparator}${toJSON(value, options, depth + 1, convertUndefinedToNull)}`;
 					return indent ? `${childrenPadding}${v}` : v;
 				});
-				return indent ? `{${core.join(itemSeparator)}${basePadding}}` : `{${core.join(itemSeparator)}}`;
+				return indent && core.length > 0
+					? `{${core.join(itemSeparator)}${basePadding}}`
+					: `{${core.join(itemSeparator)}}`;
 			}
 		}
 		default:
@@ -399,8 +420,12 @@ function toJSON(
  * Represents an Object value at runtime.
  */
 export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
-	override type = "ObjectValue";
 	private _builtins?: Map<string, AnyRuntimeValue>;
+
+	constructor(value?: Map<string, AnyRuntimeValue>) {
+		super(value);
+		this.type = "ObjectValue";
+	}
 
 	/**
 	 * NOTE: necessary to override since all JavaScript arrays are considered truthy,
@@ -501,17 +526,70 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 }
 
 /**
+ * Represents the special `loop` variable of a for loop: an object whose entries are only created if the template
+ * uses them. It keeps only the values they depend on, rather than the whole sequence, so that a `loop` which outlives
+ * its iteration (e.g., stored in a namespace) does not keep every item alive.
+ */
+class LoopValue extends ObjectValue {
+	declare entries?: Map<string, AnyRuntimeValue>;
+
+	constructor(
+		readonly iteration: number,
+		readonly length: number,
+		readonly previtem: AnyRuntimeValue | undefined,
+		readonly nextitem: AnyRuntimeValue | undefined,
+	) {
+		super();
+	}
+
+	createEntries(): Map<string, AnyRuntimeValue> {
+		const i = this.iteration;
+		const length = this.length;
+		return new Map<string, AnyRuntimeValue>([
+			["index", new IntegerValue(i + 1)],
+			["index0", new IntegerValue(i)],
+			["revindex", new IntegerValue(length - i)],
+			["revindex0", new IntegerValue(length - i - 1)],
+			["first", new BooleanValue(i === 0)],
+			["last", new BooleanValue(i === length - 1)],
+			["length", new IntegerValue(length)],
+			["previtem", this.previtem ?? new UndefinedValue()],
+			["nextitem", this.nextitem ?? new UndefinedValue()],
+		]);
+	}
+}
+
+// TypeScript does not allow a subclass to turn a property into an accessor (TS2611), since a class field in a base
+// class would shadow it. The base classes only declare `value`, so it is safe to define the accessor on the prototype.
+// The setter is needed since the RuntimeValue constructor assigns `value`.
+Object.defineProperty(LoopValue.prototype, "value", {
+	get(this: LoopValue): Map<string, AnyRuntimeValue> {
+		return (this.entries ??= this.createEntries());
+	},
+	set(this: LoopValue, entries: Map<string, AnyRuntimeValue> | undefined) {
+		this.entries = entries;
+	},
+	configurable: true,
+});
+
+/**
  * Represents a KeywordArguments value at runtime.
  */
 export class KeywordArgumentsValue extends ObjectValue {
-	override type = "KeywordArgumentsValue";
+	constructor(value?: Map<string, AnyRuntimeValue>) {
+		super(value);
+		this.type = "KeywordArgumentsValue";
+	}
 }
 
 /**
  * Represents a mutable namespace with attribute/subscript access but no mapping behavior or builtins.
  */
 export class NamespaceValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
-	override type = "NamespaceValue";
+	constructor(value?: Map<string, AnyRuntimeValue>) {
+		super(value);
+		this.type = "NamespaceValue";
+	}
 
 	override toString(): string {
 		return toJSON(this, {}, 0, false);
@@ -522,8 +600,12 @@ export class NamespaceValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
  * Represents an Array value at runtime.
  */
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
-	override type = "ArrayValue";
 	private _builtins?: Map<string, AnyRuntimeValue>;
+
+	constructor(value?: AnyRuntimeValue[]) {
+		super(value);
+		this.type = "ArrayValue";
+	}
 
 	override get builtins(): Map<string, AnyRuntimeValue> {
 		return (this._builtins ??= new Map<string, AnyRuntimeValue>([["length", new IntegerValue(this.value.length)]]));
@@ -550,28 +632,40 @@ export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
  * NOTE: We extend ArrayValue since JavaScript does not have a built-in Tuple type.
  */
 export class TupleValue extends ArrayValue {
-	override type = "TupleValue";
+	constructor(value?: AnyRuntimeValue[]) {
+		super(value);
+		this.type = "TupleValue";
+	}
 }
 
 /**
  * Represents a Function value at runtime.
  */
 export class FunctionValue extends RuntimeValue<(args: AnyRuntimeValue[], scope: Environment) => AnyRuntimeValue> {
-	override type = "FunctionValue";
+	constructor(value?: (args: AnyRuntimeValue[], scope: Environment) => AnyRuntimeValue) {
+		super(value);
+		this.type = "FunctionValue";
+	}
 }
 
 /**
  * Represents a Null value at runtime.
  */
 export class NullValue extends RuntimeValue<null> {
-	override type = "NullValue";
+	constructor(value?: null) {
+		super(value);
+		this.type = "NullValue";
+	}
 }
 
 /**
  * Represents an Undefined value at runtime.
  */
 export class UndefinedValue extends RuntimeValue<undefined> {
-	override type = "UndefinedValue";
+	constructor(value?: undefined) {
+		super(value);
+		this.type = "UndefinedValue";
+	}
 }
 
 function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntimeValue] {
@@ -593,50 +687,58 @@ function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntim
 }
 
 /**
+ * Implements the `namespace` builtin. Each environment wraps it in its own `FunctionValue`, so that replacing
+ * one environment's `namespace` does not affect any other.
+ */
+function namespaceBuiltin(args: AnyRuntimeValue[]): NamespaceValue {
+	// Copy top-level entries so namespace assignment does not mutate the input.
+	const positional = args.slice();
+	let kwargs: KeywordArgumentsValue | undefined;
+	if (positional.at(-1) instanceof KeywordArgumentsValue) {
+		kwargs = positional.pop() as KeywordArgumentsValue;
+	}
+	if (positional.length > 1) {
+		throw new Error(`namespace expected at most 1 argument, got ${positional.length}`);
+	}
+	const entries = new Map<string, AnyRuntimeValue>();
+	if (positional.length === 1) {
+		const source = positional[0];
+		if (source instanceof ObjectValue) {
+			for (const [key, value] of source.value) {
+				entries.set(key, value);
+			}
+		} else if (source instanceof ArrayValue) {
+			for (const pair of source.value) {
+				const [key, value] = normalizeNamespaceEntry(pair);
+				entries.set(key.value, value);
+			}
+		} else {
+			throw new Error(`'${source.type}' object is not iterable`);
+		}
+	}
+	if (kwargs) {
+		for (const [key, value] of kwargs.value) {
+			entries.set(key, value);
+		}
+	}
+	return new NamespaceValue(entries);
+}
+
+const CALL_BLOCK_SCOPE = Symbol("callBlockScope");
+
+/**
  * Represents the current environment (scope) at runtime.
  */
 export class Environment {
+	declare [CALL_BLOCK_SCOPE]?: boolean;
+
 	/**
 	 * The variables declared in this environment.
 	 */
-	variables: Map<string, AnyRuntimeValue> = new Map([
-		[
-			"namespace",
-			new FunctionValue((args) => {
-				// Copy top-level entries so namespace assignment does not mutate the input.
-				const positional = args.slice();
-				let kwargs: KeywordArgumentsValue | undefined;
-				if (positional.at(-1) instanceof KeywordArgumentsValue) {
-					kwargs = positional.pop() as KeywordArgumentsValue;
-				}
-				if (positional.length > 1) {
-					throw new Error(`namespace expected at most 1 argument, got ${positional.length}`);
-				}
-				const entries = new Map<string, AnyRuntimeValue>();
-				if (positional.length === 1) {
-					const source = positional[0];
-					if (source instanceof ObjectValue) {
-						for (const [key, value] of source.value) {
-							entries.set(key, value);
-						}
-					} else if (source instanceof ArrayValue) {
-						for (const pair of source.value) {
-							const [key, value] = normalizeNamespaceEntry(pair);
-							entries.set(key.value, value);
-						}
-					} else {
-						throw new Error(`'${source.type}' object is not iterable`);
-					}
-				}
-				if (kwargs) {
-					for (const [key, value] of kwargs.value) {
-						entries.set(key, value);
-					}
-				}
-				return new NamespaceValue(entries);
-			}),
-		],
-	]);
+	variables: Map<string, AnyRuntimeValue> = new Map<string, AnyRuntimeValue>().set(
+		"namespace",
+		new FunctionValue(namespaceBuiltin),
+	);
 
 	/**
 	 * The tests available in this environment.
@@ -732,9 +834,9 @@ export class Environment {
 	/**
 	 * Resolve the environment in which the variable is declared.
 	 * @param {string} name The name of the variable.
-	 * @returns {Environment} The environment in which the variable is declared.
+	 * @returns {Environment | undefined} The environment containing the variable, if declared.
 	 */
-	private resolve(name: string): Environment {
+	private resolve(name: string): Environment | undefined {
 		if (this.variables.has(name)) {
 			return this;
 		}
@@ -744,12 +846,12 @@ export class Environment {
 			return this.parent.resolve(name);
 		}
 
-		throw new Error(`Unknown variable: ${name}`);
+		return undefined;
 	}
 
 	lookupVariable(name: string): AnyRuntimeValue {
 		try {
-			return this.resolve(name).variables.get(name) ?? new UndefinedValue();
+			return this.resolve(name)?.variables.get(name) ?? new UndefinedValue();
 		} catch {
 			return new UndefinedValue();
 		}
@@ -890,14 +992,14 @@ function getParameterDescriptor(argument: Parameter): ParameterDescriptor {
 	return { name: keywordArgument.key.value, defaultValue: keywordArgument.value };
 }
 
-type SpecialMacroArgument = "kwargs" | "varargs";
+type SpecialMacroArgument = "caller" | "kwargs" | "varargs";
 
 function isSpecialMacroArgument(name: string): name is SpecialMacroArgument {
-	return name === "kwargs" || name === "varargs";
+	return name === "caller" || name === "kwargs" || name === "varargs";
 }
 
 /**
- * Find `kwargs` and `varargs` loads that precede a declaration, following Jinja's AST visit order.
+ * Find special-argument body loads that precede a declaration, following Jinja's AST visit order.
  */
 function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statement[]): Set<SpecialMacroArgument> {
 	const declared = new Set<SpecialMacroArgument>();
@@ -1055,6 +1157,22 @@ function findAccessedSpecialMacroArguments(parameters: Parameter[], body: Statem
 	return accessed;
 }
 
+/**
+ * The special-argument analysis depends only on the syntax of a macro or call block,
+ * so it is computed once per AST node instead of on every evaluation of that node.
+ */
+const ACCESSED_SPECIAL_ARGUMENTS = new WeakMap<Macro | CallStatement, Set<SpecialMacroArgument>>();
+
+function getAccessedSpecialMacroArguments(node: Macro | CallStatement): Set<SpecialMacroArgument> {
+	let accessed = ACCESSED_SPECIAL_ARGUMENTS.get(node);
+	if (accessed === undefined) {
+		const parameters = node.type === "Macro" ? (node as Macro).args : ((node as CallStatement).callerArgs ?? []);
+		accessed = findAccessedSpecialMacroArguments(parameters, node.body);
+		ACCESSED_SPECIAL_ARGUMENTS.set(node, accessed);
+	}
+	return accessed;
+}
+
 export class Interpreter {
 	global: Environment;
 
@@ -1073,11 +1191,12 @@ export class Interpreter {
 	 * Evaluates expressions following the binary operation type.
 	 */
 	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): AnyRuntimeValue {
+		const operator = node.operator.value;
 		const left = this.evaluate(node.left, environment);
 
 		// Logical operators
 		// NOTE: Short-circuiting is handled by the `evaluate` function
-		switch (node.operator.value) {
+		switch (operator) {
 			case "and":
 				return left.__bool__().value ? this.evaluate(node.right, environment) : left;
 			case "or":
@@ -1086,54 +1205,29 @@ export class Interpreter {
 
 		// Equality operators
 		const right = this.evaluate(node.right, environment);
-		switch (node.operator.value) {
+		switch (operator) {
 			case "==":
 				return new BooleanValue(left.value == right.value);
 			case "!=":
 				return new BooleanValue(left.value != right.value);
 		}
 
-		if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
-			if (right instanceof UndefinedValue && ["in", "not in"].includes(node.operator.value)) {
-				// Special case: `anything in undefined` is `false` and `anything not in undefined` is `true`
-				return new BooleanValue(node.operator.value === "not in");
-			}
-			throw new Error(`Cannot perform operation ${node.operator.value} on undefined values`);
-		} else if (left instanceof NullValue || right instanceof NullValue) {
-			throw new Error("Cannot perform operation on null values");
-		} else if (node.operator.value === "~") {
-			// toString and concatenation
-			return new StringValue(left.value.toString() + right.value.toString());
-		} else if (node.operator.value === "**" && isNumericLikeValue(left) && isNumericLikeValue(right)) {
-			// Jinja treats booleans as integers here.
-			const a = getNumericValue(left);
-			const b = getNumericValue(right);
-			if (a === 0 && b < 0) {
-				throw new Error("0.0 cannot be raised to a negative power");
-			}
-
-			const result = a ** b;
-			if (!Number.isFinite(result)) {
-				// NaN represents an unsupported complex result; Infinity represents overflow.
-				throw new Error("Exponentiation result is not a finite real number");
-			}
-
-			// Negative exponents produce floats.
-			const isFloat = left instanceof FloatValue || right instanceof FloatValue || b < 0;
-			return isFloat ? new FloatValue(result) : new IntegerValue(result);
-		} else if (
+		if (
 			(left instanceof IntegerValue || left instanceof FloatValue) &&
-			(right instanceof IntegerValue || right instanceof FloatValue)
+			(right instanceof IntegerValue || right instanceof FloatValue) &&
+			// These two operators are handled (for all operand types) below
+			operator !== "~" &&
+			operator !== "**"
 		) {
 			// Evaulate pure numeric operations with binary operators.
 			const a = left.value,
 				b = right.value;
-			switch (node.operator.value) {
+			switch (operator) {
 				// Arithmetic operators
 				case "+":
 				case "-":
 				case "*": {
-					const res = node.operator.value === "+" ? a + b : node.operator.value === "-" ? a - b : a * b;
+					const res = operator === "+" ? a + b : operator === "-" ? a - b : a * b;
 					const isFloat = left instanceof FloatValue || right instanceof FloatValue;
 					return isFloat ? new FloatValue(res) : new IntegerValue(res);
 				}
@@ -1160,15 +1254,49 @@ export class Interpreter {
 				case "<=":
 					return new BooleanValue(a <= b);
 			}
+		} else if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
+			if (right instanceof UndefinedValue && ["in", "not in"].includes(operator)) {
+				// Special case: `anything in undefined` is `false` and `anything not in undefined` is `true`
+				return new BooleanValue(operator === "not in");
+			}
+			if (operator === "~" && !(left instanceof NullValue || right instanceof NullValue)) {
+				// Special case: Jinja concatenates undefined values as empty strings
+				const lhs = left instanceof UndefinedValue ? "" : left.value.toString();
+				const rhs = right instanceof UndefinedValue ? "" : right.value.toString();
+				return new StringValue(lhs + rhs);
+			}
+			throw new Error(`Cannot perform operation ${operator} on undefined values`);
+		} else if (left instanceof NullValue || right instanceof NullValue) {
+			throw new Error("Cannot perform operation on null values");
+		} else if (operator === "~") {
+			// toString and concatenation
+			return new StringValue(left.value.toString() + right.value.toString());
+		} else if (operator === "**" && isNumericLikeValue(left) && isNumericLikeValue(right)) {
+			// Jinja treats booleans as integers here.
+			const a = getNumericValue(left);
+			const b = getNumericValue(right);
+			if (a === 0 && b < 0) {
+				throw new Error("0.0 cannot be raised to a negative power");
+			}
+
+			const result = a ** b;
+			if (!Number.isFinite(result)) {
+				// NaN represents an unsupported complex result; Infinity represents overflow.
+				throw new Error("Exponentiation result is not a finite real number");
+			}
+
+			// Negative exponents produce floats.
+			const isFloat = left instanceof FloatValue || right instanceof FloatValue || b < 0;
+			return isFloat ? new FloatValue(result) : new IntegerValue(result);
 		} else if (left instanceof ArrayValue && right instanceof ArrayValue) {
 			// Evaluate array operands with binary operator.
-			switch (node.operator.value) {
+			switch (operator) {
 				case "+":
 					return new ArrayValue(left.value.concat(right.value));
 			}
 		} else if (right instanceof ArrayValue) {
 			const member = right.value.find((x) => x.value === left.value) !== undefined;
-			switch (node.operator.value) {
+			switch (operator) {
 				case "in":
 					return new BooleanValue(member);
 				case "not in":
@@ -1178,14 +1306,14 @@ export class Interpreter {
 
 		if (left instanceof StringValue || right instanceof StringValue) {
 			// Support string concatenation as long as at least one operand is a string
-			switch (node.operator.value) {
+			switch (operator) {
 				case "+":
 					return new StringValue(left.value.toString() + right.value.toString());
 			}
 		}
 
 		if (left instanceof StringValue && right instanceof StringValue) {
-			switch (node.operator.value) {
+			switch (operator) {
 				case "in":
 					return new BooleanValue(right.value.includes(left.value));
 				case "not in":
@@ -1194,7 +1322,7 @@ export class Interpreter {
 		}
 
 		if (left instanceof StringValue && right instanceof ObjectValue) {
-			switch (node.operator.value) {
+			switch (operator) {
 				case "in":
 					return new BooleanValue(right.value.has(left.value));
 				case "not in":
@@ -1202,7 +1330,32 @@ export class Interpreter {
 			}
 		}
 
-		throw new SyntaxError(`Unknown operator "${node.operator.value}" between ${left.type} and ${right.type}`);
+		throw new SyntaxError(`Unknown operator "${operator}" between ${left.type} and ${right.type}`);
+	}
+
+	/**
+	 * Evaluates the arguments of a call in the calling convention of FunctionValue: the positional arguments,
+	 * followed by a single KeywordArgumentsValue with all keyword arguments (if there are any).
+	 */
+	private evaluateCallArguments(args: Expression[], environment: Environment): AnyRuntimeValue[] {
+		// NOTE: The whole list is checked before any argument is evaluated, so that none is evaluated twice.
+		for (const argument of args) {
+			const type = argument.type;
+			if (type === "KeywordArgumentExpression" || type === "SpreadExpression" || type === "KeywordSpreadExpression") {
+				const [positionalArguments, keywordArguments] = this.evaluateArguments(args, environment);
+				if (keywordArguments.size > 0) {
+					positionalArguments.push(new KeywordArgumentsValue(keywordArguments));
+				}
+				return positionalArguments;
+			}
+		}
+
+		// Plain positional arguments only (the most common case)
+		const positionalArguments: AnyRuntimeValue[] = new Array(args.length);
+		for (let i = 0; i < args.length; ++i) {
+			positionalArguments[i] = this.evaluate(args[i], environment);
+		}
+		return positionalArguments;
 	}
 
 	private evaluateArguments(
@@ -1362,7 +1515,7 @@ export class Interpreter {
 							? new IntegerValue(Math.abs(operand.value))
 							: new FloatValue(Math.abs(operand.value));
 					case "int":
-						return new IntegerValue(Math.floor(operand.value));
+						return new IntegerValue(Math.trunc(operand.value) + 0);
 					case "float":
 						return new FloatValue(operand.value);
 					case "string":
@@ -1485,7 +1638,7 @@ export class Interpreter {
 					const val = filterName === "int" ? parseInt(operand.value, 10) : parseFloat(operand.value);
 					return isNaN(val) ? defaultValue : filterName === "int" ? new IntegerValue(val) : new FloatValue(val);
 				} else if (operand instanceof IntegerValue || operand instanceof FloatValue) {
-					return operand;
+					return filterName === "int" ? new IntegerValue(Math.trunc(operand.value) + 0) : new FloatValue(operand.value);
 				} else if (operand instanceof BooleanValue) {
 					return filterName === "int"
 						? new IntegerValue(operand.value ? 1 : 0)
@@ -1625,14 +1778,14 @@ export class Interpreter {
 						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
 
 						const width = args.at(0) ?? kwargs.get("width") ?? new IntegerValue(4);
-						if (!(width instanceof IntegerValue)) {
-							throw new Error("width must be a number");
+						if (!(width instanceof IntegerValue || width instanceof StringValue)) {
+							throw new Error("width must be an integer or a string");
 						}
 						const first = args.at(1) ?? kwargs.get("first") ?? new BooleanValue(false);
 						const blank = args.at(2) ?? kwargs.get("blank") ?? new BooleanValue(false);
 
 						const lines = operand.value.split("\n");
-						const indent = " ".repeat(width.value);
+						const indent = width instanceof StringValue ? width.value : " ".repeat(Math.max(0, width.value));
 						const indented = lines.map((x, i) =>
 							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x,
 						);
@@ -1652,12 +1805,7 @@ export class Interpreter {
 				// Check if the filter exists in builtins for ObjectValue
 				const builtin = operand.builtins.get(filterName);
 				if (builtin && builtin instanceof FunctionValue) {
-					const [args, kwargs] = this.evaluateArguments(filter.args, environment);
-					// Pass keyword arguments as the last argument if present
-					if (kwargs.size > 0) {
-						args.push(new KeywordArgumentsValue(kwargs));
-					}
-					return builtin.value(args, environment);
+					return builtin.value(this.evaluateCallArguments(filter.args, environment), environment);
 				}
 				throw new Error(`Unknown ObjectValue filter: ${filterName}`);
 			} else {
@@ -1740,19 +1888,41 @@ export class Interpreter {
 	}
 
 	private evaluateBlock(statements: Statement[], environment: Environment): StringValue {
-		// Jinja templates always evaluate to a String,
-		// so we accumulate the result of each statement into a final string
+		return new StringValue(this.renderBlock(statements, environment));
+	}
 
+	/**
+	 * Jinja templates always evaluate to a String, so we accumulate the result of each statement into a final string.
+	 */
+	private renderBlock(statements: Statement[], environment: Environment): string {
 		let result = "";
-		for (const statement of statements) {
-			const lastEvaluated: AnyRuntimeValue = this.evaluate(statement, environment);
-
-			if (lastEvaluated.type !== "NullValue" && lastEvaluated.type !== "UndefinedValue") {
-				result += lastEvaluated.toString();
+		for (let i = 0; i < statements.length; ++i) {
+			const statement = statements[i];
+			switch (statement.type) {
+				// The most common statements contribute text (or nothing) directly, without an intermediate runtime value.
+				case "StringLiteral":
+					result += (statement as StringLiteral).value;
+					break;
+				case "If":
+					result += this.renderIf(statement as If, environment);
+					break;
+				case "For":
+					result += this.renderFor(statement as For, environment);
+					break;
+				case "Set":
+					this.executeSet(statement as SetStatement, environment);
+					break;
+				case "Comment":
+					break;
+				default: {
+					const evaluated = this.evaluate(statement, environment);
+					if (evaluated.type !== "NullValue" && evaluated.type !== "UndefinedValue") {
+						result += evaluated.toString();
+					}
+				}
 			}
 		}
-
-		return new StringValue(result);
+		return result;
 	}
 
 	private evaluateIdentifier(node: Identifier, environment: Environment): AnyRuntimeValue {
@@ -1760,13 +1930,7 @@ export class Interpreter {
 	}
 
 	private evaluateCallExpression(expr: CallExpression, environment: Environment): AnyRuntimeValue {
-		// Accumulate all keyword arguments into a single object, which will be
-		// used as the final argument in the call function.
-		const [args, kwargs] = this.evaluateArguments(expr.args, environment);
-
-		if (kwargs.size > 0) {
-			args.push(new KeywordArgumentsValue(kwargs));
-		}
+		const args = this.evaluateCallArguments(expr.args, environment);
 
 		const fn = this.evaluate(expr.callee, environment);
 		if (fn.type !== "FunctionValue") {
@@ -1853,7 +2017,7 @@ export class Interpreter {
 		return value instanceof RuntimeValue ? value : new UndefinedValue();
 	}
 
-	private evaluateSet(node: SetStatement, environment: Environment): NullValue {
+	private executeSet(node: SetStatement, environment: Environment): void {
 		const rhs = node.value ? this.evaluate(node.value, environment) : this.evaluateBlock(node.body, environment);
 		if (node.assignee.type === "Identifier") {
 			const variableName = (node.assignee as Identifier).value;
@@ -1888,16 +2052,32 @@ export class Interpreter {
 		} else {
 			throw new Error(`Invalid LHS inside assignment expression: ${JSON.stringify(node.assignee)}`);
 		}
-
-		return new NullValue();
 	}
 
-	private evaluateIf(node: If, environment: Environment): StringValue {
+	private renderIf(node: If, environment: Environment): string {
 		const test = this.evaluate(node.test, environment);
-		return this.evaluateBlock(test.__bool__().value ? node.body : node.alternate, environment);
+		return this.renderBlock(test.__bool__().value ? node.body : node.alternate, environment);
 	}
 
-	private evaluateFor(node: For, environment: Environment): StringValue {
+	/**
+	 * Assign the current item of a for loop to its loop variable(s).
+	 */
+	private bindLoopVariable(loopvar: Identifier | TupleLiteral, current: AnyRuntimeValue, scope: Environment): void {
+		if (loopvar.type === "Identifier") {
+			scope.setVariable((loopvar as Identifier).value, current);
+		} else {
+			const targets = (loopvar as TupleLiteral).value;
+			const values = (current as ArrayValue).value;
+			for (let j = 0; j < targets.length; ++j) {
+				if (targets[j].type !== "Identifier") {
+					throw new Error(`Cannot unpack non-identifier type: ${targets[j].type}`);
+				}
+				scope.setVariable((targets[j] as Identifier).value, values[j]);
+			}
+		}
+	}
+
+	private renderFor(node: For, environment: Environment): string {
 		// Scope for the for loop
 		const scope = new Environment(environment);
 
@@ -1918,51 +2098,44 @@ export class Interpreter {
 			iterable = iterable.keys();
 		}
 
-		const items: Expression[] = [];
-		const scopeUpdateFunctions: ((scope: Environment) => void)[] = [];
-		for (let i = 0; i < iterable.value.length; ++i) {
-			const loopScope = new Environment(scope);
+		// Validate (and, if there is a test, select) every item before the first iteration.
+		const loopvar = node.loopvar;
+		const candidates = iterable.value;
+		let items: AnyRuntimeValue[];
+		if (loopvar.type === "Identifier" && !test) {
+			items = candidates.slice(); // Nothing to validate or select
+		} else {
+			items = [];
+			for (let i = 0; i < candidates.length; ++i) {
+				const current = candidates[i];
 
-			const current = iterable.value[i];
-
-			let scopeUpdateFunction;
-			if (node.loopvar.type === "Identifier") {
-				scopeUpdateFunction = (scope: Environment) => scope.setVariable((node.loopvar as Identifier).value, current);
-			} else if (node.loopvar.type === "TupleLiteral") {
-				const loopvar = node.loopvar as TupleLiteral;
-				if (current.type !== "ArrayValue") {
-					throw new Error(`Cannot unpack non-iterable type: ${current.type}`);
-				}
-				const c = current as ArrayValue;
-
-				// check if too few or many items to unpack
-				if (loopvar.value.length !== c.value.length) {
-					throw new Error(`Too ${loopvar.value.length > c.value.length ? "few" : "many"} items to unpack`);
-				}
-
-				scopeUpdateFunction = (scope: Environment) => {
-					for (let j = 0; j < loopvar.value.length; ++j) {
-						if (loopvar.value[j].type !== "Identifier") {
-							throw new Error(`Cannot unpack non-identifier type: ${loopvar.value[j].type}`);
-						}
-						scope.setVariable((loopvar.value[j] as Identifier).value, c.value[j]);
+				if (loopvar.type === "TupleLiteral") {
+					if (current.type !== "ArrayValue") {
+						throw new Error(`Cannot unpack non-iterable type: ${current.type}`);
 					}
-				};
-			} else {
-				throw new Error(`Invalid loop variable(s): ${node.loopvar.type}`);
-			}
 
-			if (test) {
-				scopeUpdateFunction(loopScope);
-
-				const testValue = this.evaluate(test, loopScope);
-				if (!testValue.__bool__().value) {
-					continue;
+					// check if too few or many items to unpack
+					const expected = (loopvar as TupleLiteral).value.length;
+					const actual = (current as ArrayValue).value.length;
+					if (expected !== actual) {
+						throw new Error(`Too ${expected > actual ? "few" : "many"} items to unpack`);
+					}
+				} else if (loopvar.type !== "Identifier") {
+					throw new Error(`Invalid loop variable(s): ${loopvar.type}`);
 				}
-			}
 
-			items.push(current);
-			scopeUpdateFunctions.push(scopeUpdateFunction);
+				if (test) {
+					const loopScope = new Environment(scope);
+					this.bindLoopVariable(loopvar, current, loopScope);
+
+					const testValue = this.evaluate(test, loopScope);
+					if (!testValue.__bool__().value) {
+						continue;
+					}
+				}
+
+				items.push(current);
+			}
 		}
 
 		let result = "";
@@ -1970,28 +2143,22 @@ export class Interpreter {
 		let noIteration = true;
 		for (let i = 0; i < items.length; ++i) {
 			// Update the loop variable
-			// TODO: Only create object once, then update value?
-			const loop = new Map([
-				["index", new IntegerValue(i + 1)],
-				["index0", new IntegerValue(i)],
-				["revindex", new IntegerValue(items.length - i)],
-				["revindex0", new IntegerValue(items.length - i - 1)],
-				["first", new BooleanValue(i === 0)],
-				["last", new BooleanValue(i === items.length - 1)],
-				["length", new IntegerValue(items.length)],
-				["previtem", i > 0 ? items[i - 1] : new UndefinedValue()],
-				["nextitem", i < items.length - 1 ? items[i + 1] : new UndefinedValue()],
-			] as [string, AnyRuntimeValue][]);
-
-			scope.setVariable("loop", new ObjectValue(loop));
+			scope.setVariable(
+				"loop",
+				new LoopValue(
+					i,
+					items.length,
+					i > 0 ? items[i - 1] : undefined,
+					i < items.length - 1 ? items[i + 1] : undefined,
+				),
+			);
 
 			// Update scope for this iteration
-			scopeUpdateFunctions[i](scope);
+			this.bindLoopVariable(loopvar, items[i], scope);
 
 			try {
 				// Evaluate the body of the for loop
-				const evaluated = this.evaluateBlock(node.body, scope);
-				result += evaluated.value;
+				result += this.renderBlock(node.body, scope);
 			} catch (err) {
 				if (err instanceof ContinueControl) {
 					continue;
@@ -2008,11 +2175,10 @@ export class Interpreter {
 
 		// no iteration took place, so we render the default block
 		if (noIteration) {
-			const defaultEvaluated = this.evaluateBlock(node.defaultBlock, scope);
-			result += defaultEvaluated.value;
+			result += this.renderBlock(node.defaultBlock, scope);
 		}
 
-		return new StringValue(result);
+		return result;
 	}
 
 	/**
@@ -2066,11 +2232,23 @@ export class Interpreter {
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
-		const specialArguments = findAccessedSpecialMacroArguments(node.args, node.body);
+		const specialArguments = getAccessedSpecialMacroArguments(node);
 		environment.setVariable(
 			node.name.value,
-			new FunctionValue((args, scope) => {
-				const macroScope = new Environment(scope);
+			new FunctionValue((args, callSite) => {
+				// Macros are lexically scoped: the body resolves free names against the environment the
+				// macro was defined in, not the one it is called from. Capturing that environment by
+				// reference rather than copying it also preserves Jinja's late binding, so a name assigned
+				// in the defining scope after the macro is declared is still visible to the body.
+				// Only body loads need an invocation-local caller; default-only loads stay lexical.
+				let parent = environment;
+				if (specialArguments.has("caller")) {
+					const caller = callSite[CALL_BLOCK_SCOPE] ? callSite.variables.get("caller") : undefined;
+					parent = new Environment(environment);
+					parent.setVariable("caller", caller ?? new UndefinedValue());
+				}
+
+				const macroScope = new Environment(parent);
 				this.bindMacroArguments(`'${node.name.value}'`, node.args, specialArguments, args, macroScope);
 				return this.evaluateBlock(node.body, macroScope);
 			}),
@@ -2083,7 +2261,7 @@ export class Interpreter {
 	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
 		// Call blocks use anonymous-macro argument rules; Jinja labels them `None` in errors.
 		const parameters = node.callerArgs ?? [];
-		const specialArguments = findAccessedSpecialMacroArguments(parameters, node.body);
+		const specialArguments = getAccessedSpecialMacroArguments(node);
 		const callerFn = new FunctionValue((callerArguments: AnyRuntimeValue[]) => {
 			const callBlockEnv = new Environment(environment);
 			this.bindMacroArguments("None", parameters, specialArguments, callerArguments, callBlockEnv);
@@ -2097,6 +2275,7 @@ export class Interpreter {
 			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
 		}
 		const newEnv = new Environment(environment);
+		newEnv[CALL_BLOCK_SCOPE] = true;
 		newEnv.setVariable("caller", callerFn);
 		return (fn as FunctionValue).value(macroArgs, newEnv);
 	}
@@ -2111,35 +2290,31 @@ export class Interpreter {
 			return new UndefinedValue();
 		}
 
+		// NOTE: Cases are ordered by how often each node type is evaluated in practice.
 		switch (statement.type) {
-			// Program
-			case "Program":
-				return this.evalProgram(statement as Program, environment);
-
-			// Statements
-			case "Set":
-				return this.evaluateSet(statement as SetStatement, environment);
-			case "If":
-				return this.evaluateIf(statement as If, environment);
-			case "For":
-				return this.evaluateFor(statement as For, environment);
-			case "Macro":
-				return this.evaluateMacro(statement as Macro, environment);
-			case "CallStatement":
-				return this.evaluateCallStatement(statement as CallStatement, environment);
-
-			case "Break":
-				throw new BreakControl();
-			case "Continue":
-				throw new ContinueControl();
-
 			// Expressions
+			case "Identifier":
+				return this.evaluateIdentifier(statement as Identifier, environment);
 			case "IntegerLiteral":
 				return new IntegerValue((statement as IntegerLiteral).value);
-			case "FloatLiteral":
-				return new FloatValue((statement as FloatLiteral).value);
+			case "BinaryExpression":
+				return this.evaluateBinaryExpression(statement as BinaryExpression, environment);
 			case "StringLiteral":
 				return new StringValue((statement as StringLiteral).value);
+			case "MemberExpression":
+				return this.evaluateMemberExpression(statement as MemberExpression, environment);
+			case "CallExpression":
+				return this.evaluateCallExpression(statement as CallExpression, environment);
+			case "FilterExpression":
+				return this.evaluateFilterExpression(statement as FilterExpression, environment);
+			case "TestExpression":
+				return this.evaluateTestExpression(statement as TestExpression, environment);
+			case "Ternary":
+				return this.evaluateTernaryExpression(statement as Ternary, environment);
+			case "UnaryExpression":
+				return this.evaluateUnaryExpression(statement as UnaryExpression, environment);
+			case "FloatLiteral":
+				return new FloatValue((statement as FloatLiteral).value);
 			case "ArrayLiteral":
 				return new ArrayValue((statement as ArrayLiteral).value.map((x) => this.evaluate(x, environment)));
 			case "TupleLiteral":
@@ -2155,29 +2330,35 @@ export class Interpreter {
 				}
 				return new ObjectValue(mapping);
 			}
-			case "Identifier":
-				return this.evaluateIdentifier(statement as Identifier, environment);
-			case "CallExpression":
-				return this.evaluateCallExpression(statement as CallExpression, environment);
-			case "MemberExpression":
-				return this.evaluateMemberExpression(statement as MemberExpression, environment);
-
-			case "UnaryExpression":
-				return this.evaluateUnaryExpression(statement as UnaryExpression, environment);
-			case "BinaryExpression":
-				return this.evaluateBinaryExpression(statement as BinaryExpression, environment);
-			case "FilterExpression":
-				return this.evaluateFilterExpression(statement as FilterExpression, environment);
-			case "FilterStatement":
-				return this.evaluateFilterStatement(statement as FilterStatement, environment);
-			case "TestExpression":
-				return this.evaluateTestExpression(statement as TestExpression, environment);
 			case "SelectExpression":
 				return this.evaluateSelectExpression(statement as SelectExpression, environment);
-			case "Ternary":
-				return this.evaluateTernaryExpression(statement as Ternary, environment);
+
+			// Statements
+			case "If":
+				return new StringValue(this.renderIf(statement as If, environment));
+			case "Set":
+				this.executeSet(statement as SetStatement, environment);
+				return new NullValue();
+			case "For":
+				return new StringValue(this.renderFor(statement as For, environment));
+			case "Macro":
+				return this.evaluateMacro(statement as Macro, environment);
+			case "CallStatement":
+				return this.evaluateCallStatement(statement as CallStatement, environment);
+			case "FilterStatement":
+				return this.evaluateFilterStatement(statement as FilterStatement, environment);
 			case "Comment":
 				return new NullValue();
+
+			case "Break":
+				throw new BreakControl();
+			case "Continue":
+				throw new ContinueControl();
+
+			// Program
+			case "Program":
+				return this.evalProgram(statement as Program, environment);
+
 			default:
 				throw new SyntaxError(`Unknown node type: ${statement.type}`);
 		}
