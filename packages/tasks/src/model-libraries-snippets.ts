@@ -3480,6 +3480,29 @@ export const nemo = (model: ModelData): string[] => {
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
 };
 
+export const neurobrix = (model: ModelData): string[] => {
+	const cardData = model.cardData as Record<string, unknown> | undefined;
+	const baseModel = Array.isArray(model.cardData?.base_model)
+		? model.cardData.base_model[0]
+		: model.cardData?.base_model;
+	const id = (typeof cardData?.neurobrix_id === "string" ? cardData.neurobrix_id : undefined) ?? baseModel ?? model.id;
+	let run = `neurobrix run --model ${id} --prompt "Hello"`;
+	if (model.pipeline_tag === "automatic-speech-recognition") {
+		run = `neurobrix run --model ${id} --audio recording.wav`;
+	} else if (model.pipeline_tag === "image-to-image") {
+		run = `neurobrix run --model ${id} --input-image photo.png --output result.png`;
+	} else if (model.pipeline_tag === "text-to-image") {
+		run = `neurobrix run --model ${id} --prompt "a lighthouse at dusk" --output image.png`;
+	} else if (model.pipeline_tag === "text-to-video" || model.pipeline_tag === "image-to-video") {
+		run = `neurobrix run --model ${id} --prompt "a hot air balloon over mountains" --output video.mp4`;
+	}
+	return [
+		`# pip install neurobrix
+neurobrix import ${id} --accept-license
+${run}`,
+	];
+};
+
 export const outetts = (model: ModelData): string[] => {
 	// Don’t show this block on GGUF / ONNX mirrors
 	const t = model.tags ?? [];
