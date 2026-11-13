@@ -18,6 +18,7 @@ import {
 	mlAgents,
 	mlxim,
 	multimolecule,
+	neurobrix,
 	paddlenlp,
 	peft,
 	phantom_wan,
@@ -554,6 +555,22 @@ print(output)`);
 			expect(cartesia_pytorch(base as ModelData)[0].trimEnd()).toMatch(/print\(out_message\)$/);
 			expect(vui()[0]).toContain("from vui.legacy import Vui, render\n");
 			expect(phantom_wan(base as ModelData)[0]).toContain('Image.open("path/to/image.jpg")');
+		});
+
+		it("neurobrix: each pipeline gets the inputs its family needs", () => {
+			const nbx = (pipeline_tag: string) =>
+				neurobrix({
+					...base,
+					id: "Neurobrix/m-nbx",
+					pipeline_tag,
+					cardData: { neurobrix_id: "org/m" },
+				} as unknown as ModelData)[0];
+			expect(nbx("text-generation")).toContain("neurobrix import org/m --accept-license");
+			expect(nbx("image-to-video")).toContain("--input-image first_frame.png --prompt");
+			expect(nbx("text-to-video")).not.toContain("--input-image");
+			expect(nbx("image-text-to-text")).toContain("--input-image photo.jpg --prompt");
+			expect(nbx("any-to-any")).toContain("--mode text --input-image photo.jpg --prompt");
+			expect(nbx("automatic-speech-recognition")).toContain("--audio recording.wav");
 		});
 
 		it("templates run as pasted", () => {

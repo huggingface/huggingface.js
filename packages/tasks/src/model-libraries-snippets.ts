@@ -3480,6 +3480,32 @@ export const nemo = (model: ModelData): string[] => {
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
 };
 
+export const neurobrix = (model: ModelData): string[] => {
+	const cardData = model.cardData as Record<string, unknown> | undefined;
+	const baseModel = Array.isArray(model.cardData?.base_model)
+		? model.cardData.base_model[0]
+		: model.cardData?.base_model;
+	const id = (typeof cardData?.neurobrix_id === "string" ? cardData.neurobrix_id : undefined) ?? baseModel ?? model.id;
+	// One argument set per pipeline, as the CLI expects them (`neurobrix run --help`).
+	const args: Record<string, string> = {
+		"automatic-speech-recognition": `--audio recording.wav`,
+		"audio-text-to-text": `--audio recording.wav --prompt "Summarize this recording."`,
+		"image-to-image": `--input-image photo.png --output result.png`,
+		"image-text-to-text": `--input-image photo.jpg --prompt "What is in this image?"`,
+		"any-to-any": `--mode text --input-image photo.jpg --prompt "Describe this image."`,
+		"text-to-image": `--prompt "a lighthouse at dusk" --output image.png`,
+		"text-to-video": `--prompt "a hot air balloon over mountains" --output video.mp4`,
+		"image-to-video": `--input-image first_frame.png --prompt "the camera slowly pulls back" --output video.mp4`,
+		"text-to-speech": `--prompt "Hello from my own GPU."${id === "hexgrad/Kokoro-82M" ? " --speaker af_heart" : ""} --output speech.wav`,
+	};
+	const run = args[model.pipeline_tag ?? ""] ?? `--prompt "Hello"`;
+	return [
+		`# pip install neurobrix
+neurobrix import ${id} --accept-license
+neurobrix run --model ${id} ${run}`,
+	];
+};
+
 export const outetts = (model: ModelData): string[] => {
 	// Don’t show this block on GGUF / ONNX mirrors
 	const t = model.tags ?? [];

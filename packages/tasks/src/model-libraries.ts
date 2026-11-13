@@ -1302,6 +1302,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
 	},
+	neurobrix: {
+		prettyLabel: "NeuroBrix",
+		repoName: "neurobrix",
+		repoUrl: "https://github.com/NeuroBrix/neurobrix",
+		docsUrl: "https://docs.neurobrix.org",
+		snippets: snippets.neurobrix,
+		filter: false,
+		countDownloads: `path_extension:"nbx"`,
+	},
 	ninfer: {
 		prettyLabel: "NInfer",
 		repoName: "NInfer",
