@@ -398,6 +398,92 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(false);
 	});
 
+	it("hearthscale deeplink - gguf", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.hearthscale;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["gguf", "conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model, undefined).href).toBe("hearthscale://model?repo=bartowski%2FLlama-3.2-3B-Instruct-GGUF");
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf").href).toBe(
+			"hearthscale://model?repo=bartowski%2FLlama-3.2-3B-Instruct-GGUF&file=Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+		);
+	});
+
+	it("hearthscale - gguf of an image or speech model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.hearthscale;
+		const image: ModelData = {
+			id: "leejet/Z-Image-Turbo-GGUF",
+			pipeline_tag: "text-to-image",
+			tags: ["gguf", "text-to-image", "stable-diffusion.cpp"],
+			gguf: { total: 6154908736 },
+			inference: "",
+		};
+		const speech: ModelData = {
+			id: "handy-computer/whisper-base-gguf",
+			pipeline_tag: "automatic-speech-recognition",
+			library_name: "transcribe.cpp",
+			tags: ["transcribe.cpp", "gguf", "automatic-speech-recognition"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(image)).toBe(true);
+		expect(displayOnModelPage(speech)).toBe(true);
+	});
+
+	it("hearthscale - image and video checkpoints", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.hearthscale;
+		const image: ModelData = {
+			id: "stabilityai/stable-diffusion-xl-base-1.0",
+			pipeline_tag: "text-to-image",
+			library_name: "diffusers",
+			tags: ["diffusers", "safetensors", "text-to-image"],
+			inference: "",
+		};
+		const video: ModelData = {
+			id: "Wan-AI/Wan2.1-T2V-1.3B",
+			pipeline_tag: "text-to-video",
+			library_name: "diffusers",
+			tags: ["diffusers", "safetensors", "text-to-video"],
+			inference: "",
+		};
+		const singleFile: ModelData = {
+			id: "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+			library_name: "diffusion-single-file",
+			tags: ["diffusion-single-file", "comfyui"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(image)).toBe(true);
+		expect(displayOnModelPage(video)).toBe(true);
+		expect(displayOnModelPage(singleFile)).toBe(true);
+		expect(deeplink(image, undefined).href).toBe("hearthscale://model?repo=stabilityai%2Fstable-diffusion-xl-base-1.0");
+	});
+
+	it("hearthscale not shown for unrelated model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.hearthscale;
+		const transformers: ModelData = {
+			id: "meta-llama/Llama-3.2-3B-Instruct",
+			pipeline_tag: "text-generation",
+			library_name: "transformers",
+			tags: ["transformers", "safetensors", "conversational"],
+			inference: "",
+		};
+		const mlx: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+			pipeline_tag: "text-generation",
+			tags: ["mlx", "conversational"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(transformers)).toBe(false);
+		expect(displayOnModelPage(mlx)).toBe(false);
+	});
+
 	it("links as a function", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
