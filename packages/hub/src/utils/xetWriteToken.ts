@@ -1,5 +1,6 @@
 import { createApiError } from "../error";
 import type { XetTokenParams } from "./uploadShards";
+import { fetchWithServerWarnings } from "./serverWarnings";
 
 export interface XetWriteTokenParams {
 	accessToken: string | undefined;
@@ -47,7 +48,7 @@ export async function xetWriteToken(params: XetWriteTokenParams): Promise<{ acce
 	}
 
 	const promise = (async () => {
-		const resp = await (params.fetch ?? fetch)(params.xetParams.refreshWriteTokenUrl, {
+		const resp = await fetchWithServerWarnings(params.fetch)(params.xetParams.refreshWriteTokenUrl, {
 			headers: {
 				...(params.accessToken
 					? {

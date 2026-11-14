@@ -85,11 +85,14 @@ function readCamera(key: string, feature: Record<string, unknown>): LeRobotCamer
 	return { key, height, width, codec };
 }
 
-/** A flat list of names, or one nested under a single key such as `{ motors: [...] }`. */
+/**
+ * A flat list of names, or one nested under a single key such as `{ motors: [...] }` or in one more
+ * list such as `[[...]]` (Unitree's datasets).
+ */
 function readJointNames(feature: Record<string, unknown>): string[] | undefined {
 	const names = feature.names;
 	let list = asStringArray(names);
-	if (list === undefined && isRecord(names)) {
+	if (list === undefined && (isRecord(names) || (Array.isArray(names) && names.length === 1))) {
 		for (const nested of Object.values(names)) {
 			list = asStringArray(nested);
 			if (list !== undefined) {

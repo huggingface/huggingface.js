@@ -3,6 +3,7 @@ import { createApiError } from "../error";
 import type { ApiCreateCollectionPayload } from "../types/api/api-create-collection";
 import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function createCollection(
 	params: {
@@ -16,7 +17,7 @@ export async function createCollection(
 ): Promise<{ slug: string }> {
 	const accessToken = checkCredentials(params);
 
-	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections`, {
+	const res = await fetchWithServerWarnings(params.fetch)(`${params.hubUrl ?? HUB_URL}/api/collections`, {
 		method: "POST",
 		body: JSON.stringify(params.collection),
 		headers: {

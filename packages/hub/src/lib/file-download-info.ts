@@ -4,6 +4,7 @@ import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export interface XetFileInfo {
 	hash: string;
@@ -57,7 +58,7 @@ export async function fileDownloadInfo(
 		}${revision ? `/${encodeURIComponent(revision)}` : ""}/${params.path.split("/").map(encodeURIComponent).join("/")}` +
 		(params.noContentDisposition ? "?noContentDisposition=1" : "");
 
-	const resp = await (params.fetch ?? fetch)(url, {
+	const resp = await fetchWithServerWarnings(params.fetch)(url, {
 		method: "GET",
 		headers: {
 			...(accessToken && {

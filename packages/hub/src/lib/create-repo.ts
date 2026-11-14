@@ -5,6 +5,7 @@ import type { CredentialsParams, RepoDesignation, SpaceHardwareFlavor, SpaceSdk 
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function createRepo(
 	params: {
@@ -53,18 +54,21 @@ export async function createRepo(
 
 	const res =
 		repoId.type === "bucket"
-			? await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/buckets/${namespace}/${repoName}`, {
-					method: "POST",
-					body: JSON.stringify({
-						visibility,
-						resourceGroupId: params.resourceGroupId,
-					}),
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						"Content-Type": "application/json",
+			? await fetchWithServerWarnings(params.fetch)(
+					`${params.hubUrl ?? HUB_URL}/api/buckets/${namespace}/${repoName}`,
+					{
+						method: "POST",
+						body: JSON.stringify({
+							visibility,
+							resourceGroupId: params.resourceGroupId,
+						}),
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+							"Content-Type": "application/json",
+						},
 					},
-				})
-			: await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
+				)
+			: await fetchWithServerWarnings(params.fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
 					method: "POST",
 					body: JSON.stringify({
 						name: repoName,
