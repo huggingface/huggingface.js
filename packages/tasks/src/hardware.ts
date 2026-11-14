@@ -134,6 +134,13 @@ export const SKUS = {
 				power: 230,
 				releaseYear: 2026,
 			},
+			"D270": {
+				tflops: 40.96,
+				memory: [160, 480],
+				msrp: 21_163,
+				power: 350,
+				releaseYear: 2026,
+			},
 		},
 		QUALCOMM: {
 			"Snapdragon X Elite X1E-00-1DE": {
