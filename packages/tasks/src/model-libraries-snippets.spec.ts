@@ -169,6 +169,85 @@ print(output)`);
 			expect(autoSnippet).toContain("# pip install -U transformers accelerate");
 		});
 
+		it("transformers: timm image-classification uses the same Auto classes as native classifiers", () => {
+			const model = {
+				...base,
+				id: "timm/vit_base_patch16_224.augreg2_in21k_ft_in1k",
+				library_name: "timm",
+				pipeline_tag: "image-classification",
+				tags: ["timm", "transformers", "image-classification"],
+				// Hub transformersInfo for timm is only this: config.json has no model_type / architectures
+				transformersInfo: { auto_model: "AutoModel" },
+			} as ModelData;
+			const [pipelineSnippet, autoSnippet] = transformers(model);
+
+			expect(pipelineSnippet).toContain(
+				'pipeline("image-classification", model="timm/vit_base_patch16_224.augreg2_in21k_ft_in1k")',
+			);
+			expect(pipelineSnippet).toContain("parrots.png");
+			expect(autoSnippet).toContain("from transformers import AutoImageProcessor, AutoModelForImageClassification");
+			expect(autoSnippet).toContain(
+				'processor = AutoImageProcessor.from_pretrained("timm/vit_base_patch16_224.augreg2_in21k_ft_in1k")',
+			);
+			expect(autoSnippet).toContain(
+				'model = AutoModelForImageClassification.from_pretrained("timm/vit_base_patch16_224.augreg2_in21k_ft_in1k", device_map="auto")',
+			);
+			expect(autoSnippet).not.toContain("AutoModel.from_pretrained");
+			// the override is local to snippet generation
+			expect(model.transformersInfo).toEqual({ auto_model: "AutoModel" });
+		});
+
+		it("transformers: timm image-feature-extraction loads an image processor with AutoModel", () => {
+			const [, autoSnippet] = transformers({
+				...base,
+				id: "timm/vit_large_patch14_dinov2.lvd142m",
+				library_name: "timm",
+				pipeline_tag: "image-feature-extraction",
+				transformersInfo: { auto_model: "AutoModel" },
+			} as ModelData);
+
+			expect(autoSnippet).toContain("from transformers import AutoImageProcessor, AutoModel\n");
+			expect(autoSnippet).toContain(
+				'processor = AutoImageProcessor.from_pretrained("timm/vit_large_patch14_dinov2.lvd142m")',
+			);
+			expect(autoSnippet).toContain(
+				'model = AutoModel.from_pretrained("timm/vit_large_patch14_dinov2.lvd142m", device_map="auto")',
+			);
+			expect(autoSnippet).not.toContain("AutoModelForImageClassification");
+		});
+
+		it("transformers: other timm tasks keep the auto class reported by the Hub", () => {
+			const [snippet] = transformers({
+				...base,
+				library_name: "timm",
+				transformersInfo: { auto_model: "AutoModel" },
+			} as ModelData);
+
+			expect(snippet).toContain("from transformers import AutoModel\n");
+			expect(snippet).not.toContain("AutoImageProcessor");
+			expect(snippet).not.toContain("AutoModelForImageClassification");
+		});
+
+		it("transformers: native models keep the classes reported by the Hub", () => {
+			const [, classifier] = transformers({
+				...base,
+				library_name: "transformers",
+				pipeline_tag: "image-classification",
+				transformersInfo: { auto_model: "AutoModelForImageClassification", processor: "AutoImageProcessor" },
+			} as ModelData);
+			expect(classifier).toContain("from transformers import AutoImageProcessor, AutoModelForImageClassification");
+
+			// image-classification still returns the pipeline helper first; the direct load is the second snippet
+			const [, plain] = transformers({
+				...base,
+				library_name: "transformers",
+				pipeline_tag: "image-classification",
+				transformersInfo: { auto_model: "AutoModel" },
+			} as ModelData);
+			expect(plain).toContain("from transformers import AutoModel\n");
+			expect(plain).not.toContain("AutoImageProcessor");
+		});
+
 		it("transformers: pipelines removed in v5 get a warning with a valid pip command", () => {
 			const [snippet] = transformers({
 				...base,

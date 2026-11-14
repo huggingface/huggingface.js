@@ -12,6 +12,7 @@ import {
 	type ResolveModelAdditionalFields,
 	type ModelEntry,
 } from "./list-models";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function modelInfo<const T extends ModelAdditionalField = never>(
 	params: {
@@ -40,7 +41,7 @@ export async function modelInfo<const T extends ModelAdditionalField = never>(
 		...additionalExpandKeys.map((val) => ["expand", val] satisfies [string, string]),
 	]).toString();
 
-	const response = await (params.fetch || fetch)(
+	const response = await fetchWithServerWarnings(params.fetch)(
 		`${params?.hubUrl || HUB_URL}/api/models/${params.name}/revision/${encodeURIComponent(
 			params.revision ?? "HEAD",
 		)}?${search.toString()}`,

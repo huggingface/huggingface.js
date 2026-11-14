@@ -3,6 +3,7 @@ import { createApiError } from "../error";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function countCommits(
 	params: {
@@ -24,7 +25,7 @@ export async function countCommits(
 			params.revision ?? "main",
 		)}?limit=1`;
 
-	const res: Response = await (params.fetch ?? fetch)(url, {
+	const res: Response = await fetchWithServerWarnings(params.fetch)(url, {
 		headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
 	});
 
