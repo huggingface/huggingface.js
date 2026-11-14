@@ -122,18 +122,28 @@ function isMlxModel(model: ModelData) {
 // LiteRT CLI estimates about 41 GB of RAM to convert a 4B-parameter checkpoint, so larger ones are left out.
 const LITERT_CLI_MAX_PARAMETERS = 4.1e9;
 
+// Architectures with a real checkpoint that `litert lm run` converted and that answered. Other architectures can stop
+// in the conversion.
+const LITERT_CLI_ARCHITECTURES = [
+	"Gemma3ForCausalLM",
+	"Lfm2ForCausalLM",
+	"LlamaForCausalLM",
+	"Qwen2ForCausalLM",
+	"Qwen3ForCausalLM",
+];
+
 function isLiteRtCliModel(model: ModelData): boolean {
 	// `litert lm run <repo>` converts the repo's transformers checkpoint once, then runs it. Without a .litertlm file
-	// the CLI needs a config.json, so the entry needs a config with architectures and safetensors weights (which also
-	// leaves out GGUF-only repos). Their size is summed per dtype: `safetensors.total` is far below that sum on some
-	// repos. Chat models only, since the snippet asks a question. Left out: MLX repos, quantized checkpoints (the
-	// converter rejects them) and .litertlm repos (they get the LiteRT-LM library snippet).
+	// the CLI needs a config.json, so the entry needs a config with one of the architectures above and safetensors
+	// weights (which also leaves out GGUF-only repos). Their size is summed per dtype: `safetensors.total` is far below
+	// that sum on some repos. Chat models only, since the snippet asks a question. Left out: MLX repos, quantized
+	// checkpoints (the converter rejects them) and .litertlm repos (they get the LiteRT-LM library snippet).
 	const parameters = Object.values(model.safetensors?.parameters ?? {}).reduce((sum, n) => sum + n, 0);
 	return (
 		model.pipeline_tag === "text-generation" &&
 		model.tags.includes("conversational") &&
 		isTransformersModel(model) &&
-		!!model.config?.architectures?.length &&
+		LITERT_CLI_ARCHITECTURES.includes(model.config?.architectures?.[0] ?? "") &&
 		!model.config?.quantization_config &&
 		parameters > 0 &&
 		parameters <= LITERT_CLI_MAX_PARAMETERS &&

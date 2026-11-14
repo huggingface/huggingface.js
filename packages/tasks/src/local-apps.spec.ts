@@ -433,9 +433,60 @@ pip install -U litert-cli-nightly`);
 litert lm run Qwen/Qwen3-0.6B --prompt "What is the capital of France?"`);
 	});
 
-	it("litert-cli not shown for litert-lm, quantized, gguf-only, mlx, adapter-only, base, large or vision models", async () => {
+	it("litert-cli shown for each listed architecture", async () => {
 		const { displayOnModelPage } = LOCAL_APPS["litert-cli"];
-		// Each model passes every check but the one it is named for.
+		// The checkpoints the snippet was run on, one per architecture.
+		const models: ModelData[] = [
+			{
+				id: "Qwen/Qwen3-0.6B",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "qwen3", "text-generation", "conversational"],
+				config: { architectures: ["Qwen3ForCausalLM"], model_type: "qwen3" },
+				safetensors: { parameters: { BF16: 751632384 }, total: 751632384, sharded: false },
+				inference: "",
+			},
+			{
+				id: "HuggingFaceTB/SmolLM2-135M-Instruct",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "llama", "text-generation", "conversational"],
+				config: { architectures: ["LlamaForCausalLM"], model_type: "llama" },
+				safetensors: { parameters: { BF16: 134515008 }, total: 134515008, sharded: false },
+				inference: "",
+			},
+			{
+				id: "Qwen/Qwen2.5-0.5B-Instruct",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "qwen2", "text-generation", "conversational"],
+				config: { architectures: ["Qwen2ForCausalLM"], model_type: "qwen2" },
+				safetensors: { parameters: { BF16: 494032768 }, total: 494032768, sharded: false },
+				inference: "",
+			},
+			{
+				id: "unsloth/gemma-3-270m-it",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "gemma3_text", "text-generation", "conversational"],
+				config: { architectures: ["Gemma3ForCausalLM"], model_type: "gemma3_text" },
+				safetensors: { parameters: { BF16: 268098176 }, total: 268098176, sharded: false },
+				inference: "",
+			},
+			{
+				id: "LiquidAI/LFM2.5-230M-Base",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "lfm2", "text-generation", "conversational"],
+				config: { architectures: ["Lfm2ForCausalLM"], model_type: "lfm2" },
+				safetensors: { parameters: { BF16: 229693184 }, total: 229693184, sharded: false },
+				inference: "",
+			},
+		];
+
+		for (const model of models) {
+			expect(displayOnModelPage(model)).toBe(true);
+		}
+	});
+
+	it("litert-cli not shown for litert-lm, quantized, gguf-only, mlx, adapter-only, base, large, vision or other-architecture models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["litert-cli"];
+		// Each model passes every check but the one it is named for (the vision model's architecture is not listed either).
 		const models: ModelData[] = [
 			{
 				id: "litert-community/Qwen3-0.6B",
@@ -477,20 +528,28 @@ litert lm run Qwen/Qwen3-0.6B --prompt "What is the capital of France?"`);
 				inference: "",
 			},
 			{
-				id: "openai-community/gpt2",
+				id: "HuggingFaceTB/SmolLM2-135M",
 				pipeline_tag: "text-generation",
-				tags: ["transformers", "safetensors", "gpt2", "text-generation"],
-				config: { architectures: ["GPT2LMHeadModel"], model_type: "gpt2" },
-				safetensors: { parameters: { F32: 137022720 }, total: 137022720, sharded: false },
+				tags: ["transformers", "safetensors", "llama", "text-generation"],
+				config: { architectures: ["LlamaForCausalLM"], model_type: "llama" },
+				safetensors: { parameters: { BF16: 134515008 }, total: 134515008, sharded: false },
 				inference: "",
 			},
 			{
 				// `total` is far below the per-dtype sum on this repo.
-				id: "ornith-ai/Ornith-1.0-35B",
+				id: "laion/delphi-1e22-9_7Bparams-160Btokens-base-wc386k_lr1e5-sft",
 				pipeline_tag: "text-generation",
-				tags: ["transformers", "safetensors", "text-generation", "conversational"],
-				config: { architectures: ["Qwen3_5MoeForConditionalGeneration"], model_type: "qwen3_5_moe" },
-				safetensors: { parameters: { BF16: 35107181936 }, total: 664944, sharded: false },
+				tags: ["transformers", "safetensors", "qwen3", "text-generation", "conversational"],
+				config: { architectures: ["Qwen3ForCausalLM"], model_type: "qwen3" },
+				safetensors: { parameters: { BF16: 9714698752 }, total: 297472, sharded: true },
+				inference: "",
+			},
+			{
+				id: "microsoft/Phi-3.5-mini-instruct",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "phi3", "text-generation", "conversational"],
+				config: { architectures: ["Phi3ForCausalLM"], model_type: "phi3" },
+				safetensors: { parameters: { BF16: 3821079552 }, total: 3821079552, sharded: true },
 				inference: "",
 			},
 			{
