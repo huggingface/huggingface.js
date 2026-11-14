@@ -18,6 +18,7 @@ import type {
 	AutomaticSpeechRecognitionOutput,
 	ChatCompletionOutput,
 	FeatureExtractionOutput,
+	TextGenerationInput,
 	TextGenerationOutput,
 	TextGenerationOutputFinishReason,
 } from "@huggingface/tasks";
@@ -148,10 +149,16 @@ export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 		super("together", TOGETHER_API_BASE_URL);
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams<TextGenerationInput>): Record<string, unknown> {
 		return {
 			model: params.model,
-			...params.args,
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters
+				? {
+						max_tokens: params.args.parameters.max_new_tokens,
+						...omit(params.args.parameters, "max_new_tokens"),
+					}
+				: undefined),
 			prompt: params.args.inputs,
 		};
 	}

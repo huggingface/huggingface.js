@@ -14,9 +14,10 @@
  *
  * Thanks!
  */
-import type { FeatureExtractionOutput, TextGenerationOutput } from "@huggingface/tasks";
+import type { FeatureExtractionOutput, TextGenerationInput, TextGenerationOutput } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
+import { omit } from "../utils/omit.js";
 
 import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
 import { BaseConversationalTask, TaskProviderHelper, BaseTextGenerationTask } from "./providerHelper.js";
@@ -40,10 +41,16 @@ export class ScalewayTextGenerationTask extends BaseTextGenerationTask {
 		super("scaleway", SCALEWAY_API_BASE_URL);
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams<TextGenerationInput>): Record<string, unknown> {
 		return {
 			model: params.model,
-			...params.args,
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters
+				? {
+						max_tokens: params.args.parameters.max_new_tokens,
+						...omit(params.args.parameters, "max_new_tokens"),
+					}
+				: undefined),
 			prompt: params.args.inputs,
 		};
 	}
