@@ -369,9 +369,11 @@ function toJSON(
 		case "UndefinedValue":
 			return convertUndefinedToNull ? "null" : "undefined";
 		case "IntegerValue":
-		case "FloatValue":
 		case "BooleanValue":
 			return JSON.stringify(input.value);
+		case "FloatValue":
+			// Like Python's json.dumps, keep the decimal point of whole floats (1.0, not 1)
+			return input.toString();
 		case "StringValue": {
 			let result = JSON.stringify(input.value);
 			if (ensureAscii) {
