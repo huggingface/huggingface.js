@@ -134,6 +134,14 @@ export const SKUS = {
 				power: 230,
 				releaseYear: 2026,
 			},
+			"Gaudi 3 PCIe": {
+				tflops: 459,
+				memory: [128],
+				msrp: 11_890,
+				power: 600,
+				releaseYear: 2025,
+				aliases: ["HL-338", "Gaudi 3"],
+			},
 		},
 		QUALCOMM: {
 			"Snapdragon X Elite X1E-00-1DE": {
