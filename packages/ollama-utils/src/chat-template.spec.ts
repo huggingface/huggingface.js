@@ -152,5 +152,19 @@ describe("chat-template", () => {
 		}
 	});
 
+	it("should not emit a broken template when the last assistant turn renders differently", async () => {
+		// Minimal reproduction of the Qwen3.6 behaviour: the empty think block is only rendered on the
+		// last assistant turn, so [S,U,A] is not a prefix of [S,U,A,U]. Previously this produced the
+		// template "{{ if .Prompt }} .Prompt }}<|im_end|>..." and stop words ["<think>", ".Prompt }}<|im_end|>", ...]
+		// that silently truncate generations in Ollama.
+		const ollamaTmpl = convertGGUFTemplateToOllama({
+			chat_template:
+				"{%- for message in messages %}{%- if message.role == 'assistant' and loop.last %}{{- '<|im_start|>assistant\n<think>\n\n</think>\n\n' + message.content + '<|im_end|>\n' }}{%- else %}{{- '<|im_start|>' + message.role + '\n' + message.content + '<|im_end|>\n' }}{%- endif %}{%- endfor %}{%- if add_generation_prompt %}{{- '<|im_start|>assistant\n' }}{%- endif %}",
+			bos_token: "",
+			eos_token: "<|im_end|>",
+		});
+		expect(ollamaTmpl).toBeUndefined();
+	});
+
 	// TODO: add test with "ollama/template" module compiled to wasm
 });
