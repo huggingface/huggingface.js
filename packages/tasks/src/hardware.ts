@@ -38,8 +38,9 @@ export interface HardwareSpec {
 	 * sold via OEMs without a public MSRP (H100, MI300X, ...), this is a
 	 * widely-reported street price. For mobile/laptop GPUs that are not sold
 	 * standalone, this is the approximate module/BOM cost. For Apple Silicon
-	 * SoCs, this is the price of a Mac configured with that chip and the
-	 * largest memory option. For CPU "family" entries (e.g. "Xeon 4th Gen",
+	 * and NVIDIA GB10/RTX Spark SoCs, this is the price of a representative
+	 * system configured with that chip and the largest memory option.
+	 * For CPU "family" entries (e.g. "Xeon 4th Gen",
 	 * "Ryzen Zen 4 7000 (Ryzen 9)"), this is the tray/box price of a
 	 * representative flagship SKU at launch.
 	 */
@@ -223,11 +224,32 @@ export const SKUS = {
 				power: 250,
 				releaseYear: 2024,
 			},
+			"Intel Core 14th Generation (i9)": {
+				tflops: 0.85,
+				msrp: 589,
+				power: 253,
+				releaseYear: 2023,
+				aliases: ["i9-14900K", "i9-14900KF", "i9-14900"],
+			},
 			"Intel Core 14th Generation (i7)": {
 				tflops: 0.8,
 				msrp: 400,
 				power: 253,
 				releaseYear: 2023,
+			},
+			"Intel Core 14th Generation (i5)": {
+				tflops: 0.79,
+				msrp: 319,
+				power: 181,
+				releaseYear: 2023,
+				aliases: ["i5-14600K", "i5-14600KF", "i5-14400"],
+			},
+			"Intel Core 14th Generation (i3)": {
+				tflops: 0.58,
+				msrp: 134,
+				power: 110,
+				releaseYear: 2024,
+				aliases: ["i3-14100", "i3-14100F"],
 			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,
@@ -324,6 +346,18 @@ export const SKUS = {
 				msrp: 150,
 				power: 90,
 				releaseYear: 2020,
+			},
+			"Intel Celeron G3930": {
+				tflops: 0.046,
+				msrp: 42,
+				power: 51,
+				releaseYear: 2017,
+			},
+			"Intel Core i5-3230M": {
+				tflops: 0.083,
+				msrp: 225,
+				power: 35,
+				releaseYear: 2013,
 			},
 		},
 		AMD: {
@@ -634,9 +668,16 @@ export const SKUS = {
 			},
 			"Apple M5 Ultra": {
 				tflops: 45.6,
-				memory: [96, 256],
-				msrp: 10_799,
+				memory: [96, 256, 512],
+				msrp: 22_299,
 				power: 220,
+				releaseYear: 2026,
+			},
+			"Apple M6": {
+				tflops: 6.2,
+				memory: [16, 24, 32],
+				msrp: 2_400,
+				power: 25,
 				releaseYear: 2026,
 			},
 		},

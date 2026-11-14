@@ -3,6 +3,7 @@ import { createApiError } from "../error";
 import type { ApiWhoAmIReponse } from "../types/api/api-who-am-i";
 import type { AccessTokenRole, AuthType, CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export interface WhoAmIUser {
 	/** Unique ID persistent across renames */
@@ -70,7 +71,7 @@ export async function whoAmI(
 ): Promise<WhoAmI & { auth: AuthInfo }> {
 	const accessToken = checkCredentials(params);
 
-	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/whoami-v2`, {
+	const res = await fetchWithServerWarnings(params.fetch)(`${params.hubUrl ?? HUB_URL}/api/whoami-v2`, {
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 		},

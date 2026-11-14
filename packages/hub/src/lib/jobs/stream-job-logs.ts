@@ -2,6 +2,7 @@ import { HUB_URL } from "../../consts";
 import { createApiError } from "../../error";
 import type { CredentialsParams } from "../../types/public";
 import { checkCredentials } from "../../utils/checkCredentials";
+import { fetchWithServerWarnings } from "../../utils/serverWarnings";
 
 /**
  * Stream job logs using Server-Sent Events (SSE).
@@ -26,7 +27,7 @@ export async function* streamJobLogs(
 ): AsyncGenerator<{ message: string; timestamp: Date }, void, unknown> {
 	const accessToken = checkCredentials(params);
 
-	const response = await (params.fetch || fetch)(
+	const response = await fetchWithServerWarnings(params.fetch)(
 		`${params.hubUrl || HUB_URL}/api/jobs/${params.namespace}/${params.jobId}/logs`,
 		{
 			headers: {
