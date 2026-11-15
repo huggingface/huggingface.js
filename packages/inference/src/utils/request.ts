@@ -74,8 +74,14 @@ export async function innerRequest<T>(
 				);
 			}
 			if (typeof output.error === "string" || typeof output.detail === "string" || typeof output.message === "string") {
+				const errorMessage =
+					typeof output.error === "string"
+						? output.error
+						: typeof output.detail === "string"
+							? output.detail
+							: output.message;
 				throw new InferenceClientProviderApiError(
-					`Failed to perform inference: ${output.error ?? output.detail ?? output.message}`,
+					`Failed to perform inference: ${errorMessage}`,
 					{
 						url,
 						method: info.method ?? "GET",
@@ -155,9 +161,15 @@ export async function* innerStreamingRequest<T>(
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
 				);
 			}
-			if (typeof output.error === "string") {
+			if (typeof output.error === "string" || typeof output.detail === "string" || typeof output.message === "string") {
+				const errorMessage =
+					typeof output.error === "string"
+						? output.error
+						: typeof output.detail === "string"
+							? output.detail
+							: output.message;
 				throw new InferenceClientProviderApiError(
-					`Failed to perform inference: ${output.error}`,
+					`Failed to perform inference: ${errorMessage}`,
 					{
 						url,
 						method: info.method ?? "GET",
@@ -171,19 +183,6 @@ export async function* innerStreamingRequest<T>(
 				/// OpenAI errors
 				throw new InferenceClientProviderApiError(
 					`Failed to perform inference: ${output.error.message}`,
-					{
-						url,
-						method: info.method ?? "GET",
-						headers: info.headers as Record<string, string>,
-						body: bodyToJson(info.body),
-					},
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
-				);
-			}
-			// Some providers return a top-level `message` on error
-			if (typeof output.message === "string") {
-				throw new InferenceClientProviderApiError(
-					`Failed to perform inference: ${output.message}`,
 					{
 						url,
 						method: info.method ?? "GET",
@@ -264,7 +263,7 @@ export async function* innerStreamingRequest<T>(
 									? data.error.message
 									: JSON.stringify(data.error);
 						throw new InferenceClientProviderApiError(
-							`Failed to perform inference: an occurred while streaming the response: ${errorStr}`,
+							`Failed to perform inference: an error occurred while streaming the response: ${errorStr}`,
 							{
 								url,
 								method: info.method ?? "GET",
