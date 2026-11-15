@@ -356,6 +356,7 @@ abstract class TogetherVideoTask extends TaskProviderHelper {
 		headers?: Record<string, string>,
 		_outputType?: OutputType,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<Blob> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError("URL and headers are required for Together video tasks");
@@ -383,7 +384,7 @@ abstract class TogetherVideoTask extends TaskProviderHelper {
 			}
 			attempt += 1;
 			await delay(TOGETHER_VIDEO_POLLING_INTERVAL_MS, signal);
-			const pollResponse = await fetch(statusUrl, { headers, signal });
+			const pollResponse = await fetchFn(statusUrl, { headers, signal });
 			if (!pollResponse.ok) {
 				throw new InferenceClientProviderApiError(
 					"Failed to fetch Together video job result",
@@ -419,7 +420,7 @@ abstract class TogetherVideoTask extends TaskProviderHelper {
 			throw new InferenceClientProviderOutputError("No video URL found in completed Together video job.");
 		}
 
-		const videoResponse = await fetch(videoUrl, { signal });
+		const videoResponse = await fetchFn(videoUrl, { signal });
 		if (!videoResponse.ok) {
 			throw new InferenceClientProviderApiError(
 				"Failed to download Together video output",

@@ -23,5 +23,12 @@ export async function textToAudio(args: TextToAudioArgs, options?: Options): Pro
 		task: "text-to-audio",
 	});
 	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "text-to-audio" });
-	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, undefined, options?.signal);
+	return providerHelper.getResponse(
+		res,
+		url,
+		info.headers as Record<string, string>,
+		undefined,
+		options?.signal,
+		options?.fetch,
+	);
 }

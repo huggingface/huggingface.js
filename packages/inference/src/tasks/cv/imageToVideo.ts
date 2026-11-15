@@ -20,5 +20,12 @@ export async function imageToVideo(args: ImageToVideoArgs, options?: Options): P
 		task: "image-to-video",
 	});
 	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "image-to-video" });
-	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, undefined, options?.signal);
+	return providerHelper.getResponse(
+		res,
+		url,
+		info.headers as Record<string, string>,
+		undefined,
+		options?.signal,
+		options?.fetch,
+	);
 }

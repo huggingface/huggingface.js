@@ -24,5 +24,6 @@ export async function imageTextToVideo(args: ImageTextToVideoArgs, options?: Opt
 		requestContext.info.headers as Record<string, string>,
 		undefined,
 		options?.signal,
+		options?.fetch,
 	);
 }

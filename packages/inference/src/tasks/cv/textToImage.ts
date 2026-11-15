@@ -49,5 +49,6 @@ export async function textToImage(
 		info.headers as Record<string, string>,
 		options?.outputType,
 		options?.signal,
+		options?.fetch,
 	);
 }

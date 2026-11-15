@@ -94,6 +94,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 		headers?: Record<string, string>,
 		outputType?: OutputType,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<string | Blob | Record<string, unknown>> {
 		void url;
 		void headers;
@@ -106,7 +107,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			if (outputType === "url") {
 				return res.output;
 			}
-			const urlResponse = await fetch(res.output, { signal });
+			const urlResponse = await fetchFn(res.output, { signal });
 			const blob = await urlResponse.blob();
 			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
@@ -125,7 +126,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			if (outputType === "url") {
 				return res.output[0];
 			}
-			const urlResponse = await fetch(res.output[0], { signal });
+			const urlResponse = await fetchFn(res.output[0], { signal });
 			const blob = await urlResponse.blob();
 			return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 		}
@@ -154,6 +155,7 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 		_headers?: HeadersInit,
 		_outputType?: undefined,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<Blob> {
 		if (response instanceof Blob) {
 			return response;
@@ -161,10 +163,10 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 		if (response && typeof response === "object") {
 			if ("output" in response) {
 				if (typeof response.output === "string") {
-					const urlResponse = await fetch(response.output, { signal });
+					const urlResponse = await fetchFn(response.output, { signal });
 					return await urlResponse.blob();
 				} else if (Array.isArray(response.output)) {
-					const urlResponse = await fetch(response.output[0], { signal });
+					const urlResponse = await fetchFn(response.output[0], { signal });
 					return await urlResponse.blob();
 				}
 			}
@@ -180,6 +182,7 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 		_headers?: HeadersInit,
 		_outputType?: undefined,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<Blob> {
 		if (
 			typeof response === "object" &&
@@ -188,7 +191,7 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 			typeof response.output === "string" &&
 			isUrl(response.output)
 		) {
-			const urlResponse = await fetch(response.output, { signal });
+			const urlResponse = await fetchFn(response.output, { signal });
 			return await urlResponse.blob();
 		}
 
@@ -235,6 +238,7 @@ export class ReplicateAutomaticSpeechRecognitionTask
 		_headers?: HeadersInit,
 		_outputType?: undefined,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<AutomaticSpeechRecognitionOutput> {
 		if (typeof response?.output === "string") {
 			return { text: response.output };
@@ -258,7 +262,7 @@ export class ReplicateAutomaticSpeechRecognitionTask
 				return { text: out.translation };
 			}
 			if (typeof out.txt_file === "string") {
-				const r = await fetch(out.txt_file, { signal });
+				const r = await fetchFn(out.txt_file, { signal });
 				return { text: await r.text() };
 			}
 		}
@@ -309,6 +313,7 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 		_headers?: HeadersInit,
 		_outputType?: undefined,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<Blob> {
 		if (
 			typeof response === "object" &&
@@ -318,7 +323,7 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 			response.output.length > 0 &&
 			typeof response.output[0] === "string"
 		) {
-			const urlResponse = await fetch(response.output[0], { signal });
+			const urlResponse = await fetchFn(response.output[0], { signal });
 			return await urlResponse.blob();
 		}
 
@@ -329,7 +334,7 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 			typeof response.output === "string" &&
 			isUrl(response.output)
 		) {
-			const urlResponse = await fetch(response.output, { signal });
+			const urlResponse = await fetchFn(response.output, { signal });
 			return await urlResponse.blob();
 		}
 

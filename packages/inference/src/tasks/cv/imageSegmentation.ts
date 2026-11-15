@@ -23,5 +23,12 @@ export async function imageSegmentation(
 		task: "image-segmentation",
 	});
 	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "image-segmentation" });
-	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, undefined, options?.signal);
+	return providerHelper.getResponse(
+		res,
+		url,
+		info.headers as Record<string, string>,
+		undefined,
+		options?.signal,
+		options?.fetch,
+	);
 }

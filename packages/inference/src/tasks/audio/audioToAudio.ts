@@ -47,5 +47,12 @@ export async function audioToAudio(args: AudioToAudioArgs, options?: Options): P
 		task: "audio-to-audio",
 	});
 	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "audio-to-audio" });
-	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, undefined, options?.signal);
+	return providerHelper.getResponse(
+		res,
+		url,
+		info.headers as Record<string, string>,
+		undefined,
+		options?.signal,
+		options?.fetch,
+	);
 }
