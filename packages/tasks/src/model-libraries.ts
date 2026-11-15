@@ -1323,6 +1323,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/nvidia-medtech",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
+	"onnxruntime-genai": {
+		prettyLabel: "ONNX Runtime GenAI",
+		repoName: "onnxruntime-genai",
+		repoUrl: "https://github.com/microsoft/onnxruntime-genai",
+		docsUrl: "https://onnxruntime.ai/docs/genai/",
+		filter: false,
+		countDownloads: `path_filename:"genai_config" AND path_extension:"json"`,
+	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
 		repoName: "open-oasis",
