@@ -1325,7 +1325,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"onnxruntime-genai": {
 		prettyLabel: "ONNX Runtime GenAI",
-		repoName: "onnxruntime-genai",
+		repoName: "ONNX Runtime GenAI",
 		repoUrl: "https://github.com/microsoft/onnxruntime-genai",
 		docsUrl: "https://onnxruntime.ai/docs/genai/",
 		filter: false,
