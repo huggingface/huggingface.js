@@ -2,7 +2,7 @@ function createAbortError(signal: AbortSignal): Error {
 	return signal.reason instanceof Error ? signal.reason : new DOMException("The operation was aborted", "AbortError");
 }
 
-export function delay(ms: number, signal?: AbortSignal): Promise<void> {
+export function delay(ms: number, signal?: AbortSignal, options?: { ref?: boolean }): Promise<void> {
 	if (signal?.aborted) {
 		return Promise.reject(createAbortError(signal));
 	}
@@ -13,7 +13,9 @@ export function delay(ms: number, signal?: AbortSignal): Promise<void> {
 			cleanup();
 			resolve();
 		}, ms);
-		timeout.unref?.();
+		if (options?.ref !== true) {
+			timeout.unref?.();
+		}
 
 		if (!signal) {
 			return;

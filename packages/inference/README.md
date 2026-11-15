@@ -719,8 +719,8 @@ const response = await hf.chatCompletion({
 console.log(response.choices[0].message.content);
 ```
 
-By default, all calls to the inference endpoint will wait until the model is loaded. When [scaling to 0](https://huggingface.co/docs/inference-endpoints/en/autoscaling#scaling-to-0)
-is enabled on the endpoint, this can result in non-trivial waiting time. If you'd rather disable this behavior and handle the endpoint's returned 500 HTTP errors yourself, you can do so like so:
+By default, calls to the inference endpoint retry HTTP 503 responses up to 10 times while the model loads. Retries wait 1 second initially, doubling up to 30 seconds between attempts (181 seconds of total waiting, plus request time). When [scaling to 0](https://huggingface.co/docs/inference-endpoints/en/autoscaling#scaling-to-0)
+is enabled on the endpoint, this can result in non-trivial waiting time. If you'd rather disable this behavior and handle the endpoint's returned 503 HTTP errors yourself, you can do so like so:
 
 ```typescript
 const hf = new InferenceClient("hf_xxxxxxxxxxxxxx", {
