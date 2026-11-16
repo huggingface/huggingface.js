@@ -105,6 +105,13 @@ const MXFP4_SCALES_SUFFIX = "_scales";
 const MODELOPT_FUSED_SCALE_SUFFIXES = ["_weight_scale", "_weight_scale_2", "_input_scale"];
 
 /**
+ * Underscore-joined block scales of fused (3D) fp8 expert tensors, e.g.
+ * `model.llm.layers.0.mlp.experts.w1_weight_scale` (thinkingmachines/Inkling-2-Small-MXFP8, one
+ * UE8M0 exponent per 32 weights stored as `U8`). Same naming as ModelOpt's fused scales.
+ */
+const FP8_FUSED_SCALE_SUFFIXES = ["_weight_scale", "_weight_scale_inv"];
+
+/**
  * bitsandbytes keeps its double-quantization state beside each 4-bit weight: `absmax` (one value
  * per 64-weight block), the nested quantization of those absmax values, and the NF4/FP4 lookup
  * table. All bookkeeping — and because they share the weight's U8 container they were also
@@ -1484,6 +1491,12 @@ function shouldSkipTensor(
 	if (quantMethod === "modelopt") {
 		const suffix = getTensorSuffix(tensorName);
 		return MODELOPT_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s));
+	}
+
+	// fp8 checkpoints with fused experts name the scales the same way, e.g. `…experts.w1_weight_scale`.
+	if (quantMethod === "fp8") {
+		const suffix = getTensorSuffix(tensorName);
+		return FP8_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s));
 	}
 
 	if (quantMethod === "bitsandbytes") {
