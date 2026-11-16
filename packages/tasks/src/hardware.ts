@@ -127,6 +127,13 @@ export const SKUS = {
 				power: 200,
 				releaseYear: 2025,
 			},
+			"Arc Pro B65": {
+				tflops: 24.58,
+				memory: [32],
+				msrp: 799,
+				power: 200,
+				releaseYear: 2026,
+			},
 			"Arc Pro B70": {
 				tflops: 45.88,
 				memory: [32],
