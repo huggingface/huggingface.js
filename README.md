@@ -30,8 +30,7 @@ await uploadFile({
 // Use all supported Inference Providers!
 
 await inference.chatCompletion({
-  model: "meta-llama/Llama-3.1-8B-Instruct",
-  provider: "sambanova", // or together, fal-ai, replicate, cohere …
+  model: "deepseek-ai/DeepSeek-V4.1-Flash",
   messages: [
     {
       role: "user",
@@ -149,13 +148,6 @@ for await (const chunk of client.chatCompletionStream({
 }
 
 /// Using a third-party provider:
-await client.chatCompletion({
-  model: "meta-llama/Llama-3.1-8B-Instruct",
-  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
-  max_tokens: 512,
-  provider: "sambanova", // or together, fal-ai, replicate, cohere …
-})
-
 await client.textToImage({
   model: "black-forest-labs/FLUX.1-dev",
   inputs: "a picture of a green bird",
