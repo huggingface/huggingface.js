@@ -1588,7 +1588,12 @@ const LIBREYOLO_LOADER_TASKS = new Set([
 ]);
 
 export const libreyolo = (model: ModelData): string[] => {
-	if (!model.pipeline_tag || !LIBREYOLO_LOADER_TASKS.has(model.pipeline_tag)) {
+	// Repos tagged libreyolo-custom-loader need another entry point (LibreSAM, LibreOpenVocab, ...), see their model card.
+	if (
+		!model.pipeline_tag ||
+		!LIBREYOLO_LOADER_TASKS.has(model.pipeline_tag) ||
+		model.tags.includes("libreyolo-custom-loader")
+	) {
 		return [
 			`# pip install libreyolo
 # See the model card for usage: https://huggingface.co/${model.id}`,
