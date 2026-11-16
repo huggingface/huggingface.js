@@ -2640,8 +2640,6 @@ const autoModelClass = (model: ModelData): string | undefined => {
 	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
 };
 
-const TAG_DECISION_MODEL = "decision-model";
-
 const transformersDecisionSnippet = (model: ModelData, remote_code_snippet: string): string =>
 	[
 		"from transformers import pipeline",
@@ -2667,15 +2665,15 @@ const transformersDecisionSnippet = (model: ModelData, remote_code_snippet: stri
 
 export const transformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
-	if (model.tags.includes(TAG_DECISION_MODEL)) {
-		return [transformersDecisionSnippet(model, remote_code_snippet)];
-	}
 
 	const info = transformersSnippetInfo(model);
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
 	const auto_model = autoModelClass(model) ?? "AutoModel";
+	if (auto_model == "AutoModelForDecision") {
+		return [transformersDecisionSnippet(model, remote_code_snippet)];
+	}
 
 	const autoSnippet = [];
 	if (info.processor) {
