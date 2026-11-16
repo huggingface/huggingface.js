@@ -878,6 +878,23 @@ export function setupGlobals(env: Environment): void {
 	env.set("None", null);
 }
 
+/**
+ * Python-like equality: lists (and tuples) are compared by value, element by element.
+ */
+function isEqual(a: AnyRuntimeValue, b: AnyRuntimeValue): boolean {
+	if (a instanceof ArrayValue || b instanceof ArrayValue) {
+		if (
+			!(a instanceof ArrayValue && b instanceof ArrayValue) ||
+			a.type !== b.type ||
+			a.value.length !== b.value.length
+		) {
+			return false;
+		}
+		return a.value.every((x, i) => isEqual(x, b.value[i]));
+	}
+	return a.value == b.value;
+}
+
 type AttributeContainer = ObjectValue | NamespaceValue;
 
 function isAttributeContainer(value: AnyRuntimeValue): value is AttributeContainer {
@@ -1207,9 +1224,9 @@ export class Interpreter {
 		const right = this.evaluate(node.right, environment);
 		switch (operator) {
 			case "==":
-				return new BooleanValue(left.value == right.value);
+				return new BooleanValue(isEqual(left, right));
 			case "!=":
-				return new BooleanValue(left.value != right.value);
+				return new BooleanValue(!isEqual(left, right));
 		}
 
 		if (
