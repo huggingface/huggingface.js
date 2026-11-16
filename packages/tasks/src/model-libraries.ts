@@ -1047,6 +1047,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "LimX Dynamics",
 		repoName: "LimX Dynamics",
 		repoUrl: "https://github.com/limxdynamics/limxdynamics",
+		snippets: snippets.limx_dynamics,
 		filter: false,
 		countDownloads: `(path_filename:"params" AND path_extension:"yaml") OR (path_filename:"controllers" AND path_extension:"yaml") OR (path_filename:"norm_stats" AND path_extension:"json") OR (path_filename:"package" AND path_extension:"xml")`,
 	},
