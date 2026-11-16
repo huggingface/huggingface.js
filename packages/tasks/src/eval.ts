@@ -191,4 +191,10 @@ export const EVALUATION_FRAMEWORKS = {
 			"Cyclotron is a training and evaluation framework for humanoid robot control policies that runs Hub-hosted models and benchmarks in pinned simulation-based evaluation harnesses and records the provenance of every score.",
 		url: "https://github.com/menloresearch/cyclotron",
 	},
+	movebench: {
+		name: "movebench",
+		description:
+			"MoveBench is a Chinese sports and health coaching benchmark for LLMs, covering training plan generation, workout data analysis and expert knowledge QA, with open-ended answers graded against expert rubrics by a weighted LLM-judge panel and multiple-choice questions scored by exact match.",
+		url: "https://github.com/Keep-Tech/MoveBench",
+	},
 } as const;
