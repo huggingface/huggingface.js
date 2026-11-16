@@ -1435,6 +1435,11 @@ export class Interpreter {
 				switch (filter.value) {
 					case "list":
 						return operand;
+					case "select":
+					case "reject": {
+						const select = filter.value === "select";
+						return new ArrayValue(operand.value.filter((item) => item.__bool__().value === select));
+					}
 					case "first":
 						return operand.value[0];
 					case "last":
@@ -1497,6 +1502,9 @@ export class Interpreter {
 					case "join":
 					case "string":
 						return operand; // no-op
+					case "list":
+						// NOTE: string.split('') breaks for unicode characters
+						return new ArrayValue(Array.from(operand.value, (x) => new StringValue(x)));
 					case "int": {
 						const val = parseInt(operand.value, 10);
 						return new IntegerValue(isNaN(val) ? 0 : val);
@@ -1531,6 +1539,8 @@ export class Interpreter {
 						);
 					case "length":
 						return new IntegerValue(operand.value.size);
+					case "list":
+						return operand.keys();
 					default: {
 						// Check if the filter exists in builtins
 						const builtin = operand.builtins.get(filter.value);
@@ -1738,6 +1748,26 @@ export class Interpreter {
 						});
 
 						return new ArrayValue(filtered);
+					}
+					case "select":
+					case "reject": {
+						const select = filterName === "select";
+						const [[testName, ...testArgs]] = this.evaluateArguments(filter.args, environment);
+						let test: (...x: AnyRuntimeValue[]) => boolean;
+						if (testName) {
+							if (!(testName instanceof StringValue)) {
+								throw new Error(`test name of \`${filterName}\` must be a string`);
+							}
+							const found = environment.tests.get(testName.value);
+							if (!found) {
+								throw new Error(`Unknown test: ${testName.value}`);
+							}
+							test = found;
+						} else {
+							// Default to truthiness
+							test = (x: AnyRuntimeValue) => x.__bool__().value;
+						}
+						return new ArrayValue(operand.value.filter((item) => test(item, ...testArgs) === select));
 					}
 					case "map": {
 						// Accumulate kwargs

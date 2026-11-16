@@ -6533,6 +6533,45 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("Select and reject filters", () => {
+		it.each([
+			[`{{ [1, "a", none, 0, "b"] | select | tojson }}`, `[1, "a", "b"]`],
+			[`{{ [1, 0, ""] | reject | tojson }}`, `[0, ""]`],
+			[`{{ [1, 0, ""] | select() | tojson }}`, `[1]`],
+			[`{{ [1, 2, 3, 4] | select("odd") | tojson }}`, `[1, 3]`],
+			[`{{ [1, 2, 3, 4] | reject("odd") | tojson }}`, `[2, 4]`],
+			[`{{ [1, "a", 2] | select("string") | tojson }}`, `["a"]`],
+			[`{{ [1, "a", 2] | reject("string") | tojson }}`, `[1, 2]`],
+			[`{{ [1, 2, 3] | select("equalto", 2) | tojson }}`, `[2]`],
+		])("%s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+	});
+
+	describe("List filter", () => {
+		it.each([
+			[`{{ "abc" | list | tojson }}`, `["a", "b", "c"]`],
+			[`{{ "🤗a" | list | tojson }}`, `["🤗", "a"]`],
+			[`{{ {"a": 1, "b": 2} | list | tojson }}`, `["a", "b"]`],
+		])("%s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+	});
+
+	describe("Llama 3.1 builtin_tools", () => {
+		// From the Llama 3.1 / 3.3 Instruct chat template (meta-llama/Llama-3.1-8B-Instruct),
+		// with the expected output rendered by Python Jinja2.
+		const template = new Template(`{%- if builtin_tools is defined %}
+    {{- "Tools: " + builtin_tools | reject('equalto', 'code_interpreter') | join(", ") + "\\n\\n"}}
+{%- endif %}`);
+
+		it("renders the tools line without code_interpreter", () => {
+			expect(template.render({ builtin_tools: ["code_interpreter", "brave_search", "wolfram_alpha"] })).toBe(
+				"Tools: brave_search, wolfram_alpha\n\n",
+			);
+		});
+	});
+
 	describe("String split", () => {
 		it.each([
 			[`{{ "a,b,c".split(",", -2) | tojson }}`, `["a", "b", "c"]`],
