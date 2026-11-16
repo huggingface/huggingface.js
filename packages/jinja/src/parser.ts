@@ -15,6 +15,7 @@ import {
 	ArrayLiteral,
 	ObjectLiteral,
 	BinaryExpression,
+	ChainedComparison,
 	FilterExpression,
 	TestExpression,
 	UnaryExpression,
@@ -400,9 +401,12 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseComparisonExpression(): Statement {
-		// NOTE: membership has same precedence as comparison
-		// e.g., ('a' in 'apple' == 'b' in 'banana') evaluates as ('a' in ('apple' == ('b' in 'banana')))
-		let left = parseAdditiveExpression();
+		// NOTE: membership has same precedence as comparison, and they chain like Python
+		// e.g., ('a' in 'apple' == 'b' in 'banana') evaluates as ('a' in 'apple' and 'apple' == 'b' and 'b' in 'banana')
+		const first = parseAdditiveExpression();
+		// Like Python, `a < b < c` is a chain meaning `a < b and b < c`, not `(a < b) < c`.
+		const operands: Expression[] = [first];
+		const operators: Token[] = [];
 		while (true) {
 			let operator: Token;
 			if (isIdentifier("not", "in")) {
@@ -415,10 +419,13 @@ export function parse(tokens: Token[]): Program {
 			} else {
 				break;
 			}
-			const right = parseAdditiveExpression();
-			left = new BinaryExpression(operator, left, right);
+			operators.push(operator);
+			operands.push(parseAdditiveExpression());
 		}
-		return left;
+		if (operators.length > 1) {
+			return new ChainedComparison(operators, operands);
+		}
+		return operators.length === 1 ? new BinaryExpression(operators[0], first, operands[1]) : first;
 	}
 	function parseAdditiveExpression(): Statement {
 		let left = parseMultiplicativeExpression();
