@@ -817,12 +817,12 @@ export const LOCAL_APPS = {
 		snippet: snippetOpenClaw,
 	},
 	zero1llm: {
-+		prettyLabel: "Zero1LLM",
-+		docsUrl: "https://zero1llm.ai",
-+		mainTask: "text-generation",
-+		displayOnModelPage: isLlamaCppGgufModel,
-+		deeplink: (model) => new URL(`zero1llm://models/huggingface/${model.id}`),
-+	},
+		prettyLabel: "Zero1LLM",
+		docsUrl: "https://zero1llm.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) => new URL(`zero1llm://models/huggingface/${model.id}`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
