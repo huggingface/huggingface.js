@@ -63,6 +63,7 @@ const MLX_QUANTIZATION_METHOD = "mlx";
 const MLX_QUANTIZATION_MODES: ReadonlySet<string> = new Set(["affine", "mxfp4", "nvfp4", "mxfp8"]);
 const MLX_AFFINE_BITS: ReadonlySet<number> = new Set([2, 3, 4, 5, 6, 8]);
 const MLX_AFFINE_GROUP_SIZES: ReadonlySet<number> = new Set([32, 64, 128]);
+const INKLING2_QUANTIZATION_METHOD = "inkling2";
 
 /**
  * Block/group scales and zero-points stored alongside quantized weights. They are quantization
@@ -103,6 +104,12 @@ const MXFP4_SCALES_SUFFIX = "_scales";
 
 /** Underscore-joined scale names ModelOpt uses for fused expert tensors (see `shouldSkipTensor`). */
 const MODELOPT_FUSED_SCALE_SUFFIXES = ["_weight_scale", "_weight_scale_2", "_input_scale"];
+
+/** Inkling's NVFP4 state, e.g. `w13_weight.scale`; only under a `_weight` parent, as a bare `.scale` can be real. */
+const MODELOPT_NESTED_WEIGHT_STATE_SUFFIXES = ["scale", "scale2", "original_shape"];
+
+/** Inkling 2 names a fused weight's scales, amax and denominator after the tensor itself. */
+const INKLING2_BOOKKEEPING_SUFFIXES = ["_weight_scale", "_weight_amax", "_weight_outer_scale_denominator"];
 
 /**
  * bitsandbytes keeps its double-quantization state beside each 4-bit weight: `absmax` (one value
@@ -363,32 +370,47 @@ export type SafetensorsParseFromRepo =
 	  };
 
 /**
- * Fetches and parses model config.json
+ * Fetches and parses a small JSON file such as config.json
  */
-async function fetchModelConfig(
+async function fetchJsonFile<T>(
 	params: {
 		repo: RepoDesignation;
 		revision?: string;
 		hubUrl?: string;
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
-): Promise<ModelConfig | null> {
+	path: string,
+): Promise<T | null> {
 	try {
-		const configBlob = await downloadFile({
+		const blob = await downloadFile({
 			...params,
-			path: "config.json",
+			path,
 		});
 
-		if (!configBlob) {
+		if (!blob) {
 			return null;
 		}
 
-		const config = JSON.parse(await configBlob.slice(0, MAX_CONFIG_LENGTH).text());
-		return config as ModelConfig;
+		const json = JSON.parse(await blob.slice(0, MAX_CONFIG_LENGTH).text());
+		return json as T;
 	} catch (error) {
 		// Config file might not exist or be inaccessible
 		return null;
 	}
+}
+
+/** Only fetched when config.json has no quantization and a tensor could be packed, so unquantized repos skip the request. */
+async function fetchHfQuantConfig(
+	params: Parameters<typeof fetchJsonFile>[0],
+	headers: SafetensorsFileHeader[],
+): Promise<QuantizationConfig | undefined> {
+	const mayHavePackedWeights = headers.some((header) =>
+		typedEntries(omit(header, "__metadata__")).some(([, tensor]) => INTEGER_CONTAINER_BITS[tensor.dtype] !== undefined),
+	);
+	if (!mayHavePackedWeights) {
+		return undefined;
+	}
+	return getHfQuantizationConfig(await fetchJsonFile<HfQuantConfigFile>(params, "hf_quant_config.json"));
 }
 
 async function parseSingleFile(
@@ -828,7 +850,7 @@ export async function parseSafetensorsMetadata(
 	}
 
 	// Fetch model config for quantization information
-	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
+	const modelConfig = params.computeParametersCount ? await fetchJsonFile<ModelConfig>(params, "config.json") : null;
 	const quantConfig =
 		getModelQuantizationConfig(modelConfig) ?? getModelQuantizationConfig(modelConfig?.text_config ?? null);
 	const expertDtype = modelConfig?.expert_dtype ?? modelConfig?.text_config?.expert_dtype;
@@ -864,9 +886,11 @@ export async function parseSafetensorsMetadata(
 
 	if (location && !location.sharded) {
 		const header = await parseSingleFile(location.path, params);
+		const countQuantConfig =
+			quantConfig ?? (params.computeParametersCount ? await fetchHfQuantConfig(params, [header]) : undefined);
 		const paramStats = params.computeParametersCount
 			? (() => {
-					const parameterCount = computeNumOfParamsByDtypeSingleFile(header, quantConfig, expertDtype);
+					const parameterCount = computeNumOfParamsByDtypeSingleFile(header, countQuantConfig, expertDtype);
 					return {
 						parameterCount,
 						/// shortcut: get param count directly from metadata
@@ -891,10 +915,13 @@ export async function parseSafetensorsMetadata(
 			: await parseShardedIndex(path, params);
 		const shardedMap = fromHub?.headers ?? (await fetchAllHeaders(path, shardFilenames, params));
 		const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
+		const countQuantConfig =
+			quantConfig ??
+			(params.computeParametersCount ? await fetchHfQuantConfig(params, Object.values(shardedMap)) : undefined);
 
 		const paramStats = params.computeParametersCount
 			? (() => {
-					const parameterCount = computeNumOfParamsByDtypeSharded(shardedMap, quantConfig, expertDtype);
+					const parameterCount = computeNumOfParamsByDtypeSharded(shardedMap, countQuantConfig, expertDtype);
 					return {
 						parameterCount,
 						/// shortcut: get param count directly from metadata
@@ -949,6 +976,42 @@ export interface QuantizationConfig {
 
 export interface MlxQuantizationConfig extends QuantizationConfig {
 	[key: string]: unknown;
+}
+
+/** `hf_quant_config.json`: Inkling 2 `parameter_groups`, or a ModelOpt `quantization` block. */
+interface HfQuantConfigFile {
+	quant_method?: string;
+	model?: { parameter_groups?: Array<{ compute_dtype?: string; tensors?: string[] }> };
+	quantization?: Pick<QuantizationConfig, "quant_algo" | "quantized_layers">;
+}
+
+/** Maps the file onto the config the counting reads; only Inkling's sub-byte groups need recording. */
+function getHfQuantizationConfig(file: HfQuantConfigFile | null): QuantizationConfig | undefined {
+	if (getQuantizationMethod(file ?? undefined) === INKLING2_QUANTIZATION_METHOD) {
+		const groups = file?.model?.parameter_groups;
+		const quantizedLayers: Record<string, { quant_algo?: string }> = {};
+		for (const group of Array.isArray(groups) ? groups : []) {
+			if (bitsFromFormatString(group?.compute_dtype) === undefined || !Array.isArray(group.tensors)) {
+				continue;
+			}
+			for (const tensorName of group.tensors) {
+				if (typeof tensorName === "string") {
+					quantizedLayers[getTensorModuleName(tensorName)] = { quant_algo: group.compute_dtype };
+				}
+			}
+		}
+		return { quant_method: INKLING2_QUANTIZATION_METHOD, quantized_layers: quantizedLayers };
+	}
+
+	const quantization = file?.quantization;
+	if (typeof quantization?.quant_algo !== "string") {
+		return undefined;
+	}
+	return {
+		quant_method: "modelopt",
+		quant_algo: quantization.quant_algo,
+		quantized_layers: quantization.quantized_layers,
+	};
 }
 
 function getQuantizationMethod(quantConfig: QuantizationConfig | undefined): string | undefined {
@@ -1329,7 +1392,8 @@ export function getQuantizationMultiplier(
 			return packingFactor(dtype, numBits);
 		}
 
-		case "modelopt": {
+		case "modelopt":
+		case "inkling2": {
 			// NVIDIA ModelOpt NVFP4 packs two FP4 weights per U8
 			if (!INTEGER_CONTAINER_BITS[dtype]) {
 				return 1;
@@ -1483,7 +1547,15 @@ function shouldSkipTensor(
 	// `…experts.gate_up_proj_weight_scale`, so the dot-separated suffix check above can't see them.
 	if (quantMethod === "modelopt") {
 		const suffix = getTensorSuffix(tensorName);
-		return MODELOPT_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s));
+		return (
+			MODELOPT_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s)) ||
+			(MODELOPT_NESTED_WEIGHT_STATE_SUFFIXES.includes(suffix) && getTensorModuleName(tensorName).endsWith("_weight"))
+		);
+	}
+
+	if (quantMethod === INKLING2_QUANTIZATION_METHOD) {
+		const suffix = getTensorSuffix(tensorName);
+		return INKLING2_BOOKKEEPING_SUFFIXES.some((s) => suffix.endsWith(s));
 	}
 
 	if (quantMethod === "bitsandbytes") {
