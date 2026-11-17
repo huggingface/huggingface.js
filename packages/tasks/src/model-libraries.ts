@@ -1143,6 +1143,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.matanyone,
 		filter: false,
 	},
+	mediapipe: {
+		prettyLabel: "MediaPipe",
+		repoName: "MediaPipe",
+		repoUrl: "https://github.com/google-ai-edge/mediapipe",
+		docsUrl: "https://developers.google.com/edge/mediapipe/solutions",
+		filter: false,
+		countDownloads: `path_extension:"task" OR path_extension:"tflite" OR path_extension:"litertlm"`,
+	},
 	memra: {
 		prettyLabel: "memra",
 		repoName: "memra",
