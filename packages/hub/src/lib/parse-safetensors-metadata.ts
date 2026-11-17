@@ -101,7 +101,11 @@ const QUANTIZATION_AUXILIARY_SUFFIXES = [
  */
 const MXFP4_SCALES_SUFFIX = "_scales";
 
-/** Underscore-joined scale names ModelOpt uses for fused expert tensors (see `shouldSkipTensor`). */
+/**
+ * Underscore-joined scale names ModelOpt uses for fused expert tensors (see `shouldSkipTensor`).
+ * Some fp8 checkpoints use the same naming, e.g. `model.llm.layers.0.mlp.experts.w1_weight_scale`
+ * in thinkingmachines/Inkling-2-Small-MXFP8 (one UE8M0 exponent per 32 weights stored as `U8`).
+ */
 const MODELOPT_FUSED_SCALE_SUFFIXES = ["_weight_scale", "_weight_scale_2", "_input_scale"];
 
 /**
@@ -1479,9 +1483,10 @@ function shouldSkipTensor(
 		return dtype === "U8" && getTensorSuffix(tensorName).endsWith(MXFP4_SCALES_SUFFIX);
 	}
 
-	// ModelOpt names the scales of fused (3D) expert tensors after the tensor itself, e.g.
-	// `…experts.gate_up_proj_weight_scale`, so the dot-separated suffix check above can't see them.
-	if (quantMethod === "modelopt") {
+	// ModelOpt and some fp8 checkpoints name the scales of fused (3D) expert tensors after the tensor
+	// itself, e.g. `…experts.gate_up_proj_weight_scale` / `…experts.w1_weight_scale`, so the
+	// dot-separated suffix check above can't see them.
+	if (quantMethod === "modelopt" || quantMethod === "fp8") {
 		const suffix = getTensorSuffix(tensorName);
 		return MODELOPT_FUSED_SCALE_SUFFIXES.some((s) => suffix.endsWith(s));
 	}
