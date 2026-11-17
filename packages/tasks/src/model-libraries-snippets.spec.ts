@@ -354,6 +354,15 @@ print(output)`);
 			expect(snippet).toContain("logits.sigmoid()");
 		});
 
+		it("transformers.js: keypoint detection models are run directly since there is no keypoint-detection pipeline", () => {
+			// pipeline('keypoint-detection') throws "Unsupported pipeline" in transformers.js
+			const [snippet] = transformersJS({ ...base, pipeline_tag: "keypoint-detection" } as ModelData);
+			expect(snippet).not.toContain("pipeline(");
+			expect(snippet).toContain("AutoModel.from_pretrained('user/model')");
+			expect(snippet).toContain("AutoImageProcessor.from_pretrained('user/model')");
+			expect(snippet).toContain("processor.post_process_pose_estimation(heatmaps, boxes)");
+		});
+
 		it("peft: every PEFT task type has a loader", () => {
 			const adapter = (task_type: string) =>
 				({ ...base, config: { peft: { base_model_name_or_path: "org/base", task_type } } }) as ModelData;
