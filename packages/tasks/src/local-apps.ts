@@ -816,7 +816,7 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
 	},
-	zero1llm: {
+		zero1llm: {
 		prettyLabel: "Zero1LLM",
 		docsUrl: "https://zero1llm.ai",
 		mainTask: "text-generation",
