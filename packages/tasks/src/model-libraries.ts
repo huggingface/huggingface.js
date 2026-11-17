@@ -312,7 +312,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "ChessQueries",
 		repoUrl: "https://github.com/JSeytre/chessqueries",
 		filter: false,
-		countDownloads: `path_extension:"safetensors" OR path_extension:"tflite" OR path:*.mlpackage.zip`,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"onnx" OR path_extension:"tflite" OR path:*.mlpackage.zip`,
 	},
 	chexmix: {
 		prettyLabel: "CheXmix",
@@ -1033,8 +1033,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "LibreYOLO",
 		repoUrl: "https://github.com/LibreYOLO/libreyolo",
 		docsUrl: "https://www.libreyolo.com/docs",
+		snippets: snippets.libreyolo,
 		filter: false,
-		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json" OR path:"model_index.json" OR path:"pipeline.json"`,
 	},
 	lightglue: {
 		prettyLabel: "LightGlue",
@@ -1047,8 +1048,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "LimX Dynamics",
 		repoName: "LimX Dynamics",
 		repoUrl: "https://github.com/limxdynamics/limxdynamics",
+		snippets: snippets.limx_dynamics,
 		filter: false,
-		countDownloads: `(path_filename:"params" AND path_extension:"yaml") OR (path_filename:"controllers" AND path_extension:"yaml") OR (path_filename:"norm_stats" AND path_extension:"json")`,
+		countDownloads: `(path_filename:"params" AND path_extension:"yaml") OR (path_filename:"controllers" AND path_extension:"yaml") OR (path_filename:"norm_stats" AND path_extension:"json") OR (path_filename:"package" AND path_extension:"xml")`,
 	},
 	"lingbot-map": {
 		prettyLabel: "LingBot-Map",

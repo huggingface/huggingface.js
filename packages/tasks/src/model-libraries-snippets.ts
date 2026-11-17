@@ -1579,6 +1579,35 @@ export const ltx = (model: ModelData): string[] => {
 	return _isLtx25Model(model) ? _ltx25Snippets(model, localDir, tags) : _ltx23Snippets(model, localDir, tags);
 };
 
+const LIBREYOLO_LOADER_TASKS = new Set([
+	"object-detection",
+	"image-segmentation",
+	"keypoint-detection",
+	"image-classification",
+	"depth-estimation",
+]);
+
+export const libreyolo = (model: ModelData): string[] => {
+	// Repos tagged libreyolo-custom-loader need another entry point (LibreSAM, LibreOpenVocab, ...), see their model card.
+	if (
+		!model.pipeline_tag ||
+		!LIBREYOLO_LOADER_TASKS.has(model.pipeline_tag) ||
+		model.tags.includes("libreyolo-custom-loader")
+	) {
+		return [
+			`# pip install libreyolo
+# See the model card for usage: https://huggingface.co/${model.id}`,
+		];
+	}
+	return [
+		`# pip install libreyolo
+from libreyolo import LibreYOLO
+
+model = LibreYOLO("${model.id}")
+results = model("https://raw.githubusercontent.com/LibreYOLO/libreyolo/release/libreyolo/assets/guggenheim-bilbao.jpg", save=True)`,
+	];
+};
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
@@ -1702,6 +1731,42 @@ python -m lerobot.record \\
 		return smolvlaSnippets;
 	}
 	return [];
+};
+
+export const limx_dynamics = (model: ModelData): string[] => {
+	const download = `# Download the repository (each robot model has its own folder, see the model card)
+hf download ${model.id} --local-dir ./${model.id.split("/").pop()}`;
+	if (model.tags.includes("mjcf") || model.tags.includes("urdf")) {
+		return [
+			download,
+			`# Load a robot model in MuJoCo
+# pip install mujoco huggingface_hub
+import glob
+import mujoco
+from huggingface_hub import snapshot_download
+
+path = snapshot_download("${model.id}")
+paths = sorted(glob.glob(f"{path}/**/xml/*.xml", recursive=True))
+print(paths)  # MJCF files, one per robot model
+model = mujoco.MjModel.from_xml_path(paths[0])`,
+		];
+	}
+	if (model.tags.includes("onnx")) {
+		return [
+			download,
+			`# Load an RL policy with ONNX Runtime
+# pip install onnxruntime huggingface_hub
+import glob
+import onnxruntime as ort
+from huggingface_hub import snapshot_download
+
+path = snapshot_download("${model.id}")
+paths = sorted(glob.glob(f"{path}/**/policy.onnx", recursive=True))
+print(paths)  # one policy per robot model
+session = ort.InferenceSession(paths[0])`,
+		];
+	}
+	return [download];
 };
 
 export const litert_lm = (model: ModelData): string[] => [
@@ -2648,13 +2713,40 @@ const autoModelClass = (model: ModelData): string | undefined => {
 	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
 };
 
+const transformersDecisionSnippet = (model: ModelData, remote_code_snippet: string): string =>
+	[
+		"from transformers import pipeline",
+		"",
+		`decide = pipeline("decision", model="${model.id}"` + remote_code_snippet + ")",
+		"decision = decide(",
+		"    {",
+		'        "state": "I was charged twice for my order and want a refund.",',
+		'        "questions": {',
+		'            "department": {',
+		'                "type": "choice",',
+		'                "instructions": "Which team should handle this?",',
+		'                "criteria": {',
+		'                    "billing": "Payments and refunds",',
+		'                    "technical": "Bugs and technical issues",',
+		'                    "sales": "Pricing and subscriptions",',
+		"                },",
+		"            },",
+		"        },",
+		"    }",
+		")",
+	].join("\n");
+
 export const transformers = (model: ModelData): string[] => {
+	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+
 	const info = transformersSnippetInfo(model);
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
 	const auto_model = autoModelClass(model) ?? "AutoModel";
-	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	if (auto_model == "AutoModelForDecision") {
+		return [transformersDecisionSnippet(model, remote_code_snippet)];
+	}
 
 	const autoSnippet = [];
 	if (info.processor) {
@@ -2797,6 +2889,27 @@ const documents = [
 const inputs = tokenizer(new Array(documents.length).fill(query), { text_pair: documents, padding: true, truncation: true });
 const { logits } = await model(inputs);
 console.log(logits.sigmoid().tolist()); // one relevance score per document`,
+		];
+	}
+
+	// transformers.js has no keypoint-detection pipeline (pipeline('keypoint-detection') throws "Unsupported pipeline"),
+	// so pose estimation models such as ViTPose are run directly and their heatmaps are post-processed instead.
+	if (model.pipeline_tag === "keypoint-detection") {
+		return [
+			`// npm i ${libName}
+import { AutoModel, AutoImageProcessor, RawImage } from '${libName}';
+
+const model = await AutoModel.from_pretrained('${model.id}');
+const processor = await AutoImageProcessor.from_pretrained('${model.id}');
+
+const image = await RawImage.read('https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/ryan-gosling.jpg');
+const inputs = await processor(image);
+const { heatmaps } = await model(inputs);
+
+// ViTPose is a top-down model: pass one box per person, in COCO format [x, y, width, height]
+const boxes = [[[0, 0, image.width, image.height]]];
+const results = processor.post_process_pose_estimation(heatmaps, boxes)[0][0];
+console.log(results); // { bbox, scores, labels, keypoints }`,
 		];
 	}
 
