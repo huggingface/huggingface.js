@@ -2247,6 +2247,19 @@ export const torch_pointcloud = (model: ModelData): string[] => [
 model = tp.create_model("${nameWithoutNamespace(model.id)}", pretrained=True)`,
 ];
 
+export const s1s2 = (model: ModelData): string[] => [
+	`npm i @s1s2/web onnxruntime-web @huggingface/transformers`,
+	`import { S1S2 } from "@s1s2/web";
+
+// Runs in the browser (WebGPU). manifest.json is the default manifest of this repo.
+const model = await S1S2.load({ manifest: "https://huggingface.co/${model.id}/resolve/main/manifest.json" });
+const s = await model.decide({
+	input: "Arrived late, but works great.",
+	questions: [{ name: "positive", type: "predicate", instructions: "Is this review positive?" }],
+});
+console.log(s.answers[0].probability, s.answers[0].margin);`,
+];
+
 export const saelens = (/* model: ModelData */): string[] => [
 	`# pip install sae-lens
 from sae_lens import SAE
