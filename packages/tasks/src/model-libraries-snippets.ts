@@ -1717,8 +1717,9 @@ import mujoco
 from huggingface_hub import snapshot_download
 
 path = snapshot_download("${model.id}")
-print(sorted(glob.glob(f"{path}/**/xml/*.xml", recursive=True)))  # MJCF files, one per robot model
-model = mujoco.MjModel.from_xml_path("<one of the paths above>")`,
+paths = sorted(glob.glob(f"{path}/**/xml/*.xml", recursive=True))
+print(paths)  # MJCF files, one per robot model
+model = mujoco.MjModel.from_xml_path(paths[0])`,
 		];
 	}
 	if (model.tags.includes("onnx")) {
@@ -1731,8 +1732,9 @@ import onnxruntime as ort
 from huggingface_hub import snapshot_download
 
 path = snapshot_download("${model.id}")
-print(sorted(glob.glob(f"{path}/**/policy.onnx", recursive=True)))  # one policy per robot model
-session = ort.InferenceSession("<one of the paths above>")`,
+paths = sorted(glob.glob(f"{path}/**/policy.onnx", recursive=True))
+print(paths)  # one policy per robot model
+session = ort.InferenceSession(paths[0])`,
 		];
 	}
 	return [download];
