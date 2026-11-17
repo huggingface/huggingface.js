@@ -174,7 +174,6 @@ export const SKUS = {
 				msrp: 1_399,
 				power: 300,
 				releaseYear: 2025,
-				aliases: ["p150a", "p150b", "Blackhole p150"],
 			},
 		},
 	},
