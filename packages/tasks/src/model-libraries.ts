@@ -1613,6 +1613,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "s1s2",
 		repoUrl: "https://github.com/eduardoworrel/s1s2",
 		docsUrl: "https://github.com/eduardoworrel/s1s2/blob/main/docs/reference.md",
+		snippets: snippets.s1s2,
 		filter: false,
 		countDownloads: `path:manifest*.json`,
 	},
