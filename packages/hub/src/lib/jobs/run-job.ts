@@ -4,6 +4,7 @@ import type { CredentialsParams } from "../../types/public";
 import { checkCredentials } from "../../utils/checkCredentials";
 import { toRepoId } from "../../utils/toRepoId";
 import type { ApiJob, CreateJobOptions } from "../../types/api/api-jobs";
+import { fetchWithServerWarnings } from "../../utils/serverWarnings";
 export type { JobVolume } from "../../types/api/api-jobs";
 
 /**
@@ -72,14 +73,17 @@ export async function runJob(
 		});
 	}
 
-	const response = await (params.fetch || fetch)(`${params.hubUrl || HUB_URL}/api/jobs/${params.namespace}`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+	const response = await fetchWithServerWarnings(params.fetch)(
+		`${params.hubUrl || HUB_URL}/api/jobs/${params.namespace}`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+			},
+			body: JSON.stringify(body),
 		},
-		body: JSON.stringify(body),
-	});
+	);
 
 	if (!response.ok) {
 		throw await createApiError(response);
