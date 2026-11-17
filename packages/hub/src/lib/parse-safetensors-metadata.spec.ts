@@ -1182,7 +1182,7 @@ describe("parseSafetensorsMetadata", () => {
 					{
 						"model.llm.layers.0.mlp.experts.w1": tensor("F8_E4M3", [4, 256, 128]),
 						"model.llm.layers.0.mlp.experts.w1_weight_scale": tensor("U8", [4, 256, 4]),
-						"model.llm.layers.0.mlp.experts.w2_weight_scale_inv": tensor("F32", [4, 128, 8]),
+						"model.llm.layers.0.mlp.experts.w2_weight_scale": tensor("U8", [4, 128, 8]),
 						"model.llm.layers.0.mlp.experts.w2": tensor("F8_E4M3", [4, 128, 256]),
 						"model.llm.layers.0.attn.wq.weight": tensor("BF16", [128, 128]),
 						"model.llm.unembed.weight": tensor("BF16", [10, 128]),
