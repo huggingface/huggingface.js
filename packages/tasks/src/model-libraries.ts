@@ -886,7 +886,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"inworld-voice-isolation": {
 		prettyLabel: "Inworld Voice Isolator",
-		repoName: "voice-isolator",
+		repoName: "Inworld Voice Isolator",
 		repoUrl: "https://github.com/inworld-ai/voice-isolator",
 		filter: false,
 		countDownloads: `path:"denoiser.safetensors" OR path:"denoiser_realtime.safetensors"`,
