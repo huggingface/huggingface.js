@@ -877,6 +877,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt" OR path_extension:"zst"`,
 	},
+	"inworld-sava": {
+		prettyLabel: "Inworld SAVA",
+		repoName: "sava",
+		repoUrl: "https://github.com/inworld-ai/sava",
+		filter: false,
+		countDownloads: `path:"sava.safetensors"`,
+	},
+	"inworld-voice-isolation": {
+		prettyLabel: "Inworld Voice Isolator",
+		repoName: "voice-isolator",
+		repoUrl: "https://github.com/inworld-ai/voice-isolator",
+		filter: false,
+		countDownloads: `path:"denoiser.safetensors" OR path:"denoiser_realtime.safetensors"`,
+	},
 	"ising-decoding": {
 		prettyLabel: "Ising Decoding",
 		repoName: "Ising-Decoding",
