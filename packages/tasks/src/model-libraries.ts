@@ -1608,6 +1608,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	s1s2: {
+		prettyLabel: "s1s2",
+		repoName: "s1s2",
+		repoUrl: "https://github.com/eduardoworrel/s1s2",
+		docsUrl: "https://github.com/eduardoworrel/s1s2/blob/main/docs/reference.md",
+		snippets: snippets.s1s2,
+		filter: false,
+		countDownloads: `path:manifest*.json`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
