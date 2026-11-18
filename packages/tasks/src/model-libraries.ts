@@ -879,7 +879,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"inworld-sava": {
 		prettyLabel: "Inworld SAVA",
-		repoName: "sava",
+		repoName: "Inworld SAVA",
 		repoUrl: "https://github.com/inworld-ai/sava",
 		filter: false,
 		countDownloads: `path:"sava.safetensors"`,
