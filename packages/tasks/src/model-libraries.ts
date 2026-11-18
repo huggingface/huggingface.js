@@ -535,6 +535,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_filename:"source-identity" AND path_extension:"json"`,
 	},
+	"duo-world-model": {
+		prettyLabel: "Duo",
+		repoName: "Duo",
+		repoUrl: "https://github.com/inclusionAI/Duo",
+		filter: false,
+		countDownloads: `path:"realization/dcp/.metadata" OR path:"realization/diffusion_pytorch_model.safetensors.index.json"`,
+	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",
