@@ -4,6 +4,8 @@ import { inferenceProviderMappingCache } from "../src/lib/getInferenceProviderMa
 import { ZaiImageToTextTask } from "../src/providers/zai-org.js";
 
 const json = (body: unknown) => new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json" } });
+const mapping = (provider: string, hfModelId: string, providerId: string, task: string) =>
+	json({ inferenceProviderMapping: [{ provider, hfModelId, providerId, status: "live", task }] });
 
 describe("Provider custom fetch propagation", () => {
 	afterEach(() => {
@@ -18,17 +20,7 @@ describe("Provider custom fetch propagation", () => {
 		const customFetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>(async (input) => {
 			const url = String(input);
 			if (url.includes("inferenceProviderMapping")) {
-				return json({
-					inferenceProviderMapping: [
-						{
-							provider: "fal-ai",
-							hfModelId: "acme/img",
-							providerId: "fal-ai/acme-img",
-							status: "live",
-							task: "text-to-image",
-						},
-					],
-				});
+				return mapping("fal-ai", "acme/img", "fal-ai/acme-img", "text-to-image");
 			}
 			if (url.includes("/status")) {
 				return json({ status: "COMPLETED" });
@@ -76,6 +68,78 @@ describe("Provider custom fetch propagation", () => {
 		);
 
 		expect((payload as Record<string, unknown>).inputs).toMatch(/^data:image\/png;base64,/);
+		expect(customFetchMock).toHaveBeenCalledWith("https://example.com/image.png", { signal: undefined });
+		expect(globalFetchMock).not.toHaveBeenCalled();
+	});
+	it("uses the custom fetch for hf-inference output URL downloads", async () => {
+		const globalFetchMock = vi.fn();
+		vi.stubGlobal("fetch", globalFetchMock);
+		const customFetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>(async (input) => {
+			const url = String(input);
+			if (url.includes("inferenceProviderMapping")) {
+				return mapping("hf-inference", "acme/img", "acme/img", "text-to-image");
+			}
+			if (url === "https://cdn.example/out.png") {
+				return new Response(new Blob(["image"], { type: "image/png" }));
+			}
+			return json({ output: ["https://cdn.example/out.png"] });
+		});
+
+		const output = await new InferenceClient("hf_token").textToImage(
+			{ model: "acme/img", provider: "hf-inference", inputs: "a cat" },
+			{ fetch: customFetchMock },
+		);
+
+		expect(output).toBeInstanceOf(Blob);
+		expect(customFetchMock).toHaveBeenCalledWith("https://cdn.example/out.png", { signal: undefined });
+		expect(globalFetchMock).not.toHaveBeenCalled();
+	});
+
+	it("keeps hf-inference b64_json data URL decoding on the global fetch", async () => {
+		const nativeFetch = globalThis.fetch;
+		const globalFetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>((input, init) =>
+			nativeFetch(input, init),
+		);
+		vi.stubGlobal("fetch", globalFetchMock);
+		const customFetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>(async (input) =>
+			String(input).includes("inferenceProviderMapping")
+				? mapping("hf-inference", "acme/img", "acme/img", "text-to-image")
+				: json({ data: [{ b64_json: btoa("image") }] }),
+		);
+
+		const output = await new InferenceClient("hf_token").textToImage(
+			{ model: "acme/img", provider: "hf-inference", inputs: "a cat" },
+			{ fetch: customFetchMock },
+		);
+
+		expect(await (output as unknown as Blob).text()).toBe("image");
+		expect(globalFetchMock).toHaveBeenCalledOnce();
+		expect(String(globalFetchMock.mock.calls[0][0])).toMatch(/^data:image\/jpeg;base64,/);
+		expect(customFetchMock.mock.calls.map(([input]) => String(input))).not.toContainEqual(
+			expect.stringMatching(/^data:/),
+		);
+	});
+
+	it("uses the custom fetch for the zai image input download through imageToText", async () => {
+		const globalFetchMock = vi.fn();
+		vi.stubGlobal("fetch", globalFetchMock);
+		const customFetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>(async (input) => {
+			const url = String(input);
+			if (url.includes("inferenceProviderMapping")) {
+				return mapping("zai-org", "acme/ocr", "acme-ocr", "image-to-text");
+			}
+			if (url === "https://example.com/image.png") {
+				return new Response(new Blob(["image"], { type: "image/png" }));
+			}
+			return json({ md_results: "# caption" });
+		});
+
+		const output = await new InferenceClient("hf_token").imageToText(
+			{ model: "acme/ocr", provider: "zai-org", inputs: "https://example.com/image.png" } as never,
+			{ fetch: customFetchMock },
+		);
+
+		expect(output.generated_text).toBe("# caption");
 		expect(customFetchMock).toHaveBeenCalledWith("https://example.com/image.png", { signal: undefined });
 		expect(globalFetchMock).not.toHaveBeenCalled();
 	});
