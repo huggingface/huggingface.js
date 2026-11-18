@@ -31,6 +31,8 @@ export * from "./paths-info";
 export * from "./repo-exists";
 export * from "./snapshot-download";
 export * from "./space-info";
+export * from "./space-secrets";
+export * from "./space-variables";
 export * from "./upload-file";
 export * from "./upload-files";
 export * from "./upload-files-with-progress";
