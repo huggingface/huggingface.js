@@ -71,6 +71,7 @@ describe("Provider custom fetch propagation", () => {
 		expect(customFetchMock).toHaveBeenCalledWith("https://example.com/image.png", { signal: undefined });
 		expect(globalFetchMock).not.toHaveBeenCalled();
 	});
+
 	it("uses the custom fetch for hf-inference output URL downloads", async () => {
 		const globalFetchMock = vi.fn();
 		vi.stubGlobal("fetch", globalFetchMock);
