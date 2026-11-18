@@ -540,8 +540,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Duo",
 		repoUrl: "https://github.com/inclusionAI/Duo",
 		filter: false,
-		countDownloads:
-			`path:"realization/dcp/.metadata" OR path:"realization/diffusion_pytorch_model.safetensors.index.json"`,
+		countDownloads: `path:"realization/dcp/.metadata" OR path:"realization/diffusion_pytorch_model.safetensors.index.json"`,
 	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
