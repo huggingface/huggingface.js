@@ -172,6 +172,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
 	},
+	basalt: {
+		prettyLabel: "Basalt",
+		repoName: "Basalt",
+		repoUrl: "https://github.com/jesdga95/basalt",
+		filter: false,
+		countDownloads: `path_extension:"basalt"`,
+	},
 	basedecision: {
 		prettyLabel: "BaseDecision",
 		repoName: "BaseDecision",
