@@ -23,6 +23,9 @@ export async function subPaths(
 	for (const file of files) {
 		const filePath = pathToFileURL(fileURLToPath(path) + "/" + file.name);
 		if (file.isDirectory()) {
+			if (maxDepth <= 0) {
+				continue;
+			}
 			ret.push(
 				...(await subPaths(filePath, maxDepth - 1)).map((subPath) => ({
 					...subPath,
