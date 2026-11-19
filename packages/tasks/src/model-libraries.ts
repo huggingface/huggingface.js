@@ -1564,6 +1564,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
 	},
+	redefiner: {
+		prettyLabel: "ReDefiNER",
+		repoName: "ReDefiNER",
+		repoUrl: "https://github.com/Jungroo-AI/redefiner",
+		snippets: snippets.redefiner,
+		filter: false,
+	},
 	relik: {
 		prettyLabel: "Relik",
 		repoName: "Relik",
