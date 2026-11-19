@@ -37,6 +37,10 @@ export function range(start: number, stop?: number, step = 1): number[] {
  * @returns The sliced array.
  */
 export function slice<T>(array: T[], start?: number, stop?: number, step = 1): T[] {
+	if (step === 0) {
+		throw new Error("slice step cannot be zero");
+	}
+
 	const direction = Math.sign(step);
 
 	if (direction >= 0) {
