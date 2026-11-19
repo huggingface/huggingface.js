@@ -27,18 +27,18 @@ model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
 model.load_adapter("${model.id}", set_active=True)`,
 ];
 
-const aicSdkSetup = `# pip install aic-sdk
+const aicSdkSetup = (model: ModelData) => `# pip install aic-sdk
 import aic_sdk as aic
 
-license_key = "YOUR_SDK_KEY"  # free key at https://developers.ai-coustics.com/login`;
+license_key = "YOUR_SDK_KEY"  # free key at https://developers.ai-coustics.com/login
+model_id = "MODEL_ID"  # model IDs at https://docs.ai-coustics.com/reference/sdk/models#${model.id.split("/").pop()}`;
 
 export const aic_sdk = (model: ModelData): string[] => {
 	if (model.pipeline_tag === "voice-activity-detection") {
 		return [
-			`${aicSdkSetup}
+			`${aicSdkSetup(model)}
 
-# replace MODEL_ID with a model ID from https://huggingface.co/${model.id}
-model = aic.Model.from_file(aic.Model.download("MODEL_ID", "./models"))
+model = aic.Model.from_file(aic.Model.download(model_id, "./models"))
 config = aic.ProcessorConfig.optimal(model)
 vad = aic.Vad(model, license_key, config)
 ctx = vad.get_context()
@@ -50,10 +50,9 @@ speech_detected = ctx.is_speech_detected()`,
 	}
 	if (model.tags.includes("audio-insight")) {
 		return [
-			`${aicSdkSetup}
+			`${aicSdkSetup(model)}
 
-# replace MODEL_ID with a model ID from https://huggingface.co/${model.id}
-model = aic.Model.from_file(aic.Model.download("MODEL_ID", "./models"))
+model = aic.Model.from_file(aic.Model.download(model_id, "./models"))
 analyzer = aic.FileAnalyzer(model, license_key)
 
 # analyze a mono float32 buffer; one result per 5-second window
@@ -62,10 +61,9 @@ print(results[0].risk_score, results[0].noise, results[0].interfering_speech)`,
 		];
 	}
 	return [
-		`${aicSdkSetup}
+		`${aicSdkSetup(model)}
 
-# replace MODEL_ID with a model ID from https://huggingface.co/${model.id}
-model = aic.Model.from_file(aic.Model.download("MODEL_ID", "./models"))
+model = aic.Model.from_file(aic.Model.download(model_id, "./models"))
 config = aic.ProcessorConfig.optimal(model)
 processor = aic.Processor(model, license_key, config)
 
