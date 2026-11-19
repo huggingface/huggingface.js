@@ -307,6 +307,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	chessqueries: {
+		prettyLabel: "ChessQueries",
+		repoName: "ChessQueries",
+		repoUrl: "https://github.com/JSeytre/chessqueries",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"onnx" OR path_extension:"tflite" OR path:*.mlpackage.zip`,
+	},
 	chexmix: {
 		prettyLabel: "CheXmix",
 		repoName: "CheXmix",
@@ -363,6 +370,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.colipri,
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	cooperscene: {
+		prettyLabel: "CooperScene",
+		repoName: "CooperScene",
+		repoUrl: "https://github.com/UCR-CISL/CooperScene",
+		filter: false,
 	},
 	cosyvoice: {
 		prettyLabel: "CosyVoice",
@@ -521,6 +534,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://drinkme.petrichor.wtf",
 		filter: false,
 		countDownloads: `path_filename:"source-identity" AND path_extension:"json"`,
+	},
+	"duo-world-model": {
+		prettyLabel: "Duo",
+		repoName: "Duo",
+		repoUrl: "https://github.com/inclusionAI/Duo",
+		filter: false,
+		countDownloads: `path:"realization/dcp/.metadata" OR path:"realization/diffusion_pytorch_model.safetensors.index.json"`,
 	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
@@ -864,6 +884,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt" OR path_extension:"zst"`,
 	},
+	"inworld-sava": {
+		prettyLabel: "Inworld SAVA",
+		repoName: "Inworld SAVA",
+		repoUrl: "https://github.com/inworld-ai/sava",
+		filter: false,
+		countDownloads: `path:"sava.safetensors"`,
+	},
+	"inworld-voice-isolation": {
+		prettyLabel: "Inworld Voice Isolator",
+		repoName: "Inworld Voice Isolator",
+		repoUrl: "https://github.com/inworld-ai/voice-isolator",
+		filter: false,
+		countDownloads: `path:"denoiser.safetensors" OR path:"denoiser_realtime.safetensors"`,
+	},
 	"ising-decoding": {
 		prettyLabel: "Ising Decoding",
 		repoName: "Ising-Decoding",
@@ -1020,8 +1054,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "LibreYOLO",
 		repoUrl: "https://github.com/LibreYOLO/libreyolo",
 		docsUrl: "https://www.libreyolo.com/docs",
+		snippets: snippets.libreyolo,
 		filter: false,
-		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json" OR path:"model_index.json" OR path:"pipeline.json"`,
 	},
 	lightglue: {
 		prettyLabel: "LightGlue",
@@ -1034,8 +1069,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "LimX Dynamics",
 		repoName: "LimX Dynamics",
 		repoUrl: "https://github.com/limxdynamics/limxdynamics",
+		snippets: snippets.limx_dynamics,
 		filter: false,
-		countDownloads: `(path_filename:"params" AND path_extension:"yaml") OR (path_filename:"controllers" AND path_extension:"yaml") OR (path_filename:"norm_stats" AND path_extension:"json")`,
+		countDownloads: `(path_filename:"params" AND path_extension:"yaml") OR (path_filename:"controllers" AND path_extension:"yaml") OR (path_filename:"norm_stats" AND path_extension:"json") OR (path_filename:"package" AND path_extension:"xml")`,
 	},
 	"lingbot-map": {
 		prettyLabel: "LingBot-Map",
@@ -1310,6 +1346,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/nvidia-medtech",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
+	"onnxruntime-genai": {
+		prettyLabel: "ONNX Runtime GenAI",
+		repoName: "ONNX Runtime GenAI",
+		repoUrl: "https://github.com/microsoft/onnxruntime-genai",
+		docsUrl: "https://onnxruntime.ai/docs/genai/",
+		filter: false,
+		countDownloads: `path_filename:"genai_config" AND path_extension:"json"`,
+	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
 		repoName: "open-oasis",
@@ -1520,6 +1564,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
 	},
+	redefiner: {
+		prettyLabel: "ReDefiNER",
+		repoName: "ReDefiNER",
+		repoUrl: "https://github.com/Jungroo-AI/redefiner",
+		snippets: snippets.redefiner,
+		filter: false,
+	},
 	relik: {
 		prettyLabel: "Relik",
 		repoName: "Relik",
@@ -1584,6 +1635,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://rwkv.com/",
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	s1s2: {
+		prettyLabel: "s1s2",
+		repoName: "s1s2",
+		repoUrl: "https://github.com/eduardoworrel/s1s2",
+		docsUrl: "https://github.com/eduardoworrel/s1s2/blob/main/docs/reference.md",
+		snippets: snippets.s1s2,
+		filter: false,
+		countDownloads: `path:manifest*.json`,
 	},
 	saelens: {
 		prettyLabel: "SAELens",
@@ -1827,6 +1887,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.stanza,
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
+	},
+	"strands-decider": {
+		prettyLabel: "Strands Decider",
+		repoName: "Strands Decider",
+		repoUrl: "https://github.com/strands-labs/strands-decider",
+		snippets: snippets.strandsDecider,
+		filter: false,
+		countDownloads: `path:"strands_decider_config.json" OR path:"hobson_config.json"`,
 	},
 	supertonic: {
 		prettyLabel: "Supertonic",
@@ -2129,6 +2197,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Wan-Video/Wan2.2",
 		countDownloads: `path_filename:"config" AND path_extension:"json"`,
 	},
+	wavegen: {
+		prettyLabel: "WaveGen",
+		repoName: "WaveGen",
+		repoUrl: "https://github.com/sh-lee-prml/WaveGen",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	wham: {
 		prettyLabel: "WHAM",
 		repoName: "wham",
@@ -2166,6 +2241,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ultralytics/ultralytics",
 		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
+	},
+	"zao-lib": {
+		prettyLabel: "ZAO",
+		repoName: "ZAO",
+		repoUrl: "https://github.com/syntheticgestalt/zao",
+		snippets: snippets.zao,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
 	},
 	zipsplat: {
 		prettyLabel: "ZipSplat",
