@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"target": "es2022",
+		"lib": ["es2022", "dom", "dom.iterable"],
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"declaration": true,
+		"strict": true,
+		"exactOptionalPropertyTypes": true,
+		"noImplicitOverride": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"verbatimModuleSyntax": true
+	},
+	"include": ["src", "test/types.ts"]
+}

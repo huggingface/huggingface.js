@@ -20,8 +20,9 @@ npm install @huggingface/lerobot
 ```
 
 [hyparquet](https://github.com/hyparam/hyparquet) comes with it, and is used to read the `v3.0`
-episode index. It is imported on demand, so callers that only need `info()` or a `v2` dataset never
-load it.
+episode index and the frame data. [fzstd](https://github.com/101arrowz/fzstd) adds ZSTD alongside
+hyparquet's built-in SNAPPY. Both are imported on demand, so callers that only need `info()` or a `v2`
+episode listing never load them.
 
 ## Usage
 
@@ -54,14 +55,28 @@ const episodes = await dataset.episodes({ limit: 10 });
 //   },
 //   ...
 // ]
+
+const episode = await dataset.episode(42);
+// The episode whose `index` is 42, or undefined when there is none
 ```
+
+`offset` counts positions in the index, which match episode indexes only when a dataset numbers its
+episodes 0, 1, 2, ... Some start at 10 or skip deleted episodes, so use `episode(index)` to open a
+given episode. On a dataset numbered 0, 1, 2, ... it costs the same as
+`episodes({ offset: index, limit: 1 })`.
 
 `videos[].fromSec` / `toSec` are the episode's offsets inside `url`. On `v3.0` several episodes share
 one file, so seek to `fromSec` and stop at `toSec`; on `v2.x` each episode has its own file and the
 range simply spans it.
 
 `data` points at the frame rows for that episode, for callers that want to chart
-`observation.state` or `action` themselves.
+`observation.state` or `action` themselves. `fromRow` is inclusive and `toRow` is exclusive;
+both are row offsets inside `data.url`, not indexes across the dataset. For v3, when a page starts
+partway through a data file, listing episodes also reads that file's parquet footer to find where it
+starts. `data` is absent when that file cannot be read or disagrees with the episode metadata.
+
+Keep one `LeRobotDataset` while paging through episodes: like `info()`, it remembers the `v3.0` index
+files it has walked, so a later page or `episode()` lookup goes straight to the file that holds it.
 
 ### Pinning a revision
 

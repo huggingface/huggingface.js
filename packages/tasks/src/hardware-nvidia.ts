@@ -12,6 +12,7 @@ export interface NvidiaHardwareSpec extends HardwareSpec {
 export enum NvidiaComputeCapabilities {
 	BLACKWELL_ULTRA = 12.1,
 	BLACKWELL_RTX = 12.0,
+	THOR = 11.0,
 	BLACKWELL = 10.0,
 	HOPPER = 9.0,
 	ADA_LOVELACE = 8.9,
@@ -110,12 +111,30 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	GB10: {
 		tflops: 29.71,
-		memory: [128],
+		memory: [64, 128],
 		computeCapability: 12.1,
 		msrp: 3_999,
 		power: 140,
 		releaseYear: 2025,
 		aliases: ["DGX Spark"],
+	},
+	"RTX Spark N1X Laptop": {
+		tflops: 29.71,
+		memory: [24, 32, 48, 64, 128],
+		computeCapability: 12.1,
+		msrp: 5_900,
+		power: 80,
+		releaseYear: 2026,
+		aliases: ["N1X", "RTX Spark", "RTX Spark Laptop", "Surface Laptop Ultra"],
+	},
+	"RTX Spark N1X Desktop": {
+		tflops: 29.71,
+		memory: [128],
+		computeCapability: 12.1,
+		msrp: 6_000,
+		power: 140,
+		releaseYear: 2026, // Announced for 2026; Surface RTX Spark Dev Box is available for pre-order.
+		aliases: ["N1X", "RTX Spark", "Surface RTX Spark Dev Box"],
 	},
 	"RTX PRO 6000 WS": {
 		tflops: 126,
@@ -431,7 +450,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	"RTX 5070 Mobile": {
 		tflops: 13.13,
-		memory: [8],
+		memory: [8, 12],
 		computeCapability: 12.0,
 		msrp: 500,
 		power: 100,
@@ -717,6 +736,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 170,
 		releaseYear: 2021,
 	},
+	"RTX 3050": {
+		tflops: 9.098,
+		memory: [8, 6],
+		computeCapability: 8.6,
+		msrp: 249,
+		power: 130,
+		releaseYear: 2022,
+	},
 	"RTX 2080 Ti": {
 		tflops: 26.9,
 		memory: [11, 22], // 22GB: modded 2080ti
@@ -732,6 +759,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 700,
 		power: 215,
 		releaseYear: 2018,
+	},
+	"RTX 2080 SUPER": {
+		tflops: 22.3,
+		memory: [8],
+		computeCapability: 7.5,
+		msrp: 699,
+		power: 250,
+		releaseYear: 2019,
 	},
 	"RTX 2070": {
 		tflops: 14.93,
@@ -772,6 +807,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 250,
 		power: 95,
 		releaseYear: 2022,
+	},
+	"RTX 2060 SUPER": {
+		tflops: 14.36,
+		memory: [8],
+		computeCapability: 7.5,
+		msrp: 399,
+		power: 175,
+		releaseYear: 2019,
 	},
 	"RTX 2060": {
 		tflops: 12.9,
@@ -853,6 +896,38 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 75,
 		releaseYear: 2016,
 	},
+	"GTX 980": {
+		tflops: 4.98, // float32 (GPU does not support native float16)
+		memory: [4],
+		computeCapability: 5.2,
+		msrp: 549,
+		power: 165,
+		releaseYear: 2014,
+	},
+	"GT 730 (Kepler)": {
+		tflops: 0.69, // float32 (GPU does not support native float16)
+		memory: [1, 2, 4],
+		computeCapability: 3.5,
+		msrp: 70,
+		power: 38,
+		releaseYear: 2014,
+	},
+	"GT 710": {
+		tflops: 0.37, // float32 (GPU does not support native float16)
+		memory: [1, 2],
+		computeCapability: 3.5,
+		msrp: 40,
+		power: 19,
+		releaseYear: 2014,
+	},
+	"GT 430": {
+		tflops: 0.27, // float32 (GPU does not support native float16)
+		memory: [1, 2, 4],
+		computeCapability: 2.1,
+		msrp: 79,
+		power: 49,
+		releaseYear: 2010,
+	},
 	"RTX Titan": {
 		tflops: 32.62,
 		memory: [24],
@@ -860,6 +935,30 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 2_500,
 		power: 280,
 		releaseYear: 2018,
+	},
+	"GTX 1660 Ti": {
+		tflops: 10.87,
+		memory: [6],
+		computeCapability: 7.5,
+		msrp: 279,
+		power: 120,
+		releaseYear: 2019,
+	},
+	"GTX 1660 Ti Mobile": {
+		tflops: 9.769,
+		memory: [6],
+		computeCapability: 7.5,
+		msrp: 250,
+		power: 80,
+		releaseYear: 2019,
+	},
+	"GTX 1660 SUPER": {
+		tflops: 10.05,
+		memory: [6],
+		computeCapability: 7.5,
+		msrp: 229,
+		power: 125,
+		releaseYear: 2019,
 	},
 	"GTX 1660": {
 		tflops: 10.05,
@@ -869,6 +968,30 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 120,
 		releaseYear: 2019,
 	},
+	"GTX 1650 SUPER": {
+		tflops: 8.832,
+		memory: [4],
+		computeCapability: 7.5,
+		msrp: 159,
+		power: 100,
+		releaseYear: 2019,
+	},
+	"GTX 1650": {
+		tflops: 5.967,
+		memory: [4],
+		computeCapability: 7.5,
+		msrp: 149,
+		power: 75,
+		releaseYear: 2019,
+	},
+	"GTX 1650 Ti Mobile": {
+		tflops: 6.083,
+		memory: [4],
+		computeCapability: 7.5,
+		msrp: 200,
+		power: 55,
+		releaseYear: 2020,
+	},
 	"GTX 1650 Mobile": {
 		tflops: 6.39,
 		memory: [4],
@@ -877,6 +1000,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 50,
 		releaseYear: 2019,
 	},
+	"GTX 1630": {
+		tflops: 3.656,
+		memory: [4],
+		computeCapability: 7.5,
+		msrp: 170,
+		power: 75,
+		releaseYear: 2022,
+	},
 	T4: {
 		tflops: 65.13,
 		memory: [16],
@@ -884,6 +1015,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 2_000,
 		power: 70,
 		releaseYear: 2018,
+	},
+	T40: {
+		tflops: 28.75,
+		memory: [24],
+		computeCapability: 7.5,
+		msrp: 4_000,
+		power: 250,
+		releaseYear: 2019,
 	},
 	T10: {
 		tflops: 20.0,
@@ -900,6 +1039,30 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 10_000,
 		power: 300,
 		releaseYear: 2017,
+	},
+	"Quadro RTX 8000": {
+		tflops: 32.63,
+		memory: [48],
+		computeCapability: 7.5,
+		msrp: 10_000,
+		power: 295,
+		releaseYear: 2018,
+	},
+	"Quadro RTX 6000": {
+		tflops: 32.63,
+		memory: [24],
+		computeCapability: 7.5,
+		msrp: 6_300,
+		power: 295,
+		releaseYear: 2018,
+	},
+	"Quadro RTX 5000": {
+		tflops: 22.3,
+		memory: [16],
+		computeCapability: 7.5,
+		msrp: 2_300,
+		power: 265,
+		releaseYear: 2018,
 	},
 	"Quadro P6000": {
 		tflops: 12.63, // float32 (GPU does not support native float16)
@@ -924,6 +1087,15 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 7_000,
 		power: 300,
 		releaseYear: 2016,
+	},
+	"Jetson T5000": {
+		tflops: 258.5, // half the sparse fp16 figure
+		memory: [128],
+		computeCapability: 11.0,
+		msrp: 3_499,
+		power: 130,
+		releaseYear: 2025,
+		aliases: ["Jetson AGX Thor"],
 	},
 	"Jetson AGX Orin 64GB": {
 		tflops: 10.65,

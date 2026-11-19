@@ -1,3 +1,4 @@
+import type { SpaceHardwareFlavor } from "../public";
 import type { ApiAuthor } from "./api-author";
 
 export interface ApiCollectionInfo {
@@ -216,52 +217,8 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 			| "PAUSED"
 			| "SLEEPING";
 		hardware: {
-			current:
-				| (
-						| "cpu-basic"
-						| "cpu-upgrade"
-						| "cpu-performance"
-						| "cpu-xl"
-						| "zero-a10g"
-						| "t4-small"
-						| "t4-medium"
-						| "l4x1"
-						| "l4x4"
-						| "l40sx1"
-						| "l40sx4"
-						| "l40sx8"
-						| "a10g-small"
-						| "a10g-large"
-						| "a10g-largex2"
-						| "a10g-largex4"
-						| "a100-large"
-						| "h100"
-						| "h100x8"
-				  )
-				| null;
-			requested:
-				| (
-						| "cpu-basic"
-						| "cpu-upgrade"
-						| "cpu-performance"
-						| "cpu-xl"
-						| "zero-a10g"
-						| "t4-small"
-						| "t4-medium"
-						| "l4x1"
-						| "l4x4"
-						| "l40sx1"
-						| "l40sx4"
-						| "l40sx8"
-						| "a10g-small"
-						| "a10g-large"
-						| "a10g-largex2"
-						| "a10g-largex4"
-						| "a100-large"
-						| "h100"
-						| "h100x8"
-				  )
-				| null;
+			current: SpaceHardwareFlavor | null;
+			requested: SpaceHardwareFlavor | null;
 		};
 		storage: ("small" | "medium" | "large") | null;
 		errorMessage?: string;

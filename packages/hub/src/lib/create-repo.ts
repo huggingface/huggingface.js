@@ -1,10 +1,11 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiCreateRepoPayload } from "../types/api/api-create-repo";
-import type { CredentialsParams, RepoDesignation, SpaceSdk } from "../types/public";
+import type { CredentialsParams, RepoDesignation, SpaceHardwareFlavor, SpaceSdk } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function createRepo(
 	params: {
@@ -28,6 +29,10 @@ export async function createRepo(
 		files?: Array<{ content: ArrayBuffer | Blob; path: string }>;
 		/** @required for when {@link repo.type} === "space" */
 		sdk?: SpaceSdk;
+		/**
+		 * only used for spaces, ignored for static spaces
+		 */
+		hardware?: SpaceHardwareFlavor;
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -49,18 +54,21 @@ export async function createRepo(
 
 	const res =
 		repoId.type === "bucket"
-			? await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/buckets/${namespace}/${repoName}`, {
-					method: "POST",
-					body: JSON.stringify({
-						visibility,
-						resourceGroupId: params.resourceGroupId,
-					}),
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						"Content-Type": "application/json",
+			? await fetchWithServerWarnings(params.fetch)(
+					`${params.hubUrl ?? HUB_URL}/api/buckets/${namespace}/${repoName}`,
+					{
+						method: "POST",
+						body: JSON.stringify({
+							visibility,
+							resourceGroupId: params.resourceGroupId,
+						}),
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+							"Content-Type": "application/json",
+						},
 					},
-				})
-			: await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
+				)
+			: await fetchWithServerWarnings(params.fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
 					method: "POST",
 					body: JSON.stringify({
 						name: repoName,
@@ -72,6 +80,7 @@ export async function createRepo(
 							? {
 									type: "space",
 									sdk: params.sdk ?? "static",
+									hardware: params.hardware,
 								}
 							: {
 									type: repoId.type,

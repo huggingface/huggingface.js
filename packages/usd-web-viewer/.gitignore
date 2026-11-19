@@ -1,0 +1,7 @@
+target/
+node_modules
+/wasm/*
+!/wasm/usd_wasm.d.ts
+/dist/
+/.tshy-build/
+/THIRD_PARTY_LICENSES

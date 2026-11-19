@@ -1,0 +1,23 @@
+#usda 1.0
+
+# A robot with instanceable links (`parts/robot.usda`), referenced twice: as
+# is, and as an instance itself. Both draw their base and hand (four meshes),
+# and the two hands share one prototype's geometry.
+def Xform "World"
+{
+    def Xform "robot" (
+        prepend references = @./parts/robot.usda@
+    )
+    {
+    }
+
+    # The same robot as an instance itself: its links are instances inside it.
+    def Xform "instanced_robot" (
+        instanceable = true
+        prepend references = @./parts/robot.usda@
+    )
+    {
+        double3 xformOp:translate = (4, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+}
