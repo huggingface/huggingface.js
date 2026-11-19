@@ -37,7 +37,8 @@ export const aic_sdk = (model: ModelData): string[] => {
 		return [
 			`${aicSdkSetup}
 
-model = aic.Model.from_file(aic.Model.download("vad-ms-2.1-xxs-16khz", "./models"))
+# replace MODEL_ID with a model ID from https://huggingface.co/${model.id}
+model = aic.Model.from_file(aic.Model.download("MODEL_ID", "./models"))
 config = aic.ProcessorConfig.optimal(model)
 vad = aic.Vad(model, license_key, config)
 ctx = vad.get_context()
@@ -47,11 +48,12 @@ vad.process(audio_block)
 speech_detected = ctx.is_speech_detected()`,
 		];
 	}
-	if (model.pipeline_tag === "audio-classification") {
+	if (model.tags.includes("audio-insight")) {
 		return [
 			`${aicSdkSetup}
 
-model = aic.Model.from_file(aic.Model.download("tyto-1.1-l-16khz", "./models"))
+# replace MODEL_ID with a model ID from https://huggingface.co/${model.id}
+model = aic.Model.from_file(aic.Model.download("MODEL_ID", "./models"))
 analyzer = aic.FileAnalyzer(model, license_key)
 
 # analyze a mono float32 buffer; one result per 5-second window
@@ -62,7 +64,8 @@ print(results[0].risk_score, results[0].noise, results[0].interfering_speech)`,
 	return [
 		`${aicSdkSetup}
 
-model = aic.Model.from_file(aic.Model.download("quail-vf-2.2-l-16khz", "./models"))
+# replace MODEL_ID with a model ID from https://huggingface.co/${model.id}
+model = aic.Model.from_file(aic.Model.download("MODEL_ID", "./models"))
 config = aic.ProcessorConfig.optimal(model)
 processor = aic.Processor(model, license_key, config)
 

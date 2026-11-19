@@ -81,6 +81,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://docs.ai-coustics.com",
 		snippets: snippets.aic_sdk,
 		filter: false,
+		countDownloads: `path:"config.json"`,
 	},
 	allennlp: {
 		prettyLabel: "AllenNLP",
