@@ -248,10 +248,15 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 	}
 
 	if (params.abortSignal) {
-		params.abortSignal.addEventListener("abort", () => abortController.abort());
+		if (params.abortSignal.aborted) {
+			abortController.abort();
+		} else {
+			params.abortSignal.addEventListener("abort", () => abortController.abort());
+		}
 	}
 
 	try {
+		abortSignal.throwIfAborted();
 		const allOperations = (
 			await Promise.all(
 				params.operations.map(async (operation) => {
@@ -794,10 +799,15 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 	}
 
 	if (params.abortSignal) {
-		params.abortSignal.addEventListener("abort", () => abortController.abort());
+		if (params.abortSignal.aborted) {
+			abortController.abort();
+		} else {
+			params.abortSignal.addEventListener("abort", () => abortController.abort());
+		}
 	}
 
 	try {
+		abortSignal.throwIfAborted();
 		const allOperations = (
 			await Promise.all(
 				params.operations.map(async (operation) => {
