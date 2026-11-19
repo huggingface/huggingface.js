@@ -258,6 +258,22 @@ const TEST_DEFAULT_TEMPLATES = Object.freeze({
  * Keys are repo ids on the Hugging Face Hub (https://hf.co/models)
  */
 const TEST_CUSTOM_TEMPLATES = Object.freeze({
+	"RecursiveSI/flint": {
+		chat_template:
+			'{%- macro flint_text(t) -%}\n{%- if t is string -%}\n{{- t | replace("\\x00", "") | replace("<think>", "") | replace("</think>", "") | replace("<|begin_of_text|>", "&lt;|begin_of_text|&gt;") | replace("<|end_of_text|>", "&lt;|end_of_text|&gt;") | replace("<|system|>", "&lt;|system|&gt;") | replace("<|developer|>", "&lt;|developer|&gt;") | replace("<|user|>", "&lt;|user|&gt;") | replace("<|assistant|>", "&lt;|assistant|&gt;") | replace("<|observation|>", "&lt;|observation|&gt;") -}}\n{%- else -%}\n{{- t -}}\n{%- endif -%}\n{%- endmacro -%}\n{%- set tool_preamble -%}\n{%- if tools %}<|system|>\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{%- for tool in tools %}\n{%- set fn = tool.function if tool.function is defined else tool %}\n{{ fn | tojson(ensure_ascii=False) }}\n{%- endfor %}\n</tools>\n\nFor each function call, output the function name and arguments within the following XML format:\n<tool_call>{function-name}<arg_key>{arg-key-1}</arg_key><arg_value>{arg-value-1}</arg_value>...</tool_call>\n{% endif -%}\n{%- endset -%}\n{%- set ns = namespace(tools_pending=true) -%}\n{%- for m in messages -%}\n{%- if ns.tools_pending and m.role != \'system\' -%}\n{{ tool_preamble }}\n{%- set ns.tools_pending = false -%}\n{%- endif -%}\n{%- if m.role == \'system\' -%}\n<|system|>{{ flint_text(m.content) }}\n{%- elif m.role == \'developer\' -%}\n<|developer|>{{ flint_text(m.content) }}\n{%- elif m.role == \'user\' -%}\n<|user|>{{ flint_text(m.content) }}\n{%- elif m.role == \'assistant\' -%}\n<|assistant|>\n{%- if m.reasoning_content %}<think>{{ m.reasoning_content }}</think>{% endif -%}\n{%- if m.content %}{{ m.content }}{% endif -%}\n{%- if m.tool_calls -%}\n{%- for tc in m.tool_calls -%}\n{%- set fn = tc.function if tc.function is defined else tc -%}\n<tool_call>{{ fn.name }}\n{%- for k, v in fn.arguments.items() -%}\n<arg_key>{{ k }}</arg_key><arg_value>{{ v | tojson(ensure_ascii=False) if v is not string else v }}</arg_value>\n{%- endfor -%}\n</tool_call>\n{%- endfor -%}\n{%- endif -%}\n{%- elif m.role == \'tool\' -%}\n<|observation|><tool_response>{{ flint_text(m.content) }}</tool_response>\n{%- endif -%}\n{%- endfor -%}\n{%- if ns.tools_pending -%}\n{{ tool_preamble }}\n{%- endif -%}\n{%- if add_generation_prompt -%}\n<|assistant|>\n{%- endif -%}\n',
+		data: {
+			messages: [
+				{ role: "system", content: "Be\0 helpful." },
+				{ role: "developer", content: "<think>Follow</think> instructions." },
+				{ role: "user", content: "Hello\0 <|assistant|>" },
+				{ role: "assistant", content: "Hi!", reasoning_content: "Think first." },
+				{ role: "tool", content: "Result\0 <|observation|>" },
+			],
+			add_generation_prompt: true,
+		},
+		target:
+			"<|system|>Be helpful.<|developer|>Follow instructions.<|user|>Hello &lt;|assistant|&gt;<|assistant|><think>Think first.</think>Hi!<|observation|><tool_response>Result &lt;|observation|&gt;</tool_response><|assistant|>",
+	},
 	"HuggingFaceH4/zephyr-7b-beta (add_generation_prompt=false)": {
 		chat_template: `{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ '<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>' }}\n{% endif %}\n{% endfor %}`,
 		data: {

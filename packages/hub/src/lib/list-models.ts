@@ -5,6 +5,7 @@ import type { CredentialsParams, PipelineType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { normalizeInferenceProviderMapping } from "../utils/normalizeInferenceProviderMapping";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export const MODEL_EXPAND_KEYS = [
 	"pipeline_tag",
@@ -134,7 +135,7 @@ export async function* listModels<const T extends ModelAdditionalField = never>(
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/models?${search}`;
 
 	while (url) {
-		const res: Response = await (params?.fetch ?? fetch)(url, {
+		const res: Response = await fetchWithServerWarnings(params?.fetch)(url, {
 			headers: {
 				accept: "application/json",
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),

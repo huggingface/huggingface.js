@@ -3,6 +3,7 @@ import { createApiError } from "../error";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function deleteRepo(
 	params: {
@@ -20,14 +21,17 @@ export async function deleteRepo(
 
 	const res =
 		repoId.type === "bucket"
-			? await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/buckets/${namespace}/${repoName}`, {
-					method: "DELETE",
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						"Content-Type": "application/json",
+			? await fetchWithServerWarnings(params.fetch)(
+					`${params.hubUrl ?? HUB_URL}/api/buckets/${namespace}/${repoName}`,
+					{
+						method: "DELETE",
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+							"Content-Type": "application/json",
+						},
 					},
-				})
-			: await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/delete`, {
+				)
+			: await fetchWithServerWarnings(params.fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/delete`, {
 					method: "DELETE",
 					body: JSON.stringify({
 						name: repoName,

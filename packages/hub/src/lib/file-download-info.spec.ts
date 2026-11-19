@@ -56,4 +56,24 @@ describe("fileDownloadInfo", () => {
 		assert.strictEqual(info?.size, 62914580);
 		assert.strictEqual(info?.etag, '"c27f98578d9363b27db0bc1cbd9c692f8e6e90ae98c38cee7bc0a88829debd17"');
 	});
+
+	it("should URL-encode each segment of the path", async () => {
+		const urls: string[] = [];
+		const info = await fileDownloadInfo({
+			repo: {
+				name: "bigcode/commitpackft",
+				type: "dataset",
+			},
+			path: "data/c#/data 1.jsonl",
+			fetch: async (url) => {
+				urls.push(String(url));
+				return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
+			},
+		});
+
+		assert.strictEqual(info, null);
+		assert.deepStrictEqual(urls, [
+			"https://huggingface.co/datasets/bigcode/commitpackft/resolve/main/data/c%23/data%201.jsonl",
+		]);
+	});
 });

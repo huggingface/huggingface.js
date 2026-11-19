@@ -30,8 +30,7 @@ await uploadFile({
 // Use all supported Inference Providers!
 
 await inference.chatCompletion({
-  model: "meta-llama/Llama-3.1-8B-Instruct",
-  provider: "sambanova", // or together, fal-ai, replicate, cohere …
+  model: "deepseek-ai/DeepSeek-V4.1-Flash",
   messages: [
     {
       role: "user",
@@ -61,6 +60,7 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
 - [@huggingface/dduf](packages/dduf/README.md): Similar package for DDUF (DDUF Diffusers Unified Format)
 - [@huggingface/lerobot](packages/lerobot/README.md): A parser for LeRobot robotics datasets, reading v2.x and v3.0 layouts over ranged HTTP requests.
+- [@huggingface/usd-web-viewer](packages/usd-web-viewer/README.md): An OpenUSD viewer for the web: composes `.usd`, `.usda`, `.usdc` and `.usdz` files in WebAssembly and renders them with three.js.
 - [@huggingface/tasks](packages/tasks/README.md): The definition files and source-of-truth for the Hub's main primitives like pipeline tasks, model libraries, etc.
 - [@huggingface/jinja](packages/jinja/README.md): A minimalistic JS implementation of the Jinja templating engine, to be used for ML chat templates.
 - [@huggingface/space-header](packages/space-header/README.md): Use the Space `mini_header` outside Hugging Face
@@ -99,8 +99,8 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@4.13.30/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.17.5/+esm";
+    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@4.13.33/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.17.11/+esm";
 </script>
 ```
 
@@ -148,13 +148,6 @@ for await (const chunk of client.chatCompletionStream({
 }
 
 /// Using a third-party provider:
-await client.chatCompletion({
-  model: "meta-llama/Llama-3.1-8B-Instruct",
-  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
-  max_tokens: 512,
-  provider: "sambanova", // or together, fal-ai, replicate, cohere …
-})
-
 await client.textToImage({
   model: "black-forest-labs/FLUX.1-dev",
   inputs: "a picture of a green bird",

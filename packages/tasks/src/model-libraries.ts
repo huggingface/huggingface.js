@@ -58,6 +58,15 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	"aadya-neural": {
+		prettyLabel: "aadya-neural",
+		repoName: "aadya",
+		repoUrl: "https://github.com/manasdutta04/aadya",
+		docsUrl: "https://github.com/manasdutta04/aadya/blob/main/train/README.md",
+		snippets: snippets.aadyaNeural,
+		filter: false,
+		countDownloads: `path:"model.safetensors" OR path:"pytorch_model.bin"`,
+	},
 	acestep: {
 		prettyLabel: "ACE-Step",
 		repoName: "ACE-Step",
@@ -73,6 +82,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.adapters,
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
+	},
+	alkove: {
+		prettyLabel: "Alkove",
+		repoName: "Alkove",
+		repoUrl: "https://github.com/alkove-ai/alkove",
+		docsUrl: "https://alkove.ai/docs/",
+		snippets: snippets.alkove,
+		filter: false,
+		countDownloads: `path_extension:"alk"`,
 	},
 	allennlp: {
 		prettyLabel: "AllenNLP",
@@ -105,6 +123,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://huggingface.co/Arabic-Clip/araclip",
 		filter: false,
 		snippets: snippets.araclip,
+	},
+	asimov: {
+		prettyLabel: "Asimov",
+		repoName: "Asimov",
+		repoUrl: "https://github.com/menloresearch/humanoid-policy-viewer",
+		snippets: snippets.asimov,
+		filter: true,
+		countDownloads: `path:"env.yaml"`,
 	},
 	"aviation-ner": {
 		prettyLabel: "Aviation NER",
@@ -145,6 +171,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ByteDance-Seed/Bagel/",
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
+	},
+	basedecision: {
+		prettyLabel: "BaseDecision",
+		repoName: "BaseDecision",
+		repoUrl: "https://github.com/hrudayaditya/BaseDecision",
+		docsUrl: "https://github.com/hrudayaditya/BaseDecision/blob/main/docs/API.md",
+		snippets: snippets.basedecision,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
 	},
 	bboxmaskpose: {
 		prettyLabel: "BBoxMaskPose",
@@ -272,6 +307,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	chessqueries: {
+		prettyLabel: "ChessQueries",
+		repoName: "ChessQueries",
+		repoUrl: "https://github.com/JSeytre/chessqueries",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"onnx" OR path_extension:"tflite" OR path:*.mlpackage.zip`,
+	},
 	chexmix: {
 		prettyLabel: "CheXmix",
 		repoName: "CheXmix",
@@ -284,6 +326,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Chronos",
 		repoUrl: "https://github.com/amazon-science/chronos-forecasting",
 		snippets: snippets.chronos_forecasting,
+	},
+	"circuit-tracer": {
+		prettyLabel: "circuit-tracer",
+		repoName: "circuit-tracer",
+		repoUrl: "https://github.com/decoderesearch/circuit-tracer",
+		filter: false,
+		countDownloads: `path_filename:"config" AND path_extension:"yaml"`,
 	},
 	clara: {
 		prettyLabel: "Clara",
@@ -321,6 +370,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.colipri,
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	cooperscene: {
+		prettyLabel: "CooperScene",
+		repoName: "CooperScene",
+		repoUrl: "https://github.com/UCR-CISL/CooperScene",
+		filter: false,
 	},
 	cosyvoice: {
 		prettyLabel: "CosyVoice",
@@ -408,6 +463,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.describe_anything,
 		filter: false,
 	},
+	dewml: {
+		prettyLabel: "Dew",
+		repoName: "Dew",
+		repoUrl: "https://github.com/AshishKumar4/dew",
+		docsUrl: "https://dewml.dev",
+		snippets: snippets.dew,
+		filter: false,
+		countDownloads: `path:"run.json"`,
+	},
 	"dia-tts": {
 		prettyLabel: "Dia",
 		repoName: "Dia",
@@ -463,6 +527,21 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	drinkme: {
+		prettyLabel: "drinkme",
+		repoName: "drinkme",
+		repoUrl: "https://github.com/ninachaubal/drinkme",
+		docsUrl: "https://drinkme.petrichor.wtf",
+		filter: false,
+		countDownloads: `path_filename:"source-identity" AND path_extension:"json"`,
+	},
+	"duo-world-model": {
+		prettyLabel: "Duo",
+		repoName: "Duo",
+		repoUrl: "https://github.com/inclusionAI/Duo",
+		filter: false,
+		countDownloads: `path:"realization/dcp/.metadata" OR path:"realization/diffusion_pytorch_model.safetensors.index.json"`,
+	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",
@@ -471,6 +550,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.edsnlp,
 		countDownloads: `path_filename:"config" AND path_extension:"cfg"`,
+	},
+	egohand: {
+		prettyLabel: "EgoHand",
+		repoName: "EgoHand",
+		repoUrl: "https://github.com/NVIDIA/IsaacCapture/tree/main/src/python/isaaccapture_egopost",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	elm: {
 		prettyLabel: "ELM",
@@ -486,6 +572,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"encoderfile"`,
 	},
+	ensomi: {
+		prettyLabel: "ensomi",
+		repoName: "ensomi",
+		repoUrl: "https://github.com/ensomi-labs/ensomi-model",
+		filter: false,
+		countDownloads: `(path_filename:"ensomi-package" AND path_extension:"json") OR path:"checkpoint.pt"`,
+	},
 	espnet: {
 		prettyLabel: "ESPnet",
 		repoName: "ESPnet",
@@ -500,6 +593,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/EUPE",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	"fahr-face": {
+		prettyLabel: "FAHR-Face",
+		repoName: "FAHR-Face",
+		repoUrl: "https://github.com/AIM-Harvard/FAHR-Face",
+		docsUrl: "https://huggingface.co/fridolin22/FAHR-Face",
+		filter: false,
+		countDownloads: `path:"fahr_face.pth" OR path:"fahr_faceage.pth"`,
 	},
 	fairseq: {
 		prettyLabel: "Fairseq",
@@ -569,6 +670,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"tar"`,
 	},
+	fse: {
+		prettyLabel: "fse",
+		repoName: "fse",
+		repoUrl: "https://github.com/oborchers/Fast_Sentence_Embeddings",
+		snippets: snippets.fse,
+		filter: false,
+		countDownloads: `path:"config.json" OR path_extension:"model"`,
+	},
 	gaussianformer: {
 		prettyLabel: "GaussianFormer",
 		repoName: "GaussianFormer",
@@ -618,6 +727,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/zai-org/GLM-TTS",
 		filter: false,
 		countDownloads: `path:"flow/flow.pt"`,
+	},
+	glyd: {
+		prettyLabel: "Glyd",
+		repoName: "Glyd",
+		repoUrl: "https://github.com/surya-koritala/Glyd",
+		docsUrl: "https://getglyd.com",
+		filter: false,
 	},
 	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
@@ -768,6 +884,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt" OR path_extension:"zst"`,
 	},
+	"inworld-sava": {
+		prettyLabel: "Inworld SAVA",
+		repoName: "Inworld SAVA",
+		repoUrl: "https://github.com/inworld-ai/sava",
+		filter: false,
+		countDownloads: `path:"sava.safetensors"`,
+	},
+	"inworld-voice-isolation": {
+		prettyLabel: "Inworld Voice Isolator",
+		repoName: "Inworld Voice Isolator",
+		repoUrl: "https://github.com/inworld-ai/voice-isolator",
+		filter: false,
+		countDownloads: `path:"denoiser.safetensors" OR path:"denoiser_realtime.safetensors"`,
+	},
 	"ising-decoding": {
 		prettyLabel: "Ising Decoding",
 		repoName: "Ising-Decoding",
@@ -838,6 +968,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "KittenTTS",
 		repoUrl: "https://github.com/KittenML/KittenTTS",
 		snippets: snippets.kittentts,
+	},
+	konfai: {
+		prettyLabel: "KonfAI",
+		repoName: "KonfAI",
+		repoUrl: "https://github.com/fideus-labs/KonfAI",
+		docsUrl: "https://konfai.readthedocs.io/en/latest/usage/apps.html",
+		snippets: snippets.konfai,
+		filter: false,
+		countDownloads: `path_filename:"app" AND path_extension:"json"`,
 	},
 	kronos: {
 		prettyLabel: "KRONOS",
@@ -910,12 +1049,36 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.lerobot,
 	},
+	libreyolo: {
+		prettyLabel: "LibreYOLO",
+		repoName: "LibreYOLO",
+		repoUrl: "https://github.com/LibreYOLO/libreyolo",
+		docsUrl: "https://www.libreyolo.com/docs",
+		snippets: snippets.libreyolo,
+		filter: false,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth" OR path_extension:"ckpt" OR path_extension:"onnx" OR path:"config.json" OR path:"model_index.json" OR path:"pipeline.json"`,
+	},
 	lightglue: {
 		prettyLabel: "LightGlue",
 		repoName: "LightGlue",
 		repoUrl: "https://github.com/cvg/LightGlue",
 		filter: false,
 		countDownloads: `path_extension:"pth" OR path:"config.json"`,
+	},
+	"limx-dynamics": {
+		prettyLabel: "LimX Dynamics",
+		repoName: "LimX Dynamics",
+		repoUrl: "https://github.com/limxdynamics/limxdynamics",
+		snippets: snippets.limx_dynamics,
+		filter: false,
+		countDownloads: `(path_filename:"params" AND path_extension:"yaml") OR (path_filename:"controllers" AND path_extension:"yaml") OR (path_filename:"norm_stats" AND path_extension:"json") OR (path_filename:"package" AND path_extension:"xml")`,
+	},
+	"lingbot-map": {
+		prettyLabel: "LingBot-Map",
+		repoName: "lingbot-map",
+		repoUrl: "https://github.com/Robbyant/lingbot-map",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
@@ -929,6 +1092,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "LongCat-Video-Avatar 1.5",
 		repoUrl: "https://github.com/meituan-longcat/LongCat-Video",
 		filter: false,
+	},
+	"linnet-tts": {
+		prettyLabel: "LinnetTTS",
+		repoName: "LinnetTTS",
+		repoUrl: "https://github.com/VoxRT/LinnetTTS",
+		snippets: snippets.linnet_tts,
+		filter: false,
+		countDownloads: `path:"linnet-en-35m.fp16.safetensors"`,
 	},
 	"llama-cpp-python": {
 		prettyLabel: "llama-cpp-python",
@@ -1037,11 +1208,27 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"onnx"`,
 	},
+	"minicpm-ocr": {
+		prettyLabel: "MiniCPM-OCR",
+		repoName: "MiniCPM-OCR",
+		repoUrl: "https://github.com/OpenBMB/MiniCPM-OCR",
+		docsUrl: "https://github.com/OpenBMB/MiniCPM-OCR/blob/main/docs/minicpm_ocr_sdk_api_en.md",
+		snippets: snippets.minicpmOcr,
+		filter: false,
+	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
 		repoUrl: "https://github.com/mit-nlp/MITIE",
 		countDownloads: `path_filename:"total_word_feature_extractor"`,
+	},
+	mjlab: {
+		prettyLabel: "MJLab",
+		repoName: "MJLab",
+		repoUrl: "https://github.com/mujocolab/mjlab",
+		docsUrl: "https://mujocolab.github.io/mjlab/",
+		filter: false,
+		countDownloads: `path:"policy.onnx" OR path:"final.onnx"`,
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
@@ -1159,6 +1346,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/nvidia-medtech",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
+	"onnxruntime-genai": {
+		prettyLabel: "ONNX Runtime GenAI",
+		repoName: "ONNX Runtime GenAI",
+		repoUrl: "https://github.com/microsoft/onnxruntime-genai",
+		docsUrl: "https://onnxruntime.ai/docs/genai/",
+		filter: false,
+		countDownloads: `path_filename:"genai_config" AND path_extension:"json"`,
+	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
 		repoName: "open-oasis",
@@ -1193,6 +1388,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.opendde,
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	opendecision: {
+		prettyLabel: "OpenDecision",
+		repoName: "OpenDecision",
+		repoUrl: "https://github.com/tokz-labs/OpenDecision",
+		snippets: snippets.opendecision,
+		filter: false,
 	},
 	openpeerllm: {
 		prettyLabel: "OpenPeerLLM",
@@ -1258,12 +1460,30 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"pika-h3-flex": {
+		prettyLabel: "Pika H3 Flex",
+		repoName: "Pika-H3-Flex",
+		repoUrl: "https://github.com/Pika-Labs/Pika-H3-Flex",
+		docsUrl: "https://huggingface.co/docs/diffusers/main/en/api/pipelines/pika_h3_flex",
+		snippets: snippets.pika_h3_flex,
+		filter: false,
+		/// Diffusers modular pipeline loads (index files) plus the Pika adapters, which live in
+		/// subfolders (fl2va/, ref2va/, comfy/loras/) that the diffusers rule does not count.
+		countDownloads: `path:"modular_model_index.json" OR path:"model_index.json" OR path:"fl2va/adapter.safetensors" OR path:"ref2va/adapter.safetensors" OR (path_prefix:"comfy/loras/" AND path_extension:"safetensors")`,
+	},
 	piper: {
 		prettyLabel: "Piper",
 		repoName: "Piper",
 		repoUrl: "https://github.com/OHF-Voice/piper1-gpl",
 		filter: false,
 		countDownloads: `path_extension:"onnx" OR path_extension:"ckpt"`,
+	},
+	pixeldense: {
+		prettyLabel: "PixelDense",
+		repoName: "PixelDense",
+		repoUrl: "https://github.com/Hansxsourse/PixelDense",
+		filter: false,
+		countDownloads: `path:"PixelDense_XXL_T2I.ckpt"`,
 	},
 	"pocket-tts": {
 		prettyLabel: "Pocket-TTS",
@@ -1272,6 +1492,21 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pocket_tts,
 		filter: false,
 		countDownloads: `path:"tts_b6369a24.safetensors"`,
+	},
+	pqgan: {
+		prettyLabel: "PQGAN",
+		repoName: "PQGAN",
+		repoUrl: "https://github.com/vislearn/PQGAN",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
+	protomotions: {
+		prettyLabel: "ProtoMotions",
+		repoName: "ProtoMotions",
+		repoUrl: "https://github.com/NVlabs/ProtoMotions",
+		docsUrl: "https://nvlabs.github.io/ProtoMotions/",
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR ((path_filename:"inference_last" OR path_filename:"inference" OR path_filename:"last") AND path_extension:"ckpt")`,
 	},
 	"pruna-ai": {
 		prettyLabel: "Pruna AI",
@@ -1329,6 +1564,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
 	},
+	redefiner: {
+		prettyLabel: "ReDefiNER",
+		repoName: "ReDefiNER",
+		repoUrl: "https://github.com/Jungroo-AI/redefiner",
+		snippets: snippets.redefiner,
+		filter: false,
+	},
 	relik: {
 		prettyLabel: "Relik",
 		repoName: "Relik",
@@ -1379,6 +1621,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"onnx" OR path_extension:"joblib"`,
 	},
+	"rt-detr-hand-detector-v1": {
+		prettyLabel: "RT-DETR-Hand-Detector-v1",
+		repoName: "IsaacCapture",
+		repoUrl: "https://github.com/NVIDIA/IsaacCapture/tree/main/src/python/isaaccapture_egopost",
+		filter: false,
+		countDownloads: `path_extension:"onnx"`,
+	},
 	rwkv: {
 		prettyLabel: "RWKV",
 		repoName: "RWKV-LM",
@@ -1387,12 +1636,29 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	s1s2: {
+		prettyLabel: "s1s2",
+		repoName: "s1s2",
+		repoUrl: "https://github.com/eduardoworrel/s1s2",
+		docsUrl: "https://github.com/eduardoworrel/s1s2/blob/main/docs/reference.md",
+		snippets: snippets.s1s2,
+		filter: false,
+		countDownloads: `path:manifest*.json`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+		countDownloads: `(path_filename:"cfg" AND path_extension:"json") OR path:"config.json"`,
+	},
+	"sage-music": {
+		prettyLabel: "SAGE",
+		repoName: "SAGE",
+		repoUrl: "https://github.com/francescobrigante/SAGE",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	"scail-2": {
 		prettyLabel: "SCAIL-2",
@@ -1440,6 +1706,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sampleFactory,
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
+	},
+	"sap-case": {
+		prettyLabel: "CASE",
+		repoName: "CASE",
+		repoUrl: "https://github.com/SAP-samples/case",
+		snippets: snippets.case_model,
 	},
 	"sap-rpt-1-oss": {
 		prettyLabel: "sap-rpt-1-oss",
@@ -1616,12 +1888,27 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
 	},
+	"strands-decider": {
+		prettyLabel: "Strands Decider",
+		repoName: "Strands Decider",
+		repoUrl: "https://github.com/strands-labs/strands-decider",
+		snippets: snippets.strandsDecider,
+		filter: false,
+		countDownloads: `path:"strands_decider_config.json" OR path:"hobson_config.json"`,
+	},
 	supertonic: {
 		prettyLabel: "Supertonic",
 		repoName: "Supertonic",
 		repoUrl: "https://github.com/supertone-inc/supertonic",
 		snippets: snippets.supertonic,
 		filter: false,
+	},
+	svdtrunc: {
+		prettyLabel: "SVDtrunc",
+		repoName: "SVDtrunc",
+		repoUrl: "https://github.com/vislearn/SVDtrunc",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	swarmformer: {
 		prettyLabel: "SwarmFormer",
@@ -1734,6 +2021,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt" OR path_extension:"pth"`,
 	},
+	"torch-pointcloud": {
+		prettyLabel: "torch-pointcloud",
+		repoName: "torch-pointcloud",
+		repoUrl: "https://github.com/arthurdjn/pytorch-pointcloud",
+		docsUrl: "https://pytorch-pointcloud.org/",
+		snippets: snippets.torch_pointcloud,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
 	transformers: {
 		prettyLabel: "Transformers",
 		repoName: "🤗/transformers",
@@ -1778,6 +2074,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
+	"unitree-rl": {
+		prettyLabel: "Unitree",
+		repoName: "unitree_rl_lab",
+		repoUrl: "https://github.com/unitreerobotics/unitree_rl_lab",
+		snippets: snippets.unitree,
+		filter: true,
+		countDownloads: `path:"params/deploy.yaml"`,
+	},
 	univa: {
 		prettyLabel: "univa",
 		repoName: "univa",
@@ -1814,6 +2118,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-deepmind/videoprism",
 		countDownloads: `path_extension:"npz"`,
 		snippets: snippets.videoprism,
+	},
+	"verto-asr": {
+		prettyLabel: "Verto ASR",
+		repoName: "Verto-Arabic-ASR",
+		repoUrl: "https://github.com/yayaiu6/Verto-Arabic-ASR",
+		docsUrl: "https://github.com/yayaiu6/Verto-Arabic-ASR#javascript-quickstart",
+		filter: false,
+		countDownloads: `path:"metro.int8.onnx"`,
 	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
@@ -1885,6 +2197,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Wan-Video/Wan2.2",
 		countDownloads: `path_filename:"config" AND path_extension:"json"`,
 	},
+	wavegen: {
+		prettyLabel: "WaveGen",
+		repoName: "WaveGen",
+		repoUrl: "https://github.com/sh-lee-prml/WaveGen",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	wham: {
 		prettyLabel: "WHAM",
 		repoName: "wham",
@@ -1899,6 +2218,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
+	},
+	wilddet3d: {
+		prettyLabel: "WildDet3D",
+		repoName: "WildDet3D",
+		repoUrl: "https://github.com/allenai/WildDet3D",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	yolov10: {
 		// YOLOv10 is a fork of ultraLytics. Code snippets and download count are the same but the repo is different.
@@ -1915,6 +2241,21 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ultralytics/ultralytics",
 		docsUrl: "https://docs.ultralytics.com/models/yolo26/",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
+	},
+	"zao-lib": {
+		prettyLabel: "ZAO",
+		repoName: "ZAO",
+		repoUrl: "https://github.com/syntheticgestalt/zao",
+		snippets: snippets.zao,
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
+	zipsplat: {
+		prettyLabel: "ZipSplat",
+		repoName: "ZipSplat",
+		repoUrl: "https://github.com/cvg/ZipSplat",
+		filter: false,
+		countDownloads: `path_extension:"tar"`,
 	},
 	zonos: {
 		prettyLabel: "Zonos",
