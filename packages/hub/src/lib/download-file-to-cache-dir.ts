@@ -1,6 +1,7 @@
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { dirname, join } from "node:path";
-import { rename, lstat, mkdir, stat } from "node:fs/promises";
+import { rename, lstat, mkdir, stat, rm } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import type { PathInfo } from "./paths-info";
 import { pathsInfo } from "./paths-info";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
@@ -130,7 +131,8 @@ export async function downloadFileToCacheDir(
 		return pointerPath;
 	}
 
-	const incomplete = `${blobPath}.incomplete`;
+	// Concurrent downloads of the same blob must not share a writable file.
+	const incomplete = `${blobPath}.${randomUUID()}.incomplete`;
 	console.debug(`Downloading ${params.path} to ${incomplete}`);
 
 	const blob: Blob | null = await downloadFile({
@@ -142,10 +144,13 @@ export async function downloadFileToCacheDir(
 		throw new Error(`invalid response for file ${params.path}`);
 	}
 
-	await pipeline(Readable.fromWeb(blob.stream() as ReadableStream), createWriteStream(incomplete));
-
-	// rename .incomplete file to expect blob
-	await rename(incomplete, blobPath);
+	try {
+		await pipeline(Readable.fromWeb(blob.stream() as ReadableStream), createWriteStream(incomplete, { flags: "wx" }));
+		// Publish only a complete blob, without changing another writer's open file.
+		await rename(incomplete, blobPath);
+	} finally {
+		await rm(incomplete, { force: true });
+	}
 	// create symlinks in snapshot folder to blob object
 	await createSymlink({ sourcePath: blobPath, finalPath: pointerPath });
 	return pointerPath;
