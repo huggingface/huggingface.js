@@ -1304,6 +1304,24 @@ export class Interpreter {
 			}
 		}
 
+		if (operator === "*") {
+			// Sequence repetition: `'ab' * 3`, `3 * 'ab'`, `[1] * 2`. Counts below 1 give an empty sequence, like Python.
+			const [sequence, count] = right instanceof IntegerValue ? [left, right] : [right, left];
+			if (count instanceof IntegerValue) {
+				const times = Math.max(0, count.value);
+				if (sequence instanceof StringValue) {
+					return new StringValue(sequence.value.repeat(times));
+				}
+				if (sequence instanceof ArrayValue) {
+					const items: AnyRuntimeValue[] = [];
+					for (let i = 0; i < times; ++i) {
+						items.push(...sequence.value);
+					}
+					return new ArrayValue(items);
+				}
+			}
+		}
+
 		if (left instanceof StringValue || right instanceof StringValue) {
 			// Support string concatenation as long as at least one operand is a string
 			switch (operator) {

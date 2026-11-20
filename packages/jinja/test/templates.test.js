@@ -6980,6 +6980,29 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("Sequence repetition", () => {
+		it("repeats strings and lists", () => {
+			const template = new Template(`|{{ 'ab' * 3 }}|{{ 2 * 'xy' }}|{{ [1, 2] * 2 }}|{{ 2 * [1] }}|`);
+			expect(template.render()).toBe("|ababab|xyxy|[1, 2, 1, 2]|[1, 1]|");
+		});
+
+		it("gives an empty sequence for counts below 1", () => {
+			const template = new Template(
+				`|{{ 'ab' * 0 }}|{{ 'ab' * -2 }}|{{ ([1] * 0) | length }}|{{ ([1] * -1) | length }}|`,
+			);
+			expect(template.render()).toBe("|||0|0|");
+		});
+
+		it("does not break numeric multiplication", () => {
+			expect(new Template(`{{ 2 * 3 }}|{{ 1.5 * 2 }}`).render()).toBe("6|3.0");
+		});
+
+		it("rejects non-integer counts", () => {
+			expect(() => new Template(`{{ 'ab' * 1.5 }}`).render()).toThrowError();
+			expect(() => new Template(`{{ 'ab' * 'cd' }}`).render()).toThrowError();
+		});
+	});
+
 	describe("Exponentiation", () => {
 		it("supports boolean operands", () => {
 			const template = new Template(
