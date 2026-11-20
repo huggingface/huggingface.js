@@ -55,20 +55,24 @@ const AUDIO_MIME_TO_EXT: Record<string, string> = {
 	"audio/wave": "wav",
 	"audio/mpeg": "mp3",
 	"audio/mp3": "mp3",
-	"audio/mp4": "mp4",
+	"audio/mp4": "m4a",
 	"audio/m4a": "m4a",
 	"audio/x-m4a": "m4a",
 	"audio/flac": "flac",
 	"audio/x-flac": "flac",
 	"audio/ogg": "ogg",
 	"audio/webm": "webm",
+	"audio/opus": "opus",
+	"audio/aac": "aac",
 };
 
 function mimeTypeToExtension(mimeType: string | undefined): string {
 	if (!mimeType) {
 		return "wav";
 	}
-	return AUDIO_MIME_TO_EXT[mimeType.toLowerCase()] ?? "wav";
+	// Strip MIME parameters (e.g. `audio/webm;codecs=opus`) before lookup.
+	const baseType = mimeType.split(";")[0].trim().toLowerCase();
+	return AUDIO_MIME_TO_EXT[baseType] ?? "wav";
 }
 
 interface TogetherTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
