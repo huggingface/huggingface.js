@@ -325,7 +325,11 @@ describe("downloadFileToCacheDir", () => {
 		expect(rename).toHaveBeenCalledWith(incomplete, expectedBlob);
 		expect(rm).toHaveBeenCalledWith(incomplete, { force: true });
 		// 3. should create symlink pointing to blob
-		expect(createSymlink).toHaveBeenCalledWith({ sourcePath: expectedBlob, finalPath: expectPointer });
+		expect(createSymlink).toHaveBeenCalledWith({
+			sourcePath: expectedBlob,
+			finalPath: expectPointer,
+			reuseExisting: true,
+		});
 	});
 });
 

@@ -127,7 +127,7 @@ export async function downloadFileToCacheDir(
 	// shortcut the download if needed
 	if (await exists(blobPath)) {
 		// create symlinks in snapshot folder to blob object
-		await createSymlink({ sourcePath: blobPath, finalPath: pointerPath });
+		await createSymlink({ sourcePath: blobPath, finalPath: pointerPath, reuseExisting: true });
 		return pointerPath;
 	}
 
@@ -160,6 +160,6 @@ export async function downloadFileToCacheDir(
 		await rm(incomplete, { force: true });
 	}
 	// create symlinks in snapshot folder to blob object
-	await createSymlink({ sourcePath: blobPath, finalPath: pointerPath });
+	await createSymlink({ sourcePath: blobPath, finalPath: pointerPath, reuseExisting: true });
 	return pointerPath;
 }
