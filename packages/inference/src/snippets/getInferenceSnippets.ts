@@ -355,9 +355,9 @@ const prepareConversationalInput = (
 ): object => {
 	return {
 		messages: opts?.messages ?? getModelInputSnippet(model),
-		...(opts?.temperature ? { temperature: opts?.temperature } : undefined),
-		...(opts?.max_tokens ? { max_tokens: opts?.max_tokens } : undefined),
-		...(opts?.top_p ? { top_p: opts?.top_p } : undefined),
+		...(typeof opts?.temperature === "number" ? { temperature: opts.temperature } : undefined),
+		...(typeof opts?.max_tokens === "number" ? { max_tokens: opts.max_tokens } : undefined),
+		...(typeof opts?.top_p === "number" ? { top_p: opts.top_p } : undefined),
 	};
 };
 
