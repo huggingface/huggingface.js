@@ -6533,6 +6533,37 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("List equality", () => {
+		it.each([
+			[`{{ [1, 2] == [1, 2] }}`, `true`],
+			[`{{ [1, 2] != [1, 2] }}`, `false`],
+			[`{{ [] == [] }}`, `true`],
+			[`{{ [] != [] }}`, `false`],
+			[`{{ [1, 2] == [2, 1] }}`, `false`],
+			[`{{ [1, 2] == [1, 2, 3] }}`, `false`],
+			[`{{ [[1], ["a"]] == [[1], ["a"]] }}`, `true`],
+			[`{{ [1, 2] == (1, 2) }}`, `false`],
+			[`{{ [1] == 1 }}`, `false`],
+		])("%s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+	});
+
+	describe("LongCat-Flash-Chat tool_types", () => {
+		// The `ns.tool_types != []` check from the meituan-longcat/LongCat-Flash-Chat chat template,
+		// with expected outputs rendered by Python Jinja2.
+		const template = new Template(`{%- set ns = namespace(tool_types = []) %}
+{%- for t in tools %}{%- set ns.tool_types = ns.tool_types + [t.type] %}{%- endfor %}
+{{- "reasoning" if ns.tool_types != [] else "no reasoning" }}`);
+
+		it.each([
+			["no tools", [], "no reasoning"],
+			["a tool", [{ type: "function" }], "reasoning"],
+		])("renders with %s", (_, tools, expected) => {
+			expect(template.render({ tools })).toBe(expected);
+		});
+	});
+
 	describe("String split", () => {
 		it.each([
 			[`{{ "a,b,c".split(",", -2) | tojson }}`, `["a", "b", "c"]`],
