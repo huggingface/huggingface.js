@@ -677,7 +677,8 @@ export const LOCAL_APPS = {
 		docsUrl: "https://github.com/raullenchai/Rapid-MLX",
 		mainTask: "text-generation",
 		macOSOnly: true,
-		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
+		displayOnModelPage: (model) =>
+			model.pipeline_tag === "text-generation" && isMlxModel(model) && model.tags.includes("conversational"),
 		snippet: snippetRapidMlx,
 	},
 	tgi: {

@@ -3,7 +3,7 @@ import { LOCAL_APPS } from "./local-apps.js";
 import type { ModelData } from "./model-data.js";
 
 describe("local-apps", () => {
-	it("rapid-mlx", async () => {
+	it("rapid-mlx conversational", async () => {
 		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS["rapid-mlx"];
 		const model: ModelData = {
 			id: "mlx-community/Qwen3.5-4B-MLX-4bit",
@@ -13,7 +13,7 @@ describe("local-apps", () => {
 		};
 
 		expect(displayOnModelPage(model)).toBe(true);
-		expect(displayOnModelPage({ ...model, tags: ["gguf"] })).toBe(false);
+		expect(displayOnModelPage({ ...model, tags: ["gguf", "conversational"] })).toBe(false);
 		expect(displayOnModelPage({ ...model, pipeline_tag: "feature-extraction" })).toBe(false);
 		expect(displayOnModelPage({ ...model, pipeline_tag: undefined })).toBe(false);
 
@@ -23,6 +23,19 @@ describe("local-apps", () => {
 		expect(snippet[0].content).toContain('curl -X POST "http://localhost:8000/v1/chat/completions"');
 		expect(snippet[0].content).toContain('"model": "mlx-community/Qwen3.5-4B-MLX-4bit"');
 		expect(snippet[0].content).toContain('{"role": "user", "content": "Hello"}');
+	});
+
+	it("rapid-mlx non-conversational", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["rapid-mlx"];
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-4bit",
+			pipeline_tag: "text-generation",
+			tags: ["mlx"],
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+		expect(displayOnModelPage({ ...model, tags: [] })).toBe(false);
 	});
 
 	it("llama.cpp conversational", async () => {
