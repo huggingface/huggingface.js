@@ -7069,6 +7069,20 @@ describe("Feature regressions", () => {
 			expect(template.render({ x: -3.7, y: -0.7 })).toBe("|-3|-3|3|3.0|0.0|0.0|");
 		});
 	});
+
+	describe("Floats in tojson", () => {
+		it.each([
+			[`{{ 1.0 | tojson }}`, {}, "1.0"],
+			[`{{ (x / 2) | tojson }}`, { x: 4 }, "2.0"],
+			[`{{ (-0.0) | tojson }}`, {}, "-0.0"],
+			[`{{ x | tojson }}`, { x: 2.5 }, "2.5"],
+			[`{{ {"temperature": 1.0, "top_k": 3} | tojson }}`, {}, `{"temperature": 1.0, "top_k": 3}`],
+			[`{{ [3 | float, 2] }}`, {}, "[3.0, 2]"],
+		])("keeps the decimal point of whole floats like Python json.dumps: %s", (source, context, expected) => {
+			const template = new Template(source);
+			expect(template.render(context)).toBe(expected);
+		});
+	});
 });
 
 describe("Error checking", () => {
