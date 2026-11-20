@@ -2167,6 +2167,41 @@ export const pyannote_audio = (model: ModelData): string[] => {
 	return pyannote_audio_model(model);
 };
 
+export const redefiner = (model: ModelData): string[] => {
+	if (!model.config?.model_type) {
+		// a pointer repo: config.json names a base model and ships its own default rulebook
+		return [
+			`pip install redefiner`,
+			`from redefiner import Tagger
+
+tagger = Tagger.from_pretrained("${model.id}")  # loads the base model's weights
+
+entities = tagger.extract("Your text here.")  # uses this repo's default rulebook`,
+		];
+	}
+	return [
+		`pip install redefiner`,
+		`from redefiner import Tagger
+
+tagger = Tagger.from_pretrained("${model.id}")  # GPU if available, else CPU
+
+# Define the entity types to extract, and any rules, in plain English
+rulebook = """[RULES]
+Extract every entity of the supplied types. Return exact spans from the text.
+
+[TYPE] PERSON
+[DESCRIPTION] A person's name.
+PE1 Label the full name; leave out titles such as "Dr" or "Prof".
+
+[TYPE] ORGANIZATION
+[DESCRIPTION] A company, university or other institution.
+"""
+
+entities = tagger.extract("Prof Ada Lovelace corresponded with the Royal Society.", rulebook)
+# [{'start': 5, 'end': 17, 'text': 'Ada Lovelace', 'label': 'PERSON', 'confidence': ...}, ...]`,
+	];
+};
+
 export const relik = (model: ModelData): string[] => [
 	`from relik import Relik
 
@@ -2245,6 +2280,19 @@ export const torch_pointcloud = (model: ModelData): string[] => [
 	`import torch_pointcloud as tp
 
 model = tp.create_model("${nameWithoutNamespace(model.id)}", pretrained=True)`,
+];
+
+export const s1s2 = (model: ModelData): string[] => [
+	`npm i @s1s2/web onnxruntime-web @huggingface/transformers`,
+	`import { S1S2 } from "@s1s2/web";
+
+// Runs in the browser (WebGPU). manifest.json is the default manifest of this repo.
+const model = await S1S2.load({ manifest: "https://huggingface.co/${model.id}/resolve/main/manifest.json" });
+const s = await model.decide({
+	input: "Arrived late, but works great.",
+	questions: [{ name: "positive", type: "predicate", instructions: "Is this review positive?" }],
+});
+console.log(s.answers[0].probability, s.answers[0].margin);`,
 ];
 
 export const saelens = (/* model: ModelData */): string[] => [
@@ -2713,13 +2761,40 @@ const autoModelClass = (model: ModelData): string | undefined => {
 	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
 };
 
+const transformersDecisionSnippet = (model: ModelData, remote_code_snippet: string): string =>
+	[
+		"from transformers import pipeline",
+		"",
+		`decide = pipeline("decision", model="${model.id}"` + remote_code_snippet + ")",
+		"decision = decide(",
+		"    {",
+		'        "state": "I was charged twice for my order and want a refund.",',
+		'        "questions": {',
+		'            "department": {',
+		'                "type": "choice",',
+		'                "instructions": "Which team should handle this?",',
+		'                "criteria": {',
+		'                    "billing": "Payments and refunds",',
+		'                    "technical": "Bugs and technical issues",',
+		'                    "sales": "Pricing and subscriptions",',
+		"                },",
+		"            },",
+		"        },",
+		"    }",
+		")",
+	].join("\n");
+
 export const transformers = (model: ModelData): string[] => {
+	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+
 	const info = transformersSnippetInfo(model);
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
 	const auto_model = autoModelClass(model) ?? "AutoModel";
-	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	if (auto_model == "AutoModelForDecision") {
+		return [transformersDecisionSnippet(model, remote_code_snippet)];
+	}
 
 	const autoSnippet = [];
 	if (info.processor) {
