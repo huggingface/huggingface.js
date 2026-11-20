@@ -304,12 +304,31 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		const snippets = snippetFunc(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf");
 
 		expect(displayOnModelPage(model)).toBe(true);
-		expect(snippets[0].setup).toEqual("pip install dulus");
+		expect(snippets).toEqual([
+			{
+				title: "Pull the model with Ollama",
+				content: "ollama pull hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M",
+			},
+			{
+				title: "Run Dulus",
+				setup: "# Install Dulus:\npip install dulus",
+				content: "dulus --model ollama/hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M",
+			},
+		]);
+	});
+
+	it("dulus keeps one quant placeholder per step", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["dulus"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const snippets = snippetFunc(model) as { content: string }[];
+
 		for (const snippet of snippets) {
-			expect(snippet.content).toEqual(`# Pull the model with Ollama:
-ollama pull hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M
-# Start Dulus on it:
-dulus --model ollama/hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M`);
+			expect(snippet.content.split("{{QUANT_TAG}}").length - 1).toBe(1);
 		}
 	});
 

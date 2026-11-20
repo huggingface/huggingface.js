@@ -242,23 +242,17 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 const snippetDulus = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	// Dulus reaches the model through the local Ollama API, which serves what is
 	// already pulled: `ollama pull` downloads the GGUF from the Hub first.
+	// One step per command, so each content holds a single {{QUANT_TAG}} placeholder.
 	const ollamaModel = `hf.co/${model.id}${getQuantTag(filepath)}`;
-	const command = [
-		"# Pull the model with Ollama:",
-		`ollama pull ${ollamaModel}`,
-		"# Start Dulus on it:",
-		`dulus --model ollama/${ollamaModel}`,
-	].join("\n");
 	return [
 		{
-			title: "Install with pip",
-			setup: "pip install dulus",
-			content: command,
+			title: "Pull the model with Ollama",
+			content: `ollama pull ${ollamaModel}`,
 		},
 		{
-			title: "Install with the setup script (Linux, macOS, WSL)",
-			setup: "curl -fsSL https://raw.githubusercontent.com/KevRojo/Dulus/main/install.sh | bash",
-			content: command,
+			title: "Run Dulus",
+			setup: "# Install Dulus:\npip install dulus",
+			content: `dulus --model ollama/${ollamaModel}`,
 		},
 	];
 };
