@@ -465,6 +465,72 @@ describe("downloadFileToCacheDir on disk", () => {
 		}
 	});
 
+	test("still links the snapshot when a later rename loses to the published blob", async () => {
+		const realRename = fs.rename;
+		let blobRenames = 0;
+		vi.mocked(rename).mockImplementation(async (from, to) => {
+			if (String(to).endsWith(etag)) {
+				blobRenames += 1;
+				if (blobRenames > 1) {
+					throw Object.assign(new Error("EPERM: file in use"), { code: "EPERM" });
+				}
+			}
+			return realRename(from, to);
+		});
+		const prefixes = [content.slice(0, 4), ""];
+		const controllers: ReadableStreamDefaultController<Uint8Array>[] = [];
+		const encoder = new TextEncoder();
+		const streams = prefixes.map(
+			(prefix, index) =>
+				new ReadableStream<Uint8Array>({
+					start(controller) {
+						controllers[index] = controller;
+						if (prefix) {
+							controller.enqueue(encoder.encode(prefix));
+						}
+					},
+				}),
+		);
+		let started = 0;
+		const bodies = mockHubFetch(async () => new Response(streams[started++]));
+		const blobs = join(cacheDir, getRepoFolderName(DUMMY_REPO), "blobs");
+		async function waitForPartial(partial: string) {
+			await vi.waitFor(
+				async () => {
+					const temporaryFiles = (await fs.readdir(blobs)).filter((file) => file.endsWith(".incomplete"));
+					const contents = await Promise.all(temporaryFiles.map((file) => fs.readFile(join(blobs, file), "utf8")));
+					expect(contents).toContain(partial);
+				},
+				{ timeout: 5_000 },
+			);
+		}
+		const downloads: Promise<string>[] = [];
+		try {
+			downloads.push(download("README.md", bodies));
+			await waitForPartial(prefixes[0]);
+			downloads.push(download("README.md", bodies, "c".repeat(40)));
+			await waitForPartial(prefixes[1]);
+			controllers[0].enqueue(encoder.encode(content.slice(prefixes[0].length)));
+			controllers[0].close();
+			const first = await downloads[0];
+			controllers[1].enqueue(encoder.encode(content.slice(prefixes[1].length)));
+			controllers[1].close();
+			const second = await downloads[1];
+			expect(blobRenames).toBe(2);
+			expect(await fs.readFile(first, "utf8")).toBe(content);
+			expect(await fs.readFile(second, "utf8")).toBe(content);
+		} finally {
+			for (const controller of controllers) {
+				try {
+					controller.error(new Error("test cleanup"));
+				} catch {
+					// already closed
+				}
+			}
+			await Promise.allSettled(downloads);
+		}
+	});
+
 	test("reuses a completed blob for another revision without downloading it again", async () => {
 		const fetchMock = mockHubFetch();
 		const first = await download("README.md", fetchMock);

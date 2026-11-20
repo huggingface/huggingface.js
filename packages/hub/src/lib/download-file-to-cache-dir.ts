@@ -147,7 +147,15 @@ export async function downloadFileToCacheDir(
 	try {
 		await pipeline(Readable.fromWeb(blob.stream() as ReadableStream), createWriteStream(incomplete, { flags: "wx" }));
 		// Publish only a complete blob, without changing another writer's open file.
-		await rename(incomplete, blobPath);
+		// A sibling may have renamed onto blobPath first. Replacing it fails on Windows
+		// (sharing violation while createSymlink copies the blob), but the content is already cached.
+		try {
+			await rename(incomplete, blobPath);
+		} catch (err) {
+			if (!(await exists(blobPath))) {
+				throw err;
+			}
+		}
 	} finally {
 		await rm(incomplete, { force: true });
 	}
