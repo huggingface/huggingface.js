@@ -935,6 +935,36 @@ function getAttributeValue(item: AnyRuntimeValue, attributePath: string): AnyRun
  * @param caseSensitive Whether string comparisons should be case-sensitive (default: false)
  * @returns -1 if a < b, 1 if a > b, 0 if equal
  */
+/**
+ * Round like Python's round(): to `digits` decimal places, ties to the nearest even digit.
+ * Uses the exact decimal expansion of the double, so round(2.675, 2) is 2.67 as in Python.
+ */
+function roundHalfEven(value: number, digits: number): number {
+	if (!Number.isFinite(value)) {
+		return value;
+	}
+	if (digits < 0) {
+		const factor = Math.pow(10, -digits);
+		return roundHalfEven(value / factor, 0) * factor;
+	}
+	if (digits > 100) {
+		return value;
+	}
+	const rounded = Number(value.toFixed(digits)); // exact decimal rounding, ties away from zero
+	// toFixed only differs from half-even on exact ties, which show up as "5" followed by zeros
+	const expanded = Math.abs(value).toFixed(100);
+	const dot = expanded.indexOf(".");
+	const tail = expanded.slice(dot + 1 + digits);
+	if (/^50*$/.test(tail)) {
+		const kept = expanded.slice(0, dot + 1 + digits).replace(/\.$/, "");
+		const lastDigit = Number(kept[kept.length - 1]);
+		if (lastDigit % 2 === 0) {
+			return Math.sign(value) * Number(kept);
+		}
+	}
+	return rounded;
+}
+
 function compareRuntimeValues(a: AnyRuntimeValue, b: AnyRuntimeValue, caseSensitive: boolean = false): number {
 	// Handle null values (can only compare null with null)
 	if (a instanceof NullValue && b instanceof NullValue) {
@@ -1407,6 +1437,101 @@ export class Interpreter {
 		return [positionalArguments, keywordArguments];
 	}
 
+	/**
+	 * The `round`, `sum`, `min` and `max` filters.
+	 * https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.round
+	 */
+	private applyNumericFilter(
+		name: "round" | "sum" | "min" | "max",
+		operand: AnyRuntimeValue,
+		args: AnyRuntimeValue[],
+		kwargs: Map<string, AnyRuntimeValue>,
+	): AnyRuntimeValue {
+		if (name === "round") {
+			if (!isNumericLikeValue(operand)) {
+				throw new Error(`Cannot apply filter "round" to type: ${operand.type}`);
+			}
+			const precision = args.at(0) ?? kwargs.get("precision") ?? new IntegerValue(0);
+			if (!(precision instanceof IntegerValue)) {
+				throw new Error("precision must be an integer");
+			}
+			const method = args.at(1) ?? kwargs.get("method") ?? new StringValue("common");
+			if (!(method instanceof StringValue) || !["common", "ceil", "floor"].includes(method.value)) {
+				throw new Error("method must be common, ceil or floor");
+			}
+			const value = getNumericValue(operand);
+			const p = precision.value;
+			if (method.value === "common") {
+				// Python's round(): ints stay ints, floats stay floats
+				if (operand instanceof IntegerValue || operand instanceof BooleanValue) {
+					return new IntegerValue(p >= 0 ? value : roundHalfEven(value, p));
+				}
+				return new FloatValue(roundHalfEven(value, p));
+			}
+			const factor = Math.pow(10, p);
+			const rounded = (method.value === "ceil" ? Math.ceil(value * factor) : Math.floor(value * factor)) / factor;
+			return new FloatValue(rounded);
+		}
+
+		if (name === "sum") {
+			if (!(operand instanceof ArrayValue)) {
+				throw new Error(`Cannot apply filter "sum" to type: ${operand.type}`);
+			}
+			const attribute = args.at(0) ?? kwargs.get("attribute") ?? new NullValue();
+			if (!(attribute instanceof StringValue || attribute instanceof IntegerValue || attribute instanceof NullValue)) {
+				throw new Error("attribute must be a string, integer, or null");
+			}
+			const start = args.at(1) ?? kwargs.get("start") ?? new IntegerValue(0);
+			if (!isNumericLikeValue(start)) {
+				throw new Error("start must be a number");
+			}
+			let total = getNumericValue(start);
+			let isFloat = start instanceof FloatValue;
+			for (const item of operand.value) {
+				const v =
+					attribute instanceof NullValue
+						? item
+						: getAttributeValue(item, attribute instanceof IntegerValue ? String(attribute.value) : attribute.value);
+				if (!isNumericLikeValue(v)) {
+					throw new Error(`Cannot sum ${v.type}`);
+				}
+				total += getNumericValue(v);
+				isFloat ||= v instanceof FloatValue;
+			}
+			return isFloat ? new FloatValue(total) : new IntegerValue(total);
+		}
+
+		// min / max
+		if (!(operand instanceof ArrayValue)) {
+			throw new Error(`Cannot apply filter "${name}" to type: ${operand.type}`);
+		}
+		const caseSensitive = args.at(0) ?? kwargs.get("case_sensitive") ?? new BooleanValue(false);
+		if (!(caseSensitive instanceof BooleanValue)) {
+			throw new Error("case_sensitive must be a boolean");
+		}
+		const attribute = args.at(1) ?? kwargs.get("attribute") ?? new NullValue();
+		if (!(attribute instanceof StringValue || attribute instanceof IntegerValue || attribute instanceof NullValue)) {
+			throw new Error("attribute must be a string, integer, or null");
+		}
+		const keyOf = (item: AnyRuntimeValue) =>
+			attribute instanceof NullValue
+				? item
+				: getAttributeValue(item, attribute instanceof IntegerValue ? String(attribute.value) : attribute.value);
+		let best: AnyRuntimeValue | undefined;
+		for (const item of operand.value) {
+			if (best === undefined) {
+				best = item;
+				continue;
+			}
+			// Like Python, keep the first of several equal items
+			const cmp = compareRuntimeValues(keyOf(item), keyOf(best), caseSensitive.value);
+			if (name === "min" ? cmp < 0 : cmp > 0) {
+				best = item;
+			}
+		}
+		return best ?? new UndefinedValue();
+	}
+
 	private applyFilter(operand: AnyRuntimeValue, filterNode: Identifier | CallExpression, environment: Environment) {
 		// For now, we only support the built-in filters
 		// TODO: Add support for non-identifier filters
@@ -1419,6 +1544,27 @@ export class Interpreter {
 		//   return filter.value([operand], environment);
 
 		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-filters
+
+		// Numeric aggregation filters, which behave the same with or without arguments
+		const filterCall = filterNode.type === "CallExpression" ? (filterNode as CallExpression) : undefined;
+		const numericFilterName =
+			filterCall === undefined
+				? (filterNode as Identifier).value
+				: filterCall.callee.type === "Identifier"
+					? (filterCall.callee as Identifier).value
+					: undefined;
+		if (
+			numericFilterName === "round" ||
+			numericFilterName === "sum" ||
+			numericFilterName === "min" ||
+			numericFilterName === "max"
+		) {
+			const [args, kwargs] =
+				filterCall !== undefined
+					? this.evaluateArguments(filterCall.args, environment)
+					: [[] as AnyRuntimeValue[], new Map<string, AnyRuntimeValue>()];
+			return this.applyNumericFilter(numericFilterName, operand, args, kwargs);
+		}
 
 		if (filterNode.type === "Identifier") {
 			const filter = filterNode as Identifier;
