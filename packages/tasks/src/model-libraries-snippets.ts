@@ -2167,6 +2167,41 @@ export const pyannote_audio = (model: ModelData): string[] => {
 	return pyannote_audio_model(model);
 };
 
+export const redefiner = (model: ModelData): string[] => {
+	if (!model.config?.model_type) {
+		// a pointer repo: config.json names a base model and ships its own default rulebook
+		return [
+			`pip install redefiner`,
+			`from redefiner import Tagger
+
+tagger = Tagger.from_pretrained("${model.id}")  # loads the base model's weights
+
+entities = tagger.extract("Your text here.")  # uses this repo's default rulebook`,
+		];
+	}
+	return [
+		`pip install redefiner`,
+		`from redefiner import Tagger
+
+tagger = Tagger.from_pretrained("${model.id}")  # GPU if available, else CPU
+
+# Define the entity types to extract, and any rules, in plain English
+rulebook = """[RULES]
+Extract every entity of the supplied types. Return exact spans from the text.
+
+[TYPE] PERSON
+[DESCRIPTION] A person's name.
+PE1 Label the full name; leave out titles such as "Dr" or "Prof".
+
+[TYPE] ORGANIZATION
+[DESCRIPTION] A company, university or other institution.
+"""
+
+entities = tagger.extract("Prof Ada Lovelace corresponded with the Royal Society.", rulebook)
+# [{'start': 5, 'end': 17, 'text': 'Ada Lovelace', 'label': 'PERSON', 'confidence': ...}, ...]`,
+	];
+};
+
 export const relik = (model: ModelData): string[] => [
 	`from relik import Relik
 

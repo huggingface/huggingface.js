@@ -172,6 +172,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
 	},
+	basalt: {
+		prettyLabel: "Basalt",
+		repoName: "Basalt",
+		repoUrl: "https://github.com/jesdga95/basalt",
+		filter: false,
+		countDownloads: `path_extension:"basalt"`,
+	},
 	basedecision: {
 		prettyLabel: "BaseDecision",
 		repoName: "BaseDecision",
@@ -1164,6 +1171,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.matanyone,
 		filter: false,
 	},
+	mediapipe: {
+		prettyLabel: "MediaPipe",
+		repoName: "MediaPipe",
+		repoUrl: "https://github.com/google-ai-edge/mediapipe",
+		docsUrl: "https://developers.google.com/edge/mediapipe/solutions",
+		filter: false,
+		countDownloads: `path_extension:"task" OR path_extension:"tflite" OR path_extension:"litertlm"`,
+	},
 	memra: {
 		prettyLabel: "memra",
 		repoName: "memra",
@@ -1563,6 +1578,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-deepmind/recurrentgemma",
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
+	},
+	redefiner: {
+		prettyLabel: "ReDefiNER",
+		repoName: "ReDefiNER",
+		repoUrl: "https://github.com/Jungroo-AI/redefiner",
+		snippets: snippets.redefiner,
+		filter: false,
 	},
 	relik: {
 		prettyLabel: "Relik",
