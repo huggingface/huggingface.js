@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/jinja",
-	"version": "0.5.11",
+	"version": "0.5.13",
 	"description": "A minimalistic JavaScript implementation of the Jinja templating engine, specifically designed for parsing and rendering ML chat templates.",
 	"keywords": [
 		"face",
@@ -47,8 +47,7 @@
 	},
 	"devDependencies": {
 		"@huggingface/hub": "workspace:^",
-		"@huggingface/transformers": "^3.0.0",
-		"typescript": "^5.3.2"
+		"typescript": "^5.8.3"
 	},
 	"engines": {
 		"node": ">=18"

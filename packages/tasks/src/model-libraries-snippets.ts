@@ -173,6 +173,18 @@ function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
 	}
 }
 
+export const basedecision = (model: ModelData): string[] => [
+	`from basedecision import load_from_hub
+
+model = load_from_hub("${model.id}")
+result = model.choose(
+    context="Please refund my purchase.",
+    question="What does the customer request?",
+    options=["Refund", "Delivery status", "Change address"],
+)
+print(result.answer)`,
+];
+
 export const ben2 = (model: ModelData): string[] => [
 	`import requests
 from PIL import Image
@@ -1274,6 +1286,15 @@ import soundfile as sf
 sf.write('output.wav', audio, 24000)`,
 ];
 
+export const konfai = (model: ModelData): string[] => [
+	`pip install "konfai[imaging]" konfai-apps`,
+	`# List the apps this repository holds
+konfai-apps list ${model.id}
+
+# Run one of them on an image
+konfai-apps infer ${model.id}:<app> -i image.nii.gz -o Output`,
+];
+
 /**
  * Detect LTX-2.5 (split weights + Gemma 4 TE file) vs LTX-2.3
  * (monolith checkpoint + separate Gemma 3 root). Prefer explicit tags / ids /
@@ -1558,6 +1579,35 @@ export const ltx = (model: ModelData): string[] => {
 	return _isLtx25Model(model) ? _ltx25Snippets(model, localDir, tags) : _ltx23Snippets(model, localDir, tags);
 };
 
+const LIBREYOLO_LOADER_TASKS = new Set([
+	"object-detection",
+	"image-segmentation",
+	"keypoint-detection",
+	"image-classification",
+	"depth-estimation",
+]);
+
+export const libreyolo = (model: ModelData): string[] => {
+	// Repos tagged libreyolo-custom-loader need another entry point (LibreSAM, LibreOpenVocab, ...), see their model card.
+	if (
+		!model.pipeline_tag ||
+		!LIBREYOLO_LOADER_TASKS.has(model.pipeline_tag) ||
+		model.tags.includes("libreyolo-custom-loader")
+	) {
+		return [
+			`# pip install libreyolo
+# See the model card for usage: https://huggingface.co/${model.id}`,
+		];
+	}
+	return [
+		`# pip install libreyolo
+from libreyolo import LibreYOLO
+
+model = LibreYOLO("${model.id}")
+results = model("https://raw.githubusercontent.com/LibreYOLO/libreyolo/release/libreyolo/assets/guggenheim-bilbao.jpg", save=True)`,
+	];
+};
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
@@ -1681,6 +1731,42 @@ python -m lerobot.record \\
 		return smolvlaSnippets;
 	}
 	return [];
+};
+
+export const limx_dynamics = (model: ModelData): string[] => {
+	const download = `# Download the repository (each robot model has its own folder, see the model card)
+hf download ${model.id} --local-dir ./${model.id.split("/").pop()}`;
+	if (model.tags.includes("mjcf") || model.tags.includes("urdf")) {
+		return [
+			download,
+			`# Load a robot model in MuJoCo
+# pip install mujoco huggingface_hub
+import glob
+import mujoco
+from huggingface_hub import snapshot_download
+
+path = snapshot_download("${model.id}")
+paths = sorted(glob.glob(f"{path}/**/xml/*.xml", recursive=True))
+print(paths)  # MJCF files, one per robot model
+model = mujoco.MjModel.from_xml_path(paths[0])`,
+		];
+	}
+	if (model.tags.includes("onnx")) {
+		return [
+			download,
+			`# Load an RL policy with ONNX Runtime
+# pip install onnxruntime huggingface_hub
+import glob
+import onnxruntime as ort
+from huggingface_hub import snapshot_download
+
+path = snapshot_download("${model.id}")
+paths = sorted(glob.glob(f"{path}/**/policy.onnx", recursive=True))
+print(paths)  # one policy per robot model
+session = ort.InferenceSession(paths[0])`,
+		];
+	}
+	return [download];
 };
 
 export const litert_lm = (model: ModelData): string[] => [
@@ -1846,6 +1932,22 @@ export const opendde = (): string[] => [
 # Checkpoints are fetched from the Hub into $OPENDDE_ROOT_DIR (default ~/.cache/opendde)
 opendde doctor
 opendde pred -i examples/input.json -o ./output -n opendde_v1`,
+];
+
+export const opendecision = (model: ModelData): string[] => [
+	`# pip install tokz-opendecision
+from opendecision import OpenDecision, Choice, Bool, MultiLabel
+
+model = OpenDecision.from_pretrained("${model.id}")
+out = model.decide(
+    "I was charged twice for my May invoice and the app keeps logging me out.",
+    {
+        "queue": Choice(["billing", "technical", "account", "sales"]),
+        "tags": MultiLabel(["double_charge", "login_issue", "refund_request", "outage"]),
+        "urgent": Bool(),
+    },
+)
+print(out["queue"].best, out["tags"].selected, out["urgent"].policy)`,
 ];
 
 export const paddlenlp = (model: ModelData): string[] => {
@@ -2065,6 +2167,41 @@ export const pyannote_audio = (model: ModelData): string[] => {
 	return pyannote_audio_model(model);
 };
 
+export const redefiner = (model: ModelData): string[] => {
+	if (!model.config?.model_type) {
+		// a pointer repo: config.json names a base model and ships its own default rulebook
+		return [
+			`pip install redefiner`,
+			`from redefiner import Tagger
+
+tagger = Tagger.from_pretrained("${model.id}")  # loads the base model's weights
+
+entities = tagger.extract("Your text here.")  # uses this repo's default rulebook`,
+		];
+	}
+	return [
+		`pip install redefiner`,
+		`from redefiner import Tagger
+
+tagger = Tagger.from_pretrained("${model.id}")  # GPU if available, else CPU
+
+# Define the entity types to extract, and any rules, in plain English
+rulebook = """[RULES]
+Extract every entity of the supplied types. Return exact spans from the text.
+
+[TYPE] PERSON
+[DESCRIPTION] A person's name.
+PE1 Label the full name; leave out titles such as "Dr" or "Prof".
+
+[TYPE] ORGANIZATION
+[DESCRIPTION] A company, university or other institution.
+"""
+
+entities = tagger.extract("Prof Ada Lovelace corresponded with the Royal Society.", rulebook)
+# [{'start': 5, 'end': 17, 'text': 'Ada Lovelace', 'label': 'PERSON', 'confidence': ...}, ...]`,
+	];
+};
+
 export const relik = (model: ModelData): string[] => [
 	`from relik import Relik
 
@@ -2136,6 +2273,26 @@ export const timm = (model: ModelData): string[] => [
 	`import timm
 
 model = timm.create_model("hf-hub:${model.id}", pretrained=True)`,
+];
+
+// create_model() takes a name from the torch-pointcloud registry; the weights live in "torch-pointcloud/<name>"
+export const torch_pointcloud = (model: ModelData): string[] => [
+	`import torch_pointcloud as tp
+
+model = tp.create_model("${nameWithoutNamespace(model.id)}", pretrained=True)`,
+];
+
+export const s1s2 = (model: ModelData): string[] => [
+	`npm i @s1s2/web onnxruntime-web @huggingface/transformers`,
+	`import { S1S2 } from "@s1s2/web";
+
+// Runs in the browser (WebGPU). manifest.json is the default manifest of this repo.
+const model = await S1S2.load({ manifest: "https://huggingface.co/${model.id}/resolve/main/manifest.json" });
+const s = await model.decide({
+	input: "Arrived late, but works great.",
+	questions: [{ name: "positive", type: "predicate", instructions: "Is this review positive?" }],
+});
+console.log(s.answers[0].probability, s.answers[0].margin);`,
 ];
 
 export const saelens = (/* model: ModelData */): string[] => [
@@ -2516,6 +2673,14 @@ stanza.download("${nameWithoutNamespace(model.id).replace("stanza-", "")}")
 nlp = stanza.Pipeline("${nameWithoutNamespace(model.id).replace("stanza-", "")}")`,
 ];
 
+export const strandsDecider = (model: ModelData): string[] => [
+	`# pip install strands-decider
+strands-decider ask ${model.id} \\
+  --state "Help! My payouts have been failing for 3 days!" \\
+  --choice "Which team should handle this?=billing,sales,retail" \\
+  --noul "Does this convey urgency?"`,
+];
+
 const speechBrainMethod = (speechbrainInterface: string) => {
 	switch (speechbrainInterface) {
 		case "EncoderClassifier":
@@ -2596,13 +2761,40 @@ const autoModelClass = (model: ModelData): string | undefined => {
 	return autoModel && isValidIdentifier(autoModel) ? autoModel : undefined;
 };
 
+const transformersDecisionSnippet = (model: ModelData, remote_code_snippet: string): string =>
+	[
+		"from transformers import pipeline",
+		"",
+		`decide = pipeline("decision", model="${model.id}"` + remote_code_snippet + ")",
+		"decision = decide(",
+		"    {",
+		'        "state": "I was charged twice for my order and want a refund.",',
+		'        "questions": {',
+		'            "department": {',
+		'                "type": "choice",',
+		'                "instructions": "Which team should handle this?",',
+		'                "criteria": {',
+		'                    "billing": "Payments and refunds",',
+		'                    "technical": "Bugs and technical issues",',
+		'                    "sales": "Pricing and subscriptions",',
+		"                },",
+		"            },",
+		"        },",
+		"    }",
+		")",
+	].join("\n");
+
 export const transformers = (model: ModelData): string[] => {
+	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+
 	const info = transformersSnippetInfo(model);
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
 	const auto_model = autoModelClass(model) ?? "AutoModel";
-	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	if (auto_model == "AutoModelForDecision") {
+		return [transformersDecisionSnippet(model, remote_code_snippet)];
+	}
 
 	const autoSnippet = [];
 	if (info.processor) {
@@ -2745,6 +2937,27 @@ const documents = [
 const inputs = tokenizer(new Array(documents.length).fill(query), { text_pair: documents, padding: true, truncation: true });
 const { logits } = await model(inputs);
 console.log(logits.sigmoid().tolist()); // one relevance score per document`,
+		];
+	}
+
+	// transformers.js has no keypoint-detection pipeline (pipeline('keypoint-detection') throws "Unsupported pipeline"),
+	// so pose estimation models such as ViTPose are run directly and their heatmaps are post-processed instead.
+	if (model.pipeline_tag === "keypoint-detection") {
+		return [
+			`// npm i ${libName}
+import { AutoModel, AutoImageProcessor, RawImage } from '${libName}';
+
+const model = await AutoModel.from_pretrained('${model.id}');
+const processor = await AutoImageProcessor.from_pretrained('${model.id}');
+
+const image = await RawImage.read('https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/ryan-gosling.jpg');
+const inputs = await processor(image);
+const { heatmaps } = await model(inputs);
+
+// ViTPose is a top-down model: pass one box per person, in COCO format [x, y, width, height]
+const boxes = [[[0, 0, image.width, image.height]]];
+const results = processor.post_process_pose_estimation(heatmaps, boxes)[0][0];
+console.log(results); // { bbox, scores, labels, keypoints }`,
 		];
 	}
 
@@ -3132,6 +3345,77 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
+// Unitree deploy controllers live in two repos with slightly different robot folder names:
+// unitree_rl_lab (policies trained with Isaac Lab) and unitree_rl_mjlab (policies trained with mjlab).
+const UNITREE_ROBOTS: Record<string, { bin: string; isaaclab?: string; mjlab?: string }> = {
+	"unitree-g1-29dof": { bin: "g1_ctrl", isaaclab: "g1_29dof", mjlab: "g1" },
+	"unitree-g1-23dof": { bin: "g1_ctrl", isaaclab: "g1_23dof", mjlab: "g1_23dof" },
+	"unitree-go2": { bin: "go2_ctrl", isaaclab: "go2", mjlab: "go2" },
+	"unitree-go2w": { bin: "go2w_ctrl", isaaclab: "go2w" },
+	"unitree-h1": { bin: "h1_ctrl", isaaclab: "h1" },
+	"unitree-h1-2": { bin: "h1_2_ctrl", isaaclab: "h1_2", mjlab: "h1_2" },
+	"unitree-b2": { bin: "b2_ctrl", isaaclab: "b2" },
+	"unitree-a2": { bin: "a2_ctrl", mjlab: "a2" },
+	"unitree-r1": { bin: "r1_ctrl", mjlab: "r1" },
+};
+
+export const unitree = (model: ModelData): string[] => {
+	// Everything comes from the model card tags: unitree-<robot>, isaaclab | mjlab, velocity | mimic
+	const framework = model.tags.includes("mjlab") ? "mjlab" : "isaaclab";
+	const repo = framework === "mjlab" ? "unitree_rl_mjlab" : "unitree_rl_lab";
+	const robotTags = Object.keys(UNITREE_ROBOTS).filter((tag) => model.tags.includes(tag));
+	const robot = robotTags.length === 1 ? UNITREE_ROBOTS[robotTags[0]] : undefined;
+	const dir = robot?.[framework];
+	const robotDir = dir ?? "ROBOT";
+	const bin = dir && robot ? robot.bin : "ROBOT_ctrl";
+	const prefix = dir ? "" : `# Replace ROBOT with the robot named in the model card.\n`;
+	const name = model.id.split("/").pop() ?? model.id;
+	const simFlag = framework === "mjlab" ? " --network=lo" : "";
+
+	let install: string;
+	if (model.tags.includes("mimic")) {
+		const policyDir = `config/policy/mimic/${name}`;
+		const motion =
+			framework === "mjlab"
+				? `#       motion_file: ${policyDir}/params/motion.npz`
+				: `#       motion_file: ${policyDir}/params/motion.csv\n#       fps: 60`;
+		install = `hf download ${model.id} --local-dir ${policyDir}
+# Enable the policy in config/config.yaml:
+#   FSM:
+#     _:
+#       Mimic_Hub: {id: 110, type: Mimic}
+#     Velocity:
+#       transitions:
+#         Mimic_Hub: LT(2s) + up.on_pressed
+#     Mimic_Hub:
+#       transitions:
+#         Passive: LT + B.on_pressed
+#         Velocity: RB + X.on_pressed
+#       policy_dir: ${policyDir}/
+${motion}`;
+	} else {
+		const velocityDir =
+			framework === "mjlab" || dir === "g1_29dof"
+				? "config/policy/velocity"
+				: `../../../logs/rsl_rl/unitree_${robotDir}_velocity`;
+		install = `# The Velocity state runs the last policy folder in ${velocityDir}
+hf download ${model.id} --local-dir ${velocityDir}/v1`;
+	}
+
+	return [
+		`${prefix}# 1. Get the deploy controller and the policy
+git clone https://github.com/unitreerobotics/${repo}
+cd ${repo}/deploy/robots/${robotDir}
+${install}`,
+		`# 2. Build the controller on Linux, with unitree_sdk2 and its dependencies installed
+mkdir -p build && cd build && cmake .. && make`,
+		`# 3. Test in simulation first: start unitree_mujoco, then run
+./${bin}${simFlag}`,
+		`# 4. Run on the robot, over its Ethernet interface
+./${bin} --network eth0`,
+	];
+};
+
 export const univa = (model: ModelData): string[] => [
 	`# Follow installation instructions at https://github.com/PKU-YuanGroup/UniWorld-V1
 import torch
@@ -3489,6 +3773,15 @@ export const hezar = (model: ModelData): string[] => [
 	`from hezar import Model
 
 model = Model.load("${model.id}")`,
+];
+
+export const zao = (model: ModelData): string[] => [
+	`# pip install zao
+from zao import ZAOTransformer
+
+zao = ZAOTransformer(weights="${model.id}")
+X = zao.transform(["CC(=O)Oc1ccccc1C(=O)O", "c1ccc2[nH]ccc2c1"])
+X.shape  # (2, 2048)`,
 ];
 
 export const zonos = (model: ModelData): string[] => [

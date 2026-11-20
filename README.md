@@ -30,8 +30,7 @@ await uploadFile({
 // Use all supported Inference Providers!
 
 await inference.chatCompletion({
-  model: "meta-llama/Llama-3.1-8B-Instruct",
-  provider: "sambanova", // or together, fal-ai, replicate, cohere …
+  model: "deepseek-ai/DeepSeek-V4.1-Flash",
   messages: [
     {
       role: "user",
@@ -100,8 +99,8 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@4.13.32/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.17.10/+esm";
+    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@4.13.33/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.17.11/+esm";
 </script>
 ```
 
@@ -149,13 +148,6 @@ for await (const chunk of client.chatCompletionStream({
 }
 
 /// Using a third-party provider:
-await client.chatCompletion({
-  model: "meta-llama/Llama-3.1-8B-Instruct",
-  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
-  max_tokens: 512,
-  provider: "sambanova", // or together, fal-ai, replicate, cohere …
-})
-
 await client.textToImage({
   model: "black-forest-labs/FLUX.1-dev",
   inputs: "a picture of a green bird",
