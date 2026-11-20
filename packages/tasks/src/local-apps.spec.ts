@@ -306,7 +306,10 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(true);
 		expect(snippets[0].setup).toEqual("pip install dulus");
 		for (const snippet of snippets) {
-			expect(snippet.content).toEqual("dulus --model ollama/hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M");
+			expect(snippet.content).toEqual(`# Pull the model with Ollama:
+ollama pull hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M
+# Start Dulus on it:
+dulus --model ollama/hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M`);
 		}
 	});
 
