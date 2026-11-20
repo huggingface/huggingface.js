@@ -130,6 +130,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		headers?: Record<string, string>,
 		outputType?: OutputType,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<string | Blob | Record<string, unknown>> {
 		if (!url || !headers) {
 			throw new InferenceClientInputError("Headers are required for WaveSpeed AI API calls");
@@ -145,7 +146,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 
 		// Poll for results until completion
 		while (true) {
-			const resultResponse = await fetch(resultUrl, { headers, signal });
+			const resultResponse = await fetchFn(resultUrl, { headers, signal });
 
 			if (!resultResponse.ok) {
 				throw new InferenceClientProviderApiError(
@@ -180,7 +181,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 					}
 
 					// Default: fetch and return blob
-					const mediaResponse = await fetch(mediaUrl, { signal });
+					const mediaResponse = await fetchFn(mediaUrl, { signal });
 					if (!mediaResponse.ok) {
 						throw new InferenceClientProviderApiError(
 							"Failed to fetch generation output from WaveSpeed AI API",
@@ -226,8 +227,9 @@ export class WavespeedAITextToVideoTask extends WavespeedAITask implements TextT
 		headers?: Record<string, string>,
 		_outputType?: undefined,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<Blob> {
-		return super.getResponse(response, url, headers, undefined, signal) as Promise<Blob>;
+		return super.getResponse(response, url, headers, undefined, signal, fetchFn) as Promise<Blob>;
 	}
 }
 
@@ -249,8 +251,9 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 		headers?: Record<string, string>,
 		_outputType?: undefined,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<Blob> {
-		return super.getResponse(response, url, headers, undefined, signal) as Promise<Blob>;
+		return super.getResponse(response, url, headers, undefined, signal, fetchFn) as Promise<Blob>;
 	}
 }
 
@@ -272,8 +275,9 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 		headers?: Record<string, string>,
 		_outputType?: undefined,
 		signal?: AbortSignal,
+		fetchFn: typeof fetch = fetch,
 	): Promise<Blob> {
-		return super.getResponse(response, url, headers, undefined, signal) as Promise<Blob>;
+		return super.getResponse(response, url, headers, undefined, signal, fetchFn) as Promise<Blob>;
 	}
 }
 
