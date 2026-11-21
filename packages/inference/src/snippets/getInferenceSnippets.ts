@@ -207,6 +207,21 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			}
 		}
 
+		let curlProviderInputs = providerInputs;
+		if (!opts?.inputs && !inputPreparationFn && hasTemplate("sh", "curl", templateName)) {
+			// Default snippets contain JSON source literals. cURL needs their values before
+			// provider-specific payload mapping and JSON serialization, unlike code templates.
+			const curlBody = providerHelper.makeBody({
+				args: { inputs: JSON.parse(getModelInputSnippet(model) as string) },
+				model: providerModelId,
+				task,
+				mapping: inferenceProviderMapping,
+			});
+			if (typeof curlBody === "string") {
+				curlProviderInputs = JSON.parse(curlBody);
+			}
+		}
+
 		// Inputs for the "auto" route is strictly the same as "inputs", except the model includes the provider
 		// If not "auto" route, use the providerInputs
 		const autoInputs =
@@ -243,7 +258,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			},
 			providerInputs: {
 				asObj: providerInputs,
-				asCurlString: formatBody(providerInputs, "curl"),
+				asCurlString: formatBody(curlProviderInputs, "curl"),
 				asJsonString: formatBody(providerInputs, "json"),
 				asPythonString: formatBody(providerInputs, "python"),
 				asTsString: formatBody(providerInputs, "ts"),
@@ -432,7 +447,7 @@ export function getInferenceSnippets(
 function formatBody(obj: object, format: "curl" | "json" | "python" | "ts"): string {
 	switch (format) {
 		case "curl":
-			return indentString(formatBody(obj, "json"));
+			return indentString(formatBody(obj, "json")).replace(/'/g, "'\\''");
 
 		case "json":
 			/// Hacky: remove outer brackets to make is extendable in templates

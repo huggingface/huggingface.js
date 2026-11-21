@@ -1,6 +1,9 @@
 curl {{ fullUrl }} \
     -X POST \
-    -d '{"inputs": {{ providerInputs.asObj.inputs }}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}' \
+    -d '{
+{{ providerInputs.asCurlString }},
+        "parameters": {"candidate_labels": ["refund", "legal", "faq"]}
+    }' \
     -H 'Content-Type: application/json' \
     -H 'Authorization: {{ authorizationHeader }}'
 {% if billTo %} \
