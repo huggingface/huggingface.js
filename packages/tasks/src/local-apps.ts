@@ -587,6 +587,10 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetYollama = (model: ModelData, filepath?: string): string => {
+	return `yollama pull hf.co/${model.id}${getQuantTag(filepath)}`;
+};
+
 /**
  * Add your new local app here.
  *
@@ -815,6 +819,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	yollama: {
+		prettyLabel: "Yollama",
+		docsUrl: "https://github.com/EnlistedGhost/Yollama",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetYollama,
 	},
 } satisfies Record<string, LocalApp>;
 
