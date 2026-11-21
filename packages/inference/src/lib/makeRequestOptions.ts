@@ -80,7 +80,7 @@ export async function makeRequestOptions(
 					provider,
 					accessToken: args.accessToken,
 				},
-				{ fetch: options?.fetch },
+				{ fetch: options?.fetch, signal: options?.signal },
 			);
 	if (!inferenceProviderMapping) {
 		throw new InferenceClientInputError(
