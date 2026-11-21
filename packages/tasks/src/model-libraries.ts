@@ -1011,6 +1011,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	lattice: {
+		prettyLabel: "Lattice",
+		repoName: "Lattice",
+		repoUrl: "https://github.com/hachure-ai/Lattice",
+		filter: false,
+		countDownloads: `path:"cls.ckpt" OR path:"reg.ckpt"`,
+	},
 	laya: {
 		prettyLabel: "Laya",
 		repoName: "Laya",
