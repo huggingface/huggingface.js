@@ -35,7 +35,9 @@ export async function* mergeAsyncGenerators<T>(generators: AsyncGenerator<T>[]):
 			});
 		}
 	} finally {
-		// Close every active source, even if one cleanup fails. Keep the original source error.
-		await Promise.allSettled([...active].map((gen) => gen.return(undefined)));
+		// A return request queues behind a pending next(), so waiting for cleanup can hang
+		// early exit or hide a source error. Request every cleanup and handle its rejection,
+		// but let the consumer finish even when a source read has not settled yet.
+		void Promise.allSettled([...active].map(async (gen) => gen.return(undefined)));
 	}
 }
