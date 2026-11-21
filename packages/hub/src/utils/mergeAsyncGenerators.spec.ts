@@ -32,6 +32,7 @@ describe("mergeAsyncGenerators", () => {
 				yield 2;
 			} finally {
 				closed = true;
+				await Promise.reject(new Error("cleanup failed"));
 			}
 		}
 		const merged = mergeAsyncGenerators([failing(), sibling()]);
