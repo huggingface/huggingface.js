@@ -1648,7 +1648,7 @@ export class Interpreter {
 				}
 			} else if (filterName === "default") {
 				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
-				const defaultValue = args[0] ?? new StringValue("");
+				const defaultValue = args[0] ?? kwargs.get("default_value") ?? new StringValue("");
 				const booleanValue = args[1] ?? kwargs.get("boolean") ?? new BooleanValue(false);
 				if (!(booleanValue instanceof BooleanValue)) {
 					throw new Error("`default` filter flag must be a boolean");
