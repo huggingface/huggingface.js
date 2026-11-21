@@ -113,6 +113,35 @@ describe("streamJson", () => {
 		});
 	}
 
+	it.each(["complete", "early break", "parse error", "source error"])(
+		"releases the stream reader after %s",
+		async (mode) => {
+			const source = new ReadableStream<Uint8Array>({
+				start(controller) {
+					if (mode === "source error") {
+						controller.error(new Error("source failed"));
+					} else {
+						controller.enqueue(encoder.encode(mode === "parse error" ? "[?" : "[1,2]"));
+						controller.close();
+					}
+				},
+			});
+			const consume = async () => {
+				for await (const event of streamJson(source)) {
+					if (mode === "early break" && event.type === "startArray") break;
+				}
+			};
+			if (mode === "parse error" || mode === "source error") {
+				await expect(consume()).rejects.toThrow();
+			} else {
+				await consume();
+			}
+			expect(source.locked).toBe(false);
+			const reader = source.getReader();
+			reader.releaseLock();
+		},
+	);
+
 	it("emits events in document order", async () => {
 		expect(await collect('{"a":[1,"x"],"b":null}')).toEqual([
 			{ type: "startObject" },
