@@ -248,6 +248,158 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.parameterTotal, 109_482_240);
 	});
 
+	describe("quantization config location", () => {
+		const quantizationConfig = (bits: number) => ({ quantization_config: { quant_method: "gptq", bits } });
+		const packedHeaders: SafetensorsFileHeader[] = [
+			{
+				"model.layers.0.self_attn.q_proj.qweight": { dtype: "I32", shape: [4, 32], data_offsets: [0, 512] },
+				"model.layers.0.self_attn.q_proj.qzeros": { dtype: "I32", shape: [1, 4], data_offsets: [512, 528] },
+			},
+			{
+				"model.layers.0.self_attn.q_proj.scales": { dtype: "F16", shape: [1, 32], data_offsets: [0, 64] },
+				"model.layers.0.self_attn.q_proj.g_idx": { dtype: "I32", shape: [32], data_offsets: [64, 192] },
+				"model.norm.weight": { dtype: "BF16", shape: [32], data_offsets: [192, 256] },
+			},
+		];
+		const diffusionHeaders: SafetensorsFileHeader[] = [
+			{
+				"transformer_blocks.0.attn.to_q.weight": { dtype: "U8", shape: [16, 2], data_offsets: [0, 32] },
+				"transformer_blocks.0.attn.to_q.weight_scale": { dtype: "F32", shape: [2], data_offsets: [32, 40] },
+			},
+			{ "norm_out.weight": { dtype: "BF16", shape: [32], data_offsets: [0, 64] } },
+		];
+		const safetensorsFile = (header: SafetensorsFileHeader): Uint8Array => {
+			const json = JSON.stringify(header);
+			const headerBytes = new TextEncoder().encode(json + " ".repeat((8 - (json.length % 8)) % 8));
+			const dataBytes = Math.max(...Object.values(header).map((info) => info.data_offsets[1]));
+			const file = new Uint8Array(8 + headerBytes.length + dataBytes);
+			new DataView(file.buffer).setBigUint64(0, BigInt(headerBytes.length), true);
+			file.set(headerBytes, 8);
+			return file;
+		};
+
+		it.each(
+			[
+				{ label: "sibling config without a root config", folder: "4bit/", sibling: quantizationConfig(4) },
+				{
+					label: "sibling config instead of a different root bit width",
+					folder: "4bit/",
+					sibling: quantizationConfig(4),
+					root: quantizationConfig(8),
+				},
+				{
+					label: "automatically selected diffusers component config",
+					folder: "transformer/",
+					sibling: { quantization_config: { quant_method: "modelopt", quant_algo: "NVFP4" } },
+					auto: true,
+				},
+				{ label: "root config for root weights", folder: "", root: quantizationConfig(4) },
+				{ label: "root fallback when no sibling config exists", folder: "4bit/", root: quantizationConfig(4) },
+				{ label: "headers only without requesting config", folder: "4bit/", count: false },
+				{ label: "ordinary unquantized weights", folder: "", plain: true },
+			].flatMap((testCase) => [
+				{ ...testCase, sharded: false },
+				{ ...testCase, sharded: true },
+			]),
+		)("uses $label (sharded: $sharded)", async ({ folder, sibling, root, count = true, plain, auto, sharded }) => {
+			const sourceHeaders: SafetensorsFileHeader[] = plain
+				? [{ "model.norm.weight": { dtype: "BF16", shape: [32], data_offsets: [0, 64] } }]
+				: auto
+					? diffusionHeaders
+					: packedHeaders;
+			let dataOffset = 0;
+			const singleHeader = Object.fromEntries(
+				sourceHeaders.flatMap((header) => {
+					const entries = Object.entries(header).map(([name, info]) => [
+						name,
+						{ ...info, data_offsets: info.data_offsets.map((offset) => offset + dataOffset) },
+					]);
+					dataOffset += Math.max(...Object.values(header).map((info) => info.data_offsets[1]));
+					return entries;
+				}),
+			);
+			const headers = sharded ? sourceHeaders : [singleHeader];
+			const weightName = auto ? "diffusion_pytorch_model" : "model";
+			const filenames = headers.map((_, i) =>
+				sharded ? `${weightName}-0000${i + 1}-of-0000${headers.length}.safetensors` : `${weightName}.safetensors`,
+			);
+			const weightMap = Object.fromEntries(
+				headers.flatMap((header, i) => Object.keys(header).map((name) => [name, filenames[i]])),
+			);
+			const path = `${folder}${weightName}.safetensors${sharded ? ".index.json" : ""}`;
+			const revision = "checkpoint/4bit";
+			const hubUrl = "https://hub.example.test";
+			const files = new Map(filenames.map((filename, i) => [folder + filename, safetensorsFile(headers[i])]));
+			const jsonFile = (value: unknown) => new TextEncoder().encode(JSON.stringify(value));
+			if (sharded) {
+				files.set(path, jsonFile({ weight_map: weightMap }));
+			}
+			if (root) {
+				files.set("config.json", jsonFile(root));
+			}
+			if (sibling) {
+				files.set(`${folder}config.json`, jsonFile(sibling));
+			}
+			const requestedPaths: string[] = [];
+			const fetch: typeof globalThis.fetch = async (input, init) => {
+				const url = new URL(typeof input === "string" || input instanceof URL ? input : input.url);
+				assert.strictEqual(url.origin, hubUrl);
+				assert.strictEqual(new Headers(init?.headers).get("authorization"), "Bearer hf_test_config_location");
+				const endpoint = init?.method === "HEAD" ? "raw" : "resolve";
+				const prefix = `/some-user/nested-checkpoints/${endpoint}/${encodeURIComponent(revision)}/`;
+				assert(url.pathname.startsWith(prefix));
+				const requestedPath = url.pathname.slice(prefix.length);
+				requestedPaths.push(requestedPath);
+				const file = files.get(requestedPath);
+				if (!file) {
+					return new Response(null, { status: 404, headers: { "X-Error-Code": "EntryNotFound" } });
+				}
+				const range = new Headers(init?.headers).get("range");
+				if (!range) {
+					return new Response(file);
+				}
+				const [start, end] = range.slice("bytes=".length).split("-").map(Number);
+				const last = Math.min(end, file.length - 1);
+				return new Response(file.slice(start, last + 1), {
+					status: 206,
+					headers: { "content-range": `bytes ${start}-${last}/${file.length}`, etag: '"config-location-test"' },
+				});
+			};
+			const parse = await parseSafetensorsMetadata({
+				repo: "some-user/nested-checkpoints",
+				path: auto ? undefined : path,
+				library: auto ? "diffusers" : undefined,
+				revision,
+				hubUrl,
+				accessToken: "hf_test_config_location",
+				computeParametersCount: count,
+				useSafetensorsMetadataEndpoint: false,
+				fetch,
+			});
+
+			assert.strictEqual(parse.sharded, sharded);
+			assert.deepStrictEqual(parse.filepaths, sharded ? [path, ...filenames.map((name) => folder + name)] : [path]);
+			if (parse.sharded) {
+				assert.deepStrictEqual(parse.headers, Object.fromEntries(filenames.map((name, i) => [name, headers[i]])));
+				assert.deepStrictEqual(parse.index.weight_map, weightMap);
+			} else {
+				assert.deepStrictEqual(parse.header, headers[0]);
+			}
+			// GPTQ packs the 32x32 matrix eight 4-bit weights per I32; ModelOpt packs
+			// the diffusion component's 64 weights two per U8. Quantization state is not a parameter.
+			assert.deepStrictEqual(
+				parse.parameterCount,
+				count ? (plain ? { BF16: 32 } : auto ? { U8: 64, BF16: 32 } : { I32: 1024, BF16: 32 }) : undefined,
+			);
+			if (!count) {
+				assert(!requestedPaths.some((name) => name.endsWith("config.json")));
+			} else if (sibling) {
+				assert(requestedPaths.includes(`${folder}config.json`));
+				assert(!requestedPaths.includes("config.json"));
+			}
+		});
+	});
+
 	describe("malformed headers (crafted parameter counts)", () => {
 		/**
 		 * Builds the bytes of a minimal safetensors file from a JSON header plus a data buffer,
