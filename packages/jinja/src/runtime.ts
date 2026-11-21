@@ -50,11 +50,13 @@ class ContinueControl extends Error {}
 const EMPTY_BUILTINS: ReadonlyMap<string, AnyRuntimeValue> = new Map();
 const ZERO_ARGUMENT_FILTERS = new Set([
 	"abs",
+	"bool",
 	"capitalize",
 	"first",
 	"items",
 	"last",
 	"length",
+	"list",
 	"lower",
 	"reverse",
 	"safe",
