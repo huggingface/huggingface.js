@@ -3,6 +3,7 @@ import { createApiError } from "../../error";
 import type { CredentialsParams } from "../../types/public";
 import { checkCredentials } from "../../utils/checkCredentials";
 import type { ApiJobHardware } from "../../types/api/api-jobs";
+import { fetchWithServerWarnings } from "../../utils/serverWarnings";
 
 /**
  * Get the list of available hardware for jobs.
@@ -25,7 +26,7 @@ export async function listJobHardware(
 		headers.Authorization = `Bearer ${accessToken}`;
 	}
 
-	const response = await (params?.fetch || fetch)(`${params?.hubUrl || HUB_URL}/api/jobs/hardware`, {
+	const response = await fetchWithServerWarnings(params?.fetch)(`${params?.hubUrl || HUB_URL}/api/jobs/hardware`, {
 		headers,
 	});
 

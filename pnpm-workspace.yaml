@@ -9,6 +9,7 @@ packages:
   - packages/tasks
   - packages/tasks-gen
   - packages/gguf
+  - packages/lerobot
   - packages/jinja
   - packages/space-header
   - packages/ollama-utils
@@ -18,3 +19,4 @@ packages:
   - packages/xetchunk-wasm
   - packages/gearhash-jit
   - packages/splitmix64-wasm
+  - packages/usd-web-viewer

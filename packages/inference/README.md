@@ -46,25 +46,11 @@ Your access token should be kept private. If you need to protect it in front-end
 
 You can send inference requests to third-party providers with the inference client.
 
-Currently, we support the following providers:
+Currently, chat model inference is powered by [OpenRouter](https://openrouter.ai), and the other tasks are served by the following providers:
 - [Fal.ai](https://fal.ai)
-- [Featherless AI](https://featherless.ai)
-- [Fireworks AI](https://fireworks.ai)
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
-- [Novita](https://novita.ai)
-- [Nscale](https://nscale.com)
-- [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
-- [Public AI](https://publicai.co)
 - [Replicate](https://replicate.com)
-- [Scaleway](https://www.scaleway.com/en/generative-apis/)
-- [Together](https://together.xyz)
-- [Baseten](https://baseten.co)
-- [Cohere](https://cohere.com)
-- [Cerebras](https://cerebras.ai/)
-- [DeepInfra](https://deepinfra.com)
-- [Groq](https://groq.com)
 - [Wavespeed.ai](https://wavespeed.ai/)
-- [Z.ai](https://z.ai/)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. The default value of the `provider` parameter is "auto", which will select the first of the providers available for the model, sorted by your preferred order in https://hf.co/settings/inference-providers.
 
@@ -83,24 +69,14 @@ You also have to make sure your request is authenticated with an access token.
 When authenticated with a Hugging Face access token, the request is routed through https://huggingface.co.
 When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
 
+Chat completion (`chatCompletion` and `chatCompletionStream`) with a Hugging Face access token goes through the router at https://router.huggingface.co/v1/chat/completions. The router picks a provider for the model, or runs it on the one you pass as `provider` (sent as `model:provider`, e.g. `"together"`). With a provider API key, it calls that provider directly. To list the providers serving a model, check its model page on the Hub.
+
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
-- [Featherless AI supported models](https://huggingface.co/api/partners/featherless-ai/models)
-- [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
 - [HF Inference supported models](https://huggingface.co/api/partners/hf-inference/models)
-- [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
-- [OVHcloud supported models](https://huggingface.co/api/partners/ovhcloud/models)
+- [OpenRouter supported models](https://huggingface.co/api/partners/openrouter/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
-- [Scaleway supported models](https://huggingface.co/api/partners/scaleway/models)
-- [Together supported models](https://huggingface.co/api/partners/together/models)
-- [Baseten supported models](https://huggingface.co/api/partners/baseten/models)
-- [Cohere supported models](https://huggingface.co/api/partners/cohere/models)
-- [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
-- [DeepInfra supported models](https://huggingface.co/api/partners/deepinfra/models)
-- [Groq supported models](https://console.groq.com/docs/models)
-- [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 - [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed/models)
-- [Z.ai supported models](https://huggingface.co/api/partners/zai-org/models)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
 This is not an issue for LLMs as everyone converged on the OpenAI API anyways, but can be more tricky for other tasks like "text-to-image" or "automatic-speech-recognition" where there exists no standard API. Let us know if any help is needed or if we can make things easier for you!
@@ -144,6 +120,7 @@ The package defines several error types that extend the base `Error` class:
 import { InferenceClient } from "@huggingface/inference";
 import {
   InferenceClientError,
+  InferenceClientInputError,
   InferenceClientProviderApiError,
   InferenceClientProviderOutputError,
   InferenceClientHubApiError,
@@ -160,13 +137,13 @@ try {
   if (error instanceof InferenceClientProviderApiError) {
     // Handle API errors (e.g., rate limits, authentication issues)
     console.error("Provider API Error:", error.message);
-    console.error("HTTP Request details:", error.request);
-    console.error("HTTP Response details:", error.response);
-  if (error instanceof InferenceClientHubApiError) {
+    console.error("HTTP Request details:", error.httpRequest);
+    console.error("HTTP Response details:", error.httpResponse);
+  } else if (error instanceof InferenceClientHubApiError) {
     // Handle API errors (e.g., rate limits, authentication issues)
     console.error("Hub API Error:", error.message);
-    console.error("HTTP Request details:", error.request);
-    console.error("HTTP Response details:", error.response);
+    console.error("HTTP Request details:", error.httpRequest);
+    console.error("HTTP Response details:", error.httpResponse);
   } else if (error instanceof InferenceClientProviderOutputError) {
     // Handle malformed responses from providers
     console.error("Provider Output Error:", error.message);
@@ -204,8 +181,8 @@ This error occurs when there are issues with the API request when performing inf
 
 It has several properties:
 - `message`: A descriptive error message
-- `request`: Details about the failed request (URL, method, headers)
-- `response`: Response details including status code and body
+- `httpRequest`: Details about the failed request (URL, method, headers)
+- `httpResponse`: Response details including status code and body
 
 #### InferenceClientHubApiError
 
@@ -213,8 +190,8 @@ This error occurs when there are issues with the API request when requesting the
 
 It has several properties:
 - `message`: A descriptive error message
-- `request`: Details about the failed request (URL, method, headers)
-- `response`: Response details including status code and body
+- `httpRequest`: Details about the failed request (URL, method, headers)
+- `httpResponse`: Response details including status code and body
 
 
 #### InferenceClientProviderOutputError
@@ -230,18 +207,16 @@ This error occurs when input parameters are invalid or missing. The error messag
 
 #### Text Generation
 
-Generates text from an input prompt.
+Generates text from an input prompt, on `hf-inference` or on your own endpoint (see [Using Inference Endpoints](#using-inference-endpoints)). For LLMs served by third-party providers, use [Chat Completion](#chat-completion).
 
 ```typescript
-await hf.textGeneration({
-  model: 'mistralai/Mixtral-8x7B-v0.1',
-  provider: "together",
+const endpoint = hf.endpoint("https://<your-endpoint>.endpoints.huggingface.cloud");
+
+await endpoint.textGeneration({
   inputs: 'The answer to the universe is'
 })
 
-for await (const output of hf.textGenerationStream({
-  model: "mistralai/Mixtral-8x7B-v0.1",
-  provider: "together",
+for await (const output of endpoint.textGenerationStream({
   inputs: 'repeat "one two three four"',
   parameters: { max_new_tokens: 250 }
 })) {
@@ -256,8 +231,7 @@ Generate a model response from a list of messages comprising a conversation.
 ```typescript
 // Non-streaming API
 const out = await hf.chatCompletion({
-  model: "Qwen/Qwen3-32B",
-  provider: "cerebras",
+  model: "deepseek-ai/DeepSeek-V4.1-Flash",
   messages: [{ role: "user", content: "Hello, nice to meet you!" }],
   max_tokens: 512,
   temperature: 0.1,
@@ -266,8 +240,7 @@ const out = await hf.chatCompletion({
 // Streaming API
 let out = "";
 for await (const chunk of hf.chatCompletionStream({
-  model: "Qwen/Qwen3-32B",
-  provider: "cerebras",
+  model: "deepseek-ai/DeepSeek-V4.1-Flash",
   messages: [
     { role: "user", content: "Can you help me solve an equation?" },
   ],
@@ -416,6 +389,25 @@ await hf.sentenceSimilarity({
       'That is a happy dog',
       'That is a very happy person',
       'Today is a sunny day'
+    ]
+  }
+})
+```
+
+#### Text Ranking
+
+Rank documents by their relevance to a query.
+
+```typescript
+await hf.textRanking({
+  model: 'cross-encoder/ettin-reranker-68m-v1',
+  inputs: {
+    query: 'Which planet is known as the Red Planet?',
+    texts: [
+      "Venus is often called Earth's twin because of its similar size and proximity.",
+      'Mars, known for its reddish appearance, is often referred to as the Red Planet.',
+      'Jupiter, the largest planet in our solar system, has a prominent red spot.',
+      'Saturn, famous for its rings, is sometimes mistaken for the Red Planet.'
     ]
   }
 })

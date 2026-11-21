@@ -19,6 +19,8 @@ export type {
 } from "./types/public";
 export { HubApiError, InvalidApiResponseFormatError } from "./error";
 export { HUB_URL } from "./consts";
+export { streamJson, JsonStreamParseError } from "./utils/streamJson";
+export type { JsonStreamEvent } from "./utils/streamJson";
 /**
  * Only exported for E2Es convenience
  */
