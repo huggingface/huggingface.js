@@ -668,7 +668,7 @@ export class UndefinedValue extends RuntimeValue<undefined> {
 	}
 }
 
-function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntimeValue] {
+function normalizeNamespaceEntry(pair: AnyRuntimeValue, name = "namespace"): [StringValue, AnyRuntimeValue] {
 	let values: AnyRuntimeValue[] | undefined;
 	if (pair instanceof ArrayValue) {
 		values = pair.value;
@@ -676,21 +676,21 @@ function normalizeNamespaceEntry(pair: AnyRuntimeValue): [StringValue, AnyRuntim
 		values = Array.from(pair.value, (char) => new StringValue(char));
 	}
 	if (!values || values.length !== 2) {
-		throw new Error("namespace expected an object or an iterable of [key, value] pairs");
+		throw new Error(`${name} expected an object or an iterable of [key, value] pairs`);
 	}
 
 	const [key, value] = values;
 	if (!(key instanceof StringValue)) {
-		throw new Error("namespace keys must be strings");
+		throw new Error(`${name} keys must be strings`);
 	}
 	return [key, value];
 }
 
 /**
- * Implements the `namespace` builtin. Each environment wraps it in its own `FunctionValue`, so that replacing
- * one environment's `namespace` does not affect any other.
+ * Builds the entries of a `namespace(...)` or `dict(...)` call: an optional mapping or
+ * iterable of [key, value] pairs, then keyword arguments, like Python's `dict()`.
  */
-function namespaceBuiltin(args: AnyRuntimeValue[]): NamespaceValue {
+function collectMappingArguments(args: AnyRuntimeValue[], name: string): Map<string, AnyRuntimeValue> {
 	// Copy top-level entries so namespace assignment does not mutate the input.
 	const positional = args.slice();
 	let kwargs: KeywordArgumentsValue | undefined;
@@ -698,7 +698,7 @@ function namespaceBuiltin(args: AnyRuntimeValue[]): NamespaceValue {
 		kwargs = positional.pop() as KeywordArgumentsValue;
 	}
 	if (positional.length > 1) {
-		throw new Error(`namespace expected at most 1 argument, got ${positional.length}`);
+		throw new Error(`${name} expected at most 1 argument, got ${positional.length}`);
 	}
 	const entries = new Map<string, AnyRuntimeValue>();
 	if (positional.length === 1) {
@@ -709,7 +709,7 @@ function namespaceBuiltin(args: AnyRuntimeValue[]): NamespaceValue {
 			}
 		} else if (source instanceof ArrayValue) {
 			for (const pair of source.value) {
-				const [key, value] = normalizeNamespaceEntry(pair);
+				const [key, value] = normalizeNamespaceEntry(pair, name);
 				entries.set(key.value, value);
 			}
 		} else {
@@ -721,7 +721,15 @@ function namespaceBuiltin(args: AnyRuntimeValue[]): NamespaceValue {
 			entries.set(key, value);
 		}
 	}
-	return new NamespaceValue(entries);
+	return entries;
+}
+
+/**
+ * Implements the `namespace` builtin. Each environment wraps it in its own `FunctionValue`, so that replacing
+ * one environment's `namespace` does not affect any other.
+ */
+function namespaceBuiltin(args: AnyRuntimeValue[]): NamespaceValue {
+	return new NamespaceValue(collectMappingArguments(args, "namespace"));
 }
 
 const CALL_BLOCK_SCOPE = Symbol("callBlockScope");
@@ -849,9 +857,16 @@ export class Environment {
 		return undefined;
 	}
 
+	/**
+	 * Built-in globals that templates and render variables may shadow, as in Python Jinja.
+	 */
+	private static readonly BUILTINS: ReadonlyMap<string, AnyRuntimeValue> = new Map([
+		["dict", new FunctionValue((args) => new ObjectValue(collectMappingArguments(args, "dict")))],
+	]);
+
 	lookupVariable(name: string): AnyRuntimeValue {
 		try {
-			return this.resolve(name)?.variables.get(name) ?? new UndefinedValue();
+			return this.resolve(name)?.variables.get(name) ?? Environment.BUILTINS.get(name) ?? new UndefinedValue();
 		} catch {
 			return new UndefinedValue();
 		}
