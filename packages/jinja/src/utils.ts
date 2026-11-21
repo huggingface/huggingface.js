@@ -123,3 +123,38 @@ export function replace(str: string, oldvalue: string, newvalue: string, count?:
 		return match;
 	});
 }
+
+/** Parse a complete Python-style decimal string, returning undefined for invalid syntax. */
+export function parseNumericString(value: string): number | undefined {
+	let first = 0;
+	let last = value.length;
+	while (first < last && /\p{White_Space}/u.test(value[first])) {
+		++first;
+	}
+	while (last > first && /\p{White_Space}/u.test(value[last - 1])) {
+		--last;
+	}
+	const text = value.slice(first, last).replace(/\p{Decimal_Number}/gu, (digit) => {
+		const point = digit.codePointAt(0);
+		if (point === undefined || point <= 0x39) {
+			return digit;
+		}
+		let start = point;
+		while (/\p{Decimal_Number}/u.test(String.fromCodePoint(start - 1))) {
+			--start;
+		}
+		// Decimal digits occur in runs of ten, including adjacent mathematical digit sets.
+		return String((point - start) % 10);
+	});
+
+	if (/^[+-]?nan$/i.test(text)) {
+		return NaN;
+	}
+	if (/^[+-]?inf(?:inity)?$/i.test(text)) {
+		return text.startsWith("-") ? -Infinity : Infinity;
+	}
+	if (!/^[+-]?(?:\d(?:_?\d)*(?:\.(?:\d(?:_?\d)*)?)?|\.\d(?:_?\d)*)(?:[eE][+-]?\d(?:_?\d)*)?$/.test(text)) {
+		return undefined;
+	}
+	return Number(text.replaceAll("_", ""));
+}
