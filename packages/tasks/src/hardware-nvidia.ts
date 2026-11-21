@@ -111,12 +111,30 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	GB10: {
 		tflops: 29.71,
-		memory: [128],
+		memory: [64, 128],
 		computeCapability: 12.1,
 		msrp: 3_999,
 		power: 140,
 		releaseYear: 2025,
 		aliases: ["DGX Spark"],
+	},
+	"RTX Spark N1X Laptop": {
+		tflops: 29.71,
+		memory: [24, 32, 48, 64, 128],
+		computeCapability: 12.1,
+		msrp: 5_900,
+		power: 80,
+		releaseYear: 2026,
+		aliases: ["N1X", "RTX Spark", "RTX Spark Laptop", "Surface Laptop Ultra"],
+	},
+	"RTX Spark N1X Desktop": {
+		tflops: 29.71,
+		memory: [128],
+		computeCapability: 12.1,
+		msrp: 6_000,
+		power: 140,
+		releaseYear: 2026, // Announced for 2026; Surface RTX Spark Dev Box is available for pre-order.
+		aliases: ["N1X", "RTX Spark", "Surface RTX Spark Dev Box"],
 	},
 	"RTX PRO 6000 WS": {
 		tflops: 126,
@@ -432,7 +450,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	"RTX 5070 Mobile": {
 		tflops: 13.13,
-		memory: [8],
+		memory: [8, 12],
 		computeCapability: 12.0,
 		msrp: 500,
 		power: 100,
@@ -885,6 +903,30 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 549,
 		power: 165,
 		releaseYear: 2014,
+	},
+	"GT 730 (Kepler)": {
+		tflops: 0.69, // float32 (GPU does not support native float16)
+		memory: [1, 2, 4],
+		computeCapability: 3.5,
+		msrp: 70,
+		power: 38,
+		releaseYear: 2014,
+	},
+	"GT 710": {
+		tflops: 0.37, // float32 (GPU does not support native float16)
+		memory: [1, 2],
+		computeCapability: 3.5,
+		msrp: 40,
+		power: 19,
+		releaseYear: 2014,
+	},
+	"GT 430": {
+		tflops: 0.27, // float32 (GPU does not support native float16)
+		memory: [1, 2, 4],
+		computeCapability: 2.1,
+		msrp: 79,
+		power: 49,
+		releaseYear: 2010,
 	},
 	"RTX Titan": {
 		tflops: 32.62,
