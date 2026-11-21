@@ -167,6 +167,15 @@ export const SKUS = {
 				releaseYear: 2024,
 			},
 		},
+		TENSTORRENT: {
+			"Blackhole p150a": {
+				tflops: 332,
+				memory: [32],
+				msrp: 1_399,
+				power: 300,
+				releaseYear: 2025,
+			},
+		},
 	},
 	CPU: {
 		Intel: {
