@@ -83,6 +83,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	"aic-sdk": {
+		prettyLabel: "aic-sdk",
+		repoName: "aic-sdk",
+		repoUrl: "https://github.com/ai-coustics/aic-sdk-py",
+		docsUrl: "https://docs.ai-coustics.com",
+		snippets: snippets.aic_sdk,
+		filter: false,
+		countDownloads: `path:"config.json"`,
+	},
 	alkove: {
 		prettyLabel: "Alkove",
 		repoName: "Alkove",
