@@ -2,6 +2,32 @@ import { describe, it, expect } from "vitest";
 import { RangeList } from "./RangeList";
 
 describe("RangeList", () => {
+	it.each([
+		[0, 10],
+		[20, 30],
+		[30, 40],
+	])("allows disjoint range %s:%s when another range has cached data", (start, end) => {
+		const ranges = new RangeList<Uint8Array[]>();
+		ranges.add(10, 20);
+		const cached = ranges.getAllRanges()[0];
+		const data = [new Uint8Array([1, 2])];
+		cached.data = data;
+
+		ranges.add(start, end);
+
+		expect(ranges.getRanges(10, 20)).toEqual([{ start: 10, end: 20, refCount: 1, data }]);
+		expect(ranges.getRanges(10, 20)[0]).toBe(cached);
+		expect(ranges.getRanges(start, end)).toEqual([{ start, end, refCount: 1, data: null }]);
+	});
+
+	it("still rejects an overlap with cached data without changing ranges", () => {
+		const ranges = new RangeList<number>();
+		ranges.add(10, 20);
+		ranges.getAllRanges()[0].data = 0;
+		expect(() => ranges.add(15, 25)).toThrow("Overlapping range already has data");
+		expect(ranges.getAllRanges()).toEqual([{ start: 10, end: 20, refCount: 1, data: 0 }]);
+	});
+
 	it("should add a single range", () => {
 		const rangeList = new RangeList();
 		rangeList.add(1, 100);
