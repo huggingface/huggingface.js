@@ -18,9 +18,8 @@ export function splitAsyncGenerator<T>(source: AsyncGenerator<T>, n: number): Ar
 					await sleep(1);
 				}
 				takenIndex = i;
-				return source.next().then((r) => {
+				return source.next().finally(() => {
 					takenIndex = null;
-					return r;
 				});
 			},
 			return: async () => {
