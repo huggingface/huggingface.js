@@ -50,6 +50,7 @@ interface TemplateParams {
 	baseUrl?: string;
 	fullUrl?: string;
 	inputs?: object;
+	sentenceSimilarityInputs?: object;
 	providerInputs?: object;
 	autoInputs?: object;
 	model?: ModelDataMinimal;
@@ -241,6 +242,11 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 				asPythonString: formatBody(inputs, "python"),
 				asTsString: formatBody(inputs, "ts"),
 			},
+			// The Python client takes separate arguments instead of the HTTP inputs object.
+			sentenceSimilarityInputs:
+				task === "sentence-similarity"
+					? (opts?.inputs ?? JSON.parse(getModelInputSnippet(model) as string))
+					: undefined,
 			providerInputs: {
 				asObj: providerInputs,
 				asCurlString: formatBody(providerInputs, "curl"),
