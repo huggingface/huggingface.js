@@ -4,6 +4,41 @@ import { splitAsyncGenerator } from "./splitAsyncGenerator";
 
 describe("mergeAsyncGenerators", () => {
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+	it("closes active sources when the consumer breaks", async () => {
+		const closed: number[] = [];
+		async function* source(id: number) {
+			try {
+				yield id;
+				yield id + 10;
+			} finally {
+				closed.push(id);
+			}
+		}
+		for await (const value of mergeAsyncGenerators([source(1), source(2)])) {
+			expect(value).toBe(1);
+			break;
+		}
+		expect(closed.sort()).toEqual([1, 2]);
+	});
+
+	it("closes siblings and preserves the source failure", async () => {
+		const error = new Error("download failed");
+		let closed = false;
+		async function* failing(): AsyncGenerator<number> {
+			yield await Promise.reject(error);
+		}
+		async function* sibling() {
+			try {
+				yield 2;
+			} finally {
+				closed = true;
+			}
+		}
+		const merged = mergeAsyncGenerators([failing(), sibling()]);
+		await expect(merged.next()).rejects.toBe(error);
+		expect(closed).toBe(true);
+	});
+
 	it("should merge multiple async generators", async () => {
 		const generator1 = (async function* () {
 			yield 1;
