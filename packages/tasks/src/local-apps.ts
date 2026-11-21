@@ -680,6 +680,32 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
+	chaty: {
+		prettyLabel: "Chaty",
+		docsUrl: "https://chaty.ca",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			isLlamaCppGgufModel(model) ||
+			isMlxModel(model) ||
+			// Image studio: diffusion GGUFs (they carry no context length; FLUX.2 [klein] is
+			// tagged image-to-image) and mflux's MLX saves.
+			(model.tags.includes("gguf") &&
+				(model.pipeline_tag === "text-to-image" || model.pipeline_tag === "image-to-image")) ||
+			model.library_name === "mflux" ||
+			// Music studio: audio.cpp packages of the families it runs.
+			(model.tags.includes("audio.cpp") &&
+				/yue[-_.]?2|ace[-_.]?step|heartmula|stable[-_.]?audio|minimax[-_.]?music|midashenglm[-_.]?gen/i.test(
+					model.id.split("/").pop() ?? "",
+				)),
+		deeplink: (model, filepath) => {
+			const url = new URL("https://chaty.ca/use.html");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
+	},
 	"atomic-chat": {
 		prettyLabel: "Atomic Chat",
 		docsUrl: "https://atomic.chat",
