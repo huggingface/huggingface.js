@@ -894,6 +894,28 @@ export const espnet = (model: ModelData): string[] => {
 	return espnetUnknown();
 };
 
+export const executorch = (model: ModelData): string[] => [
+	`pip install executorch huggingface_hub`,
+	`from huggingface_hub import hf_hub_download, list_repo_files
+from executorch.runtime import Runtime
+
+# A repo can hold several programs: per backend, precision, size or language, or one per part of a pipeline.
+# XNNPACK programs run on any CPU. Other backends need their hardware and an ExecuTorch build that includes them.
+programs = [f for f in list_repo_files("${model.id}") if f.endswith(".pte")]
+print(programs)
+program_file = next((f for f in programs if "xnnpack" in f.lower()), programs[0])
+
+# Only load programs from sources you trust.
+program = Runtime.get().load_program(hf_hub_download("${model.id}", program_file))
+for name in sorted(program.method_names):
+    print(program.metadata(name))  # each method's input and output shapes and dtypes
+
+# To run a method, register the CPU kernels it may need and pass tensors with those shapes and dtypes:
+# import executorch.kernels.quantized
+# from executorch.extension.llm.custom_ops import custom_ops
+# outputs = program.load_method("forward").execute([...])  # or another method printed above`,
+];
+
 export const fairseq = (model: ModelData): string[] => [
 	`from fairseq.checkpoint_utils import load_model_ensemble_and_task_from_hf_hub
 
