@@ -2,6 +2,29 @@ import { describe, expect, it } from "vitest";
 import { Template } from "../src/index";
 
 describe("numeric string conversion", () => {
+	it.each([
+		["inf", "inf"],
+		["+Infinity", "inf"],
+		["-INF", "-inf"],
+		["nan", "nan"],
+		["-NaN", "nan"],
+		["1e309", "inf"],
+		["-1e309", "-inf"],
+	])("renders non-finite %j with Python spellings", (value, expected) => {
+		for (const filter of ["float", "float()", "float(7)", "float(default=8)"]) {
+			expect(new Template(`{{ value | ${filter} }}`).render({ value })).toBe(expected);
+			expect(new Template(`{{ value | ${filter} | string }}`).render({ value })).toBe(expected);
+		}
+	});
+
+	it.each([
+		["7.0", "7.0"],
+		["-0.0", "-0.0"],
+		["0", "0.0"],
+	])("preserves finite formatting for %j", (value, expected) => {
+		expect(new Template("{{ value | float }}").render({ value })).toBe(expected);
+	});
+
 	it.each(["12oops", "1.5oops", "1e", "1e+", "1__2", "1_.2", "_12", "12_", "0xff", "1 2", "", " ", "\ufeff1"])(
 		"uses defaults for the complete invalid string %j",
 		(value) => {

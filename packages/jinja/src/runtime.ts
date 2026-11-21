@@ -110,6 +110,15 @@ export class FloatValue extends RuntimeValue<number> {
 	}
 
 	override toString(): string {
+		if (Number.isNaN(this.value)) {
+			return "nan";
+		}
+		if (this.value === Infinity) {
+			return "inf";
+		}
+		if (this.value === -Infinity) {
+			return "-inf";
+		}
 		if (Object.is(this.value, -0)) {
 			return "-0.0";
 		}
