@@ -11,6 +11,10 @@ export function range(start: number, stop?: number, step = 1): number[] {
 		start = 0;
 	}
 
+	if (![start, stop, step].every(Number.isInteger)) {
+		throw new Error("range() arguments must be integers");
+	}
+
 	if (step === 0) {
 		throw new Error("range() step must not be zero");
 	}
