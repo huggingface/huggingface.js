@@ -71,9 +71,10 @@ export function strftime_now(format: string): string {
  * A minimalistic implementation of Python's strftime function.
  */
 export function strftime(date: Date, format: string): string {
-	// Set locale to undefined to use the default locale
-	const monthFormatterLong = new Intl.DateTimeFormat(undefined, { month: "long" });
-	const monthFormatterShort = new Intl.DateTimeFormat(undefined, { month: "short" });
+	// Pin the locale so `%b`/`%B` are deterministic and match Python's `strftime`,
+	// which uses the C locale (English month names) unless the process locale is set.
+	const monthFormatterLong = new Intl.DateTimeFormat("en-US", { month: "long" });
+	const monthFormatterShort = new Intl.DateTimeFormat("en-US", { month: "short" });
 
 	const pad2 = (n: number): string => (n < 10 ? "0" + n : n.toString());
 

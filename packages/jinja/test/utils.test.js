@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 import { range, slice, strftime, replace } from "../src/utils";
 
@@ -104,6 +104,23 @@ describe("Test utility functions", () => {
 		it("should format '%B %d, %Y'", () => {
 			expect(strftime(date, "%B %d, %Y")).toEqual("June 04, 2025");
 			expect(strftime(leapDate, "%B %d, %Y")).toEqual("February 29, 2000");
+		});
+
+		it("should use English month names even when the host locale is not English", () => {
+			// Python's strftime formats month names in the C locale. Simulate a host
+			// whose default locale is not English so the assertion does not depend on
+			// the locale the test runner happens to use.
+			const OriginalDateTimeFormat = Intl.DateTimeFormat;
+			const spy = vi
+				.spyOn(Intl, "DateTimeFormat")
+				.mockImplementation((locales, options) => new OriginalDateTimeFormat(locales ?? "zh-CN", options));
+
+			try {
+				expect(strftime(date, "%d %b %Y")).toEqual("04 Jun 2025");
+				expect(strftime(date, "%B %d, %Y")).toEqual("June 04, 2025");
+			} finally {
+				spy.mockRestore();
+			}
 		});
 	});
 
