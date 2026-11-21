@@ -78,18 +78,18 @@ export class FileBlob extends Blob {
 	 * Read the part of the file delimited by the FileBlob and returns it as an ArrayBuffer.
 	 */
 	override async arrayBuffer(): Promise<ArrayBuffer> {
-		const slice = await this.execute((file) => file.read(Buffer.alloc(this.size), 0, this.size, this.start));
+		const slice = await this.execute((file) => file.read(new Uint8Array(this.size), 0, this.size, this.start));
 
-		return slice.buffer;
+		return slice.buffer.buffer;
 	}
 
 	/**
 	 * Read the part of the file delimited by the FileBlob and returns it as a string.
 	 */
 	override async text(): Promise<string> {
-		const buffer = (await this.arrayBuffer()) as Buffer;
+		const buffer = await this.arrayBuffer();
 
-		return buffer.toString("utf8");
+		return new TextDecoder().decode(buffer);
 	}
 
 	/**

@@ -1,9 +1,25 @@
-import { open, stat } from "node:fs/promises";
+import { open, readFile, stat } from "node:fs/promises";
 import { TextDecoder } from "node:util";
 import { describe, expect, it } from "vitest";
 import { FileBlob } from "./FileBlob";
 
 describe("FileBlob", () => {
+	it.each([
+		[0, undefined],
+		[10, 20],
+		[0, 0],
+	])("returns an ArrayBuffer usable by DataView for slice %s:%s", async (start, end) => {
+		const bytes = await readFile("package.json");
+		const fileBlob = await FileBlob.create("package.json");
+		const slice = fileBlob.slice(start, end);
+		const buffer = await slice.arrayBuffer();
+
+		expect(buffer).toBeInstanceOf(ArrayBuffer);
+		expect(new DataView(buffer).byteLength).toBe(slice.size);
+		expect(new Uint8Array(buffer)).toEqual(new Uint8Array(bytes.subarray(start, end)));
+		expect(await slice.text()).toBe(bytes.subarray(start, end).toString("utf8"));
+	});
+
 	it("should create a FileBlob with a slice on the entire file", async () => {
 		const file = await open("package.json", "r");
 		const { size } = await stat("package.json");
