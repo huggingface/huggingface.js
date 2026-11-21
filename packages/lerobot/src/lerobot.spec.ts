@@ -1,7 +1,14 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { parquetReadObjects } from "hyparquet";
 import { parquetWriteBuffer } from "hyparquet-writer";
-import { formatPathTemplate, isSafeRepoPath, LeRobotDataset, parseInfo, resolveUrl } from "./index";
+import {
+	formatPathTemplate,
+	isSafeRepoPath,
+	LeRobotDataset,
+	normalizeDatasetPath,
+	parseInfo,
+	resolveUrl,
+} from "./index";
 
 /**
  * Both revisions are the same SO-101 dataset: `e18e43d` predates the v2 -> v3 migration, `f641879`
@@ -1777,4 +1784,129 @@ describe("episode by index", () => {
 			expect(seen.filter((path) => path === "meta/episodes.jsonl")).toHaveLength(1);
 		}
 	});
+});
+
+describe("datasets in subdirectories", () => {
+	it("defaults to the root and normalizes directory separators", () => {
+		for (const path of [undefined, "", ".", "/", "./"]) {
+			const dataset = new LeRobotDataset(REPO_ID, { path });
+			expect(dataset.path).toBe("");
+			expect(dataset.fileUrl("meta/info.json")).toBe(
+				resolveUrl("https://huggingface.co", REPO_ID, "main", "meta/info.json"),
+			);
+		}
+		expect(normalizeDatasetPath("./datasets//one/")).toBe("datasets/one");
+		expect(new LeRobotDataset(REPO_ID, { path: "/datasets/./one/" }).path).toBe("datasets/one");
+	});
+
+	it("encodes directory segments once and combines with endpoint and revision", () => {
+		const dataset = new LeRobotDataset(REPO_ID, {
+			path: "datasets/robot #1%/",
+			revision: "refs/pr/1",
+			endpoint: "https://hub.example/",
+		});
+		expect(dataset.fileUrl("meta/info.json")).toBe(
+			`https://hub.example/datasets/${REPO_ID}/resolve/refs%2Fpr%2F1/datasets/robot%20%231%25/meta/info.json`,
+		);
+	});
+
+	it("rejects unsafe directories at construction and unsafe file paths before prefixing", () => {
+		for (const path of ["..", "datasets/../other", "datasets\\other", "datasets\0other", "datasets\nother"]) {
+			expect(() => new LeRobotDataset(REPO_ID, { path })).toThrow();
+		}
+		const dataset = new LeRobotDataset(REPO_ID, { path: "datasets/one" });
+		for (const path of ["", "../meta/info.json", "/meta/info.json", "data/../../other"]) {
+			expect(() => dataset.fileUrl(path)).toThrow(/unsafe repo path/);
+		}
+	});
+
+	function files(version: string, value: number): Record<string, Uint8Array> {
+		const v3 = version === "v3.0";
+		const dataPath = v3 ? "data/chunk-000/file-000.parquet" : "data/chunk-000/episode_000000.parquet";
+		return {
+			"meta/info.json": encoder.encode(
+				JSON.stringify({
+					codebase_version: version,
+					fps: value,
+					total_episodes: 1,
+					total_frames: 2,
+					chunks_size: 1000,
+					data_path: v3
+						? "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet"
+						: "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet",
+					video_path: v3
+						? "videos/{video_key}/chunk-{chunk_index:03d}/file-{file_index:03d}.mp4"
+						: "videos/{video_key}/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.mp4",
+					features: { cam: { dtype: "video", shape: [16, 16, 3] }, action: { dtype: "float32", shape: [1] } },
+				}),
+			),
+			"meta/episodes.jsonl": encoder.encode(JSON.stringify({ episode_index: 0, length: 2, tasks: ["pick"] }) + "\n"),
+			"meta/episodes/chunk-000/file-000.parquet": parquet([
+				{
+					episode_index: 0,
+					length: 2,
+					"data/chunk_index": 0,
+					"data/file_index": 0,
+					dataset_from_index: 0,
+					dataset_to_index: 2,
+					"videos/cam/chunk_index": 0,
+					"videos/cam/file_index": 0,
+					"videos/cam/from_timestamp": 3,
+					"videos/cam/to_timestamp": 5,
+				},
+			]),
+			[dataPath]: parquet([
+				{ index: 0, episode_index: 0, frame_index: 0, timestamp: 0, action: value },
+				{ index: 1, episode_index: 0, frame_index: 1, timestamp: 1, action: value + 1 },
+			]),
+		};
+	}
+
+	for (const version of ["v2.0", "v2.1", "v3.0"]) {
+		it(`${version}: reads metadata, episodes, frames and video offsets from the directory`, async () => {
+			const path = "datasets/robot #1%";
+			const prefix = path.split("/").map(encodeURIComponent).join("/") + "/";
+			const seen: string[] = [];
+			const origin = Object.fromEntries(
+				Object.entries(files(version, 10)).map(([file, bytes]) => [prefix + file, bytes]),
+			);
+			const dataset = new LeRobotDataset(REPO_ID, { path, fetch: mockFetch(origin, seen) });
+			expect((await dataset.info()).fps).toBe(10);
+			const [episode] = await dataset.episodes({ limit: 1 });
+			expect(episode.index).toBe(0);
+			expect(episode.data?.url).toContain(`/resolve/main/${prefix}data/`);
+			expect(episode.videos[0].url).toContain(`/resolve/main/${prefix}videos/cam/`);
+			expect(episode.videos[0].fromSec).toBe(version === "v3.0" ? 3 : 0);
+			expect(episode.videos[0].toSec).toBe(version === "v3.0" ? 5 : 0.2);
+			expect((await dataset.frames(episode))?.series.action).toEqual([[10, 11]]);
+			expect(await dataset.episode(0)).toEqual(episode);
+			expect(seen.every((file) => file.startsWith(prefix))).toBe(true);
+		});
+
+		it(`${version}: isolates root and sibling datasets with the same episode indexes`, async () => {
+			const seen: string[] = [];
+			const origin = {
+				...files(version, 10),
+				...Object.fromEntries(
+					Object.entries(files(version, 20)).map(([file, bytes]) => [`datasets/one/${file}`, bytes]),
+				),
+				...Object.fromEntries(
+					Object.entries(files(version, 30)).map(([file, bytes]) => [`datasets/two/${file}`, bytes]),
+				),
+			};
+			const fetch = mockFetch(origin, seen);
+			const datasets = ["", "datasets/one", "datasets/two"].map((path) => new LeRobotDataset(REPO_ID, { path, fetch }));
+			for (const [index, dataset] of datasets.entries()) {
+				const value = (index + 1) * 10;
+				expect((await dataset.info()).fps).toBe(value);
+				const [episode] = await dataset.episodes({ limit: 1 });
+				expect((await dataset.frames(episode))?.series.action).toEqual([[value, value + 1]]);
+			}
+			for (const dataset of datasets) {
+				const before = seen.length;
+				await dataset.info();
+				expect(seen.length).toBe(before);
+			}
+		});
+	}
 });
