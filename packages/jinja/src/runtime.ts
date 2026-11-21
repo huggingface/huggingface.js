@@ -48,6 +48,22 @@ class BreakControl extends Error {}
 class ContinueControl extends Error {}
 
 const EMPTY_BUILTINS: ReadonlyMap<string, AnyRuntimeValue> = new Map();
+const ZERO_ARGUMENT_FILTERS = new Set([
+	"abs",
+	"capitalize",
+	"first",
+	"items",
+	"last",
+	"length",
+	"lower",
+	"reverse",
+	"safe",
+	"string",
+	"title",
+	"trim",
+	"unique",
+	"upper",
+]);
 
 /**
  * Abstract base class for all Runtime values.
@@ -1419,6 +1435,17 @@ export class Interpreter {
 		//   return filter.value([operand], environment);
 
 		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-filters
+
+		if (filterNode.type === "CallExpression") {
+			const call = filterNode as CallExpression;
+			if (
+				call.args.length === 0 &&
+				call.callee.type === "Identifier" &&
+				ZERO_ARGUMENT_FILTERS.has((call.callee as Identifier).value)
+			) {
+				filterNode = call.callee as Identifier;
+			}
+		}
 
 		if (filterNode.type === "Identifier") {
 			const filter = filterNode as Identifier;
