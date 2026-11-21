@@ -29,7 +29,7 @@ import type {
 	KeywordSpreadExpression,
 } from "./ast";
 import { Statement } from "./ast";
-import { range, replace, slice, strftime_now, titleCase } from "./utils";
+import { parseNumericString, range, replace, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| IntegerValue
@@ -110,6 +110,15 @@ export class FloatValue extends RuntimeValue<number> {
 	}
 
 	override toString(): string {
+		if (Number.isNaN(this.value)) {
+			return "nan";
+		}
+		if (this.value === Infinity) {
+			return "inf";
+		}
+		if (this.value === -Infinity) {
+			return "-inf";
+		}
 		if (Object.is(this.value, -0)) {
 			return "-0.0";
 		}
@@ -1498,12 +1507,12 @@ export class Interpreter {
 					case "string":
 						return operand; // no-op
 					case "int": {
-						const val = parseInt(operand.value, 10);
-						return new IntegerValue(isNaN(val) ? 0 : val);
+						const val = parseNumericString(operand.value);
+						return new IntegerValue(val === undefined || !Number.isFinite(val) ? 0 : Math.trunc(val) + 0);
 					}
 					case "float": {
-						const val = parseFloat(operand.value);
-						return new FloatValue(isNaN(val) ? 0.0 : val);
+						const val = parseNumericString(operand.value);
+						return new FloatValue(val === undefined ? 0.0 : val);
 					}
 					default:
 						throw new Error(`Unknown StringValue filter: ${filter.value}`);
@@ -1635,8 +1644,11 @@ export class Interpreter {
 					args.at(0) ?? kwargs.get("default") ?? (filterName === "int" ? new IntegerValue(0) : new FloatValue(0.0));
 
 				if (operand instanceof StringValue) {
-					const val = filterName === "int" ? parseInt(operand.value, 10) : parseFloat(operand.value);
-					return isNaN(val) ? defaultValue : filterName === "int" ? new IntegerValue(val) : new FloatValue(val);
+					const val = parseNumericString(operand.value);
+					if (val === undefined || (filterName === "int" && !Number.isFinite(val))) {
+						return defaultValue;
+					}
+					return filterName === "int" ? new IntegerValue(Math.trunc(val) + 0) : new FloatValue(val);
 				} else if (operand instanceof IntegerValue || operand instanceof FloatValue) {
 					return filterName === "int" ? new IntegerValue(Math.trunc(operand.value) + 0) : new FloatValue(operand.value);
 				} else if (operand instanceof BooleanValue) {
