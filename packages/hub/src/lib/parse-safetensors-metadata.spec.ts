@@ -1173,6 +1173,36 @@ describe("parseSafetensorsMetadata", () => {
 			});
 		});
 
+		describe("fp8 with fused expert scales", () => {
+			const tensor = (dtype: Dtype, shape: number[]): TensorInfo => ({ dtype, shape, data_offsets: [0, 0] });
+
+			it("excludes underscore-joined `…_weight_scale` block scales (thinkingmachines/Inkling-2-Small-MXFP8)", () => {
+				// MXFP8: F8_E4M3 weights with one UE8M0 exponent per 32 values, stored as plain U8
+				const parameterCount = computeNumOfParamsByDtypeSingleFile(
+					{
+						"model.llm.layers.0.mlp.experts.w1": tensor("F8_E4M3", [4, 256, 128]),
+						"model.llm.layers.0.mlp.experts.w1_weight_scale": tensor("U8", [4, 256, 4]),
+						"model.llm.layers.0.mlp.experts.w2_weight_scale": tensor("U8", [4, 128, 8]),
+						"model.llm.layers.0.mlp.experts.w2": tensor("F8_E4M3", [4, 128, 256]),
+						"model.llm.layers.0.attn.wq.weight": tensor("BF16", [128, 128]),
+						"model.llm.unembed.weight": tensor("BF16", [10, 128]),
+					},
+					{
+						quant_method: "fp8",
+						modules_to_not_convert: ["model.llm.unembed", "model.visual", "model.llm.layers.*.attn.*"],
+					},
+				);
+				assert.deepStrictEqual(parameterCount, { F8_E4M3: 2 * 4 * 256 * 128, BF16: 128 * 128 + 1280 });
+			});
+
+			it("still counts those names without a quantization_config", () => {
+				const parameterCount = computeNumOfParamsByDtypeSingleFile({
+					"model.layers.0.mlp.experts.w1_weight_scale": tensor("BF16", [4, 8]),
+				});
+				assert.deepStrictEqual(parameterCount, { BF16: 32 });
+			});
+		});
+
 		it("ignores fp6, which is stored in native F6_* dtypes rather than packed", () => {
 			// A 6-bit width in an 8-bit container has no reference implementation, so claiming any
 			// packing for it would be a guess.
