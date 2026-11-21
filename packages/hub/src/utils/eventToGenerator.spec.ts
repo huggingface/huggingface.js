@@ -2,6 +2,19 @@ import { describe, expect, it } from "vitest";
 import { eventToGenerator } from "./eventToGenerator";
 
 describe("eventToGenerator", () => {
+	it("retains a failure reported while the consumer is paused", async () => {
+		const error = new Error("upload interrupted");
+		let fail!: (reason: unknown) => void;
+		const iterator = eventToGenerator<number, void>((emit, _complete, reject) => {
+			fail = reject;
+			emit(1);
+		});
+		await expect(iterator.next()).resolves.toEqual({ done: false, value: 1 });
+		fail(error);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		await expect(iterator.next()).rejects.toBe(error);
+	});
+
 	it("delivers queued progress before a synchronous producer failure", async () => {
 		const error = new Error("upload failed");
 		const iterator = eventToGenerator<number, void>((emit, _complete, reject) => {
