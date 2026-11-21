@@ -128,7 +128,9 @@ describe("streamJson", () => {
 			});
 			const consume = async () => {
 				for await (const event of streamJson(source)) {
-					if (mode === "early break" && event.type === "startArray") break;
+					if (mode === "early break" && event.type === "startArray") {
+						break;
+					}
 				}
 			};
 			if (mode === "parse error" || mode === "source error") {
