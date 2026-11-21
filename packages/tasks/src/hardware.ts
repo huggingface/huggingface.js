@@ -78,11 +78,13 @@ export const SKUS = {
 		NVIDIA: NVIDIA_SKUS,
 		AMD: AMD_GPU_SKUS,
 		INTEL: {
-			"Intel Arc Graphics (Core Ultra 100H)": {
+			"Arc Graphics (Meteor Lake-H)": {
 				tflops: 9.4,
-				msrp: 0,
+				memory: [16, 32, 64, 96],
+				msrp: 503,
 				power: 28,
 				releaseYear: 2023,
+				aliases: ["Intel Arc Graphics", "Core Ultra 100H"],
 			},
 			"Arc A380": {
 				tflops: 8.4,
@@ -231,28 +233,28 @@ export const SKUS = {
 				releaseYear: 2024,
 			},
 			"Intel Core Ultra 9 185H": {
-				tflops: 0.90,
+				tflops: 0.9,
 				msrp: 650,
 				power: 115,
-				releaseYear: 2024,
+				releaseYear: 2023,
 			},
 			"Intel Core Ultra 7 165H": {
 				tflops: 0.89,
-				msrp: 550,
+				msrp: 460,
 				power: 115,
-				releaseYear: 2024,
+				releaseYear: 2023,
 			},
 			"Intel Core Ultra 7 155H": {
 				tflops: 0.87,
-				msrp: 450,
+				msrp: 503,
 				power: 115,
-				releaseYear: 2024,
+				releaseYear: 2023,
 			},
 			"Intel Core Ultra 5 135H": {
 				tflops: 0.84,
 				msrp: 350,
 				power: 115,
-				releaseYear: 2024,
+				releaseYear: 2023,
 			},
 			"Intel Core 14th Generation (i9)": {
 				tflops: 0.85,

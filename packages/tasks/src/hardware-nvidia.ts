@@ -217,14 +217,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		releaseYear: 2023,
 		aliases: ["NVIDIA RTX 5000 Ada Generation"],
 	},
-	"RTX 5000 Ada Generation Laptop GPU": {
+	"RTX 5000 Ada Mobile": {
 		tflops: 40.9,
 		memory: [16],
 		computeCapability: 8.9,
 		msrp: 4_000,
 		power: 175,
 		releaseYear: 2023,
-		aliases: ["NVIDIA RTX 5000 Ada Generation"],
+		aliases: ["NVIDIA RTX 5000 Ada Generation Laptop GPU"],
 	},
 	"RTX 4500 Ada": {
 		tflops: 39.6,
@@ -244,14 +244,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		releaseYear: 2023,
 		aliases: ["NVIDIA RTX 4000 Ada Generation"],
 	},
-	"RTX 4000 Ada Generation Laptop GPU": {
-		tflops: 33.6,
+	"RTX 4000 Ada Mobile": {
+		tflops: 24.72,
 		memory: [12],
 		computeCapability: 8.9,
 		msrp: 2_500,
-		power: 140,
+		power: 175,
 		releaseYear: 2023,
-		aliases: ["NVIDIA RTX 4000 Ada Generation"],
+		aliases: ["NVIDIA RTX 4000 Ada Generation Laptop GPU"],
 	},
 	"RTX 4000 SFF Ada": {
 		tflops: 19.2,
@@ -268,7 +268,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		msrp: 1_500,
 		power: 150,
 		releaseYear: 2023,
-		aliases: ["NVIDIA RTX 3500 Ada Generation"],
+		aliases: ["NVIDIA RTX 3500 Ada Generation Laptop GPU"],
 	},
 	"RTX 2000 Ada": {
 		tflops: 12.0,
@@ -279,32 +279,32 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		releaseYear: 2024,
 		aliases: ["NVIDIA RTX 2000 Ada Generation"],
 	},
-	"RTX 2000 Ada Generation Laptop GPU": {
-		tflops: 11.0,
+	"RTX 2000 Ada Mobile": {
+		tflops: 12.99,
 		memory: [8],
 		computeCapability: 8.9,
 		msrp: 1_000,
-		power: 115,
+		power: 140,
 		releaseYear: 2023,
-		aliases: ["NVIDIA RTX 2000 Ada Generation"],
+		aliases: ["NVIDIA RTX 2000 Ada Generation Laptop GPU"],
 	},
-	"RTX 1000 Ada Generation Laptop GPU": {
-		tflops: 8.6,
+	"RTX 1000 Ada Mobile": {
+		tflops: 10.37,
 		memory: [6],
 		computeCapability: 8.9,
 		msrp: 700,
-		power: 80,
+		power: 140,
 		releaseYear: 2024,
-		aliases: ["NVIDIA RTX 1000 Ada Generation"],
+		aliases: ["NVIDIA RTX 1000 Ada Generation Laptop GPU"],
 	},
-	"RTX 500 Ada Generation Laptop GPU": {
-		tflops: 6.1,
+	"RTX 500 Ada Mobile": {
+		tflops: 8.29,
 		memory: [4],
 		computeCapability: 8.9,
 		msrp: 500,
 		power: 60,
 		releaseYear: 2024,
-		aliases: ["NVIDIA RTX 500 Ada Generation"],
+		aliases: ["NVIDIA RTX 500 Ada Generation Laptop GPU"],
 	},
 	"RTX A6000": {
 		tflops: 38.7,
