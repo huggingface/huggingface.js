@@ -47,7 +47,7 @@ import { InferenceClient } from "@huggingface/inference";
 
 const inference = new InferenceClient(HF_TOKEN);
 await inference.imageSegmentation({
-	data: await (await fetch("https://picsum.photos/300/300")).blob(),
+	inputs: await (await fetch("https://picsum.photos/300/300")).blob(),
 	model: "facebook/mask2former-swin-base-coco-panoptic",
 });
 ```

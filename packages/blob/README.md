@@ -36,7 +36,7 @@ import { WebBlob } from "@huggingface/blob/WebBlob";
 import { createBlob } from "@huggingface/blob";
 
 const fileBlob = await FileBlob.create("path/to/file");
-const webBlob = await WebBlob.create("https://url/to/file");
+const webBlob = await WebBlob.create(new URL("https://url/to/file"));
 
 const blob = await createBlob("..."); // Automatically detects if it's a file or web URL
 ```

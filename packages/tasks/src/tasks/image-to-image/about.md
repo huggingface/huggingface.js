@@ -49,7 +49,7 @@ import { InferenceClient } from "@huggingface/inference";
 
 const inference = new InferenceClient(HF_TOKEN);
 await inference.imageToImage({
-	data: await (await fetch("image")).blob(),
+	inputs: await (await fetch("image")).blob(),
 	model: "timbrooks/instruct-pix2pix",
 	parameters: {
 		prompt: "Deblur this image",

@@ -19,12 +19,14 @@ You can then load a tokenizer from the Hugging Face Hub and render a list of cha
 import { Template } from "@huggingface/jinja";
 import { downloadFile } from "@huggingface/hub";
 
-const config = await (
-	await downloadFile({
-		repo: "mistralai/Mistral-7B-Instruct-v0.1",
-		path: "tokenizer_config.json",
-	})
-).json();
+const config = JSON.parse(
+	await (
+		await downloadFile({
+			repo: "mistralai/Mistral-7B-Instruct-v0.1",
+			path: "tokenizer_config.json",
+		})
+	).text()
+);
 
 const chat = [
 	{ role: "user", content: "Hello, how are you?" },
