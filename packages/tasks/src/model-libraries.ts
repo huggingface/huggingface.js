@@ -83,6 +83,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	akeratos: {
+		prettyLabel: "Akeratos",
+		repoName: "Akeratos",
+		repoUrl: "https://github.com/cogvera-labs/akeratos",
+		snippets: snippets.akeratos,
+		filter: false,
+	},
 	alkove: {
 		prettyLabel: "Alkove",
 		repoName: "Alkove",
