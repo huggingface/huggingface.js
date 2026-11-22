@@ -83,6 +83,18 @@ model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
 model.load_adapter("${model.id}", set_active=True)`,
 ];
 
+export const akeratos = (model: ModelData): string[] => {
+	const dir = model.id.split("/").pop() ?? "model";
+	return [
+		`# Needs an Apple silicon Mac with macOS 14 or later, and uv 0.13.6 or newer
+git clone --branch v0.1.0 https://github.com/cogvera-labs/akeratos
+cd akeratos
+uv sync --frozen
+uv run --frozen --no-sync hf download ${model.id} --local-dir ${dir}
+uv run --frozen --no-sync bake generate ${dir} --prompt "The capital of France is"`,
+	];
+};
+
 export const alkove = (model: ModelData): string[] => {
 	const name = /^alkove-([a-z]+)-/.exec(model.id.split("/").pop() ?? "")?.[1] ?? "focus";
 	return [
