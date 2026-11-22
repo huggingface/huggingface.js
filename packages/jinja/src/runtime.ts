@@ -209,15 +209,21 @@ export class StringValue extends RuntimeValue<string> {
 					} else if (endArg instanceof KeywordArgumentsValue) {
 						endArg = endArg.value.get("end");
 					}
-					const [start, end] = resolveSliceRange(
-						this.value.length,
-						parseSliceIndex(startArg, "startswith", "start"),
-						parseSliceIndex(endArg, "startswith", "end"),
-					);
-					if (start > end) {
-						return new BooleanValue(false);
+					let target: string;
+					if (startArg === undefined && endArg === undefined) {
+						target = this.value;
+					} else {
+						const chars = Array.from(this.value);
+						const [start, end] = resolveSliceRange(
+							chars.length,
+							parseSliceIndex(startArg, "startswith", "start"),
+							parseSliceIndex(endArg, "startswith", "end"),
+						);
+						if (start > end) {
+							return new BooleanValue(false);
+						}
+						target = chars.slice(start, end).join("");
 					}
-					const target = this.value.slice(start, end);
 					if (pattern instanceof StringValue) {
 						return new BooleanValue(target.startsWith(pattern.value));
 					}
@@ -255,15 +261,21 @@ export class StringValue extends RuntimeValue<string> {
 					} else if (endArg instanceof KeywordArgumentsValue) {
 						endArg = endArg.value.get("end");
 					}
-					const [start, end] = resolveSliceRange(
-						this.value.length,
-						parseSliceIndex(startArg, "endswith", "start"),
-						parseSliceIndex(endArg, "endswith", "end"),
-					);
-					if (start > end) {
-						return new BooleanValue(false);
+					let target: string;
+					if (startArg === undefined && endArg === undefined) {
+						target = this.value;
+					} else {
+						const chars = Array.from(this.value);
+						const [start, end] = resolveSliceRange(
+							chars.length,
+							parseSliceIndex(startArg, "endswith", "start"),
+							parseSliceIndex(endArg, "endswith", "end"),
+						);
+						if (start > end) {
+							return new BooleanValue(false);
+						}
+						target = chars.slice(start, end).join("");
 					}
-					const target = this.value.slice(start, end);
 					if (pattern instanceof StringValue) {
 						return new BooleanValue(target.endsWith(pattern.value));
 					}

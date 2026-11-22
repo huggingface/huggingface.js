@@ -282,4 +282,11 @@ describe("String builtins: startswith and endswith with start and end arguments"
 			"endswith() tuple elements must be strings",
 		);
 	});
+
+	it("correctly handles Unicode code points (emoji / non-BMP characters)", () => {
+		expect(new Template("{{ '🤗test🤗'.startswith('test', 1) }}").render()).toBe("true");
+		expect(new Template("{{ '🤗test🤗'.startswith('test', 2) }}").render()).toBe("false");
+		expect(new Template("{{ '🤗test🤗'.endswith('test', 1, 5) }}").render()).toBe("true");
+		expect(new Template("{{ '🤗test🤗'.endswith('🤗', 0, 1) }}").render()).toBe("true");
+	});
 });
