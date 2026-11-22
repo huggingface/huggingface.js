@@ -35,6 +35,25 @@ import {
 } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
+	it("feeds speech to the native Qwen3-ASR model and strips its language prefix", () => {
+		const model: ModelData = {
+			id: "Qwen/Qwen3-ASR-1.7B-hf",
+			inference: "",
+			pipeline_tag: "automatic-speech-recognition",
+			config: { architectures: ["Qwen3ASRForConditionalGeneration"], chat_template_jinja: "template" },
+			transformersInfo: { auto_model: "AutoModelForMultimodalLM", processor: "AutoProcessor" },
+			tags: ["conversational"],
+		};
+		const example = transformers(model);
+		expect(example).toHaveLength(1);
+		expect(example[0]).toContain(`model_id = "${model.id}"`);
+		expect(example[0]).toContain("apply_transcription_request(audio=audio)");
+		expect(example[0]).toContain('return_format="transcription_only"');
+		expect(example[0]).not.toContain("Who are you?");
+		const [other] = transformers({ ...model, config: { architectures: ["GraniteSpeechForConditionalGeneration"] } });
+		expect(other).toContain('pipeline("automatic-speech-recognition"');
+	});
+
 	it("llama_cpp_python conversational", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",

@@ -2802,6 +2802,28 @@ export const transformers = (model: ModelData): string[] => {
 		return [`# ⚠️ Type of model unknown`];
 	}
 	const auto_model = autoModelClass(model) ?? "AutoModel";
+	if (
+		model.pipeline_tag === "automatic-speech-recognition" &&
+		model.config?.architectures?.includes("Qwen3ASRForConditionalGeneration") &&
+		info.processor === "AutoProcessor" &&
+		auto_model === "AutoModelForMultimodalLM"
+	) {
+		// Qwen3-ASR's chat template expects audio and emits a language prefix before the transcript.
+		return [
+			`# pip install -U transformers accelerate librosa
+from transformers import AutoModelForMultimodalLM, AutoProcessor
+
+model_id = "${model.id}"
+processor = AutoProcessor.from_pretrained(model_id)
+model = AutoModelForMultimodalLM.from_pretrained(model_id, device_map="auto")
+
+audio = "https://huggingface.co/datasets/bezzam/audio_samples/resolve/main/librispeech_mr_quilter.wav"
+inputs = processor.apply_transcription_request(audio=audio).to(model.device, model.dtype)
+output_ids = model.generate(**inputs, max_new_tokens=256)
+generated_ids = output_ids[:, inputs["input_ids"].shape[1]:]
+print(processor.decode(generated_ids, return_format="transcription_only")[0])`,
+		];
+	}
 	if (auto_model == "AutoModelForDecision") {
 		return [transformersDecisionSnippet(model, remote_code_snippet)];
 	}
