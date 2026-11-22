@@ -29,7 +29,7 @@ import type {
 	KeywordSpreadExpression,
 } from "./ast";
 import { Statement } from "./ast";
-import { range, replace, slice, strftime_now, titleCase } from "./utils";
+import { range, replace, resolveSliceRange, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| IntegerValue
@@ -117,6 +117,16 @@ export class FloatValue extends RuntimeValue<number> {
 	}
 }
 
+function parseSliceIndex(arg: AnyRuntimeValue | undefined, fnName: string, paramName: string): number | undefined {
+	if (arg === undefined || arg instanceof NullValue || arg instanceof UndefinedValue) {
+		return undefined;
+	}
+	if (arg instanceof IntegerValue) {
+		return arg.value;
+	}
+	throw new Error(`${fnName}() ${paramName} argument must be an integer or null`);
+}
+
 /**
  * Represents a string value at runtime.
  */
@@ -180,14 +190,32 @@ export class StringValue extends RuntimeValue<string> {
 						throw new Error("startswith() requires at least one argument");
 					}
 					const pattern = args[0];
+					let startArg: AnyRuntimeValue | undefined = args[1];
+					let endArg: AnyRuntimeValue | undefined = args[2];
+					if (startArg instanceof KeywordArgumentsValue) {
+						const kwargs = startArg.value;
+						startArg = kwargs.get("start");
+						endArg = kwargs.get("end");
+					} else if (endArg instanceof KeywordArgumentsValue) {
+						endArg = endArg.value.get("end");
+					}
+					const [start, end] = resolveSliceRange(
+						this.value.length,
+						parseSliceIndex(startArg, "startswith", "start"),
+						parseSliceIndex(endArg, "startswith", "end"),
+					);
+					if (start > end) {
+						return new BooleanValue(false);
+					}
+					const target = this.value.slice(start, end);
 					if (pattern instanceof StringValue) {
-						return new BooleanValue(this.value.startsWith(pattern.value));
+						return new BooleanValue(target.startsWith(pattern.value));
 					} else if (pattern instanceof ArrayValue) {
 						for (const item of pattern.value) {
 							if (!(item instanceof StringValue)) {
 								throw new Error("startswith() tuple elements must be strings");
 							}
-							if (this.value.startsWith(item.value)) {
+							if (target.startsWith(item.value)) {
 								return new BooleanValue(true);
 							}
 						}
@@ -203,14 +231,32 @@ export class StringValue extends RuntimeValue<string> {
 						throw new Error("endswith() requires at least one argument");
 					}
 					const pattern = args[0];
+					let startArg: AnyRuntimeValue | undefined = args[1];
+					let endArg: AnyRuntimeValue | undefined = args[2];
+					if (startArg instanceof KeywordArgumentsValue) {
+						const kwargs = startArg.value;
+						startArg = kwargs.get("start");
+						endArg = kwargs.get("end");
+					} else if (endArg instanceof KeywordArgumentsValue) {
+						endArg = endArg.value.get("end");
+					}
+					const [start, end] = resolveSliceRange(
+						this.value.length,
+						parseSliceIndex(startArg, "endswith", "start"),
+						parseSliceIndex(endArg, "endswith", "end"),
+					);
+					if (start > end) {
+						return new BooleanValue(false);
+					}
+					const target = this.value.slice(start, end);
 					if (pattern instanceof StringValue) {
-						return new BooleanValue(this.value.endsWith(pattern.value));
+						return new BooleanValue(target.endsWith(pattern.value));
 					} else if (pattern instanceof ArrayValue) {
 						for (const item of pattern.value) {
 							if (!(item instanceof StringValue)) {
 								throw new Error("endswith() tuple elements must be strings");
 							}
-							if (this.value.endsWith(item.value)) {
+							if (target.endsWith(item.value)) {
 								return new BooleanValue(true);
 							}
 						}
