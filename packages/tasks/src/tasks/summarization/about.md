@@ -49,7 +49,7 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 
 ### Scripts for training
 
-- [PyTorch](https://github.com/huggingface/transformers/tree/main/examples/pytorch/summarization)
+- [PyTorch](https://github.com/huggingface/transformers/tree/v5.19.0/examples/pytorch/summarization)
 - [TensorFlow](https://github.com/huggingface/transformers/tree/main/examples/tensorflow/summarization)
 - [Flax](https://github.com/huggingface/transformers/tree/main/examples/flax/summarization)
 

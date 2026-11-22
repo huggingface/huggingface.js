@@ -78,7 +78,7 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 
 ### Scripts for training
 
-- [PyTorch](https://github.com/huggingface/transformers/tree/main/examples/pytorch/audio-classification)
+- [PyTorch](https://github.com/huggingface/transformers/tree/v5.19.0/examples/pytorch/audio-classification)
 
 ### Documentation
 

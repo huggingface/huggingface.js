@@ -57,7 +57,7 @@ Would you like to learn more about Translation? Great! Here you can find some cu
 
 ### Scripts for training
 
-- [PyTorch](https://github.com/huggingface/transformers/tree/main/examples/pytorch/translation)
+- [PyTorch](https://github.com/huggingface/transformers/tree/v5.19.0/examples/pytorch/translation)
 - [TensorFlow](https://github.com/huggingface/transformers/tree/main/examples/tensorflow/translation)
 
 ### Documentation
