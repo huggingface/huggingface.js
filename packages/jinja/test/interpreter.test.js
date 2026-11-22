@@ -267,4 +267,19 @@ describe("String builtins: startswith and endswith with start and end arguments"
 			"endswith() end argument must be an integer or null",
 		);
 	});
+
+	it("validates pattern and tuple elements even on inverted slice range", () => {
+		expect(() => new Template("{{ 'abc'.startswith(123, 2, 1) }}").render()).toThrow(
+			"startswith() argument must be a string or tuple of strings",
+		);
+		expect(() => new Template("{{ 'abc'.startswith([123], 2, 1) }}").render()).toThrow(
+			"startswith() tuple elements must be strings",
+		);
+		expect(() => new Template("{{ 'abc'.endswith(123, 2, 1) }}").render()).toThrow(
+			"endswith() argument must be a string or tuple of strings",
+		);
+		expect(() => new Template("{{ 'abc'.endswith([123], 2, 1) }}").render()).toThrow(
+			"endswith() tuple elements must be strings",
+		);
+	});
 });

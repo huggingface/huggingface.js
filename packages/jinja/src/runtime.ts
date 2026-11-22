@@ -190,6 +190,16 @@ export class StringValue extends RuntimeValue<string> {
 						throw new Error("startswith() requires at least one argument");
 					}
 					const pattern = args[0];
+					if (!(pattern instanceof StringValue || pattern instanceof ArrayValue)) {
+						throw new Error("startswith() argument must be a string or tuple of strings");
+					}
+					if (pattern instanceof ArrayValue) {
+						for (const item of pattern.value) {
+							if (!(item instanceof StringValue)) {
+								throw new Error("startswith() tuple elements must be strings");
+							}
+						}
+					}
 					let startArg: AnyRuntimeValue | undefined = args[1];
 					let endArg: AnyRuntimeValue | undefined = args[2];
 					if (startArg instanceof KeywordArgumentsValue) {
@@ -210,18 +220,13 @@ export class StringValue extends RuntimeValue<string> {
 					const target = this.value.slice(start, end);
 					if (pattern instanceof StringValue) {
 						return new BooleanValue(target.startsWith(pattern.value));
-					} else if (pattern instanceof ArrayValue) {
-						for (const item of pattern.value) {
-							if (!(item instanceof StringValue)) {
-								throw new Error("startswith() tuple elements must be strings");
-							}
-							if (target.startsWith(item.value)) {
-								return new BooleanValue(true);
-							}
-						}
-						return new BooleanValue(false);
 					}
-					throw new Error("startswith() argument must be a string or tuple of strings");
+					for (const item of pattern.value) {
+						if (target.startsWith((item as StringValue).value)) {
+							return new BooleanValue(true);
+						}
+					}
+					return new BooleanValue(false);
 				}),
 			],
 			[
@@ -231,6 +236,16 @@ export class StringValue extends RuntimeValue<string> {
 						throw new Error("endswith() requires at least one argument");
 					}
 					const pattern = args[0];
+					if (!(pattern instanceof StringValue || pattern instanceof ArrayValue)) {
+						throw new Error("endswith() argument must be a string or tuple of strings");
+					}
+					if (pattern instanceof ArrayValue) {
+						for (const item of pattern.value) {
+							if (!(item instanceof StringValue)) {
+								throw new Error("endswith() tuple elements must be strings");
+							}
+						}
+					}
 					let startArg: AnyRuntimeValue | undefined = args[1];
 					let endArg: AnyRuntimeValue | undefined = args[2];
 					if (startArg instanceof KeywordArgumentsValue) {
@@ -251,18 +266,13 @@ export class StringValue extends RuntimeValue<string> {
 					const target = this.value.slice(start, end);
 					if (pattern instanceof StringValue) {
 						return new BooleanValue(target.endsWith(pattern.value));
-					} else if (pattern instanceof ArrayValue) {
-						for (const item of pattern.value) {
-							if (!(item instanceof StringValue)) {
-								throw new Error("endswith() tuple elements must be strings");
-							}
-							if (target.endsWith(item.value)) {
-								return new BooleanValue(true);
-							}
-						}
-						return new BooleanValue(false);
 					}
-					throw new Error("endswith() argument must be a string or tuple of strings");
+					for (const item of pattern.value) {
+						if (target.endsWith((item as StringValue).value)) {
+							return new BooleanValue(true);
+						}
+					}
+					return new BooleanValue(false);
 				}),
 			],
 			[
