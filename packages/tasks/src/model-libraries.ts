@@ -1304,7 +1304,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	neurobrix: {
 		prettyLabel: "NeuroBrix",
-		repoName: "neurobrix",
+		repoName: "NeuroBrix",
 		repoUrl: "https://github.com/NeuroBrix/neurobrix",
 		docsUrl: "https://docs.neurobrix.org",
 		snippets: snippets.neurobrix,
