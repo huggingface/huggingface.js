@@ -779,7 +779,10 @@ export class Environment {
 		["string", (operand) => operand.type === "StringValue"],
 		["number", (operand) => operand instanceof IntegerValue || operand instanceof FloatValue],
 		["integer", (operand) => operand instanceof IntegerValue],
-		["iterable", (operand) => operand.type === "ArrayValue" || operand.type === "StringValue"],
+		[
+			"iterable",
+			(operand) => operand instanceof ArrayValue || operand instanceof StringValue || operand instanceof ObjectValue,
+		],
 		["mapping", (operand) => operand instanceof ObjectValue],
 		[
 			"sequence",
