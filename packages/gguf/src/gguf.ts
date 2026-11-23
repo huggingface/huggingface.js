@@ -57,6 +57,7 @@ const MAX_TENSOR_DIM = 2 ** 32;
 const MIN_BITS_PER_PARAMETER = 1;
 const MAX_ARRAY_RECURSION_DEPTH = 4; // nested ARRAY-of-ARRAY depth limit (CWE-674)
 const MAX_CHUNK_FETCHES_PER_VALUE = 30; // prevent infinite fetch loop (CWE-835)
+const MAX_ALIGNMENT = 1 << 30; // 2^30 — largest power-of-2 safe for JS bitwise ops (CWE-190)
 const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); // defined in ggml.h
 const PARALLEL_DOWNLOADS = 20;
 
@@ -580,6 +581,12 @@ export async function gguf(
 	if (alignment <= 0 || !Number.isInteger(alignment)) {
 		throw new Error(`general.alignment must be a positive integer, got ${rawAlignment}`);
 	}
+	if ((alignment & (alignment - 1)) !== 0) {
+		throw new Error(`general.alignment must be a power of 2, got ${rawAlignment}`);
+	}
+	if (alignment > MAX_ALIGNMENT) {
+		throw new Error(`general.alignment ${rawAlignment} exceeds maximum safe value (${MAX_ALIGNMENT}) for JS bitwise operations`);
+	}
 	const tensorInfoEndBeforePadOffset = offset;
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
@@ -730,6 +737,9 @@ export function serializeGgufMetadata(
 ): Uint8Array {
 	const littleEndian = options.littleEndian ?? true;
 	const alignment = options.alignment ?? GGUF_DEFAULT_ALIGNMENT;
+	if (alignment <= 0 || !Number.isInteger(alignment) || (alignment & (alignment - 1)) !== 0 || alignment > MAX_ALIGNMENT) {
+		throw new Error(`alignment must be a power of 2 in [1, ${MAX_ALIGNMENT}], got ${alignment}`);
+	}
 	const version = typedMetadata.version.value;
 
 	// Start with GGUF magic number: "GGUF"
@@ -838,6 +848,9 @@ export async function buildGgufHeader(
 	},
 ): Promise<Blob> {
 	const alignment = options.alignment ?? GGUF_DEFAULT_ALIGNMENT;
+	if (alignment <= 0 || !Number.isInteger(alignment) || (alignment & (alignment - 1)) !== 0 || alignment > MAX_ALIGNMENT) {
+		throw new Error(`alignment must be a power of 2 in [1, ${MAX_ALIGNMENT}], got ${alignment}`);
+	}
 	const version = updatedMetadata.version.value;
 
 	// Serialize the new metadata
