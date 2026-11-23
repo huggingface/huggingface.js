@@ -2225,6 +2225,17 @@ from renderformer import RenderFormerRenderingPipeline
 pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
 ];
 
+export const reverb_tts = (model: ModelData): string[] => [
+	`# pip install reverb-tts
+import soundfile as sf
+from reverb_tts import TTS
+
+tts = TTS.from_pretrained("${model.id}")
+voice = tts.preset_voice("en_male_narrator_1")
+audio = tts.generate("Hello! This is a preset voice speaking.", voice, language="en")
+sf.write("output.wav", audio, tts.sample_rate)`,
+];
+
 export const routee_powertrain = (model: ModelData): string[] => [
 	`# pip install routee.powertrain
 import pandas as pd
