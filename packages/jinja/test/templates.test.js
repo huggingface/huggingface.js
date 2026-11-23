@@ -6536,6 +6536,33 @@ describe("Feature regressions", () => {
 		);
 	});
 
+	describe("Iterable test", () => {
+		it.each([
+			{ value: {}, expected: "true" },
+			{ value: { a: 1 }, expected: "true" },
+			{ value: [], expected: "true" },
+			{ value: "", expected: "true" },
+			{ value: 1, expected: "false" },
+			{ value: null, expected: "false" },
+			{ value: false, expected: "false" },
+		])("recognizes $value as $expected", ({ value, expected }) => {
+			expect(new Template("{{ value is iterable }}").render({ value })).toBe(expected);
+		});
+		it("allows mapping iteration guarded by the iterable test", () => {
+			const template = new Template("{% if value is iterable %}{% for key in value %}{{ key }}{% endfor %}{% endif %}");
+			expect(template.render({ value: { a: 1, b: 2 } })).toBe("ab");
+		});
+	});
+
+	describe("Zero-step slicing", () => {
+		it.each([{ value: [1, 2, 3] }, { value: [] }, { value: "abc" }, { value: "" }])(
+			"rejects a zero step for $value",
+			({ value }) => {
+				expect(() => new Template("{{ value[::0] }}").render({ value })).toThrow("slice step cannot be zero");
+			},
+		);
+	});
+
 	describe("Indent filter", () => {
 		it("uses a positional string width as a literal prefix", () => {
 			const template = new Template('{{ text | indent("> ") }}');
