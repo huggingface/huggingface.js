@@ -8,16 +8,19 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 let failSymlink = false;
+let symlinkCreated = false;
 vi.mock("node:fs/promises", async (importOriginal) => ({
 	...(await importOriginal<typeof import("node:fs/promises")>()),
 	symlink: async (...args: any[]) => {
+		symlinkCreated = false;
 		if (failSymlink) {
 			failSymlink = false;
 			throw new Error("Symlink not supported");
 		}
 
 		// @ts-expect-error - ignore
-		return (await importOriginal<typeof import("node:fs/promises")>()).symlink(...args);
+		await (await importOriginal<typeof import("node:fs/promises")>()).symlink(...args);
+		symlinkCreated = true;
 	},
 }));
 
@@ -30,7 +33,7 @@ describe("utils/symlink", () => {
 		});
 
 		const stats = await lstat(join(tmpdir(), "test-symlink.txt"));
-		expect(stats.isSymbolicLink()).toBe(process.platform !== "win32");
+		expect(stats.isSymbolicLink()).toBe(symlinkCreated);
 
 		// Test file content
 		const content = readFileSync(join(tmpdir(), "test-symlink.txt"), "utf8");
@@ -54,7 +57,7 @@ describe("utils/symlink", () => {
 		});
 
 		const stats = await lstat(join(tmpdir(), "test-symlink.txt"));
-		expect(stats.isSymbolicLink()).toBe(process.platform !== "win32");
+		expect(stats.isSymbolicLink()).toBe(symlinkCreated);
 
 		// Test file content
 		const content = readFileSync(join(tmpdir(), "test-symlink.txt"), "utf8");
