@@ -26,6 +26,10 @@ import {
 
 const WAVESPEEDAI_API_BASE_URL = "https://api.wavespeed.ai";
 
+const WAVESPEEDAI_POLLING_INTERVAL_MS = 500;
+// Upper bound on status polls (~1 hour at WAVESPEEDAI_POLLING_INTERVAL_MS).
+const WAVESPEEDAI_MAX_POLL_ATTEMPTS = 7200;
+
 /**
  * Response structure for task status and results
  */
@@ -37,7 +41,7 @@ interface WaveSpeedAITaskResponse {
 		get: string;
 	};
 	has_nsfw_contents: boolean[];
-	status: "created" | "processing" | "completed" | "failed";
+	status: "created" | "processing" | "completed" | "failed" | "cancelled" | "timeout" | "deleted";
 	created_at: string;
 	error: string;
 	executionTime: number;
@@ -142,6 +146,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 			parsedUrl.host === "router.huggingface.co" ? "/wavespeed" : ""
 		}`;
 		const resultUrl = `${baseUrl}${resultPath}`;
+		let attempt = 0;
 
 		// Poll for results until completion
 		while (true) {
@@ -195,13 +200,23 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 					const blob = await mediaResponse.blob();
 					return outputType === "dataUrl" ? dataUrlFromBlob(blob) : blob;
 				}
-				case "failed": {
-					throw new InferenceClientProviderOutputError(taskResult.error || "Task failed");
+				// Terminal failure statuses documented at https://wavespeed.ai/docs/get-result
+				case "failed":
+				case "cancelled":
+				case "timeout":
+				case "deleted": {
+					throw new InferenceClientProviderOutputError(taskResult.error || `WaveSpeed AI task ${taskResult.status}`);
 				}
 
 				default: {
+					attempt += 1;
+					if (attempt >= WAVESPEEDAI_MAX_POLL_ATTEMPTS) {
+						throw new InferenceClientProviderOutputError(
+							`Timed out while waiting for the result from WaveSpeed AI API - aborting after ${WAVESPEEDAI_MAX_POLL_ATTEMPTS} attempts`,
+						);
+					}
 					// Wait before polling again
-					await delay(500, signal);
+					await delay(WAVESPEEDAI_POLLING_INTERVAL_MS, signal);
 					continue;
 				}
 			}
