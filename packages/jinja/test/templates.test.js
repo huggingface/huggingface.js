@@ -6516,6 +6516,15 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Zero-step slicing", () => {
+		it.each([{ value: [1, 2, 3] }, { value: [] }, { value: "abc" }, { value: "" }])(
+			"rejects a zero step for $value",
+			({ value }) => {
+				expect(() => new Template("{{ value[::0] }}").render({ value })).toThrow("slice step cannot be zero");
+			},
+		);
+	});
+
 	describe("Indent filter", () => {
 		it("uses a positional string width as a literal prefix", () => {
 			const template = new Template('{{ text | indent("> ") }}');
