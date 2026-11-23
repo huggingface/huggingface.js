@@ -137,8 +137,14 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 
 	// Check if the refs directory exists and scan it
 	const refsByHash: Map<string, string[]> = new Map();
-	const refsStat = await stat(refsPath);
-	if (refsStat.isDirectory()) {
+	const refsStat = await stat(refsPath).catch((err: NodeJS.ErrnoException) => {
+		// No refs when only specific commits were downloaded
+		if (err.code === "ENOENT") {
+			return undefined;
+		}
+		throw err;
+	});
+	if (refsStat?.isDirectory()) {
 		await scanRefsDir(refsPath, refsByHash);
 	}
 
@@ -207,16 +213,25 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 	};
 }
 
-export async function scanRefsDir(refsPath: string, refsByHash: Map<string, string[]>): Promise<void> {
+export async function scanRefsDir(
+	refsPath: string,
+	refsByHash: Map<string, string[]>,
+	refPrefix: string = "",
+): Promise<void> {
 	const refFiles = await readdir(refsPath, { withFileTypes: true });
 	for (const refFile of refFiles) {
+		if (FILES_TO_IGNORE.includes(refFile.name)) {
+			continue;
+		}
+
 		const refFilePath = join(refsPath, refFile.name);
+		const refName = refPrefix + refFile.name;
 		if (refFile.isDirectory()) {
-			continue; // Skip directories
+			await scanRefsDir(refFilePath, refsByHash, `${refName}/`); // e.g. refs/pr/1
+			continue;
 		}
 
 		const commitHash = await readFile(refFilePath, "utf-8");
-		const refName = refFile.name;
 		if (!refsByHash.has(commitHash)) {
 			refsByHash.set(commitHash, []);
 		}
@@ -231,11 +246,12 @@ export async function scanSnapshotDir(
 ): Promise<void> {
 	const files = await readdir(revisionPath, { withFileTypes: true });
 	for (const file of files) {
+		const filePath = join(revisionPath, file.name);
 		if (file.isDirectory()) {
-			continue; // Skip directories
+			await scanSnapshotDir(filePath, cachedFiles, blobStats);
+			continue;
 		}
 
-		const filePath = join(revisionPath, file.name);
 		const blobPath = await realpath(filePath);
 		const blobStat = await getBlobStat(blobPath, blobStats);
 
