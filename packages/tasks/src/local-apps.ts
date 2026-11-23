@@ -543,6 +543,42 @@ const snippetOpenClaw = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetVtcode = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const isMLX = isMlxModel(model);
+	const providerId = isMLX ? "mlx-lm" : "llama-cpp";
+	const modelId = isMLX ? model.id : `${model.id}${getQuantTag(filepath)}`;
+	const serverStep = getLocalServerStep(model, filepath);
+
+	const sessionToml = [
+		"[agent]",
+		`provider = "${providerId}"`,
+		`default_model = "${modelId}"`,
+		`reasoning_effort = "none"`,
+		"",
+		"[[custom_providers]]",
+		`name = "${providerId}"`,
+		`display_name = "${isMLX ? "MLX LM" : "llama.cpp"} (local)"`,
+		`base_url = "http://localhost:${getLocalServerPort(model)}/v1"`,
+		`model = "${modelId}"`,
+		`models = ["${modelId}"]`,
+		"supports_tools = true",
+	].join("\n");
+
+	return [
+		serverStep,
+		{
+			title: "Configure VT Code",
+			setup:
+				"# Install VT Code:\ncurl -fsSL https://raw.githubusercontent.com/vinhnx/vtcode/main/scripts/install.sh | bash",
+			content: `# Save as vtcode-local.toml:\n${sessionToml}`,
+		},
+		{
+			title: "Run VT Code",
+			content: `# Start VT Code with the local model:\nvtcode --config vtcode-local.toml`,
+		},
+	];
+};
+
 const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
 	// Only add quant tag for GGUF models, not safetensors
 	const quantTag = isLlamaCppGgufModel(model) ? getQuantTag(filepath) : "";
@@ -815,6 +851,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	vtcode: {
+		prettyLabel: "VT Code",
+		docsUrl: "https://github.com/vinhnx/vtcode",
+		mainTask: "text-generation",
+		displayOnModelPage: isToolCallingLocalAgentModel,
+		snippet: snippetVtcode,
 	},
 } satisfies Record<string, LocalApp>;
 
