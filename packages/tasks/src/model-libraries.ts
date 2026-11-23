@@ -83,6 +83,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	akeratos: {
+		prettyLabel: "Akeratos",
+		repoName: "Akeratos",
+		repoUrl: "https://github.com/cogvera-labs/akeratos",
+		snippets: snippets.akeratos,
+		filter: false,
+	},
 	alkove: {
 		prettyLabel: "Alkove",
 		repoName: "Alkove",
@@ -1339,6 +1346,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.nemo,
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
+	},
+	neurobrix: {
+		prettyLabel: "NeuroBrix",
+		repoName: "NeuroBrix",
+		repoUrl: "https://github.com/NeuroBrix/neurobrix",
+		docsUrl: "https://docs.neurobrix.org",
+		snippets: snippets.neurobrix,
+		filter: false,
+		countDownloads: `path_extension:"nbx"`,
 	},
 	ninfer: {
 		prettyLabel: "NInfer",
