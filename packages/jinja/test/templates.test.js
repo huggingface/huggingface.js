@@ -5,6 +5,23 @@ import { tokenize } from "../src/lexer";
 import { parse } from "../src/parser";
 import { Environment, Interpreter, setupGlobals } from "../src/runtime";
 
+describe("default filter keyword arguments", () => {
+	it.each([
+		[`{{ missing | default(default_value="fallback") }}`, "fallback"],
+		[`{{ "" | default(default_value="fallback", boolean=true) }}`, "fallback"],
+		[`{{ "" | default(boolean=true, default_value="fallback") }}`, "fallback"],
+		[`{{ "present" | default(default_value="fallback") }}`, "present"],
+		[`{{ "" | default(default_value="fallback") }}`, ""],
+		[`{{ missing | default(default_value=0) }}`, "0"],
+		[`{{ missing | default(default_value=false) | tojson }}`, "false"],
+		[`{{ missing | default(default_value=none) | tojson }}`, "null"],
+	])("renders %s", (source, expected) => {
+		const template = new Template(source);
+		expect(template.render()).toBe(expected);
+		expect(new Template(template.format()).render()).toBe(expected);
+	});
+});
+
 const TEST_STRINGS = {
 	// Text nodes
 	NO_TEMPLATE: `Hello world!`,
