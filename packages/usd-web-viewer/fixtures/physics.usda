@@ -127,6 +127,9 @@ def Xform "Cabinet" (
             rel physics:body1 = </Cabinet/Door>
             float physxMimicJoint:rotZ:gearing = -1
             rel physxMimicJoint:rotZ:referenceJoint = </Cabinet/Joints/Hinge>
+            # Past UsdPhysics' sentinel (0.5e38): no upper limit.
+            float physics:lowerLimit = -45
+            float physics:upperLimit = 1e38
         }
     }
 

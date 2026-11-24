@@ -13,7 +13,7 @@ openusd.workspace = true
 openusd-schemas.workspace = true
 # Already linked by openusd for .usdz; used to read packaged files from memory.
 # Decode only: openusd itself still enables `deflate`, which adds the zopfli encoder.
-zip = { version = "8.2.0", default-features = false, features = ["deflate-flate2-zlib-rs"] }
+zip = { version = "9.0.1", default-features = false, features = ["deflate-flate2-zlib-rs"] }
 serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
 serde_json = { version = "1", default-features = false, features = ["alloc"] }
 
