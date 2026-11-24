@@ -84,7 +84,8 @@ export type WarningCode =
 	| "composition"
 	| "texture-failed"
 	| "triangle-limit"
-	| "instance-limit";
+	| "instance-limit"
+	| "joint-unreadable";
 
 export interface LoadWarning {
 	readonly code: WarningCode;
@@ -228,7 +229,10 @@ export type UsdJoint = UsdJointKind & {
 	/** The `physics:body0` / `physics:body1` targets as authored; null is the world. */
 	readonly target0: string | null;
 	readonly target1: string | null;
-	/** The rigid bodies it connects: the nearest rigid body at or above each target, else the target itself; null is the world. */
+	/**
+	 * The rigid bodies it connects: the nearest rigid body at or above each target, else the topmost collider above it, else the
+	 * target itself; null is the world.
+	 */
 	readonly body0: string | null;
 	readonly body1: string | null;
 	/** The joint frame on each target (`localPos` and `localRot` placed in the authored pose), without scale; not updated by `setJointPositions`. */
@@ -243,12 +247,13 @@ export type UsdJoint = UsdJointKind & {
 };
 
 /**
- * A `PhysicsDriveAPI:<axis>` instance, as authored but in SI units. Positions are in meters (linear) or degrees (angular). For a
+ * A `PhysicsDriveAPI:<axis>` instance, with the schema's fallbacks for what is not authored and null for an infinite value (no
+ * limit), in SI units. Positions are in meters (linear) or degrees (angular). For a
  * force drive (the default), stiffness is in N/m or N·m/°, damping in N·s/m or N·m·s/° and `maxForce` in N or N·m; for an
  * acceleration drive, stiffness is in 1/s², damping in 1/s and `maxForce` in m/s² or °/s².
  */
 export interface UsdJointDrive {
-	readonly axis: "linear" | "angular" | "transX" | "transY" | "transZ" | "rotX" | "rotY" | "rotZ";
+	readonly axis: "linear" | "angular" | "distance" | "transX" | "transY" | "transZ" | "rotX" | "rotY" | "rotZ";
 	/** `force` or `acceleration`. */
 	readonly type: string | null;
 	readonly targetPosition: number | null;

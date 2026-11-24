@@ -31,7 +31,7 @@ await complete; // textures stream in after the geometry
 
 ## Physics and joints
 
-`info` also reports what the stage authors for simulation (UsdPhysics) and its UsdSemantics labels, as authored: nothing is estimated. Masses are in kilograms, densities in kg/m³, inertia in kg·m², joint limits and positions in degrees or meters; positions and matrices are in stage space, like the meshes under `root`.
+`info` also reports what the stage authors for simulation (UsdPhysics) and its UsdSemantics labels, as authored: nothing is estimated, though a drive or physics material value left unauthored reads as the schema default, as simulators read it. Masses are in kilograms, densities in kg/m³, inertia in kg·m², joint limits and positions in degrees or meters; positions and matrices are in stage space, like the meshes under `root`.
 
 ```js
 const { info, joints, setJointPositions, resetJointPositions, getJointPositions, getWorldMatrix } = await viewer.load(url);
