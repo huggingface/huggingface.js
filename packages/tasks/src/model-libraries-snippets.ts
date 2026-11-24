@@ -83,6 +83,16 @@ model = AutoAdapterModel.from_pretrained("${escapeStringForJson(
 model.load_adapter("${model.id}", set_active=True)`,
 ];
 
+export const akeratos = (model: ModelData): string[] => {
+	const dir = model.id.split("/").pop() ?? "model";
+	return [
+		`# Needs an Apple silicon Mac with macOS 14 or later
+pip install akeratos huggingface_hub`,
+		`hf download ${model.id} --local-dir ${dir}
+bake generate ${dir} --prompt "The capital of France is"`,
+	];
+};
+
 export const alkove = (model: ModelData): string[] => {
 	const name = /^alkove-([a-z]+)-/.exec(model.id.split("/").pop() ?? "")?.[1] ?? "focus";
 	return [
@@ -2215,6 +2225,17 @@ from renderformer import RenderFormerRenderingPipeline
 pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
 ];
 
+export const reverb_tts = (model: ModelData): string[] => [
+	`# pip install reverb-tts
+import soundfile as sf
+from reverb_tts import TTS
+
+tts = TTS.from_pretrained("${model.id}")
+voice = tts.preset_voice("en_male_narrator_1")
+audio = tts.generate("Hello! This is a preset voice speaking.", voice, language="en")
+sf.write("output.wav", audio, tts.sample_rate)`,
+];
+
 export const routee_powertrain = (model: ModelData): string[] => [
 	`# pip install routee.powertrain
 import pandas as pd
@@ -3639,6 +3660,32 @@ export const nemo = (model: ModelData): string[] => {
 	}
 
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
+};
+
+export const neurobrix = (model: ModelData): string[] => {
+	const cardData = model.cardData as Record<string, unknown> | undefined;
+	const baseModel = Array.isArray(model.cardData?.base_model)
+		? model.cardData.base_model[0]
+		: model.cardData?.base_model;
+	const id = (typeof cardData?.neurobrix_id === "string" ? cardData.neurobrix_id : undefined) ?? baseModel ?? model.id;
+	// One argument set per pipeline, as the CLI expects them (`neurobrix run --help`).
+	const args: Record<string, string> = {
+		"automatic-speech-recognition": `--audio recording.wav`,
+		"audio-text-to-text": `--audio recording.wav --prompt "Summarize this recording."`,
+		"image-to-image": `--input-image photo.png --output result.png`,
+		"image-text-to-text": `--input-image photo.jpg --prompt "What is in this image?"`,
+		"any-to-any": `--mode text --input-image photo.jpg --prompt "Describe this image."`,
+		"text-to-image": `--prompt "a lighthouse at dusk" --output image.png`,
+		"text-to-video": `--prompt "a hot air balloon over mountains" --output video.mp4`,
+		"image-to-video": `--input-image first_frame.png --prompt "the camera slowly pulls back" --output video.mp4`,
+		"text-to-speech": `--prompt "Hello from my own GPU."${id === "hexgrad/Kokoro-82M" ? " --speaker af_heart" : ""} --output speech.wav`,
+	};
+	const run = args[model.pipeline_tag ?? ""] ?? `--prompt "Hello"`;
+	return [
+		`# pip install neurobrix
+neurobrix import ${id} --accept-license
+neurobrix run --model ${id} ${run}`,
+	];
 };
 
 export const outetts = (model: ModelData): string[] => {

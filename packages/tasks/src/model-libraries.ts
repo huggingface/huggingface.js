@@ -83,6 +83,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	akeratos: {
+		prettyLabel: "Akeratos",
+		repoName: "Akeratos",
+		repoUrl: "https://github.com/cogvera-labs/akeratos",
+		snippets: snippets.akeratos,
+		filter: false,
+	},
 	alkove: {
 		prettyLabel: "Alkove",
 		repoName: "Alkove",
@@ -1340,6 +1347,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
 	},
+	neurobrix: {
+		prettyLabel: "NeuroBrix",
+		repoName: "NeuroBrix",
+		repoUrl: "https://github.com/NeuroBrix/neurobrix",
+		docsUrl: "https://docs.neurobrix.org",
+		snippets: snippets.neurobrix,
+		filter: false,
+		countDownloads: `path_extension:"nbx"`,
+	},
 	ninfer: {
 		prettyLabel: "NInfer",
 		repoName: "NInfer",
@@ -1613,6 +1629,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Reverb",
 		repoUrl: "https://github.com/revdotcom/reverb",
 		filter: false,
+	},
+	"reverb-tts": {
+		prettyLabel: "Reverb-TTS",
+		repoName: "Reverb-TTS",
+		repoUrl: "https://github.com/software-mansion-labs/Reverb-TTS",
+		snippets: snippets.reverb_tts,
+		filter: false,
+		countDownloads: `path_filename:"config" AND path_extension:"json"`,
 	},
 	rkllm: {
 		prettyLabel: "RKLLM",
@@ -1909,7 +1933,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/strands-labs/strands-decider",
 		snippets: snippets.strandsDecider,
 		filter: false,
-		countDownloads: `path:"strands_decider_config.json" OR path:"hobson_config.json"`,
+		countDownloads: `path:"strands_decider_config.json" OR path:"hobson_config.json" OR path:"decision_config.json"`,
 	},
 	supertonic: {
 		prettyLabel: "Supertonic",

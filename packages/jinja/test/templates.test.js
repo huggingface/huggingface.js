@@ -6516,6 +6516,33 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Iterable test", () => {
+		it.each([
+			{ value: {}, expected: "true" },
+			{ value: { a: 1 }, expected: "true" },
+			{ value: [], expected: "true" },
+			{ value: "", expected: "true" },
+			{ value: 1, expected: "false" },
+			{ value: null, expected: "false" },
+			{ value: false, expected: "false" },
+		])("recognizes $value as $expected", ({ value, expected }) => {
+			expect(new Template("{{ value is iterable }}").render({ value })).toBe(expected);
+		});
+		it("allows mapping iteration guarded by the iterable test", () => {
+			const template = new Template("{% if value is iterable %}{% for key in value %}{{ key }}{% endfor %}{% endif %}");
+			expect(template.render({ value: { a: 1, b: 2 } })).toBe("ab");
+		});
+	});
+
+	describe("Zero-step slicing", () => {
+		it.each([{ value: [1, 2, 3] }, { value: [] }, { value: "abc" }, { value: "" }])(
+			"rejects a zero step for $value",
+			({ value }) => {
+				expect(() => new Template("{{ value[::0] }}").render({ value })).toThrow("slice step cannot be zero");
+			},
+		);
+	});
+
 	describe("Indent filter", () => {
 		it("uses a positional string width as a literal prefix", () => {
 			const template = new Template('{{ text | indent("> ") }}');
@@ -7002,6 +7029,42 @@ describe("Feature regressions", () => {
 	});
 
 	describe("For loops", () => {
+		describe("string iteration", () => {
+			it.each([
+				["abc", "1:a:false|2:b:false|3:c:true|"],
+				["A😀B", "1:A:false|2:😀:false|3:B:true|"],
+				["e\u0301", "1:e:false|2:́:true|"],
+				["", "empty"],
+			])("iterates the code points of %j", (value, expected) => {
+				const template = new Template(
+					"{% for char in value %}{{ loop.index }}:{{ char }}:{{ loop.last }}|{% else %}empty{% endfor %}",
+				);
+				expect(template.render({ value })).toBe(expected);
+			});
+
+			it("computes loop metadata after selecting characters", () => {
+				const template = new Template(
+					"{% for char in value if char != 'x' %}{{ char }}:{{ loop.index }}/{{ loop.length }}|{% endfor %}",
+				);
+				expect(template.render({ value: "xA😀x" })).toBe("A:1/2|😀:2/2|");
+			});
+
+			it("takes the else branch when all characters are filtered out", () => {
+				expect(
+					new Template("{% for char in value if char != 'x' %}{{ char }}{% else %}empty{% endfor %}").render({
+						value: "xx",
+					}),
+				).toBe("empty");
+			});
+
+			it("exposes neighboring characters", () => {
+				const template = new Template(
+					"{% for char in value %}{{ loop.previtem | default('-') }}:{{ char }}:{{ loop.nextitem | default('-') }}|{% endfor %}",
+				);
+				expect(template.render({ value: "A😀" })).toBe("-:A:😀|A:😀:-|");
+			});
+		});
+
 		it.each([
 			{
 				name: "keeps the loop object of an earlier iteration",

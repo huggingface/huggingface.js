@@ -770,7 +770,10 @@ export class Environment {
 		["string", (operand) => operand.type === "StringValue"],
 		["number", (operand) => operand instanceof IntegerValue || operand instanceof FloatValue],
 		["integer", (operand) => operand instanceof IntegerValue],
-		["iterable", (operand) => operand.type === "ArrayValue" || operand.type === "StringValue"],
+		[
+			"iterable",
+			(operand) => operand instanceof ArrayValue || operand instanceof StringValue || operand instanceof ObjectValue,
+		],
 		["mapping", (operand) => operand instanceof ObjectValue],
 		[
 			"sequence",
@@ -2088,6 +2091,10 @@ export class Interpreter {
 			test = select.test;
 		} else {
 			iterable = this.evaluate(node.iterable, scope);
+		}
+
+		if (iterable instanceof StringValue) {
+			iterable = new ArrayValue(Array.from(iterable.value, (char) => new StringValue(char)));
 		}
 
 		if (!(iterable instanceof ArrayValue || iterable instanceof ObjectValue)) {
