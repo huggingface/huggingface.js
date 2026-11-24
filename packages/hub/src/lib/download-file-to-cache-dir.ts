@@ -15,9 +15,13 @@ import { createWriteStream } from "node:fs";
 
 export const REGEX_COMMIT_HASH: RegExp = new RegExp("^[0-9a-f]{40}$");
 
-function getFilePointer(storageFolder: string, revision: string, relativeFilename: string): string {
-	const snapshotPath = join(storageFolder, "snapshots");
-	return join(snapshotPath, revision, relativeFilename);
+function getFilePointer(storageFolder: string, revision: string, relativeFilename: string, raw: boolean): string {
+	// Raw pointers get their own snapshot namespace: the raw and resolved
+	// representations of an LFS/Xet file share a commit and path, so a single
+	// snapshots/<commit>/<path> entry would hand the wrong bytes to later calls.
+	// The Python cache only defines the resolved layout, which stays unchanged.
+	const representationFolder = join(storageFolder, raw ? "raw-snapshots" : "snapshots");
+	return join(representationFolder, revision, relativeFilename);
 }
 
 /**
@@ -74,6 +78,7 @@ export async function downloadFileToCacheDir(
 	// The path comes from the tree API, ie. from the repo, and is joined onto the cache dir below:
 	// reject anything that would escape it (see huggingface_hub#4540).
 	validateRelativeFilename(params.path);
+	const raw = Boolean(params.raw);
 	const revision = params.revision ?? "main";
 	const cacheDir = params.cacheDir ?? getHFHubCachePath();
 	const storageFolder = join(cacheDir, getRepoFolderName(repoId));
@@ -82,7 +87,7 @@ export async function downloadFileToCacheDir(
 
 	if (revision && REGEX_COMMIT_HASH.test(revision)) {
 		commitHash = revision;
-		const pointerPath = getFilePointer(storageFolder, revision, params.path);
+		const pointerPath = getFilePointer(storageFolder, revision, params.path, raw);
 		if (await exists(pointerPath, true)) {
 			return pointerPath;
 		}
@@ -100,7 +105,14 @@ export async function downloadFileToCacheDir(
 
 	const info = pathsInformation[0];
 	let etag: string;
-	if (info.lfs) {
+	if (raw) {
+		// The Git object id names the pointer bytes; lfs.oid/xetHash name the
+		// resolved content and must not key the raw representation.
+		if (!info.oid) {
+			throw new Error(`cannot determine etag for ${params.path}`);
+		}
+		etag = info.oid;
+	} else if (info.lfs) {
 		etag = info.lfs.oid;
 	} else if (info.xetHash) {
 		etag = info.xetHash;
@@ -111,11 +123,17 @@ export async function downloadFileToCacheDir(
 	}
 
 	const snapshotId = commitHash ?? info.lastCommit?.id ?? etag;
-	const pointerPath = getFilePointer(storageFolder, snapshotId, params.path);
+	const pointerPath = getFilePointer(storageFolder, snapshotId, params.path, raw);
 	const blobPath = join(storageFolder, "blobs", etag);
 
 	if (await exists(pointerPath, true)) {
 		return pointerPath;
+	}
+
+	if (raw) {
+		// Cache scanners require snapshots/ to exist; keep it present even when
+		// the repository only ever cached raw files.
+		await mkdir(join(storageFolder, "snapshots"), { recursive: true });
 	}
 
 	// mkdir blob and pointer path parent directory
@@ -136,6 +154,7 @@ export async function downloadFileToCacheDir(
 	const blob: Blob | null = await downloadFile({
 		...params,
 		revision,
+		raw,
 	});
 
 	if (!blob) {
