@@ -3,6 +3,21 @@ import { LOCAL_APPS } from "./local-apps.js";
 import type { ModelData } from "./model-data.js";
 
 describe("local-apps", () => {
+	it("opens a generative safetensors checkpoint in Atomic Chat", () => {
+		const app = LOCAL_APPS["atomic-chat"];
+		const model: ModelData = {
+			id: "nvidia/Gemma-4-31B-IT-NVFP4",
+			tags: ["safetensors", "ModelOpt", "NVFP4"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+		expect(app.displayOnModelPage(model)).toBe(true);
+		expect(app.deeplink(model).href).toBe("atomic-chat://models/huggingface/nvidia/Gemma-4-31B-IT-NVFP4");
+		expect(app.displayOnModelPage({ ...model, pipeline_tag: "image-text-to-text" })).toBe(true);
+		expect(app.displayOnModelPage({ ...model, pipeline_tag: "feature-extraction" })).toBe(false);
+		expect(app.displayOnModelPage({ ...model, tags: ["peft", "safetensors"] })).toBe(false);
+	});
+
 	it("llama.cpp conversational", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
 		const model: ModelData = {
