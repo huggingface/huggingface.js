@@ -3,11 +3,12 @@
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
-use openusd::gf::Matrix4d;
-use openusd::sdf::{self, Value};
+use openusd::gf::Mat4d;
+use openusd::sdf;
 use openusd::usd::{self, PrimPredicate, Stage};
+use openusd::vt::Value;
 use openusd_schemas::geom::XformCache;
-use openusd_schemas::shade::MaterialBindingAPI;
+use openusd_schemas::shade::{BindingCache, MaterialBindingAPI};
 use serde::{Serialize, Serializer};
 
 use crate::implicit;
@@ -45,8 +46,8 @@ pub struct Scene {
 /// Something the viewer could not show faithfully.
 #[derive(Serialize)]
 pub struct Warning {
-    /// `prim-unsupported`, `material-fallback`, `instance-limit` or
-    /// `composition` (the page adds layer, texture, `triangle-limit` and
+    /// `prim-unsupported`, `material-fallback`, `instance-limit`,
+    /// `joint-unreadable` or `composition` (the page adds layer, texture, `triangle-limit` and
     /// `nothing-drawable` warnings).
     pub code: &'static str,
     pub message: String,
@@ -152,7 +153,7 @@ struct Inherited {
 /// instancer) and its prototype-to-world transform.
 struct Prototype {
     root: sdf::Path,
-    placements: Vec<(String, Matrix4d)>,
+    placements: Vec<(String, Mat4d)>,
     /// The instancers that target it.
     instancers: Vec<u32>,
 }
@@ -218,7 +219,7 @@ impl Placer<'_> {
                 String::new(),
                 self.xforms
                     .local_to_world_transform(&prim)
-                    .unwrap_or(Matrix4d::IDENTITY),
+                    .unwrap_or(Mat4d::IDENTITY),
             )],
             Some(e) => {
                 self.resolve(e)?;
@@ -228,8 +229,8 @@ impl Placer<'_> {
                     .prim(prototype.root.parent().unwrap_or_else(sdf::Path::abs_root))?;
                 let (to_root, _) = self
                     .xforms
-                    .compute_relative_transform(&prim, &above_root)
-                    .unwrap_or((Matrix4d::IDENTITY, false));
+                    .relative_transform(&prim, &above_root)
+                    .unwrap_or((Mat4d::IDENTITY, false));
                 prototype
                     .placements
                     .iter()
@@ -365,6 +366,7 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
 
     let mut state: HashMap<sdf::Path, Inherited> = HashMap::with_capacity(paths.len());
     let mut xforms = XformCache::new(None);
+    let mut bindings = BindingCache::default();
     let mut geometry_by_source: HashMap<String, u32> = HashMap::new();
     // Each source's local extent, and the world box of the instances so far.
     let mut extents: Vec<Option<[[f32; 3]; 2]>> = Vec::new();
@@ -546,8 +548,7 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
             Some(proto) => proto,
             None => prim.clone(),
         };
-        let binding = MaterialBindingAPI::from_prim_unchecked(prim.clone())
-            .compute_bound_material("preview")?;
+        let binding = bound_material(&prim, "preview", &mut bindings)?;
         let mesh_material = shown_material(
             stage,
             &mut materials,
@@ -558,8 +559,7 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
         let mut subset_materials = HashMap::new();
         for child in prim.children()? {
             if is_material_subset(&child)?
-                && let Some(mat) = MaterialBindingAPI::from_prim_unchecked(child.clone())
-                    .compute_bound_material("preview")?
+                && let Some(mat) = bound_material(&child, "preview", &mut bindings)?
                 && let Some(name) = child.path().name()
             {
                 let index = shown_material(
@@ -609,8 +609,8 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
                 let above_root =
                     stage.prim(prototype.root.parent().unwrap_or_else(sdf::Path::abs_root))?;
                 let (to_root, _) = xforms
-                    .compute_relative_transform(&prim, &above_root)
-                    .unwrap_or((Matrix4d::IDENTITY, false));
+                    .relative_transform(&prim, &above_root)
+                    .unwrap_or((Mat4d::IDENTITY, false));
                 placements
                     .iter()
                     .take(count)
@@ -623,7 +623,7 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
                 path.as_str().to_owned(),
                 xforms
                     .local_to_world_transform(&prim)
-                    .unwrap_or(Matrix4d::IDENTITY),
+                    .unwrap_or(Mat4d::IDENTITY),
             )],
         };
         let double_sided = matches!(prim.attribute("doubleSided").get::<bool>(), Ok(Some(true)));
@@ -643,7 +643,7 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
         }
     }
     scene.bounds = bounds.filter(|_| !scene.instances.is_empty());
-    (scene.physics, scene.labels) = physics.finish();
+    (scene.physics, scene.labels) = physics.finish(&mut scene.warnings);
     scene.variant_selections = physics::variant_selections(stage)?;
     if let Some(path) = over_limit.or(truncated) {
         scene.warnings.push(Warning {
@@ -678,6 +678,19 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
         });
     }
     Ok(scene)
+}
+
+/// The path of the material bound to `prim` for `purpose`, whatever prim it
+/// names, counting bindings on prims without `MaterialBindingAPI` applied as
+/// C++ does by default.
+pub fn bound_material(
+    prim: &usd::Prim,
+    purpose: &str,
+    cache: &mut BindingCache,
+) -> openusd::Result<Option<sdf::Path>> {
+    Ok(MaterialBindingAPI::from_prim_unchecked(prim.clone())
+        .resolve_binding(purpose, true, cache)?
+        .map(|binding| binding.material_path().clone()))
 }
 
 /// A gprim's local bounding box: its authored `extent`, or for an implicit
@@ -725,7 +738,7 @@ fn is_gprim(prim: &usd::Prim, ty: &str) -> openusd::Result<bool> {
 fn add_placements(
     prim: &usd::Prim,
     targets: &[u32],
-    bases: &[(String, Matrix4d)],
+    bases: &[(String, Mat4d)],
     prototypes: &mut [Prototype],
     max: usize,
     truncated: &mut Option<String>,
@@ -765,7 +778,7 @@ fn add_placements(
         Some(Value::Int64Vec(ids)) => ids.into_iter().collect(),
         _ => HashSet::new(),
     };
-    if let Some(Value::Int64ListOp(op)) = prim.get_metadata::<Value>("inactiveIds")? {
+    if let Some(Value::Int64ListOp(op)) = prim.metadata::<Value>("inactiveIds")? {
         hidden.extend(op.compose_over(&[]));
     }
 
@@ -801,9 +814,9 @@ fn add_placements(
                 }
                 let orientation = orientations.get(i).copied().unwrap_or([1.0, 0.0, 0.0, 0.0]);
                 let scale = scales.get(i).copied().unwrap_or([1.0; 3]);
-                let placement = Matrix4d::scale(scale.map(f64::from))
-                    * Matrix4d::from_quat(orientation)
-                    * Matrix4d::translation(positions[i].map(f64::from))
+                let placement = Mat4d::scale(scale.map(f64::from))
+                    * Mat4d::from_quat(orientation)
+                    * Mat4d::translation(positions[i].map(f64::from))
                     * *base;
                 placements.push((format!("{label}[{i}]"), placement));
             }
@@ -892,7 +905,7 @@ where
     let Some(mut values) = convert(&value) else {
         return Ok(None);
     };
-    let interp = match attr.get_metadata::<Value>("interpolation")? {
+    let interp = match attr.metadata::<Value>("interpolation")? {
         Some(Value::Token(t)) => match t.as_str() {
             "constant" => Interp::Constant,
             "uniform" => Interp::Uniform,

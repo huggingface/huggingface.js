@@ -8,8 +8,9 @@
 
 use std::collections::HashMap;
 
-use openusd::sdf::{self, Value};
+use openusd::sdf;
 use openusd::usd::Stage;
+use openusd::vt::Value;
 use serde::{Serialize, Serializer};
 
 use crate::ser::{as_map, finite};

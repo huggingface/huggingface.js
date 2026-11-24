@@ -68,8 +68,6 @@ Would you like to learn more about token classification? Great! Here you can fin
 ### Scripts for training
 
 - [PyTorch](https://github.com/huggingface/transformers/tree/main/examples/pytorch/token-classification)
-- [TensorFlow](https://github.com/huggingface/transformers/tree/main/examples/tensorflow)
-- [Flax](https://github.com/huggingface/transformers/tree/main/examples/flax/token-classification)
 
 ### Documentation
 

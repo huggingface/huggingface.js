@@ -6,8 +6,8 @@
 
 use std::f32::consts::{FRAC_PI_2, PI, TAU};
 
-use openusd::sdf::Value;
 use openusd::usd;
+use openusd::vt::Value;
 
 use crate::extract::{Geometry, Group, bounds, token_attr};
 
