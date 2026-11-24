@@ -284,7 +284,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["openrouter"],
+		providers: ["openai"],
 		opts: { directRequest: true },
 	},
 	{

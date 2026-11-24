@@ -1,9 +1,9 @@
 async function query(data) {
 	const response = await fetch(
-		"https://openrouter.ai/api/v1/chat/completions",
+		"https://api.openai.com/v1/chat/completions",
 		{
 			headers: {
-				Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+				Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -15,7 +15,7 @@ async function query(data) {
 }
 
 query({ 
-    model: "<openrouter alias for meta-llama/Llama-3.1-8B-Instruct>",
+    model: "<openai alias for meta-llama/Llama-3.1-8B-Instruct>",
     messages: [
         {
             role: "user",

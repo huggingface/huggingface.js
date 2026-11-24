@@ -1,9 +1,9 @@
 import os
 import requests
 
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
+API_URL = "https://api.openai.com/v1/chat/completions"
 headers = {
-    "Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}",
+    "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
 }
 
 def query(payload):
@@ -11,7 +11,7 @@ def query(payload):
     return response.json()
 
 response = query({
-    "model": "<openrouter alias for meta-llama/Llama-3.1-8B-Instruct>",
+    "model": "<openai alias for meta-llama/Llama-3.1-8B-Instruct>",
     "messages": [
         {
             "role": "user",

@@ -1,12 +1,12 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://openrouter.ai/api/v1",
-	apiKey: process.env.OPENROUTER_API_KEY,
+	baseURL: "https://api.openai.com/v1",
+	apiKey: process.env.OPENAI_API_KEY,
 });
 
 const chatCompletion = await client.chat.completions.create({
-	model: "<openrouter alias for meta-llama/Llama-3.1-8B-Instruct>",
+	model: "<openai alias for meta-llama/Llama-3.1-8B-Instruct>",
     messages: [
         {
             role: "user",

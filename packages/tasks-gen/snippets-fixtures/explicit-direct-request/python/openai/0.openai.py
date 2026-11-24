@@ -1,13 +1,13 @@
 import os
-from huggingface_hub import InferenceClient
+from openai import OpenAI
 
-client = InferenceClient(
-    provider="openrouter",
-    api_key=os.environ["OPENROUTER_API_KEY"],
+client = OpenAI(
+    base_url="https://api.openai.com/v1",
+    api_key=os.environ["OPENAI_API_KEY"],
 )
 
 completion = client.chat.completions.create(
-    model="meta-llama/Llama-3.1-8B-Instruct",
+    model="<openai alias for meta-llama/Llama-3.1-8B-Instruct>",
     messages=[
         {
             "role": "user",

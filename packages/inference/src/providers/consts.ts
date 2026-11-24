@@ -21,7 +21,6 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	"fal-ai": {},
 	"hf-inference": {},
 	openai: {},
-	openrouter: {},
 	replicate: {},
 	wavespeed: {},
 };

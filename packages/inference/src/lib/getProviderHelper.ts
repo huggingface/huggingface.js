@@ -1,7 +1,6 @@
 import * as FalAI from "../providers/fal-ai.js";
 import * as HFInference from "../providers/hf-inference.js";
 import * as OpenAI from "../providers/openai.js";
-import * as OpenRouter from "../providers/openrouter.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -90,9 +89,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
-	},
-	openrouter: {
-		conversational: new OpenRouter.OpenRouterConversationalTask(),
 	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
