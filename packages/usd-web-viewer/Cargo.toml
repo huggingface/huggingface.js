@@ -3,8 +3,8 @@ resolver = "3"
 members = ["crate"]
 
 [workspace.dependencies]
-openusd = "0.8.0"
-openusd-schemas = { version = "0.8.0", features = ["geom", "shade"] }
+openusd = "0.9.0"
+openusd-schemas = { version = "0.9.0", features = ["geom", "physics", "shade"] }
 
 [profile.release]
 opt-level = "s"

@@ -2122,6 +2122,10 @@ export class Interpreter {
 			iterable = this.evaluate(node.iterable, scope);
 		}
 
+		if (iterable instanceof StringValue) {
+			iterable = new ArrayValue(Array.from(iterable.value, (char) => new StringValue(char)));
+		}
+
 		if (!(iterable instanceof ArrayValue || iterable instanceof ObjectValue)) {
 			throw new Error(`Expected iterable or object type in for loop: got ${iterable.type}`);
 		}
