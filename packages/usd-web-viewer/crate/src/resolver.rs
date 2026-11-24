@@ -161,7 +161,7 @@ pub fn check_package(package: &[u8]) -> io::Result<()> {
         if entry.compression() != zip::CompressionMethod::Stored {
             return Err(io::Error::other(format!(
                 "{} is compressed ({}): USDZ packages store their files uncompressed",
-                entry.name(),
+                entry.name().map_err(io::Error::other)?,
                 entry.compression()
             )));
         }
@@ -349,11 +349,7 @@ impl ar::Resolver for MemoryResolver {
         }))
     }
 
-    fn get_modification_timestamp(
-        &self,
-        _: &str,
-        _: &ResolvedPath,
-    ) -> Option<std::time::SystemTime> {
+    fn modification_timestamp(&self, _: &str, _: &ResolvedPath) -> Option<std::time::SystemTime> {
         None
     }
 

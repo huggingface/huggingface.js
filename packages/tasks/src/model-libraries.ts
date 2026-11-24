@@ -1630,6 +1630,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/revdotcom/reverb",
 		filter: false,
 	},
+	"reverb-tts": {
+		prettyLabel: "Reverb-TTS",
+		repoName: "Reverb-TTS",
+		repoUrl: "https://github.com/software-mansion-labs/Reverb-TTS",
+		snippets: snippets.reverb_tts,
+		filter: false,
+		countDownloads: `path_filename:"config" AND path_extension:"json"`,
+	},
 	rkllm: {
 		prettyLabel: "RKLLM",
 		repoName: "RKLLM",

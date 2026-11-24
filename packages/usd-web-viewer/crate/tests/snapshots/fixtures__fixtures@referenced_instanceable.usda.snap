@@ -19,9 +19,9 @@ instances:
 geometries:
   0 /World/robot/base/mesh: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
     normals (0, 0, 1) x3
-  1 /__Prototype_0/mesh: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+  1 /__Prototype_1/mesh: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
     normals (0, 0, 1) x3
-  2 /__Prototype_1/base/mesh: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
+  2 /__Prototype_2/base/mesh: 1 triangles (all outward), 3 vertices, bounds (0, 0, 0)..(1, 1, 0)
     normals (0, 0, 1) x3
 
 materials:
