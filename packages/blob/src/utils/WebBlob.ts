@@ -19,14 +19,19 @@ interface WebBlobCreateOptions {
 export class WebBlob extends Blob {
 	static async create(url: URL, opts?: WebBlobCreateOptions): Promise<Blob> {
 		const customFetch = opts?.fetch ?? fetch;
-		const response = await customFetch(url, { method: "HEAD" });
-
-		const size = Number(response.headers.get("content-length"));
+		// A range probe exposes the total even when a CDN omits HEAD headers.
+		const response = await customFetch(url, { headers: { Range: "bytes=0-0" } });
 		const contentType = response.headers.get("content-type") || "";
-		const supportRange = response.headers.get("accept-ranges") === "bytes";
 
-		if (!supportRange || size < (opts?.cacheBelow ?? 1_000_000)) {
-			return await (await customFetch(url)).blob();
+		// If ranges are ignored, reuse the full response we already received.
+		if (response.status !== 206) {
+			return response.blob();
+		}
+
+		const size = Number(response.headers.get("content-range")?.split("/").pop());
+		await response.body?.cancel();
+		if (!Number.isFinite(size) || size < (opts?.cacheBelow ?? 1_000_000)) {
+			return (await customFetch(url)).blob();
 		}
 
 		return new WebBlob(url, 0, size, contentType, true, customFetch);

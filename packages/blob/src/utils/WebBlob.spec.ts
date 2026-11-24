@@ -8,10 +8,11 @@ describe("WebBlob", () => {
 	let contentType: string;
 
 	beforeAll(async () => {
-		const response = await fetch(resourceUrl, { method: "HEAD" });
-		size = Number(response.headers.get("content-length"));
+		const response = await fetch(resourceUrl);
 		contentType = response.headers.get("content-type") || "";
-		fullText = await (await fetch(resourceUrl)).text();
+		const blob = await response.blob();
+		size = blob.size;
+		fullText = await blob.text();
 	});
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {
@@ -86,5 +87,69 @@ describe("WebBlob", () => {
 
 		expect(() => webBlob.slice(-5)).toThrow(TypeError);
 		expect(() => webBlob.slice(0, -1)).toThrow(TypeError);
+	});
+});
+
+describe("WebBlob range probe", () => {
+	const url = new URL("https://example.com/model.json");
+	it("uses the range total when HEAD would omit the size", async () => {
+		const requests: RequestInit[] = [];
+		let cancelled = false;
+		const customFetch: typeof fetch = async (_url, init) => {
+			requests.push(init ?? {});
+			if (init?.method === "HEAD") {
+				return new Response(null);
+			}
+			if (new Headers(init?.headers).get("Range") === "bytes=0-0") {
+				return new Response(
+					new ReadableStream({
+						cancel() {
+							cancelled = true;
+						},
+					}),
+					{
+						status: 206,
+						headers: { "Content-Range": "bytes 0-0/10", "Content-Type": "text/plain" },
+					},
+				);
+			}
+			return new Response("0123456789");
+		};
+		const blob = await WebBlob.create(url, { fetch: customFetch, cacheBelow: 0 });
+		expect(blob).toBeInstanceOf(WebBlob);
+		expect(blob.size).toBe(10);
+		expect(blob.type).toBe("text/plain");
+		expect(cancelled).toBe(true);
+		expect(requests).toHaveLength(1);
+		expect(new Headers(requests[0].headers).get("Range")).toBe("bytes=0-0");
+		expect(await blob.text()).toBe("0123456789");
+	});
+
+	it("reuses the full response when ranges are ignored", async () => {
+		let requests = 0;
+		const blob = await WebBlob.create(url, {
+			fetch: async () => {
+				requests++;
+				return new Response("full content");
+			},
+		});
+		expect(await blob.text()).toBe("full content");
+		expect(requests).toBe(1);
+	});
+
+	it.each(["bytes 0-0/10", "bytes 0-0/*", null])("buffers a small or unknown range total %s", async (range) => {
+		let requests = 0;
+		const blob = await WebBlob.create(url, {
+			fetch: async () => {
+				requests++;
+				if (requests === 1) {
+					return new Response("0", { status: 206, headers: range ? { "Content-Range": range } : {} });
+				}
+				return new Response("0123456789");
+			},
+		});
+		expect(blob).not.toBeInstanceOf(WebBlob);
+		expect(blob.size).toBe(10);
+		expect(await blob.text()).toBe("0123456789");
 	});
 });
