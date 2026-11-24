@@ -7138,6 +7138,29 @@ describe("Feature regressions", () => {
 				expect(new Template(`{{ value | ${filter} | string }}`).render({ value })).toBe(expected);
 			}
 		});
+		it.each([
+			["1e21", "1000000000000000000000"],
+			["-1e21", "-1000000000000000000000"],
+			["1e23", "99999999999999991611392"],
+		])("preserves large integers across output paths for %j", (value, expected) => {
+			const cases = [
+				["n ~ ''", expected],
+				["'' ~ n", expected],
+				["missing ~ n", expected],
+				["n ~ missing", expected],
+				["[n, n] | join", expected + expected],
+				["[n, n] | join(' / ')", `${expected} / ${expected}`],
+				["[n, n] | join(separator=' / ')", `${expected} / ${expected}`],
+				["n | tojson", expected],
+				["[n] | tojson", `[${expected}]`],
+				["{'n': n} | tojson", `{"n": ${expected}}`],
+				["[n] | string", `[${expected}]`],
+			];
+			for (const [expression, output] of cases) {
+				expect(new Template(`{% set n = value | int %}{{ ${expression} }}`).render({ value })).toBe(output);
+			}
+		});
+
 		it("converts numbers with int and float like Python", () => {
 			const template = new Template(
 				`|{{ x | int }}|{{ x | int(0) }}|{{ 3.7 | int(default=0) }}|{{ 3 | float(0.0) }}|{{ y | int | float }}|{{ y | int(0) | float }}|`,
