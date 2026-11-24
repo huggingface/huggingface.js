@@ -13,6 +13,7 @@ export * from "./delete-files";
 export * from "./delete-repo";
 export * from "./delete-collection";
 export * from "./download-file";
+export * from "./duplicate-repo";
 export * from "./download-file-to-cache-dir";
 export * from "./file-download-info";
 export * from "./file-exists";
