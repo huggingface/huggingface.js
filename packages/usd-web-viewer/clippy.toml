@@ -1,0 +1,2 @@
+# openusd hashes an sdf::Path once, when it is made: its Arc'd text never changes a key's hash.
+ignore-interior-mutability = ["openusd::sdf::Path"]
