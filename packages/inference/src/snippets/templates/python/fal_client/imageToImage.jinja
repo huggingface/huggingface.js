@@ -14,7 +14,9 @@ result = fal_client.subscribe(
     "{{ providerModelId }}",
     arguments={
         "image_url": f"data:image/png;base64,{image_base_64}",
-        "prompt": "{{ inputs.asObj.parameters.prompt }}",
+        # Some fal endpoints (e.g. FLUX.2-dev) read a list of images from image_urls
+        "image_urls": [f"data:image/png;base64,{image_base_64}"],
+        "prompt": {{ inputs.asObj.parameters.prompt | tojson }},
     },
     with_logs=True,
     on_queue_update=on_queue_update,

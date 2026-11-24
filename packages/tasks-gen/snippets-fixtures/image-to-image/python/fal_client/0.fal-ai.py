@@ -13,6 +13,8 @@ result = fal_client.subscribe(
     "<fal-ai alias for black-forest-labs/FLUX.1-Kontext-dev>",
     arguments={
         "image_url": f"data:image/png;base64,{image_base_64}",
+        # Some fal endpoints (e.g. FLUX.2-dev) read a list of images from image_urls
+        "image_urls": [f"data:image/png;base64,{image_base_64}"],
         "prompt": "Turn the cat into a tiger.",
     },
     with_logs=True,
