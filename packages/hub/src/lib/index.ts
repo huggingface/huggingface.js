@@ -24,6 +24,7 @@ export * from "./list-models";
 export * from "./list-spaces";
 export * from "./list-collections";
 export * from "./model-info";
+export * from "./move-repo";
 export * from "./oauth-handle-redirect";
 export * from "./oauth-login-url";
 export * from "./parse-safetensors-metadata";
