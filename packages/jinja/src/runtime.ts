@@ -1754,10 +1754,6 @@ export class Interpreter {
 							}
 							const defaultValue = kwargs.get("default");
 							const mapped = operand.value.map((item) => {
-								if (!isAttributeContainer(item)) {
-									throw new Error("items in map must be an object");
-								}
-
 								const value = getAttributeValue(item, attr.value);
 								return value instanceof UndefinedValue ? (defaultValue ?? new UndefinedValue()) : value;
 							});
