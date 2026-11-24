@@ -125,6 +125,42 @@ describe("WebBlob range probe", () => {
 		expect(await blob.text()).toBe("0123456789");
 	});
 
+	it("fetches an empty resource after an unsatisfiable range probe", async () => {
+		let requests = 0;
+		const blob = await WebBlob.create(url, {
+			fetch: async () => {
+				requests++;
+				return requests === 1
+					? new Response("Range not satisfiable", { status: 416, headers: { "Content-Range": "bytes */0" } })
+					: new Response("", { headers: { "Content-Type": "application/json" } });
+			},
+		});
+		expect(blob.size).toBe(0);
+		expect(blob.type).toBe("application/json");
+		expect(await blob.text()).toBe("");
+		expect(requests).toBe(2);
+	});
+
+	it.each([403, 500])("rejects an HTTP %s probe instead of exposing its body", async (status) => {
+		await expect(
+			WebBlob.create(url, {
+				fetch: async () => new Response("error payload", { status }),
+			}),
+		).rejects.toThrow(`HTTP ${status}`);
+	});
+
+	it("rejects an error from the full-file fallback", async () => {
+		let requests = 0;
+		await expect(
+			WebBlob.create(url, {
+				fetch: async () =>
+					++requests === 1
+						? new Response("0", { status: 206, headers: { "Content-Range": "bytes 0-0/10" } })
+						: new Response("error payload", { status: 404 }),
+			}),
+		).rejects.toThrow("HTTP 404");
+	});
+
 	it("reuses the full response when ranges are ignored", async () => {
 		let requests = 0;
 		const blob = await WebBlob.create(url, {
