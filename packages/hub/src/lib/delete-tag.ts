@@ -1,0 +1,33 @@
+import { HUB_URL } from "../consts";
+import { createApiError } from "../error";
+import type { AccessToken, RepoDesignation } from "../types/public";
+import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
+
+export async function deleteTag(params: {
+	repo: RepoDesignation;
+	/**
+	 * The name of the tag to delete
+	 */
+	tag: string;
+	hubUrl?: string;
+	accessToken?: AccessToken;
+	fetch?: typeof fetch;
+}): Promise<void> {
+	const repoId = toRepoId(params.repo);
+	const res = await fetchWithServerWarnings(params.fetch)(
+		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/tag/${encodeURIComponent(params.tag)}`,
+		{
+			method: "DELETE",
+			headers: {
+				...(params.accessToken && {
+					Authorization: `Bearer ${params.accessToken}`,
+				}),
+			},
+		},
+	);
+
+	if (!res.ok) {
+		throw await createApiError(res);
+	}
+}
