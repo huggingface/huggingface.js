@@ -589,7 +589,29 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 
 /**
  * Add your new local app here.
- *
+ *pocketpal: {
+  prettyLabel: "PocketPal AI (口袋AI)",
+  docsUrl: "https://pocketpal.dev/",
+  mainTask: "text-generation",
+  // ✅ 只在 GGUF 文本生成模型页面显示按钮
+  displayOnModelPage: (model) => {
+    return isLlamaCppGgufModel(model);
+  },
+  snippet: (model) => {
+    return {
+      title: "在 PocketPal AI（口袋AI）手机App加载该模型",
+      setup: "✅ PocketPal AI 是安卓 / iOS 离线本地大模型App，支持直接从HuggingFace下载GGUF模型",
+      content: [
+        "1. 在安卓 / iPhone 安装 PocketPal AI",
+        "2. 打开App → 侧边菜单 → Models → 点击右下角 +",
+        `3. 选择 Add from HuggingFace，粘贴模型仓库ID：${model.id}`,
+        "4. 选择适合手机内存的量化版本（推荐 Q4_K_M），等待下载",
+        "5. 下载完成后点击 Load，即可离线推理"
+      ]
+    }
+  }
+},
+
  * This is open to new suggestions and awesome upcoming apps.
  *
  * /!\ IMPORTANT
