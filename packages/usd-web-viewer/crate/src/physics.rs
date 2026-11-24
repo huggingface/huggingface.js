@@ -6,17 +6,16 @@
 
 use std::collections::HashMap;
 
-use openusd::gf::{self, Mat4d, Quatf, Vec3f};
+use openusd::gf::{Mat4d, Quatf, Vec3f};
 use openusd::sdf;
 use openusd::usd::{self, Stage};
 use openusd::vt::Value;
-use openusd_schemas::SchemaError;
 use openusd_schemas::geom::XformCache;
 use openusd_schemas::physics::{self as schema, ParseOptions, desc};
 use openusd_schemas::shade::BindingCache;
 use serde::Serialize;
 
-use crate::extract::{bound_material, token_attr};
+use crate::extract::{Warning, bound_material, token_attr};
 use crate::ser::finite;
 
 #[derive(Default, Serialize)]
@@ -263,6 +262,8 @@ pub struct Reader<'a> {
     /// Prim -> the index of the nearest rigid body at or above it.
     body_of: HashMap<sdf::Path, Option<usize>>,
     bindings: BindingCache,
+    /// `Physics…Joint` prims, read in [`Reader::finish`] once every body is known.
+    joints: Vec<sdf::Path>,
     physics: Physics,
     labels: Vec<Label>,
 }
@@ -280,6 +281,7 @@ impl<'a> Reader<'a> {
             meters_per_unit,
             body_of: HashMap::new(),
             bindings: BindingCache::default(),
+            joints: Vec::new(),
             physics: Physics::default(),
             labels: Vec::new(),
         })
@@ -315,11 +317,17 @@ impl<'a> Reader<'a> {
                     value,
                     source: "authored",
                 }),
-                center_of_mass: vec3(prim, "physics:centerOfMass"),
-                diagonal_inertia: vec3(prim, "physics:diagonalInertia").map(|v| {
-                    v.map(|c| c as f64 * self.kilograms_per_unit * self.meters_per_unit.powi(2))
-                }),
-                principal_axes: quat(prim, "physics:principalAxes"),
+                // The schema's fallbacks for these mean unset: a center of
+                // mass at -inf, a zero inertia and zero principal axes.
+                center_of_mass: vec3(prim, "physics:centerOfMass")
+                    .filter(|v| v.iter().all(|c| c.is_finite())),
+                diagonal_inertia: vec3(prim, "physics:diagonalInertia")
+                    .filter(|v| v.iter().any(|&c| c != 0.0))
+                    .map(|v| {
+                        v.map(|c| c as f64 * self.kilograms_per_unit * self.meters_per_unit.powi(2))
+                    }),
+                principal_axes: quat(prim, "physics:principalAxes")
+                    .filter(|q| q.iter().any(|&c| c != 0.0)),
                 world: world(xforms, prim),
                 colliders: Vec::new(),
                 attached: Vec::new(),
@@ -396,24 +404,46 @@ impl<'a> Reader<'a> {
                 values,
             });
         }
+
+        if let Some(ty) = ty
+            && ty.starts_with("Physics")
+            && ty.ends_with("Joint")
+        {
+            self.joints.push(path.clone());
+        }
         Ok(())
     }
 
-    /// The physics, with the joints upstream's parse reports, each body's mass
-    /// completed from its colliders and its fixed attachments listed, and the labels.
-    pub fn finish(mut self) -> openusd::Result<(Physics, Vec<Label>)> {
-        let options = ParseOptions {
-            include: vec![sdf::Path::abs_root()],
-            ..ParseOptions::default()
-        };
-        let parsed = schema::parse(self.stage, &options).map_err(|e| match e {
-            SchemaError::Core(e) => e,
-            e => openusd::Error::Convert(Box::new(e)),
-        })?;
+    /// The physics, with each joint as upstream's parse reads it, each body's
+    /// mass completed from its colliders and its fixed attachments listed, and
+    /// the labels. A joint that fails to read is a warning, not a failed load.
+    pub fn finish(mut self, warnings: &mut Vec<Warning>) -> (Physics, Vec<Label>) {
         let mut xforms = XformCache::new(None);
-        for joint in &parsed.joints {
-            let joint = self.joint(joint, &mut xforms)?;
-            self.physics.joints.push(joint);
+        for path in std::mem::take(&mut self.joints) {
+            // One joint at a time: a broken prim elsewhere fails nothing here.
+            let options = ParseOptions {
+                include: vec![path.clone()],
+                ..ParseOptions::default()
+            };
+            let read = schema::parse(self.stage, &options)
+                .map_err(|e| e.to_string())
+                .and_then(|parsed| match parsed.joints.first() {
+                    Some(joint) => self
+                        .joint(joint, &mut xforms)
+                        .map(Some)
+                        .map_err(|e| e.to_string()),
+                    // A type UsdPhysics does not define, which C++ skips too.
+                    None => Ok(None),
+                });
+            match read {
+                Ok(Some(joint)) => self.physics.joints.push(joint),
+                Ok(None) => {}
+                Err(message) => warnings.push(Warning {
+                    code: "joint-unreadable",
+                    message: format!("joint not read: {message}"),
+                    path: Some(path.as_str().to_owned()),
+                }),
+            }
         }
         let physics = &mut self.physics;
         let collider_mass: HashMap<&str, f64> = physics
@@ -449,7 +479,7 @@ impl<'a> Reader<'a> {
                 physics.bodies[i].attached.push(b1.clone());
             }
         }
-        Ok((self.physics, self.labels))
+        (self.physics, self.labels)
     }
 
     fn mass(&self, prim: &usd::Prim) -> Option<f64> {
@@ -465,11 +495,18 @@ impl<'a> Reader<'a> {
             .map(|d| d as f64 * self.kilograms_per_unit / self.meters_per_unit.powi(3))
     }
 
+    /// The rigid body nearest at or above `target`, as read so far.
+    fn body_above(&self, target: &sdf::Path) -> Option<String> {
+        std::iter::successors(Some(target.clone()), |p| p.parent())
+            .find_map(|p| self.body_of.get(&p).copied().flatten())
+            .map(|b| self.physics.bodies[b].path.clone())
+    }
+
     /// A drive in SI units: lengths scale by metersPerUnit, masses by
     /// kilogramsPerUnit; angles stay in degrees.
     fn drive(&self, axis: &str, drive: &desc::Drive) -> Drive {
         let (kg, m) = (self.kilograms_per_unit, self.meters_per_unit);
-        let length = if matches!(axis, "linear" | "transX" | "transY" | "transZ") {
+        let length = if matches!(axis, "linear" | "distance" | "transX" | "transY" | "transZ") {
             m
         } else {
             1.0
@@ -508,19 +545,22 @@ impl<'a> Reader<'a> {
             .type_name()?
             .map(|t| t.as_str().to_owned())
             .unwrap_or_default();
-        // Each anchor placed on its body (the world for none), without scale.
-        let mut frame = |body: &Option<sdf::Path>,
-                         pos: Vec3f,
-                         rot: Quatf|
-         -> openusd::Result<[f64; 16]> {
-            let body = match body {
-                Some(path) => Mat4d(world(xforms, &self.stage.prim(path)?)).remove_scale_shear(),
-                None => Mat4d::IDENTITY,
+        // Each anchor as authored on its target, placed in the world: the
+        // descriptor's anchors are in body frames, which drop a target's own
+        // scale and turn under a scaled body.
+        let mut frame = |target: &Option<sdf::Path>, n: u8| -> openusd::Result<[f64; 16]> {
+            let world = match target {
+                Some(path) => world(xforms, &self.stage.prim(path)?),
+                None => Mat4d::IDENTITY.0,
             };
-            Ok((Mat4d::from_trs(pos, rot, gf::vec3f(1.0, 1.0, 1.0)) * body).0)
+            Ok(rigid_frame(
+                &world,
+                vec3(&prim, &format!("physics:localPos{n}")).unwrap_or([0.0; 3]),
+                quat(&prim, &format!("physics:localRot{n}")).unwrap_or([1.0, 0.0, 0.0, 0.0]),
+            ))
         };
-        let frame0 = frame(&joint.body0, joint.local_pos0, joint.local_rot0)?;
-        let frame1 = frame(&joint.body1, joint.local_pos1, joint.local_rot1)?;
+        let frame0 = frame(&joint.rel0, 0)?;
+        let frame1 = frame(&joint.rel1, 1)?;
         // Translation limits and positions in meters; rotations stay in degrees.
         let m = self.meters_per_unit;
         let meters = |v: Option<f32>| v.map(|v| (v as f64 * m) as f32);
@@ -544,18 +584,15 @@ impl<'a> Reader<'a> {
                     upper: meters(upper),
                 }
             }
+            // Each side on its own: negative is none, as is past the sentinel.
             desc::JointKind::Spherical { axis, limit } => Limits::Spherical {
                 axis: axis.as_token().to_owned(),
-                cone0: limit.enabled.then_some(limit.lower),
-                cone1: limit.enabled.then_some(limit.upper),
+                cone0: non_negative(limit.lower),
+                cone1: non_negative(limit.upper),
             },
-            desc::JointKind::Distance {
-                min_enabled,
-                max_enabled,
-                limit,
-            } => Limits::Distance {
-                min: meters(min_enabled.then_some(limit.lower)),
-                max: meters(max_enabled.then_some(limit.upper)),
+            desc::JointKind::Distance { limit, .. } => Limits::Distance {
+                min: meters(non_negative(limit.lower)),
+                max: meters(non_negative(limit.upper)),
             },
             desc::JointKind::Fixed => Limits::Fixed,
             desc::JointKind::D6 {
@@ -633,8 +670,13 @@ impl<'a> Reader<'a> {
             display_name: prim.metadata::<String>("displayName").ok().flatten(),
             target0: path(&joint.rel0),
             target1: path(&joint.rel1),
-            body0: path(&joint.body0).or_else(|| path(&joint.rel0)),
-            body1: path(&joint.body1).or_else(|| path(&joint.rel1)),
+            // Upstream finds no body for a target that composes nothing.
+            body0: path(&joint.body0)
+                .or_else(|| joint.rel0.as_ref().and_then(|t| self.body_above(t)))
+                .or_else(|| path(&joint.rel0)),
+            body1: path(&joint.body1)
+                .or_else(|| joint.rel1.as_ref().and_then(|t| self.body_above(t)))
+                .or_else(|| path(&joint.rel1)),
             frame0,
             frame1,
             rest,
@@ -646,6 +688,11 @@ impl<'a> Reader<'a> {
 
 /// Each side of `limit` that bounds the joint: finite and inside the schema's
 /// sentinel, past which a limit means none.
+/// A distance or cone limit that is one: not negative and inside the sentinel.
+fn non_negative(v: f32) -> Option<f32> {
+    (0.0..desc::Limit::SENTINEL).contains(&v).then_some(v)
+}
+
 fn bounds(limit: &desc::Limit) -> (Option<f32>, Option<f32>) {
     let sentinel = desc::Limit::SENTINEL;
     (
@@ -707,6 +754,58 @@ fn axis_index(axis: &str) -> usize {
         "Z" => 2,
         _ => 0,
     }
+}
+
+/// The world matrix of a joint frame (position and rotation in a body whose
+/// local-to-world is `world`), orthonormalized so lengths along it are in
+/// stage units whatever the body's scale. Row-vector convention, row-major.
+fn rigid_frame(world: &[f64; 16], pos: [f32; 3], rot: [f32; 4]) -> [f64; 16] {
+    let [w, x, y, z] = rot.map(|v| v as f64);
+    let n = (w * w + x * x + y * y + z * z)
+        .sqrt()
+        .max(f64::MIN_POSITIVE);
+    let [w, x, y, z] = [w / n, x / n, y / n, z / n];
+    // The frame's axes in the body: the rotated basis vectors.
+    let local = [
+        [
+            1.0 - 2.0 * (y * y + z * z),
+            2.0 * (x * y + w * z),
+            2.0 * (x * z - w * y),
+        ],
+        [
+            2.0 * (x * y - w * z),
+            1.0 - 2.0 * (x * x + z * z),
+            2.0 * (y * z + w * x),
+        ],
+        [
+            2.0 * (x * z + w * y),
+            2.0 * (y * z - w * x),
+            1.0 - 2.0 * (x * x + y * y),
+        ],
+    ];
+    let dir = |d: [f64; 3]| -> [f64; 3] {
+        [0, 1, 2].map(|k| d[0] * world[k] + d[1] * world[4 + k] + d[2] * world[8 + k])
+    };
+    let p = pos.map(|v| v as f64);
+    let origin = [0, 1, 2].map(|k| dir(p)[k] + world[12 + k]);
+    // Gram-Schmidt: x, then y without its x part, then z = x × y.
+    let unit = |v: [f64; 3]| {
+        let l = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
+        if l > 0.0 { v.map(|c| c / l) } else { v }
+    };
+    let dot = |a: [f64; 3], b: [f64; 3]| a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    let ax = unit(dir(local[0]));
+    let y0 = dir(local[1]);
+    let ay = unit([0, 1, 2].map(|k| y0[k] - dot(y0, ax) * ax[k]));
+    let az = [
+        ax[1] * ay[2] - ax[2] * ay[1],
+        ax[2] * ay[0] - ax[0] * ay[2],
+        ax[0] * ay[1] - ax[1] * ay[0],
+    ];
+    [
+        ax[0], ax[1], ax[2], 0.0, ay[0], ay[1], ay[2], 0.0, az[0], az[1], az[2], 0.0, origin[0],
+        origin[1], origin[2], 1.0,
+    ]
 }
 
 /// The angle in degrees, about axis `k` of `frame0`, from frame0 to frame1.

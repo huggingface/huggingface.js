@@ -46,8 +46,8 @@ pub struct Scene {
 /// Something the viewer could not show faithfully.
 #[derive(Serialize)]
 pub struct Warning {
-    /// `prim-unsupported`, `material-fallback`, `instance-limit` or
-    /// `composition` (the page adds layer, texture, `triangle-limit` and
+    /// `prim-unsupported`, `material-fallback`, `instance-limit`,
+    /// `joint-unreadable` or `composition` (the page adds layer, texture, `triangle-limit` and
     /// `nothing-drawable` warnings).
     pub code: &'static str,
     pub message: String,
@@ -643,7 +643,7 @@ pub fn plan(stage: &Stage, max_instances: usize) -> openusd::Result<Scene> {
         }
     }
     scene.bounds = bounds.filter(|_| !scene.instances.is_empty());
-    (scene.physics, scene.labels) = physics.finish()?;
+    (scene.physics, scene.labels) = physics.finish(&mut scene.warnings);
     scene.variant_selections = physics::variant_selections(stage)?;
     if let Some(path) = over_limit.or(truncated) {
         scene.warnings.push(Warning {

@@ -84,7 +84,8 @@ export type WarningCode =
 	| "composition"
 	| "texture-failed"
 	| "triangle-limit"
-	| "instance-limit";
+	| "instance-limit"
+	| "joint-unreadable";
 
 export interface LoadWarning {
 	readonly code: WarningCode;
@@ -252,7 +253,7 @@ export type UsdJoint = UsdJointKind & {
  * acceleration drive, stiffness is in 1/s², damping in 1/s and `maxForce` in m/s² or °/s².
  */
 export interface UsdJointDrive {
-	readonly axis: "linear" | "angular" | "transX" | "transY" | "transZ" | "rotX" | "rotY" | "rotZ";
+	readonly axis: "linear" | "angular" | "distance" | "transX" | "transY" | "transZ" | "rotX" | "rotY" | "rotZ";
 	/** `force` or `acceleration`. */
 	readonly type: string | null;
 	readonly targetPosition: number | null;

@@ -292,3 +292,58 @@ fn dump() {
     let root = std::env::var("USD_PHYSICS_DUMP").expect("USD_PHYSICS_DUMP");
     println!("{}", serde_json::to_string_pretty(&physics(&root)).unwrap());
 }
+
+/// What `usda`, as the only layer, reports for physics, and its scene.
+fn compose_inline(usda: &str) -> usd_wasm::Scene {
+    common::compose("/inline.usda", |p| {
+        (p == "/inline.usda").then(|| usda.as_bytes().to_vec())
+    })
+    .unwrap_or_else(|e| panic!("{e}"))
+    .scene
+}
+
+#[test]
+fn a_joint_on_a_part_of_a_scaled_body_turns_with_the_part() {
+    // The part is turned 45° inside a body stretched 2x along X: in the world
+    // it is turned atan(1/2) = 26.565°, and that is where the hinge rests.
+    let scene = compose_inline(
+        r#"#usda 1.0
+def Xform "Base" (prepend apiSchemas = ["PhysicsRigidBodyAPI"]) {}
+def Xform "Body" (prepend apiSchemas = ["PhysicsRigidBodyAPI"])
+{
+    double3 xformOp:scale = (2, 1, 1)
+    uniform token[] xformOpOrder = ["xformOp:scale"]
+    def Xform "Part"
+    {
+        double3 xformOp:rotateXYZ = (0, 0, 45)
+        uniform token[] xformOpOrder = ["xformOp:rotateXYZ"]
+    }
+}
+def PhysicsRevoluteJoint "Hinge"
+{
+    uniform token physics:axis = "Z"
+    rel physics:body0 = </Base>
+    rel physics:body1 = </Body/Part>
+}
+"#,
+    );
+    let hinge = &scene.physics.joints[0];
+    assert_eq!(hinge.body1.as_deref(), Some("/Body"));
+    assert!((hinge.rest - 26.565).abs() < 1e-3, "{}", hinge.rest);
+}
+
+#[test]
+fn a_broken_rigid_body_does_not_fail_the_load() {
+    // A body placed by inverting a singular matrix has no transform; the cube still draws.
+    let scene = compose_inline(
+        r#"#usda 1.0
+def Cube "Visible" {}
+def Xform "Flat" (prepend apiSchemas = ["PhysicsRigidBodyAPI"])
+{
+    matrix4d xformOp:transform = ( (0, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )
+    uniform token[] xformOpOrder = ["!invert!xformOp:transform"]
+}
+"#,
+    );
+    assert_eq!(scene.instances.len(), 1);
+}
