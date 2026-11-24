@@ -147,14 +147,15 @@ fn joints_report_limits_by_kind() {
         dofs.iter()
             .map(|d| d["dof"].as_str().unwrap())
             .collect::<Vec<_>>(),
-        ["rotX", "transY", "rotY"]
+        ["transY", "rotX", "rotY"],
+        "in UsdPhysics' degree-of-freedom order"
     );
-    assert!(close(&dofs[0]["low"], -10.0) && close(&dofs[0]["high"], 10.0));
     assert!(
-        close(&dofs[1]["low"], 0.01) && close(&dofs[1]["high"], -0.01),
+        close(&dofs[0]["low"], 0.01) && close(&dofs[0]["high"], -0.01),
         "{}",
-        dofs[1]
+        dofs[0]
     );
+    assert!(close(&dofs[1]["low"], -10.0) && close(&dofs[1]["high"], 10.0));
     assert!(close(&dofs[2]["low"], -5.0) && dofs[2]["high"].is_null());
     // A prismatic mimic's offset is in meters, whatever its instance is named.
     let slide_follower = &find(joints, "/Cabinet/Joints/SlideFollower")["mimic"];
@@ -164,6 +165,11 @@ fn joints_report_limits_by_kind() {
     assert_eq!(
         follower["mimic"],
         json!({ "reference": "/Cabinet/Joints/Hinge", "gearing": -1.0, "offset": 0.0 })
+    );
+    // A limit past UsdPhysics' sentinel is none.
+    assert!(
+        close(&follower["lower"], -45.0) && follower["upper"].is_null(),
+        "{follower}"
     );
 }
 
@@ -237,7 +243,8 @@ fn drives_and_articulation_roots_are_in_si_units() {
     ] {
         assert!(close(&slide[key], expected), "{key}: {}", slide[key]);
     }
-    assert_eq!(slide["targetVelocity"], Value::Null);
+    // Not authored: the schema's fallback.
+    assert!(close(&slide["targetVelocity"], 0.0));
     // An angular drive keeps degrees; its stiffness is in N·m per degree.
     let hinge = &find(joints, "/Cabinet/Joints/Hinge")["drives"][0];
     assert!(close(&hinge["targetPosition"], 45.0));

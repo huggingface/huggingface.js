@@ -6,14 +6,17 @@
 
 use std::collections::HashMap;
 
-use openusd::gf::{Matrix4d, Quatf, Vec3f};
-use openusd::sdf::{self, Value};
+use openusd::gf::{self, Mat4d, Quatf, Vec3f};
+use openusd::sdf;
 use openusd::usd::{self, Stage};
+use openusd::vt::Value;
+use openusd_schemas::SchemaError;
 use openusd_schemas::geom::XformCache;
-use openusd_schemas::shade::MaterialBindingAPI;
+use openusd_schemas::physics::{self as schema, ParseOptions, desc};
+use openusd_schemas::shade::BindingCache;
 use serde::Serialize;
 
-use crate::extract::token_attr;
+use crate::extract::{bound_material, token_attr};
 use crate::ser::finite;
 
 #[derive(Default, Serialize)]
@@ -132,7 +135,8 @@ pub struct Joint {
     pub target0: Option<String>,
     pub target1: Option<String>,
     /// The rigid bodies it connects: the nearest rigid body at or above each
-    /// target, else the target itself; `None` is the world.
+    /// target, else the topmost collider above it, else the target itself;
+    /// `None` is the world.
     pub body0: Option<String>,
     pub body1: Option<String>,
     /// The joint frame on each target, local-to-world in stage space with the
@@ -151,7 +155,8 @@ pub struct Joint {
     pub drives: Vec<Drive>,
 }
 
-/// A `PhysicsDriveAPI:<axis>` instance, in SI units: positions in meters or
+/// A `PhysicsDriveAPI:<axis>` instance, with the schema's fallbacks for what
+/// is not authored and `None` for an infinite value, in SI units: positions in meters or
 /// degrees; for a force drive (the default), forces in newtons and torques in
 /// newton-meters (per meter or degree for stiffness, per meter or degree per
 /// second for damping); for an acceleration drive, gains in 1/s² and 1/s and
@@ -257,6 +262,7 @@ pub struct Reader<'a> {
     meters_per_unit: f64,
     /// Prim -> the index of the nearest rigid body at or above it.
     body_of: HashMap<sdf::Path, Option<usize>>,
+    bindings: BindingCache,
     physics: Physics,
     labels: Vec<Label>,
 }
@@ -273,6 +279,7 @@ impl<'a> Reader<'a> {
             kilograms_per_unit,
             meters_per_unit,
             body_of: HashMap::new(),
+            bindings: BindingCache::default(),
             physics: Physics::default(),
             labels: Vec::new(),
         })
@@ -332,8 +339,7 @@ impl<'a> Reader<'a> {
         }
 
         if has("PhysicsCollisionAPI") {
-            let material = MaterialBindingAPI::from_prim_unchecked(prim.clone())
-                .compute_bound_material("physics")
+            let material = bound_material(prim, "physics", &mut self.bindings)
                 .ok()
                 .flatten()
                 .map(|p| p.as_str().to_owned());
@@ -390,29 +396,24 @@ impl<'a> Reader<'a> {
                 values,
             });
         }
-
-        if let Some(ty) = ty
-            && ty.starts_with("Physics")
-            && ty.ends_with("Joint")
-        {
-            let joint = self.joint(prim, ty, &schemas, xforms)?;
-            self.physics.joints.push(joint);
-        }
         Ok(())
     }
 
-    /// The physics, with each body's mass completed from its colliders and
-    /// its fixed attachments listed, and the labels.
-    pub fn finish(mut self) -> (Physics, Vec<Label>) {
-        // A joint may come before the bodies it names, so its targets resolve now.
-        let resolved: Vec<_> = self
-            .physics
-            .joints
-            .iter()
-            .map(|j| (self.resolve(&j.body0), self.resolve(&j.body1)))
-            .collect();
-        for (joint, (body0, body1)) in self.physics.joints.iter_mut().zip(resolved) {
-            (joint.body0, joint.body1) = (body0, body1);
+    /// The physics, with the joints upstream's parse reports, each body's mass
+    /// completed from its colliders and its fixed attachments listed, and the labels.
+    pub fn finish(mut self) -> openusd::Result<(Physics, Vec<Label>)> {
+        let options = ParseOptions {
+            include: vec![sdf::Path::abs_root()],
+            ..ParseOptions::default()
+        };
+        let parsed = schema::parse(self.stage, &options).map_err(|e| match e {
+            SchemaError::Core(e) => e,
+            e => openusd::Error::Convert(Box::new(e)),
+        })?;
+        let mut xforms = XformCache::new(None);
+        for joint in &parsed.joints {
+            let joint = self.joint(joint, &mut xforms)?;
+            self.physics.joints.push(joint);
         }
         let physics = &mut self.physics;
         let collider_mass: HashMap<&str, f64> = physics
@@ -448,7 +449,7 @@ impl<'a> Reader<'a> {
                 physics.bodies[i].attached.push(b1.clone());
             }
         }
-        (self.physics, self.labels)
+        Ok((self.physics, self.labels))
     }
 
     fn mass(&self, prim: &usd::Prim) -> Option<f64> {
@@ -464,25 +465,9 @@ impl<'a> Reader<'a> {
             .map(|d| d as f64 * self.kilograms_per_unit / self.meters_per_unit.powi(3))
     }
 
-    /// The rigid body a `physics:body` target belongs to: the nearest at or
-    /// above it, else the target itself.
-    fn resolve(&self, target: &Option<String>) -> Option<String> {
-        let target = target.as_ref()?;
-        let Ok(path) = sdf::Path::new(target) else {
-            return Some(target.clone());
-        };
-        Some(
-            std::iter::successors(Some(path), |p| p.parent())
-                .find_map(|p| self.body_of.get(&p).copied().flatten())
-                .map_or_else(|| target.clone(), |b| self.physics.bodies[b].path.clone()),
-        )
-    }
-
     /// A drive in SI units: lengths scale by metersPerUnit, masses by
     /// kilogramsPerUnit; angles stay in degrees.
-    fn drive(&self, prim: &usd::Prim, axis: &str) -> Drive {
-        let attr = |name: &str| float(prim, &format!("drive:{axis}:physics:{name}")).map(f64::from);
-        let drive_type = token_attr(prim, &format!("drive:{axis}:physics:type"));
+    fn drive(&self, axis: &str, drive: &desc::Drive) -> Drive {
         let (kg, m) = (self.kilograms_per_unit, self.meters_per_unit);
         let length = if matches!(axis, "linear" | "transX" | "transY" | "transZ") {
             m
@@ -493,96 +478,113 @@ impl<'a> Reader<'a> {
         // degree (kg·m²/s² per degree), and its limit a force or torque. An
         // acceleration drive's gains carry no mass or length, and its limit is an
         // acceleration (m/s² or °/s²).
-        let (gain, force) = if drive_type.as_deref() == Some("acceleration") {
+        let (gain, force) = if drive.acceleration {
             (1.0, length)
         } else {
             (kg * m * m / length / length, kg * m * m / length)
         };
+        let scaled = |v: f32, by: f64| v.is_finite().then_some(v as f64 * by);
         Drive {
             axis: axis.to_owned(),
-            drive_type,
-            target_position: attr("targetPosition").map(|v| v * length),
-            target_velocity: attr("targetVelocity").map(|v| v * length),
-            stiffness: attr("stiffness").map(|v| v * gain),
-            damping: attr("damping").map(|v| v * gain),
-            max_force: attr("maxForce").map(|v| v * force),
+            drive_type: Some(
+                if drive.acceleration {
+                    "acceleration"
+                } else {
+                    "force"
+                }
+                .to_owned(),
+            ),
+            target_position: scaled(drive.target_position, length),
+            target_velocity: scaled(drive.target_velocity, length),
+            stiffness: scaled(drive.stiffness, gain),
+            damping: scaled(drive.damping, gain),
+            max_force: scaled(drive.force_limit, force),
         }
     }
 
-    fn joint(
-        &self,
-        prim: &usd::Prim,
-        ty: &str,
-        schemas: &[openusd::tf::Token],
-        xforms: &mut XformCache,
-    ) -> openusd::Result<Joint> {
-        let target = |name: &str| -> openusd::Result<Option<sdf::Path>> {
-            Ok(prim.relationship(name).targets()?.into_iter().next())
+    fn joint(&self, joint: &desc::Joint, xforms: &mut XformCache) -> openusd::Result<Joint> {
+        let prim = self.stage.prim(&joint.path)?;
+        let ty = prim
+            .type_name()?
+            .map(|t| t.as_str().to_owned())
+            .unwrap_or_default();
+        // Each anchor placed on its body (the world for none), without scale.
+        let mut frame = |body: &Option<sdf::Path>,
+                         pos: Vec3f,
+                         rot: Quatf|
+         -> openusd::Result<[f64; 16]> {
+            let body = match body {
+                Some(path) => Mat4d(world(xforms, &self.stage.prim(path)?)).remove_scale_shear(),
+                None => Mat4d::IDENTITY,
+            };
+            Ok((Mat4d::from_trs(pos, rot, gf::vec3f(1.0, 1.0, 1.0)) * body).0)
         };
-        let target0 = target("physics:body0")?;
-        let target1 = target("physics:body1")?;
-        let mut world_of = |target: &Option<sdf::Path>| -> openusd::Result<[f64; 16]> {
-            Ok(match target {
-                Some(path) => world(xforms, &self.stage.prim(path)?),
-                None => Matrix4d::IDENTITY.0,
-            })
-        };
-        let frame0 = rigid_frame(
-            &world_of(&target0)?,
-            vec3(prim, "physics:localPos0").unwrap_or([0.0; 3]),
-            quat(prim, "physics:localRot0").unwrap_or([1.0, 0.0, 0.0, 0.0]),
-        );
-        let frame1 = rigid_frame(
-            &world_of(&target1)?,
-            vec3(prim, "physics:localPos1").unwrap_or([0.0; 3]),
-            quat(prim, "physics:localRot1").unwrap_or([1.0, 0.0, 0.0, 0.0]),
-        );
-        // The schema's tokens; anything else falls back to the schema's default, X.
-        let axis = || match token_attr(prim, "physics:axis").as_deref() {
-            Some(axis @ ("Y" | "Z")) => axis.to_owned(),
-            _ => "X".to_owned(),
-        };
+        let frame0 = frame(&joint.body0, joint.local_pos0, joint.local_rot0)?;
+        let frame1 = frame(&joint.body1, joint.local_pos1, joint.local_rot1)?;
         // Translation limits and positions in meters; rotations stay in degrees.
         let m = self.meters_per_unit;
         let meters = |v: Option<f32>| v.map(|v| (v as f64 * m) as f32);
-        let limits = match ty {
-            "PhysicsRevoluteJoint" => Limits::Revolute {
-                axis: axis(),
-                lower: float(prim, "physics:lowerLimit"),
-                upper: float(prim, "physics:upperLimit"),
+        let mut drives = Vec::new();
+        let limits = match &joint.kind {
+            desc::JointKind::Revolute { axis, limit, drive } => {
+                drives.extend(drive.map(|d| self.drive("angular", &d)));
+                let (lower, upper) = bounds(limit);
+                Limits::Revolute {
+                    axis: axis.as_token().to_owned(),
+                    lower,
+                    upper,
+                }
+            }
+            desc::JointKind::Prismatic { axis, limit, drive } => {
+                drives.extend(drive.map(|d| self.drive("linear", &d)));
+                let (lower, upper) = bounds(limit);
+                Limits::Prismatic {
+                    axis: axis.as_token().to_owned(),
+                    lower: meters(lower),
+                    upper: meters(upper),
+                }
+            }
+            desc::JointKind::Spherical { axis, limit } => Limits::Spherical {
+                axis: axis.as_token().to_owned(),
+                cone0: limit.enabled.then_some(limit.lower),
+                cone1: limit.enabled.then_some(limit.upper),
             },
-            "PhysicsPrismaticJoint" => Limits::Prismatic {
-                axis: axis(),
-                lower: meters(float(prim, "physics:lowerLimit")),
-                upper: meters(float(prim, "physics:upperLimit")),
+            desc::JointKind::Distance {
+                min_enabled,
+                max_enabled,
+                limit,
+            } => Limits::Distance {
+                min: meters(min_enabled.then_some(limit.lower)),
+                max: meters(max_enabled.then_some(limit.upper)),
             },
-            "PhysicsSphericalJoint" => Limits::Spherical {
-                axis: axis(),
-                cone0: float(prim, "physics:coneAngle0Limit"),
-                cone1: float(prim, "physics:coneAngle1Limit"),
-            },
-            "PhysicsDistanceJoint" => Limits::Distance {
-                min: meters(float(prim, "physics:minDistance")),
-                max: meters(float(prim, "physics:maxDistance")),
-            },
-            "PhysicsFixedJoint" => Limits::Fixed,
-            _ => Limits::Generic {
-                dofs: prim
-                    .api_schema_instance_names("PhysicsLimitAPI")?
-                    .into_iter()
-                    .filter_map(|dof| {
-                        let dof = dof.as_str();
-                        let scale = |v| if dof.starts_with("rot") { v } else { meters(v) };
-                        let low = scale(float(prim, &format!("limit:{dof}:physics:low")));
-                        let high = scale(float(prim, &format!("limit:{dof}:physics:high")));
-                        (low.is_some() || high.is_some()).then(|| Dof {
-                            dof: dof.to_owned(),
-                            low,
-                            high,
+            desc::JointKind::Fixed => Limits::Fixed,
+            desc::JointKind::D6 {
+                limits,
+                drives: dof_drives,
+            } => {
+                drives.extend(
+                    dof_drives
+                        .iter()
+                        .map(|(dof, d)| self.drive(dof.as_token(), d)),
+                );
+                Limits::Generic {
+                    dofs: limits
+                        .iter()
+                        .filter(|(_, limit)| limit.enabled)
+                        .map(|(dof, limit)| {
+                            let (low, high) = bounds(limit);
+                            let rotation = dof.as_token().starts_with("rot");
+                            Dof {
+                                dof: dof.as_token().to_owned(),
+                                low: if rotation { low } else { meters(low) },
+                                high: if rotation { high } else { meters(high) },
+                            }
                         })
-                    })
-                    .collect(),
-            },
+                        .collect(),
+                }
+            }
+            // Parse reports custom joints only for the types its options name, and ours name none.
+            desc::JointKind::Custom => Limits::Generic { dofs: Vec::new() },
         };
         let rest = match &limits {
             Limits::Revolute { axis, .. } => rest_angle(&frame0, &frame1, axis_index(axis)),
@@ -595,9 +597,14 @@ impl<'a> Reader<'a> {
             }
             _ => 0.0,
         };
-        let mimic = schemas
+        let mimic = prim
+            .api_schemas()?
             .iter()
-            .find_map(|s| s.as_str().strip_prefix("PhysxMimicJointAPI:"))
+            .find_map(|s| {
+                s.as_str()
+                    .strip_prefix("PhysxMimicJointAPI:")
+                    .map(str::to_owned)
+            })
             .and_then(|dof| {
                 let reference = prim
                     .relationship(format!("physxMimicJoint:{dof}:referenceJoint"))
@@ -607,39 +614,27 @@ impl<'a> Reader<'a> {
                     .next()?;
                 Some(Mimic {
                     reference: reference.as_str().to_owned(),
-                    gearing: float(prim, &format!("physxMimicJoint:{dof}:gearing")).unwrap_or(1.0),
+                    gearing: float(&prim, &format!("physxMimicJoint:{dof}:gearing")).unwrap_or(1.0),
                     // In the joint's own units: meters for a prismatic joint, whatever the instance is named.
-                    offset: float(prim, &format!("physxMimicJoint:{dof}:offset"))
-                        .map(|v| match ty {
+                    offset: float(&prim, &format!("physxMimicJoint:{dof}:offset"))
+                        .map(|v| match ty.as_str() {
                             "PhysicsPrismaticJoint" => (v as f64 * m) as f32,
                             _ => v,
                         })
                         .unwrap_or(0.0),
                 })
             });
-        let target0 = target0.map(|t| t.as_str().to_owned());
-        let target1 = target1.map(|t| t.as_str().to_owned());
-        let drives = prim
-            .api_schema_instance_names("PhysicsDriveAPI")?
-            .into_iter()
-            .map(|axis| self.drive(prim, axis.as_str()))
-            .collect();
+        let path = |p: &Option<sdf::Path>| p.as_ref().map(|p| p.as_str().to_owned());
         Ok(Joint {
-            path: prim.path().as_str().to_owned(),
-            type_name: ty.to_owned(),
+            path: joint.path.as_str().to_owned(),
+            type_name: ty,
             limits,
-            enabled: prim
-                .attribute("physics:jointEnabled")
-                .get::<bool>()
-                .ok()
-                .flatten()
-                .unwrap_or(true),
-            display_name: prim.get_metadata::<String>("displayName").ok().flatten(),
-            // The targets for now: [`Reader::finish`] resolves them to bodies once every prim is read.
-            body0: target0.clone(),
-            body1: target1.clone(),
-            target0,
-            target1,
+            enabled: joint.enabled,
+            display_name: prim.metadata::<String>("displayName").ok().flatten(),
+            target0: path(&joint.rel0),
+            target1: path(&joint.rel1),
+            body0: path(&joint.body0).or_else(|| path(&joint.rel0)),
+            body1: path(&joint.body1).or_else(|| path(&joint.rel1)),
             frame0,
             frame1,
             rest,
@@ -647,6 +642,16 @@ impl<'a> Reader<'a> {
             drives,
         })
     }
+}
+
+/// Each side of `limit` that bounds the joint: finite and inside the schema's
+/// sentinel, past which a limit means none.
+fn bounds(limit: &desc::Limit) -> (Option<f32>, Option<f32>) {
+    let sentinel = desc::Limit::SENTINEL;
+    (
+        (limit.lower.is_finite() && limit.lower > -sentinel).then_some(limit.lower),
+        (limit.upper.is_finite() && limit.upper < sentinel).then_some(limit.upper),
+    )
 }
 
 /// The variant selections on the stage's default prim, where an asset offers
@@ -659,7 +664,7 @@ pub fn variant_selections(stage: &Stage) -> openusd::Result<Vec<VariantSelection
     let prim = stage.prim(&path)?;
     Ok(prim
         .variant_sets()
-        .get_all_variant_selections()?
+        .selections()?
         .into_iter()
         .map(|(set, selection)| VariantSelection {
             prim: path.as_str().to_owned(),
@@ -672,7 +677,7 @@ pub fn variant_selections(stage: &Stage) -> openusd::Result<Vec<VariantSelection
 fn world(xforms: &mut XformCache, prim: &usd::Prim) -> [f64; 16] {
     xforms
         .local_to_world_transform(prim)
-        .unwrap_or(Matrix4d::IDENTITY)
+        .unwrap_or(Mat4d::IDENTITY)
         .0
 }
 
@@ -702,58 +707,6 @@ fn axis_index(axis: &str) -> usize {
         "Z" => 2,
         _ => 0,
     }
-}
-
-/// The world matrix of a joint frame (position and rotation in a body whose
-/// local-to-world is `world`), orthonormalized so lengths along it are in
-/// stage units whatever the body's scale. Row-vector convention, row-major.
-fn rigid_frame(world: &[f64; 16], pos: [f32; 3], rot: [f32; 4]) -> [f64; 16] {
-    let [w, x, y, z] = rot.map(|v| v as f64);
-    let n = (w * w + x * x + y * y + z * z)
-        .sqrt()
-        .max(f64::MIN_POSITIVE);
-    let [w, x, y, z] = [w / n, x / n, y / n, z / n];
-    // The frame's axes in the body: the rotated basis vectors.
-    let local = [
-        [
-            1.0 - 2.0 * (y * y + z * z),
-            2.0 * (x * y + w * z),
-            2.0 * (x * z - w * y),
-        ],
-        [
-            2.0 * (x * y - w * z),
-            1.0 - 2.0 * (x * x + z * z),
-            2.0 * (y * z + w * x),
-        ],
-        [
-            2.0 * (x * z + w * y),
-            2.0 * (y * z - w * x),
-            1.0 - 2.0 * (x * x + y * y),
-        ],
-    ];
-    let dir = |d: [f64; 3]| -> [f64; 3] {
-        [0, 1, 2].map(|k| d[0] * world[k] + d[1] * world[4 + k] + d[2] * world[8 + k])
-    };
-    let p = pos.map(|v| v as f64);
-    let origin = [0, 1, 2].map(|k| dir(p)[k] + world[12 + k]);
-    // Gram-Schmidt: x, then y without its x part, then z = x × y.
-    let unit = |v: [f64; 3]| {
-        let l = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
-        if l > 0.0 { v.map(|c| c / l) } else { v }
-    };
-    let dot = |a: [f64; 3], b: [f64; 3]| a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-    let ax = unit(dir(local[0]));
-    let y0 = dir(local[1]);
-    let ay = unit([0, 1, 2].map(|k| y0[k] - dot(y0, ax) * ax[k]));
-    let az = [
-        ax[1] * ay[2] - ax[2] * ay[1],
-        ax[2] * ay[0] - ax[0] * ay[2],
-        ax[0] * ay[1] - ax[1] * ay[0],
-    ];
-    [
-        ax[0], ax[1], ax[2], 0.0, ay[0], ay[1], ay[2], 0.0, az[0], az[1], az[2], 0.0, origin[0],
-        origin[1], origin[2], 1.0,
-    ]
 }
 
 /// The angle in degrees, about axis `k` of `frame0`, from frame0 to frame1.
