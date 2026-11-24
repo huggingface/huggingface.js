@@ -246,6 +246,15 @@ function convertJinjaToGoTemplate(gguf: NonNullable<GGUFParsedInfo>):
 		const formattedUser1 = format([systemMsg, userMsg, assistantMsg, userMsg]);
 		const formattedUser = addedPart(formattedUser0, formattedUser1);
 
+		// addedPart() assumes each render is a prefix of the next one. Templates that render the last
+		// assistant turn differently from earlier ones (e.g. Qwen3.x adds "<think>\n\n</think>" only after
+		// the last user query) break that assumption and produce a cut-off part such as " .Prompt }}<|im_end|>".
+		// Serving such a template (and the stop words derived from it) is worse than serving none,
+		// so bail out when a placeholder did not survive.
+		if (!formattedUser.includes("{{ .Prompt }}") || !formattedResp.includes("{{ .Response }}")) {
+			return undefined;
+		}
+
 		// if the system message contains placeholder, we render it as normal
 		let goTmpl = `{{ if .System }}${formattedSystem}{{ end }}{{ if .Prompt }}${formattedUser}{{ end }}${formattedResp}`;
 
