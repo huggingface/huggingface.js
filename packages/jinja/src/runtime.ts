@@ -98,6 +98,14 @@ export class IntegerValue extends RuntimeValue<number> {
 		super(value);
 		this.type = "IntegerValue";
 	}
+
+	override toString(): string {
+		// Number stringification uses exponent notation at 1e21; integers need all digits.
+		if (Math.abs(this.value) >= 1e21 && Number.isInteger(this.value)) {
+			return BigInt(this.value).toString();
+		}
+		return super.toString();
+	}
 }
 
 /**
