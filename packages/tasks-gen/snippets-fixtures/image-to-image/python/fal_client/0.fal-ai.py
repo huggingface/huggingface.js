@@ -10,10 +10,10 @@ with open("cat.png", "rb") as image_file:
     image_base_64 = base64.b64encode(image_file.read()).decode('utf-8')
 
 result = fal_client.subscribe(
-    "fal-ai/flux-kontext/dev",
+    "<fal-ai alias for black-forest-labs/FLUX.1-Kontext-dev>",
     arguments={
-        "prompt": f"data:image/png;base64,{image_base_64}",
-        "image_url": "cat.png",
+        "image_url": f"data:image/png;base64,{image_base_64}",
+        "prompt": "Turn the cat into a tiger.",
     },
     with_logs=True,
     on_queue_update=on_queue_update,

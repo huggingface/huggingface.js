@@ -10,7 +10,7 @@ with open("cat.png", "rb") as image_file:
     image_base_64 = base64.b64encode(image_file.read()).decode('utf-8')
 
 result = fal_client.subscribe(
-    "Wan-AI/Wan2.2-I2V-A14B",
+    "<fal-ai alias for Wan-AI/Wan2.2-I2V-A14B>",
     arguments={
         "image_url": f"data:image/png;base64,{image_base_64}",
         "prompt": "The cat starts to dance",
