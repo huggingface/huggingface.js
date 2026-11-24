@@ -1,16 +1,6 @@
 /// This list is for illustration purposes only.
 /// in the `tasks` sub-package, we do not need actual strong typing of the inference providers.
-const INFERENCE_PROVIDERS = [
-	"cerebras",
-	"cohere",
-	"deepinfra",
-	"fal-ai",
-	"fireworks-ai",
-	"hf-inference",
-	"ovhcloud",
-	"replicate",
-	"together",
-] as const;
+const INFERENCE_PROVIDERS = ["fal-ai", "hf-inference", "replicate"] as const;
 
 export type SnippetInferenceProvider = (typeof INFERENCE_PROVIDERS)[number] | string;
 

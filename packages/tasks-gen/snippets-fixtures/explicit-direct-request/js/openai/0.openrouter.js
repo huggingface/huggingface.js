@@ -1,12 +1,12 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://api.together.xyz/v1",
-	apiKey: process.env.TOGETHER_API_KEY,
+	baseURL: "https://openrouter.ai/api/v1",
+	apiKey: process.env.OPENROUTER_API_KEY,
 });
 
 const chatCompletion = await client.chat.completions.create({
-	model: "<together alias for meta-llama/Llama-3.1-8B-Instruct>",
+	model: "<openrouter alias for meta-llama/Llama-3.1-8B-Instruct>",
     messages: [
         {
             role: "user",

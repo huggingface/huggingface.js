@@ -8,7 +8,7 @@ if (!process.env.HF_TOKEN) {
 describe("McpClient", () => {
 	it("You can create a mcp client", async () => {
 		const client = new McpClient({
-			provider: "together",
+			provider: "auto",
 			model: "Qwen/Qwen2.5-72B-Instruct",
 			apiKey: process.env.HF_TOKEN,
 		});

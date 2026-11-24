@@ -1,9 +1,9 @@
 import { InferenceClient } from "@huggingface/inference";
 
-const client = new InferenceClient(process.env.TOGETHER_API_KEY);
+const client = new InferenceClient(process.env.OPENROUTER_API_KEY);
 
 const chatCompletion = await client.chatCompletion({
-    provider: "together",
+    provider: "openrouter",
     model: "meta-llama/Llama-3.1-8B-Instruct",
     messages: [
         {

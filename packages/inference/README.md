@@ -69,7 +69,7 @@ You also have to make sure your request is authenticated with an access token.
 When authenticated with a Hugging Face access token, the request is routed through https://huggingface.co.
 When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
 
-Chat completion (`chatCompletion` and `chatCompletionStream`) with a Hugging Face access token goes through the router at https://router.huggingface.co/v1/chat/completions. The router picks a provider for the model, or runs it on the one you pass as `provider` (sent as `model:provider`, e.g. `"together"`). With a provider API key, it calls that provider directly. To list the providers serving a model, check its model page on the Hub.
+Chat completion (`chatCompletion` and `chatCompletionStream`) with a Hugging Face access token goes through the router at https://router.huggingface.co/v1/chat/completions. The router picks a provider for the model, or runs it on the one you pass as `provider` (sent as `model:provider`, e.g. `"together"`). To list the providers serving a model, check its model page on the Hub.
 
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)

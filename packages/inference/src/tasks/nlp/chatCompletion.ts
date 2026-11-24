@@ -10,7 +10,7 @@ import { AutoRouterConversationalTask } from "../../providers/providerHelper.js"
  * Use the chat completion endpoint to generate a response to a prompt, using OpenAI message completion API no stream
  */
 export async function chatCompletion(
-	args: BaseArgs & ChatCompletionInput,
+	args: Omit<BaseArgs, "provider"> & { provider?: string } & ChatCompletionInput,
 	options?: Options,
 ): Promise<ChatCompletionOutput> {
 	let providerHelper: ConversationalTaskHelper & TaskProviderHelper;
@@ -22,13 +22,12 @@ export async function chatCompletion(
 		providerHelper = new AutoRouterConversationalTask();
 	} else if (
 		args.model &&
-		args.accessToken?.startsWith("hf_") &&
 		args.provider !== "hf-inference" &&
+		args.provider !== "openai" &&
 		args.provider !== "openrouter"
 	) {
-		// With a HF token, the router resolves `model:provider` server-side, no Hub mapping lookup.
-		// Provider keys still call the provider directly.
-		// `hf-inference` and `openrouter` keep their dedicated routes.
+		// The router resolves `model:provider` server-side, no Hub mapping lookup.
+		// `hf-inference`, `openai` and `openrouter` keep their dedicated routes.
 		providerHelper = new AutoRouterConversationalTask();
 		args = { ...args, model: `${args.model}:${args.provider}` };
 	} else {

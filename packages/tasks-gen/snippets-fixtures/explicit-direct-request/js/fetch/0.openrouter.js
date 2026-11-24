@@ -1,9 +1,9 @@
 async function query(data) {
 	const response = await fetch(
-		"https://router.huggingface.co/v1/chat/completions",
+		"https://openrouter.ai/api/v1/chat/completions",
 		{
 			headers: {
-				Authorization: `Bearer ${process.env.HF_TOKEN}`,
+				Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -15,13 +15,13 @@ async function query(data) {
 }
 
 query({ 
+    model: "<openrouter alias for meta-llama/Llama-3.1-8B-Instruct>",
     messages: [
         {
             role: "user",
             content: "What is the capital of France?",
         },
     ],
-    model: "meta-llama/Llama-3.1-8B-Instruct:together",
 }).then((response) => {
     console.log(JSON.stringify(response));
 });

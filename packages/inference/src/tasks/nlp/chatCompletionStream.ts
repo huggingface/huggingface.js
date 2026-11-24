@@ -10,7 +10,7 @@ import { AutoRouterConversationalTask } from "../../providers/providerHelper.js"
  * Use to continue text from a prompt. Same as `textGeneration` but returns generator that can be read one token at a time
  */
 export async function* chatCompletionStream(
-	args: BaseArgs & ChatCompletionInput,
+	args: Omit<BaseArgs, "provider"> & { provider?: string } & ChatCompletionInput,
 	options?: Options,
 ): AsyncGenerator<ChatCompletionStreamOutput> {
 	let providerHelper: ConversationalTaskHelper & TaskProviderHelper;
@@ -22,13 +22,12 @@ export async function* chatCompletionStream(
 		providerHelper = new AutoRouterConversationalTask();
 	} else if (
 		args.model &&
-		args.accessToken?.startsWith("hf_") &&
 		args.provider !== "hf-inference" &&
+		args.provider !== "openai" &&
 		args.provider !== "openrouter"
 	) {
-		// With a HF token, the router resolves `model:provider` server-side, no Hub mapping lookup.
-		// Provider keys still call the provider directly.
-		// `hf-inference` and `openrouter` keep their dedicated routes.
+		// The router resolves `model:provider` server-side, no Hub mapping lookup.
+		// `hf-inference`, `openai` and `openrouter` keep their dedicated routes.
 		providerHelper = new AutoRouterConversationalTask();
 		args = { ...args, model: `${args.model}:${args.provider}` };
 	} else {

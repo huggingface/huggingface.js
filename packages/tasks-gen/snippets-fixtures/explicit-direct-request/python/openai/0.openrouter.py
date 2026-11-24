@@ -2,12 +2,12 @@ import os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://router.huggingface.co/v1",
-    api_key=os.environ["HF_TOKEN"],
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
 )
 
 completion = client.chat.completions.create(
-    model="meta-llama/Llama-3.1-8B-Instruct:together",
+    model="<openrouter alias for meta-llama/Llama-3.1-8B-Instruct>",
     messages=[
         {
             "role": "user",
