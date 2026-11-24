@@ -3,7 +3,8 @@
 use std::collections::HashSet;
 use std::io;
 
-use openusd::sdf::{self, AbstractData, Value};
+use openusd::sdf::{self, AbstractData};
+use openusd::vt::Value;
 
 /// Deepest prim nesting a layer may author. Composing takes time that grows
 /// steeply with depth (seconds at 1,000 levels), far beyond any real scene.
@@ -103,12 +104,14 @@ fn selected_here(data: &dyn AbstractData, spec: &str) -> bool {
 }
 
 /// Items a list op adds; deleted items add no opinion.
-fn live_items<T: Default + Clone + PartialEq>(op: &sdf::ListOp<T>) -> impl Iterator<Item = &T> {
-    op.explicit_items
+fn live_items<T: Clone + PartialEq + std::hash::Hash>(
+    op: &sdf::ListOp<T>,
+) -> impl Iterator<Item = &T> {
+    op.explicit_items()
         .iter()
-        .chain(&op.prepended_items)
-        .chain(&op.appended_items)
-        .chain(&op.added_items)
+        .chain(op.prepended_items())
+        .chain(op.appended_items())
+        .chain(op.added_items())
 }
 
 #[cfg(test)]
@@ -132,10 +135,9 @@ mod tests {
         let error = loader
             .add_layer("/h/deep.usda", nested(super::MAX_PRIM_DEPTH + 1))
             .unwrap_err();
+        // openusd's usda parser refuses it first; our own check covers usdc.
         assert!(
-            error
-                .to_string()
-                .contains("prims nest more than 256 levels deep"),
+            error.to_string().contains("nested more than 256 deep"),
             "{error}"
         );
         assert!(!loader.has("/h/deep.usda"));
