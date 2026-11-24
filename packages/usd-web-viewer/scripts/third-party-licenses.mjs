@@ -19,6 +19,7 @@ const FILE_FOR = {
 	"Unicode-3.0": /unicode/i,
 	"BSD-2-Clause": /bsd/i,
 	Unlicense: /unlicense/i,
+	"CC0-1.0": /cc0/i,
 };
 
 const metadata = JSON.parse(
