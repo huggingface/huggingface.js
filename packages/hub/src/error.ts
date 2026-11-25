@@ -4,7 +4,11 @@ export async function createApiError(
 	response: Response,
 	opts?: { requestId?: string; message?: string },
 ): Promise<never> {
-	const error = new HubApiError(response.url, response.status, response.headers.get("X-Request-Id") ?? opts?.requestId);
+	const requestId = response.headers.get("X-Request-Id") ?? opts?.requestId;
+	const error =
+		response.status === 402 && response.headers.get("X-Error-Code") === "EgressLimitReached"
+			? new EgressLimitReachedError(response.url, response.status, requestId)
+			: new HubApiError(response.url, response.status, requestId);
 
 	error.message = `Api error with status ${error.statusCode}${opts?.message ? `. ${opts.message}` : ""}`;
 
@@ -45,5 +49,13 @@ export class HubApiError extends Error {
 		this.url = url;
 	}
 }
+
+/**
+ * Error thrown when the Hugging Face Hub refuses a download (HTTP 402) because the account
+ * reached its egress allowance.
+ *
+ * The error message, sent by the Hub, explains the situation and how to get a higher allowance.
+ */
+export class EgressLimitReachedError extends HubApiError {}
 
 export class InvalidApiResponseFormatError extends Error {}

@@ -1575,7 +1575,7 @@ async function getAccessToken(
 		});
 
 		if (!resp.ok) {
-			throw new Error(`Failed to get JWT token: ${resp.status} ${await resp.text()}`);
+			throw await createApiError(resp, { message: "Failed to get JWT token" });
 		}
 
 		const json: { accessToken: string; casUrl: string; exp: number } = await resp.json();

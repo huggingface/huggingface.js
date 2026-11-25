@@ -17,7 +17,7 @@ export type {
 	SpaceSdk,
 	SpaceStage,
 } from "./types/public";
-export { HubApiError, InvalidApiResponseFormatError } from "./error";
+export { EgressLimitReachedError, HubApiError, InvalidApiResponseFormatError } from "./error";
 export { HUB_URL } from "./consts";
 export { streamJson, JsonStreamParseError } from "./utils/streamJson";
 export type { JsonStreamEvent } from "./utils/streamJson";
