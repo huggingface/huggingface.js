@@ -6516,6 +6516,37 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Tuple unpacking in for loops", () => {
+		// Python Jinja2 unpacks tuples and lists alike in `for a, b in ...`.
+		it.each([
+			[`{% for a, b in [(1, 2), (3, 4)] %}{{ a }}-{{ b }};{% endfor %}`, "1-2;3-4;"],
+			[`{% for a, b in ((1, 2), (3, 4)) %}{{ a }}-{{ b }};{% endfor %}`, "1-2;3-4;"],
+			[`{% for a, b in [[1, 2], (3, 4)] %}{{ a }}-{{ b }};{% endfor %}`, "1-2;3-4;"],
+			[`{% for a, b in [(1, 2), (3, 4)] if a > 1 %}{{ a }}-{{ b }};{% endfor %}`, "3-4;"],
+		])("unpacks tuple items: %s", (source, expected) => {
+			expect(new Template(source).render({})).toBe(expected);
+		});
+
+		it("renders a loop over a list of tuples (Functionary chat template pattern)", () => {
+			// Mirrors `{%- for field, field_name in [("maximum", "Maximum"), ("minimum", "Minimum"), ...] -%}`
+			// from the chat template of meetkai/functionary-small-v3.2.
+			const template = new Template(
+				`{%- for field, field_name in [("maximum", "Maximum"), ("minimum", "Minimum")] -%}` +
+					`{%- if field in param %} {{ field_name }}: {{ param[field] }}{% endif -%}` +
+					`{%- endfor -%}`,
+			);
+			expect(template.render({ param: { minimum: 1, maximum: 5 } })).toBe(" Maximum: 5 Minimum: 1");
+		});
+
+		it.each([
+			[`{% for a, b in [(1, 2, 3)] %}{{ a }}{% endfor %}`, "Too many items to unpack"],
+			[`{% for a, b, c in [(1, 2)] %}{{ a }}{% endfor %}`, "Too few items to unpack"],
+			[`{% for a, b in [1, 2] %}{{ a }}{% endfor %}`, "Cannot unpack non-iterable type: IntegerValue"],
+		])("still rejects items that cannot be unpacked: %s", (source, message) => {
+			expect(() => new Template(source).render({})).toThrowError(message);
+		});
+	});
+
 	describe("Iterable test", () => {
 		it.each([
 			{ value: {}, expected: "true" },
