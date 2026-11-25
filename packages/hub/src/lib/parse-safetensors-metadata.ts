@@ -376,11 +376,12 @@ async function fetchModelConfig(
 		hubUrl?: string;
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>,
+	path = "config.json",
 ): Promise<ModelConfig | null> {
 	try {
 		const configBlob = await downloadFile({
 			...params,
-			path: "config.json",
+			path,
 		});
 
 		if (!configBlob) {
@@ -831,12 +832,6 @@ export async function parseSafetensorsMetadata(
 		throw new TypeError("Only model repos should contain safetensors files.");
 	}
 
-	// Fetch model config for quantization information
-	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
-	const quantConfig =
-		getModelQuantizationConfig(modelConfig) ?? getModelQuantizationConfig(modelConfig?.text_config ?? null);
-	const expertDtype = modelConfig?.expert_dtype ?? modelConfig?.text_config?.expert_dtype;
-
 	// Resolve which file to parse, in order:
 	//  1. An explicit `params.path` (single file or sharded index, detected from the filename).
 	//  2. The conventional root-level `model.safetensors` / `model.safetensors.index.json`.
@@ -865,6 +860,17 @@ export async function parseSafetensorsMetadata(
 			}
 		}
 	}
+
+	// A nested checkpoint/component may have a different quantization config from the repo root.
+	// Prefer its sibling config, retaining the root fallback for repos that only configure there.
+	const configFolder = location?.path.slice(0, location.path.lastIndexOf("/") + 1);
+	const modelConfig = params.computeParametersCount
+		? ((configFolder ? await fetchModelConfig(params, `${configFolder}config.json`) : null) ??
+			(await fetchModelConfig(params)))
+		: null;
+	const quantConfig =
+		getModelQuantizationConfig(modelConfig) ?? getModelQuantizationConfig(modelConfig?.text_config ?? null);
+	const expertDtype = modelConfig?.expert_dtype ?? modelConfig?.text_config?.expert_dtype;
 
 	if (location && !location.sharded) {
 		const header = await parseSingleFile(location.path, params);
