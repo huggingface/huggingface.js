@@ -1023,6 +1023,91 @@ describe.skip("InferenceClient", () => {
 	 * Compatibility with third-party Inference Providers
 	 */
 	describe.concurrent(
+		"DeepInfra",
+		() => {
+			const client = new InferenceClient(env.DEEPINFRA_API_KEY ?? env.HF_DEEPINFRA_KEY ?? "dummy");
+
+			const ASR_HF_MODEL = "nvidia/nemotron-3.5-asr-streaming-0.6b";
+			const ASR_PROVIDER_ID = "nvidia/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b";
+
+			const TTS_HF_MODEL = "hexgrad/Kokoro-82M";
+			const TTS_PROVIDER_ID = "hexgrad/Kokoro-82M";
+
+			const FE_HF_MODEL = "Qwen/Qwen3-Embedding-0.6B";
+			const FE_PROVIDER_ID = "Qwen/Qwen3-Embedding-0.6B";
+
+			const setAsrMapping = () => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[ASR_HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: ASR_HF_MODEL,
+						providerId: ASR_PROVIDER_ID,
+						status: "live",
+						task: "automatic-speech-recognition",
+					},
+				};
+			};
+
+			const setTtsMapping = () => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[TTS_HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: TTS_HF_MODEL,
+						providerId: TTS_PROVIDER_ID,
+						status: "live",
+						task: "text-to-speech",
+					},
+				};
+			};
+
+			const setFeatureExtractionMapping = () => {
+				HARDCODED_MODEL_INFERENCE_MAPPING["deepinfra"] = {
+					[FE_HF_MODEL]: {
+						provider: "deepinfra",
+						hfModelId: FE_HF_MODEL,
+						providerId: FE_PROVIDER_ID,
+						status: "live",
+						task: "feature-extraction",
+					},
+				};
+			};
+
+			it("automaticSpeechRecognition", async () => {
+				setAsrMapping();
+				const res = await client.automaticSpeechRecognition({
+					model: ASR_HF_MODEL,
+					provider: "deepinfra",
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+				});
+				expect(typeof res.text).toBe("string");
+				expect(res.text.length).toBeGreaterThan(0);
+			});
+
+			it("textToSpeech", async () => {
+				setTtsMapping();
+				const res = await client.textToSpeech({
+					model: TTS_HF_MODEL,
+					provider: "deepinfra",
+					inputs: "Hello from DeepInfra text to speech.",
+					parameters: { voice: "af_bella" },
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("featureExtraction", async () => {
+				setFeatureExtractionMapping();
+				const res = await client.featureExtraction({
+					model: FE_HF_MODEL,
+					provider: "deepinfra",
+					inputs: "Hello from DeepInfra feature extraction.",
+				});
+				expect(Array.isArray(res)).toBe(true);
+				expect(res.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT,
+	);
+	describe.concurrent(
 		"Fal AI",
 		() => {
 			const client = new InferenceClient(env.HF_FAL_KEY ?? "dummy");

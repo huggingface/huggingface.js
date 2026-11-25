@@ -1,3 +1,4 @@
+import * as DeepInfra from "../providers/deepinfra.js";
 import * as FalAI from "../providers/fal-ai.js";
 import * as HFInference from "../providers/hf-inference.js";
 import * as OpenAI from "../providers/openai.js";
@@ -43,6 +44,11 @@ import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from
 import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
+	deepinfra: {
+		"automatic-speech-recognition": new DeepInfra.DeepInfraAutomaticSpeechRecognitionTask(),
+		"feature-extraction": new DeepInfra.DeepInfraFeatureExtractionTask(),
+		"text-to-speech": new DeepInfra.DeepInfraTextToSpeechTask(),
+	},
 	"fal-ai": {
 		"audio-to-audio": new FalAI.FalAIAudioToAudioTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),

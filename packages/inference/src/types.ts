@@ -44,7 +44,7 @@ export interface Options {
 
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
-export const INFERENCE_PROVIDERS = ["fal-ai", "hf-inference", "openai", "replicate", "wavespeed"] as const;
+export const INFERENCE_PROVIDERS = ["deepinfra", "fal-ai", "hf-inference", "openai", "replicate", "wavespeed"] as const;
 
 export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
 
@@ -58,6 +58,7 @@ export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
  * Whenever possible, InferenceProvider should == org namespace
  */
 export const PROVIDERS_HUB_ORGS: Record<InferenceProvider, string> = {
+	deepinfra: "DeepInfra",
 	"fal-ai": "fal",
 	"hf-inference": "hf-inference",
 	openai: "openai",
