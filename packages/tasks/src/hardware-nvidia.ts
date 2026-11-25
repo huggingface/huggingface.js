@@ -904,6 +904,14 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 165,
 		releaseYear: 2014,
 	},
+		"GTX 860M": {
+		tflops: 1.36, // float32 (GPU does not support native float16)
+		memory: [2],
+		computeCapability: 5.0,
+		msrp: 250,
+		power: 36,
+		releaseYear: 2014,
+	},
 	"GT 730 (Kepler)": {
 		tflops: 0.69, // float32 (GPU does not support native float16)
 		memory: [1, 2, 4],
