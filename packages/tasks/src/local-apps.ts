@@ -236,7 +236,10 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 };
 
 const snippetOllama = (model: ModelData, filepath?: string): string => {
-	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
+	// The Hub also accepts full filenames as Ollama tags. Unlike a quantization
+	// label, this identifies the selected file even with nonstandard filenames.
+	const tag = filepath && !filepath.includes("/") ? `:${filepath}` : getQuantTag(filepath);
+	return `ollama run hf.co/${model.id}${tag}`;
 };
 
 const snippetDulus = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
