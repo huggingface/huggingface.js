@@ -39,3 +39,8 @@
   sections:
     - local: lerobot/README
       title: Parse LeRobot robotics datasets
+- title: "@huggingface/usd-web-viewer"
+  isExpanded: true
+  sections:
+    - local: usd-web-viewer/README
+      title: View OpenUSD files in the browser

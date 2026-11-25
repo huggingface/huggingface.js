@@ -1,0 +1,23 @@
+{
+	"$id": "/inference/schemas/text-ranking/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"title": "TextRankingOutput",
+	"description": "Documents ranked by relevance to the query, in descending score order.",
+	"type": "array",
+	"items": {
+		"title": "TextRankingOutputElement",
+		"type": "object",
+		"properties": {
+			"index": {
+				"type": "integer",
+				"minimum": 0,
+				"description": "The index of the document in the input texts."
+			},
+			"score": {
+				"type": "number",
+				"description": "The relevance score of the document."
+			}
+		},
+		"required": ["index", "score"]
+	}
+}

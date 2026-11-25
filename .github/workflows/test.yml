@@ -31,6 +31,30 @@ jobs:
             echo "SINCE=$(git merge-base $BASE_REF ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
+      # usd-web-viewer's tests build its Rust crate: cache cargo's output when they run.
+      - name: "Checking whether usd-web-viewer changed"
+        id: usd
+        run: |
+          if git diff --quiet ${STEPS_SINCE_OUTPUTS_SINCE} ${{ github.sha }} -- packages/usd-web-viewer
+          then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
+      # rust-cache keys on the installed toolchains: install the pinned one first.
+      - name: "Installing usd-web-viewer's Rust toolchain"
+        if: steps.usd.outputs.changed == 'true'
+        working-directory: packages/usd-web-viewer
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        if: steps.usd.outputs.changed == 'true'
+        with:
+          workspaces: packages/usd-web-viewer
+          # PR runs restore main's cache but don't save their own, which would evict it.
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
       - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
@@ -40,8 +64,10 @@ jobs:
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
           pnpm install --frozen-lockfile --filter .
-          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+          pnpm install --frozen-lockfile --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]...
+          pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]... build
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
       - name: Install the hf CLI
         run: |
@@ -63,7 +89,9 @@ jobs:
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
+        run: pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}] test
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
   browser:
     runs-on: ubuntu-latest
@@ -81,12 +109,13 @@ jobs:
         id: since
         env:
           PR_REF: ${{  github.event.pull_request.head.ref }}
+          GITHUB_EVENT_PULL_REQUEST_BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
           if [ -z $PR_REF ]
           then
             echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
+            echo "SINCE=$(git merge-base origin/${GITHUB_EVENT_PULL_REQUEST_BASE_REF} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
       - run: google-chrome --version
@@ -100,8 +129,10 @@ jobs:
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
           pnpm install --frozen-lockfile --filter .
-          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+          pnpm install --frozen-lockfile --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]...
+          pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}]... build
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
       - name: Install the hf CLI
         run: |
@@ -123,7 +154,9 @@ jobs:
           echo "HF_TOKEN=$token" >> "$GITHUB_ENV"
 
       - name: Test in browser
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
+        run: pnpm --filter ...[${STEPS_SINCE_OUTPUTS_SINCE}] test:browser
+        env:
+          STEPS_SINCE_OUTPUTS_SINCE: ${{ steps.since.outputs.SINCE }}
 
   e2e:
     runs-on: ubuntu-latest

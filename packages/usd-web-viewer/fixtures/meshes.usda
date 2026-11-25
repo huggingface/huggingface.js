@@ -1,0 +1,124 @@
+#usda 1.0
+
+# Mesh topology, normals and primvar interpolation, then purpose inheritance
+# and the gprims that are not drawn.
+
+# Two quads folded 90 degrees along x = 1, the second a hole: two triangles
+# drawn, and the hole leaves the smooth normals of the shared edge alone.
+def Mesh "Hole"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (1, 0, -1), (0, 1, 0), (1, 1, 0), (1, 1, -1)]
+    int[] holeIndices = [1]
+}
+
+# A primvar without interpolation is constant: every vertex reads its one value.
+def Mesh "ConstantUv"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (2, 0, 0), (0, 1, 0), (1, 1, 0), (2, 1, 0)]
+    texCoord2f[] primvars:st = [(0.25, 0.75)]
+}
+
+# Two quads folded 90 degrees along x = 1, one facing +Z, the other +X.
+# Polygonal without normals: faceted, the shared edge split.
+def Mesh "Faceted"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (1, 0, -1), (0, 1, 0), (1, 1, 0), (1, 1, -1)]
+    uniform token subdivisionScheme = "none"
+}
+
+# A subdivision surface (the schema fallback) without normals: smooth, points shared.
+def Mesh "Smooth"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (1, 0, -1), (0, 1, 0), (1, 1, 0), (1, 1, -1)]
+}
+
+# A normals primvar without interpolation is constant.
+def Mesh "ConstantNormals"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (1, 0, -1), (0, 1, 0), (1, 1, 0), (1, 1, -1)]
+    normal3f[] primvars:normals = [(0, 1, 0)]
+}
+
+# The normals attribute without interpolation is per vertex.
+def Mesh "VertexNormals"
+{
+    int[] faceVertexCounts = [4, 4]
+    int[] faceVertexIndices = [0, 1, 4, 3, 1, 2, 5, 4]
+    point3f[] points = [(0, 0, 0), (1, 0, 0), (2, 0, 0), (0, 1, 0), (1, 1, 0), (2, 1, 0)]
+    normal3f[] normals = [(0, 0, 1), (0, 1, 0), (0, 0, 1), (0, 0, 1), (0, 1, 0), (0, 0, 1)]
+}
+
+# A prim's purpose is its nearest authored one, `default` included, as
+# UsdGeomImageable::ComputePurpose resolves it: under a guide parent, a mesh
+# that authors default or render is drawn; a mesh that authors nothing under a
+# proxy parent, or guide under a default parent, is not.
+def Xform "GuideDefault"
+{
+    uniform token purpose = "guide"
+
+    def Mesh "Tri"
+    {
+        uniform token purpose = "default"
+        int[] faceVertexCounts = [3]
+        int[] faceVertexIndices = [0, 1, 2]
+        point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    }
+}
+
+def Xform "GuideRender"
+{
+    uniform token purpose = "guide"
+
+    def Mesh "Tri"
+    {
+        uniform token purpose = "render"
+        int[] faceVertexCounts = [3]
+        int[] faceVertexIndices = [0, 1, 2]
+        point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    }
+}
+
+def Xform "ProxyUnauthored"
+{
+    uniform token purpose = "proxy"
+
+    def Mesh "Tri"
+    {
+        int[] faceVertexCounts = [3]
+        int[] faceVertexIndices = [0, 1, 2]
+        point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    }
+}
+
+def Xform "DefaultGuide"
+{
+    uniform token purpose = "default"
+
+    def Mesh "Tri"
+    {
+        uniform token purpose = "guide"
+        int[] faceVertexCounts = [3]
+        int[] faceVertexIndices = [0, 1, 2]
+        point3f[] points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    }
+}
+
+# Every visible gprim type not drawn is reported, once per type; hidden ones
+# and prims that are not gprims are not.
+def ParticleField3DGaussianSplat "Splat" {}
+def Volume "NuRec" {}
+def TetMesh "Tet" {}
+def BasisCurves "Hair" {}
+def Points "Hidden" { token visibility = "invisible" }
+def Points "Guide" { uniform token purpose = "guide" }
+def Xform "NotAGprim" {}

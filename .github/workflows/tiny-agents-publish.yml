@@ -29,6 +29,7 @@ jobs:
   version_and_release:
     permissions:
       contents: write
+      id-token: write
       packages: write
     runs-on: ubuntu-latest
     steps:

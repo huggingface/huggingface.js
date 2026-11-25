@@ -37,6 +37,34 @@ llama cli -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`,
 		]);
 	});
 
+	it("llama.cpp embedding", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
+		const model: ModelData = {
+			id: "ggml-org/embeddinggemma-300M-GGUF",
+			tags: ["feature-extraction"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toEqual([
+			`# Start a local OpenAI-compatible embeddings server:
+llama serve -hf ggml-org/embeddinggemma-300M-GGUF:{{QUANT_TAG}} --embeddings`,
+		]);
+		expect(snippet.map((s) => s.title)).not.toContain("Use Docker");
+	});
+
+	it("llama.cpp decision model is not treated as an embedding model", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
+		const model: ModelData = {
+			id: "ggml-org/Julia-1-GGUF",
+			tags: ["feature-extraction", "decision-model"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content[0]).not.toContain("--embeddings");
+	});
+
 	it("vLLM conversational llm", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["vllm"];
 		const model: ModelData = {
@@ -134,6 +162,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet[0].content).toContain(`llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 		expect(snippet[1].setup).toContain("npm install -g @earendil-works/pi-coding-agent");
+		expect(snippet[1].content).toContain('"baseUrl": "http://localhost:9931/v1"');
 		expect(snippet[1].content).toContain(`"id": "bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"`);
 		expect(snippet[2].content).toContain("pi");
 	});
@@ -173,7 +202,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet[0].content).toContain(`llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 		expect(snippet[1].content).toContain("hermes config set model.provider custom");
-		expect(snippet[1].content).toContain("hermes config set model.base_url http://127.0.0.1:8080/v1");
+		expect(snippet[1].content).toContain("hermes config set model.base_url http://127.0.0.1:9931/v1");
 		expect(snippet[1].content).toContain(
 			"hermes config set model.default bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}",
 		);
@@ -197,6 +226,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
 		expect(snippet[1].content).toContain("hermes config set model.provider custom");
+		expect(snippet[1].content).toContain("hermes config set model.base_url http://127.0.0.1:8080/v1");
 		expect(snippet[1].content).toContain("hermes config set model.default mlx-community/Llama-3.2-3B-Instruct-mlx");
 		expect(snippet[2].content).toContain("hermes");
 	});
@@ -215,7 +245,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[1].setup).toContain("npm install -g openclaw@latest");
 		expect(snippet[1].content).toContain("openclaw onboard --non-interactive --mode local");
 		expect(snippet[1].content).toContain("--auth-choice custom-api-key");
-		expect(snippet[1].content).toContain("--custom-base-url http://127.0.0.1:8080/v1");
+		expect(snippet[1].content).toContain("--custom-base-url http://127.0.0.1:9931/v1");
 		expect(snippet[1].content).toContain('--custom-model-id "bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"');
 		expect(snippet[1].content).toContain("--custom-provider-id llama-cpp");
 		expect(snippet[1].content).toContain("--custom-compatibility openai");
@@ -243,6 +273,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 
 		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
 		expect(snippet[1].content).toContain("openclaw onboard --non-interactive --mode local");
+		expect(snippet[1].content).toContain("--custom-base-url http://127.0.0.1:8080/v1");
 		expect(snippet[1].content).toContain('--custom-model-id "mlx-community/Llama-3.2-3B-Instruct-mlx"');
 		expect(snippet[1].content).toContain("--custom-provider-id mlx-lm");
 		expect(snippet[1].content).toContain("--custom-text-input");
@@ -298,6 +329,22 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		};
 
 		expect(displayOnModelPage(model)).toBe(false);
+	});
+
+	it("llama deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["llama-app"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe("llama://install?repo=bartowski/Llama-3.2-3B-Instruct-GGUF");
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf").href).toBe(
+			"llama://install?repo=bartowski/Llama-3.2-3B-Instruct-GGUF&quant=Q4_K_M",
+		);
 	});
 
 	it("unsloth tagged model", async () => {

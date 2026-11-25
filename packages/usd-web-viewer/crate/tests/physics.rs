@@ -1,0 +1,349 @@
+//! UsdPhysics and UsdSemantics as the scene reports them, read as authored.
+
+mod common;
+
+use serde_json::{Value, json};
+
+fn physics(root: &str) -> Value {
+    let loaded =
+        common::compose(root, |p| std::fs::read(p).ok()).unwrap_or_else(|e| panic!("{root}: {e}"));
+    let scene = &loaded.scene;
+    json!({
+        "physics": serde_json::to_value(&scene.physics).unwrap(),
+        "labels": serde_json::to_value(&scene.labels).unwrap(),
+        "variantSelections": serde_json::to_value(&scene.variant_selections).unwrap(),
+    })
+}
+
+fn fixture() -> Value {
+    let path = std::fs::canonicalize(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../fixtures/physics.usda"
+    ))
+    .expect("physics fixture");
+    physics(&path.to_string_lossy())
+}
+
+fn find<'a>(list: &'a Value, path: &str) -> &'a Value {
+    list.as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["path"] == path)
+        .unwrap_or_else(|| panic!("{path} not in {list}"))
+}
+
+fn close(value: &Value, expected: f64) -> bool {
+    (value.as_f64().unwrap() - expected).abs() < 1e-4
+}
+
+#[test]
+fn masses_are_kilograms_and_read_as_authored() {
+    let out = fixture();
+    let bodies = &out["physics"]["bodies"];
+    // kilogramsPerUnit = 0.001: grams in the file.
+    let body = find(bodies, "/Cabinet/Body");
+    assert!(close(&body["mass"]["value"], 100.0));
+    assert_eq!(body["mass"]["source"], "authored");
+    assert_eq!(body["centerOfMass"], json!([0.0, 0.0, 50.0]));
+    // No mass on the drawer: the sum of its colliders' own masses.
+    let drawer = find(bodies, "/Cabinet/Drawer");
+    assert!(close(&drawer["mass"]["value"], 2.5));
+    assert_eq!(drawer["mass"]["source"], "colliders");
+    // Nothing authored: nothing guessed.
+    let door = find(bodies, "/Cabinet/Door");
+    // One of the door's colliders has a mass, the other not: no partial sum.
+    assert_eq!(door["mass"], Value::Null);
+}
+
+#[test]
+fn colliders_know_their_body_shape_and_material() {
+    let out = fixture();
+    let colliders = &out["physics"]["colliders"];
+    let shell = find(colliders, "/Cabinet/Body/Shell");
+    assert_eq!(shell["body"], "/Cabinet/Body");
+    assert_eq!(shell["shape"], "Cube");
+    assert_eq!(shell["approximation"], Value::Null);
+    let box_ = find(colliders, "/Cabinet/Drawer/Box");
+    assert_eq!(box_["approximation"], "convexHull");
+    assert_eq!(box_["material"], "/Cabinet/Materials/Plastic");
+    assert_eq!(box_["visual"], true);
+    // A guide collision mesh is a collider the viewer does not draw.
+    let hull = find(colliders, "/Cabinet/Drawer/Hull");
+    assert_eq!(hull["visual"], false);
+    // A collider under no rigid body is static.
+    assert_eq!(find(colliders, "/Cabinet/Floor")["body"], Value::Null);
+    let drawer = find(&out["physics"]["bodies"], "/Cabinet/Drawer");
+    assert_eq!(
+        drawer["colliders"],
+        json!(["/Cabinet/Drawer/Box", "/Cabinet/Drawer/Hull"])
+    );
+}
+
+#[test]
+fn physics_materials_are_in_si_units() {
+    let out = fixture();
+    let plastic = find(&out["physics"]["materials"], "/Cabinet/Materials/Plastic");
+    // 0.95 g/cm³ (kilogramsPerUnit 0.001, metersPerUnit 0.01) is 950 kg/m³.
+    assert!(close(&plastic["density"], 950.0));
+    assert!(close(&plastic["staticFriction"], 0.4));
+    assert!(close(&plastic["dynamicFriction"], 0.3));
+    assert!(close(&plastic["restitution"], 0.5));
+}
+
+#[test]
+fn labels_and_variant_selections() {
+    let out = fixture();
+    assert_eq!(
+        out["labels"],
+        json!([
+            { "path": "/Cabinet", "taxonomy": "wikidata_class", "values": ["cabinet"] },
+            { "path": "/Cabinet/Materials/Plastic", "taxonomy": "material", "values": ["plastic"] },
+        ])
+    );
+    assert_eq!(
+        out["variantSelections"],
+        json!([{ "prim": "/Cabinet", "set": "Engine", "selection": "PhysX" }])
+    );
+}
+
+#[test]
+fn joints_report_limits_by_kind() {
+    let out = fixture();
+    let joints = &out["physics"]["joints"];
+    let slide = find(joints, "/Cabinet/Joints/Slide");
+    assert_eq!(slide["kind"], "prismatic");
+    assert_eq!(slide["axis"], "X");
+    // Centimeters in the file, meters out.
+    assert!(
+        close(&slide["lower"], 0.0) && close(&slide["upper"], 0.3),
+        "{slide}"
+    );
+    assert_eq!(slide["displayName"], "Top drawer");
+    // A target inside a rigid body is that body.
+    assert_eq!(slide["body0"], "/Cabinet/Body");
+    assert_eq!(slide["body1"], "/Cabinet/Drawer");
+
+    let hinge = find(joints, "/Cabinet/Joints/Hinge");
+    assert_eq!(hinge["kind"], "revolute");
+    assert_eq!(hinge["displayName"], Value::Null);
+
+    assert_eq!(find(joints, "/Cabinet/Joints/Pane")["kind"], "fixed");
+    let ball = find(joints, "/Cabinet/Joints/Ball");
+    assert_eq!(
+        (ball["kind"].as_str(), ball["cone0"].as_f64()),
+        (Some("spherical"), Some(30.0))
+    );
+    assert_eq!(ball["body0"], Value::Null);
+    let rope = find(joints, "/Cabinet/Joints/Rope");
+    assert!(
+        close(&rope["min"], 0.05) && close(&rope["max"], 0.5),
+        "{rope}"
+    );
+    let custom = find(joints, "/Cabinet/Joints/Custom");
+    assert_eq!(custom["kind"], "generic");
+    // Rotations stay in degrees; translations are in meters.
+    let dofs = custom["dofs"].as_array().unwrap();
+    assert_eq!(
+        dofs.iter()
+            .map(|d| d["dof"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        ["transY", "rotX", "rotY"],
+        "in UsdPhysics' degree-of-freedom order"
+    );
+    assert!(
+        close(&dofs[0]["low"], 0.01) && close(&dofs[0]["high"], -0.01),
+        "{}",
+        dofs[0]
+    );
+    assert!(close(&dofs[1]["low"], -10.0) && close(&dofs[1]["high"], 10.0));
+    assert!(close(&dofs[2]["low"], -5.0) && dofs[2]["high"].is_null());
+    // A prismatic mimic's offset is in meters, whatever its instance is named.
+    let slide_follower = &find(joints, "/Cabinet/Joints/SlideFollower")["mimic"];
+    assert_eq!(slide_follower["reference"], "/Cabinet/Joints/Slide");
+    assert!(close(&slide_follower["offset"], 0.05), "{slide_follower}");
+    let follower = find(joints, "/Cabinet/Joints/Follower");
+    assert_eq!(
+        follower["mimic"],
+        json!({ "reference": "/Cabinet/Joints/Hinge", "gearing": -1.0, "offset": 0.0 })
+    );
+    // A limit past UsdPhysics' sentinel is none.
+    assert!(
+        close(&follower["lower"], -45.0) && follower["upper"].is_null(),
+        "{follower}"
+    );
+}
+
+#[test]
+fn joints_know_their_frame_and_where_the_authored_pose_puts_them() {
+    let out = fixture();
+    let joints = &out["physics"]["joints"];
+    // The drawer's prim sits 40 up, where the slide's frame on the body is: at 0.
+    let slide = find(joints, "/Cabinet/Joints/Slide");
+    assert!(close(&slide["rest"], 0.0));
+    assert_eq!(
+        slide["frame0"].as_array().unwrap()[12..15],
+        [json!(0.0), json!(0.0), json!(40.0)]
+    );
+    // The door's frame is turned 90° about Z from the hinge's frame on the body.
+    let hinge = find(joints, "/Cabinet/Joints/Hinge");
+    assert!(close(&hinge["rest"], 90.0), "{}", hinge["rest"]);
+}
+
+#[test]
+fn inertia_is_in_kilogram_square_meters() {
+    let out = fixture();
+    let body = find(&out["physics"]["bodies"], "/Cabinet/Body");
+    // g·cm² (kilogramsPerUnit 0.001, metersPerUnit 0.01) to kg·m²: × 1e-7.
+    let inertia = body["diagonalInertia"].as_array().unwrap();
+    for (v, expected) in inertia.iter().zip([1e-4, 2e-4, 3e-4]) {
+        assert!(
+            (v.as_f64().unwrap() - expected).abs() < 1e-12,
+            "{inertia:?}"
+        );
+    }
+}
+
+#[test]
+fn joints_keep_their_authored_type_targets_and_both_frames() {
+    let out = fixture();
+    let joints = &out["physics"]["joints"];
+    let slide = find(joints, "/Cabinet/Joints/Slide");
+    assert_eq!(slide["type"], "PhysicsPrismaticJoint");
+    assert_eq!(slide["target1"], "/Cabinet/Drawer/Box");
+    assert_eq!(slide["body1"], "/Cabinet/Drawer");
+    assert_eq!(slide["frame1"].as_array().unwrap().len(), 16);
+    assert_eq!(
+        find(joints, "/Cabinet/Joints/Custom")["type"],
+        "PhysicsJoint"
+    );
+    // An axis outside the schema's X, Y, Z reads as its default, X.
+    assert_eq!(find(joints, "/Cabinet/Joints/Ball")["axis"], "X");
+}
+
+#[test]
+fn drives_and_articulation_roots_are_in_si_units() {
+    let out = fixture();
+    assert_eq!(
+        out["physics"]["articulationRoots"],
+        json!(["/Cabinet/Body"])
+    );
+    let joints = &out["physics"]["joints"];
+    // Grams and centimeters in the file: a linear drive's gains are in kg/s² and kg/s,
+    // its position in meters and its force in newtons.
+    let slide = &find(joints, "/Cabinet/Joints/Slide")["drives"][0];
+    assert_eq!(
+        (slide["axis"].as_str(), slide["type"].as_str()),
+        (Some("linear"), Some("force"))
+    );
+    for (key, expected) in [
+        ("targetPosition", 0.1),
+        ("stiffness", 1.0),
+        ("damping", 0.2),
+        ("maxForce", 1.0),
+    ] {
+        assert!(close(&slide[key], expected), "{key}: {}", slide[key]);
+    }
+    // Not authored: the schema's fallback.
+    assert!(close(&slide["targetVelocity"], 0.0));
+    // An angular drive keeps degrees; its stiffness is in N·m per degree.
+    let hinge = &find(joints, "/Cabinet/Joints/Hinge")["drives"][0];
+    assert!(close(&hinge["targetPosition"], 45.0));
+    assert!(close(&hinge["stiffness"], 1.0), "{}", hinge["stiffness"]);
+    assert_eq!(find(joints, "/Cabinet/Joints/Pane")["drives"], json!([]));
+    // An acceleration drive's gains carry no mass: only its limit, an acceleration, scales to m/s².
+    let custom = &find(joints, "/Cabinet/Joints/Custom")["drives"][0];
+    assert_eq!(custom["type"], "acceleration");
+    assert!(close(&custom["stiffness"], 5.0), "{}", custom["stiffness"]);
+    assert!(close(&custom["maxForce"], 1.0), "{}", custom["maxForce"]);
+}
+
+#[test]
+fn fixed_joints_attach_bodies_to_the_one_that_moves_them() {
+    let out = fixture();
+    let door = find(&out["physics"]["bodies"], "/Cabinet/Door");
+    assert_eq!(door["attached"], json!(["/Cabinet/Glass"]));
+}
+
+#[test]
+fn xforms_under_a_body_are_reported_as_frames() {
+    let out = fixture();
+    let frames = out["physics"]["frames"].as_array().unwrap();
+    // Only the Tip: not the body itself, the Xforms above it or the shapes beside it.
+    assert_eq!(frames.len(), 1, "{frames:?}");
+    assert_eq!(frames[0]["path"], "/Cabinet/Door/Tip");
+    assert_eq!(frames[0]["body"], "/Cabinet/Door");
+    assert_eq!(frames[0]["world"].as_array().unwrap()[12], json!(55.0));
+}
+
+#[test]
+fn disabled_joints_are_reported_and_attach_nothing() {
+    let out = fixture();
+    let joints = &out["physics"]["joints"];
+    assert_eq!(find(joints, "/Cabinet/Joints/Disabled")["enabled"], false);
+    assert_eq!(find(joints, "/Cabinet/Joints/Pane")["enabled"], true);
+    let body = find(&out["physics"]["bodies"], "/Cabinet/Body");
+    assert_eq!(body["attached"], json!([]));
+}
+
+/// `USD_PHYSICS_DUMP=<root layer> cargo test --test physics dump -- --nocapture --ignored`
+#[test]
+#[ignore]
+fn dump() {
+    let root = std::env::var("USD_PHYSICS_DUMP").expect("USD_PHYSICS_DUMP");
+    println!("{}", serde_json::to_string_pretty(&physics(&root)).unwrap());
+}
+
+/// What `usda`, as the only layer, reports for physics, and its scene.
+fn compose_inline(usda: &str) -> usd_wasm::Scene {
+    common::compose("/inline.usda", |p| {
+        (p == "/inline.usda").then(|| usda.as_bytes().to_vec())
+    })
+    .unwrap_or_else(|e| panic!("{e}"))
+    .scene
+}
+
+#[test]
+fn a_joint_on_a_part_of_a_scaled_body_turns_with_the_part() {
+    // The part is turned 45° inside a body stretched 2x along X: in the world
+    // it is turned atan(1/2) = 26.565°, and that is where the hinge rests.
+    let scene = compose_inline(
+        r#"#usda 1.0
+def Xform "Base" (prepend apiSchemas = ["PhysicsRigidBodyAPI"]) {}
+def Xform "Body" (prepend apiSchemas = ["PhysicsRigidBodyAPI"])
+{
+    double3 xformOp:scale = (2, 1, 1)
+    uniform token[] xformOpOrder = ["xformOp:scale"]
+    def Xform "Part"
+    {
+        double3 xformOp:rotateXYZ = (0, 0, 45)
+        uniform token[] xformOpOrder = ["xformOp:rotateXYZ"]
+    }
+}
+def PhysicsRevoluteJoint "Hinge"
+{
+    uniform token physics:axis = "Z"
+    rel physics:body0 = </Base>
+    rel physics:body1 = </Body/Part>
+}
+"#,
+    );
+    let hinge = &scene.physics.joints[0];
+    assert_eq!(hinge.body1.as_deref(), Some("/Body"));
+    assert!((hinge.rest - 26.565).abs() < 1e-3, "{}", hinge.rest);
+}
+
+#[test]
+fn a_broken_rigid_body_does_not_fail_the_load() {
+    // A body placed by inverting a singular matrix has no transform; the cube still draws.
+    let scene = compose_inline(
+        r#"#usda 1.0
+def Cube "Visible" {}
+def Xform "Flat" (prepend apiSchemas = ["PhysicsRigidBodyAPI"])
+{
+    matrix4d xformOp:transform = ( (0, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )
+    uniform token[] xformOpOrder = ["!invert!xformOp:transform"]
+}
+"#,
+    );
+    assert_eq!(scene.instances.len(), 1);
+}
