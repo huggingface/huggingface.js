@@ -5,6 +5,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as os from "node:os";
+import { randomUUID } from "node:crypto";
 
 function expandUser(path: string): string {
 	if (path.startsWith("~")) {
@@ -46,20 +47,43 @@ export async function createSymlink(params: {
 	 * The path the symlink should point to.
 	 */
 	sourcePath: string;
+	/** Reuse a complete destination published by a concurrent cache writer. */
+	reuseExisting?: boolean;
 }): Promise<void> {
 	const abs_src = path.resolve(expandUser(params.sourcePath));
 	const abs_dst = path.resolve(expandUser(params.finalPath));
 
-	try {
-		await fs.rm(abs_dst);
-	} catch {
-		// ignore
+	if (!params.reuseExisting) {
+		try {
+			await fs.rm(abs_dst);
+		} catch {
+			// ignore
+		}
 	}
 
+	// Cache pointers must become visible only after their symlink or copy is complete.
+	const target = params.reuseExisting ? path.join(path.dirname(abs_dst), `.${randomUUID()}.incomplete`) : abs_dst;
 	try {
-		await fs.symlink(path.relative(path.dirname(abs_dst), abs_src), abs_dst);
-	} catch {
-		console.info(`Symlink not supported. Copying file from ${abs_src} to ${abs_dst}`);
-		await fs.copyFile(abs_src, abs_dst);
+		try {
+			await fs.symlink(path.relative(path.dirname(abs_dst), abs_src), target);
+		} catch {
+			console.info(`Symlink not supported. Copying file from ${abs_src} to ${abs_dst}`);
+			await fs.copyFile(abs_src, target);
+		}
+
+		if (params.reuseExisting) {
+			try {
+				await fs.rename(target, abs_dst);
+			} catch (error) {
+				const existing = await fs.stat(abs_dst).catch(() => undefined);
+				if (!existing?.isFile()) {
+					throw error;
+				}
+			}
+		}
+	} finally {
+		if (params.reuseExisting) {
+			await fs.rm(target, { force: true });
+		}
 	}
 }
