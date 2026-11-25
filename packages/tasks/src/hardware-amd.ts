@@ -150,7 +150,7 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 	},
 	"RX 7600 XT": {
 		tflops: 45.14,
-		memory: [16, 8],
+		memory: [16],
 		gfxVersion: "gfx1102",
 		msrp: 350,
 		power: 190,
