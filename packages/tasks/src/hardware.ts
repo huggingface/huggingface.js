@@ -222,7 +222,6 @@ export const SKUS = {
 				msrp: 520,
 				power: 37,
 				releaseYear: 2024,
-				aliases: ["Lunar Lake"],
 			},
 			"Intel Core Ultra 7 265KF": {
 				tflops: 1.53,
