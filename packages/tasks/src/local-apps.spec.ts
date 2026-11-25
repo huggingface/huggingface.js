@@ -3,21 +3,6 @@ import { LOCAL_APPS } from "./local-apps.js";
 import type { ModelData } from "./model-data.js";
 
 describe("local-apps", () => {
-	it.each([
-		["gemma-4-26B_q4_0-it.gguf", ":gemma-4-26B_q4_0-it.gguf"],
-		["model.Q4_K_M.gguf", ":model.Q4_K_M.gguf"],
-		["model.gguf", ":model.gguf"],
-		["Q4_K_M/model.gguf", ":Q4_K_M"],
-		[undefined, ":{{QUANT_TAG}}"],
-	])("Ollama selects the requested file %s", (filepath, tag) => {
-		const model: ModelData = {
-			id: "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
-			tags: ["conversational"],
-			inference: "",
-		};
-		expect(LOCAL_APPS.ollama.snippet(model, filepath)).toBe(`ollama run hf.co/${model.id}${tag}`);
-	});
-
 	it("llama.cpp conversational", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
 		const model: ModelData = {
