@@ -1,15 +1,133 @@
-import { assert, it, describe } from "vitest";
+import { assert, it, describe, expect, vi } from "vitest";
 
 import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts";
 import type { RepoId } from "../types/public";
 import type { CommitFile } from "./commit";
-import { commit } from "./commit";
+import { commit, commitIter } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { fileDownloadInfo } from "./file-download-info";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { isFrontend } from "../utils/isFrontend";
+
+describe("commit cancellation", () => {
+	const response = {
+		commitOid: "0123456789abcdef",
+		commitUrl: "https://example.test/commit",
+		hookOutput: "",
+		failed: [],
+	};
+
+	it.each(["model", "bucket"] as const)("honors a pre-aborted signal for a %s", async (type) => {
+		const controller = new AbortController();
+		controller.abort();
+		const fetch = vi.fn(async () => new Response(JSON.stringify(response)));
+
+		await expect(
+			commit({
+				repo: { type, name: "test/repo" },
+				title: "Delete a file",
+				accessToken: "hf_test",
+				hubUrl: "https://example.test",
+				operations: [{ operation: "delete", path: "old.txt" }],
+				abortSignal: controller.signal,
+				fetch,
+			}),
+		).rejects.toMatchObject({ name: "AbortError" });
+		expect(fetch).not.toHaveBeenCalled();
+	});
+
+	it.each(["model", "bucket"] as const)("does not fetch URL content when already aborted for a %s", async (type) => {
+		const controller = new AbortController();
+		controller.abort();
+		const fetch = vi.fn().mockRejectedValue(new Error("Unexpected source request"));
+		await expect(
+			commit({
+				repo: { type, name: "test/repo" },
+				title: "Upload a URL",
+				accessToken: "hf_test",
+				hubUrl: "https://example.test",
+				operations: [{ operation: "addOrUpdate", path: "new.txt", content: new URL("https://example.test/source") }],
+				abortSignal: controller.signal,
+				fetch,
+			}),
+		).rejects.toMatchObject({ name: "AbortError" });
+		expect(fetch).not.toHaveBeenCalled();
+	});
+
+	it.each(["model", "bucket"] as const)("honors cancellation after the first phase for a %s", async (type) => {
+		const controller = new AbortController();
+		const fetch = vi.fn(async () => new Response(JSON.stringify(response)));
+		const iterator = commitIter({
+			repo: { type, name: "test/repo" },
+			title: "Delete a file",
+			accessToken: "hf_test",
+			hubUrl: "https://example.test",
+			operations: [{ operation: "delete", path: "old.txt" }],
+			abortSignal: controller.signal,
+			fetch,
+		});
+
+		expect(await iterator.next()).toEqual({
+			done: false,
+			value: { event: "phase", phase: type === "model" ? "preuploading" : "uploadingLargeFiles" },
+		});
+		controller.abort();
+		const consumeRemaining = async () => {
+			let result = await iterator.next();
+			while (!result.done) {
+				result = await iterator.next();
+			}
+		};
+		await expect(consumeRemaining()).rejects.toMatchObject({ name: "AbortError" });
+		expect(fetch).not.toHaveBeenCalled();
+	});
+
+	it.each(["model", "bucket"] as const)("still cancels an in-flight request for a %s", async (type) => {
+		const controller = new AbortController();
+		const fetch = vi.fn(
+			async (_input: RequestInfo | URL, init?: RequestInit) =>
+				new Promise<Response>((_resolve, reject) => {
+					const signal = init?.signal;
+					assert(signal);
+					signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+					controller.abort();
+				}),
+		);
+		await expect(
+			commit({
+				repo: { type, name: "test/repo" },
+				title: "Delete a file",
+				accessToken: "hf_test",
+				hubUrl: "https://example.test",
+				operations: [{ operation: "delete", path: "old.txt" }],
+				abortSignal: controller.signal,
+				fetch,
+			}),
+		).rejects.toMatchObject({ name: "AbortError" });
+		expect(fetch).toHaveBeenCalledOnce();
+	});
+
+	it.each([
+		{ type: "model", withSignal: true },
+		{ type: "model", withSignal: false },
+		{ type: "bucket", withSignal: true },
+		{ type: "bucket", withSignal: false },
+	] as const)("still commits to a $type withSignal=$withSignal", async ({ type, withSignal }) => {
+		const fetch = vi.fn(async () => new Response(JSON.stringify(response)));
+		await commit({
+			repo: { type, name: "test/repo" },
+			title: "Delete a file",
+			accessToken: "hf_test",
+			hubUrl: "https://example.test",
+			operations: [{ operation: "delete", path: "old.txt" }],
+			abortSignal: withSignal ? new AbortController().signal : undefined,
+			fetch,
+		});
+		expect(fetch).toHaveBeenCalledOnce();
+	});
+});
 
 const lfsContent = "O123456789".repeat(100_000);
 
