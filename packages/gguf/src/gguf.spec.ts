@@ -921,6 +921,7 @@ describe("gguf", () => {
 			const originalHeaderBytes = new Uint8Array(await originalHeaderResponse.arrayBuffer());
 
 			const alignment = Number(originalMetadata["general.alignment"] ?? 32);
+			originalMetadata.tensor_count.value = 0n;
 			const completeHeaderBytes = serializeGgufMetadata(originalMetadata, {
 				littleEndian,
 				alignment,
@@ -1048,6 +1049,33 @@ describe("gguf", () => {
 			await expect(parseBytes(buildGgufWithShapes([[1_000_000n, 1_000_000n]]))).rejects.toThrow(
 				/cannot fit in a \d+-byte file/,
 			);
+		});
+
+		it("rejects a file truncated before its tensor infos", async () => {
+			const bytes = buildGgufWithShapes([[4n, 4n]], 64).subarray(0, 24);
+			await expect(parseBytes(bytes)).rejects.toThrow();
+		});
+
+		it("rejects a file truncated inside a metadata value", async () => {
+			// one UINT32 KV with its value bytes missing
+			const key = new TextEncoder().encode("abc");
+			const bytes = new Uint8Array(4 + 4 + 8 + 8 + 8 + key.length + 4);
+			const view = new DataView(bytes.buffer);
+			let off = 0;
+			bytes.set(new TextEncoder().encode("GGUF"), off);
+			off += 4;
+			view.setUint32(off, 3, true);
+			off += 4;
+			view.setBigUint64(off, 0n, true);
+			off += 8;
+			view.setBigUint64(off, 1n, true);
+			off += 8;
+			view.setBigUint64(off, BigInt(key.length), true);
+			off += 8;
+			bytes.set(key, off);
+			off += key.length;
+			view.setUint32(off, GGUFValueType.UINT32, true);
+			await expect(parseBytes(bytes)).rejects.toThrow(/unexpected end of file/);
 		});
 
 		it("accepts a well-formed small file", async () => {

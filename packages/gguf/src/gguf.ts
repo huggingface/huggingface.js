@@ -137,6 +137,7 @@ class RangeView {
 	 * Fetch a new chunk from the server
 	 */
 	async fetchChunk() {
+		this.assertHasMoreData();
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
 		const response = await (this.params?.fetch ?? fetch)(this.uri, {
 			headers: {
@@ -161,6 +162,7 @@ class RangeView {
 	 * Append new data into the buffer
 	 */
 	appendBuffer(buf: Uint8Array) {
+		const newByteLength = this.chunk * HTTP_CHUNK_SIZE + buf.byteLength;
 		/// TODO(fix typing)
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -168,14 +170,14 @@ class RangeView {
 			/// TODO(fix typing)
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			this.buffer.resize((this.chunk + 1) * HTTP_CHUNK_SIZE);
+			this.buffer.resize(newByteLength);
 			new Uint8Array(this.buffer).set(buf, this.chunk * HTTP_CHUNK_SIZE);
 		} else {
 			// If the browser does not support ArrayBuffer.resize, we fallback to this polyfill version
 			/// TODO(fix typing)
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			const newBuffer = new ArrayBuffer((this.chunk + 1) * HTTP_CHUNK_SIZE, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
+			const newBuffer = new ArrayBuffer(newByteLength, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
 			const arrView = new Uint8Array(newBuffer);
 			arrView.set(new Uint8Array(this.buffer));
 			arrView.set(buf, this.chunk * HTTP_CHUNK_SIZE);
@@ -187,8 +189,19 @@ class RangeView {
 	 * Check whether we need to fetch a new chunk
 	 */
 	async fetchChunkIfNeeded(offset: number) {
+		if (this.totalFileSize !== undefined && this.dataView.byteLength >= this.totalFileSize) {
+			return;
+		}
 		if (this.dataView.byteLength - offset < HTTP_DATA_LEEWAY) {
 			await this.fetchChunk();
+		}
+	}
+	/**
+	 * Reject when the next chunk would start at or past the end of the file
+	 */
+	assertHasMoreData() {
+		if (this.totalFileSize !== undefined && this.chunk * HTTP_CHUNK_SIZE >= this.totalFileSize) {
+			throw new Error("not a valid gguf file: unexpected end of file");
 		}
 	}
 }
@@ -202,6 +215,7 @@ class RangeViewLocalFile extends RangeView {
 	 * Read a new chunk from local file system.
 	 */
 	override async fetchChunk(): Promise<void> {
+		this.assertHasMoreData();
 		const { FileBlob } = await import("./utils/FileBlob");
 		const blob = await FileBlob.create(this.uri);
 		this.totalFileSize = blob.size;
