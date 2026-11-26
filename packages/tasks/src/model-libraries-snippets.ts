@@ -1618,6 +1618,18 @@ results = model("https://raw.githubusercontent.com/LibreYOLO/libreyolo/release/l
 	];
 };
 
+export const liteparse = (): string[] => [
+	`# pip install liteparse
+from liteparse import LiteParse, models
+
+models.pull("ocria-nano")  # once: downloads this model and ONNX Runtime
+result = LiteParse(ocr_backend="ocria-nano", output_format="markdown").parse("scan.pdf")
+print(result.text)`,
+	`# CLI: pip install liteparse, npm i -g @llamaindex/liteparse or cargo install liteparse
+lit models pull ocria-nano
+lit parse scan.pdf --format markdown`,
+];
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [

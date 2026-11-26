@@ -1040,6 +1040,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/webis-de/lightning-ir",
 		snippets: snippets.lightning_ir,
 	},
+	liteparse: {
+		prettyLabel: "LiteParse",
+		repoName: "LiteParse",
+		repoUrl: "https://github.com/run-llama/liteparse",
+		docsUrl: "https://developers.llamaindex.ai/liteparse/",
+		snippets: snippets.liteparse,
+		filter: false,
+		countDownloads: `path:"det.meta.json"`,
+	},
 	litert: {
 		prettyLabel: "LiteRT",
 		repoName: "LiteRT",

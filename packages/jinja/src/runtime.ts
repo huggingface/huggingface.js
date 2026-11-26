@@ -1243,6 +1243,9 @@ export class Interpreter {
 			// Evaulate pure numeric operations with binary operators.
 			const a = left.value,
 				b = right.value;
+			if (b === 0 && ["/", "//", "%"].includes(operator)) {
+				throw new Error("division by zero");
+			}
 			switch (operator) {
 				// Arithmetic operators
 				case "+":
