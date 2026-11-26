@@ -156,6 +156,22 @@ function isToolCallingLocalAgentModel(model: ModelData): boolean {
 	);
 }
 
+/**
+ * Whether a parsed quant label is delimited the way llama.cpp matches Hub tags:
+ * `(^|[-./])<tag>[.-]` (see ggml-org/llama.cpp download.cpp). Labels glued with
+ * `_` (e.g. `…_q4_0-it.gguf` → `Q4_0`) do not match and must not be used as tags.
+ */
+function quantLabelMatchesFilename(filepath: string, quantLabel: string): boolean {
+	const escaped = quantLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return new RegExp(`(^|[-./])${escaped}[.-]`, "i").test(filepath);
+}
+
+/**
+ * Hub tag for GGUF snippets (`repo:tag`). Prefer a delimited quant label when it
+ * will resolve; for root-level files with nonstandard names, use the filename
+ * without `.gguf` (accepted by Hub manifests and llama.cpp / node-llama-cpp).
+ * Nested paths keep the quant-label fallback used before exact-file tags.
+ */
 function getQuantTag(filepath?: string): string {
 	const defaultTag = ":{{QUANT_TAG}}";
 
@@ -164,6 +180,15 @@ function getQuantTag(filepath?: string): string {
 	}
 
 	const quantLabel = parseGGUFQuantLabel(filepath);
+	if (quantLabel && quantLabelMatchesFilename(filepath, quantLabel)) {
+		return `:${quantLabel}`;
+	}
+
+	if (!filepath.includes("/")) {
+		const base = filepath.replace(/\.gguf$/i, "");
+		return base ? `:${base}` : defaultTag;
+	}
+
 	return quantLabel ? `:${quantLabel}` : defaultTag;
 }
 

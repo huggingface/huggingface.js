@@ -20,6 +20,76 @@ llama cli -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`,
 		]);
 	});
 
+	it("llama.cpp uses delimited quant tags for conventional filenames", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf");
+
+		expect(snippet[0].content).toEqual([
+			`# Start a local OpenAI-compatible server with a web UI:
+llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M`,
+			`# Run inference directly in the terminal:
+llama cli -hf bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M`,
+		]);
+	});
+
+	it("llama.cpp falls back to the root filename when the quant label is not delimited", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
+		const model: ModelData = {
+			id: "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
+			tags: ["conversational"],
+			inference: "",
+		};
+		const file = "gemma-4-26B_q4_0-it.gguf";
+		const snippet = snippetFunc(model, file);
+
+		expect(snippet[0].content).toEqual([
+			`# Start a local OpenAI-compatible server with a web UI:
+llama serve -hf google/gemma-4-26B-A4B-it-qat-q4_0-gguf:gemma-4-26B_q4_0-it`,
+			`# Run inference directly in the terminal:
+llama cli -hf google/gemma-4-26B-A4B-it-qat-q4_0-gguf:gemma-4-26B_q4_0-it`,
+		]);
+	});
+
+	it("node-llama-cpp uses the root filename when the quant label is not delimited", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["node-llama-cpp"];
+		const model: ModelData = {
+			id: "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
+			tags: ["conversational"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model, "gemma-4-26B_q4_0-it.gguf");
+
+		expect(snippet[0].content).toBe(
+			"npx -y node-llama-cpp chat hf:google/gemma-4-26B-A4B-it-qat-q4_0-gguf:gemma-4-26B_q4_0-it",
+		);
+		expect(snippet[1].content).toBe(
+			"npx -y node-llama-cpp inspect estimate hf:google/gemma-4-26B-A4B-it-qat-q4_0-gguf:gemma-4-26B_q4_0-it",
+		);
+	});
+
+	it("pi llama.cpp server uses the root filename when the quant label is not delimited", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["pi"];
+		const model: ModelData = {
+			id: "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096, chat_template: "{% if tools %}" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model, "gemma-4-26B_q4_0-it.gguf");
+
+		expect(snippet[0].content).toContain(
+			"llama serve -hf google/gemma-4-26B-A4B-it-qat-q4_0-gguf:gemma-4-26B_q4_0-it",
+		);
+		expect(snippet[1].content).toContain(
+			'"id": "google/gemma-4-26B-A4B-it-qat-q4_0-gguf:gemma-4-26B_q4_0-it"',
+		);
+	});
+
 	it("llama.cpp non-conversational", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
 		const model: ModelData = {
