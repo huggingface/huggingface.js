@@ -13,11 +13,24 @@ export class ResultFormatter {
 	 * Formats a CallToolResult's contents into a single string.
 	 * - Text content is included directly
 	 * - Binary content (images, audio, blobs) is summarized
+	 * - `isError: true` is prefixed so the model can see MCP-level tool failures
+	 *   (the protocol reports those as a successful RPC with `isError`, not an exception)
 	 *
 	 * @param result The CallToolResult to format
 	 * @returns A human-readable string representation of the result contents
 	 */
 	static format(result: CompatibilityCallToolResult): string {
+		const body = this.formatContent(result);
+		if (!result.isError) {
+			return body;
+		}
+		if (body.startsWith("Error:")) {
+			return body;
+		}
+		return `Error: MCP tool returned isError=true\n${body}`;
+	}
+
+	private static formatContent(result: CompatibilityCallToolResult): string {
 		if (!result.content || !Array.isArray(result.content) || result.content.length === 0) {
 			return "[No content]";
 		}
