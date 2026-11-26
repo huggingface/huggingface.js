@@ -156,6 +156,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 190,
 		releaseYear: 2024,
 	},
+	"RX 7600": {
+		tflops: 43.5,
+		memory: [8],
+		gfxVersion: "gfx1102",
+		msrp: 269,
+		power: 165,
+		releaseYear: 2023,
+	},
 	"RX 6950 XT": {
 		tflops: 47.31,
 		memory: [16],
