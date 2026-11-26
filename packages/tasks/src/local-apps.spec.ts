@@ -293,6 +293,35 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 	});
 
+	it("hatchlight deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["hatchlight"];
+		const model: ModelData = {
+			id: "stabilityai/stable-diffusion-xl-base-1.0",
+			tags: ["diffusers", "safetensors"],
+			library_name: "diffusers",
+			pipeline_tag: "text-to-image",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe("https://hatchlight.app/hf?repo=stabilityai%2Fstable-diffusion-xl-base-1.0");
+		expect(deeplink(model, "sd_xl_base_1.0.safetensors").href).toBe(
+			"https://hatchlight.app/hf?repo=stabilityai%2Fstable-diffusion-xl-base-1.0&file=sd_xl_base_1.0.safetensors",
+		);
+	});
+
+	it("hatchlight deeplink - lora", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["hatchlight"];
+		const model: ModelData = {
+			id: "nerijs/pixel-art-xl",
+			tags: ["diffusers", "lora"],
+			library_name: "diffusers",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+	});
+
 	it("atomic chat deeplink", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS["atomic-chat"];
 		const model: ModelData = {

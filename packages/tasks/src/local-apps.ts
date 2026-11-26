@@ -754,6 +754,21 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://diffusionbee.com/huggingface_import?model_id=${model.id}`),
 	},
+	hatchlight: {
+		prettyLabel: "Hatchlight",
+		docsUrl: "https://hatchlight.app",
+		mainTask: "text-to-image",
+		displayOnModelPage: (model) =>
+			model.library_name === "diffusers" && (model.pipeline_tag === "text-to-image" || model.tags.includes("lora")),
+		deeplink: (model, filepath?: string) => {
+			const url = new URL("https://hatchlight.app/hf");
+			url.searchParams.set("repo", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
+	},
 	joyfusion: {
 		prettyLabel: "JoyFusion",
 		docsUrl: "https://joyfusion.app",
