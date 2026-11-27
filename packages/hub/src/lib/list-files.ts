@@ -42,6 +42,10 @@ export interface ListFileEntry {
 	 */
 	uploadedAt?: string;
 	/**
+	 * POSIX file mode (st_mode), e.g. `0o100755`. Only available for bucket files that have a mode set.
+	 */
+	mode?: number;
+	/**
 	 * Only fetched if `expand` is set to `true` in the `listFiles` call.
 	 */
 	securityFileStatus?: unknown;
