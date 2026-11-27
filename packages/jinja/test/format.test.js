@@ -73,6 +73,16 @@ const FORMATTING_TESTS = Object.freeze({
 		formatted: `{{- (not 1) == false and true and not false -}}`,
 		rendered: `true`,
 	},
+	COMPARISON_CHAIN: {
+		template: `{{ 1 <   2<3 }}`,
+		formatted: `{{- 1 < 2 < 3 -}}`,
+		rendered: `true`,
+	},
+	GROUPED_COMPARISON_OPERAND: {
+		template: `{{ (1 < 2) == true == (2 < 3) }}`,
+		formatted: `{{- (1 < 2) == true == (2 < 3) -}}`,
+		rendered: `true`,
+	},
 	NEGATED_FILTER_OPERAND: {
 		template: `{{ -(5 | abs) }}`,
 		formatted: `{{- -(5 | abs) -}}`,
