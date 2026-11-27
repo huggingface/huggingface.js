@@ -1,0 +1,106 @@
+#usda 1.0
+(
+    upAxis = "Z"
+)
+
+# Every implicit gprim, on each axis, rotated and scaled, bound to a material
+# or tinted by displayColor, hidden or of guide purpose (not drawn), and placed
+# by a PointInstancer.
+def Material "Red"
+{
+    token outputs:surface.connect = </Red/Surface.outputs:surface>
+
+    def Shader "Surface"
+    {
+        uniform token info:id = "UsdPreviewSurface"
+        color3f inputs:diffuseColor = (1, 0, 0)
+        token outputs:surface
+    }
+}
+
+def Xform "Shapes" (
+    prepend apiSchemas = ["MaterialBindingAPI"]
+)
+{
+    rel material:binding = </Red>
+    float3 xformOp:rotateXYZ = (30, 45, 10)
+    uniform token[] xformOpOrder = ["xformOp:rotateXYZ"]
+
+    def Cube "Cube"
+    {
+        double size = 3
+    }
+    def Sphere "Sphere"
+    {
+        double radius = 2
+        double3 xformOp:translate = (6, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+    def Cylinder "CylinderX"
+    {
+        double radius = 0.5
+        double height = 4
+        uniform token axis = "X"
+    }
+    def Cylinder "CylinderY"
+    {
+        uniform token axis = "Y"
+        double3 xformOp:translate = (0, 6, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+    def Cone "Cone"
+    {
+        double radius = 1.5
+        double height = 3
+        float3 xformOp:scale = (1, 2, 0.5)
+        uniform token[] xformOpOrder = ["xformOp:scale"]
+    }
+    def Capsule "CapsuleY"
+    {
+        double radius = 0.75
+        double height = 2
+        uniform token axis = "Y"
+    }
+    def Plane "PlaneX"
+    {
+        double width = 2
+        double length = 5
+        uniform token axis = "X"
+    }
+    def Plane "PlaneY"
+    {
+        double width = 3
+        double length = 1
+        uniform token axis = "Y"
+    }
+}
+
+def Sphere "Tinted"
+{
+    color3f[] primvars:displayColor = [(0, 1, 0)]
+    double3 xformOp:translate = (0, 0, 10)
+    uniform token[] xformOpOrder = ["xformOp:translate"]
+}
+
+def Sphere "Hidden"
+{
+    token visibility = "invisible"
+}
+
+def Cube "Guide"
+{
+    uniform token purpose = "guide"
+}
+
+def PointInstancer "Instancer"
+{
+    rel prototypes = </Instancer/Protos/Box>
+    int[] protoIndices = [0, 0]
+    point3f[] positions = [(0, -8, 0), (4, -8, 0)]
+    quath[] orientations = [(1, 0, 0, 0), (0.9239, 0.3827, 0, 0)]
+
+    def Scope "Protos"
+    {
+        def Cube "Box" {}
+    }
+}

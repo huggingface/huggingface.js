@@ -2,6 +2,7 @@ import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export async function deleteCollectionItem(
 	params: {
@@ -23,7 +24,7 @@ export async function deleteCollectionItem(
 ): Promise<void> {
 	const accessToken = checkCredentials(params);
 
-	const res = await (params.fetch ?? fetch)(
+	const res = await fetchWithServerWarnings(params.fetch)(
 		`${params.hubUrl ?? HUB_URL}/api/collections/${params.slug}/items/${params.itemId}`,
 		{
 			method: "DELETE",

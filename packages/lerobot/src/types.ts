@@ -40,15 +40,12 @@ export interface LeRobotEpisodeVideo {
 
 /** An episode's frame rows, read from the parquet file its `data` points at. */
 export interface LeRobotFrames {
-	/** Number of frames read. */
 	length: number;
 	/** Seconds from the start of the episode, one per frame. */
 	timestamps: number[];
 	/**
-	 * Feature key -> one series per component, e.g. `observation.state` -> an array per motor, each
-	 * `length` long. Numeric and boolean columns are included, a scalar one as a single series and
-	 * booleans as 0 / 1. LeRobot's bookkeeping columns (`timestamp`, `frame_index`, `episode_index`,
-	 * `index`, `task_index`) are left out.
+	 * Feature key -> one series per component (e.g. per motor), each `length` long. A scalar is one
+	 * series, booleans are 0 / 1, and bookkeeping columns such as `frame_index` are left out.
 	 */
 	series: Record<string, number[][]>;
 	/** Feature key -> component names, for the features whose `info.json` entry declares them. */
@@ -63,12 +60,9 @@ export interface LeRobotEpisodeData {
 	toRow: number;
 }
 
-/**
- * One episode, normalized so that v2 and v3 datasets are indistinguishable to callers.
- */
+/** One episode, the same shape for v2 and v3. */
 export interface LeRobotEpisode {
 	index: number;
-	/** Number of frames. */
 	length: number;
 	durationSec: number;
 	tasks: string[];

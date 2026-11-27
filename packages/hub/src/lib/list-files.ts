@@ -5,6 +5,7 @@ import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { toRepoId } from "../utils/toRepoId";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export interface ListFileEntry {
 	type: "file" | "directory" | "unknown";
@@ -40,6 +41,10 @@ export interface ListFileEntry {
 	 * Only available for bucket repos.
 	 */
 	uploadedAt?: string;
+	/**
+	 * POSIX file mode (st_mode), e.g. `0o100755`. Only available for bucket files that have a mode set.
+	 */
+	mode?: number;
 	/**
 	 * Only fetched if `expand` is set to `true` in the `listFiles` call.
 	 */
@@ -79,10 +84,10 @@ export async function* listFiles(
 	const revision = repoId.type === "bucket" ? undefined : params.revision || "main";
 	let url: string | undefined = `${params.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}/tree${
 		revision ? `/${encodeURIComponent(revision)}` : ""
-	}${params.path ? "/" + params.path : ""}?recursive=${!!params.recursive}&expand=${!!params.expand}`;
+	}${params.path ? "/" + params.path.split("/").map(encodeURIComponent).join("/") : ""}?recursive=${!!params.recursive}&expand=${!!params.expand}`;
 
 	while (url) {
-		const res: Response = await (params.fetch ?? fetch)(url, {
+		const res: Response = await fetchWithServerWarnings(params.fetch)(url, {
 			headers: {
 				accept: "application/json",
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),

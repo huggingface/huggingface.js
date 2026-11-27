@@ -5,6 +5,7 @@ import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export const DATASET_EXPAND_KEYS = [
 	"private",
@@ -97,7 +98,7 @@ export async function* listDatasets<
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/datasets` + (search ? "?" + search : "");
 
 	while (url) {
-		const res: Response = await (params?.fetch ?? fetch)(url, {
+		const res: Response = await fetchWithServerWarnings(params?.fetch)(url, {
 			headers: {
 				accept: "application/json",
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),

@@ -3,6 +3,7 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
+import { fetchWithServerWarnings } from "../utils/serverWarnings";
 
 export interface LfsPathInfo {
 	oid: string;
@@ -44,6 +45,10 @@ export interface PathInfo {
 	 * Only available for bucket repos.
 	 */
 	uploadedAt?: string;
+	/**
+	 * POSIX file mode (st_mode), e.g. `0o100755`. Only available for bucket files that have a mode set.
+	 */
+	mode?: number;
 	securityFileStatus?: SecurityFileStatus;
 }
 
@@ -98,7 +103,7 @@ export async function pathsInfo(
 		revision ? `/${encodeURIComponent(revision)}` : ""
 	}`;
 
-	const resp = await (params.fetch ?? fetch)(url, {
+	const resp = await fetchWithServerWarnings(params.fetch)(url, {
 		method: "POST",
 		headers: {
 			...(accessToken && {
@@ -130,6 +135,7 @@ export async function pathsInfo(
 		size: item.size,
 		xetHash: item.xetHash,
 		uploadedAt: item.uploadedAt,
+		mode: item.mode,
 		securityFileStatus: item.securityFileStatus,
 		lastCommit: item.lastCommit
 			? {
