@@ -1509,3 +1509,110 @@ describe("gguf", () => {
 		}, 15_000);
 	});
 });
+
+describe("gguf over HTTP: response status handling", () => {
+	const URL_FAKE = "https://example.com/org/repo/resolve/main/model.gguf";
+
+	const STRING_LENGTH = 20_000;
+
+	/**
+	 * A valid GGUF (v3, no tensors) of about `approxSize` bytes: many medium-sized string KVs (so that the
+	 * parser has to fetch further chunks), followed by a small one.
+	 */
+	function makeGguf(approxSize: number): Uint8Array {
+		const typedMetadata = {
+			version: { value: 3, type: GGUFValueType.UINT32 },
+			tensor_count: { value: 0n, type: GGUFValueType.UINT64 },
+			kv_count: { value: 0n, type: GGUFValueType.UINT64 },
+			"general.architecture": { value: "llama", type: GGUFValueType.STRING },
+		} as GGUFTypedMetadata;
+		for (let i = 0; i < Math.ceil(approxSize / STRING_LENGTH); i++) {
+			typedMetadata[`test.s${i}`] = { value: String(i).padStart(STRING_LENGTH, "x"), type: GGUFValueType.STRING };
+		}
+		typedMetadata["test.after"] = { value: 42, type: GGUFValueType.UINT32 };
+		return serializeGgufMetadata(typedMetadata);
+	}
+
+	function expectFullyParsed(parsed: GGUFParseOutput, approxSize: number) {
+		const last = Math.ceil(approxSize / STRING_LENGTH) - 1;
+		const metadata: Record<string, MetadataValue> = Object.fromEntries(Object.entries(parsed.metadata));
+		expect(metadata["general.architecture"]).toBe("llama");
+		expect(metadata["test.s0"]).toBe("0".padStart(STRING_LENGTH, "x"));
+		expect(metadata[`test.s${last}`]).toBe(String(last).padStart(STRING_LENGTH, "x"));
+		expect(metadata["test.after"]).toBe(42);
+	}
+
+	/** Fake server that honors `Range` with a 206 + `Content-Range`. */
+	function rangeFetch(file: Uint8Array, calls: Array<{ range: string | null; status: number }> = []): typeof fetch {
+		return (async (_input: RequestInfo | URL, init?: RequestInit) => {
+			const range = new Headers(init?.headers).get("range");
+			const match = range?.match(/^bytes=(\d+)-(\d+)$/);
+			if (!match) {
+				calls.push({ range, status: 200 });
+				return new Response(file, { status: 200 });
+			}
+			const start = Number(match[1]);
+			const end = Math.min(Number(match[2]), file.length - 1);
+			if (start >= file.length) {
+				calls.push({ range, status: 416 });
+				return new Response(JSON.stringify({ error: "Range Not Satisfiable" }), {
+					status: 416,
+					headers: { "content-range": `bytes */${file.length}`, "content-type": "application/json" },
+				});
+			}
+			calls.push({ range, status: 206 });
+			return new Response(file.slice(start, end + 1), {
+				status: 206,
+				headers: { "content-range": `bytes ${start}-${end}/${file.length}` },
+			});
+		}) as typeof fetch;
+	}
+
+	it("parses a file served with 206 partial responses (spanning several chunks)", async () => {
+		const file = makeGguf(3_000_000);
+		const calls: Array<{ range: string | null; status: number }> = [];
+		const parsed = await gguf(URL_FAKE, { fetch: rangeFetch(file, calls) });
+
+		expectFullyParsed(parsed, 3_000_000);
+		expect(calls.length).toBeGreaterThan(1);
+		expect(calls.every((c) => c.status === 206)).toBe(true);
+	});
+
+	it("tolerates a 416 on the extra chunk fetched near the end of a file smaller than one chunk", async () => {
+		// the KVs go past (chunk size - leeway) in a file smaller than one chunk, which triggers a fetch of chunk 1
+		const file = makeGguf(1_700_000);
+		const calls: Array<{ range: string | null; status: number }> = [];
+		const parsed = await gguf(URL_FAKE, { fetch: rangeFetch(file, calls) });
+
+		expectFullyParsed(parsed, 1_700_000);
+		expect(calls.map((c) => c.status)).toEqual([206, 416]);
+	});
+
+	it("handles a server that ignores Range and answers 200 with the whole file", async () => {
+		const file = makeGguf(3_000_000);
+		const fetchIgnoringRange = (async () => new Response(file, { status: 200 })) as unknown as typeof fetch;
+		const parsed = await gguf(URL_FAKE, { fetch: fetchIgnoringRange });
+
+		expectFullyParsed(parsed, 3_000_000);
+	});
+
+	it.each([
+		[401, "Unauthorized", JSON.stringify({ error: "Invalid username or password." })],
+		[403, "Forbidden", "Access to this gated repo is restricted"],
+		[404, "Not Found", JSON.stringify({ error: "Entry not found" })],
+		[500, "Internal Server Error", "boom"],
+	])("throws a status error (not a GGUF magic number error) on HTTP %i", async (status, statusText, body) => {
+		const failingFetch = (async () => new Response(body, { status, statusText })) as unknown as typeof fetch;
+		const error = await gguf(`${URL_FAKE}?X-Amz-Signature=sig-secret#frag`, {
+			fetch: failingFetch,
+			additionalFetchHeaders: { Authorization: "Bearer hf_token-secret" },
+		}).then(
+			() => undefined,
+			(e: unknown) => e as Error,
+		);
+
+		expect(error).toBeInstanceOf(Error);
+		expect(error?.message).toBe(`Failed to fetch ${URL_FAKE}: ${status} ${statusText}`);
+		expect(error?.message).not.toContain("not a valid gguf file");
+	});
+});

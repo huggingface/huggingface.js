@@ -97,6 +97,52 @@ const HTTP_TOTAL_MAX_SIZE = 50 * 10 ** 6; /// 50MB
 /**
  * Internal stateful instance to fetch ranges of HTTP data when needed
  */
+/**
+ * Drops the query string and fragment, which may carry credentials (e.g. signed URLs), before a URL goes
+ * into an error message. Request headers are never part of the message.
+ */
+function stripQueryAndHash(uri: string): string {
+	try {
+		const url = new URL(uri);
+		url.search = "";
+		url.hash = "";
+		return url.toString();
+	} catch {
+		return uri.split(/[?#]/)[0];
+	}
+}
+
+/**
+ * Reads bytes [start, end) of a response body, without buffering anything past `end`.
+ */
+async function readBodyRange(response: Response, start: number, end: number): Promise<Uint8Array> {
+	if (!response.body) {
+		return new Uint8Array(await response.arrayBuffer()).slice(start, end);
+	}
+	const out = new Uint8Array(Math.max(end - start, 0));
+	let written = 0;
+	let position = 0; // offset in the body of the first byte of the current piece
+	const reader = response.body.getReader();
+	try {
+		while (position < end) {
+			const { done, value } = await reader.read();
+			if (done) {
+				break;
+			}
+			const from = Math.max(start - position, 0);
+			const to = Math.min(end - position, value.length);
+			if (to > from) {
+				out.set(value.subarray(from, to), written);
+				written += to - from;
+			}
+			position += value.length;
+		}
+	} finally {
+		await reader.cancel().catch(() => undefined);
+	}
+	return out.subarray(0, written);
+}
+
 class RangeView {
 	protected chunk: number;
 	private buffer: ArrayBuffer;
@@ -144,6 +190,13 @@ class RangeView {
 				Range: `bytes=${range[0]}-${range[1]}`,
 			},
 		});
+		// 416 means the range starts at or past the end of the file (e.g. the extra chunk fetched near the end of a
+		// file smaller than the chunk size), so it is treated as "no more data" rather than as a failure
+		if (!response.ok && response.status !== 416) {
+			throw new Error(
+				`Failed to fetch ${stripQueryAndHash(this.uri)}: ${response.status} ${response.statusText}`.trim(),
+			);
+		}
 		// "bytes 0-999/49501056" — the total is the only part we want, and it costs no extra request
 		const contentRange = response.headers.get("content-range");
 		const total = contentRange?.match(/\/\s*(\d+)\s*$/)?.[1];
@@ -153,7 +206,16 @@ class RangeView {
 				this.totalFileSize = parsed;
 			}
 		}
-		const buf = new Uint8Array(await response.arrayBuffer());
+		let buf: Uint8Array;
+		if (response.status === 416) {
+			buf = new Uint8Array(0);
+		} else if (response.status === 200) {
+			// 200 instead of 206: the server ignored the Range header and is sending the whole file.
+			// Keep only the bytes of the requested range, and stop reading once we have them.
+			buf = await readBodyRange(response, range[0], range[1] + 1);
+		} else {
+			buf = new Uint8Array(await response.arrayBuffer());
+		}
 		this.appendBuffer(buf);
 		this.chunk += 1;
 	}
