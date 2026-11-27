@@ -1959,20 +1959,29 @@ export class Interpreter {
 		const step = this.evaluate(expr.step, environment);
 
 		// Validate arguments
-		if (!(start instanceof IntegerValue || start instanceof UndefinedValue)) {
-			throw new Error("Slice start must be numeric or undefined");
+		if (!(start instanceof IntegerValue || start instanceof UndefinedValue || start instanceof NullValue)) {
+			throw new Error("Slice start must be numeric, none, or undefined");
 		}
-		if (!(stop instanceof IntegerValue || stop instanceof UndefinedValue)) {
-			throw new Error("Slice stop must be numeric or undefined");
+		if (!(stop instanceof IntegerValue || stop instanceof UndefinedValue || stop instanceof NullValue)) {
+			throw new Error("Slice stop must be numeric, none, or undefined");
 		}
-		if (!(step instanceof IntegerValue || step instanceof UndefinedValue)) {
-			throw new Error("Slice step must be numeric or undefined");
+		if (!(step instanceof IntegerValue || step instanceof UndefinedValue || step instanceof NullValue)) {
+			throw new Error("Slice step must be numeric, none, or undefined");
 		}
 
 		if (object instanceof ArrayValue) {
-			return new ArrayValue(slice(object.value, start.value, stop.value, step.value));
+			return new ArrayValue(
+				slice(object.value, start.value ?? undefined, stop.value ?? undefined, step.value ?? undefined),
+			);
 		} else {
-			return new StringValue(slice(Array.from(object.value), start.value, stop.value, step.value).join(""));
+			return new StringValue(
+				slice(
+					Array.from(object.value),
+					start.value ?? undefined,
+					stop.value ?? undefined,
+					step.value ?? undefined,
+				).join(""),
+			);
 		}
 	}
 
