@@ -12,6 +12,30 @@ export interface AmdGpuHardwareSpec extends HardwareSpec {
 const AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS = [16, 24, 32, 48, 64, 96];
 
 export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
+	MI355X: {
+		tflops: 737.2,
+		memory: [288],
+		gfxVersion: "gfx950",
+		msrp: 25_000,
+		power: 1400,
+		releaseYear: 2025,
+	},
+	MI350X: {
+		tflops: 675.8,
+		memory: [288],
+		gfxVersion: "gfx950",
+		msrp: 22_000,
+		power: 1000,
+		releaseYear: 2025,
+	},
+	MI325X: {
+		tflops: 383.0,
+		memory: [256],
+		gfxVersion: "gfx942",
+		msrp: 20_000,
+		power: 1000,
+		releaseYear: 2024,
+	},
 	MI300: {
 		tflops: 383.0,
 		memory: [192],
