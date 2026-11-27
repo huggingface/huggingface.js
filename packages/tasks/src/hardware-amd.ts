@@ -43,7 +43,15 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		msrp: 15_000,
 		power: 750,
 		releaseYear: 2023,
-	},
+MI300: {
+		tflops: 1307.4,
+		memory: [192],
+		gfxVersion: "gfx942",
+		msrp: 15_000,
+		power: 750,
+		releaseYear: 2023,
+		aliases: ["MI300X"],
+},
 	MI325X: {
 		tflops: 1307.4,
 		memory: [256],
