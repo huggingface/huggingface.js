@@ -1537,6 +1537,8 @@ export class Interpreter {
 						);
 					case "length":
 						return new IntegerValue(operand.value.size);
+					case "string":
+						return new StringValue(toJSON(operand, {}, 0, false));
 					default: {
 						// Check if the filter exists in builtins
 						const builtin = operand.builtins.get(filter.value);
