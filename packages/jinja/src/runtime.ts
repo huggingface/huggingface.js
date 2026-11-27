@@ -1267,8 +1267,8 @@ export class Interpreter {
 			}
 			if (operator === "~" && !(left instanceof NullValue || right instanceof NullValue)) {
 				// Special case: Jinja concatenates undefined values as empty strings
-				const lhs = left instanceof UndefinedValue ? "" : left.value.toString();
-				const rhs = right instanceof UndefinedValue ? "" : right.value.toString();
+				const lhs = left instanceof UndefinedValue ? "" : left.toString();
+				const rhs = right instanceof UndefinedValue ? "" : right.toString();
 				return new StringValue(lhs + rhs);
 			}
 			throw new Error(`Cannot perform operation ${operator} on undefined values`);
@@ -1276,7 +1276,7 @@ export class Interpreter {
 			throw new Error("Cannot perform operation on null values");
 		} else if (operator === "~") {
 			// toString and concatenation
-			return new StringValue(left.value.toString() + right.value.toString());
+			return new StringValue(left.toString() + right.toString());
 		} else if (operator === "**" && isNumericLikeValue(left) && isNumericLikeValue(right)) {
 			// Jinja treats booleans as integers here.
 			const a = getNumericValue(left);
@@ -1454,7 +1454,11 @@ export class Interpreter {
 						return new ArrayValue(operand.value.slice().sort((a, b) => compareRuntimeValues(a, b, false)));
 					}
 					case "join":
-						return new StringValue(operand.value.map((x) => x.value).join(""));
+						return new StringValue(
+							operand.value
+								.map((x) => (x instanceof NullValue || x instanceof UndefinedValue ? "" : x.toString()))
+								.join(""),
+						);
 					case "string":
 						return new StringValue(toJSON(operand, {}, 0, false));
 					case "unique": {
@@ -1623,7 +1627,7 @@ export class Interpreter {
 					// NOTE: string.split('') breaks for unicode characters
 					value = Array.from(operand.value);
 				} else if (operand instanceof ArrayValue) {
-					value = operand.value.map((x) => x.value);
+					value = operand.value.map((x) => (x instanceof NullValue || x instanceof UndefinedValue ? "" : x.toString()));
 				} else {
 					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 				}
