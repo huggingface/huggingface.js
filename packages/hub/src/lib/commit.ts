@@ -286,7 +286,6 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							operation: "addOrUpdate" as const,
 							path: operation.path,
 							content: splicedBlob,
-							mode: operation.mode,
 						};
 					}
 
@@ -833,6 +832,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 							operation: "addOrUpdate" as const,
 							path: operation.path,
 							content: splicedBlob,
+							mode: operation.mode,
 						};
 					}
 
