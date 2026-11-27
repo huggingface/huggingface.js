@@ -754,6 +754,16 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://diffusionbee.com/huggingface_import?model_id=${model.id}`),
 	},
+	vulkara: {
+		prettyLabel: "VulKara",
+		docsUrl: "https://www.vulkara.net",
+		mainTask: "text-to-image",
+		macOSOnly: true,
+		displayOnModelPage: (model) =>
+			model.library_name === "diffusers" &&
+			(model.pipeline_tag === "text-to-image" || model.pipeline_tag === "image-to-image"),
+		deeplink: (model) => new URL(`https://www.vulkara.net/hf/?model_id=${model.id}`),
+	},
 	joyfusion: {
 		prettyLabel: "JoyFusion",
 		docsUrl: "https://joyfusion.app",

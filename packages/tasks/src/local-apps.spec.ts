@@ -347,6 +347,47 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		);
 	});
 
+	it("vulkara deeplink", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS["vulkara"];
+		const model: ModelData = {
+			id: "stable-diffusion-v1-5/stable-diffusion-v1-5",
+			tags: ["diffusers", "text-to-image"],
+			library_name: "diffusers",
+			pipeline_tag: "text-to-image",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(deeplink(model).href).toBe(
+			"https://www.vulkara.net/hf/?model_id=stable-diffusion-v1-5/stable-diffusion-v1-5",
+		);
+	});
+
+	it("vulkara shown for diffusers image-to-image models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["vulkara"];
+		const model: ModelData = {
+			id: "black-forest-labs/FLUX.2-klein-4B",
+			tags: ["diffusers", "image-to-image"],
+			library_name: "diffusers",
+			pipeline_tag: "image-to-image",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+	});
+
+	it("vulkara not shown for unrelated model", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["vulkara"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(false);
+	});
+
 	it("unsloth tagged model", async () => {
 		const { displayOnModelPage, deeplink } = LOCAL_APPS.unsloth;
 		const model: ModelData = {
