@@ -1692,21 +1692,30 @@ export class Interpreter {
 							throw new Error("attribute must be a string, integer, or null");
 						}
 
-						// Helper function to get the value to sort by
-						const getSortValue = (item: AnyRuntimeValue): AnyRuntimeValue => {
-							if (attribute instanceof NullValue) {
-								return item;
-							}
-							const attrPath = attribute instanceof IntegerValue ? String(attribute.value) : attribute.value;
-							return getAttributeValue(item, attrPath);
-						};
+						const attributes =
+							attribute instanceof NullValue
+								? null
+								: attribute instanceof StringValue
+									? attribute.value.split(",")
+									: [String(attribute.value)];
 
 						return new ArrayValue(
 							operand.value.slice().sort((a, b) => {
-								const aVal = getSortValue(a);
-								const bVal = getSortValue(b);
-								const result = compareRuntimeValues(aVal, bVal, caseSensitive.value);
-								return reverse.value ? -result : result;
+								if (attributes === null) {
+									const result = compareRuntimeValues(a, b, caseSensitive.value);
+									return reverse.value ? -result : result;
+								}
+								for (const path of attributes) {
+									const result = compareRuntimeValues(
+										getAttributeValue(a, path),
+										getAttributeValue(b, path),
+										caseSensitive.value,
+									);
+									if (result !== 0) {
+										return reverse.value ? -result : result;
+									}
+								}
+								return 0;
 							}),
 						);
 					}
