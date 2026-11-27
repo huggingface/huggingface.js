@@ -333,6 +333,7 @@ export async function* copyFolderIter(
 					path: destPath,
 					sourceXetHash: item.xetHash as string,
 					sourceRepo: sourceRepoId,
+					mode: item.mode,
 				});
 				continue;
 			case "lfs":
@@ -459,6 +460,7 @@ async function* resolveCopyOperationsIter(
 						path: file.destinationPath,
 						sourceXetHash: info.xetHash as string,
 						sourceRepo: group.repoId,
+						mode: info.mode,
 					};
 					continue;
 				case "lfs":

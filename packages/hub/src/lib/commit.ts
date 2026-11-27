@@ -48,6 +48,13 @@ export interface CommitFile {
 	operation: "addOrUpdate";
 	path: string;
 	content: ContentSource;
+	/**
+	 * POSIX file mode (st_mode), e.g. `0o755`, optionally with file type bits `0o100000` (regular file)
+	 * or `0o120000` (symlink, content is the link target).
+	 *
+	 * Only supported for buckets, ignored otherwise. When omitted, the file has no mode on the Hub.
+	 */
+	mode?: number;
 	// forceLfs?: boolean
 }
 
@@ -92,6 +99,13 @@ export interface CommitEditFile {
 		 */
 		end: number;
 	}>;
+	/**
+	 * POSIX file mode (st_mode), e.g. `0o755`, optionally with file type bits `0o100000` (regular file)
+	 * or `0o120000` (symlink, content is the link target).
+	 *
+	 * Only supported for buckets, ignored otherwise. When omitted, the file has no mode on the Hub.
+	 */
+	mode?: number;
 }
 
 type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
@@ -119,6 +133,13 @@ export interface CommitCopyFile {
 	path: string;
 	sourceXetHash: string;
 	sourceRepo: RepoDesignation;
+	/**
+	 * POSIX file mode (st_mode), e.g. `0o755`, optionally with file type bits `0o100000` (regular file)
+	 * or `0o120000` (symlink, content is the link target).
+	 *
+	 * Only supported for buckets, ignored otherwise. When omitted, the file has no mode on the Hub.
+	 */
+	mode?: number;
 }
 
 export type CommitOperation =
@@ -265,6 +286,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							operation: "addOrUpdate" as const,
 							path: operation.path,
 							content: splicedBlob,
+							mode: operation.mode,
 						};
 					}
 
@@ -843,6 +865,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 
 		for (const operations of chunk(allOperations.filter(isFileOperation), 100)) {
 			const xetHashes = new Map<string, string>();
+			const modes = new Map(operations.map((op) => [op.path, op.mode]));
 			abortSignal?.throwIfAborted();
 
 			// First get all the files that are already uploaded out of the way
@@ -907,6 +930,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 								type: "addFile",
 								path,
 								xetHash,
+								mode: modes.get(path),
 							}),
 						)
 						.join("\n"),
@@ -956,6 +980,7 @@ export async function* commitIterBucket(params: CommitParams): AsyncGenerator<Co
 								xetHash: op.sourceXetHash,
 								sourceRepoType: sourceRepoId.type,
 								sourceRepoId: sourceRepoId.name,
+								mode: op.mode,
 							});
 						})
 						.join("\n"),
