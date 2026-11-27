@@ -45,9 +45,19 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 				"nscale provider does not support URL output. Use outputType 'blob', 'dataUrl' or 'json' instead.",
 			);
 		}
+		const parameters: Record<string, unknown> = { ...params.args.parameters };
+		// nscale expects the output resolution as a single `size` string
+		if (typeof parameters.width === "number" && typeof parameters.height === "number") {
+			parameters.size = `${parameters.width}x${parameters.height}`;
+			delete parameters.width;
+			delete parameters.height;
+		}
+		// nscale does not support these parameters
+		delete parameters.num_inference_steps;
+		delete parameters.cfg_scale;
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
-			...params.args.parameters,
+			...parameters,
 			response_format: "b64_json",
 			prompt: params.args.inputs,
 			model: params.model,

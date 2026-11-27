@@ -90,9 +90,18 @@ export class ZaiTextToImageTask extends ZaiTask implements TextToImageTaskHelper
 	}
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const parameters: Record<string, unknown> = { ...(params.args.parameters as Record<string, unknown>) };
+		// zai expects the output resolution as a single `size` string, and no width/height keys
+		const width = parameters.width;
+		const height = parameters.height;
+		delete parameters.width;
+		delete parameters.height;
+		if (typeof width === "number" && typeof height === "number") {
+			parameters.size = `${width}x${height}`;
+		}
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
-			...(params.args.parameters as Record<string, unknown>),
+			...parameters,
 			model: params.model,
 			prompt: params.args.inputs,
 		};
