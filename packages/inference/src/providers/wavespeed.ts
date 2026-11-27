@@ -5,6 +5,7 @@ import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
 import type { BodyParams, OutputType, RequestArgs, UrlParams } from "../types.js";
 import type { ImageTextToVideoArgs } from "../tasks/cv/imageTextToVideo.js";
+import { HF_HUB_URL } from "../config.js";
 import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
@@ -75,12 +76,17 @@ interface WaveSpeedAISubmitTaskResponse {
 }
 
 async function buildImagesField(
-	inputs: Blob | ArrayBuffer,
+	inputs: Blob | ArrayBuffer | ArrayBufferView,
 	hasImages: unknown,
 ): Promise<{ base: string; images: string[] }> {
-	const base = base64FromBytes(
-		new Uint8Array(inputs instanceof ArrayBuffer ? inputs : await (inputs as Blob).arrayBuffer()),
-	);
+	// Accept Blob, ArrayBuffer and ArrayBufferView (e.g. a Node Buffer from fs.readFileSync)
+	const bytes =
+		inputs instanceof ArrayBuffer
+			? new Uint8Array(inputs)
+			: ArrayBuffer.isView(inputs)
+				? new Uint8Array(inputs.buffer, inputs.byteOffset, inputs.byteLength)
+				: new Uint8Array(await inputs.arrayBuffer());
+	const base = base64FromBytes(bytes);
 	const images =
 		Array.isArray(hasImages) && hasImages.every((value): value is string => typeof value === "string")
 			? hasImages
@@ -116,7 +122,11 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		if (params.mapping?.adapter === "lora") {
 			payload.loras = [
 				{
-					path: params.mapping.hfModelId,
+					// Point at the exact weights file when the mapping specifies one — a bare
+					// repo id is ambiguous for repos that contain several LoRA files.
+					path: params.mapping.adapterWeightsPath
+						? `${HF_HUB_URL}/${params.mapping.hfModelId}/resolve/main/${params.mapping.adapterWeightsPath}`
+						: params.mapping.hfModelId,
 					scale: 1, // Default scale value
 				},
 			];
@@ -239,7 +249,7 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
 		const hasImages =
 			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
-		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
+		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer | ArrayBufferView, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
 	}
 
@@ -262,7 +272,7 @@ export class WavespeedAIImageToVideoTask extends WavespeedAITask implements Imag
 	async preparePayloadAsync(args: ImageToVideoArgs): Promise<RequestArgs> {
 		const hasImages =
 			(args as { images?: unknown }).images ?? (args.parameters as Record<string, unknown> | undefined)?.images;
-		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer, hasImages);
+		const { base, images } = await buildImagesField(args.inputs as Blob | ArrayBuffer | ArrayBufferView, hasImages);
 		return { ...args, inputs: args.parameters?.prompt, image: base, images };
 	}
 
@@ -282,7 +292,9 @@ const TRANSPARENT_1PX_PNG_BASE64 =
 	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
 function getTransparentPngBlob(): Blob {
-	const bytes = Uint8Array.from(Buffer.from(TRANSPARENT_1PX_PNG_BASE64, "base64"));
+	const bytes = globalThis.Buffer
+		? Uint8Array.from(globalThis.Buffer.from(TRANSPARENT_1PX_PNG_BASE64, "base64"))
+		: Uint8Array.from(globalThis.atob(TRANSPARENT_1PX_PNG_BASE64), (c) => c.charCodeAt(0));
 	return new Blob([bytes], { type: "image/png" });
 }
 

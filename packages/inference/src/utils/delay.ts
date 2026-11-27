@@ -13,7 +13,6 @@ export function delay(ms: number, signal?: AbortSignal): Promise<void> {
 			cleanup();
 			resolve();
 		}, ms);
-		timeout.unref?.();
 
 		if (!signal) {
 			return;
