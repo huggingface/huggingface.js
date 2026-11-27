@@ -13,7 +13,7 @@ const AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS = [16, 24, 32, 48, 64, 96];
 
 export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 	MI455X: {
-		tflops: 1474.4,
+		tflops: 5000,
 		memory: [432],
 		gfxVersion: "gfx1250",
 		msrp: 40_000,
@@ -21,36 +21,12 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		releaseYear: 2026,
 	},
 	MI450X: {
-		tflops: 1474.4,
+		tflops: 5000,
 		memory: [288],
 		gfxVersion: "gfx1250",
 		msrp: 35_000,
 		power: 2300,
 		releaseYear: 2026,
-	},
-	MI355X: {
-		tflops: 737.2,
-		memory: [288],
-		gfxVersion: "gfx950",
-		msrp: 25_000,
-		power: 1400,
-		releaseYear: 2025,
-	},
-	MI350X: {
-		tflops: 675.8,
-		memory: [288],
-		gfxVersion: "gfx950",
-		msrp: 22_000,
-		power: 1000,
-		releaseYear: 2025,
-	},
-	MI325X: {
-		tflops: 383.0,
-		memory: [256],
-		gfxVersion: "gfx942",
-		msrp: 20_000,
-		power: 1000,
-		releaseYear: 2024,
 	},
 	MI300: {
 		tflops: 383.0,
