@@ -26,6 +26,71 @@ export interface ChatCompletionInputMessageTool extends ChatCompletionInputMessa
 	name?: string;
 }
 
+/**
+ * Assembles the streamed `tool_calls` deltas of one assistant message into complete tool calls.
+ *
+ * `index` is how OpenAI identifies a call across deltas, but OpenAI-compatible servers and gateways differ: some omit
+ * it, some re-use one index for several calls, and some send `id` / `function.name` in a later delta.
+ * A delta is therefore matched to a call in progress by `id` first, then by `index`, then by recency:
+ * - a delta with an `id` we have not seen starts a new call, unless it lands on the index of a call that has no `id` yet;
+ * - a delta with neither `id` nor `index` continues the most recent call, unless it carries a name and that call
+ *   already has one (several whole calls written one after the other).
+ */
+class ToolCallAccumulator {
+	readonly toolCalls: ChatCompletionStreamOutputDeltaToolCall[] = [];
+	private readonly byId = new Map<string, ChatCompletionStreamOutputDeltaToolCall>();
+	private readonly byIndex = new Map<number, ChatCompletionStreamOutputDeltaToolCall>();
+
+	add(delta: ChatCompletionStreamOutputDeltaToolCall): void {
+		let toolCall = this.find(delta);
+		if (!toolCall) {
+			/// first chunk of the tool call. Copy it: the chunk itself is yielded to the caller and must not change later.
+			/// `.function.arguments` is always a string
+			toolCall = { ...delta, function: { ...delta.function, arguments: delta.function.arguments ?? "" } };
+			this.toolCalls.push(toolCall);
+		} else {
+			/// any subsequent chunk to the same tool call
+			if (delta.id && !toolCall.id) {
+				toolCall.id = delta.id;
+			}
+			const name = delta.function.name;
+			if (name && !toolCall.function.name) {
+				toolCall.function.name = name;
+			} else if (name && name !== toolCall.function.name) {
+				/// the name is split over several chunks (a chunk repeating the whole name is ignored)
+				toolCall.function.name += name;
+			}
+			if (delta.function.arguments) {
+				toolCall.function.arguments += delta.function.arguments;
+			}
+		}
+		if (toolCall.id) {
+			this.byId.set(toolCall.id, toolCall);
+		}
+		/// `index` is typed as always present, but some servers omit it
+		if (delta.index !== undefined) {
+			this.byIndex.set(delta.index, toolCall);
+		}
+	}
+
+	private find(delta: ChatCompletionStreamOutputDeltaToolCall): ChatCompletionStreamOutputDeltaToolCall | undefined {
+		const known = delta.id ? this.byId.get(delta.id) : undefined;
+		if (known) {
+			return known;
+		}
+		if (delta.index !== undefined) {
+			const sameIndex = this.byIndex.get(delta.index);
+			/// `sameIndex` would have been found by id above if it had the same one: a different id means an index re-used
+			return !delta.id || !sameIndex?.id ? sameIndex : undefined;
+		}
+		if (delta.id) {
+			return undefined;
+		}
+		const last = this.toolCalls[this.toolCalls.length - 1];
+		return delta.function.name && last?.function.name ? undefined : last;
+	}
+}
+
 export class McpClient {
 	protected client: InferenceClient;
 	protected provider: InferenceProviderOrPolicy | undefined;
@@ -142,7 +207,7 @@ export class McpClient {
 			role: "unknown",
 			content: "",
 		} satisfies ChatCompletionInputMessage;
-		const finalToolCalls: Record<number, ChatCompletionStreamOutputDeltaToolCall> = {};
+		const toolCallAccumulator = new ToolCallAccumulator();
 		let numOfChunks = 0;
 
 		for await (const chunk of stream) {
@@ -163,22 +228,9 @@ export class McpClient {
 			}
 			for (const toolCall of delta.tool_calls ?? []) {
 				// aggregating chunks into an encoded arguments JSON object
-				if (!finalToolCalls[toolCall.index]) {
-					/// first chunk of the tool call
-					finalToolCalls[toolCall.index] = toolCall;
-
-					/// ensure .function.arguments is always a string
-					if (finalToolCalls[toolCall.index].function.arguments === undefined) {
-						finalToolCalls[toolCall.index].function.arguments = "";
-					}
-				} else {
-					/// any subsequent chunk to the same tool call
-					if (toolCall.function.arguments) {
-						finalToolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
-					}
-				}
+				toolCallAccumulator.add(toolCall);
 			}
-			if (opts.exitIfFirstChunkNoTool && numOfChunks <= 2 && Object.keys(finalToolCalls).length === 0) {
+			if (opts.exitIfFirstChunkNoTool && numOfChunks <= 2 && toolCallAccumulator.toolCalls.length === 0) {
 				/// If no tool is present in chunk number 1 or 2, exit.
 				return;
 			}
@@ -190,7 +242,7 @@ export class McpClient {
 			content: message.content,
 		};
 
-		const finalToolCallValues = Object.values(finalToolCalls);
+		const finalToolCallValues = toolCallAccumulator.toolCalls;
 
 		if (finalToolCallValues.length > 0) {
 			assistantMessage.tool_calls = finalToolCallValues.map((toolCall) => ({
