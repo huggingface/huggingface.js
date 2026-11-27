@@ -17,20 +17,20 @@ interface TextToImageOptions extends Options {
  */
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType: "url" },
+	options: TextToImageOptions & { outputType: "url" },
 ): Promise<string>;
 export async function textToImage(
 	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType: "dataUrl" },
+	options: TextToImageOptions & { outputType: "dataUrl" },
 ): Promise<string>;
+export async function textToImage(
+	args: TextToImageArgs,
+	options: TextToImageOptions & { outputType: "json" },
+): Promise<Record<string, unknown>>;
 export async function textToImage(
 	args: TextToImageArgs,
 	options?: TextToImageOptions & { outputType?: undefined | "blob" },
 ): Promise<Blob>;
-export async function textToImage(
-	args: TextToImageArgs,
-	options?: TextToImageOptions & { outputType?: undefined | "json" },
-): Promise<Record<string, unknown>>;
 export async function textToImage(
 	args: TextToImageArgs,
 	options?: TextToImageOptions,
