@@ -108,6 +108,18 @@ const TEST_CASES: {
 		opts: { endpointUrl: "http://localhost:8080/v1" },
 	},
 	{
+		testName: "conversational-llm-temperature-zero",
+		task: "conversational",
+		model: {
+			id: "meta-llama/Llama-3.1-8B-Instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		opts: { streaming: false, temperature: 0, max_tokens: 512 },
+	},
+	{
 		testName: "document-question-answering",
 		task: "document-question-answering",
 		model: {
