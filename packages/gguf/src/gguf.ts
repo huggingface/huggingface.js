@@ -668,7 +668,8 @@ function writeMetadataValue(
 		case GGUFValueType.STRING:
 			return writeString(value as string, version, littleEndian);
 		case GGUFValueType.ARRAY: {
-			if (!subType) {
+			// `GGUFValueType.UINT8` is 0, so compare against `undefined` rather than testing truthiness
+			if (subType === undefined) {
 				throw new Error("Array type requires subType to be specified");
 			}
 			const arrayValue = value as MetadataValue[];
