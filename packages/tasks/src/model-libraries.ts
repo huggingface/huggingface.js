@@ -124,6 +124,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
 	},
+	antinet: {
+		prettyLabel: "Antinet",
+		repoName: "anet",
+		repoUrl: "https://github.com/antinet-ai/anet",
+		filter: false,
+		countDownloads: `path_extension:"bin"`,
+	},
 	araclip: {
 		prettyLabel: "AraClip",
 		repoName: "AraClip",
