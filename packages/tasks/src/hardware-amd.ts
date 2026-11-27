@@ -12,6 +12,22 @@ export interface AmdGpuHardwareSpec extends HardwareSpec {
 const AMD_GPU_INTEGRATED_SHARED_MEMORY_OPTIONS = [16, 24, 32, 48, 64, 96];
 
 export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
+	MI455X: {
+		tflops: 5000,
+		memory: [432],
+		gfxVersion: "gfx1250",
+		msrp: 40_000,
+		power: 2300,
+		releaseYear: 2026,
+	},
+	MI450X: {
+		tflops: 5000,
+		memory: [288],
+		gfxVersion: "gfx1250",
+		msrp: 35_000,
+		power: 2300,
+		releaseYear: 2026,
+	},
 	MI300: {
 		tflops: 383.0,
 		memory: [192],
@@ -196,6 +212,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 190,
 		releaseYear: 2024,
 	},
+	"RX 7600": {
+		tflops: 43.5,
+		memory: [8],
+		gfxVersion: "gfx1102",
+		msrp: 269,
+		power: 165,
+		releaseYear: 2023,
+	},
 	"RX 6950 XT": {
 		tflops: 47.31,
 		memory: [16],
@@ -275,6 +299,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		msrp: 350,
 		power: 132,
 		releaseYear: 2021,
+	},
+	"RX 6400": {
+		tflops: 7.13,
+		memory: [4],
+		gfxVersion: "gfx1034",
+		msrp: 159,
+		power: 53,
+		releaseYear: 2022,
 	},
 	"RX 5700 XT": {
 		tflops: 19.51,
@@ -356,6 +388,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 300,
 		releaseYear: 2018,
 		aliases: ["Radeon Pro V340L"],
+	},
+	"Radeon Pro WX 2100": {
+		tflops: 1.25,
+		memory: [2],
+		gfxVersion: "gfx803",
+		msrp: 149,
+		power: 35,
+		releaseYear: 2017,
 	},
 	"Radeon 610M": {
 		tflops: 0.97,
@@ -444,6 +484,15 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		msrp: 1_500,
 		power: 120,
 		releaseYear: 2025,
-		aliases: ["Strix Halo"],
+		aliases: ["Strix Halo", "Radeon 8060S"],
+	},
+	"Ryzen AI Max+ PRO 495": {
+		tflops: 30.72,
+		memory: [128, 192],
+		gfxVersion: "gfx1151",
+		msrp: 7_299,
+		power: 120,
+		releaseYear: 2026,
+		aliases: ["Gorgon Halo", "Radeon 8065S"],
 	},
 };

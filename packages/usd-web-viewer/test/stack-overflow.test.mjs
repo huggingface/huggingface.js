@@ -21,5 +21,6 @@ test("layers nested too deeply fail as a compose error, not a bare trap", async 
 	assert.ok(error, "the load fails");
 	const failure = loadFailure(error, exports.memory.buffer.byteLength, lastPanic);
 	assert.equal(failure.code, "compose");
-	assert.match(failure.message, /^stack overflow: the scene nests too deeply to read/);
+	// openusd's usda parser refuses the nesting before it can overflow the stack.
+	assert.match(failure.message, /nested more than 256 deep/);
 });
