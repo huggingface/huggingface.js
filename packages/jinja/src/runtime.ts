@@ -29,7 +29,7 @@ import type {
 	KeywordSpreadExpression,
 } from "./ast";
 import { Statement } from "./ast";
-import { range, replace, slice, strftime_now, titleCase } from "./utils";
+import { indent, range, replace, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| IntegerValue
@@ -1491,15 +1491,7 @@ export class Interpreter {
 					case "trim":
 						return new StringValue(operand.value.trim());
 					case "indent":
-						return new StringValue(
-							operand.value
-								.split("\n")
-								.map((x, i) =>
-									// By default, don't indent the first line or empty lines
-									i === 0 || x.length === 0 ? x : "    " + x,
-								)
-								.join("\n"),
-						);
+						return new StringValue(indent(operand.value, "    "));
 					case "join":
 					case "string":
 						return operand; // no-op
@@ -1790,12 +1782,8 @@ export class Interpreter {
 						const first = args.at(1) ?? kwargs.get("first") ?? new BooleanValue(false);
 						const blank = args.at(2) ?? kwargs.get("blank") ?? new BooleanValue(false);
 
-						const lines = operand.value.split("\n");
-						const indent = width instanceof StringValue ? width.value : " ".repeat(Math.max(0, width.value));
-						const indented = lines.map((x, i) =>
-							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x,
-						);
-						return new StringValue(indented.join("\n"));
+						const prefix = width instanceof StringValue ? width.value : " ".repeat(Math.max(0, width.value));
+						return new StringValue(indent(operand.value, prefix, Boolean(first.value), Boolean(blank.value)));
 					}
 					case "replace": {
 						const replaceFn = operand.builtins.get("replace");

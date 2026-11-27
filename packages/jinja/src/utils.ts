@@ -127,3 +127,11 @@ export function replace(str: string, oldvalue: string, newvalue: string, count?:
 		return match;
 	});
 }
+
+/** Indent lines using Python splitlines boundaries, including CRLF as one boundary. */
+export function indent(value: string, prefix: string, first = false, blank = false): string {
+	// Match Jinja's appended newline before splitlines, without retaining the split's final empty entry.
+	// eslint-disable-next-line no-control-regex -- Python splitlines includes ASCII file/group/record separators.
+	const lines = (value + "\n").split(/\r\n|[\n\r\v\f\x1c-\x1e\x85\u2028\u2029]/).slice(0, -1);
+	return lines.map((line, i) => ((i === 0 ? first : blank || line.length > 0) ? prefix + line : line)).join("\n");
+}
