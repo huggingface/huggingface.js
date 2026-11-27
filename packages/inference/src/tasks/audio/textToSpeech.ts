@@ -1,6 +1,7 @@
 import type { TextToSpeechInput } from "@huggingface/tasks";
 import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import { makeRequestOptions } from "../../lib/makeRequestOptions.js";
 import type { BaseArgs, Options } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
 type TextToSpeechArgs = BaseArgs & TextToSpeechInput;
@@ -19,5 +20,6 @@ export async function textToSpeech(args: TextToSpeechArgs, options?: Options): P
 		...options,
 		task: "text-to-speech",
 	});
-	return providerHelper.getResponse(res, undefined, undefined, undefined, options?.signal);
+	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "text-to-speech" });
+	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, undefined, options?.signal);
 }

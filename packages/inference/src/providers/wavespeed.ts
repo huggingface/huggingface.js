@@ -16,6 +16,8 @@ import type {
 	ImageToVideoTaskHelper,
 	ImageTextToImageTaskHelper,
 	ImageTextToVideoTaskHelper,
+	TextToSpeechTaskHelper,
+	TextToAudioTaskHelper,
 } from "./providerHelper.js";
 import { TaskProviderHelper } from "./providerHelper.js";
 import {
@@ -216,6 +218,46 @@ export class WavespeedAITextToImageTask extends WavespeedAITask implements TextT
 }
 
 export class WavespeedAITextToVideoTask extends WavespeedAITask implements TextToVideoTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+
+	override async getResponse(
+		response: WaveSpeedAISubmitTaskResponse,
+		url?: string,
+		headers?: Record<string, string>,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob> {
+		return super.getResponse(response, url, headers, undefined, signal) as Promise<Blob>;
+	}
+}
+
+export class WavespeedAITextToSpeechTask extends WavespeedAITask implements TextToSpeechTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters ? (params.args.parameters as Record<string, unknown>) : undefined),
+			text: params.args.inputs,
+		};
+	}
+
+	override async getResponse(
+		response: WaveSpeedAISubmitTaskResponse,
+		url?: string,
+		headers?: Record<string, string>,
+		_outputType?: undefined,
+		signal?: AbortSignal,
+	): Promise<Blob> {
+		return super.getResponse(response, url, headers, undefined, signal) as Promise<Blob>;
+	}
+}
+
+export class WavespeedAITextToAudioTask extends WavespeedAITask implements TextToAudioTaskHelper {
 	constructor() {
 		super(WAVESPEEDAI_API_BASE_URL);
 	}
