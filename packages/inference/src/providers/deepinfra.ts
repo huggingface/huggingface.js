@@ -28,6 +28,7 @@ import { InferenceClientInputError, InferenceClientProviderOutputError } from ".
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { BodyParams, OutputType, RequestArgs } from "../types.js";
 import { omit } from "../utils/omit.js";
+import { dataUrlFromBlob } from "../utils/dataUrlFromBlob.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	BaseConversationalTask,
@@ -350,7 +351,15 @@ export class DeepInfraTextToImageTask extends TaskProviderHelper implements Text
 				return { ...response };
 			}
 			if (typeof response.data[0].url === "string") {
-				return response.data[0].url;
+				if (outputType === "url") {
+					return response.data[0].url;
+				}
+				const imageResponse = await fetch(response.data[0].url, { signal });
+				if (!imageResponse.ok) {
+					throw new InferenceClientProviderOutputError(`Failed to fetch image from DeepInfra: ${imageResponse.status}`);
+				}
+				const blob = await imageResponse.blob();
+				return outputType === "dataUrl" ? dataUrlFromBlob(blob, blob.type || undefined) : blob;
 			}
 			if (typeof response.data[0].b64_json === "string") {
 				const base64Data = response.data[0].b64_json;
