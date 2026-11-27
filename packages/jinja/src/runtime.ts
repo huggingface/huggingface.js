@@ -1272,6 +1272,15 @@ export class Interpreter {
 				return new StringValue(lhs + rhs);
 			}
 			throw new Error(`Cannot perform operation ${operator} on undefined values`);
+		} else if (
+			left instanceof NullValue &&
+			(right instanceof ArrayValue || right instanceof ObjectValue) &&
+			["in", "not in"].includes(operator)
+		) {
+			// Special case: `none in [...]` and `none in {...}` are membership tests, as in Python.
+			// Mapping keys are always strings, so `none` is never a key.
+			const member = right instanceof ArrayValue && right.value.some((x) => x instanceof NullValue);
+			return new BooleanValue(operator === "in" ? member : !member);
 		} else if (left instanceof NullValue || right instanceof NullValue) {
 			throw new Error("Cannot perform operation on null values");
 		} else if (operator === "~") {
