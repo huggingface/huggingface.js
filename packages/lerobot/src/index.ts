@@ -5,7 +5,7 @@ import type { LeRobotEpisode, LeRobotFrames, LeRobotInfo } from "./types";
 import { readEpisode, readEpisodes } from "./episodes";
 import { readFrames } from "./frames";
 import { fetchTextPrefix } from "./http";
-import { MAX_INFO_BYTES, resolveUrl } from "./paths";
+import { isSafeRepoPath, MAX_INFO_BYTES, normalizeDatasetPath, resolveUrl } from "./paths";
 import { parseInfo } from "./info";
 
 export const DEFAULT_ENDPOINT = "https://huggingface.co";
@@ -15,6 +15,8 @@ export interface LeRobotDatasetOptions extends FetchOptions {
 	/** Branch, tag or commit sha. Prefer a sha when the result is cached anywhere. */
 	revision?: string;
 	endpoint?: string;
+	/** Directory containing meta/info.json, relative to the repo root. Defaults to the root. */
+	path?: string;
 }
 
 export interface ListEpisodesOptions {
@@ -40,6 +42,8 @@ export interface ReadFramesOptions {
  * ```
  */
 export class LeRobotDataset {
+	/** Normalized dataset directory; empty for a dataset at the repository root. */
+	public readonly path: string;
 	private readonly endpoint: string;
 	private readonly revision: string;
 	private readonly fetchOptions: FetchOptions;
@@ -53,12 +57,17 @@ export class LeRobotDataset {
 	) {
 		this.endpoint = (options?.endpoint ?? DEFAULT_ENDPOINT).replace(/\/+$/, "");
 		this.revision = options?.revision ?? "main";
+		this.path = normalizeDatasetPath(options?.path);
 		this.fetchOptions = { fetch: options?.fetch, additionalFetchHeaders: options?.additionalFetchHeaders };
 	}
 
-	/** Absolute `/resolve/` URL for a path inside the repo. */
+	/** Absolute `/resolve/` URL for a path relative to this dataset directory. */
 	fileUrl(path: string): string {
-		return resolveUrl(this.endpoint, this.repoId, this.revision, path);
+		// Validate before prefixing, so an absolute file path cannot become relative by accident.
+		if (!isSafeRepoPath(path)) {
+			throw new Error(`Refusing to build a URL for unsafe repo path: ${path}`);
+		}
+		return resolveUrl(this.endpoint, this.repoId, this.revision, this.path ? `${this.path}/${path}` : path);
 	}
 
 	/** Parsed `meta/info.json`. Memoized for the lifetime of this instance. */
@@ -118,7 +127,7 @@ export class LeRobotDataset {
 }
 
 export { parseInfo } from "./info";
-export { formatPathTemplate, isSafeRepoPath, MAX_INFO_BYTES, resolveUrl } from "./paths";
+export { formatPathTemplate, isSafeRepoPath, MAX_INFO_BYTES, normalizeDatasetPath, resolveUrl } from "./paths";
 export { episodesMetadataPath } from "./episodes";
 export { fetchRange, fetchTextPrefix, HttpError, openRemoteFile } from "./http";
 export type { FetchOptions, RandomAccessFile, RangeResult, TextPrefix } from "./http";
