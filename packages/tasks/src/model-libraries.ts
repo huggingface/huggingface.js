@@ -124,6 +124,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
 	},
+	antinet: {
+		prettyLabel: "Antinet",
+		repoName: "anet",
+		repoUrl: "https://github.com/antinet-ai/anet",
+		filter: false,
+		countDownloads: `path_extension:"bin"`,
+	},
 	araclip: {
 		prettyLabel: "AraClip",
 		repoName: "AraClip",
@@ -2273,6 +2280,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/allenai/WildDet3D",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	yhatmodels: {
+		prettyLabel: "YHatModels",
+		repoName: "yhatmodels",
+		repoUrl: "https://github.com/yhatlabs/yhatmodels",
+		docsUrl: "https://yhatlabs.com/models/docs/open-models",
+		snippets: snippets.yhatmodels,
+		filter: false,
 	},
 	yolov10: {
 		// YOLOv10 is a fork of ultraLytics. Code snippets and download count are the same but the repo is different.

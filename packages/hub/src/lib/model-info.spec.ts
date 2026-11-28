@@ -67,9 +67,9 @@ describe("modelInfo", () => {
 		expect(info.filePaths).to.include("README.md");
 	});
 
-	it("should return model info deepseek-ai models with inference provider mapping", async () => {
+	it("should return model info with inference provider mapping", async () => {
 		const info = await modelInfo({
-			name: "deepseek-ai/DeepSeek-R1-0528",
+			name: "stabilityai/stable-diffusion-3.5-large",
 			additionalFields: ["inferenceProviderMapping"],
 		});
 
@@ -78,7 +78,7 @@ describe("modelInfo", () => {
 		expect(info.inferenceProviderMapping?.length).toBeGreaterThan(0);
 		info.inferenceProviderMapping?.forEach((item) => {
 			expect(item).toHaveProperty("provider");
-			expect(item).toHaveProperty("hfModelId", "deepseek-ai/DeepSeek-R1-0528");
+			expect(item).toHaveProperty("hfModelId", "stabilityai/stable-diffusion-3.5-large");
 			expect(item).toHaveProperty("providerId");
 		});
 	});
