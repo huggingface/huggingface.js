@@ -5,21 +5,22 @@ export async function* eventToGenerator<YieldType, ReturnType>(
 		rejectCallack: (reason: unknown) => void,
 	) => unknown,
 ): AsyncGenerator<YieldType, ReturnType> {
-	const promises: Array<{
-		p: Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>;
-		resolve: (value: { done: true; value: ReturnType } | { done: false; value: YieldType }) => void;
-		reject: (reason?: unknown) => void;
-	}> = [];
+	type Event = { done: true; value: ReturnType } | { done: false; value: YieldType } | { error: unknown };
+	const promises: Array<{ p: Promise<Event>; resolve: (value: Event) => void }> = [];
 
 	function addPromise() {
-		let resolve: (value: { done: true; value: ReturnType } | { done: false; value: YieldType }) => void;
-		let reject: (reason?: unknown) => void;
-		const p = new Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>((res, rej) => {
+		let resolve!: (value: Event) => void;
+		const p = new Promise<Event>((res) => {
 			resolve = res;
-			reject = rej;
 		});
-		// @ts-expect-error TS doesn't know that promise callback is executed immediately
-		promises.push({ p, resolve, reject });
+		promises.push({ p, resolve });
+	}
+
+	function reject(reason: unknown) {
+		// Queue failures after buffered progress, just like yield/return events.
+		// Resolving an error event also avoids an unhandled rejection while the consumer is paused.
+		addPromise();
+		promises.at(-2)?.resolve({ error: reason });
 	}
 
 	addPromise();
@@ -35,10 +36,10 @@ export async function* eventToGenerator<YieldType, ReturnType>(
 					addPromise();
 					promises.at(-2)?.resolve({ done: true, value: r });
 				},
-				(err) => promises.shift()?.reject(err),
+				reject,
 			),
 		)
-		.catch((err) => promises.shift()?.reject(err));
+		.catch(reject);
 
 	while (1) {
 		const p = promises[0];
@@ -47,6 +48,9 @@ export async function* eventToGenerator<YieldType, ReturnType>(
 		}
 		const result = await p.p;
 		promises.shift();
+		if ("error" in result) {
+			throw result.error;
+		}
 		if (result.done) {
 			await callbackRes; // Clean up, may be removed in the future
 			// // Cleanup promises - shouldn't be needed due to above await
