@@ -6601,6 +6601,24 @@ describe("Feature regressions", () => {
 		);
 	});
 
+	describe("Undefined iterables", () => {
+		// Python Jinja2 iterates undefined values as an empty sequence.
+		it.each([
+			[`{% for t in tools %}[{{ t }}]{% endfor %}done`, {}, "done"],
+			[`{% for t in tools %}[{{ t }}]{% else %}none{% endfor %}`, {}, "none"],
+			[`{% for t in object.tools %}[{{ t }}]{% endfor %}done`, { object: {} }, "done"],
+			[`{{ missing | list | length }}`, {}, "0"],
+		])("treats undefined as empty: %s", (source, context, expected) => {
+			expect(new Template(source).render(context)).toBe(expected);
+		});
+
+		it("still throws when iterating none", () => {
+			expect(() => new Template(`{% for t in none %}{% endfor %}`).render({})).toThrowError(
+				/Expected iterable or object type in for loop: got NullValue/,
+			);
+		});
+	});
+
 	describe("Generation tags", () => {
 		it.each([
 			{

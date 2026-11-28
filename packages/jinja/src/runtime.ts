@@ -1549,6 +1549,8 @@ export class Interpreter {
 						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
 					}
 				}
+			} else if (operand instanceof UndefinedValue && filter.value === "list") {
+				return new ArrayValue([]);
 			} else if (operand instanceof BooleanValue) {
 				switch (filter.value) {
 					case "bool":
@@ -2098,6 +2100,10 @@ export class Interpreter {
 
 		if (iterable instanceof StringValue) {
 			iterable = new ArrayValue(Array.from(iterable.value, (char) => new StringValue(char)));
+		}
+		// Like Jinja, iterate an undefined value as an empty sequence
+		if (iterable instanceof UndefinedValue) {
+			iterable = new ArrayValue([]);
 		}
 
 		if (!(iterable instanceof ArrayValue || iterable instanceof ObjectValue)) {
