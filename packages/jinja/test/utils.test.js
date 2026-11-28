@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { range, slice, strftime, replace } from "../src/utils";
+import { range, slice, strftime, replace, resolveSliceRange } from "../src/utils";
 
 describe("Test utility functions", () => {
 	describe("range function", () => {
@@ -143,6 +143,38 @@ describe("Test utility functions", () => {
 			const str = "🤗test🤗"; // \ud83e\udd17
 			expect(replace(str, "test", "🤗")).toEqual("🤗🤗🤗");
 			expect(replace(str, "\ud83e", "X")).toEqual(str); // No replacement
+		});
+	});
+
+	describe("resolveSliceRange function", () => {
+		it("resolves default open bounds", () => {
+			expect(resolveSliceRange(5)).toEqual([0, 5]);
+			expect(resolveSliceRange(5, undefined, undefined)).toEqual([0, 5]);
+		});
+
+		it("resolves positive start and end bounds", () => {
+			expect(resolveSliceRange(5, 1)).toEqual([1, 5]);
+			expect(resolveSliceRange(5, 1, 4)).toEqual([1, 4]);
+			expect(resolveSliceRange(5, 0, 2)).toEqual([0, 2]);
+		});
+
+		it("clamps end to length if end exceeds length", () => {
+			expect(resolveSliceRange(5, 1, 10)).toEqual([1, 5]);
+		});
+
+		it("preserves start without clamping to length (Python parity for start > length)", () => {
+			expect(resolveSliceRange(5, 10)).toEqual([10, 5]);
+			expect(resolveSliceRange(0, 1)).toEqual([1, 0]);
+		});
+
+		it("resolves negative start bounds", () => {
+			expect(resolveSliceRange(5, -2)).toEqual([3, 5]);
+			expect(resolveSliceRange(5, -10)).toEqual([0, 5]);
+		});
+
+		it("resolves negative end bounds", () => {
+			expect(resolveSliceRange(5, 1, -1)).toEqual([1, 4]);
+			expect(resolveSliceRange(5, 1, -10)).toEqual([1, 0]);
 		});
 	});
 });

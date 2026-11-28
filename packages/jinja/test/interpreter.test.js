@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import { Environment, Interpreter } from "../src/runtime";
 import { tokenize } from "../src/lexer";
 import { parse } from "../src/parser";
+import { Template } from "../src/index";
 
 describe("Test interpreter options", () => {
 	// https://jinja.palletsprojects.com/en/3.0.x/templates/#whitespace-control
@@ -199,5 +200,93 @@ describe("Environment lookup", () => {
 			},
 		});
 		expect(child.lookupVariable("missing").type).toBe("UndefinedValue");
+	});
+});
+
+describe("String builtins: startswith and endswith with start and end arguments", () => {
+	it("supports optional start argument in startswith", () => {
+		expect(new Template("{{ 'abc'.startswith('b', 1) }}").render()).toBe("true");
+		expect(new Template("{{ 'abc'.startswith('a', 1) }}").render()).toBe("false");
+		expect(new Template("{% if 'abc'.startswith('b', 1) %}yes{% else %}no{% endif %}").render()).toBe("yes");
+	});
+
+	it("supports optional end argument in startswith", () => {
+		expect(new Template("{{ 'abcdef'.startswith('c', 2, 4) }}").render()).toBe("true");
+		expect(new Template("{{ 'abcdef'.startswith('d', 2, 4) }}").render()).toBe("false");
+		expect(new Template("{{ 'abcdef'.startswith('c', 2, 2) }}").render()).toBe("false");
+		expect(new Template("{{ 'abcdef'.startswith('', 2, 2) }}").render()).toBe("true");
+		expect(new Template("{{ 'abcdef'.startswith('c', 3, 2) }}").render()).toBe("false");
+	});
+
+	it("supports negative indexing in startswith", () => {
+		expect(new Template("{{ 'abcdef'.startswith('e', -2) }}").render()).toBe("true");
+		expect(new Template("{{ 'abcdef'.startswith('c', -4, -1) }}").render()).toBe("true");
+		expect(new Template("{{ 'abcdef'.startswith('a', -10) }}").render()).toBe("true");
+	});
+
+	it("supports tuple targets in startswith with slice bounds", () => {
+		expect(new Template("{{ 'abc'.startswith(('x', 'b'), 1) }}").render()).toBe("true");
+		expect(new Template("{{ 'abc'.startswith(('x', 'y'), 1) }}").render()).toBe("false");
+	});
+
+	it("supports none/null open bounds in startswith", () => {
+		expect(new Template("{{ 'abc'.startswith('b', 1, none) }}").render()).toBe("true");
+		expect(new Template("{{ 'abc'.startswith('a', none, 2) }}").render()).toBe("true");
+	});
+
+	it("supports optional start and end arguments in endswith", () => {
+		expect(new Template("{{ 'abc'.endswith('b', 0, 2) }}").render()).toBe("true");
+		expect(new Template("{{ 'abc'.endswith('c', 0, 2) }}").render()).toBe("false");
+		expect(new Template("{{ 'abcdef'.endswith('d', 1, 4) }}").render()).toBe("true");
+		expect(new Template("{{ 'abcdef'.endswith('', 2, 2) }}").render()).toBe("true");
+		expect(new Template("{{ 'abcdef'.endswith('d', 4, 2) }}").render()).toBe("false");
+	});
+
+	it("supports negative indexing in endswith", () => {
+		expect(new Template("{{ 'abcdef'.endswith('d', 0, -2) }}").render()).toBe("true");
+		expect(new Template("{{ 'abcdef'.endswith('e', -3, -1) }}").render()).toBe("true");
+		expect(new Template("{{ 'abcdef'.endswith('f', -10) }}").render()).toBe("true");
+	});
+
+	it("supports tuple targets in endswith with slice bounds", () => {
+		expect(new Template("{{ 'abc'.endswith(('b', 'z'), 0, 2) }}").render()).toBe("true");
+		expect(new Template("{{ 'abc'.endswith(('a', 'z'), 0, 2) }}").render()).toBe("false");
+	});
+
+	it("supports keyword arguments for start and end", () => {
+		expect(new Template("{{ 'abc'.startswith('b', start=1) }}").render()).toBe("true");
+		expect(new Template("{{ 'abc'.endswith('b', end=2) }}").render()).toBe("true");
+		expect(new Template("{{ 'abc'.startswith('b', start=1, end=2) }}").render()).toBe("true");
+	});
+
+	it("throws on invalid non-integer slice bounds", () => {
+		expect(() => new Template("{{ 'abc'.startswith('b', 'invalid') }}").render()).toThrow(
+			"startswith() start argument must be an integer or null",
+		);
+		expect(() => new Template("{{ 'abc'.endswith('b', 0, 'invalid') }}").render()).toThrow(
+			"endswith() end argument must be an integer or null",
+		);
+	});
+
+	it("validates pattern and tuple elements even on inverted slice range", () => {
+		expect(() => new Template("{{ 'abc'.startswith(123, 2, 1) }}").render()).toThrow(
+			"startswith() argument must be a string or tuple of strings",
+		);
+		expect(() => new Template("{{ 'abc'.startswith([123], 2, 1) }}").render()).toThrow(
+			"startswith() tuple elements must be strings",
+		);
+		expect(() => new Template("{{ 'abc'.endswith(123, 2, 1) }}").render()).toThrow(
+			"endswith() argument must be a string or tuple of strings",
+		);
+		expect(() => new Template("{{ 'abc'.endswith([123], 2, 1) }}").render()).toThrow(
+			"endswith() tuple elements must be strings",
+		);
+	});
+
+	it("correctly handles Unicode code points (emoji / non-BMP characters)", () => {
+		expect(new Template("{{ '🤗test🤗'.startswith('test', 1) }}").render()).toBe("true");
+		expect(new Template("{{ '🤗test🤗'.startswith('test', 2) }}").render()).toBe("false");
+		expect(new Template("{{ '🤗test🤗'.endswith('test', 1, 5) }}").render()).toBe("true");
+		expect(new Template("{{ '🤗test🤗'.endswith('🤗', 0, 1) }}").render()).toBe("true");
 	});
 });

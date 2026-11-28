@@ -29,6 +29,19 @@ export function range(start: number, stop?: number, step = 1): number[] {
 }
 
 /**
+ * Resolves start and end slice indices for a given length following Python slice semantics.
+ * @param length The length of the string or array.
+ * @param start The start index.
+ * @param end The end index.
+ * @returns A tuple [start, end] of resolved indices.
+ */
+export function resolveSliceRange(length: number, start?: number, end?: number): [number, number] {
+	const to = end === undefined ? length : end > length ? length : end < 0 ? Math.max(length + end, 0) : end;
+	const from = start === undefined ? 0 : start < 0 ? Math.max(length + start, 0) : start;
+	return [from, to];
+}
+
+/**
  * Function that mimics Python's array slicing.
  * @param array The array to slice.
  * @param start The start index of the slice. Defaults to 0.

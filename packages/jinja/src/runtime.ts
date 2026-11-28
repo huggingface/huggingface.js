@@ -29,7 +29,7 @@ import type {
 	KeywordSpreadExpression,
 } from "./ast";
 import { Statement } from "./ast";
-import { range, replace, slice, strftime_now, titleCase } from "./utils";
+import { range, replace, resolveSliceRange, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| IntegerValue
@@ -117,6 +117,16 @@ export class FloatValue extends RuntimeValue<number> {
 	}
 }
 
+function parseSliceIndex(arg: AnyRuntimeValue | undefined, fnName: string, paramName: string): number | undefined {
+	if (arg === undefined || arg instanceof NullValue || arg instanceof UndefinedValue) {
+		return undefined;
+	}
+	if (arg instanceof IntegerValue) {
+		return arg.value;
+	}
+	throw new Error(`${fnName}() ${paramName} argument must be an integer or null`);
+}
+
 /**
  * Represents a string value at runtime.
  */
@@ -180,20 +190,49 @@ export class StringValue extends RuntimeValue<string> {
 						throw new Error("startswith() requires at least one argument");
 					}
 					const pattern = args[0];
-					if (pattern instanceof StringValue) {
-						return new BooleanValue(this.value.startsWith(pattern.value));
-					} else if (pattern instanceof ArrayValue) {
+					if (!(pattern instanceof StringValue || pattern instanceof ArrayValue)) {
+						throw new Error("startswith() argument must be a string or tuple of strings");
+					}
+					if (pattern instanceof ArrayValue) {
 						for (const item of pattern.value) {
 							if (!(item instanceof StringValue)) {
 								throw new Error("startswith() tuple elements must be strings");
 							}
-							if (this.value.startsWith(item.value)) {
-								return new BooleanValue(true);
-							}
 						}
-						return new BooleanValue(false);
 					}
-					throw new Error("startswith() argument must be a string or tuple of strings");
+					let startArg: AnyRuntimeValue | undefined = args[1];
+					let endArg: AnyRuntimeValue | undefined = args[2];
+					if (startArg instanceof KeywordArgumentsValue) {
+						const kwargs = startArg.value;
+						startArg = kwargs.get("start");
+						endArg = kwargs.get("end");
+					} else if (endArg instanceof KeywordArgumentsValue) {
+						endArg = endArg.value.get("end");
+					}
+					let target: string;
+					if (startArg === undefined && endArg === undefined) {
+						target = this.value;
+					} else {
+						const chars = Array.from(this.value);
+						const [start, end] = resolveSliceRange(
+							chars.length,
+							parseSliceIndex(startArg, "startswith", "start"),
+							parseSliceIndex(endArg, "startswith", "end"),
+						);
+						if (start > end) {
+							return new BooleanValue(false);
+						}
+						target = chars.slice(start, end).join("");
+					}
+					if (pattern instanceof StringValue) {
+						return new BooleanValue(target.startsWith(pattern.value));
+					}
+					for (const item of pattern.value) {
+						if (target.startsWith((item as StringValue).value)) {
+							return new BooleanValue(true);
+						}
+					}
+					return new BooleanValue(false);
 				}),
 			],
 			[
@@ -203,20 +242,49 @@ export class StringValue extends RuntimeValue<string> {
 						throw new Error("endswith() requires at least one argument");
 					}
 					const pattern = args[0];
-					if (pattern instanceof StringValue) {
-						return new BooleanValue(this.value.endsWith(pattern.value));
-					} else if (pattern instanceof ArrayValue) {
+					if (!(pattern instanceof StringValue || pattern instanceof ArrayValue)) {
+						throw new Error("endswith() argument must be a string or tuple of strings");
+					}
+					if (pattern instanceof ArrayValue) {
 						for (const item of pattern.value) {
 							if (!(item instanceof StringValue)) {
 								throw new Error("endswith() tuple elements must be strings");
 							}
-							if (this.value.endsWith(item.value)) {
-								return new BooleanValue(true);
-							}
 						}
-						return new BooleanValue(false);
 					}
-					throw new Error("endswith() argument must be a string or tuple of strings");
+					let startArg: AnyRuntimeValue | undefined = args[1];
+					let endArg: AnyRuntimeValue | undefined = args[2];
+					if (startArg instanceof KeywordArgumentsValue) {
+						const kwargs = startArg.value;
+						startArg = kwargs.get("start");
+						endArg = kwargs.get("end");
+					} else if (endArg instanceof KeywordArgumentsValue) {
+						endArg = endArg.value.get("end");
+					}
+					let target: string;
+					if (startArg === undefined && endArg === undefined) {
+						target = this.value;
+					} else {
+						const chars = Array.from(this.value);
+						const [start, end] = resolveSliceRange(
+							chars.length,
+							parseSliceIndex(startArg, "endswith", "start"),
+							parseSliceIndex(endArg, "endswith", "end"),
+						);
+						if (start > end) {
+							return new BooleanValue(false);
+						}
+						target = chars.slice(start, end).join("");
+					}
+					if (pattern instanceof StringValue) {
+						return new BooleanValue(target.endsWith(pattern.value));
+					}
+					for (const item of pattern.value) {
+						if (target.endsWith((item as StringValue).value)) {
+							return new BooleanValue(true);
+						}
+					}
+					return new BooleanValue(false);
 				}),
 			],
 			[
