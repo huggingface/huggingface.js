@@ -1137,6 +1137,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/abetlen/llama-cpp-python",
 		snippets: snippets.llama_cpp_python,
 	},
+	loom: {
+		prettyLabel: "Loom",
+		repoName: "hrx-system",
+		repoUrl: "https://github.com/ROCm/hrx-system",
+		docsUrl: "https://rocm.github.io/hrx-system/loom/",
+		filter: false,
+		countDownloads: `path:"model.json"`,
+	},
 	"mini-omni2": {
 		prettyLabel: "Mini-Omni2",
 		repoName: "Mini-Omni2",
