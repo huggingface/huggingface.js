@@ -869,7 +869,19 @@ export function setupGlobals(env: Environment): void {
 	env.set("raise_exception", (args: string) => {
 		throw new Error(args);
 	});
-	env.set("range", range);
+	env.setVariable(
+		"range",
+		new FunctionValue((args) => {
+			if (args.length < 1 || args.length > 3) {
+				throw new Error("range() expects 1 to 3 arguments");
+			}
+			if (args.some((arg) => !(arg instanceof IntegerValue || arg instanceof BooleanValue))) {
+				throw new Error("range() arguments must be integers");
+			}
+			const values = args.map((arg) => Number(arg.value));
+			return new ArrayValue(range(values[0], values[1], values[2]).map((value) => new IntegerValue(value)));
+		}),
+	);
 	env.set("strftime_now", strftime_now);
 
 	// NOTE: According to the Jinja docs: The special constants true, false, and none are indeed lowercase.
