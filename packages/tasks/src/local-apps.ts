@@ -438,6 +438,27 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const snippetRapidMlx = (model: ModelData): LocalAppSnippet[] => [
+	{
+		title: "Run an OpenAI-compatible server",
+		setup: ["# Install Rapid-MLX (macOS with Apple Silicon)", "uv tool install rapid-mlx"].join("\n"),
+		content: [
+			"# Start the server",
+			`rapid-mlx serve "${model.id}"`,
+			"",
+			"# In another terminal, call the OpenAI-compatible server with curl",
+			`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+			`   -H "Content-Type: application/json" \\`,
+			`   --data '{`,
+			`     "model": "${model.id}",`,
+			`     "messages": [`,
+			`       {"role": "user", "content": "Hello"}`,
+			`     ]`,
+			`   }'`,
+		].join("\n"),
+	},
+];
+
 const getLocalServerPort = (model: ModelData): number => (isMlxModel(model) ? 8080 : 9931);
 
 const getLocalServerStep = (model: ModelData, filepath?: string): LocalAppSnippet => {
@@ -653,6 +674,15 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
 		snippet: snippetMlxLm,
+	},
+	"rapid-mlx": {
+		prettyLabel: "Rapid-MLX",
+		docsUrl: "https://github.com/raullenchai/Rapid-MLX",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: (model) =>
+			model.pipeline_tag === "text-generation" && isMlxModel(model) && model.tags.includes("conversational"),
+		snippet: snippetRapidMlx,
 	},
 	tgi: {
 		prettyLabel: "TGI",
