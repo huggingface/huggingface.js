@@ -110,6 +110,30 @@ describe("copyFiles (mocked)", () => {
 			}),
 		).rejects.toThrow(/LFS file\(s\).*'model\.safetensors' \(5\.30 GB\).*Migrate these files to xet/s);
 	});
+
+	it("forwards the source file mode in copyFile batch entries", async () => {
+		let batchBody = "";
+		await copyFiles({
+			destination: { type: "bucket", name: "ns/dst" },
+			files: [
+				{
+					source: { repo: { type: "bucket", name: "ns/src" }, path: "run.sh" },
+					destinationPath: "run.sh",
+				},
+			],
+			accessToken: TEST_ACCESS_TOKEN,
+			hubUrl: "https://example.invalid",
+			fetch: mockFetch({
+				"/api/buckets/ns/src/paths-info": () =>
+					jsonResponse([{ path: "run.sh", type: "file", size: 5, xetHash: "abc123", mode: 0o100755 }]),
+				"/api/buckets/ns/dst/batch": async (req) => {
+					batchBody = await req.text();
+					return jsonResponse({ success: true, processed: 1, succeeded: 1, failed: [] });
+				},
+			}),
+		});
+		expect(JSON.parse(batchBody)).toMatchObject({ type: "copyFile", path: "run.sh", mode: 0o100755 });
+	});
 });
 
 describe("copyFile / copyFiles / copyFolder (integration)", () => {
