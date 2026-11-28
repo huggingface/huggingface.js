@@ -2281,6 +2281,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
+	yhatmodels: {
+		prettyLabel: "YHatModels",
+		repoName: "yhatmodels",
+		repoUrl: "https://github.com/yhatlabs/yhatmodels",
+		docsUrl: "https://yhatlabs.com/models/docs/open-models",
+		snippets: snippets.yhatmodels,
+		filter: false,
+	},
 	yolov10: {
 		// YOLOv10 is a fork of ultraLytics. Code snippets and download count are the same but the repo is different.
 		prettyLabel: "YOLOv10",
