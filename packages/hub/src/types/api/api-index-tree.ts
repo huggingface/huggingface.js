@@ -14,6 +14,8 @@ export interface ApiIndexTreeEntry {
 	 * that have been migrated to xet.
 	 */
 	xetHash?: string;
+	/** POSIX file mode (st_mode), only for bucket files that have a mode set */
+	mode?: number;
 	lastCommit?: {
 		date: string;
 		id: string;
