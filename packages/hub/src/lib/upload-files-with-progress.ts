@@ -21,7 +21,7 @@ const multipartUploadTracking = new WeakMap<
 export async function* uploadFilesWithProgress(
 	params: {
 		repo: CommitParams["repo"];
-		files: Array<URL | File | { path: string; content: ContentSource } | CommitEditFileParams>;
+		files: Array<URL | File | { path: string; content: ContentSource; mode?: number } | CommitEditFileParams>;
 		commitTitle?: CommitParams["title"];
 		commitDescription?: CommitParams["description"];
 		hubUrl?: CommitParams["hubUrl"];
@@ -48,12 +48,14 @@ export async function* uploadFilesWithProgress(
 				path,
 				originalContent: file.originalContent,
 				edits: file.edits,
+				mode: file.mode,
 			};
 		}
 		return {
 			operation: "addOrUpdate",
 			path,
 			content: "content" in file ? file.content : file,
+			mode: "content" in file ? file.mode : undefined,
 		};
 	});
 
