@@ -6560,6 +6560,86 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("List equality", () => {
+		it.each([
+			[`{{ [1, 2] == [1, 2] }}`, `true`],
+			[`{{ [1, 2] != [1, 2] }}`, `false`],
+			[`{{ [] == [] }}`, `true`],
+			[`{{ [] != [] }}`, `false`],
+			[`{{ [1, 2] == [2, 1] }}`, `false`],
+			[`{{ [1, 2] == [1, 2, 3] }}`, `false`],
+			[`{{ [[1], ["a"]] == [[1], ["a"]] }}`, `true`],
+			[`{{ [1, 2] == (1, 2) }}`, `false`],
+			[`{{ [1] == 1 }}`, `false`],
+		])("%s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+	});
+
+	describe("Dict equality", () => {
+		it.each([
+			[`{{ {"a": 1} == {"a": 1} }}`, `true`],
+			[`{{ {"a": 1} != {"a": 1} }}`, `false`],
+			[`{{ {"a": 1} == {"a": 2} }}`, `false`],
+			[`{{ {"a": 1} == {"b": 1} }}`, `false`],
+			[`{{ {"a": 1} == {"a": 1, "b": 2} }}`, `false`],
+			[`{{ {"a": 1, "b": 2} == {"b": 2, "a": 1} }}`, `true`],
+			[`{{ {"a": {"b": [1, 2]}} == {"a": {"b": [1, 2]}} }}`, `true`],
+			[`{{ {"a": {"b": [1, 2]}} == {"a": {"b": [1, 3]}} }}`, `false`],
+			[`{{ [{"a": 1}] == [{"a": 1}] }}`, `true`],
+			[`{{ [{"a": 1}] == [{"a": 2}] }}`, `false`],
+			[`{{ {} == {} }}`, `true`],
+			[`{{ {} != {} }}`, `false`],
+			[`{{ {"a": 1} == [1] }}`, `false`],
+			[`{{ {} == [] }}`, `false`],
+			[`{{ {"a": 1} == 1 }}`, `false`],
+		])("%s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+
+		it("compares a loop only to itself", () => {
+			expectTemplateToRender(`{% for x in [1] %}{{ loop == loop }} {{ loop == {} }}{% endfor %}`, `true false`);
+		});
+	});
+
+	describe("Membership in a list", () => {
+		it.each([
+			[`{{ [1, 2] in [[1, 2]] }}`, `true`],
+			[`{{ [1, 2] not in [[1, 2]] }}`, `false`],
+			[`{{ [3] in [[1, 2]] }}`, `false`],
+			[`{{ [3] not in [[1, 2]] }}`, `true`],
+			[`{{ {"a": 1} in [{"a": 1}] }}`, `true`],
+			[`{{ {"a": 1} not in [{"a": 1}] }}`, `false`],
+			[`{{ {"a": 2} in [{"a": 1}] }}`, `false`],
+			[`{{ {"a": 1} in [[1], 2] }}`, `false`],
+			// Scalars are unchanged.
+			[`{{ 1 in [1, 2] }}`, `true`],
+			[`{{ 3 in [1, 2] }}`, `false`],
+			[`{{ 3 not in [1, 2] }}`, `true`],
+			[`{{ "a" in ["a", "b"] }}`, `true`],
+			[`{{ "c" not in ["a", "b"] }}`, `true`],
+			[`{{ true in [true] }}`, `true`],
+			[`{{ "1" in [1, 2] }}`, `false`],
+		])("%s", (source, expected) => {
+			expectTemplateToRender(source, expected);
+		});
+	});
+
+	describe("LongCat-Flash-Chat tool_types", () => {
+		// The `ns.tool_types != []` check from the meituan-longcat/LongCat-Flash-Chat chat template,
+		// with expected outputs rendered by Python Jinja2.
+		const template = new Template(`{%- set ns = namespace(tool_types = []) %}
+{%- for t in tools %}{%- set ns.tool_types = ns.tool_types + [t.type] %}{%- endfor %}
+{{- "reasoning" if ns.tool_types != [] else "no reasoning" }}`);
+
+		it.each([
+			["no tools", [], "no reasoning"],
+			["a tool", [{ type: "function" }], "reasoning"],
+		])("renders with %s", (_, tools, expected) => {
+			expect(template.render({ tools })).toBe(expected);
+		});
+	});
+
 	describe("String split", () => {
 		it.each([
 			[`{{ "a,b,c".split(",", -2) | tojson }}`, `["a", "b", "c"]`],

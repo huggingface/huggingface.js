@@ -881,6 +881,40 @@ export function setupGlobals(env: Environment): void {
 	env.set("None", null);
 }
 
+/**
+ * Python-like equality: lists (and tuples) are compared by value, element by element, and dicts are compared by
+ * value, key by key, regardless of key order.
+ */
+function isEqual(a: AnyRuntimeValue, b: AnyRuntimeValue): boolean {
+	if (a instanceof ArrayValue || b instanceof ArrayValue) {
+		if (
+			!(a instanceof ArrayValue && b instanceof ArrayValue) ||
+			a.type !== b.type ||
+			a.value.length !== b.value.length
+		) {
+			return false;
+		}
+		return a.value.every((x, i) => isEqual(x, b.value[i]));
+	}
+	if (a instanceof ObjectValue || b instanceof ObjectValue) {
+		// `loop` is not a dict in Python, so (like a namespace) it is only equal to itself.
+		if (!(a instanceof ObjectValue && b instanceof ObjectValue) || a instanceof LoopValue || b instanceof LoopValue) {
+			return a === b;
+		}
+		if (a.value.size !== b.value.size) {
+			return false;
+		}
+		for (const [key, x] of a.value) {
+			const y = b.value.get(key);
+			if (y === undefined || !isEqual(x, y)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	return a.value == b.value;
+}
+
 type AttributeContainer = ObjectValue | NamespaceValue;
 
 function isAttributeContainer(value: AnyRuntimeValue): value is AttributeContainer {
@@ -1210,9 +1244,9 @@ export class Interpreter {
 		const right = this.evaluate(node.right, environment);
 		switch (operator) {
 			case "==":
-				return new BooleanValue(left.value == right.value);
+				return new BooleanValue(isEqual(left, right));
 			case "!=":
-				return new BooleanValue(left.value != right.value);
+				return new BooleanValue(!isEqual(left, right));
 		}
 
 		if (
@@ -1294,14 +1328,18 @@ export class Interpreter {
 			// Negative exponents produce floats.
 			const isFloat = left instanceof FloatValue || right instanceof FloatValue || b < 0;
 			return isFloat ? new FloatValue(result) : new IntegerValue(result);
-		} else if (left instanceof ArrayValue && right instanceof ArrayValue) {
+		} else if (left instanceof ArrayValue && right instanceof ArrayValue && operator === "+") {
 			// Evaluate array operands with binary operator.
 			switch (operator) {
 				case "+":
 					return new ArrayValue(left.value.concat(right.value));
 			}
 		} else if (right instanceof ArrayValue) {
-			const member = right.value.find((x) => x.value === left.value) !== undefined;
+			// Lists and dicts are compared by value, as in Python. Scalars keep strict comparison.
+			const isStructured = (v: AnyRuntimeValue) => v instanceof ArrayValue || v instanceof ObjectValue;
+			const member =
+				right.value.find((x) => (isStructured(x) || isStructured(left) ? isEqual(x, left) : x.value === left.value)) !==
+				undefined;
 			switch (operator) {
 				case "in":
 					return new BooleanValue(member);
