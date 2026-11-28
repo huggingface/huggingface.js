@@ -912,7 +912,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 105,
 		releaseYear: 2014,
 	},
-		"GTX 870M": {
+	"GTX 870M": {
 		tflops: 2.59, // float32 (GPU does not support native float16)
 		memory: [3, 6],
 		computeCapability: 3.0,
@@ -920,7 +920,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 100,
 		releaseYear: 2014,
 	},
-		"GTX 860M (Kepler)": {
+	"GTX 860M (Kepler)": {
 		tflops: 2.10, // float32 (GPU does not support native float16)
 		memory: [4],
 		computeCapability: 3.0,
@@ -936,7 +936,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 45,
 		releaseYear: 2014,
 	},
-		"GTX 850A": {
+	"GTX 850A": {
 		tflops: 1.19, // float32 (GPU does not support native float16)
 		memory: [2, 4],
 		computeCapability: 5.0,
@@ -944,7 +944,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 45,
 		releaseYear: 2014,
 	},
-		"GTX 850M": {
+	"GTX 850M": {
 		tflops: 1.12, // float32 (GPU does not support native float16)
 		memory: [2, 4],
 		computeCapability: 5.0,
