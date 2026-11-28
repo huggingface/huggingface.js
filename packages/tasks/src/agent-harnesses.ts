@@ -189,7 +189,7 @@ export const AGENT_HARNESSES = {
 		envVars: { TRAE_AI_SHELL_ID: "*" },
 	},
 	vtcode: {
-		prettyLabel: "VTCode",
+		prettyLabel: "VT Code",
 		repoUrl: "https://github.com/vinhnx/VTCode",
 		description: "Rust coding agent with multi-provider LLM support, OS-native sandboxing, and extensible skills",
 		envVars: {

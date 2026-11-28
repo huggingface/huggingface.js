@@ -280,6 +280,74 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(snippet[2].content).toContain('openclaw agent --local --agent main --message "Hello from Hugging Face"');
 	});
 
+	it("vtcode", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.vtcode;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096, chat_template: "{% if tools %}" },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].content).toContain(`llama serve -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
+		expect(snippet[1].setup).toContain(
+			"curl -fsSL https://raw.githubusercontent.com/vinhnx/vtcode/main/scripts/install.sh | bash",
+		);
+		expect(snippet[1].content).toContain("[[custom_providers]]");
+		expect(snippet[1].content).toContain('name = "llama-cpp"');
+		expect(snippet[1].content).toContain('base_url = "http://localhost:9931/v1"');
+		expect(snippet[1].content).toContain('model = "bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}"');
+		expect(snippet[1].content).toContain("supports_tools = true");
+		expect(snippet[1].content).toContain('reasoning_effort = "none"');
+		expect(snippet[2].content).toContain("vtcode --config vtcode-local.toml");
+	});
+
+	it("vtcode - mlx", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS.vtcode;
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-mlx",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			config: {
+				tokenizer_config: {
+					chat_template: "{% if tools %}...{% endif %}",
+				},
+			},
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet[0].setup).toContain("uv tool install mlx-lm");
+		expect(snippet[0].content).toContain('mlx_lm.server --model "mlx-community/Llama-3.2-3B-Instruct-mlx"');
+		expect(snippet[1].content).toContain("[[custom_providers]]");
+		expect(snippet[1].content).toContain('name = "mlx-lm"');
+		expect(snippet[1].content).toContain('base_url = "http://localhost:8080/v1"');
+		expect(snippet[1].content).toContain('model = "mlx-community/Llama-3.2-3B-Instruct-mlx"');
+		expect(snippet[1].content).toContain("supports_tools = true");
+		expect(snippet[1].content).toContain('reasoning_effort = "none"');
+		expect(snippet[2].content).toContain("vtcode --config vtcode-local.toml");
+	});
+
+	it("vtcode shown only for tool-calling local agent models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.vtcode;
+		const toolCallingModel: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096, chat_template: "{% if tools %}" },
+			inference: "",
+		};
+		const plainModel: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(displayOnModelPage(toolCallingModel)).toBe(true);
+		expect(displayOnModelPage(plainModel)).toBe(false);
+	});
+
 	it("docker model runner", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
 		const model: ModelData = {
