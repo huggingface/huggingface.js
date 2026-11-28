@@ -7039,6 +7039,31 @@ describe("Feature regressions", () => {
 		});
 	});
 
+	describe("Membership of none", () => {
+		it.each([
+			[`{{ none in ["low", "high"] }}`, "false"],
+			[`{{ none not in ["low", "high"] }}`, "true"],
+			[`{{ none in [1, none] }}`, "true"],
+			[`{{ none not in [none] }}`, "false"],
+			[`{{ none in {"a": 1} }}`, "false"],
+			[`{{ none not in {"a": 1} }}`, "true"],
+		])("evaluates %s like Python", (source, expected) => {
+			expect(new Template(source).render()).toBe(expected);
+		});
+
+		it("checks a reasoning effort that defaults to none (Kolibri-1 chat template pattern)", () => {
+			const template = new Template(
+				`{%- set effort = reasoning_effort | default(none) -%}{{ effort in ["low", "high", "max"] or effort is none }}`,
+			);
+			expect(template.render({})).toBe("true");
+			expect(template.render({ reasoning_effort: "high" })).toBe("true");
+		});
+
+		it.each([`{{ "a" in none }}`, `{{ none in "abc" }}`, `{{ none + [1] }}`])("still throws for %s", (source) => {
+			expect(() => new Template(source).render()).toThrowError("Cannot perform operation on null values");
+		});
+	});
+
 	describe("Exponentiation", () => {
 		it("supports boolean operands", () => {
 			const template = new Template(
