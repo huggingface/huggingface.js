@@ -84,13 +84,13 @@ describe("listModels", () => {
 	it("should search model by inference provider", async () => {
 		let count = 0;
 		for await (const entry of listModels({
-			search: { inferenceProviders: ["together"] },
+			search: { inferenceProviders: ["fal-ai"] },
 			additionalFields: ["inferenceProviderMapping"],
 			limit: 10,
 		})) {
 			count++;
 			if (Array.isArray(entry.inferenceProviderMapping)) {
-				expect(entry.inferenceProviderMapping.map(({ provider }) => provider)).to.include("together");
+				expect(entry.inferenceProviderMapping.map(({ provider }) => provider)).to.include("fal-ai");
 			}
 		}
 
@@ -99,7 +99,7 @@ describe("listModels", () => {
 
 	it("should search model by several inference providers", async () => {
 		let count = 0;
-		const inferenceProviders = ["together", "replicate"];
+		const inferenceProviders = ["replicate", "fal-ai"];
 		for await (const entry of listModels({
 			search: { inferenceProviders },
 			additionalFields: ["inferenceProviderMapping"],
@@ -116,10 +116,11 @@ describe("listModels", () => {
 		expect(count).to.equal(10);
 	});
 
-	it("should list meta-llama models with inference provider mapping", async () => {
+	it("should list openai models with inference provider mapping", async () => {
 		let count = 0;
 		for await (const entry of listModels({
-			search: { owner: "meta-llama" },
+			/// Chat models are served through OpenRouter and have no direct mapping, so pick a non-chat provider
+			search: { owner: "openai", inferenceProviders: ["hf-inference"] },
 			additionalFields: ["inferenceProviderMapping"],
 			limit: 1,
 		})) {
