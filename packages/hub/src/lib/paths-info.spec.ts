@@ -1,6 +1,6 @@
 import { expect, it, describe } from "vitest";
 import type { CommitInfo, PathInfo } from "./paths-info";
-import { pathsInfo } from "./paths-info";
+import { pathsInfo } from "../../index";
 
 describe("pathsInfo", () => {
 	it("should fetch LFS path info", async () => {
@@ -69,5 +69,60 @@ describe("pathsInfo", () => {
 		const modelPathInfo = result[0];
 		expect(modelPathInfo.path).toBe("config.json");
 		expect(modelPathInfo.lfs).toBeUndefined();
+	});
+});
+
+// Offline fixtures exercise the documented custom-fetch boundary, not the live Hub.
+describe("pathsInfo offline expanded metadata", () => {
+	it.each([{ type: "bucket", name: "owner/bucket" } as const, "buckets/owner/bucket"])(
+		"keeps bucket upload metadata without lastCommit for %j",
+		async (repo) => {
+			const calls: { url: string; body: unknown; method: string | undefined }[] = [];
+			const uploadedAt = "2026-01-01T00:00:00Z";
+			const customFetch: typeof fetch = async (url, init) => {
+				calls.push({ url: String(url), body: JSON.parse(String(init?.body)), method: init?.method });
+				return new Response(
+					JSON.stringify([{ path: "file.txt", type: "file", size: 7, xetHash: "xet-hash", uploadedAt }]),
+					{ status: 200 },
+				);
+			};
+			const result = await pathsInfo({
+				repo,
+				paths: ["file.txt"],
+				expand: true,
+				revision: "ignored-for-buckets",
+				hubUrl: "https://fixture.invalid",
+				fetch: customFetch,
+			});
+			expect(calls).toEqual([
+				{
+					url: "https://fixture.invalid/api/buckets/owner/bucket/paths-info",
+					method: "POST",
+					body: { paths: ["file.txt"], expand: true },
+				},
+			]);
+			expect(result[0].lastCommit).toBeUndefined();
+			expect(result[0].uploadedAt).toBe(uploadedAt);
+			expect(result[0].xetHash).toBe("xet-hash");
+		},
+	);
+
+	it.each(["model", "dataset", "space", "kernel"] as const)("preserves expanded commit dates for %s", async (type) => {
+		const date = "2019-09-23T19:48:44.000Z";
+		const customFetch: typeof fetch = async () =>
+			new Response(
+				JSON.stringify([
+					{ path: "file.txt", type: "file", size: 7, lastCommit: { id: "commit-id", title: "Commit title", date } },
+				]),
+				{ status: 200 },
+			);
+		const result = await pathsInfo({
+			repo: { type, name: "owner/repo" },
+			paths: ["file.txt"],
+			expand: true,
+			fetch: customFetch,
+		});
+		expect(result[0].lastCommit).toEqual({ id: "commit-id", title: "Commit title", date: new Date(date) });
+		expect(result[0].lastCommit.date).toBeInstanceOf(Date);
 	});
 });
