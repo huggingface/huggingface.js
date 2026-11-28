@@ -380,6 +380,7 @@ function toJSON(
 			return result;
 		}
 		case "ArrayValue":
+		case "TupleValue":
 		case "NamespaceValue":
 		case "ObjectValue": {
 			const indentValue = indent ? " ".repeat(indent) : "";
@@ -387,8 +388,8 @@ function toJSON(
 			const childrenPadding = basePadding + indentValue; // Depth + 1
 
 			// Like Python's json.dumps, empty containers render as [] and {} even when indenting.
-			if (input.type === "ArrayValue") {
-				const core = (input as ArrayValue).value.map((x) => toJSON(x, options, depth + 1, convertUndefinedToNull));
+			if (input instanceof ArrayValue) {
+				const core = input.value.map((x) => toJSON(x, options, depth + 1, convertUndefinedToNull));
 				return indent && core.length > 0
 					? `[${childrenPadding}${core.join(`${itemSeparator}${childrenPadding}`)}${basePadding}]`
 					: `[${core.join(itemSeparator)}]`;

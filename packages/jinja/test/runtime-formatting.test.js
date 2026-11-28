@@ -16,6 +16,23 @@ describe("Runtime formatting in text composition", () => {
 		expect(new Template(source).render()).toBe(expected);
 	});
 
+	it.each([
+		["{{ (1, 2) ~ '!' }}", "[1, 2]!"],
+		["{{ '!' ~ (1, 2) }}", "![1, 2]"],
+		["{{ missing ~ (1, 2) }}", "[1, 2]"],
+		["{{ (1, 2) ~ missing }}", "[1, 2]"],
+		["{{ [(1, 2), (3, 4)] | join }}", "[1, 2][3, 4]"],
+		["{{ [(1, 2), (3, 4)] | join(':') }}", "[1, 2]:[3, 4]"],
+		["{{ [{'pair': (1, 2)}] | join }}", '{"pair": [1, 2]}'],
+		["{{ [(1, 2)] ~ '!' }}", "[[1, 2]]!"],
+		["{{ (1, 2) | tojson }}", "[1, 2]"],
+		["{{ ((1, 2), (3, 4)) | tojson(indent=2) }}", "[\n  [\n    1,\n    2\n  ],\n  [\n    3,\n    4\n  ]\n]"],
+		["{{ (1, 2) }}", "[1, 2]"],
+		["{{ (1, 2) | join(':') }}", "1:2"],
+	])("renders tuples through the array serialization path: %s", (source, expected) => {
+		expect(new Template(source).render()).toBe(expected);
+	});
+
 	it("retains scalar and empty-item compatibility", () => {
 		expect(new Template("{{ [none, missing, true, false, 2, 'x']|join(':') }}").render()).toBe("::true:false:2:x");
 		expect(new Template("{{ missing ~ true ~ false }}").render()).toBe("truefalse");
