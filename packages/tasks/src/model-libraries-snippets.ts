@@ -2315,18 +2315,70 @@ export const torch_pointcloud = (model: ModelData): string[] => [
 model = tp.create_model("${nameWithoutNamespace(model.id)}", pretrained=True)`,
 ];
 
-export const s1s2 = (model: ModelData): string[] => [
-	`npm i @s1s2/web onnxruntime-web @huggingface/transformers`,
-	`import { S1S2 } from "@s1s2/web";
+export const s1s2 = (model: ModelData): string[] => {
+	const manifest = `https://huggingface.co/${model.id}/resolve/main/manifest.json`;
+	if (model.tags.includes("refusal-prediction")) {
+		return [
+			`# Experimental reader: build @s1s2/web from main, then install the tarball in your app.
+git clone --branch main https://github.com/eduardoworrel/s1s2.js.git
+(cd s1s2.js && npm ci && npm run build && npm pack)
+npm i ./s1s2.js/s1s2-web-*.tgz onnxruntime-web@1.31.1 @huggingface/transformers@4.3.1`,
+			`import * as ort from "onnxruntime-web/webgpu";
+import * as transformers from "@huggingface/transformers";
+import { S1S2 } from "@s1s2/web";
+
+const model = await S1S2.load({ manifest: "${manifest}", device: "webgpu", modules: { ort, transformers } });
+const { forecast, session } = await model.forecast({
+	input: "Can you provide me with the timetable for the next train to London?",
+	questions: [{ name: "refuse", type: "predicate", instructions: "Will your answer refuse to do what this request asks?" }],
+});
+console.log(forecast.behaviors.refuse.p);
+await session.dispose();
+await model.dispose();`,
+		];
+	}
+	if (model.pipeline_tag === "audio-classification") {
+		return [
+			`npm i @s1s2/web onnxruntime-web@1.31.1`,
+			`import * as ort from "onnxruntime-web/webgpu";
+import { loadMedia } from "@s1s2/web/media";
+
+const audio = await loadMedia({ manifest: "${manifest}", modules: { ort } });
+// samples: Float32Array of mono audio at 16 kHz
+const encoded = await audio.encode({ samples, sampleRate: 16000 });
+const [activity] = await audio.read(encoded, ["voice_activity"]);
+console.log(activity.decision, activity.probability);`,
+		];
+	}
+	if (model.pipeline_tag === "image-text-to-text") {
+		return [
+			`npm i @s1s2/web onnxruntime-web@1.31.1 @huggingface/transformers@4.3.1`,
+			`import * as ort from "onnxruntime-web/webgpu";
+import * as transformers from "@huggingface/transformers";
+import { loadMedia } from "@s1s2/web/media";
+
+const reader = await loadMedia({ manifest: "${manifest}", modality: "image", device: "webgpu", modules: { ort, transformers } });
+// imageData: ImageData obtained from a canvas
+const result = await reader.decide({
+	image: { rgb: imageData.data, width: imageData.width, height: imageData.height, channels: 4 },
+	questions: [{ name: "dog", instruction: "Is there a dog in the image?", options: ["yes", "no"] }],
+});
+console.log(result.answers[0].decision, result.answers[0].probability);`,
+		];
+	}
+	return [
+		`npm i @s1s2/web onnxruntime-web @huggingface/transformers`,
+		`import { S1S2 } from "@s1s2/web";
 
 // Runs in the browser (WebGPU). manifest.json is the default manifest of this repo.
-const model = await S1S2.load({ manifest: "https://huggingface.co/${model.id}/resolve/main/manifest.json" });
+const model = await S1S2.load({ manifest: "${manifest}" });
 const s = await model.decide({
 	input: "Arrived late, but works great.",
 	questions: [{ name: "positive", type: "predicate", instructions: "Is this review positive?" }],
 });
 console.log(s.answers[0].probability, s.answers[0].margin);`,
-];
+	];
+};
 
 export const saelens = (/* model: ModelData */): string[] => [
 	`# pip install sae-lens

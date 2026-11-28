@@ -22,6 +22,7 @@ import {
 	peft,
 	phantom_wan,
 	pruna,
+	s1s2,
 	sam2,
 	sam_3d_body,
 	sentenceTransformers,
@@ -35,6 +36,18 @@ import {
 } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
+	it.each([
+		["text-classification", [], "model.decide("],
+		["audio-classification", [], "audio.read("],
+		["image-text-to-text", [], "reader.decide("],
+		["text-classification", ["refusal-prediction"], "model.forecast("],
+	] as const)("s1s2 chooses the reader for %s with tags %j", (pipeline_tag, tags, call) => {
+		const [install, usage] = s1s2({ id: "owner/model", pipeline_tag, tags: [...tags], inference: "" });
+		expect(usage).toContain(call);
+		expect(usage).toContain("https://huggingface.co/owner/model/resolve/main/manifest.json");
+		if (call === "model.forecast(") expect(install).toContain("--branch main");
+	});
+
 	it("llama_cpp_python conversational", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
