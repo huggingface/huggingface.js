@@ -118,8 +118,8 @@ export function parseInfo(text: string): LeRobotInfo {
 	let json: unknown;
 	try {
 		json = JSON.parse(text);
-	} catch {
-		throw new Error("meta/info.json is not valid JSON (an LFS pointer or a truncated read?)");
+	} catch (cause) {
+		throw new Error("meta/info.json is not valid JSON (an LFS pointer or a truncated read?)", { cause });
 	}
 	if (!isRecord(json)) {
 		throw new Error("meta/info.json is not an object");
