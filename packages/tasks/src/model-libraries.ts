@@ -425,6 +425,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
 	},
+	"comfyui-magi2-native": {
+		prettyLabel: "ComfyUI MAGI-2 Native",
+		repoName: "comfyui-magi2-native",
+		repoUrl: "https://github.com/Colnb83/comfyui-magi2-native",
+		filter: false,
+		countDownloads: `path:"comfyui/diffusion_models/magi2_preview_nvfp4_comfy.safetensors"`,
+	},
 	cortiq: {
 		prettyLabel: "cortiq",
 		repoName: "cortiq",
