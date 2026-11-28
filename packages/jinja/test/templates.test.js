@@ -6516,6 +6516,134 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("User-defined filters", () => {
+		it("applies a filter passed as data", () => {
+			const template = new Template("{{ name | shout }}");
+			expect(template.render({ name: "hi", shout: (value) => value.toUpperCase() })).toBe("HI");
+		});
+
+		it("passes filter arguments after the operand", () => {
+			const template = new Template('{{ name | wrap("[", "]") }}');
+			expect(template.render({ name: "hi", wrap: (value, left, right) => left + value + right })).toBe("[hi]");
+		});
+
+		it("works in filter statements", () => {
+			const template = new Template("{% filter shout %}hi{% endfilter %}");
+			expect(template.render({ shout: (value) => value.toUpperCase() })).toBe("HI");
+		});
+
+		it("applies a filter bound with `{% set %}`", () => {
+			const template = new Template("{% set shout = helper %}{{ name | shout }}");
+			expect(template.render({ name: "hi", helper: (value) => value.toUpperCase() })).toBe("HI");
+		});
+
+		it("passes keyword arguments to a macro used as a filter", () => {
+			const template = new Template(
+				"{% macro pad(value, char='-') %}{{ char }}{{ value }}{% endmacro %}{{ name | pad(char='#') }}",
+			);
+			expect(template.render({ name: "hi" })).toBe("#hi");
+		});
+
+		it("can use a global function as a filter", () => {
+			const template = new Template("{{ format | strftime_now }}");
+			expect(template.render({ format: "%Y" })).toBe(String(new Date().getFullYear()));
+		});
+
+		it("does not let a function replace a built-in filter by default", () => {
+			const template = new Template("{{ name | upper }}");
+			expect(template.render({ name: "hi", upper: () => "overridden" })).toBe("HI");
+		});
+
+		it("replaces a built-in filter when allowFilterOverride is true", () => {
+			const template = new Template("{{ name | upper }}", { allowFilterOverride: true });
+			expect(template.render({ name: "hi", upper: (value) => `[${value}]` })).toBe("[hi]");
+		});
+
+		it("applies user-defined filters when allowFilterOverride is true", () => {
+			const template = new Template("{{ name | shout }}", { allowFilterOverride: true });
+			expect(template.render({ name: "hi", shout: (value) => value.toUpperCase() })).toBe("HI");
+		});
+
+		it("ignores a non-function named like a built-in filter", () => {
+			const template = new Template("{{ value | list | length }}", { allowFilterOverride: true });
+			expect(template.render({ value: [1, 2], list: "not a function" })).toBe("2");
+		});
+
+		it("keeps the built-in error for a non-function that is not a filter either", () => {
+			const template = new Template("{{ value | nope }}");
+			expect(() => template.render({ value: "a", nope: 1 })).toThrow("Unknown StringValue filter: nope");
+		});
+
+		it("keeps reporting unknown filters when nothing is in scope", () => {
+			const template = new Template('{{ "a" | nope }}');
+			expect(() => template.render()).toThrow("Unknown StringValue filter: nope");
+		});
+
+		it("applies a user-defined filter when the built-in one does not accept the operand", () => {
+			const template = new Template("{{ xs | int }}");
+			expect(template.render({ xs: [1], int: () => "user-int" })).toBe("user-int");
+		});
+
+		it("keeps the built-in error when a built-in filter does not accept the operand", () => {
+			const template = new Template("{{ xs | int(0) }}");
+			expect(() => template.render({ xs: [1] })).toThrow('Cannot apply filter "int" to type: ArrayValue');
+		});
+
+		it("evaluates filter arguments exactly once when falling back to a user-defined filter", () => {
+			let calls = 0;
+			const template = new Template("{{ missing | int(spy()) }}");
+			const result = template.render({
+				spy: () => {
+					++calls;
+					return 5;
+				},
+				int: () => "user-int",
+			});
+			expect(result).toBe("user-int");
+			expect(calls).toBe(1);
+		});
+
+		it("does not mistake an error thrown by user code for an unknown filter", () => {
+			let calls = 0;
+			const template = new Template("{{ xs | join(sub()) }}");
+			expect(() =>
+				template.render({
+					xs: ["a", "b"],
+					sub: () => {
+						++calls;
+						return new Template("{{ 1 | nope }}").render();
+					},
+					join: () => "user-join",
+				}),
+			).toThrow("Unknown NumericValue filter: nope");
+			expect(calls).toBe(1);
+		});
+
+		it("evaluates filter arguments once for a built-in filter", () => {
+			let calls = 0;
+			const template = new Template("{{ xs | join(sep()) }}");
+			expect(template.render({ xs: ["a", "b"], sep: () => ++calls && "-" })).toBe("a-b");
+			expect(calls).toBe(1);
+		});
+
+		it("resolves macros declared in the template", () => {
+			const template = new Template("{% macro shout(value) %}{{ value | upper }}{% endmacro %}{{ name | shout }}");
+			expect(template.render({ name: "hi" })).toBe("HI");
+		});
+
+		it("lets errors thrown inside a user-defined filter propagate", () => {
+			const template = new Template("{{ name | boom }}");
+			expect(() =>
+				template.render({
+					name: "hi",
+					boom: () => {
+						throw new Error("boom inside");
+					},
+				}),
+			).toThrow("boom inside");
+		});
+	});
+
 	describe("Iterable test", () => {
 		it.each([
 			{ value: {}, expected: "true" },
