@@ -45,6 +45,10 @@ export interface PathInfo {
 	 * Only available for bucket repos.
 	 */
 	uploadedAt?: string;
+	/**
+	 * POSIX file mode (st_mode), e.g. `0o100755`. Only available for bucket files that have a mode set.
+	 */
+	mode?: number;
 	securityFileStatus?: SecurityFileStatus;
 }
 
@@ -131,6 +135,7 @@ export async function pathsInfo(
 		size: item.size,
 		xetHash: item.xetHash,
 		uploadedAt: item.uploadedAt,
+		mode: item.mode,
 		securityFileStatus: item.securityFileStatus,
 		lastCommit: item.lastCommit
 			? {
