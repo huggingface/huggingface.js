@@ -6516,6 +6516,25 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("String case tests", () => {
+		it.each([
+			["", "false|false"],
+			["123!?", "false|false"],
+			["中文", "false|false"],
+			["hello 123", "true|false"],
+			["HELLO 123", "false|true"],
+			["Hello", "false|false"],
+			["é", "true|false"],
+			["É", "false|true"],
+			["ª", "true|false"],
+			["ªA", "false|false"],
+			["ªa", "true|false"],
+			["ǅ", "false|false"],
+		])("checks the cased characters of %j", (value, expected) => {
+			expect(new Template("{{ value is lower }}|{{ value is upper }}").render({ value })).toBe(expected);
+		});
+	});
+
 	describe("Iterable test", () => {
 		it.each([
 			{ value: {}, expected: "true" },

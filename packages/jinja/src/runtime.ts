@@ -783,14 +783,14 @@ export class Environment {
 			"lower",
 			(operand) => {
 				const str = (operand as StringValue).value;
-				return operand.type === "StringValue" && str === str.toLowerCase();
+				return operand.type === "StringValue" && /\p{Lowercase}/u.test(str) && !/[\p{Uppercase}\p{Lt}]/u.test(str);
 			},
 		],
 		[
 			"upper",
 			(operand) => {
 				const str = (operand as StringValue).value;
-				return operand.type === "StringValue" && str === str.toUpperCase();
+				return operand.type === "StringValue" && /\p{Uppercase}/u.test(str) && !/[\p{Lowercase}\p{Lt}]/u.test(str);
 			},
 		],
 		["none", (operand) => operand.type === "NullValue"],
