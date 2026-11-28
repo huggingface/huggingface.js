@@ -242,6 +242,24 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}${tag}`;
 };
 
+const snippetDulus = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	// Dulus reaches the model through the local Ollama API, which serves what is
+	// already pulled: `ollama pull` downloads the GGUF from the Hub first.
+	// One step per command, so each content holds a single {{QUANT_TAG}} placeholder.
+	const ollamaModel = `hf.co/${model.id}${getQuantTag(filepath)}`;
+	return [
+		{
+			title: "Pull the model with Ollama",
+			content: `ollama pull ${ollamaModel}`,
+		},
+		{
+			title: "Run Dulus",
+			setup: "# Install Dulus:\npip install dulus",
+			content: `dulus --model ollama/${ollamaModel}`,
+		},
+	];
+};
+
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		["# Load and run the model:", `${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`].join("\n");
@@ -818,6 +836,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	dulus: {
+		prettyLabel: "Dulus",
+		docsUrl: "https://github.com/KevRojo/Dulus",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetDulus,
 	},
 } satisfies Record<string, LocalApp>;
 
