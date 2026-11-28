@@ -160,6 +160,13 @@ const TEST_STRINGS = {
 	SORT_UNDEFINED_VALUES: `{{ [a, b, c] | sort }}`,
 	SORT_MIXED_BOOL_NUM: `{{ [0, true, false, 1, 0.5] | sort }}`,
 
+	// Join filter
+	JOIN_BASIC: `{{ ["a", "b", "c"] | join(", ") }}`,
+	JOIN_NO_ARGS: `{{ ["a", "b"] | join }}`,
+	JOIN_ATTRIBUTE: `{{ users | join(", ", attribute="name") }}`,
+	JOIN_ATTRIBUTE_DOT_NOTATION: `{{ items | join(",", attribute="details.priority") }}`,
+	JOIN_ATTRIBUTE_POSITIONAL: `{{ users | join(",", "name") }}`,
+
 	// Filter statements
 	FILTER_STATEMENTS: `{% filter upper %}text{% endfilter %}`,
 
@@ -3470,6 +3477,73 @@ const TEST_PARSED = {
 		{ value: "sort", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	JOIN_BASIC: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "c", type: "StringLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ", ", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	JOIN_NO_ARGS: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	JOIN_ATTRIBUTE: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "users", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ", ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "attribute", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "name", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	JOIN_ATTRIBUTE_DOT_NOTATION: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "items", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "attribute", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "details.priority", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	JOIN_ATTRIBUTE_POSITIONAL: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "users", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "name", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Filter statements
 	FILTER_STATEMENTS: [
@@ -6007,6 +6081,31 @@ const TEST_CONTEXT = {
 	SORT_UNDEFINED_VALUES: {},
 	SORT_MIXED_BOOL_NUM: {},
 
+	// Join filter
+	JOIN_BASIC: {},
+	JOIN_NO_ARGS: {},
+	JOIN_ATTRIBUTE: {
+		users: [
+			{ name: "Charlie", age: 30 },
+			{ name: "Alice", age: 25 },
+			{ name: "Bob", age: 35 },
+		],
+	},
+	JOIN_ATTRIBUTE_DOT_NOTATION: {
+		items: [
+			{ name: "item1", details: { priority: 3 } },
+			{ name: "item2", details: { priority: 1 } },
+			{ name: "item3", details: { priority: 2 } },
+		],
+	},
+	JOIN_ATTRIBUTE_POSITIONAL: {
+		users: [
+			{ name: "Charlie", age: 30 },
+			{ name: "Alice", age: 25 },
+			{ name: "Bob", age: 35 },
+		],
+	},
+
 	// Filter statements
 	FILTER_STATEMENTS: {},
 
@@ -6296,6 +6395,13 @@ const EXPECTED_OUTPUTS = {
 	SORT_NULL_VALUES: `[null, null]`,
 	SORT_UNDEFINED_VALUES: `[undefined, undefined, undefined]`,
 	SORT_MIXED_BOOL_NUM: `[0, false, 0.5, true, 1]`,
+
+	// Join filter
+	JOIN_BASIC: `a, b, c`,
+	JOIN_NO_ARGS: `ab`,
+	JOIN_ATTRIBUTE: `Charlie, Alice, Bob`,
+	JOIN_ATTRIBUTE_DOT_NOTATION: `3,1,2`,
+	JOIN_ATTRIBUTE_POSITIONAL: `Charlie,Alice,Bob`,
 
 	// Filter statements
 	FILTER_STATEMENTS: `TEXT`,

@@ -1618,20 +1618,33 @@ export class Interpreter {
 					}),
 				);
 			} else if (filterName === "join") {
-				let value;
-				if (operand instanceof StringValue) {
-					// NOTE: string.split('') breaks for unicode characters
-					value = Array.from(operand.value);
-				} else if (operand instanceof ArrayValue) {
-					value = operand.value.map((x) => x.value);
-				} else {
-					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
-				}
 				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
 
 				const separator = args.at(0) ?? kwargs.get("separator") ?? new StringValue("");
 				if (!(separator instanceof StringValue)) {
 					throw new Error("separator must be a string");
+				}
+
+				const attribute = args.at(1) ?? kwargs.get("attribute") ?? new NullValue();
+				if (
+					!(attribute instanceof StringValue || attribute instanceof IntegerValue || attribute instanceof NullValue)
+				) {
+					throw new Error("attribute must be a string, integer, or null");
+				}
+
+				let value;
+				if (operand instanceof StringValue) {
+					// NOTE: string.split('') breaks for unicode characters
+					value = Array.from(operand.value);
+				} else if (operand instanceof ArrayValue) {
+					if (attribute instanceof NullValue) {
+						value = operand.value.map((x) => x.value);
+					} else {
+						const attrPath = attribute instanceof IntegerValue ? String(attribute.value) : attribute.value;
+						value = operand.value.map((x) => getAttributeValue(x, attrPath).value);
+					}
+				} else {
+					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 				}
 
 				return new StringValue(value.join(separator.value));
