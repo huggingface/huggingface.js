@@ -114,6 +114,27 @@ describe("parseInfo", () => {
 		).toThrow(/Unsupported codebase_version/);
 	});
 
+	it.each([
+		"version https://git-lfs.github.com/spec/v1\noid sha256:abc\nsize 42\n",
+		'{"codebase_version": "v3.0",',
+		'{"fps": }',
+	])("preserves the JSON parser error for %s", (text) => {
+		let cause: unknown;
+		try {
+			JSON.parse(text);
+		} catch (error) {
+			cause = error;
+		}
+		try {
+			parseInfo(text);
+			expect.fail("Expected invalid JSON to throw");
+		} catch (error) {
+			expect(error).toBeInstanceOf(Error);
+			expect((error as Error).cause).toBeInstanceOf(SyntaxError);
+			expect(((error as Error).cause as Error).message).toBe((cause as Error).message);
+		}
+	});
+
 	it("rejects an LFS pointer", () => {
 		expect(() => parseInfo("version https://git-lfs.github.com/spec/v1\noid sha256:abc\nsize 42\n")).toThrow(
 			/not valid JSON/,
