@@ -826,6 +826,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://hezarai.github.io/hezar",
 		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
 	},
+	"hrx-loom": {
+		prettyLabel: "Loom",
+		repoName: "hrx-system",
+		repoUrl: "https://github.com/ROCm/hrx-system",
+		docsUrl: "https://rocm.github.io/hrx-system/loom/",
+		filter: false,
+		countDownloads: `path:"model.json"`,
+	},
 	htrflow: {
 		prettyLabel: "HTRflow",
 		repoName: "HTRflow",
