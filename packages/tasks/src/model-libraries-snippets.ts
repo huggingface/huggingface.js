@@ -3834,6 +3834,17 @@ export const hezar = (model: ModelData): string[] => [
 model = Model.load("${model.id}")`,
 ];
 
+export const yhatmodels = (model: ModelData): string[] => [
+	`pip install yhatmodels`,
+	`from yhatmodels import ChakraTS
+
+model = ChakraTS.from_pretrained("${model.id}")  # the first time, accept the license in your browser`,
+	`import numpy as np
+
+history = 10 + np.sin(np.arange(500) / 24 * 2 * np.pi)  # any series: sales, demand, sensor readings
+q = model.forecast(history, h=48)  # the next 48 steps: quantiles 0.1, 0.5 and 0.9`,
+];
+
 export const zao = (model: ModelData): string[] => [
 	`# pip install zao
 from zao import ZAOTransformer
