@@ -634,6 +634,44 @@ describe("frames columns", () => {
 		expect(frames?.series).toEqual({ "next.reward": [[0, 0.5, 1]] });
 	});
 
+	it("reads float16 columns, which parquet stores as FIXED_LEN_BYTE_ARRAY", async () => {
+		const float16 = { type: "FIXED_LEN_BYTE_ARRAY", type_length: 2, logical_type: { type: "FLOAT16" } } as const;
+		const data = parquetWriteBuffer({
+			columnData: [
+				{ name: "timestamp", data: [0, 0.1, 0.2] },
+				{
+					name: "observation.state",
+					data: [
+						[1, 2],
+						[3, 4],
+						[5, 6],
+					],
+				},
+				{ name: "next.reward", data: [0, 0.5, 1] },
+			],
+			schema: [
+				{ name: "root", num_children: 3 },
+				{ name: "timestamp", type: "DOUBLE", repetition_type: "OPTIONAL" },
+				{ name: "observation.state", repetition_type: "OPTIONAL", converted_type: "LIST", num_children: 1 },
+				{ name: "list", repetition_type: "REPEATED", num_children: 1 },
+				{ name: "element", ...float16, repetition_type: "REQUIRED" },
+				{ name: "next.reward", ...float16, repetition_type: "OPTIONAL" },
+			],
+		});
+		const dataset = new LeRobotDataset(REPO_ID, {
+			fetch: mockFetch({ ...files, "data/chunk-000/file-000.parquet": new Uint8Array(data) }),
+		});
+		const [episode] = await dataset.episodes({ limit: 1 });
+		const frames = await dataset.frames(episode);
+		expect(frames?.series).toEqual({
+			"observation.state": [
+				[1, 3, 5],
+				[2, 4, 6],
+			],
+			"next.reward": [[0, 0.5, 1]],
+		});
+	});
+
 	it("reads only the features asked for", async () => {
 		const dataset = new LeRobotDataset(REPO_ID, { fetch: mockFetch(files) });
 		const [episode] = await dataset.episodes({ limit: 1 });

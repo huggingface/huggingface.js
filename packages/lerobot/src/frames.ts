@@ -11,7 +11,11 @@ const BOOKKEEPING_COLUMNS = new Set(["timestamp", "frame_index", "episode_index"
 const NUMBER_TYPES = new Set(["BOOLEAN", "INT32", "INT64", "FLOAT", "DOUBLE"]);
 
 function isNumberLeaf(node: SchemaTree | undefined): boolean {
-	return node !== undefined && node.children.length === 0 && NUMBER_TYPES.has(node.element.type ?? "");
+	if (node === undefined || node.children.length > 0) {
+		return false;
+	}
+	/// float16 is a FIXED_LEN_BYTE_ARRAY that hyparquet decodes to a number.
+	return NUMBER_TYPES.has(node.element.type ?? "") || node.element.logical_type?.type === "FLOAT16";
 }
 
 /**
