@@ -922,7 +922,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	"GTX 860M (Kepler)": {
 		tflops: 2.10, // float32 (GPU does not support native float16)
-		memory: [4],
+		memory: [2, 4],
 		computeCapability: 3.0,
 		msrp: 280,
 		power: 75,
@@ -930,7 +930,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	"GTX 860M (Maxwell)": {
 		tflops: 1.38, // float32 (GPU does not support native float16)
-		memory: [2],
+		memory: [2, 4],
 		computeCapability: 5.0,
 		msrp: 240,
 		power: 45,
@@ -938,7 +938,7 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 	},
 	"GTX 850A": {
 		tflops: 1.19, // float32 (GPU does not support native float16)
-		memory: [2, 4],
+		memory: [2],
 		computeCapability: 5.0,
 		msrp: 180,
 		power: 45,
