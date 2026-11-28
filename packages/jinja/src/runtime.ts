@@ -1176,11 +1176,41 @@ function getAccessedSpecialMacroArguments(node: Macro | CallStatement): Set<Spec
 	return accessed;
 }
 
+/**
+ * Thrown by `applyBuiltinFilter` when a name is not a built-in filter for this operand type.
+ * `applyFilter` uses it to decide whether to fall back to a user-defined filter.
+ */
+class UnknownFilterError extends Error {}
+
+/**
+ * `UnknownFilterError`s that an `applyFilter` call has already acted on. Filter applications nest (through a
+ * built-in filter's arguments, or through a template rendered by one of them), and only the innermost one may
+ * treat such an error as "this name is not a built-in filter"; otherwise an error raised by user code would
+ * make an outer filter fall back to a function of the same name.
+ */
+const claimedFilterErrors = new WeakSet<Error>();
+
+export interface InterpreterOptions {
+	/**
+	 * Whether a function in scope (render data, `{% set %}`, `{% macro %}`, or a global) may replace a
+	 * built-in filter that has the same name. Defaults to `false`: user-defined filters are only used
+	 * for names that are not a built-in filter of the operand's type.
+	 *
+	 * A replacement is installed for every operand type, and is called like any other function from the
+	 * template, so it unpacks its arguments itself (`{{ x | tojson(indent=2) }}` passes a `Map` holding
+	 * `indent`). Turn it on only for templates you control: render data such as `{ items: fn }` or
+	 * `{ tojson: fn }` then replaces every one of those filters in the template.
+	 */
+	allowFilterOverride?: boolean;
+}
+
 export class Interpreter {
 	global: Environment;
+	private options: InterpreterOptions;
 
-	constructor(env?: Environment) {
+	constructor(env?: Environment, options: InterpreterOptions = {}) {
 		this.global = env ?? new Environment();
+		this.options = options;
 	}
 
 	/**
@@ -1414,15 +1444,85 @@ export class Interpreter {
 	}
 
 	private applyFilter(operand: AnyRuntimeValue, filterNode: Identifier | CallExpression, environment: Environment) {
-		// For now, we only support the built-in filters
+		// With `allowFilterOverride`, a function in scope (render data, `{% set %}`, `{% macro %}`, or a
+		// global) takes priority over the built-in filters, so `{{ name | upper }}` can get a custom
+		// `upper`.
+		const userFilter = this.options.allowFilterOverride ? this.getUserFilter(filterNode, environment) : undefined;
+		if (userFilter) {
+			return this.applyUserFilter(userFilter, operand, filterNode, environment);
+		}
+
+		try {
+			return this.applyBuiltinFilter(operand, filterNode, environment);
+		} catch (error) {
+			// Only the innermost filter application acts on an unknown filter, see `claimedFilterErrors`.
+			const unknown = error instanceof UnknownFilterError && !claimedFilterErrors.has(error);
+			if (unknown) {
+				claimedFilterErrors.add(error);
+			}
+			if (!unknown || this.options.allowFilterOverride) {
+				// With overrides on, the name was already looked up above, so nothing can take over here.
+				throw error;
+			}
+
+			// Not a built-in filter: a function in scope can still provide a filter that has no built-in
+			// equivalent, which works regardless of `allowFilterOverride`.
+			const fallback = this.getUserFilter(filterNode, environment);
+			if (!fallback) {
+				throw error;
+			}
+			return this.applyUserFilter(fallback, operand, filterNode, environment);
+		}
+	}
+
+	/**
+	 * Return the function bound to the filter name of `x | name` or `x | name(...)`, if the filter is a
+	 * plain name and that name holds a function in the current environment.
+	 */
+	private getUserFilter(filterNode: Identifier | CallExpression, environment: Environment): FunctionValue | undefined {
+		let name: string | undefined;
+		if (filterNode.type === "Identifier") {
+			name = (filterNode as Identifier).value;
+		} else if (filterNode.type === "CallExpression") {
+			const callee = (filterNode as CallExpression).callee;
+			if (callee?.type === "Identifier") {
+				name = (callee as Identifier).value;
+			}
+		}
+		if (name === undefined) {
+			return undefined;
+		}
+
+		// Anything that is not a function is not a filter, and is left alone: the built-in error message
+		// ("Unknown StringValue filter: ...") stays more precise than anything we could add here.
+		const filter = environment.lookupVariable(name);
+		return filter instanceof FunctionValue ? filter : undefined;
+	}
+
+	private applyUserFilter(
+		filter: FunctionValue,
+		operand: AnyRuntimeValue,
+		filterNode: Identifier | CallExpression,
+		environment: Environment,
+	): AnyRuntimeValue {
+		// The operand comes first, then the filter arguments (which may be positional or keyword).
+		const args =
+			filterNode.type === "CallExpression"
+				? this.evaluateCallArguments((filterNode as CallExpression).args, environment)
+				: [];
+		return filter.value([operand, ...args], environment);
+	}
+
+	private applyBuiltinFilter(
+		operand: AnyRuntimeValue,
+		filterNode: Identifier | CallExpression,
+		environment: Environment,
+	) {
+		// NOTE: names which are not built-in filters fall back to user-defined filters in `applyFilter`. That
+		// means an `UnknownFilterError` must be thrown before any argument is evaluated or user code is called,
+		// so that the fallback does not run their side effects twice.
 		// TODO: Add support for non-identifier filters
 		//   e.g., functions which return filters: {{ numbers | select("odd") }}
-		// TODO: Add support for user-defined filters
-		//   const filter = environment.lookupVariable(node.filter.value);
-		//   if (!(filter instanceof FunctionValue)) {
-		//     throw new Error(`Filter must be a function: got ${filter.type}`);
-		//   }
-		//   return filter.value([operand], environment);
 
 		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-filters
 
@@ -1469,7 +1569,7 @@ export class Interpreter {
 						return new ArrayValue(output);
 					}
 					default:
-						throw new Error(`Unknown ArrayValue filter: ${filter.value}`);
+						throw new UnknownFilterError(`Unknown ArrayValue filter: ${filter.value}`);
 				}
 			} else if (operand instanceof StringValue) {
 				switch (filter.value) {
@@ -1485,7 +1585,7 @@ export class Interpreter {
 						} else if (builtin instanceof IntegerValue) {
 							return builtin;
 						} else {
-							throw new Error(`Unknown StringValue filter: ${filter.value}`);
+							throw new UnknownFilterError(`Unknown StringValue filter: ${filter.value}`);
 						}
 					}
 					case "trim":
@@ -1512,7 +1612,7 @@ export class Interpreter {
 						return new FloatValue(isNaN(val) ? 0.0 : val);
 					}
 					default:
-						throw new Error(`Unknown StringValue filter: ${filter.value}`);
+						throw new UnknownFilterError(`Unknown StringValue filter: ${filter.value}`);
 				}
 			} else if (operand instanceof IntegerValue || operand instanceof FloatValue) {
 				switch (filter.value) {
@@ -1527,7 +1627,7 @@ export class Interpreter {
 					case "string":
 						return new StringValue(operand.toString());
 					default:
-						throw new Error(`Unknown NumericValue filter: ${filter.value}`);
+						throw new UnknownFilterError(`Unknown NumericValue filter: ${filter.value}`);
 				}
 			} else if (operand instanceof ObjectValue) {
 				switch (filter.value) {
@@ -1546,7 +1646,7 @@ export class Interpreter {
 							}
 							return builtin;
 						}
-						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
+						throw new UnknownFilterError(`Unknown ObjectValue filter: ${filter.value}`);
 					}
 				}
 			} else if (operand instanceof BooleanValue) {
@@ -1560,15 +1660,15 @@ export class Interpreter {
 					case "string":
 						return new StringValue(operand.value ? "true" : "false");
 					default:
-						throw new Error(`Unknown BooleanValue filter: ${filter.value}`);
+						throw new UnknownFilterError(`Unknown BooleanValue filter: ${filter.value}`);
 				}
 			}
-			throw new Error(`Cannot apply filter "${filter.value}" to type: ${operand.type}`);
+			throw new UnknownFilterError(`Cannot apply filter "${filter.value}" to type: ${operand.type}`);
 		} else if (filterNode.type === "CallExpression") {
 			const filter = filterNode as CallExpression;
 
 			if (filter.callee.type !== "Identifier") {
-				throw new Error(`Unknown filter: ${filter.callee.type}`);
+				throw new UnknownFilterError(`Unknown filter: ${filter.callee.type}`);
 			}
 			const filterName = (filter.callee as Identifier).value;
 
@@ -1625,7 +1725,7 @@ export class Interpreter {
 				} else if (operand instanceof ArrayValue) {
 					value = operand.value.map((x) => x.value);
 				} else {
-					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
+					throw new UnknownFilterError(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 				}
 				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
 
@@ -1636,6 +1736,19 @@ export class Interpreter {
 
 				return new StringValue(value.join(separator.value));
 			} else if (filterName === "int" || filterName === "float") {
+				// The operand type is checked before the arguments are evaluated, since this throw lets a
+				// user-defined filter of the same name take over in `applyFilter`.
+				if (
+					!(
+						operand instanceof StringValue ||
+						operand instanceof IntegerValue ||
+						operand instanceof FloatValue ||
+						operand instanceof BooleanValue
+					)
+				) {
+					throw new UnknownFilterError(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
+				}
+
 				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
 				const defaultValue =
 					args.at(0) ?? kwargs.get("default") ?? (filterName === "int" ? new IntegerValue(0) : new FloatValue(0.0));
@@ -1645,12 +1758,10 @@ export class Interpreter {
 					return isNaN(val) ? defaultValue : filterName === "int" ? new IntegerValue(val) : new FloatValue(val);
 				} else if (operand instanceof IntegerValue || operand instanceof FloatValue) {
 					return filterName === "int" ? new IntegerValue(Math.trunc(operand.value) + 0) : new FloatValue(operand.value);
-				} else if (operand instanceof BooleanValue) {
+				} else {
 					return filterName === "int"
 						? new IntegerValue(operand.value ? 1 : 0)
 						: new FloatValue(operand.value ? 1.0 : 0.0);
-				} else {
-					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 				}
 			} else if (filterName === "default") {
 				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
@@ -1770,7 +1881,7 @@ export class Interpreter {
 						}
 					}
 				}
-				throw new Error(`Unknown ArrayValue filter: ${filterName}`);
+				throw new UnknownFilterError(`Unknown ArrayValue filter: ${filterName}`);
 			} else if (operand instanceof StringValue) {
 				switch (filterName) {
 					case "indent": {
@@ -1806,19 +1917,19 @@ export class Interpreter {
 						return replaceFn.value([...args, new KeywordArgumentsValue(kwargs)], environment);
 					}
 				}
-				throw new Error(`Unknown StringValue filter: ${filterName}`);
+				throw new UnknownFilterError(`Unknown StringValue filter: ${filterName}`);
 			} else if (operand instanceof ObjectValue) {
 				// Check if the filter exists in builtins for ObjectValue
 				const builtin = operand.builtins.get(filterName);
 				if (builtin && builtin instanceof FunctionValue) {
 					return builtin.value(this.evaluateCallArguments(filter.args, environment), environment);
 				}
-				throw new Error(`Unknown ObjectValue filter: ${filterName}`);
+				throw new UnknownFilterError(`Unknown ObjectValue filter: ${filterName}`);
 			} else {
-				throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
+				throw new UnknownFilterError(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 			}
 		}
-		throw new Error(`Unknown filter: ${filterNode.type}`);
+		throw new UnknownFilterError(`Unknown filter: ${filterNode.type}`);
 	}
 
 	/**

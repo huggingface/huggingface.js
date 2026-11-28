@@ -14,21 +14,25 @@ import { tokenize } from "./lexer";
 import { parse } from "./parser";
 import { Environment, Interpreter, setupGlobals } from "./runtime";
 import type { Program } from "./ast";
-import type { StringValue } from "./runtime";
+import type { StringValue, InterpreterOptions } from "./runtime";
 import { format } from "./format";
 
 export class Template {
 	parsed: Program;
 
+	private options: InterpreterOptions;
+
 	/**
 	 * @param {string} template The template string
+	 * @param {InterpreterOptions} [options] Interpreter options, e.g. `allowFilterOverride`
 	 */
-	constructor(template: string) {
+	constructor(template: string, options: InterpreterOptions = {}) {
 		const tokens = tokenize(template, {
 			lstrip_blocks: true,
 			trim_blocks: true,
 		});
 		this.parsed = parse(tokens);
+		this.options = options;
 	}
 
 	render(items?: Record<string, unknown>): string {
@@ -43,7 +47,7 @@ export class Template {
 			}
 		}
 
-		const interpreter = new Interpreter(env);
+		const interpreter = new Interpreter(env, this.options);
 
 		const result = interpreter.run(this.parsed) as StringValue;
 		return result.value;
@@ -55,3 +59,4 @@ export class Template {
 }
 
 export { Environment, Interpreter, tokenize, parse };
+export type { InterpreterOptions };
