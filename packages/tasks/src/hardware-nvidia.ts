@@ -920,7 +920,6 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 75,
 		releaseYear: 2014,
 	},
-	},
 	"GT 730 (Kepler)": {
 		tflops: 0.69, // float32 (GPU does not support native float16)
 		memory: [1, 2, 4],
