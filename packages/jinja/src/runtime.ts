@@ -29,7 +29,7 @@ import type {
 	KeywordSpreadExpression,
 } from "./ast";
 import { Statement } from "./ast";
-import { range, replace, slice, strftime_now, titleCase } from "./utils";
+import { parseNumericString, range, replace, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| IntegerValue
@@ -98,6 +98,14 @@ export class IntegerValue extends RuntimeValue<number> {
 		super(value);
 		this.type = "IntegerValue";
 	}
+
+	override toString(): string {
+		// Number stringification uses exponent notation at 1e21; integers need all digits.
+		if (Math.abs(this.value) >= 1e21 && Number.isInteger(this.value)) {
+			return BigInt(this.value).toString();
+		}
+		return super.toString();
+	}
 }
 
 /**
@@ -110,6 +118,15 @@ export class FloatValue extends RuntimeValue<number> {
 	}
 
 	override toString(): string {
+		if (Number.isNaN(this.value)) {
+			return "nan";
+		}
+		if (this.value === Infinity) {
+			return "inf";
+		}
+		if (this.value === -Infinity) {
+			return "-inf";
+		}
 		if (Object.is(this.value, -0)) {
 			return "-0.0";
 		}
@@ -369,6 +386,7 @@ function toJSON(
 		case "UndefinedValue":
 			return convertUndefinedToNull ? "null" : "undefined";
 		case "IntegerValue":
+			return Number.isFinite(input.value) ? input.toString() : JSON.stringify(input.value);
 		case "FloatValue":
 		case "BooleanValue":
 			return JSON.stringify(input.value);
@@ -1267,8 +1285,9 @@ export class Interpreter {
 			}
 			if (operator === "~" && !(left instanceof NullValue || right instanceof NullValue)) {
 				// Special case: Jinja concatenates undefined values as empty strings
-				const lhs = left instanceof UndefinedValue ? "" : left.value.toString();
-				const rhs = right instanceof UndefinedValue ? "" : right.value.toString();
+				const lhs = left instanceof UndefinedValue ? "" : (left instanceof IntegerValue ? left : left.value).toString();
+				const rhs =
+					right instanceof UndefinedValue ? "" : (right instanceof IntegerValue ? right : right.value).toString();
 				return new StringValue(lhs + rhs);
 			}
 			throw new Error(`Cannot perform operation ${operator} on undefined values`);
@@ -1276,7 +1295,10 @@ export class Interpreter {
 			throw new Error("Cannot perform operation on null values");
 		} else if (operator === "~") {
 			// toString and concatenation
-			return new StringValue(left.value.toString() + right.value.toString());
+			return new StringValue(
+				(left instanceof IntegerValue ? left : left.value).toString() +
+					(right instanceof IntegerValue ? right : right.value).toString(),
+			);
 		} else if (operator === "**" && isNumericLikeValue(left) && isNumericLikeValue(right)) {
 			// Jinja treats booleans as integers here.
 			const a = getNumericValue(left);
@@ -1454,7 +1476,9 @@ export class Interpreter {
 						return new ArrayValue(operand.value.slice().sort((a, b) => compareRuntimeValues(a, b, false)));
 					}
 					case "join":
-						return new StringValue(operand.value.map((x) => x.value).join(""));
+						return new StringValue(
+							operand.value.map((x) => (x instanceof IntegerValue ? x.toString() : x.value)).join(""),
+						);
 					case "string":
 						return new StringValue(toJSON(operand, {}, 0, false));
 					case "unique": {
@@ -1504,12 +1528,12 @@ export class Interpreter {
 					case "string":
 						return operand; // no-op
 					case "int": {
-						const val = parseInt(operand.value, 10);
-						return new IntegerValue(isNaN(val) ? 0 : val);
+						const val = parseNumericString(operand.value);
+						return new IntegerValue(val === undefined || !Number.isFinite(val) ? 0 : Math.trunc(val) + 0);
 					}
 					case "float": {
-						const val = parseFloat(operand.value);
-						return new FloatValue(isNaN(val) ? 0.0 : val);
+						const val = parseNumericString(operand.value);
+						return new FloatValue(val === undefined ? 0.0 : val);
 					}
 					default:
 						throw new Error(`Unknown StringValue filter: ${filter.value}`);
@@ -1623,7 +1647,7 @@ export class Interpreter {
 					// NOTE: string.split('') breaks for unicode characters
 					value = Array.from(operand.value);
 				} else if (operand instanceof ArrayValue) {
-					value = operand.value.map((x) => x.value);
+					value = operand.value.map((x) => (x instanceof IntegerValue ? x.toString() : x.value));
 				} else {
 					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 				}
@@ -1641,8 +1665,11 @@ export class Interpreter {
 					args.at(0) ?? kwargs.get("default") ?? (filterName === "int" ? new IntegerValue(0) : new FloatValue(0.0));
 
 				if (operand instanceof StringValue) {
-					const val = filterName === "int" ? parseInt(operand.value, 10) : parseFloat(operand.value);
-					return isNaN(val) ? defaultValue : filterName === "int" ? new IntegerValue(val) : new FloatValue(val);
+					const val = parseNumericString(operand.value);
+					if (val === undefined || (filterName === "int" && !Number.isFinite(val))) {
+						return defaultValue;
+					}
+					return filterName === "int" ? new IntegerValue(Math.trunc(val) + 0) : new FloatValue(val);
 				} else if (operand instanceof IntegerValue || operand instanceof FloatValue) {
 					return filterName === "int" ? new IntegerValue(Math.trunc(operand.value) + 0) : new FloatValue(operand.value);
 				} else if (operand instanceof BooleanValue) {

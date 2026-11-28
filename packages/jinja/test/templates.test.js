@@ -7157,6 +7157,42 @@ describe("Feature regressions", () => {
 	});
 
 	describe("Numeric filters", () => {
+		it.each([
+			["1e20", "100000000000000000000"],
+			["1e21", "1000000000000000000000"],
+			["-1e21", "-1000000000000000000000"],
+			["1e23", "99999999999999991611392"],
+			["-1e23", "-99999999999999991611392"],
+			["1.234e25", "12339999999999999052087296"],
+		])("renders a large scientific-notation integer %j in full", (value, expected) => {
+			for (const filter of ["int", "int()", "int(7)", "int(default=8)"]) {
+				expect(new Template(`{{ value | ${filter} }}`).render({ value })).toBe(expected);
+				expect(new Template(`{{ value | ${filter} | string }}`).render({ value })).toBe(expected);
+			}
+		});
+		it.each([
+			["1e21", "1000000000000000000000"],
+			["-1e21", "-1000000000000000000000"],
+			["1e23", "99999999999999991611392"],
+		])("preserves large integers across output paths for %j", (value, expected) => {
+			const cases = [
+				["n ~ ''", expected],
+				["'' ~ n", expected],
+				["missing ~ n", expected],
+				["n ~ missing", expected],
+				["[n, n] | join", expected + expected],
+				["[n, n] | join(' / ')", `${expected} / ${expected}`],
+				["[n, n] | join(separator=' / ')", `${expected} / ${expected}`],
+				["n | tojson", expected],
+				["[n] | tojson", `[${expected}]`],
+				["{'n': n} | tojson", `{"n": ${expected}}`],
+				["[n] | string", `[${expected}]`],
+			];
+			for (const [expression, output] of cases) {
+				expect(new Template(`{% set n = value | int %}{{ ${expression} }}`).render({ value })).toBe(output);
+			}
+		});
+
 		it("converts numbers with int and float like Python", () => {
 			const template = new Template(
 				`|{{ x | int }}|{{ x | int(0) }}|{{ 3.7 | int(default=0) }}|{{ 3 | float(0.0) }}|{{ y | int | float }}|{{ y | int(0) | float }}|`,
