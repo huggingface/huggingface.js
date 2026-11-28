@@ -904,20 +904,52 @@ export const NVIDIA_SKUS: Record<string, NvidiaHardwareSpec> = {
 		power: 165,
 		releaseYear: 2014,
 	},
+	"GTX 880M": {
+		tflops: 3.10, // float32 (GPU does not support native float16)
+		memory: [4, 8],
+		computeCapability: 3.0,
+		msrp: 420,
+		power: 105,
+		releaseYear: 2014,
+	},
+		"GTX 870M": {
+		tflops: 2.59, // float32 (GPU does not support native float16)
+		memory: [3, 6],
+		computeCapability: 3.0,
+		msrp: 340,
+		power: 100,
+		releaseYear: 2014,
+	},
+		"GTX 860M (Kepler)": {
+		tflops: 2.10, // float32 (GPU does not support native float16)
+		memory: [4],
+		computeCapability: 3.0,
+		msrp: 280,
+		power: 75,
+		releaseYear: 2014,
+	},
 	"GTX 860M (Maxwell)": {
-		tflops: 1.37, // float32 (GPU does not support native float16)
-		memory: [2, 4],
+		tflops: 1.38, // float32 (GPU does not support native float16)
+		memory: [2],
 		computeCapability: 5.0,
 		msrp: 240,
 		power: 45,
 		releaseYear: 2014,
 	},
-	"GTX 860M (Kepler)": {
-		tflops: 2.10, // float32 (GPU does not support native float16)
+		"GTX 850A": {
+		tflops: 1.19, // float32 (GPU does not support native float16)
 		memory: [2, 4],
-		computeCapability: 3.0,
-		msrp: 220,
-		power: 75,
+		computeCapability: 5.0,
+		msrp: 180,
+		power: 45,
+		releaseYear: 2014,
+	},
+		"GTX 850M": {
+		tflops: 1.12, // float32 (GPU does not support native float16)
+		memory: [2, 4],
+		computeCapability: 5.0,
+		msrp: 140,
+		power: 45,
 		releaseYear: 2014,
 	},
 	"GT 730 (Kepler)": {
