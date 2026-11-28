@@ -91,18 +91,25 @@ export class McpClient {
 		const mcp = new Client({ name: "@huggingface/mcp-client", version: packageVersion });
 		await mcp.connect(transport);
 
-		const toolsResult = await mcp.listTools();
+		// tools/list is paginated: follow nextCursor until the server stops returning one
+		const tools: Awaited<ReturnType<Client["listTools"]>>["tools"] = [];
+		let cursor: string | undefined;
+		do {
+			const page = await mcp.listTools({ cursor });
+			tools.push(...page.tools);
+			cursor = page.nextCursor;
+		} while (cursor !== undefined);
 		debug(
 			"Connected to server with tools:",
-			toolsResult.tools.map(({ name }) => name),
+			tools.map(({ name }) => name),
 		);
 
-		for (const tool of toolsResult.tools) {
+		for (const tool of tools) {
 			this.clients.set(tool.name, mcp);
 		}
 
 		this.availableTools.push(
-			...toolsResult.tools.map((tool) => {
+			...tools.map((tool) => {
 				return {
 					type: "function",
 					function: {
