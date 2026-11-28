@@ -4,6 +4,101 @@ import { splitAsyncGenerator } from "./splitAsyncGenerator";
 
 describe("mergeAsyncGenerators", () => {
 	const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+	it.each(["source error", "early break"])("settles %s while a sibling read is pending", async (mode) => {
+		const error = new Error("download failed");
+		let release!: () => void;
+		const pending = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		let closed = false;
+		let finishCleanup!: () => void;
+		const cleanup = new Promise<void>((resolve) => {
+			finishCleanup = resolve;
+		});
+		async function* blocked() {
+			try {
+				await pending;
+				yield 2;
+			} finally {
+				closed = true;
+				finishCleanup();
+			}
+		}
+		async function* ready() {
+			if (mode === "source error") {
+				yield await Promise.reject(error);
+			}
+			yield 1;
+		}
+		const sibling = blocked();
+		const merged = mergeAsyncGenerators([ready(), sibling]);
+		const consume = async () => {
+			for await (const value of merged) {
+				expect(value).toBe(1);
+				break;
+			}
+		};
+		const operation = consume().then(
+			() => "complete",
+			(reason) => reason,
+		);
+		let result: unknown;
+		try {
+			result = await Promise.race([operation, sleep(100).then(() => "still pending")]);
+			expect(closed).toBe(false);
+		} finally {
+			release();
+			await operation;
+			await cleanup;
+		}
+		expect(result).toBe(mode === "source error" ? error : "complete");
+		expect(closed).toBe(true);
+	});
+
+	it("closes active sources when the consumer breaks", async () => {
+		const closed: number[] = [];
+		let resolveCleanup!: () => void;
+		const cleanup = new Promise<void>((resolve) => {
+			resolveCleanup = resolve;
+		});
+		async function* source(id: number) {
+			try {
+				yield id;
+				yield id + 10;
+			} finally {
+				closed.push(id);
+				if (closed.length === 2) {
+					resolveCleanup();
+				}
+			}
+		}
+		for await (const value of mergeAsyncGenerators([source(1), source(2)])) {
+			expect(value).toBe(1);
+			break;
+		}
+		await cleanup;
+		expect(closed.sort()).toEqual([1, 2]);
+	});
+
+	it("closes siblings and preserves the source failure", async () => {
+		const error = new Error("download failed");
+		let closed = false;
+		async function* failing(): AsyncGenerator<number> {
+			yield await Promise.reject(error);
+		}
+		async function* sibling() {
+			try {
+				yield 2;
+			} finally {
+				closed = true;
+				await Promise.reject(new Error("cleanup failed"));
+			}
+		}
+		const merged = mergeAsyncGenerators([failing(), sibling()]);
+		await expect(merged.next()).rejects.toBe(error);
+		expect(closed).toBe(true);
+	});
+
 	it("should merge multiple async generators", async () => {
 		const generator1 = (async function* () {
 			yield 1;
