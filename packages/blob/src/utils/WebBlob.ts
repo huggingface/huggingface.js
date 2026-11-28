@@ -19,14 +19,36 @@ interface WebBlobCreateOptions {
 export class WebBlob extends Blob {
 	static async create(url: URL, opts?: WebBlobCreateOptions): Promise<Blob> {
 		const customFetch = opts?.fetch ?? fetch;
-		const response = await customFetch(url, { method: "HEAD" });
-
-		const size = Number(response.headers.get("content-length"));
+		const fetchFullBlob = async () => {
+			const full = await customFetch(url);
+			if (!full.ok) {
+				await full.body?.cancel();
+				throw new Error(`Failed to fetch resource: HTTP ${full.status}`);
+			}
+			return full.blob();
+		};
+		// A range probe exposes the total even when a CDN omits HEAD headers.
+		const response = await customFetch(url, { headers: { Range: "bytes=0-0" } });
+		// An empty resource has no satisfiable byte range; retry without Range.
+		if (response.status === 416) {
+			await response.body?.cancel();
+			return fetchFullBlob();
+		}
+		if (!response.ok) {
+			await response.body?.cancel();
+			throw new Error(`Failed to fetch resource: HTTP ${response.status}`);
+		}
 		const contentType = response.headers.get("content-type") || "";
-		const supportRange = response.headers.get("accept-ranges") === "bytes";
 
-		if (!supportRange || size < (opts?.cacheBelow ?? 1_000_000)) {
-			return await (await customFetch(url)).blob();
+		// If ranges are ignored, reuse the full response we already received.
+		if (response.status !== 206) {
+			return response.blob();
+		}
+
+		const size = Number(response.headers.get("content-range")?.split("/").pop());
+		await response.body?.cancel();
+		if (!Number.isFinite(size) || size < (opts?.cacheBelow ?? 1_000_000)) {
+			return fetchFullBlob();
 		}
 
 		return new WebBlob(url, 0, size, contentType, true, customFetch);
