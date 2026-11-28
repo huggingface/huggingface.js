@@ -119,6 +119,39 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
+// LiteRT CLI estimates about 41 GB of RAM to convert a 4B-parameter checkpoint, so larger ones are left out.
+const LITERT_CLI_MAX_PARAMETERS = 4.1e9;
+
+// Architectures with a real checkpoint that `litert lm run` converted and that answered. Other architectures can stop
+// in the conversion.
+const LITERT_CLI_ARCHITECTURES = [
+	"Gemma3ForCausalLM",
+	"Lfm2ForCausalLM",
+	"LlamaForCausalLM",
+	"Qwen2ForCausalLM",
+	"Qwen3ForCausalLM",
+];
+
+function isLiteRtCliModel(model: ModelData): boolean {
+	// `litert lm run <repo>` converts the repo's transformers checkpoint once, then runs it. Without a .litertlm file
+	// the CLI needs a config.json, so the entry needs a config with one of the architectures above and safetensors
+	// weights (which also leaves out GGUF-only repos). Their size is summed per dtype: `safetensors.total` is far below
+	// that sum on some repos. Chat models only, since the snippet asks a question. Left out: MLX repos, quantized
+	// checkpoints (the converter rejects them) and .litertlm repos (they get the LiteRT-LM library snippet).
+	const parameters = Object.values(model.safetensors?.parameters ?? {}).reduce((sum, n) => sum + n, 0);
+	return (
+		model.pipeline_tag === "text-generation" &&
+		model.tags.includes("conversational") &&
+		isTransformersModel(model) &&
+		LITERT_CLI_ARCHITECTURES.includes(model.config?.architectures?.[0] ?? "") &&
+		!model.config?.quantization_config &&
+		parameters > 0 &&
+		parameters <= LITERT_CLI_MAX_PARAMETERS &&
+		!isMlxModel(model) &&
+		!model.tags.includes("litert-lm")
+	);
+}
+
 /**
  * Returns the model's chat template string, coalescing across sources:
  * GGUF metadata > chat_template_jinja file > tokenizer_config.json
@@ -437,6 +470,17 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 			: []),
 	];
 };
+
+const snippetLiteRtCli = (model: ModelData): LocalAppSnippet[] => [
+	{
+		title: "Install from pip and run the model",
+		setup: ["# Install LiteRT CLI from pip:", "pip install -U litert-cli-nightly"].join("\n"),
+		content: [
+			"# Run the model (the first run converts it to LiteRT and caches it):",
+			`litert lm run ${model.id} --prompt "What is the capital of France?"`,
+		].join("\n"),
+	},
+];
 
 const getLocalServerPort = (model: ModelData): number => (isMlxModel(model) ? 8080 : 9931);
 
@@ -818,6 +862,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isToolCallingLocalAgentModel,
 		snippet: snippetOpenClaw,
+	},
+	"litert-cli": {
+		prettyLabel: "LiteRT CLI",
+		docsUrl: "https://github.com/google-ai-edge/LiteRT-CLI",
+		mainTask: "text-generation",
+		displayOnModelPage: isLiteRtCliModel,
+		snippet: snippetLiteRtCli,
 	},
 } satisfies Record<string, LocalApp>;
 

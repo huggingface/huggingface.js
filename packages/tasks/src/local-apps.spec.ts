@@ -413,4 +413,157 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 			{ label: "Releases", url: "https://github.com/bartowski/Llama-3.2-3B-Instruct-GGUF/releases" },
 		]);
 	});
+
+	it("litert-cli transformers llm", async () => {
+		const { displayOnModelPage, snippet: snippetFunc } = LOCAL_APPS["litert-cli"];
+		const model: ModelData = {
+			id: "Qwen/Qwen3-0.6B",
+			pipeline_tag: "text-generation",
+			tags: ["transformers", "safetensors", "qwen3", "text-generation", "conversational"],
+			config: { architectures: ["Qwen3ForCausalLM"], model_type: "qwen3" },
+			safetensors: { parameters: { BF16: 751632384 }, total: 751632384, sharded: false },
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(snippet[0].setup).toEqual(`# Install LiteRT CLI from pip:
+pip install -U litert-cli-nightly`);
+		expect(snippet[0].content).toEqual(`# Run the model (the first run converts it to LiteRT and caches it):
+litert lm run Qwen/Qwen3-0.6B --prompt "What is the capital of France?"`);
+	});
+
+	it("litert-cli shown for each listed architecture", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["litert-cli"];
+		// The checkpoints the snippet was run on, one per architecture.
+		const models: ModelData[] = [
+			{
+				id: "Qwen/Qwen3-0.6B",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "qwen3", "text-generation", "conversational"],
+				config: { architectures: ["Qwen3ForCausalLM"], model_type: "qwen3" },
+				safetensors: { parameters: { BF16: 751632384 }, total: 751632384, sharded: false },
+				inference: "",
+			},
+			{
+				id: "HuggingFaceTB/SmolLM2-135M-Instruct",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "llama", "text-generation", "conversational"],
+				config: { architectures: ["LlamaForCausalLM"], model_type: "llama" },
+				safetensors: { parameters: { BF16: 134515008 }, total: 134515008, sharded: false },
+				inference: "",
+			},
+			{
+				id: "Qwen/Qwen2.5-0.5B-Instruct",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "qwen2", "text-generation", "conversational"],
+				config: { architectures: ["Qwen2ForCausalLM"], model_type: "qwen2" },
+				safetensors: { parameters: { BF16: 494032768 }, total: 494032768, sharded: false },
+				inference: "",
+			},
+			{
+				id: "unsloth/gemma-3-270m-it",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "gemma3_text", "text-generation", "conversational"],
+				config: { architectures: ["Gemma3ForCausalLM"], model_type: "gemma3_text" },
+				safetensors: { parameters: { BF16: 268098176 }, total: 268098176, sharded: false },
+				inference: "",
+			},
+			{
+				id: "LiquidAI/LFM2.5-230M-Base",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "lfm2", "text-generation", "conversational"],
+				config: { architectures: ["Lfm2ForCausalLM"], model_type: "lfm2" },
+				safetensors: { parameters: { BF16: 229693184 }, total: 229693184, sharded: false },
+				inference: "",
+			},
+		];
+
+		for (const model of models) {
+			expect(displayOnModelPage(model)).toBe(true);
+		}
+	});
+
+	it("litert-cli not shown for litert-lm, quantized, gguf-only, mlx, adapter-only, base, large, vision or other-architecture models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS["litert-cli"];
+		// Each model passes every check but the one it is named for (the vision model's architecture is not listed either).
+		const models: ModelData[] = [
+			{
+				id: "litert-community/Qwen3-0.6B",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "litert-lm", "text-generation", "conversational"],
+				config: { architectures: ["Qwen3ForCausalLM"], model_type: "qwen3" },
+				safetensors: { parameters: { BF16: 751632384 }, total: 751632384, sharded: false },
+				inference: "",
+			},
+			{
+				id: "Qwen/Qwen3-4B-AWQ",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "text-generation", "conversational", "awq"],
+				config: { architectures: ["Qwen3ForCausalLM"], quantization_config: { bits: 4, quant_method: "awq" } },
+				safetensors: { parameters: { I32: 3633315840, BF16: 389152256 }, total: 4022468096, sharded: false },
+				inference: "",
+			},
+			{
+				id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "gguf", "conversational"],
+				config: { architectures: ["LlamaForCausalLM"], model_type: "llama" },
+				gguf: { total: 1, context_length: 4096 },
+				inference: "",
+			},
+			{
+				id: "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "mlx", "text-generation", "conversational"],
+				config: { architectures: ["Qwen2ForCausalLM"], model_type: "qwen2" },
+				safetensors: { parameters: { U32: 1 }, total: 1, sharded: false },
+				inference: "",
+			},
+			{
+				id: "someone/Qwen3-0.6B-LoRA",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "peft", "safetensors", "text-generation", "conversational"],
+				safetensors: { parameters: { F32: 1 }, total: 1, sharded: false },
+				inference: "",
+			},
+			{
+				id: "HuggingFaceTB/SmolLM2-135M",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "llama", "text-generation"],
+				config: { architectures: ["LlamaForCausalLM"], model_type: "llama" },
+				safetensors: { parameters: { BF16: 134515008 }, total: 134515008, sharded: false },
+				inference: "",
+			},
+			{
+				// `total` is far below the per-dtype sum on this repo.
+				id: "laion/delphi-1e22-9_7Bparams-160Btokens-base-wc386k_lr1e5-sft",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "qwen3", "text-generation", "conversational"],
+				config: { architectures: ["Qwen3ForCausalLM"], model_type: "qwen3" },
+				safetensors: { parameters: { BF16: 9714698752 }, total: 297472, sharded: true },
+				inference: "",
+			},
+			{
+				id: "microsoft/Phi-3.5-mini-instruct",
+				pipeline_tag: "text-generation",
+				tags: ["transformers", "safetensors", "phi3", "text-generation", "conversational"],
+				config: { architectures: ["Phi3ForCausalLM"], model_type: "phi3" },
+				safetensors: { parameters: { BF16: 3821079552 }, total: 3821079552, sharded: true },
+				inference: "",
+			},
+			{
+				id: "HuggingFaceTB/SmolVLM-256M-Instruct",
+				pipeline_tag: "image-text-to-text",
+				tags: ["transformers", "safetensors", "conversational"],
+				config: { architectures: ["Idefics3ForConditionalGeneration"], model_type: "idefics3" },
+				safetensors: { parameters: { BF16: 256484928 }, total: 256484928, sharded: false },
+				inference: "",
+			},
+		];
+
+		for (const model of models) {
+			expect(displayOnModelPage(model)).toBe(false);
+		}
+	});
 });
