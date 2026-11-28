@@ -2120,7 +2120,7 @@ export class Interpreter {
 				const current = candidates[i];
 
 				if (loopvar.type === "TupleLiteral") {
-					if (current.type !== "ArrayValue") {
+					if (!(current instanceof ArrayValue)) {
 						throw new Error(`Cannot unpack non-iterable type: ${current.type}`);
 					}
 
