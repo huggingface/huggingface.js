@@ -109,6 +109,14 @@ export const AMD_GPU_SKUS: Record<string, AmdGpuHardwareSpec> = {
 		power: 300,
 		releaseYear: 2018,
 	},
+	MI25: {
+		tflops: 24.6,
+		memory: [16],
+		gfxVersion: "gfx900",
+		msrp: 8_000,
+		power: 300,
+		releaseYear: 2017,
+	},
 	"R9700 PRO": {
 		tflops: 95.7,
 		memory: [32],
