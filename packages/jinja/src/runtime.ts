@@ -2030,10 +2030,16 @@ export class Interpreter {
 			environment.setVariable(variableName, rhs);
 		} else if (node.assignee.type === "TupleLiteral") {
 			const tuple = node.assignee as TupleLiteral;
-			if (!(rhs instanceof ArrayValue)) {
+			let arr: AnyRuntimeValue[];
+			if (rhs instanceof ArrayValue) {
+				arr = rhs.value;
+			} else if (rhs instanceof StringValue) {
+				arr = Array.from(rhs.value, (char) => new StringValue(char));
+			} else if (rhs instanceof ObjectValue) {
+				arr = rhs.keys().value;
+			} else {
 				throw new Error(`Cannot unpack non-iterable type in set: ${rhs.type}`);
 			}
-			const arr = rhs.value;
 			if (arr.length !== tuple.value.length) {
 				throw new Error(`Too ${tuple.value.length > arr.length ? "few" : "many"} items to unpack in set`);
 			}
