@@ -398,6 +398,93 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		expect(displayOnModelPage(model)).toBe(false);
 	});
 
+	it("loci deeplink", async () => {
+		const { displayOnModelPage, deeplink, macOSOnly } = LOCAL_APPS.loci;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+
+		expect(macOSOnly).toBe(true);
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(displayOnModelPage({ ...model, pipeline_tag: "text-generation" })).toBe(true);
+		expect(deeplink(model, undefined).href).toBe("https://askloci.ai/hf/?model=bartowski%2FLlama-3.2-3B-Instruct-GGUF");
+		expect(deeplink(model, "Llama-3.2-3B-Instruct-Q4_K_M.gguf").href).toBe(
+			"https://askloci.ai/hf/?model=bartowski%2FLlama-3.2-3B-Instruct-GGUF&file=Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+		);
+	});
+
+	it("loci deeplink - mlx", async () => {
+		const { displayOnModelPage, deeplink } = LOCAL_APPS.loci;
+		const model: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+			tags: ["mlx", "conversational"],
+			pipeline_tag: "text-generation",
+			inference: "",
+		};
+
+		expect(displayOnModelPage(model)).toBe(true);
+		expect(displayOnModelPage({ ...model, pipeline_tag: "image-text-to-text" })).toBe(true);
+		expect(deeplink(model, undefined).href).toBe(
+			"https://askloci.ai/hf/?model=mlx-community%2FLlama-3.2-3B-Instruct-4bit",
+		);
+	});
+
+	it("loci deeplink keeps the exact file path", async () => {
+		const { deeplink } = LOCAL_APPS.loci;
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const filepath = "quants/Llama 3.2 ✓ Q4_K_M+imatrix&v2.gguf";
+		const url = deeplink(model, filepath);
+
+		expect(url.href).toBe(
+			"https://askloci.ai/hf/?model=bartowski%2FLlama-3.2-3B-Instruct-GGUF&file=quants%2FLlama+3.2+%E2%9C%93+Q4_K_M%2Bimatrix%26v2.gguf",
+		);
+		expect(url.searchParams.get("model")).toBe(model.id);
+		expect(url.searchParams.get("file")).toBe(filepath);
+	});
+
+	it("loci not shown for unsupported models", async () => {
+		const { displayOnModelPage } = LOCAL_APPS.loci;
+		const gguf: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["gguf"],
+			gguf: { total: 1, context_length: 4096 },
+			inference: "",
+		};
+		const mlx: ModelData = {
+			id: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+			tags: ["mlx"],
+			inference: "",
+		};
+
+		// GGUF repository without parsed language model metadata
+		expect(displayOnModelPage({ ...gguf, gguf: undefined, library_name: "gguf" })).toBe(false);
+		expect(displayOnModelPage({ ...gguf, gguf: { total: 1 } })).toBe(false);
+		// GGUF repository for another task
+		expect(displayOnModelPage({ ...gguf, pipeline_tag: "text-to-speech" })).toBe(false);
+		expect(displayOnModelPage({ ...gguf, pipeline_tag: "feature-extraction" })).toBe(false);
+		// MLX repository without a pipeline tag, or for another task
+		expect(displayOnModelPage(mlx)).toBe(false);
+		expect(displayOnModelPage({ ...mlx, pipeline_tag: "automatic-speech-recognition" })).toBe(false);
+		expect(displayOnModelPage({ ...mlx, pipeline_tag: "text-to-image" })).toBe(false);
+		// Neither GGUF nor MLX
+		expect(
+			displayOnModelPage({
+				id: "meta-llama/Llama-3.2-3B-Instruct",
+				tags: ["transformers", "safetensors", "conversational"],
+				pipeline_tag: "text-generation",
+				inference: "",
+			}),
+		).toBe(false);
+	});
+
 	it("links as a function", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",

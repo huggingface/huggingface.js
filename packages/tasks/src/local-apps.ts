@@ -135,6 +135,13 @@ function getChatTemplate(model: ModelData): string | undefined {
 	return undefined;
 }
 
+function isLociModel(model: ModelData): boolean {
+	if (model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text") {
+		return isLlamaCppGgufModel(model) || isMlxModel(model);
+	}
+	return !model.pipeline_tag && isLlamaCppGgufModel(model);
+}
+
 function isUnslothModel(model: ModelData) {
 	return model.tags.includes("unsloth") || isLlamaCppGgufModel(model);
 }
@@ -668,6 +675,23 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
+	},
+	loci: {
+		prettyLabel: "Loci",
+		docsUrl: "https://askloci.ai/private-ai-mac/",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		// The app verifies the selected files, runtime compatibility and device fit before importing.
+		displayOnModelPage: isLociModel,
+		deeplink: (model, filepath) => {
+			// The page opens Loci where it is installed and offers the download where it is not.
+			const url = new URL("https://askloci.ai/hf/");
+			url.searchParams.set("model", model.id);
+			if (filepath) {
+				url.searchParams.set("file", filepath);
+			}
+			return url;
+		},
 	},
 	localai: {
 		prettyLabel: "LocalAI",
