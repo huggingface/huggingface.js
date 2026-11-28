@@ -34,12 +34,14 @@ export interface CommitEditFileParams {
 		/** The end position of the edit in the original content */
 		end: number;
 	}>;
+	/** POSIX file mode (e.g. `0o755`), only supported for buckets. */
+	mode?: number;
 }
 
 export function uploadFile(
 	params: {
 		repo: CommitParams["repo"];
-		file: URL | File | { path: string; content: ContentSource } | CommitEditFileParams;
+		file: URL | File | { path: string; content: ContentSource; mode?: number } | CommitEditFileParams;
 		commitTitle?: CommitParams["title"];
 		commitDescription?: CommitParams["description"];
 		hubUrl?: CommitParams["hubUrl"];
@@ -67,11 +69,13 @@ export function uploadFile(
 					path,
 					originalContent: params.file.originalContent,
 					edits: params.file.edits,
+					mode: params.file.mode,
 				}
 			: {
 					operation: "addOrUpdate",
 					path,
 					content: "content" in params.file ? params.file.content : params.file,
+					mode: "content" in params.file ? params.file.mode : undefined,
 				};
 
 	return commit({
