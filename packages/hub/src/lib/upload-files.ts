@@ -6,7 +6,7 @@ import type { CommitEditFileParams } from "./upload-file";
 export function uploadFiles(
 	params: {
 		repo: CommitParams["repo"];
-		files: Array<URL | File | { path: string; content: ContentSource } | CommitEditFileParams>;
+		files: Array<URL | File | { path: string; content: ContentSource; mode?: number } | CommitEditFileParams>;
 		commitTitle?: CommitParams["title"];
 		commitDescription?: CommitParams["description"];
 		hubUrl?: CommitParams["hubUrl"];
@@ -31,12 +31,14 @@ export function uploadFiles(
 				path,
 				originalContent: file.originalContent,
 				edits: file.edits,
+				mode: file.mode,
 			};
 		}
 		return {
 			operation: "addOrUpdate",
 			path,
 			content: "content" in file ? file.content : file,
+			mode: "content" in file ? file.mode : undefined,
 		};
 	});
 
