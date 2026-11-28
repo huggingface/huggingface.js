@@ -429,7 +429,7 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 			typeof response?.created === "number" &&
 			typeof response?.id === "string" &&
 			typeof response?.model === "string" &&
-			/// Some providers (e.g. Together.ai) do not output a system_fingerprint
+			/// Some providers do not output a system_fingerprint
 			(response.system_fingerprint === undefined ||
 				response.system_fingerprint === null ||
 				typeof response.system_fingerprint === "string") &&

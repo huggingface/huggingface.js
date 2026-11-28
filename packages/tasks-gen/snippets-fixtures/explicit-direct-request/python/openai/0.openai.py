@@ -2,12 +2,12 @@ import os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.together.xyz/v1",
-    api_key=os.environ["TOGETHER_API_KEY"],
+    base_url="https://api.openai.com/v1",
+    api_key=os.environ["OPENAI_API_KEY"],
 )
 
 completion = client.chat.completions.create(
-    model="<together alias for meta-llama/Llama-3.1-8B-Instruct>",
+    model="<openai alias for meta-llama/Llama-3.1-8B-Instruct>",
     messages=[
         {
             "role": "user",

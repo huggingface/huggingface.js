@@ -2,13 +2,8 @@ import type { WidgetType } from "@huggingface/tasks";
 import { HF_HUB_URL } from "../config.js";
 import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts.js";
 import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference.js";
-import type {
-	InferenceProvider,
-	InferenceProviderMappingEntry,
-	InferenceProviderOrPolicy,
-	ModelId,
-	Options,
-} from "../types.js";
+import { INFERENCE_PROVIDERS } from "../types.js";
+import type { InferenceProvider, InferenceProviderMappingEntry, ModelId, Options } from "../types.js";
 import { typedInclude } from "../utils/typedInclude.js";
 import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
 import { getLogger } from "./logger.js";
@@ -167,7 +162,7 @@ export async function getInferenceProviderMapping(
 }
 
 export async function resolveProvider(
-	provider?: InferenceProviderOrPolicy,
+	provider?: string,
 	modelId?: string,
 	endpointUrl?: string,
 	options?: Pick<Options, "fetch">,
@@ -191,11 +186,12 @@ export async function resolveProvider(
 			throw new InferenceClientInputError("Specifying a model is required when provider is 'auto'");
 		}
 		const mappings = await fetchInferenceProviderMappingForModel(modelId, undefined, options);
-		provider = mappings[0]?.provider as InferenceProvider | undefined;
+		/// The Hub can still list providers this client no longer supports
+		provider = mappings.find((mapping) => typedInclude(INFERENCE_PROVIDERS, mapping.provider))?.provider;
 		logger.log("Auto selected provider:", provider);
 	}
 	if (!provider) {
 		throw new InferenceClientInputError(`No Inference Provider available for model ${modelId}.`);
 	}
-	return provider;
+	return provider as InferenceProvider;
 }

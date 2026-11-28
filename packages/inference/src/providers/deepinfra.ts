@@ -19,22 +19,15 @@ model to DeepInfra, please open an issue on the present repo
 * Thanks!
 */
 
-import type {
-	AutomaticSpeechRecognitionOutput,
-	FeatureExtractionOutput,
-	TextGenerationOutput,
-} from "@huggingface/tasks";
+import type { AutomaticSpeechRecognitionOutput, FeatureExtractionOutput } from "@huggingface/tasks";
 import { InferenceClientInputError, InferenceClientProviderOutputError } from "../errors.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
-import type { BodyParams, OutputType, RequestArgs } from "../types.js";
+import type { BodyParams, RequestArgs } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
-	BaseConversationalTask,
-	BaseTextGenerationTask,
 	type FeatureExtractionTaskHelper,
 	TaskProviderHelper,
-	type TextToImageTaskHelper,
 	type TextToSpeechTaskHelper,
 } from "./providerHelper.js";
 
@@ -67,15 +60,6 @@ function mimeTypeToExtension(mimeType: string | undefined): string {
 	return AUDIO_MIME_TO_EXT[baseType] ?? "wav";
 }
 
-interface DeepInfraCompletionChoice {
-	text?: string;
-}
-
-interface DeepInfraCompletionResponse {
-	choices: DeepInfraCompletionChoice[];
-	model: string;
-}
-
 interface DeepInfraAudioTranscriptionSegment {
 	start: number;
 	end: number;
@@ -95,67 +79,6 @@ interface DeepInfraEmbeddingsResponse {
 	}>;
 	model: string;
 	object: string;
-}
-
-interface DeepInfraImageGenerationResponse {
-	data: Array<{
-		b64_json?: string;
-		url?: string;
-	}>;
-}
-
-export class DeepInfraConversationalTask extends BaseConversationalTask {
-	constructor() {
-		super("deepinfra", DEEPINFRA_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "v1/openai/chat/completions";
-	}
-}
-
-export class DeepInfraTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("deepinfra", DEEPINFRA_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "v1/openai/completions";
-	}
-
-	override preparePayload(params: BodyParams): Record<string, unknown> {
-		const parameters = params.args.parameters as Record<string, unknown> | undefined;
-		const res = {
-			model: params.model,
-			prompt: params.args.inputs,
-			...omit(params.args, ["inputs", "parameters"]),
-			...(parameters
-				? {
-						max_tokens: parameters.max_new_tokens,
-						...omit(parameters, ["max_new_tokens"]),
-					}
-				: undefined),
-		};
-		return res;
-	}
-
-	override async getResponse(response: DeepInfraCompletionResponse): Promise<TextGenerationOutput> {
-		if (
-			typeof response === "object" &&
-			response !== null &&
-			Array.isArray(response.choices) &&
-			response.choices.length > 0
-		) {
-			const completion = response.choices[0].text;
-			if (typeof completion === "string") {
-				return { generated_text: completion };
-			}
-		}
-
-		throw new InferenceClientProviderOutputError(
-			"Received malformed response from DeepInfra text-generation API: expected OpenAI completion payload",
-		);
-	}
 }
 
 export class DeepInfraAutomaticSpeechRecognitionTask
@@ -306,60 +229,5 @@ export class DeepInfraFeatureExtractionTask extends TaskProviderHelper implement
 		throw new InferenceClientProviderOutputError(
 			`Received malformed response from DeepInfra feature-extraction (embeddings) API: ${JSON.stringify(response)}`,
 		);
-	}
-}
-
-export class DeepInfraTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
-	constructor() {
-		super("deepinfra", DEEPINFRA_API_BASE_URL);
-	}
-
-	makeRoute(): string {
-		return "v1/openai/images/generations";
-	}
-
-	preparePayload(params: BodyParams): Record<string, unknown> {
-		// `prompt` and `model` are applied after the caller parameters so neither can be
-		// overridden by them.
-		return {
-			...omit(params.args, ["inputs", "parameters"]),
-			...(params.args.parameters as Record<string, unknown> | undefined),
-			response_format: params.outputType === "url" ? "url" : "b64_json",
-			prompt: params.args.inputs,
-			model: params.model,
-		};
-	}
-
-	async getResponse(
-		response: DeepInfraImageGenerationResponse,
-		url?: string,
-		headers?: HeadersInit,
-		outputType?: OutputType,
-		signal?: AbortSignal,
-	): Promise<string | Blob | Record<string, unknown>> {
-		void url;
-		void headers;
-		if (
-			typeof response === "object" &&
-			!!response &&
-			"data" in response &&
-			Array.isArray(response.data) &&
-			response.data.length > 0
-		) {
-			if (outputType === "json") {
-				return { ...response };
-			}
-			if (typeof response.data[0].url === "string") {
-				return response.data[0].url;
-			}
-			if (typeof response.data[0].b64_json === "string") {
-				const base64Data = response.data[0].b64_json;
-				if (outputType === "dataUrl") {
-					return `data:image/jpeg;base64,${base64Data}`;
-				}
-				return fetch(`data:image/jpeg;base64,${base64Data}`, { signal }).then((res) => res.blob());
-			}
-		}
-		throw new InferenceClientProviderOutputError("Received malformed response from DeepInfra text-to-image API");
 	}
 }

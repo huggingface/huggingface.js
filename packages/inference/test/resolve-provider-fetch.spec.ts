@@ -37,4 +37,33 @@ describe("resolveProvider with provider='auto'", () => {
 		expect(customFetchMock).toHaveBeenCalledTimes(1);
 		expect(globalFetchMock).not.toHaveBeenCalled();
 	});
+	it("skips the providers the Hub lists that this client no longer supports", async () => {
+		const customFetchMock = vi.fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>(() =>
+			Promise.resolve(
+				new Response(
+					JSON.stringify({
+						inferenceProviderMapping: [
+							{
+								provider: "together",
+								hfModelId: "my-model",
+								providerId: "my-model",
+								status: "live",
+								task: "text-to-image",
+							},
+							{
+								provider: "fal-ai",
+								hfModelId: "my-model",
+								providerId: "my-model",
+								status: "live",
+								task: "text-to-image",
+							},
+						],
+					}),
+					{ headers: { "Content-Type": "application/json" } },
+				),
+			),
+		);
+
+		expect(await resolveProvider("auto", "my-model", undefined, { fetch: customFetchMock })).toBe("fal-ai");
+	});
 });

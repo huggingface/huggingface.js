@@ -46,7 +46,7 @@ The agent will load available MCP tools (by default, connecting to a filesystem 
 
 *   `HF_TOKEN` (Optional): Your Hugging Face API token. Required if you use an Inference Provider on HF.
 *   `MODEL_ID` (Optional): The model ID to use for the agent's inference. Defaults to `Qwen/Qwen2.5-72B-Instruct`.
-*   `PROVIDER` (Optional): The inference provider. Defaults to `together`. See `@huggingface/inference` for available providers.
+*   `PROVIDER` (Optional): The inference provider. Defaults to `auto`. See `@huggingface/inference` for available providers.
 *   `ENDPOINT_URL` or `BASE_URL` (Optional): A custom base URL (local for instance) to call.
 
 Example with custom model:

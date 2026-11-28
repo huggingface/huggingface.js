@@ -56,7 +56,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["hf-inference", "together", "auto"],
+		providers: ["hf-inference", "auto"],
 		opts: { streaming: false },
 	},
 	{
@@ -68,7 +68,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["hf-inference", "together", "auto"],
+		providers: ["hf-inference", "auto"],
 		opts: { streaming: true },
 	},
 	{
@@ -80,7 +80,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["hf-inference", "fireworks-ai", "auto"],
+		providers: ["hf-inference", "auto"],
 		opts: { streaming: false },
 	},
 	{
@@ -92,7 +92,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["hf-inference", "fireworks-ai", "auto"],
+		providers: ["hf-inference", "auto"],
 		opts: { streaming: true },
 	},
 	{
@@ -284,7 +284,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		providers: ["together"],
+		providers: ["openai"],
 		opts: { directRequest: true },
 	},
 	{
