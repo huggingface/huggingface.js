@@ -127,6 +127,14 @@ export const SKUS = {
 				power: 200,
 				releaseYear: 2025,
 			},
+			"Gaudi 3 PCIe": {
+				tflops: 28.7,
+				memory: [128],
+				msrp: 15_625,
+				power: 600,
+				releaseYear: 2025,
+				aliases: ["HL-338"],
+			},
 			"Arc Pro B70": {
 				tflops: 45.88,
 				memory: [32],
