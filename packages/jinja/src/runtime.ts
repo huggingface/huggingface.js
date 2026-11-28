@@ -1437,6 +1437,19 @@ export class Interpreter {
 				return new StringValue(toJSON(operand, {}));
 			}
 
+			if (
+				(filter.value === "int" || filter.value === "float") &&
+				!(
+					operand instanceof StringValue ||
+					operand instanceof IntegerValue ||
+					operand instanceof FloatValue ||
+					operand instanceof BooleanValue ||
+					operand instanceof UndefinedValue
+				)
+			) {
+				return filter.value === "int" ? new IntegerValue(0) : new FloatValue(0.0);
+			}
+
 			if (operand instanceof ArrayValue) {
 				switch (filter.value) {
 					case "list":
@@ -1649,8 +1662,10 @@ export class Interpreter {
 					return filterName === "int"
 						? new IntegerValue(operand.value ? 1 : 0)
 						: new FloatValue(operand.value ? 1.0 : 0.0);
-				} else {
+				} else if (operand instanceof UndefinedValue) {
 					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
+				} else {
+					return defaultValue;
 				}
 			} else if (filterName === "default") {
 				const [args, kwargs] = this.evaluateArguments(filter.args, environment);

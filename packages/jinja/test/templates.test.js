@@ -6516,6 +6516,26 @@ function expectTemplateToRender(source, expected) {
 }
 
 describe("Feature regressions", () => {
+	describe("Numeric filter defaults", () => {
+		it.each(["int", "int()", "int(7)", "float", "float()", "float(7.5)"])(
+			"still rejects undefined values with %s",
+			(filter) => {
+				expect(() => new Template(`{{ missing | ${filter} }}`).render()).toThrow();
+			},
+		);
+
+		it.each([{ value: null }, { value: [] }, { value: [1] }, { value: {} }, { value: { a: 1 } }])(
+			"uses the fallback when $value cannot be converted",
+			({ value }) => {
+				const template = new Template(
+					"{{ value | int }}|{{ value | int() }}|{{ value | int(7) }}|{{ value | int(default=8) }}|" +
+						"{{ value | float }}|{{ value | float() }}|{{ value | float(7.5) }}|{{ value | float(default=8.5) }}",
+				);
+				expect(template.render({ value })).toBe("0|0|7|8|0.0|0.0|7.5|8.5");
+			},
+		);
+	});
+
 	describe("Iterable test", () => {
 		it.each([
 			{ value: {}, expected: "true" },
