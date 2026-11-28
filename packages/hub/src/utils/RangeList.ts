@@ -47,9 +47,9 @@ export class RangeList<T> {
 			const range = this.ranges[i];
 			if (start < range.end && end > range.start) {
 				overlappingRanges.push({ index: i, range });
-			}
-			if (range.data !== null) {
-				throw new Error("Overlapping range already has data");
+				if (range.data !== null) {
+					throw new Error("Overlapping range already has data");
+				}
 			}
 		}
 
