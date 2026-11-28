@@ -116,7 +116,11 @@ async function* toByteChunks(
 		}
 	} finally {
 		// cancel() rejects if the stream is already errored/closed; we don't care either way
-		await reader.cancel().catch(() => undefined);
+		try {
+			await reader.cancel().catch(() => undefined);
+		} finally {
+			reader.releaseLock();
+		}
 	}
 }
 
